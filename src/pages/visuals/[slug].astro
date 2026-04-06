@@ -2,6 +2,8 @@
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import VisualSummary from '../../components/VisualSummary.astro';
+import EntryMeta from '../../components/EntryMeta.astro';
+import BackLink from '../../components/BackLink.astro';
 
 export async function getStaticPaths() {
   const entries = await getCollection('visuals');
@@ -40,11 +42,8 @@ const defaultSummary = [
       <span class="eyebrow warm">Interactive Brief</span>
       <h1>{entry.data.title}</h1>
       <p class="lead">{entry.data.summary}</p>
-      <div class="meta-row">
-        <span class="meta-pill">{entry.data.pubDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
-        <span class="meta-pill">{entry.data.visualType}</span>
-        <span class="meta-pill">{entry.data.status}</span>
-      </div>
+      <BackLink href="/visuals" label="Back to Visuals" />
+      <EntryMeta date={entry.data.pubDate} primary={entry.data.visualType} readTime={entry.data.status} />
       <div class="cta-row">
         <a class="button primary" href={entry.data.openPath} target="_blank" rel="noreferrer">Open full screen</a>
       </div>

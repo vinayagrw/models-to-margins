@@ -1,7 +1,9 @@
 ---
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import EntryMeta from '../../components/EntryMeta.astro';
 import VisualSummary from '../../components/VisualSummary.astro';
+import BackLink from '../../components/BackLink.astro';
 
 export async function getStaticPaths() {
   const reservedBriefRoutes = new Set(['private-ai-vs-public-ai']);
@@ -45,11 +47,8 @@ const interactiveSummary = [
       <span class="eyebrow warm">Brief</span>
       <h1>{entry.data.title}</h1>
       <p class="lead">{entry.data.summary}</p>
-      <div class="meta-row">
-        <span class="meta-pill">{entry.data.pubDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
-        <span class="meta-pill">{entry.data.industry}</span>
-        {entry.data.readTime && <span class="meta-pill">{entry.data.readTime}</span>}
-      </div>
+      <BackLink href="/briefs" label="Back to Brief" />
+      <EntryMeta date={entry.data.pubDate} primary={entry.data.industry} readTime={entry.data.readTime} />
       <div class="tag-row">
         {entry.data.tags.map((tag: string) => (
           <span class="tag">{tag}</span>

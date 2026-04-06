@@ -1,38 +1,383 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Private AI Control Plane</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Syne:wght@600;700;800&family=DM+Sans:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<script>
+(() => {
+  const params = new URLSearchParams(window.location.search);
+  const storageKey = 'm2m-theme';
+  const root = document.documentElement;
+  const media = window.matchMedia('(prefers-color-scheme: dark)');
+  const normalizeTheme = (value) => value === 'dark' || value === 'light' ? value : null;
+  const getStoredTheme = () => {
+    try {
+      return normalizeTheme(window.localStorage.getItem(storageKey));
+    } catch {
+      return null;
+    }
+  };
+  const getSystemTheme = () => media.matches ? 'dark' : 'light';
+  const getPreferredTheme = () => normalizeTheme(params.get('theme')) ?? getStoredTheme() ?? getSystemTheme();
+
+  root.dataset.embedded = params.get('embed') === '1' ? 'true' : 'false';
+
+  window.__m2mApplyTheme = (theme, persist = false) => {
+    const nextTheme = normalizeTheme(theme) ?? getPreferredTheme();
+    root.dataset.theme = nextTheme;
+    root.style.colorScheme = nextTheme;
+    if (persist) {
+      try {
+        window.localStorage.setItem(storageKey, nextTheme);
+      } catch {
+        // Ignore storage failures.
+      }
+    }
+  };
+
+  window.__m2mApplyTheme(getPreferredTheme(), false);
+
+  const syncSystemTheme = (event) => {
+    if (getStoredTheme()) return;
+    window.__m2mApplyTheme(event.matches ? 'dark' : 'light', false);
+  };
+
+  if (typeof media.addEventListener === 'function') {
+    media.addEventListener('change', syncSystemTheme);
+  } else if (typeof media.addListener === 'function') {
+    media.addListener(syncSystemTheme);
+  }
+})();
+</script>
 <style>
+:root,
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg-start: #f7efe5;
+  --bg-mid: #e8f5fa;
+  --bg-end: #f4e7e2;
+  --grid-dot: rgba(16, 42, 67, 0.06);
+  --divider: rgba(16, 42, 67, 0.08);
+  --section-label: rgba(16, 42, 67, 0.36);
+  --title-copy: #179bc7;
+  --subtitle-copy: rgba(16, 42, 67, 0.66);
+  --footer-copy: rgba(16, 42, 67, 0.5);
+  --top-line: rgba(34, 211, 238, 0.36);
+  --chrome-bg: rgba(255, 255, 255, 0.82);
+  --chrome-border: rgba(16, 42, 67, 0.1);
+  --chrome-text: #10263b;
+  --chrome-muted: #536779;
+  --theme-toggle-shell: rgba(10, 17, 31, 0.92);
+  --theme-toggle-border: rgba(16, 42, 67, 0.12);
+  --theme-toggle-icon: rgba(238, 246, 255, 0.92);
+  --theme-toggle-icon-inactive: rgba(238, 246, 255, 0.56);
+  --theme-toggle-thumb: linear-gradient(135deg, #ffe2ad, #f4b24b);
+  --theme-toggle-thumb-shadow: 0 10px 22px rgba(240, 162, 77, 0.28);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg-start: #040915;
+    --bg-mid: #050b16;
+    --bg-end: #02050c;
+    --grid-dot: rgba(255, 255, 255, 0.04);
+    --divider: rgba(255, 255, 255, 0.05);
+    --section-label: rgba(255, 255, 255, 0.20);
+    --title-copy: #22d3ee;
+    --subtitle-copy: rgba(255, 255, 255, 0.45);
+    --footer-copy: rgba(255, 255, 255, 0.28);
+    --top-line: rgba(34, 211, 238, 0.16);
+    --chrome-bg: rgba(8, 15, 28, 0.86);
+    --chrome-border: rgba(166, 212, 255, 0.14);
+    --chrome-text: #ebf4ff;
+    --chrome-muted: rgba(235, 244, 255, 0.72);
+    --theme-toggle-shell: rgba(10, 17, 31, 0.92);
+    --theme-toggle-border: rgba(166, 212, 255, 0.14);
+    --theme-toggle-icon: rgba(235, 244, 255, 0.92);
+    --theme-toggle-icon-inactive: rgba(235, 244, 255, 0.52);
+    --theme-toggle-thumb: linear-gradient(135deg, #c48cff, #a56cff);
+    --theme-toggle-thumb-shadow: 0 10px 22px rgba(165, 108, 255, 0.28);
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg-start: #040915;
+  --bg-mid: #050b16;
+  --bg-end: #02050c;
+  --grid-dot: rgba(255, 255, 255, 0.04);
+  --divider: rgba(255, 255, 255, 0.05);
+  --section-label: rgba(255, 255, 255, 0.20);
+  --title-copy: #22d3ee;
+  --subtitle-copy: rgba(255, 255, 255, 0.45);
+  --footer-copy: rgba(255, 255, 255, 0.28);
+  --top-line: rgba(34, 211, 238, 0.16);
+  --chrome-bg: rgba(8, 15, 28, 0.86);
+  --chrome-border: rgba(166, 212, 255, 0.14);
+  --chrome-text: #ebf4ff;
+  --chrome-muted: rgba(235, 244, 255, 0.72);
+  --theme-toggle-shell: rgba(10, 17, 31, 0.92);
+  --theme-toggle-border: rgba(166, 212, 255, 0.14);
+  --theme-toggle-icon: rgba(235, 244, 255, 0.92);
+  --theme-toggle-icon-inactive: rgba(235, 244, 255, 0.52);
+  --theme-toggle-thumb: linear-gradient(135deg, #c48cff, #a56cff);
+  --theme-toggle-thumb-shadow: 0 10px 22px rgba(165, 108, 255, 0.28);
+}
+
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body {
   min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   background:
     radial-gradient(circle at top left, rgba(34, 211, 238, 0.12), transparent 30%),
     radial-gradient(circle at bottom right, rgba(249, 115, 22, 0.10), transparent 24%),
-    linear-gradient(180deg, #040915 0%, #050b16 48%, #02050c 100%);
-  font-family: 'DM Sans', sans-serif;
+    linear-gradient(180deg, var(--bg-start) 0%, var(--bg-mid) 48%, var(--bg-end) 100%);
+  font-family: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif;
+  color: var(--chrome-text);
+  padding: 0;
+}
+.site-header {
+  position: sticky;
+  top: 16px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin: 20px auto 18px;
+  padding: 16px 18px;
+  width: min(calc(100% - 28px), 1680px);
+  background: var(--chrome-bg);
+  border: 1px solid var(--chrome-border);
+  border-radius: 999px;
+  backdrop-filter: blur(18px);
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.22);
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  color: inherit;
+  text-decoration: none;
+}
+.brand-mark {
+  width: 40px;
+  height: 40px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #0a1524;
+  background: linear-gradient(135deg, #22d3ee, #f97316);
+}
+.brand-copy strong,
+.brand-copy span {
+  display: block;
+}
+.brand-copy strong {
+  font-size: 0.96rem;
+}
+.brand-copy span {
+  color: var(--chrome-muted);
+  font-size: 0.78rem;
+}
+.site-header-actions,
+.site-nav {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.site-header-actions {
+  gap: 12px;
+}
+.site-nav .nav-item {
+  padding: 10px 14px;
+  border-radius: 999px;
+  color: var(--chrome-muted);
+  transition: 180ms ease;
+  text-decoration: none;
+}
+.site-nav a:hover,
+.site-nav a[aria-current="page"] {
+  color: var(--chrome-text);
+  background: color-mix(in srgb, var(--title-copy) 12%, transparent);
+}
+.site-nav .is-disabled {
+  color: color-mix(in srgb, var(--chrome-muted) 56%, transparent);
+  background: color-mix(in srgb, var(--chrome-bg) 58%, transparent);
+  border: 1px solid color-mix(in srgb, var(--chrome-border) 55%, transparent);
+  cursor: not-allowed;
+}
+:root[data-embedded="true"] .site-header,
+:root[data-embedded="true"] .page-lead {
+  display: none;
+}
+.zoom-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--chrome-border);
+  background: var(--chrome-bg);
+  color: var(--chrome-muted);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
+  backdrop-filter: blur(16px);
+  text-decoration: none;
+  font-size: 13px;
+}
+.zoom-button:hover {
+  color: var(--chrome-text);
+}
+.zoom-button {
+  appearance: none;
+  cursor: pointer;
+  padding: 0;
+  width: 42px;
+}
+.zoom-button.is-reset {
+  width: auto;
+  padding: 10px 14px;
+}
+.page {
+  width: min(calc(100% - 28px), 1680px);
+  margin: 0 auto;
+  padding: 6px 0 40px;
+  position: relative;
+  z-index: 1;
+}
+.page-lead {
+  margin-bottom: 14px;
+}
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  color: var(--chrome-muted);
+  font-size: 0.92rem;
+  transition: color 180ms ease, transform 180ms ease;
+  text-decoration: none;
+}
+.back-link:hover {
+  color: var(--chrome-text);
+  transform: translateX(-1px);
+}
+.poster-shell {
+  width: min(100%, 1200px);
+  margin: 0 auto;
+}
+.poster-tools {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin: 0 0 12px;
+}
+.theme-toggle {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  line-height: 1;
+}
+.theme-toggle__track {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  align-items: center;
+  gap: 8px;
+  width: 92px;
+  height: 48px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: var(--theme-toggle-shell);
+  border: 1px solid var(--theme-toggle-border);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
+  isolation: isolate;
+}
+.theme-toggle__icon {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  color: var(--theme-toggle-icon-inactive);
+  transition: color 180ms ease;
+}
+.theme-toggle__icon svg {
+  width: 18px;
+  height: 18px;
+  display: block;
+}
+.theme-toggle__thumb {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--theme-toggle-thumb);
+  box-shadow: var(--theme-toggle-thumb-shadow);
+  transition: transform 220ms ease, background 180ms ease, box-shadow 180ms ease;
+}
+.theme-toggle[data-theme="light"] .theme-toggle__thumb { transform: translateX(0); }
+.theme-toggle[data-theme="dark"] .theme-toggle__thumb { transform: translateX(44px); }
+.theme-toggle[data-theme="light"] .theme-toggle__icon--sun,
+.theme-toggle[data-theme="dark"] .theme-toggle__icon--moon { color: var(--theme-toggle-icon); }
+.theme-toggle:focus-visible .theme-toggle__track {
+  outline: 2px solid #22d3ee;
+  outline-offset: 3px;
 }
 .poster {
-  width: 1200px;
-  height: 680px;
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1200 / 680;
   overflow: hidden;
   border-radius: 22px;
   box-shadow: 0 24px 90px rgba(0, 0, 0, 0.42);
 }
+:root[data-embedded="true"] .poster {
+  width: 100%;
+  height: calc(100vh - 60px);
+  aspect-ratio: auto;
+  border-radius: 0;
+  box-shadow: none;
+}
+:root[data-embedded="true"] .page {
+  width: 100%;
+  padding: 0;
+}
+:root[data-embedded="true"] .poster-shell {
+  width: 100%;
+}
+:root[data-embedded="true"] .poster-tools {
+  margin: 0;
+  padding: 10px 12px 8px;
+}
 svg { display: block; width: 100%; height: 100%; }
+#stage-svg {
+  cursor: grab;
+  touch-action: none;
+}
+#stage-svg.is-panning {
+  cursor: grabbing;
+}
 
 .node-g {
   opacity: 0;
   transform: scale(0.88) translateY(10px);
   transform-box: fill-box;
   transform-origin: center;
-  transition: opacity 0.55s ease, transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: opacity 0.55s ease, transform 0.55s cubic-bezier(0.16, 1, 0.3, 1), filter 200ms ease;
 }
 .node-g.show {
   opacity: 1;
@@ -43,6 +388,27 @@ svg { display: block; width: 100%; height: 100%; }
   transition: opacity 0.4s ease;
 }
 .edge-g.show {
+  opacity: 1;
+}
+.node-g.route-muted {
+  opacity: 0.18;
+  filter: saturate(0.8);
+}
+.edge-g.route-muted {
+  opacity: 0.12;
+}
+.node-g.route-highlight {
+  opacity: 1;
+  filter: url(#activeGlow);
+}
+.edge-g.route-highlight {
+  opacity: 1;
+}
+.edge-g.route-highlight use {
+  stroke-width: 3;
+}
+.edge-g.route-highlight circle,
+.edge-g.route-highlight polygon {
   opacity: 1;
 }
 
@@ -65,11 +431,77 @@ svg { display: block; width: 100%; height: 100%; }
 .title-glow { animation: titleGlow 3s ease-in-out infinite; }
 .pulse-dot { animation: pulseDot 2s ease-out infinite; }
 .pulse-dot.delayed { animation-delay: 0.7s; }
+
+@media (max-width: 720px) {
+  .site-header,
+  .page {
+    width: min(calc(100% - 18px), 1680px);
+  }
+
+  .site-header {
+    position: static;
+    flex-direction: column;
+    align-items: stretch;
+    border-radius: 28px;
+  }
+
+  .site-header-actions,
+  .site-nav {
+    justify-content: space-between;
+  }
+
+  .poster-tools {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+}
 </style>
 </head>
 <body>
+<header class="site-header">
+  <a class="brand" href="/">
+    <span class="brand-mark">M2M</span>
+    <span class="brand-copy">
+      <strong>Models to Margins</strong>
+      <span>Business-first AI research and operating maps</span>
+    </span>
+  </a>
+  <div class="site-header-actions">
+    <nav class="site-nav" aria-label="Primary">
+      <a class="nav-item" href="/briefs" aria-current="page">Brief</a>
+      <a class="nav-item" href="/deep-dives">Deep Dives</a>
+      <span class="nav-item is-disabled" aria-disabled="true">About</span>
+    </nav>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Toggle color theme" title="Toggle color theme">
+      <span class="theme-toggle__track" aria-hidden="true">
+        <span class="theme-toggle__icon theme-toggle__icon--sun">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="4.25" fill="none" stroke="currentColor" stroke-width="1.8"></circle>
+            <path d="M12 2.5v3M12 18.5v3M21.5 12h-3M5.5 12h-3M18.7 5.3l-2.1 2.1M7.4 16.6l-2.1 2.1M18.7 18.7l-2.1-2.1M7.4 7.4L5.3 5.3" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.8"></path>
+          </svg>
+        </span>
+        <span class="theme-toggle__icon theme-toggle__icon--moon">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M15.7 3.6a8.6 8.6 0 1 0 4.7 15.5a8 8 0 1 1-4.7-15.5Z" fill="none" stroke="currentColor" stroke-linejoin="round" stroke-width="1.8"></path>
+          </svg>
+        </span>
+        <span class="theme-toggle__thumb"></span>
+      </span>
+    </button>
+  </div>
+</header>
+<div class="page">
+<div class="page-lead">
+  <a class="back-link" href="/briefs/private-ai-vs-public-ai"><span aria-hidden="true">&larr;</span><span>Back to Brief</span></a>
+</div>
+<div class="poster-shell">
+<div class="poster-tools" aria-label="Zoom controls">
+  <button class="zoom-button" type="button" data-zoom="out" aria-label="Zoom out" title="Zoom out">-</button>
+  <button class="zoom-button" type="button" data-zoom="in" aria-label="Zoom in" title="Zoom in">+</button>
+  <button class="zoom-button is-reset" type="button" data-zoom="reset" aria-label="Reset view" title="Reset view">Reset</button>
+</div>
 <div class="poster">
-<svg viewBox="0 0 1200 680" xmlns="http://www.w3.org/2000/svg">
+<svg id="stage-svg" viewBox="0 0 1200 680" xmlns="http://www.w3.org/2000/svg">
 <defs>
   <filter id="softGlow" x="-80%" y="-80%" width="260%" height="260%">
     <feGaussianBlur stdDeviation="6" result="blur"/>
@@ -80,6 +512,13 @@ svg { display: block; width: 100%; height: 100%; }
   </filter>
   <filter id="titleGlowFilter" x="-40%" y="-40%" width="180%" height="180%">
     <feGaussianBlur stdDeviation="8" result="blur"/>
+    <feMerge>
+      <feMergeNode in="blur"/>
+      <feMergeNode in="SourceGraphic"/>
+    </feMerge>
+  </filter>
+  <filter id="activeGlow" x="-60%" y="-60%" width="220%" height="220%">
+    <feGaussianBlur stdDeviation="7" result="blur"/>
     <feMerge>
       <feMergeNode in="blur"/>
       <feMergeNode in="SourceGraphic"/>
@@ -121,7 +560,7 @@ svg { display: block; width: 100%; height: 100%; }
   </linearGradient>
 
   <pattern id="dotGrid" width="28" height="28" patternUnits="userSpaceOnUse">
-    <circle cx="1" cy="1" r="0.75" fill="rgba(255,255,255,0.04)"/>
+    <circle cx="1" cy="1" r="0.75" fill="var(--grid-dot)"/>
   </pattern>
 
   <path id="p0" d="M145,340 L182,340"/>
@@ -129,16 +568,17 @@ svg { display: block; width: 100%; height: 100%; }
   <path id="p2" d="M484,322 L516,322 L516,108 L540,108"/>
   <path id="p3" d="M484,338 L516,338 L516,228 L540,228"/>
   <path id="p4" d="M484,348 L516,348 L516,366 L540,366"/>
-  <path id="p5" d="M484,358 L516,358 L516,506 L540,506"/>
-  <path id="p6" d="M484,368 L516,368 L516,608 L540,608"/>
-  <path id="p7" d="M690,228 L724,228"/>
-  <path id="p8" d="M690,366 L724,366"/>
-  <path id="p9" d="M690,506 L724,506"/>
-  <path id="p10" d="M884,458 L920,458"/>
-  <path id="p11" d="M884,554 L920,554"/>
+  <path id="p5" d="M484,358 L516,358 L516,493 L650,493"/>
+  <path id="p6" d="M484,368 L516,368 L516,618 L540,618"/>
+  <path id="p7" d="M690,228 L760,228"/>
+  <path id="p8" d="M690,366 L760,366"/>
+  <path id="p9" d="M800,493 L830,493 L830,453 L860,453"/>
+  <path id="p10" d="M1000,453 L1040,453"/>
+  <path id="p11" d="M800,493 L830,493 L830,543 L860,543"/>
+  <path id="p12" d="M1000,543 L1040,543"/>
 </defs>
-
-<rect width="1200" height="680" fill="#050b16"/>
+<g id="scene">
+<rect width="1200" height="680" fill="var(--bg-mid)"/>
 <rect width="1200" height="680" fill="url(#dotGrid)"/>
 <ellipse cx="408" cy="346" rx="236" ry="172" fill="url(#blueHalo)" class="halo"/>
 <ellipse cx="992" cy="506" rx="156" ry="120" fill="url(#orangeHalo)" class="halo"/>
@@ -148,18 +588,19 @@ svg { display: block; width: 100%; height: 100%; }
 <circle cx="1168" cy="650" r="74" fill="none" stroke="#f97316" stroke-width="0.5" opacity="0.10"/>
 <circle cx="1168" cy="650" r="108" fill="none" stroke="#f97316" stroke-width="0.3" opacity="0.06"/>
 
-<line x1="158" y1="52" x2="158" y2="646" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
-<line x1="324" y1="52" x2="324" y2="646" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
-<line x1="514" y1="52" x2="514" y2="646" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
-<line x1="704" y1="52" x2="704" y2="646" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
-<line x1="920" y1="52" x2="920" y2="646" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+<line x1="158" y1="84" x2="158" y2="646" stroke="var(--divider)" stroke-width="1"/>
+<line x1="324" y1="84" x2="324" y2="646" stroke="var(--divider)" stroke-width="1"/>
+<line x1="514" y1="84" x2="514" y2="646" stroke="var(--divider)" stroke-width="1"/>
+<line x1="704" y1="84" x2="704" y2="646" stroke="var(--divider)" stroke-width="1"/>
+<line x1="1020" y1="84" x2="1020" y2="646" stroke="var(--divider)" stroke-width="1"/>
 
-<text x="70" y="56" font-family="'DM Sans', sans-serif" font-size="9" font-weight="500" fill="rgba(255,255,255,0.20)" letter-spacing="2.5">ENTRY</text>
-<text x="372" y="56" font-family="'DM Sans', sans-serif" font-size="9" font-weight="500" fill="rgba(255,255,255,0.20)" letter-spacing="2.5">CONTROL</text>
-<text x="548" y="56" font-family="'DM Sans', sans-serif" font-size="9" font-weight="500" fill="rgba(255,255,255,0.20)" letter-spacing="2.5">POLICY AND DATA</text>
-<text x="740" y="56" font-family="'DM Sans', sans-serif" font-size="9" font-weight="500" fill="rgba(255,255,255,0.20)" letter-spacing="2.5">MODEL PATHS</text>
-<text x="948" y="56" font-family="'DM Sans', sans-serif" font-size="9" font-weight="500" fill="rgba(255,255,255,0.20)" letter-spacing="2.5">EXECUTION</text>
+<text x="70" y="88" font-family="'DM Sans', sans-serif" font-size="9" font-weight="500" fill="var(--section-label)" letter-spacing="2.5">ENTRY</text>
+<text x="372" y="88" font-family="'DM Sans', sans-serif" font-size="9" font-weight="500" fill="var(--section-label)" letter-spacing="2.5">CONTROL</text>
+<text x="548" y="88" font-family="'DM Sans', sans-serif" font-size="9" font-weight="500" fill="var(--section-label)" letter-spacing="2.5">POLICY AND DATA</text>
+<text x="734" y="88" font-family="'DM Sans', sans-serif" font-size="9" font-weight="500" fill="var(--section-label)" letter-spacing="2.5">ROUTER AND MODEL PATHS</text>
+<text x="1046" y="88" font-family="'DM Sans', sans-serif" font-size="9" font-weight="500" fill="var(--section-label)" letter-spacing="2.5">EXECUTION</text>
 
+<g id="diagram-core" transform="translate(0 28)">
 <g class="edge-g" id="e0">
   <use href="#p0" fill="none" stroke="#22d3ee" stroke-width="2" opacity="0.72" filter="url(#softGlow)"/>
   <circle r="3.8" fill="#22d3ee"><animateMotion dur="1.1s" repeatCount="indefinite"><mpath href="#p0"/></animateMotion></circle>
@@ -194,43 +635,49 @@ svg { display: block; width: 100%; height: 100%; }
   <use href="#p5" fill="none" stroke="#a78bfa" stroke-width="2" opacity="0.66" filter="url(#softGlow)"/>
   <circle r="3.4" fill="#d8b4fe"><animateMotion dur="1.7s" repeatCount="indefinite"><mpath href="#p5"/></animateMotion></circle>
   <circle r="2" fill="#a855f7" opacity="0.55"><animateMotion dur="1.7s" begin="-0.55s" repeatCount="indefinite"><mpath href="#p5"/></animateMotion></circle>
-  <polygon points="531,501 540,506 531,511" fill="#a78bfa"/>
+  <polygon points="641,488 650,493 641,498" fill="#a78bfa"/>
 </g>
 <g class="edge-g" id="e6">
   <use href="#p6" fill="none" stroke="#fb7185" stroke-width="2" opacity="0.60" filter="url(#softGlow)"/>
   <circle r="3.4" fill="#fda4af"><animateMotion dur="2.1s" repeatCount="indefinite"><mpath href="#p6"/></animateMotion></circle>
   <circle r="2" fill="#f43f5e" opacity="0.55"><animateMotion dur="2.1s" begin="-0.7s" repeatCount="indefinite"><mpath href="#p6"/></animateMotion></circle>
-  <polygon points="531,603 540,608 531,613" fill="#fb7185"/>
+  <polygon points="531,613 540,618 531,623" fill="#fb7185"/>
 </g>
 <g class="edge-g" id="e7">
   <use href="#p7" fill="none" stroke="#22d3ee" stroke-width="2" opacity="0.66" filter="url(#softGlow)"/>
   <circle r="3.4" fill="#67e8f9"><animateMotion dur="1.3s" repeatCount="indefinite"><mpath href="#p7"/></animateMotion></circle>
   <circle r="2" fill="#22d3ee" opacity="0.55"><animateMotion dur="1.3s" begin="-0.43s" repeatCount="indefinite"><mpath href="#p7"/></animateMotion></circle>
-  <polygon points="715,223 724,228 715,233" fill="#22d3ee"/>
+  <polygon points="751,223 760,228 751,233" fill="#22d3ee"/>
 </g>
 <g class="edge-g" id="e8">
   <use href="#p8" fill="none" stroke="#22d3ee" stroke-width="2" opacity="0.66" filter="url(#softGlow)"/>
   <circle r="3.4" fill="#67e8f9"><animateMotion dur="1.3s" repeatCount="indefinite"><mpath href="#p8"/></animateMotion></circle>
   <circle r="2" fill="#22d3ee" opacity="0.55"><animateMotion dur="1.3s" begin="-0.43s" repeatCount="indefinite"><mpath href="#p8"/></animateMotion></circle>
-  <polygon points="715,361 724,366 715,371" fill="#22d3ee"/>
+  <polygon points="751,361 760,366 751,371" fill="#22d3ee"/>
 </g>
 <g class="edge-g" id="e9">
   <use href="#p9" fill="none" stroke="#a78bfa" stroke-width="2" opacity="0.66" filter="url(#softGlow)"/>
   <circle r="3.4" fill="#d8b4fe"><animateMotion dur="1.5s" repeatCount="indefinite"><mpath href="#p9"/></animateMotion></circle>
   <circle r="2" fill="#a855f7" opacity="0.55"><animateMotion dur="1.5s" begin="-0.5s" repeatCount="indefinite"><mpath href="#p9"/></animateMotion></circle>
-  <polygon points="715,501 724,506 715,511" fill="#a78bfa"/>
+  <polygon points="851,448 860,453 851,458" fill="#a78bfa"/>
 </g>
 <g class="edge-g" id="e10">
   <use href="#p10" fill="none" stroke="#f97316" stroke-width="2.5" opacity="0.82" filter="url(#softGlow)"/>
   <circle r="4.3" fill="#fb923c"><animateMotion dur="0.95s" repeatCount="indefinite"><mpath href="#p10"/></animateMotion></circle>
   <circle r="2.4" fill="#fdba74" opacity="0.72"><animateMotion dur="0.95s" begin="-0.3s" repeatCount="indefinite"><mpath href="#p10"/></animateMotion></circle>
-  <polygon points="911,453 920,458 911,463" fill="#f97316"/>
+  <polygon points="1031,448 1040,453 1031,458" fill="#f97316"/>
 </g>
 <g class="edge-g" id="e11">
-  <use href="#p11" fill="none" stroke="#f97316" stroke-width="2.5" opacity="0.82" filter="url(#softGlow)"/>
-  <circle r="4.3" fill="#fb923c"><animateMotion dur="0.95s" repeatCount="indefinite"><mpath href="#p11"/></animateMotion></circle>
-  <circle r="2.4" fill="#fdba74" opacity="0.72"><animateMotion dur="0.95s" begin="-0.3s" repeatCount="indefinite"><mpath href="#p11"/></animateMotion></circle>
-  <polygon points="911,549 920,554 911,559" fill="#f97316"/>
+  <use href="#p11" fill="none" stroke="#a78bfa" stroke-width="2" opacity="0.66" filter="url(#softGlow)"/>
+  <circle r="3.4" fill="#d8b4fe"><animateMotion dur="1.6s" repeatCount="indefinite"><mpath href="#p11"/></animateMotion></circle>
+  <circle r="2" fill="#a855f7" opacity="0.55"><animateMotion dur="1.6s" begin="-0.52s" repeatCount="indefinite"><mpath href="#p11"/></animateMotion></circle>
+  <polygon points="851,538 860,543 851,548" fill="#a78bfa"/>
+</g>
+<g class="edge-g" id="e12">
+  <use href="#p12" fill="none" stroke="#f97316" stroke-width="2.5" opacity="0.82" filter="url(#softGlow)"/>
+  <circle r="4.3" fill="#fb923c"><animateMotion dur="0.95s" repeatCount="indefinite"><mpath href="#p12"/></animateMotion></circle>
+  <circle r="2.4" fill="#fdba74" opacity="0.72"><animateMotion dur="0.95s" begin="-0.3s" repeatCount="indefinite"><mpath href="#p12"/></animateMotion></circle>
+  <polygon points="1031,538 1040,543 1031,548" fill="#f97316"/>
 </g>
 
 <g class="node-g" id="n0" filter="url(#softGlow)">
@@ -262,79 +709,327 @@ svg { display: block; width: 100%; height: 100%; }
   <text x="615" y="378" text-anchor="middle" dominant-baseline="central" font-family="'DM Sans', sans-serif" font-size="9.5" fill="rgba(167,243,208,0.55)">CRM, ERP, tickets</text>
 </g>
 <g class="node-g" id="n6" filter="url(#softGlow)">
-  <rect x="540" y="484" width="150" height="44" rx="10" fill="url(#violetFill)" stroke="#a78bfa" stroke-width="1.4"/>
-  <text x="615" y="502" text-anchor="middle" dominant-baseline="central" font-family="'DM Sans', sans-serif" font-size="12" font-weight="500" fill="#ddd6fe">Model Router</text>
-  <text x="615" y="518" text-anchor="middle" dominant-baseline="central" font-family="'DM Sans', sans-serif" font-size="9.5" fill="rgba(221,214,254,0.55)">cost, policy, capability</text>
+  <rect x="650" y="470" width="150" height="46" rx="12" fill="url(#violetFill)" stroke="#a78bfa" stroke-width="1.5"/>
+  <text x="725" y="489" text-anchor="middle" dominant-baseline="central" font-family="'Syne', sans-serif" font-size="13" font-weight="700" fill="#e9d5ff">Model Router</text>
+  <text x="725" y="505" text-anchor="middle" dominant-baseline="central" font-family="'DM Sans', sans-serif" font-size="9.5" fill="rgba(233,213,255,0.62)">cost, policy, capability</text>
 </g>
 <g class="node-g" id="n7" filter="url(#softGlow)">
-  <rect x="540" y="586" width="150" height="46" rx="10" fill="url(#roseFill)" stroke="#fb7185" stroke-width="1.4"/>
-  <text x="615" y="604" text-anchor="middle" dominant-baseline="central" font-family="'DM Sans', sans-serif" font-size="12" font-weight="500" fill="#fecdd3">Logs / Evals</text>
-  <text x="615" y="621" text-anchor="middle" dominant-baseline="central" font-family="'DM Sans', sans-serif" font-size="9.5" fill="rgba(254,205,211,0.55)">observability and spend</text>
+  <rect x="540" y="595" width="150" height="46" rx="10" fill="url(#roseFill)" stroke="#fb7185" stroke-width="1.4"/>
+  <text x="615" y="613" text-anchor="middle" dominant-baseline="central" font-family="'DM Sans', sans-serif" font-size="12" font-weight="500" fill="#fecdd3">Logs / Evals</text>
+  <text x="615" y="630" text-anchor="middle" dominant-baseline="central" font-family="'DM Sans', sans-serif" font-size="9.5" fill="rgba(254,205,211,0.55)">observability and spend</text>
 </g>
 <g class="node-g" id="n8" filter="url(#softGlow)">
-  <rect x="724" y="206" width="160" height="44" rx="10" fill="url(#cyanFill)" stroke="#22d3ee" stroke-width="1.4"/>
-  <text x="804" y="224" text-anchor="middle" dominant-baseline="central" font-family="'DM Sans', sans-serif" font-size="12" font-weight="500" fill="#67e8f9">Docs / Search Index</text>
-  <text x="804" y="240" text-anchor="middle" dominant-baseline="central" font-family="'DM Sans', sans-serif" font-size="9.5" fill="rgba(103,232,249,0.55)">contracts, wiki, notes</text>
+  <rect x="760" y="206" width="160" height="44" rx="10" fill="url(#cyanFill)" stroke="#22d3ee" stroke-width="1.4"/>
+  <text x="840" y="224" text-anchor="middle" dominant-baseline="central" font-family="'DM Sans', sans-serif" font-size="12" font-weight="500" fill="#67e8f9">Docs / Search Index</text>
+  <text x="840" y="240" text-anchor="middle" dominant-baseline="central" font-family="'DM Sans', sans-serif" font-size="9.5" fill="rgba(103,232,249,0.55)">contracts, wiki, notes</text>
 </g>
 <g class="node-g" id="n9" filter="url(#softGlow)">
-  <rect x="724" y="344" width="160" height="44" rx="10" fill="url(#cyanFill)" stroke="#22d3ee" stroke-width="1.4"/>
-  <text x="804" y="362" text-anchor="middle" dominant-baseline="central" font-family="'DM Sans', sans-serif" font-size="12" font-weight="500" fill="#67e8f9">Live System Data</text>
-  <text x="804" y="378" text-anchor="middle" dominant-baseline="central" font-family="'DM Sans', sans-serif" font-size="9.5" fill="rgba(103,232,249,0.55)">orders, CRM, incidents</text>
+  <rect x="760" y="344" width="160" height="44" rx="10" fill="url(#cyanFill)" stroke="#22d3ee" stroke-width="1.4"/>
+  <text x="840" y="362" text-anchor="middle" dominant-baseline="central" font-family="'DM Sans', sans-serif" font-size="12" font-weight="500" fill="#67e8f9">Live System Data</text>
+  <text x="840" y="378" text-anchor="middle" dominant-baseline="central" font-family="'DM Sans', sans-serif" font-size="9.5" fill="rgba(103,232,249,0.55)">orders, CRM, incidents</text>
 </g>
 <g class="node-g" id="n10" filter="url(#softGlow)">
-  <rect x="724" y="484" width="160" height="46" rx="10" fill="url(#violetFill)" stroke="#a78bfa" stroke-width="1.4"/>
-  <text x="804" y="502" text-anchor="middle" dominant-baseline="central" font-family="'Syne', sans-serif" font-size="12.5" font-weight="700" fill="#ddd6fe">Private Inference</text>
-  <text x="804" y="519" text-anchor="middle" dominant-baseline="central" font-family="'DM Sans', sans-serif" font-size="9.5" font-style="italic" fill="rgba(221,214,254,0.62)">open models you control</text>
+  <rect x="860" y="430" width="140" height="46" rx="12" fill="url(#violetFill)" stroke="#a78bfa" stroke-width="1.4"/>
+  <text x="930" y="449" text-anchor="middle" dominant-baseline="central" font-family="'Syne', sans-serif" font-size="12.25" font-weight="700" fill="#ddd6fe">Private Inference</text>
+  <text x="930" y="465" text-anchor="middle" dominant-baseline="central" font-family="'DM Sans', sans-serif" font-size="9.2" font-style="italic" fill="rgba(221,214,254,0.62)">open models you control</text>
 </g>
 <g class="node-g" id="n11" filter="url(#softGlow)">
-  <rect x="724" y="580" width="160" height="46" rx="10" fill="url(#violetFill)" stroke="#c084fc" stroke-width="1.4"/>
-  <text x="804" y="598" text-anchor="middle" dominant-baseline="central" font-family="'Syne', sans-serif" font-size="12.5" font-weight="700" fill="#e9d5ff">Premium Inference</text>
-  <text x="804" y="615" text-anchor="middle" dominant-baseline="central" font-family="'DM Sans', sans-serif" font-size="9.5" font-style="italic" fill="rgba(233,213,255,0.62)">closed models you rent</text>
+  <rect x="860" y="520" width="140" height="46" rx="12" fill="url(#violetFill)" stroke="#c084fc" stroke-width="1.4"/>
+  <text x="930" y="539" text-anchor="middle" dominant-baseline="central" font-family="'Syne', sans-serif" font-size="12.25" font-weight="700" fill="#e9d5ff">Premium Inference</text>
+  <text x="930" y="555" text-anchor="middle" dominant-baseline="central" font-family="'DM Sans', sans-serif" font-size="9.2" font-style="italic" fill="rgba(233,213,255,0.62)">closed models you rent</text>
 </g>
 <g class="node-g" id="n12" filter="url(#softGlow)">
-  <rect x="920" y="435" width="152" height="46" rx="10" fill="url(#orangeFill)" stroke="#fb923c" stroke-width="1.7"/>
-  <circle cx="940" cy="458" r="4" fill="#f97316" class="pulse-dot"/>
-  <circle cx="940" cy="458" r="4" fill="#f97316" class="pulse-dot delayed"/>
-  <text x="996" y="454" text-anchor="middle" dominant-baseline="central" font-family="'DM Sans', sans-serif" font-size="12.5" font-weight="500" fill="#fdba74">Private GPU</text>
-  <text x="996" y="471" text-anchor="middle" dominant-baseline="central" font-family="'DM Sans', sans-serif" font-size="9.5" fill="rgba(253,186,116,0.55)">self-hosted cluster</text>
+  <rect x="1040" y="430" width="130" height="46" rx="12" fill="url(#orangeFill)" stroke="#fb923c" stroke-width="1.7"/>
+  <circle cx="1058" cy="453" r="4" fill="#f97316" class="pulse-dot"/>
+  <circle cx="1058" cy="453" r="4" fill="#f97316" class="pulse-dot delayed"/>
+  <text x="1105" y="449" text-anchor="middle" dominant-baseline="central" font-family="'DM Sans', sans-serif" font-size="12" font-weight="500" fill="#fdba74">Private GPU</text>
+  <text x="1105" y="465" text-anchor="middle" dominant-baseline="central" font-family="'DM Sans', sans-serif" font-size="9.2" fill="rgba(253,186,116,0.55)">self-hosted cluster</text>
 </g>
 <g class="node-g" id="n13" filter="url(#softGlow)">
-  <rect x="920" y="531" width="152" height="46" rx="10" fill="url(#orangeFill)" stroke="#fb923c" stroke-width="1.7"/>
-  <circle cx="940" cy="554" r="4" fill="#f97316" class="pulse-dot"/>
-  <circle cx="940" cy="554" r="4" fill="#f97316" class="pulse-dot delayed"/>
-  <text x="996" y="550" text-anchor="middle" dominant-baseline="central" font-family="'DM Sans', sans-serif" font-size="12.5" font-weight="500" fill="#fdba74">Managed APIs</text>
-  <text x="996" y="567" text-anchor="middle" dominant-baseline="central" font-family="'DM Sans', sans-serif" font-size="9.5" fill="rgba(253,186,116,0.55)">frontier services</text>
+  <rect x="1040" y="520" width="130" height="46" rx="12" fill="url(#orangeFill)" stroke="#fb923c" stroke-width="1.7"/>
+  <circle cx="1058" cy="543" r="4" fill="#f97316" class="pulse-dot"/>
+  <circle cx="1058" cy="543" r="4" fill="#f97316" class="pulse-dot delayed"/>
+  <text x="1105" y="539" text-anchor="middle" dominant-baseline="central" font-family="'DM Sans', sans-serif" font-size="12" font-weight="500" fill="#fdba74">Managed APIs</text>
+  <text x="1105" y="555" text-anchor="middle" dominant-baseline="central" font-family="'DM Sans', sans-serif" font-size="9.2" fill="rgba(253,186,116,0.55)">frontier services</text>
+</g>
+</g>
 </g>
 
 <g class="title-glow">
-  <text x="40" y="24" font-family="'Syne', sans-serif" font-size="24" font-weight="800" fill="#22d3ee" filter="url(#titleGlowFilter)">Private AI Control Plane</text>
+  <text x="40" y="24" font-family="'Syne', sans-serif" font-size="24" font-weight="800" fill="var(--title-copy)" filter="url(#titleGlowFilter)">Private AI Control Plane</text>
 </g>
-<text x="40" y="50" font-family="'DM Sans', sans-serif" font-size="12.5" fill="rgba(255,255,255,0.45)">Open models as controllable infrastructure. Closed models as premium managed services.</text>
-<line x1="40" y1="62" x2="1160" y2="62" stroke="rgba(34,211,238,0.16)" stroke-width="0.9"/>
+<text x="40" y="52" font-family="'DM Sans', sans-serif" font-size="12.5" fill="var(--subtitle-copy)">Open models as controllable infrastructure. Closed models as premium managed services.</text>
+<line x1="40" y1="76" x2="1160" y2="76" stroke="var(--top-line)" stroke-width="0.9"/>
 
 <g opacity="0.76">
-  <circle cx="1086" cy="100" r="4" fill="#22d3ee"/>
-  <text x="1098" y="105" font-family="'DM Sans', sans-serif" font-size="10" fill="rgba(255,255,255,0.52)">Entry and policy</text>
-  <circle cx="1086" cy="120" r="4" fill="#60a5fa"/>
-  <text x="1098" y="125" font-family="'DM Sans', sans-serif" font-size="10" fill="rgba(255,255,255,0.52)">Control plane</text>
-  <circle cx="1086" cy="140" r="4" fill="#34d399"/>
-  <text x="1098" y="145" font-family="'DM Sans', sans-serif" font-size="10" fill="rgba(255,255,255,0.52)">Data and tools</text>
-  <circle cx="1086" cy="160" r="4" fill="#a78bfa"/>
-  <text x="1098" y="165" font-family="'DM Sans', sans-serif" font-size="10" fill="rgba(255,255,255,0.52)">Model paths</text>
-  <circle cx="1086" cy="180" r="4" fill="#fb923c"/>
-  <text x="1098" y="185" font-family="'DM Sans', sans-serif" font-size="10" fill="rgba(255,255,255,0.52)">Execution</text>
-  <circle cx="1086" cy="200" r="4" fill="#fb7185"/>
-  <text x="1098" y="205" font-family="'DM Sans', sans-serif" font-size="10" fill="rgba(255,255,255,0.52)">Observability</text>
+  <circle cx="1086" cy="116" r="4" fill="#22d3ee"/>
+  <text x="1098" y="121" font-family="'DM Sans', sans-serif" font-size="10" fill="var(--subtitle-copy)">Entry and policy</text>
+  <circle cx="1086" cy="136" r="4" fill="#60a5fa"/>
+  <text x="1098" y="141" font-family="'DM Sans', sans-serif" font-size="10" fill="var(--subtitle-copy)">Control plane</text>
+  <circle cx="1086" cy="156" r="4" fill="#34d399"/>
+  <text x="1098" y="161" font-family="'DM Sans', sans-serif" font-size="10" fill="var(--subtitle-copy)">Data and tools</text>
+  <circle cx="1086" cy="176" r="4" fill="#a78bfa"/>
+  <text x="1098" y="181" font-family="'DM Sans', sans-serif" font-size="10" fill="var(--subtitle-copy)">Router and model paths</text>
+  <circle cx="1086" cy="196" r="4" fill="#fb923c"/>
+  <text x="1098" y="201" font-family="'DM Sans', sans-serif" font-size="10" fill="var(--subtitle-copy)">Execution</text>
+  <circle cx="1086" cy="216" r="4" fill="#fb7185"/>
+  <text x="1098" y="221" font-family="'DM Sans', sans-serif" font-size="10" fill="var(--subtitle-copy)">Observability</text>
 </g>
 
-<text x="40" y="650" font-family="'DM Sans', sans-serif" font-size="11.5" fill="rgba(255,255,255,0.28)">Portfolio strategy for routing sensitive, premium, and high-volume AI work</text>
+<text x="40" y="650" font-family="'DM Sans', sans-serif" font-size="11.5" fill="var(--footer-copy)">Portfolio strategy for routing sensitive, premium, and high-volume AI work</text>
 <rect x="0" y="0" width="1200" height="2.5" rx="1" fill="#22d3ee" opacity="0.6"/>
 </svg>
 </div>
+</div>
+</div>
 
 <script>
+const svg = document.getElementById('stage-svg');
+const scene = document.getElementById('scene');
 const nodes = ['n0', 'n1', 'n2', 'n3', 'n4', 'n5', 'n6', 'n7', 'n8', 'n9', 'n10', 'n11', 'n12', 'n13'];
-const edges = ['e0', 'e1', 'e2', 'e3', 'e4', 'e5', 'e6', 'e7', 'e8', 'e9', 'e10', 'e11'];
+const edges = ['e0', 'e1', 'e2', 'e3', 'e4', 'e5', 'e6', 'e7', 'e8', 'e9', 'e10', 'e11', 'e12'];
+const focusGroups = {
+  all: {
+    nodes,
+    edges
+  },
+  router: {
+    nodes: ['n6', 'n10', 'n11', 'n12', 'n13'],
+    edges: ['e5', 'e9', 'e10', 'e11', 'e12']
+  },
+  private: {
+    nodes: ['n6', 'n10', 'n12'],
+    edges: ['e5', 'e9', 'e10']
+  },
+  public: {
+    nodes: ['n6', 'n11', 'n13'],
+    edges: ['e5', 'e11', 'e12']
+  }
+};
+const zoomState = {
+  scale: 1,
+  x: 0,
+  y: 0,
+  minScale: 0.75,
+  maxScale: 2.5
+};
+const panState = {
+  active: false,
+  pointerId: null,
+  startX: 0,
+  startY: 0,
+  originX: 0,
+  originY: 0
+};
+
+function syncThemeToggle() {
+  const theme = document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
+  document.querySelectorAll('[data-theme-toggle]').forEach((toggle) => {
+    toggle.dataset.theme = theme;
+    toggle.setAttribute('aria-pressed', theme === 'dark' ? 'true' : 'false');
+    const label = theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme';
+    toggle.setAttribute('aria-label', label);
+    toggle.setAttribute('title', label);
+  });
+}
+
+function normalizeFocus(mode) {
+  return ['all', 'router', 'private', 'public'].includes(mode) ? mode : 'router';
+}
+
+function applyTransform() {
+  scene.setAttribute(
+    'transform',
+    `matrix(${zoomState.scale} 0 0 ${zoomState.scale} ${zoomState.x} ${zoomState.y})`
+  );
+  svg.classList.toggle('is-panning', panState.active);
+}
+
+function clampScale(value) {
+  return Math.min(zoomState.maxScale, Math.max(zoomState.minScale, value));
+}
+
+function getSvgPoint(clientX, clientY) {
+  const rect = svg.getBoundingClientRect();
+  const viewBox = svg.viewBox.baseVal;
+  return {
+    x: viewBox.x + ((clientX - rect.left) / rect.width) * viewBox.width,
+    y: viewBox.y + ((clientY - rect.top) / rect.height) * viewBox.height
+  };
+}
+
+function zoomAt(clientX, clientY, factor) {
+  const point = getSvgPoint(clientX, clientY);
+  const previousScale = zoomState.scale;
+  const nextScale = clampScale(previousScale * factor);
+
+  if (nextScale === previousScale) return;
+
+  const ratio = nextScale / previousScale;
+  zoomState.x = point.x - (point.x - zoomState.x) * ratio;
+  zoomState.y = point.y - (point.y - zoomState.y) * ratio;
+  zoomState.scale = nextScale;
+
+  if (Math.abs(zoomState.scale - 1) < 0.001) {
+    zoomState.scale = 1;
+    zoomState.x = 0;
+    zoomState.y = 0;
+  }
+
+  applyTransform();
+}
+
+function zoomByStep(direction) {
+  const rect = svg.getBoundingClientRect();
+  const centerX = rect.left + rect.width / 2;
+  const centerY = rect.top + rect.height / 2;
+  zoomAt(centerX, centerY, direction > 0 ? 1.14 : 1 / 1.14);
+}
+
+function resetView() {
+  zoomState.scale = 1;
+  zoomState.x = 0;
+  zoomState.y = 0;
+  panState.active = false;
+  panState.pointerId = null;
+  applyTransform();
+}
+
+function setEdgeMotion(edgeId, state) {
+  const edge = document.getElementById(edgeId);
+  if (!edge) return;
+
+  edge.querySelectorAll('animateMotion').forEach((animation) => {
+    const raw = animation.dataset.baseDur || animation.getAttribute('dur') || '1s';
+
+    if (!animation.dataset.baseDur) {
+      animation.dataset.baseDur = raw;
+    }
+
+    const base = Number.parseFloat(raw);
+    const next = state === 'highlight'
+      ? base * 0.82
+      : state === 'muted'
+        ? base * 1.12
+        : base;
+
+    animation.setAttribute('dur', `${Math.max(next, 0.35).toFixed(2).replace(/\.00$/, '')}s`);
+  });
+}
+
+function applyFocus(mode = 'router') {
+  const focusMode = normalizeFocus(mode);
+  const group = focusGroups[focusMode];
+  const highlightedNodes = new Set(group.nodes);
+  const highlightedEdges = new Set(group.edges);
+  const useMutedState = focusMode !== 'all';
+
+  nodes.forEach((id) => {
+    const element = document.getElementById(id);
+    if (!element) return;
+    const isHighlighted = highlightedNodes.has(id);
+    element.classList.toggle('route-highlight', isHighlighted);
+    element.classList.toggle('route-muted', useMutedState && !isHighlighted);
+  });
+
+  edges.forEach((id) => {
+    const element = document.getElementById(id);
+    if (!element) return;
+    const isHighlighted = highlightedEdges.has(id);
+    element.classList.toggle('route-highlight', isHighlighted);
+    element.classList.toggle('route-muted', useMutedState && !isHighlighted);
+    setEdgeMotion(id, isHighlighted ? 'highlight' : useMutedState ? 'muted' : 'normal');
+  });
+}
+
+function stopPan() {
+  if (panState.pointerId !== null && typeof svg.releasePointerCapture === 'function') {
+    try {
+      svg.releasePointerCapture(panState.pointerId);
+    } catch {
+      // Ignore pointer capture cleanup issues.
+    }
+  }
+
+  panState.active = false;
+  panState.pointerId = null;
+  applyTransform();
+}
+
+window.addEventListener('message', (event) => {
+  if (event.origin !== window.location.origin) return;
+
+  if (event.data?.type === 'm2m:set-theme') {
+    window.__m2mApplyTheme?.(event.data.theme, false);
+    syncThemeToggle();
+  }
+
+  if (event.data?.type === 'm2m:set-focus') {
+    applyFocus(event.data.focus);
+  }
+});
+
+document.querySelectorAll('[data-theme-toggle]').forEach((toggle) => {
+  toggle.addEventListener('click', () => {
+    const nextTheme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+    window.__m2mApplyTheme?.(nextTheme, true);
+    syncThemeToggle();
+  });
+});
+
+const zoomOutButton = document.querySelector('[data-zoom="out"]');
+if (zoomOutButton) {
+  zoomOutButton.textContent = '-';
+}
+
+document.querySelectorAll('[data-zoom]').forEach((button) => {
+  button.addEventListener('click', () => {
+    const action = button.getAttribute('data-zoom');
+    if (action === 'in') zoomByStep(1);
+    if (action === 'out') zoomByStep(-1);
+    if (action === 'reset') resetView();
+  });
+});
+
+svg.addEventListener('wheel', (event) => {
+  event.preventDefault();
+  zoomAt(event.clientX, event.clientY, event.deltaY < 0 ? 1.12 : 1 / 1.12);
+}, { passive: false });
+
+svg.addEventListener('pointerdown', (event) => {
+  if (event.button !== 0 || zoomState.scale <= 1.001) return;
+
+  const point = getSvgPoint(event.clientX, event.clientY);
+  panState.active = true;
+  panState.pointerId = event.pointerId;
+  panState.startX = point.x;
+  panState.startY = point.y;
+  panState.originX = zoomState.x;
+  panState.originY = zoomState.y;
+
+  if (typeof svg.setPointerCapture === 'function') {
+    svg.setPointerCapture(event.pointerId);
+  }
+
+  applyTransform();
+});
+
+svg.addEventListener('pointermove', (event) => {
+  if (!panState.active || event.pointerId !== panState.pointerId) return;
+
+  const point = getSvgPoint(event.clientX, event.clientY);
+  zoomState.x = panState.originX + (point.x - panState.startX);
+  zoomState.y = panState.originY + (point.y - panState.startY);
+  applyTransform();
+});
+
+svg.addEventListener('pointerup', stopPan);
+svg.addEventListener('pointercancel', stopPan);
+svg.addEventListener('lostpointercapture', stopPan);
+
+syncThemeToggle();
+applyTransform();
+applyFocus('router');
 
 nodes.forEach((id, index) => {
   setTimeout(() => {
@@ -352,3 +1047,5 @@ edges.forEach((id, index) => {
 </script>
 </body>
 </html>
+
+

@@ -1,11 +1,48 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Governed Procurement Architecture</title>
+  <script>
+    (() => {
+      const params = new URLSearchParams(window.location.search);
+      const storageKey = 'm2m-theme';
+      const root = document.documentElement;
+      const media = window.matchMedia('(prefers-color-scheme: dark)');
+      const normalizeTheme = (value) => value === 'dark' || value === 'light' ? value : null;
+      const getStoredTheme = () => {
+        try {
+          return normalizeTheme(window.localStorage.getItem(storageKey));
+        } catch {
+          return null;
+        }
+      };
+      const getSystemTheme = () => media.matches ? 'dark' : 'light';
+      const getPreferredTheme = () => getStoredTheme() ?? getSystemTheme();
+
+      root.dataset.embedded = params.get('embed') === '1' ? 'true' : 'false';
+
+      window.__m2mApplyTheme = (theme, persist = false) => {
+        const nextTheme = normalizeTheme(theme) ?? getPreferredTheme();
+        root.dataset.theme = nextTheme;
+        root.style.colorScheme = nextTheme;
+        if (persist) {
+          try {
+            window.localStorage.setItem(storageKey, nextTheme);
+          } catch {
+            // Ignore storage failures.
+          }
+        }
+      };
+
+      window.__m2mApplyTheme(getPreferredTheme(), false);
+    })();
+  </script>
   <style>
-    :root {
+    :root,
+    :root[data-theme="light"] {
+      color-scheme: light;
       --bg-a: #f8efe2;
       --bg-b: #d5eef2;
       --bg-c: #f2d8d1;
@@ -26,6 +63,56 @@
       --governance: #155e75;
       --experience: #7c5e10;
       --active: #0f172a;
+      --theme-toggle-shell: rgba(10, 17, 31, 0.92);
+      --theme-toggle-border: rgba(16, 42, 67, 0.12);
+      --theme-toggle-icon: rgba(238, 246, 255, 0.92);
+      --theme-toggle-icon-inactive: rgba(238, 246, 255, 0.56);
+      --theme-toggle-thumb: linear-gradient(135deg, #ffe2ad, #f4b24b);
+      --theme-toggle-thumb-shadow: 0 10px 22px rgba(240, 162, 77, 0.28);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        color-scheme: dark;
+        --bg-a: #08111f;
+        --bg-b: #0e223c;
+        --bg-c: #132a43;
+        --card: rgba(10, 24, 47, 0.78);
+        --card-strong: rgba(14, 30, 54, 0.9);
+        --ink: #ebf4ff;
+        --muted: #95aecb;
+        --line: rgba(166, 212, 255, 0.14);
+        --shadow: 0 24px 60px rgba(0, 0, 0, 0.34);
+        --shadow-soft: 0 14px 32px rgba(0, 0, 0, 0.22);
+        --active: #ffffff;
+        --theme-toggle-shell: rgba(10, 17, 31, 0.92);
+        --theme-toggle-border: rgba(166, 212, 255, 0.14);
+        --theme-toggle-icon: rgba(235, 244, 255, 0.92);
+        --theme-toggle-icon-inactive: rgba(235, 244, 255, 0.52);
+        --theme-toggle-thumb: linear-gradient(135deg, #c48cff, #a56cff);
+        --theme-toggle-thumb-shadow: 0 10px 22px rgba(165, 108, 255, 0.28);
+      }
+    }
+
+    :root[data-theme="dark"] {
+      color-scheme: dark;
+      --bg-a: #08111f;
+      --bg-b: #0e223c;
+      --bg-c: #132a43;
+      --card: rgba(10, 24, 47, 0.78);
+      --card-strong: rgba(14, 30, 54, 0.9);
+      --ink: #ebf4ff;
+      --muted: #95aecb;
+      --line: rgba(166, 212, 255, 0.14);
+      --shadow: 0 24px 60px rgba(0, 0, 0, 0.34);
+      --shadow-soft: 0 14px 32px rgba(0, 0, 0, 0.22);
+      --active: #ffffff;
+      --theme-toggle-shell: rgba(10, 17, 31, 0.92);
+      --theme-toggle-border: rgba(166, 212, 255, 0.14);
+      --theme-toggle-icon: rgba(235, 244, 255, 0.92);
+      --theme-toggle-icon-inactive: rgba(235, 244, 255, 0.52);
+      --theme-toggle-thumb: linear-gradient(135deg, #c48cff, #a56cff);
+      --theme-toggle-thumb-shadow: 0 10px 22px rgba(165, 108, 255, 0.28);
     }
 
     * { box-sizing: border-box; }
@@ -71,10 +158,160 @@
       background: rgba(26, 115, 232, 0.14);
     }
 
+    .site-header {
+      position: sticky;
+      top: 16px;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      margin: 20px auto 18px;
+      padding: 16px 18px;
+      width: min(calc(100% - 28px), 1560px);
+      background: var(--card-strong);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      backdrop-filter: blur(18px);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .brand-mark {
+      width: 40px;
+      height: 40px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      font-size: 0.9rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: #0a1524;
+      background: linear-gradient(135deg, var(--source), var(--intel));
+    }
+
+    .brand-copy strong,
+    .brand-copy span {
+      display: block;
+    }
+
+    .brand-copy strong {
+      font-size: 0.96rem;
+    }
+
+    .brand-copy span {
+      color: var(--muted);
+      font-size: 0.78rem;
+    }
+
+    .site-header-actions,
+    .site-nav {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .site-header-actions {
+      gap: 12px;
+    }
+
+    .site-nav .nav-item {
+      padding: 10px 14px;
+      border-radius: 999px;
+      color: var(--muted);
+      transition: 180ms ease;
+      text-decoration: none;
+    }
+
+    .site-nav a:hover,
+    .site-nav a[aria-current="page"] {
+      color: var(--ink);
+      background: color-mix(in srgb, var(--source) 14%, transparent);
+    }
+
+    .site-nav .is-disabled {
+      color: color-mix(in srgb, var(--muted) 56%, transparent);
+      background: color-mix(in srgb, var(--card-strong) 58%, transparent);
+      border: 1px solid color-mix(in srgb, var(--line) 55%, transparent);
+      cursor: not-allowed;
+    }
+
+    :root[data-embedded="true"] .site-header,
+    :root[data-embedded="true"] .back-link {
+      display: none;
+    }
+
+    .theme-toggle {
+      appearance: none;
+      border: 0;
+      background: transparent;
+      padding: 0;
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    .theme-toggle__track {
+      position: relative;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      align-items: center;
+      gap: 8px;
+      width: 92px;
+      height: 48px;
+      padding: 0 10px;
+      border-radius: 999px;
+      background: var(--theme-toggle-shell);
+      border: 1px solid var(--theme-toggle-border);
+      box-shadow: var(--shadow-soft);
+      isolation: isolate;
+    }
+
+    .theme-toggle__icon {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      place-items: center;
+      color: var(--theme-toggle-icon-inactive);
+      transition: color 180ms ease;
+    }
+
+    .theme-toggle__icon svg {
+      width: 18px;
+      height: 18px;
+      display: block;
+    }
+
+    .theme-toggle__thumb {
+      position: absolute;
+      top: 5px;
+      left: 5px;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: var(--theme-toggle-thumb);
+      box-shadow: var(--theme-toggle-thumb-shadow);
+      transition: transform 220ms ease, background 180ms ease, box-shadow 180ms ease;
+    }
+
+    .theme-toggle[data-theme="light"] .theme-toggle__thumb { transform: translateX(0); }
+    .theme-toggle[data-theme="dark"] .theme-toggle__thumb { transform: translateX(44px); }
+    .theme-toggle[data-theme="light"] .theme-toggle__icon--sun,
+    .theme-toggle[data-theme="dark"] .theme-toggle__icon--moon { color: var(--theme-toggle-icon); }
+
     .page {
-      max-width: 1560px;
+      width: min(calc(100% - 28px), 1560px);
       margin: 0 auto;
-      padding: 30px 28px 40px;
+      padding: 6px 0 40px;
       position: relative;
       z-index: 1;
     }
@@ -112,11 +349,49 @@
     }
 
     .hero p {
-      margin: 0;
+      margin: 0 0 10px;
       max-width: 820px;
       font-size: 17px;
       line-height: 1.6;
       color: var(--muted);
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      width: fit-content;
+      color: var(--muted);
+      font-size: 0.92rem;
+      text-decoration: none;
+      transition: color 180ms ease, transform 180ms ease;
+      margin-bottom: 12px;
+    }
+
+    .back-link:hover {
+      color: var(--ink);
+      transform: translateX(-1px);
+    }
+
+    .meta-strip {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .meta-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      border-radius: 999px;
+      background: var(--card-strong);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow-soft);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--ink);
     }
 
     .hero-stats {
@@ -306,6 +581,41 @@
       padding: 6px 4px 0;
     }
 
+    .stage-tools {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: flex-end;
+      align-items: center;
+    }
+
+    .zoom-button {
+      appearance: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 40px;
+      min-width: 40px;
+      padding: 0 14px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: var(--card-strong);
+      color: var(--muted);
+      box-shadow: var(--shadow-soft);
+      font-size: 13px;
+      backdrop-filter: blur(12px);
+    }
+
+    .zoom-button:hover {
+      color: var(--ink);
+    }
+
+    .zoom-button.is-reset {
+      min-width: unset;
+    }
+
     .stage-head h2 {
       margin: 0 0 6px;
       font-size: 26px;
@@ -354,6 +664,15 @@
       display: block;
       width: 100%;
       height: auto;
+    }
+
+    #stage-svg {
+      cursor: grab;
+      touch-action: none;
+    }
+
+    #stage-svg.is-panning {
+      cursor: grabbing;
     }
 
     .node {
@@ -497,6 +816,38 @@
   </style>
 </head>
 <body>
+  <header class="site-header">
+    <a class="brand" href="/">
+      <span class="brand-mark">M2M</span>
+      <span class="brand-copy">
+        <strong>Models to Margins</strong>
+        <span>Business-first AI research and operating maps</span>
+      </span>
+    </a>
+    <div class="site-header-actions">
+      <nav class="site-nav" aria-label="Primary">
+        <a class="nav-item" href="/briefs" aria-current="page">Brief</a>
+        <a class="nav-item" href="/deep-dives">Deep Dives</a>
+        <span class="nav-item is-disabled" aria-disabled="true">About</span>
+      </nav>
+      <button class="theme-toggle" type="button" data-theme-toggle aria-label="Toggle color theme" title="Toggle color theme">
+        <span class="theme-toggle__track" aria-hidden="true">
+          <span class="theme-toggle__icon theme-toggle__icon--sun">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="4.25" fill="none" stroke="currentColor" stroke-width="1.8"></circle>
+              <path d="M12 2.5v3M12 18.5v3M21.5 12h-3M5.5 12h-3M18.7 5.3l-2.1 2.1M7.4 16.6l-2.1 2.1M18.7 18.7l-2.1-2.1M7.4 7.4L5.3 5.3" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.8"></path>
+            </svg>
+          </span>
+          <span class="theme-toggle__icon theme-toggle__icon--moon">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M15.7 3.6a8.6 8.6 0 1 0 4.7 15.5a8 8 0 1 1-4.7-15.5Z" fill="none" stroke="currentColor" stroke-linejoin="round" stroke-width="1.8"></path>
+            </svg>
+          </span>
+          <span class="theme-toggle__thumb"></span>
+        </span>
+      </button>
+    </div>
+  </header>
   <div class="page">
     <section class="hero">
       <div class="hero-copy">
@@ -505,6 +856,12 @@
         <p>
           This version is built to present, not just explain. It frames the operating problem, the delivery constraints, the modeled ROI, and the architecture pattern that makes agentic procurement usable inside real enterprise controls.
         </p>
+        <a class="back-link" href="/briefs"><span aria-hidden="true">&larr;</span><span>Back to Brief</span></a>
+        <div class="meta-strip" aria-label="Page metadata">
+          <span class="meta-chip">April 5, 2026</span>
+          <span class="meta-chip">Procurement AI</span>
+          <span class="meta-chip">Architecture map</span>
+        </div>
       </div>
       <div class="hero-stats">
         <div class="stat"><strong>7</strong><span>Color-coded layers from source systems through buyer experience.</span></div>
@@ -548,13 +905,18 @@
             <h2>Governed procurement AI reference architecture</h2>
             <p>Click a layer or chip to inspect what it handles, why it matters, and where the real enterprise value or risk lives.</p>
           </div>
+          <div class="stage-tools" aria-label="Zoom controls">
+            <button class="zoom-button" type="button" data-zoom="out" aria-label="Zoom out" title="Zoom out">-</button>
+            <button class="zoom-button" type="button" data-zoom="in" aria-label="Zoom in" title="Zoom in">+</button>
+            <button class="zoom-button is-reset" type="button" data-zoom="reset" aria-label="Reset view" title="Reset view">Reset</button>
+          </div>
           <div class="stage-badges">
             <span class="badge" style="color: var(--data);"><span class="badge-dot"></span>Trusted Data First</span>
             <span class="badge" style="color: var(--agents);"><span class="badge-dot"></span>Agentic Workflow</span>
             <span class="badge" style="color: var(--governance);"><span class="badge-dot"></span>Policy Controlled</span>
           </div>
         </div>
-        <svg viewBox="0 0 980 980" aria-labelledby="title desc" role="img">
+        <svg id="stage-svg" viewBox="0 0 980 980" aria-labelledby="title desc" role="img">
           <title id="title">Governed procurement architecture</title>
           <desc id="desc">An interactive, animated procurement architecture with seven color-coded layers, moving particles, and clickable nodes.</desc>
           <defs>
@@ -576,6 +938,7 @@
             <path id="flowLeft" d="M 265 140 C 250 200 250 255 270 315 S 280 430 250 520 S 250 660 280 820" />
             <path id="flowRight" d="M 715 140 C 730 205 730 255 710 315 S 700 430 730 520 S 730 660 700 820" />
           </defs>
+          <g id="scene">
 
           <rect x="0" y="0" width="980" height="980" rx="30" fill="url(#bgGrid)" />
           <rect x="0" y="0" width="980" height="980" rx="30" fill="url(#gridPattern)" />
@@ -711,6 +1074,7 @@
           </g>
 
           <text x="492" y="900" class="hint-copy" text-anchor="middle">Human approval remains mandatory for supplier selection, policy exceptions, and savings booking.</text>
+          </g>
         </svg>
         <div class="legend">
           <span class="legend-item"><span class="mini-dot" style="--dot: var(--source);"></span>Source Systems</span>
@@ -739,6 +1103,25 @@
     </section>
   </div>
   <script>
+    function syncThemeToggle() {
+      const theme = document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
+      document.querySelectorAll('[data-theme-toggle]').forEach((toggle) => {
+        toggle.dataset.theme = theme;
+        toggle.setAttribute('aria-pressed', theme === 'dark' ? 'true' : 'false');
+        const label = theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme';
+        toggle.setAttribute('aria-label', label);
+        toggle.setAttribute('title', label);
+      });
+    }
+
+    document.querySelectorAll('[data-theme-toggle]').forEach((toggle) => {
+      toggle.addEventListener('click', () => {
+        const nextTheme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+        window.__m2mApplyTheme?.(nextTheme, true);
+        syncThemeToggle();
+      });
+    });
+
     const nodeData = {
       "source-systems": {
         title: "Source Systems",
@@ -1042,6 +1425,80 @@
     const detailSummary = document.getElementById("detail-summary");
     const detailHandles = document.getElementById("detail-handles");
     const detailMatters = document.getElementById("detail-matters");
+    const svg = document.getElementById("stage-svg");
+    const scene = document.getElementById("scene");
+    const zoomState = { scale: 1, x: 0, y: 0, minScale: 0.75, maxScale: 2.5 };
+    const panState = { active: false, pointerId: null, startX: 0, startY: 0, originX: 0, originY: 0 };
+
+    function applyTransform() {
+      if (!scene || !svg) return;
+      scene.setAttribute("transform", `matrix(${zoomState.scale} 0 0 ${zoomState.scale} ${zoomState.x} ${zoomState.y})`);
+      svg.classList.toggle("is-panning", panState.active);
+    }
+
+    function clampScale(value) {
+      return Math.min(zoomState.maxScale, Math.max(zoomState.minScale, value));
+    }
+
+    function getSvgPoint(clientX, clientY) {
+      const rect = svg.getBoundingClientRect();
+      const viewBox = svg.viewBox.baseVal;
+      return {
+        x: viewBox.x + ((clientX - rect.left) / rect.width) * viewBox.width,
+        y: viewBox.y + ((clientY - rect.top) / rect.height) * viewBox.height
+      };
+    }
+
+    function zoomAt(clientX, clientY, factor) {
+      const point = getSvgPoint(clientX, clientY);
+      const previousScale = zoomState.scale;
+      const nextScale = clampScale(previousScale * factor);
+
+      if (nextScale === previousScale) return;
+
+      const ratio = nextScale / previousScale;
+      zoomState.x = point.x - (point.x - zoomState.x) * ratio;
+      zoomState.y = point.y - (point.y - zoomState.y) * ratio;
+      zoomState.scale = nextScale;
+
+      if (Math.abs(zoomState.scale - 1) < 0.001) {
+        zoomState.scale = 1;
+        zoomState.x = 0;
+        zoomState.y = 0;
+      }
+
+      applyTransform();
+    }
+
+    function zoomByStep(direction) {
+      const rect = svg.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+      zoomAt(centerX, centerY, direction > 0 ? 1.14 : 1 / 1.14);
+    }
+
+    function resetView() {
+      zoomState.scale = 1;
+      zoomState.x = 0;
+      zoomState.y = 0;
+      panState.active = false;
+      panState.pointerId = null;
+      applyTransform();
+    }
+
+    function stopPan() {
+      if (panState.pointerId !== null && typeof svg.releasePointerCapture === "function") {
+        try {
+          svg.releasePointerCapture(panState.pointerId);
+        } catch {
+          // Ignore pointer cleanup issues.
+        }
+      }
+
+      panState.active = false;
+      panState.pointerId = null;
+      applyTransform();
+    }
 
     function renderList(target, items) {
       target.innerHTML = "";
@@ -1074,7 +1531,57 @@
       });
     });
 
+    document.querySelectorAll("[data-zoom]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const action = button.getAttribute("data-zoom");
+        if (action === "in") zoomByStep(1);
+        if (action === "out") zoomByStep(-1);
+        if (action === "reset") resetView();
+      });
+    });
+
+    if (svg) {
+      svg.addEventListener("wheel", (event) => {
+        event.preventDefault();
+        zoomAt(event.clientX, event.clientY, event.deltaY < 0 ? 1.12 : 1 / 1.12);
+      }, { passive: false });
+
+      svg.addEventListener("pointerdown", (event) => {
+        if (event.button !== 0 || zoomState.scale <= 1.001) return;
+
+        const point = getSvgPoint(event.clientX, event.clientY);
+        panState.active = true;
+        panState.pointerId = event.pointerId;
+        panState.startX = point.x;
+        panState.startY = point.y;
+        panState.originX = zoomState.x;
+        panState.originY = zoomState.y;
+
+        if (typeof svg.setPointerCapture === "function") {
+          svg.setPointerCapture(event.pointerId);
+        }
+
+        applyTransform();
+      });
+
+      svg.addEventListener("pointermove", (event) => {
+        if (!panState.active || event.pointerId !== panState.pointerId) return;
+
+        const point = getSvgPoint(event.clientX, event.clientY);
+        zoomState.x = panState.originX + (point.x - panState.startX);
+        zoomState.y = panState.originY + (point.y - panState.startY);
+        applyTransform();
+      });
+
+      svg.addEventListener("pointerup", stopPan);
+      svg.addEventListener("pointercancel", stopPan);
+      svg.addEventListener("lostpointercapture", stopPan);
+    }
+
+    syncThemeToggle();
+    applyTransform();
     selectNode("source-systems");
   </script>
 </body>
 </html>
+

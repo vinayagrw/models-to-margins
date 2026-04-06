@@ -1,17 +1,15 @@
 ---
 import { getEntry } from 'astro:content';
+import '../../styles/global.css';
+import EntryMeta from '../../components/EntryMeta.astro';
+import BackLink from '../../components/BackLink.astro';
+import ThemeToggle from '../../components/ThemeToggle.astro';
 
 const entry = await getEntry('briefs', 'private-ai-vs-public-ai');
 
 if (!entry) {
   throw new Error('Expected the private-ai-vs-public-ai brief to exist in the briefs collection.');
 }
-
-const metaDate = entry.data.pubDate.toLocaleDateString('en-US', {
-  month: 'long',
-  day: 'numeric',
-  year: 'numeric'
-});
 
 const openItems = [
   {
@@ -195,8 +193,116 @@ const focusData = {
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{entry.data.title} | Models to Margins</title>
     <meta name="description" content={entry.data.summary} />
+    <script is:inline>
+      (() => {
+        if (typeof window.__m2mInitTheme === 'function') {
+          window.__m2mInitTheme();
+          return;
+        }
+
+        window.__m2mInitTheme = () => {
+          const storageKey = 'm2m-theme';
+          const root = document.documentElement;
+          const media = window.matchMedia('(prefers-color-scheme: dark)');
+          const normalizeTheme = (value) => value === 'dark' || value === 'light' ? value : null;
+          const getStoredTheme = () => {
+            try {
+              return normalizeTheme(window.localStorage.getItem(storageKey));
+            } catch {
+              return null;
+            }
+          };
+          const getSystemTheme = () => media.matches ? 'dark' : 'light';
+          const getPreferredTheme = () => getStoredTheme() ?? getSystemTheme();
+
+          window.__m2mThemeKey = storageKey;
+          window.__m2mGetTheme = () => root.dataset.theme || getPreferredTheme();
+          window.__m2mApplyTheme = (theme, persist = false) => {
+            const nextTheme = normalizeTheme(theme) ?? getPreferredTheme();
+            root.dataset.theme = nextTheme;
+            root.style.colorScheme = nextTheme;
+            if (persist) {
+              try {
+                window.localStorage.setItem(storageKey, nextTheme);
+              } catch {
+                // Ignore storage errors so the page still works in restricted contexts.
+              }
+            }
+            window.dispatchEvent(new CustomEvent('m2m:themechange', { detail: { theme: nextTheme } }));
+          };
+
+          window.__m2mApplyTheme(getPreferredTheme(), false);
+
+          const syncSystemTheme = (event) => {
+            if (getStoredTheme()) return;
+            window.__m2mApplyTheme(event.matches ? 'dark' : 'light', false);
+          };
+
+          if (typeof media.addEventListener === 'function') {
+            media.addEventListener('change', syncSystemTheme);
+          } else if (typeof media.addListener === 'function') {
+            media.addListener(syncSystemTheme);
+          }
+        };
+
+        window.__m2mInitTheme();
+      })();
+    </script>
     <style>
-      :root {
+      :root,
+      :root[data-theme="light"] {
+        color-scheme: light;
+        --bg-0: #f7efe5;
+        --bg-1: #e6f4fa;
+        --bg-2: #f5ebe5;
+        --panel: rgba(255, 255, 255, 0.74);
+        --border: rgba(16, 42, 67, 0.1);
+        --ink: #10263b;
+        --muted: #536779;
+        --open: #178f86;
+        --control: #7857e6;
+        --closed: #d28b2f;
+        --shadow: 0 18px 42px rgba(15, 33, 52, 0.16);
+        --radius: 24px;
+        --surface-soft: rgba(255, 255, 255, 0.68);
+        --surface-strong: rgba(255, 255, 255, 0.84);
+        --grid-line: rgba(16, 42, 67, 0.04);
+        --theme-toggle-shell: rgba(10, 17, 31, 0.92);
+        --theme-toggle-border: rgba(16, 42, 67, 0.12);
+        --theme-toggle-icon: rgba(238, 246, 255, 0.92);
+        --theme-toggle-icon-inactive: rgba(238, 246, 255, 0.56);
+        --theme-toggle-thumb: linear-gradient(135deg, #ffe2ad, #f4b24b);
+        --theme-toggle-thumb-shadow: 0 10px 22px rgba(240, 162, 77, 0.28);
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-theme="light"]) {
+          color-scheme: dark;
+          --bg-0: #06111f;
+          --bg-1: #0a1a32;
+          --bg-2: #102545;
+          --panel: rgba(10, 24, 47, 0.78);
+          --border: rgba(166, 212, 255, 0.12);
+          --ink: #ebf4ff;
+          --muted: #95aecb;
+          --open: #4fd1c5;
+          --control: #9b8cff;
+          --closed: #ffd166;
+          --shadow: 0 18px 42px rgba(0, 0, 0, 0.28);
+          --surface-soft: rgba(255, 255, 255, 0.03);
+          --surface-strong: rgba(255, 255, 255, 0.04);
+          --grid-line: rgba(166, 212, 255, 0.032);
+          --theme-toggle-shell: rgba(10, 17, 31, 0.92);
+          --theme-toggle-border: rgba(166, 212, 255, 0.14);
+          --theme-toggle-icon: rgba(235, 244, 255, 0.92);
+          --theme-toggle-icon-inactive: rgba(235, 244, 255, 0.52);
+          --theme-toggle-thumb: linear-gradient(135deg, #c48cff, #a56cff);
+          --theme-toggle-thumb-shadow: 0 10px 22px rgba(165, 108, 255, 0.28);
+        }
+      }
+
+      :root[data-theme="dark"] {
+        color-scheme: dark;
         --bg-0: #06111f;
         --bg-1: #0a1a32;
         --bg-2: #102545;
@@ -208,7 +314,15 @@ const focusData = {
         --control: #9b8cff;
         --closed: #ffd166;
         --shadow: 0 18px 42px rgba(0, 0, 0, 0.28);
-        --radius: 24px;
+        --surface-soft: rgba(255, 255, 255, 0.03);
+        --surface-strong: rgba(255, 255, 255, 0.04);
+        --grid-line: rgba(166, 212, 255, 0.032);
+        --theme-toggle-shell: rgba(10, 17, 31, 0.92);
+        --theme-toggle-border: rgba(166, 212, 255, 0.14);
+        --theme-toggle-icon: rgba(235, 244, 255, 0.92);
+        --theme-toggle-icon-inactive: rgba(235, 244, 255, 0.52);
+        --theme-toggle-thumb: linear-gradient(135deg, #c48cff, #a56cff);
+        --theme-toggle-thumb-shadow: 0 10px 22px rgba(165, 108, 255, 0.28);
       }
 
       * {
@@ -219,12 +333,11 @@ const focusData = {
         margin: 0;
         min-height: 100vh;
         color: var(--ink);
-        font-family: "Segoe UI Variable Display", "Aptos", "IBM Plex Sans", sans-serif;
+        font-family: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif;
         background:
-          radial-gradient(circle at 12% 16%, rgba(79, 209, 197, 0.12), transparent 23%),
-          radial-gradient(circle at 84% 18%, rgba(155, 140, 255, 0.14), transparent 18%),
-          radial-gradient(circle at 68% 88%, rgba(255, 209, 102, 0.1), transparent 24%),
-          linear-gradient(155deg, var(--bg-0), var(--bg-1) 44%, var(--bg-2));
+          radial-gradient(circle at top left, rgba(79, 209, 197, 0.12), transparent 32%),
+          radial-gradient(circle at top right, rgba(255, 209, 102, 0.12), transparent 26%),
+          linear-gradient(180deg, var(--bg-0) 0%, var(--bg-1) 48%, var(--bg-2) 100%);
         overflow-x: hidden;
       }
 
@@ -234,27 +347,23 @@ const focusData = {
         inset: 0;
         pointer-events: none;
         background-image:
-          linear-gradient(rgba(166, 212, 255, 0.032) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(166, 212, 255, 0.032) 1px, transparent 1px);
+          linear-gradient(var(--grid-line) 1px, transparent 1px),
+          linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
         background-size: 44px 44px;
         mask-image: radial-gradient(circle at center, black 34%, transparent 86%);
         opacity: 0.85;
       }
 
       .page {
-        max-width: 1680px;
         margin: 0 auto;
-        padding: 18px 22px 24px;
+        padding: 6px 0 24px;
         position: relative;
         z-index: 1;
       }
 
       .hero {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) auto;
-        gap: 14px 18px;
-        align-items: end;
-        margin-bottom: 14px;
+        display: block;
+        margin-bottom: 16px;
       }
 
       .eyebrow {
@@ -287,34 +396,39 @@ const focusData = {
         font-size: clamp(34px, 4.2vw, 58px);
         line-height: 0.94;
         letter-spacing: -0.04em;
-        font-family: "Georgia", "Aptos Display", sans-serif;
+        font-family: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif;
       }
 
       .subtitle {
-        margin: 0;
+        margin: 0 0 18px;
         max-width: 840px;
         font-size: 15px;
         line-height: 1.58;
         color: var(--muted);
       }
 
-      .meta-strip {
+      .meta-strip,
+      .entry-meta {
         display: flex;
         flex-wrap: wrap;
         gap: 10px;
-        justify-content: flex-end;
-        align-self: start;
-        margin-top: 8px;
+        justify-content: flex-start;
+        align-self: auto;
+        margin-top: 10px;
       }
 
-      .meta-chip {
-        padding: 10px 12px;
+      .meta-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
         border-radius: 999px;
         border: 1px solid var(--border);
-        background: rgba(255, 255, 255, 0.04);
-        font-size: 12px;
+        background: var(--surface-strong);
+        font-size: 0.82rem;
+        line-height: 1;
         color: var(--ink);
-        box-shadow: var(--shadow);
+        box-shadow: var(--shadow-soft);
         white-space: nowrap;
       }
 
@@ -435,7 +549,7 @@ const focusData = {
         margin-top: 14px;
         padding: 13px 14px;
         border-radius: 18px;
-        background: rgba(255, 255, 255, 0.03);
+        background: var(--surface-soft);
         border: 1px solid rgba(255, 255, 255, 0.06);
       }
 
@@ -534,7 +648,7 @@ const focusData = {
         padding: 10px 12px;
         border-radius: 16px;
         border: 1px solid rgba(255, 255, 255, 0.06);
-        background: rgba(255, 255, 255, 0.03);
+        background: var(--surface-soft);
       }
 
       .focus-bar strong {
@@ -552,7 +666,7 @@ const focusData = {
         overflow: hidden;
         border-radius: 22px;
         border: 1px solid rgba(255, 255, 255, 0.08);
-        background: rgba(255, 255, 255, 0.03);
+        background: var(--surface-soft);
         min-height: 720px;
         box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
       }
@@ -579,7 +693,7 @@ const focusData = {
         padding: 8px 10px;
         border-radius: 999px;
         border: 1px solid rgba(255, 255, 255, 0.06);
-        background: rgba(255, 255, 255, 0.03);
+        background: var(--surface-soft);
         color: var(--muted);
         font-size: 12px;
       }
@@ -630,14 +744,15 @@ const focusData = {
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        margin-top: 12px;
+        width: fit-content;
         color: var(--muted);
-        text-decoration: none;
-        font-size: 13px;
+        font-size: 0.92rem;
+        transition: color 180ms ease, transform 180ms ease;
       }
 
       .back-link:hover {
         color: var(--ink);
+        transform: translateX(-1px);
       }
 
       @media (max-width: 1480px) {
@@ -655,8 +770,9 @@ const focusData = {
       }
 
       @media (max-width: 1240px) {
-        .hero {
-          grid-template-columns: 1fr;
+        .meta-strip,
+        .entry-meta {
+          justify-content: flex-start;
         }
 
         .board {
@@ -692,21 +808,32 @@ const focusData = {
     </style>
   </head>
   <body>
-    <div class="page">
+    <header class="site-header">
+      <a class="brand" href="/">
+        <span class="brand-mark">M2M</span>
+        <span class="brand-copy">
+          <strong>Models to Margins</strong>
+          <span>Business-first AI research and operating maps</span>
+        </span>
+      </a>
+      <div class="site-header-actions">
+        <nav class="site-nav" aria-label="Primary">
+          <a class="nav-item" href="/briefs" aria-current="page">Brief</a>
+          <a class="nav-item" href="/deep-dives">Deep Dives</a>
+          <span class="nav-item is-disabled" aria-disabled="true">About</span>
+        </nav>
+        <ThemeToggle />
+      </div>
+    </header>
+    <main class="site-shell page">
       <section class="hero">
-        <div>
-          <span class="eyebrow">Live Brief</span>
-          <h1>Private AI vs public AI, shown as one portfolio operating model.</h1>
-          <p class="subtitle">
-            {entry.data.summary}
-          </p>
-          <a class="back-link" href="/briefs">&larr; Back to Brief</a>
-        </div>
-        <div class="meta-strip" aria-label="Brief metadata">
-          <span class="meta-chip">{metaDate}</span>
-          <span class="meta-chip">{entry.data.industry}</span>
-          {entry.data.readTime && <span class="meta-chip">{entry.data.readTime}</span>}
-        </div>
+        <span class="eyebrow">Live Brief</span>
+        <h1>Private AI vs public AI, shown as one portfolio operating model.</h1>
+        <p class="subtitle">
+          {entry.data.summary}
+        </p>
+        <BackLink href="/briefs" label="Back to Brief" />
+        <EntryMeta className="meta-strip" date={entry.data.pubDate} primary={entry.data.industry} readTime={entry.data.readTime} />
       </section>
 
       <section class="board">
@@ -757,7 +884,8 @@ const focusData = {
 
           <div class="visual-frame">
             <iframe
-              src={entry.data.supportingVisualPath}
+              id="architecture-frame"
+              src={`${entry.data.supportingVisualPath}?embed=1`}
               title="Private AI control plane"
               loading="eager"
             ></iframe>
@@ -812,12 +940,77 @@ const focusData = {
           <p>Private paths fit sensitive and high-volume workloads. Public paths fit fast-moving premium capability. The ROI comes from routing each job to the right economics and governance boundary.</p>
         </article>
       </section>
-    </div>
+    </main>
 
     <script define:vars={{ focusData }}>
+      const media = window.matchMedia('(prefers-color-scheme: dark)');
       const summaryItems = Array.from(document.querySelectorAll(".summary-item"));
       const focusTitle = document.getElementById("focus-title");
       const focusCopy = document.getElementById("focus-copy");
+      const architectureFrame = document.getElementById("architecture-frame");
+      const privateFocusNodes = new Set([
+        "private-path",
+        "sensitive-data",
+        "unit-economics",
+        "workflow-control",
+        "sovereign-deployment",
+        "platform-leverage"
+      ]);
+      const publicFocusNodes = new Set([
+        "public-path",
+        "frontier-quality",
+        "speed-to-ship",
+        "managed-reliability",
+        "multimodal-maturity",
+        "lean-team-fit"
+      ]);
+
+      const getTheme = () => document.documentElement.dataset.theme === "dark" ? "dark" : "light";
+      const getFocusMode = (id) => {
+        if (id === "router-layer") return "router";
+        if (privateFocusNodes.has(id)) return "private";
+        if (publicFocusNodes.has(id)) return "public";
+        return "all";
+      };
+
+      const syncThemeToggles = () => {
+        const theme = getTheme();
+        document.querySelectorAll("[data-theme-toggle]").forEach((toggle) => {
+          toggle.dataset.theme = theme;
+          toggle.setAttribute("aria-pressed", theme === "dark" ? "true" : "false");
+          const label = theme === "dark" ? "Switch to light theme" : "Switch to dark theme";
+          toggle.setAttribute("aria-label", label);
+          toggle.setAttribute("title", label);
+        });
+      };
+
+      const syncEmbeddedTheme = () => {
+        if (!architectureFrame?.contentWindow) return;
+        architectureFrame.contentWindow.postMessage(
+          { type: "m2m:set-theme", theme: getTheme() },
+          window.location.origin
+        );
+      };
+
+      const syncEmbeddedFocus = (mode) => {
+        if (!architectureFrame?.contentWindow) return;
+        architectureFrame.contentWindow.postMessage(
+          { type: "m2m:set-focus", focus: mode },
+          window.location.origin
+        );
+      };
+
+      const bindThemeToggles = () => {
+        document.querySelectorAll("[data-theme-toggle]").forEach((toggle) => {
+          if (toggle.dataset.themeBound === "true") return;
+          toggle.dataset.themeBound = "true";
+          toggle.addEventListener("click", () => {
+            const nextTheme = getTheme() === "dark" ? "light" : "dark";
+            window.__m2mApplyTheme?.(nextTheme, true);
+          });
+        });
+        syncThemeToggles();
+      };
 
       function activateNode(id) {
         const data = focusData[id];
@@ -826,6 +1019,7 @@ const focusData = {
         summaryItems.forEach((item) => item.classList.toggle("is-active", item.dataset.node === id));
         focusTitle.textContent = data.title;
         focusCopy.textContent = data.copy;
+        syncEmbeddedFocus(getFocusMode(id));
       }
 
       function bindActivator(element) {
@@ -842,7 +1036,23 @@ const focusData = {
       }
 
       summaryItems.forEach(bindActivator);
+      bindThemeToggles();
+      architectureFrame?.addEventListener("load", () => {
+        syncEmbeddedTheme();
+        syncEmbeddedFocus(getFocusMode("router-layer"));
+      });
+      window.addEventListener("m2m:themechange", () => {
+        syncThemeToggles();
+        syncEmbeddedTheme();
+      });
+      window.addEventListener("storage", (event) => {
+        if (event.key !== window.__m2mThemeKey) return;
+        const fallbackTheme = media.matches ? "dark" : "light";
+        window.__m2mApplyTheme?.(event.newValue ?? fallbackTheme, false);
+      });
       activateNode("router-layer");
+      syncEmbeddedTheme();
+      syncEmbeddedFocus(getFocusMode("router-layer"));
     </script>
   </body>
 </html>

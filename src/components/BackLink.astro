@@ -1,0 +1,14 @@
+---
+interface Props {
+  href: string;
+  label: string;
+  className?: string;
+}
+
+const { href, label, className = '' } = Astro.props;
+---
+
+<a class:list={['back-link', className]} href={href}>
+  <span aria-hidden="true">&larr;</span>
+  <span>{label}</span>
+</a>

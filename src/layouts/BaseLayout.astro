@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import ThemeToggle from '../components/ThemeToggle.astro';
 
 interface Props {
   title?: string;
@@ -35,6 +36,52 @@ const navItems = [
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="canonical" href={canonical.href} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <script is:inline>
+      (() => {
+        const storageKey = 'm2m-theme';
+        const root = document.documentElement;
+        const media = window.matchMedia('(prefers-color-scheme: dark)');
+        const normalizeTheme = (value) => value === 'dark' || value === 'light' ? value : null;
+        const getStoredTheme = () => {
+          try {
+            return normalizeTheme(window.localStorage.getItem(storageKey));
+          } catch {
+            return null;
+          }
+        };
+        const getSystemTheme = () => media.matches ? 'dark' : 'light';
+        const getPreferredTheme = () => getStoredTheme() ?? getSystemTheme();
+
+        window.__m2mThemeKey = storageKey;
+        window.__m2mGetTheme = () => root.dataset.theme || getPreferredTheme();
+        window.__m2mApplyTheme = (theme, persist = false) => {
+          const nextTheme = normalizeTheme(theme) ?? getPreferredTheme();
+          root.dataset.theme = nextTheme;
+          root.style.colorScheme = nextTheme;
+          if (persist) {
+            try {
+              window.localStorage.setItem(storageKey, nextTheme);
+            } catch {
+              // Ignore storage errors so theme switching still works in restricted contexts.
+            }
+          }
+          window.dispatchEvent(new CustomEvent('m2m:themechange', { detail: { theme: nextTheme } }));
+        };
+
+        window.__m2mApplyTheme(getPreferredTheme(), false);
+
+        const syncSystemTheme = (event) => {
+          if (getStoredTheme()) return;
+          window.__m2mApplyTheme(event.matches ? 'dark' : 'light', false);
+        };
+
+        if (typeof media.addEventListener === 'function') {
+          media.addEventListener('change', syncSystemTheme);
+        } else if (typeof media.addListener === 'function') {
+          media.addListener(syncSystemTheme);
+        }
+      })();
+    </script>
   </head>
   <body>
     <header class="site-header">
@@ -45,17 +92,20 @@ const navItems = [
           <span>Business-first AI research and operating maps</span>
         </span>
       </a>
-      <nav class="site-nav" aria-label="Primary">
-        {navItems.map((item) => (
-          item.disabled ? (
-            <span class="nav-item is-disabled" aria-disabled="true">{item.label}</span>
-          ) : (
-            <a class="nav-item" href={item.href} aria-current={currentPath === item.href ? 'page' : undefined}>
-              {item.label}
-            </a>
-          )
-        ))}
-      </nav>
+      <div class="site-header-actions">
+        <nav class="site-nav" aria-label="Primary">
+          {navItems.map((item) => (
+            item.disabled ? (
+              <span class="nav-item is-disabled" aria-disabled="true">{item.label}</span>
+            ) : (
+              <a class="nav-item" href={item.href} aria-current={currentPath === item.href ? 'page' : undefined}>
+                {item.label}
+              </a>
+            )
+          ))}
+        </nav>
+        <ThemeToggle />
+      </div>
     </header>
     <main class="site-shell">
       <slot />
@@ -65,5 +115,43 @@ const navItems = [
         <span>Models to Margins</span>
       </div>
     </footer>
+    <script is:inline>
+      (() => {
+        const media = window.matchMedia('(prefers-color-scheme: dark)');
+
+        const getTheme = () => document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
+
+        const syncToggles = () => {
+          const theme = getTheme();
+          document.querySelectorAll('[data-theme-toggle]').forEach((toggle) => {
+            toggle.dataset.theme = theme;
+            toggle.setAttribute('aria-pressed', theme === 'dark' ? 'true' : 'false');
+            const label = theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme';
+            toggle.setAttribute('aria-label', label);
+            toggle.setAttribute('title', label);
+          });
+        };
+
+        const bindToggles = () => {
+          document.querySelectorAll('[data-theme-toggle]').forEach((toggle) => {
+            if (toggle.dataset.themeBound === 'true') return;
+            toggle.dataset.themeBound = 'true';
+            toggle.addEventListener('click', () => {
+              const nextTheme = getTheme() === 'dark' ? 'light' : 'dark';
+              window.__m2mApplyTheme?.(nextTheme, true);
+            });
+          });
+          syncToggles();
+        };
+
+        bindToggles();
+        window.addEventListener('m2m:themechange', syncToggles);
+        window.addEventListener('storage', (event) => {
+          if (event.key !== window.__m2mThemeKey) return;
+          const fallbackTheme = media.matches ? 'dark' : 'light';
+          window.__m2mApplyTheme?.(event.newValue ?? fallbackTheme, false);
+        });
+      })();
+    </script>
   </body>
 </html>

@@ -1,11 +1,101 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Procurement AI Command Center</title>
+  <script>
+    (() => {
+      const params = new URLSearchParams(window.location.search);
+      const storageKey = 'm2m-theme';
+      const root = document.documentElement;
+      const media = window.matchMedia('(prefers-color-scheme: dark)');
+      const normalizeTheme = (value) => value === 'dark' || value === 'light' ? value : null;
+      const getStoredTheme = () => {
+        try {
+          return normalizeTheme(window.localStorage.getItem(storageKey));
+        } catch {
+          return null;
+        }
+      };
+      const getSystemTheme = () => media.matches ? 'dark' : 'light';
+      const getPreferredTheme = () => getStoredTheme() ?? getSystemTheme();
+
+      root.dataset.embedded = params.get('embed') === '1' ? 'true' : 'false';
+
+      window.__m2mApplyTheme = (theme, persist = false) => {
+        const nextTheme = normalizeTheme(theme) ?? getPreferredTheme();
+        root.dataset.theme = nextTheme;
+        root.style.colorScheme = nextTheme;
+        if (persist) {
+          try {
+            window.localStorage.setItem(storageKey, nextTheme);
+          } catch {
+            // Ignore storage failures.
+          }
+        }
+      };
+
+      window.__m2mApplyTheme(getPreferredTheme(), false);
+    })();
+  </script>
   <style>
-    :root {
+    :root,
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg-0: #f7efe5;
+      --bg-1: #e6f4fa;
+      --bg-2: #f5ebe5;
+      --panel: rgba(255, 255, 255, 0.74);
+      --border: rgba(16, 42, 67, 0.1);
+      --ink: #10263b;
+      --muted: #536779;
+      --problem: #d34d5d;
+      --system: #178f86;
+      --value: #d28b2f;
+      --shadow: 0 18px 42px rgba(15, 33, 52, 0.16);
+      --radius: 24px;
+      --surface-soft: rgba(255, 255, 255, 0.68);
+      --surface-strong: rgba(255, 255, 255, 0.82);
+      --grid-line: rgba(16, 42, 67, 0.04);
+      --zone-label: rgba(16, 42, 67, 0.48);
+      --theme-toggle-shell: rgba(10, 17, 31, 0.92);
+      --theme-toggle-border: rgba(16, 42, 67, 0.12);
+      --theme-toggle-icon: rgba(238, 246, 255, 0.92);
+      --theme-toggle-icon-inactive: rgba(238, 246, 255, 0.56);
+      --theme-toggle-thumb: linear-gradient(135deg, #ffe2ad, #f4b24b);
+      --theme-toggle-thumb-shadow: 0 10px 22px rgba(240, 162, 77, 0.28);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        color-scheme: dark;
+        --bg-0: #06111f;
+        --bg-1: #0a1a32;
+        --bg-2: #102545;
+        --panel: rgba(10, 24, 47, 0.78);
+        --border: rgba(166, 212, 255, 0.12);
+        --ink: #ebf4ff;
+        --muted: #95aecb;
+        --problem: #ff6b6b;
+        --system: #4fd1c5;
+        --value: #ffd166;
+        --shadow: 0 18px 42px rgba(0, 0, 0, 0.28);
+        --surface-soft: rgba(255, 255, 255, 0.03);
+        --surface-strong: rgba(255, 255, 255, 0.04);
+        --grid-line: rgba(166, 212, 255, 0.032);
+        --zone-label: rgba(235, 244, 255, 0.56);
+        --theme-toggle-shell: rgba(10, 17, 31, 0.92);
+        --theme-toggle-border: rgba(166, 212, 255, 0.14);
+        --theme-toggle-icon: rgba(235, 244, 255, 0.92);
+        --theme-toggle-icon-inactive: rgba(235, 244, 255, 0.52);
+        --theme-toggle-thumb: linear-gradient(135deg, #c48cff, #a56cff);
+        --theme-toggle-thumb-shadow: 0 10px 22px rgba(165, 108, 255, 0.28);
+      }
+    }
+
+    :root[data-theme="dark"] {
+      color-scheme: dark;
       --bg-0: #06111f;
       --bg-1: #0a1a32;
       --bg-2: #102545;
@@ -17,7 +107,16 @@
       --system: #4fd1c5;
       --value: #ffd166;
       --shadow: 0 18px 42px rgba(0, 0, 0, 0.28);
-      --radius: 24px;
+      --surface-soft: rgba(255, 255, 255, 0.03);
+      --surface-strong: rgba(255, 255, 255, 0.04);
+      --grid-line: rgba(166, 212, 255, 0.032);
+      --zone-label: rgba(235, 244, 255, 0.56);
+      --theme-toggle-shell: rgba(10, 17, 31, 0.92);
+      --theme-toggle-border: rgba(166, 212, 255, 0.14);
+      --theme-toggle-icon: rgba(235, 244, 255, 0.92);
+      --theme-toggle-icon-inactive: rgba(235, 244, 255, 0.52);
+      --theme-toggle-thumb: linear-gradient(135deg, #c48cff, #a56cff);
+      --theme-toggle-thumb-shadow: 0 10px 22px rgba(165, 108, 255, 0.28);
     }
 
     * {
@@ -28,7 +127,7 @@
       margin: 0;
       min-height: 100vh;
       color: var(--ink);
-      font-family: "Segoe UI Variable Display", "Aptos", "IBM Plex Sans", sans-serif;
+      font-family: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif;
       background:
         radial-gradient(circle at 12% 16%, rgba(79, 209, 197, 0.12), transparent 23%),
         radial-gradient(circle at 84% 18%, rgba(255, 107, 107, 0.14), transparent 18%),
@@ -37,23 +136,173 @@
       overflow-x: hidden;
     }
 
+    .site-header {
+      position: sticky;
+      top: 16px;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      margin: 20px auto 18px;
+      padding: 16px 18px;
+      width: min(calc(100% - 28px), 1680px);
+      background: var(--surface-strong);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      backdrop-filter: blur(18px);
+      box-shadow: var(--shadow);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .brand-mark {
+      width: 40px;
+      height: 40px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      font-size: 0.9rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: #0a1524;
+      background: linear-gradient(135deg, var(--system), var(--value));
+    }
+
+    .brand-copy strong,
+    .brand-copy span {
+      display: block;
+    }
+
+    .brand-copy strong {
+      font-size: 0.96rem;
+    }
+
+    .brand-copy span {
+      color: var(--muted);
+      font-size: 0.78rem;
+    }
+
+    .site-header-actions,
+    .site-nav {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .site-header-actions {
+      gap: 12px;
+    }
+
+    .site-nav .nav-item {
+      padding: 10px 14px;
+      border-radius: 999px;
+      color: var(--muted);
+      transition: 180ms ease;
+      text-decoration: none;
+    }
+
+    .site-nav a:hover,
+    .site-nav a[aria-current="page"] {
+      color: var(--ink);
+      background: color-mix(in srgb, var(--system) 14%, transparent);
+    }
+
+    .site-nav .is-disabled {
+      color: color-mix(in srgb, var(--muted) 56%, transparent);
+      background: color-mix(in srgb, var(--surface-strong) 58%, transparent);
+      border: 1px solid color-mix(in srgb, var(--border) 55%, transparent);
+      cursor: not-allowed;
+    }
+
+    :root[data-embedded="true"] .site-header,
+    :root[data-embedded="true"] .back-link {
+      display: none;
+    }
+
+    .theme-toggle {
+      appearance: none;
+      border: 0;
+      background: transparent;
+      padding: 0;
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    .theme-toggle__track {
+      position: relative;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      align-items: center;
+      gap: 8px;
+      width: 92px;
+      height: 48px;
+      padding: 0 10px;
+      border-radius: 999px;
+      background: var(--theme-toggle-shell);
+      border: 1px solid var(--theme-toggle-border);
+      box-shadow: var(--shadow);
+      isolation: isolate;
+    }
+
+    .theme-toggle__icon {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      place-items: center;
+      color: var(--theme-toggle-icon-inactive);
+      transition: color 180ms ease;
+    }
+
+    .theme-toggle__icon svg {
+      width: 18px;
+      height: 18px;
+      display: block;
+    }
+
+    .theme-toggle__thumb {
+      position: absolute;
+      top: 5px;
+      left: 5px;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: var(--theme-toggle-thumb);
+      box-shadow: var(--theme-toggle-thumb-shadow);
+      transition: transform 220ms ease, background 180ms ease, box-shadow 180ms ease;
+    }
+
+    .theme-toggle[data-theme="light"] .theme-toggle__thumb { transform: translateX(0); }
+    .theme-toggle[data-theme="dark"] .theme-toggle__thumb { transform: translateX(44px); }
+    .theme-toggle[data-theme="light"] .theme-toggle__icon--sun,
+    .theme-toggle[data-theme="dark"] .theme-toggle__icon--moon { color: var(--theme-toggle-icon); }
+
     body::before {
       content: "";
       position: fixed;
       inset: 0;
       pointer-events: none;
       background-image:
-        linear-gradient(rgba(166, 212, 255, 0.032) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(166, 212, 255, 0.032) 1px, transparent 1px);
+        linear-gradient(var(--grid-line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
       background-size: 44px 44px;
       mask-image: radial-gradient(circle at center, black 34%, transparent 86%);
       opacity: 0.85;
     }
 
     .page {
-      max-width: 1680px;
+      width: min(calc(100% - 28px), 1680px);
       margin: 0 auto;
-      padding: 18px 22px 24px;
+      padding: 6px 0 24px;
       position: relative;
       z-index: 1;
     }
@@ -73,7 +322,7 @@
       padding: 8px 13px;
       border-radius: 999px;
       border: 1px solid var(--border);
-      background: rgba(255, 255, 255, 0.04);
+      background: var(--surface-strong);
       color: var(--muted);
       font-size: 11px;
       letter-spacing: 0.1em;
@@ -100,11 +349,28 @@
     }
 
     .subtitle {
-      margin: 0;
+      margin: 0 0 10px;
       max-width: 820px;
       font-size: 15px;
       line-height: 1.58;
       color: var(--muted);
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      width: fit-content;
+      color: var(--muted);
+      font-size: 0.92rem;
+      text-decoration: none;
+      transition: color 180ms ease, transform 180ms ease;
+      margin-bottom: 10px;
+    }
+
+    .back-link:hover {
+      color: var(--ink);
+      transform: translateX(-1px);
     }
 
     .meta-strip {
@@ -120,11 +386,15 @@
       padding: 10px 12px;
       border-radius: 999px;
       border: 1px solid var(--border);
-      background: rgba(255, 255, 255, 0.04);
+      background: var(--surface-strong);
       font-size: 12px;
       color: var(--ink);
       box-shadow: var(--shadow);
       white-space: nowrap;
+    }
+
+    .hero .meta-strip {
+      justify-content: flex-start;
     }
 
     .board {
@@ -180,7 +450,7 @@
       padding: 11px 12px;
       border-radius: 16px;
       border: 1px solid rgba(255, 255, 255, 0.06);
-      background: rgba(255, 255, 255, 0.03);
+      background: var(--surface-soft);
       color: var(--ink);
       text-align: left;
       cursor: pointer;
@@ -244,7 +514,7 @@
       margin-top: 14px;
       padding: 13px 14px;
       border-radius: 18px;
-      background: rgba(255, 255, 255, 0.03);
+      background: var(--surface-soft);
       border: 1px solid rgba(255, 255, 255, 0.06);
     }
 
@@ -273,6 +543,41 @@
       gap: 12px;
       align-items: end;
       margin-bottom: 10px;
+    }
+
+    .stage-tools {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: flex-end;
+      align-items: center;
+    }
+
+    .zoom-button {
+      appearance: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 40px;
+      min-width: 40px;
+      padding: 0 14px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--surface-strong);
+      color: var(--muted);
+      box-shadow: var(--shadow);
+      font-size: 13px;
+      backdrop-filter: blur(12px);
+    }
+
+    .zoom-button:hover {
+      color: var(--ink);
+    }
+
+    .zoom-button.is-reset {
+      min-width: unset;
     }
 
     .canvas-head h2 {
@@ -358,6 +663,7 @@
 
     .viz-wrap {
       position: relative;
+      overflow: hidden;
     }
 
     svg {
@@ -366,11 +672,20 @@
       height: auto;
     }
 
+    #stage-svg {
+      cursor: grab;
+      touch-action: none;
+    }
+
+    #stage-svg.is-panning {
+      cursor: grabbing;
+    }
+
     .zone-label {
       font-size: 11px;
       letter-spacing: 0.12em;
       text-transform: uppercase;
-      fill: rgba(235, 244, 255, 0.56);
+      fill: var(--zone-label);
     }
 
     .viz-node {
@@ -449,7 +764,7 @@
       padding: 8px 10px;
       border-radius: 999px;
       border: 1px solid rgba(255, 255, 255, 0.06);
-      background: rgba(255, 255, 255, 0.03);
+      background: var(--surface-soft);
       color: var(--muted);
       font-size: 12px;
     }
@@ -501,6 +816,70 @@
         grid-template-columns: 240px minmax(0, 1fr) 250px;
       }
 
+      .theme-toggle-wrap {
+        position: fixed;
+        top: 18px;
+        right: 18px;
+        z-index: 8;
+      }
+
+      .theme-toggle {
+        appearance: none;
+        border: 0;
+        background: transparent;
+        padding: 0;
+        cursor: pointer;
+        line-height: 1;
+      }
+
+      .theme-toggle__track {
+        position: relative;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        align-items: center;
+        gap: 8px;
+        width: 92px;
+        height: 48px;
+        padding: 0 10px;
+        border-radius: 999px;
+        background: var(--theme-toggle-shell);
+        border: 1px solid var(--theme-toggle-border);
+        box-shadow: var(--shadow);
+        isolation: isolate;
+      }
+
+      .theme-toggle__icon {
+        position: relative;
+        z-index: 1;
+        display: grid;
+        place-items: center;
+        color: var(--theme-toggle-icon-inactive);
+        transition: color 180ms ease;
+      }
+
+      .theme-toggle__icon svg {
+        width: 18px;
+        height: 18px;
+        display: block;
+      }
+
+      .theme-toggle__thumb {
+        position: absolute;
+        top: 5px;
+        left: 5px;
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        background: var(--theme-toggle-thumb);
+        box-shadow: var(--theme-toggle-thumb-shadow);
+        transition: transform 220ms ease, background 180ms ease, box-shadow 180ms ease;
+      }
+
+      .theme-toggle[data-theme="light"] .theme-toggle__thumb { transform: translateX(0); }
+      .theme-toggle[data-theme="dark"] .theme-toggle__thumb { transform: translateX(44px); }
+      .theme-toggle[data-theme="light"] .theme-toggle__icon--sun,
+      .theme-toggle[data-theme="dark"] .theme-toggle__icon--moon { color: var(--theme-toggle-icon); }
+
       .system-strip {
         grid-template-columns: repeat(4, minmax(0, 1fr));
       }
@@ -536,6 +915,38 @@
   </style>
 </head>
 <body>
+  <header class="site-header">
+    <a class="brand" href="/">
+      <span class="brand-mark">M2M</span>
+      <span class="brand-copy">
+        <strong>Models to Margins</strong>
+        <span>Business-first AI research and operating maps</span>
+      </span>
+    </a>
+    <div class="site-header-actions">
+      <nav class="site-nav" aria-label="Primary">
+        <a class="nav-item" href="/briefs" aria-current="page">Brief</a>
+        <a class="nav-item" href="/deep-dives">Deep Dives</a>
+        <span class="nav-item is-disabled" aria-disabled="true">About</span>
+      </nav>
+      <button class="theme-toggle" type="button" data-theme-toggle aria-label="Toggle color theme" title="Toggle color theme">
+        <span class="theme-toggle__track" aria-hidden="true">
+          <span class="theme-toggle__icon theme-toggle__icon--sun">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="4.25" fill="none" stroke="currentColor" stroke-width="1.8"></circle>
+              <path d="M12 2.5v3M12 18.5v3M21.5 12h-3M5.5 12h-3M18.7 5.3l-2.1 2.1M7.4 16.6l-2.1 2.1M18.7 18.7l-2.1-2.1M7.4 7.4L5.3 5.3" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.8"></path>
+            </svg>
+          </span>
+          <span class="theme-toggle__icon theme-toggle__icon--moon">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M15.7 3.6a8.6 8.6 0 1 0 4.7 15.5a8 8 0 1 1-4.7-15.5Z" fill="none" stroke="currentColor" stroke-linejoin="round" stroke-width="1.8"></path>
+            </svg>
+          </span>
+          <span class="theme-toggle__thumb"></span>
+        </span>
+      </button>
+    </div>
+  </header>
   <div class="page">
     <section class="hero">
       <div>
@@ -544,6 +955,12 @@
         <p class="subtitle">
           Large enterprises still run sourcing and supplier decisions across fragmented systems, duplicated supplier records, manual event prep, and delayed savings tracking. This view keeps the business problem, operating design, and ROI case on one screen.
         </p>
+        <a class="back-link" href="/briefs"><span aria-hidden="true">&larr;</span><span>Back to Brief</span></a>
+        <div class="meta-strip" aria-label="Page metadata">
+          <span class="meta-chip">April 5, 2026</span>
+          <span class="meta-chip">Procurement AI</span>
+          <span class="meta-chip">Interactive brief</span>
+        </div>
       </div>
     </section>
 
@@ -593,6 +1010,11 @@
             <h2>Real flow from source systems to value capture</h2>
             <p>The cyan line follows the actual architecture path. Red influence lines show where business pain enters the stack. Gold routes show value moving into ROI outcomes.</p>
           </div>
+          <div class="stage-tools" aria-label="Zoom controls">
+            <button class="zoom-button" type="button" data-zoom="out" aria-label="Zoom out" title="Zoom out">-</button>
+            <button class="zoom-button" type="button" data-zoom="in" aria-label="Zoom in" title="Zoom in">+</button>
+            <button class="zoom-button is-reset" type="button" data-zoom="reset" aria-label="Reset view" title="Reset view">Reset</button>
+          </div>
         </div>
 
         <div class="system-strip">
@@ -636,7 +1058,7 @@
         </div>
 
         <div class="viz-wrap">
-          <svg viewBox="0 0 1120 700" role="img" aria-labelledby="vizTitle vizDesc">
+          <svg id="stage-svg" viewBox="0 0 1120 700" role="img" aria-labelledby="vizTitle vizDesc">
             <title id="vizTitle">Procurement AI master map</title>
             <desc id="vizDesc">An always-visible procurement AI map showing business problems, system architecture, and value outcomes in one view.</desc>
             <defs>
@@ -663,6 +1085,7 @@
               <path id="path-value-cycle" d="M 880 452 C 920 410 935 250 940 184" />
               <path id="path-value-savings" d="M 880 476 C 915 514 932 514 930 504" />
             </defs>
+            <g id="scene">
 
             <rect x="0" y="0" width="1120" height="700" rx="24" fill="rgba(255,255,255,0.02)" />
 
@@ -860,6 +1283,7 @@
               <text x="1010" y="500" text-anchor="middle" class="node-title">Savings Confidence</text>
               <text x="1010" y="515" text-anchor="middle" class="node-sub">better linkage to realized value</text>
             </g>
+            </g>
           </svg>
         </div>
 
@@ -932,6 +1356,25 @@
     </section>
   </div>
   <script>
+    function syncThemeToggle() {
+      const theme = document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
+      document.querySelectorAll('[data-theme-toggle]').forEach((toggle) => {
+        toggle.dataset.theme = theme;
+        toggle.setAttribute('aria-pressed', theme === 'dark' ? 'true' : 'false');
+        const label = theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme';
+        toggle.setAttribute('aria-label', label);
+        toggle.setAttribute('title', label);
+      });
+    }
+
+    document.querySelectorAll('[data-theme-toggle]').forEach((toggle) => {
+      toggle.addEventListener('click', () => {
+        const nextTheme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+        window.__m2mApplyTheme?.(nextTheme, true);
+        syncThemeToggle();
+      });
+    });
+
     const nodeData = {
       "erp-fragmentation": {
         title: "ERP Fragmentation",
@@ -1020,6 +1463,80 @@
     const linkGroups = Array.from(document.querySelectorAll(".link-group"));
     const focusTitle = document.getElementById("focus-title");
     const focusCopy = document.getElementById("focus-copy");
+    const svg = document.getElementById("stage-svg");
+    const scene = document.getElementById("scene");
+    const zoomState = { scale: 1, x: 0, y: 0, minScale: 0.75, maxScale: 2.5 };
+    const panState = { active: false, pointerId: null, startX: 0, startY: 0, originX: 0, originY: 0 };
+
+    function applyTransform() {
+      if (!scene || !svg) return;
+      scene.setAttribute("transform", `matrix(${zoomState.scale} 0 0 ${zoomState.scale} ${zoomState.x} ${zoomState.y})`);
+      svg.classList.toggle("is-panning", panState.active);
+    }
+
+    function clampScale(value) {
+      return Math.min(zoomState.maxScale, Math.max(zoomState.minScale, value));
+    }
+
+    function getSvgPoint(clientX, clientY) {
+      const rect = svg.getBoundingClientRect();
+      const viewBox = svg.viewBox.baseVal;
+      return {
+        x: viewBox.x + ((clientX - rect.left) / rect.width) * viewBox.width,
+        y: viewBox.y + ((clientY - rect.top) / rect.height) * viewBox.height
+      };
+    }
+
+    function zoomAt(clientX, clientY, factor) {
+      const point = getSvgPoint(clientX, clientY);
+      const previousScale = zoomState.scale;
+      const nextScale = clampScale(previousScale * factor);
+
+      if (nextScale === previousScale) return;
+
+      const ratio = nextScale / previousScale;
+      zoomState.x = point.x - (point.x - zoomState.x) * ratio;
+      zoomState.y = point.y - (point.y - zoomState.y) * ratio;
+      zoomState.scale = nextScale;
+
+      if (Math.abs(zoomState.scale - 1) < 0.001) {
+        zoomState.scale = 1;
+        zoomState.x = 0;
+        zoomState.y = 0;
+      }
+
+      applyTransform();
+    }
+
+    function zoomByStep(direction) {
+      const rect = svg.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+      zoomAt(centerX, centerY, direction > 0 ? 1.14 : 1 / 1.14);
+    }
+
+    function resetView() {
+      zoomState.scale = 1;
+      zoomState.x = 0;
+      zoomState.y = 0;
+      panState.active = false;
+      panState.pointerId = null;
+      applyTransform();
+    }
+
+    function stopPan() {
+      if (panState.pointerId !== null && typeof svg.releasePointerCapture === "function") {
+        try {
+          svg.releasePointerCapture(panState.pointerId);
+        } catch {
+          // Ignore pointer cleanup issues.
+        }
+      }
+
+      panState.active = false;
+      panState.pointerId = null;
+      applyTransform();
+    }
 
     function activateNode(id) {
       const data = nodeData[id];
@@ -1051,8 +1568,57 @@
 
     nodes.forEach(bindActivator);
     summaryItems.forEach(bindActivator);
+    document.querySelectorAll("[data-zoom]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const action = button.getAttribute("data-zoom");
+        if (action === "in") zoomByStep(1);
+        if (action === "out") zoomByStep(-1);
+        if (action === "reset") resetView();
+      });
+    });
 
+    if (svg) {
+      svg.addEventListener("wheel", (event) => {
+        event.preventDefault();
+        zoomAt(event.clientX, event.clientY, event.deltaY < 0 ? 1.12 : 1 / 1.12);
+      }, { passive: false });
+
+      svg.addEventListener("pointerdown", (event) => {
+        if (event.button !== 0 || zoomState.scale <= 1.001) return;
+
+        const point = getSvgPoint(event.clientX, event.clientY);
+        panState.active = true;
+        panState.pointerId = event.pointerId;
+        panState.startX = point.x;
+        panState.startY = point.y;
+        panState.originX = zoomState.x;
+        panState.originY = zoomState.y;
+
+        if (typeof svg.setPointerCapture === "function") {
+          svg.setPointerCapture(event.pointerId);
+        }
+
+        applyTransform();
+      });
+
+      svg.addEventListener("pointermove", (event) => {
+        if (!panState.active || event.pointerId !== panState.pointerId) return;
+
+        const point = getSvgPoint(event.clientX, event.clientY);
+        zoomState.x = panState.originX + (point.x - panState.startX);
+        zoomState.y = panState.originY + (point.y - panState.startY);
+        applyTransform();
+      });
+
+      svg.addEventListener("pointerup", stopPan);
+      svg.addEventListener("pointercancel", stopPan);
+      svg.addEventListener("lostpointercapture", stopPan);
+    }
+
+    syncThemeToggle();
+    applyTransform();
     activateNode("data-unification");
   </script>
 </body>
 </html>
+

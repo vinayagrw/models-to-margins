@@ -1,0 +1,28 @@
+---
+interface Props {
+  className?: string;
+  label?: string;
+}
+
+const {
+  className = '',
+  label = 'Toggle color theme'
+} = Astro.props;
+---
+
+<button class:list={['theme-toggle', className]} type="button" data-theme-toggle aria-label={label} title={label}>
+  <span class="theme-toggle__track" aria-hidden="true">
+    <span class="theme-toggle__icon theme-toggle__icon--sun">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="12" cy="12" r="4.25" fill="none" stroke="currentColor" stroke-width="1.8" />
+        <path d="M12 2.5v3M12 18.5v3M21.5 12h-3M5.5 12h-3M18.7 5.3l-2.1 2.1M7.4 16.6l-2.1 2.1M18.7 18.7l-2.1-2.1M7.4 7.4L5.3 5.3" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.8" />
+      </svg>
+    </span>
+    <span class="theme-toggle__icon theme-toggle__icon--moon">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M15.7 3.6a8.6 8.6 0 1 0 4.7 15.5a8 8 0 1 1-4.7-15.5Z" fill="none" stroke="currentColor" stroke-linejoin="round" stroke-width="1.8" />
+      </svg>
+    </span>
+    <span class="theme-toggle__thumb"></span>
+  </span>
+</button>

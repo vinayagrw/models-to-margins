@@ -1,0 +1,37 @@
+---
+interface Props {
+  date: Date;
+  primary: string;
+  readTime?: string;
+  extra?: string;
+  className?: string;
+}
+
+const {
+  date,
+  primary,
+  readTime,
+  extra,
+  className = ''
+} = Astro.props;
+
+const formattedDate = new Intl.DateTimeFormat('en-US', {
+  month: 'long',
+  day: 'numeric',
+  year: 'numeric',
+  timeZone: 'UTC'
+}).format(date);
+
+const items = [
+  formattedDate,
+  primary,
+  readTime,
+  extra
+].filter(Boolean);
+---
+
+<div class:list={['meta-row', 'entry-meta', className]}>
+  {items.map((item) => (
+    <span class="meta-pill">{item}</span>
+  ))}
+</div>

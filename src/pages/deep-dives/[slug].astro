@@ -1,6 +1,8 @@
 ---
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import EntryMeta from '../../components/EntryMeta.astro';
+import BackLink from '../../components/BackLink.astro';
 
 export async function getStaticPaths() {
   const entries = (await getCollection('deep-dives')).filter((entry) => entry.data.listed);
@@ -24,11 +26,13 @@ const { Content } = await render(entry);
       <span class="eyebrow">Deep Dive</span>
       <h1>{entry.data.title}</h1>
       <p class="lead">{entry.data.summary}</p>
-      <div class="meta-row">
-        <span class="meta-pill">{entry.data.pubDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
-        <span class="meta-pill">{entry.data.geography}</span>
-        {entry.data.horizon && <span class="meta-pill">{entry.data.horizon}</span>}
-      </div>
+      <BackLink href="/deep-dives" label="Back to Deep Dives" />
+      <EntryMeta
+        date={entry.data.pubDate}
+        primary={entry.data.geography}
+        readTime={entry.data.readTime}
+        extra={entry.data.horizon}
+      />
       <div class="tag-row">
         {entry.data.tags.map((tag: string) => (
           <span class="tag">{tag}</span>
