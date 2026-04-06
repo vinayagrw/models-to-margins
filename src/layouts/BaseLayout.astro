@@ -1,0 +1,69 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+  currentPath?: string;
+}
+
+const {
+  title = 'Models to Margins',
+  description = 'Business-first research translating AI and operations into measurable outcomes.',
+  currentPath = '/'
+} = Astro.props;
+
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const navItems = [
+  { href: '/briefs', label: 'Brief' },
+  { href: '/deep-dives', label: 'Deep Dives' },
+  { label: 'About', disabled: true }
+];
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonical.href} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="canonical" href={canonical.href} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="/">
+        <span class="brand-mark">M2M</span>
+        <span class="brand-copy">
+          <strong>Models to Margins</strong>
+          <span>Business-first AI research and operating maps</span>
+        </span>
+      </a>
+      <nav class="site-nav" aria-label="Primary">
+        {navItems.map((item) => (
+          item.disabled ? (
+            <span class="nav-item is-disabled" aria-disabled="true">{item.label}</span>
+          ) : (
+            <a class="nav-item" href={item.href} aria-current={currentPath === item.href ? 'page' : undefined}>
+              {item.label}
+            </a>
+          )
+        ))}
+      </nav>
+    </header>
+    <main class="site-shell">
+      <slot />
+    </main>
+    <footer class="site-shell site-footer">
+      <div class="footer-grid">
+        <span>Models to Margins</span>
+      </div>
+    </footer>
+  </body>
+</html>

@@ -1,0 +1,109 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import CollectionCard from '../components/CollectionCard.astro';
+
+const briefs = (await getCollection('briefs'))
+  .filter((entry) => entry.data.listed)
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+const deepDives = (await getCollection('deep-dives'))
+  .filter((entry) => entry.data.listed)
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
+const featuredBrief = briefs.find((entry) => entry.data.featured) ?? briefs[0];
+const featuredDeepDive = deepDives.find((entry) => entry.data.featured) ?? deepDives[0];
+const latestBriefs = briefs.slice(0, 2);
+const latestDeepDives = deepDives.slice(0, 2);
+const getBriefHref = (entry) => entry.data.briefType === 'interactive' && entry.data.openPath
+  ? entry.data.openPath
+  : `/briefs/${entry.id}`;
+---
+
+<BaseLayout
+  title="Models to Margins"
+  description="A growing publication of briefs and deep dives on AI, operations, and business outcomes."
+  currentPath="/"
+>
+  <section class="hero-panel">
+    <span class="eyebrow">Current Publication</span>
+    <div class="section-block">
+      <h1>Built to scale with two collections.</h1>
+      <p class="lead">
+        Models to Margins is organized into two reading modes. Brief is the faster, curated front door: flagship reads that frame the market,
+        explain the shift, and help you orient quickly. Deep Dives is where the operating detail lives: company breakdowns, workflow maps,
+        and interactive systems thinking built for readers who want to understand how the mechanics actually work.
+      </p>
+    </div>
+    <div class="cta-row">
+      <a class="button primary" href="/briefs">Explore brief</a>
+      <a class="button secondary" href="/deep-dives">Explore deep dives</a>
+    </div>
+  </section>
+
+  <section class="section-block split-grid">
+    <div class="glass-card">
+      <span class="eyebrow warm">Featured Brief</span>
+      <div class="section-block">
+        <h2>{featuredBrief.data.title}</h2>
+        <p>{featuredBrief.data.summary}</p>
+      </div>
+      <div class="cta-row">
+        <a class="button secondary" href={getBriefHref(featuredBrief)}>Open brief</a>
+      </div>
+    </div>
+    <div class="glass-card">
+      <span class="eyebrow">Featured Deep Dive</span>
+      <div class="section-block">
+        <h2>{featuredDeepDive.data.title}</h2>
+        <p>{featuredDeepDive.data.summary}</p>
+      </div>
+      <div class="cta-row">
+        <a class="button secondary" href={`/deep-dives/${featuredDeepDive.id}`}>Open deep dive</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-block">
+    <div class="section-head">
+      <div>
+        <span class="eyebrow warm">Brief</span>
+        <h2>Current brief</h2>
+        <p>Curated flagship reads that synthesize the signal quickly and make the deeper operating questions easier to navigate.</p>
+      </div>
+    </div>
+    <div class="content-grid">
+      {latestBriefs.map((entry) => (
+        <CollectionCard
+          href={getBriefHref(entry)}
+          kicker="Brief"
+          title={entry.data.title}
+          summary={entry.data.summary}
+          date={entry.data.pubDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+          meta={entry.data.readTime ?? entry.data.industry}
+        />
+      ))}
+    </div>
+  </section>
+
+  <section class="section-block">
+    <div class="section-head">
+      <div>
+        <span class="eyebrow">Deep Dives</span>
+        <h2>Current deep dives</h2>
+        <p>Workflow-level analysis, interactive maps, and company-specific investigations for readers who want more than the headline.</p>
+      </div>
+    </div>
+    <div class="content-grid">
+      {latestDeepDives.map((entry) => (
+        <CollectionCard
+          href={`/deep-dives/${entry.id}`}
+          kicker="Deep Dive"
+          title={entry.data.title}
+          summary={entry.data.summary}
+          date={entry.data.pubDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+          meta={entry.data.readTime ?? entry.data.geography}
+        />
+      ))}
+    </div>
+  </section>
+</BaseLayout>

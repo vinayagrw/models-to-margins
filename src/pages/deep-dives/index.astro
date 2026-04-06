@@ -1,0 +1,35 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import CollectionCard from '../../components/CollectionCard.astro';
+
+const deepDives = (await getCollection('deep-dives'))
+  .filter((entry) => entry.data.listed)
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+---
+
+<BaseLayout
+  title="Deep Dives | Models to Margins"
+  description="Workflow-level analysis, interactive maps, and company-specific investigations for readers who want more than the headline."
+  currentPath="/deep-dives"
+>
+  <section class="article-shell">
+    <header>
+      <span class="eyebrow">Deep Dives</span>
+      <h1>Where the operating detail gets unpacked.</h1>
+      <p class="lead">Workflow-level analysis, interactive maps, and company-specific investigations for readers who want more than the headline.</p>
+    </header>
+    <div class="content-grid section-block">
+      {deepDives.map((entry) => (
+        <CollectionCard
+          href={`/deep-dives/${entry.id}`}
+          kicker="Deep Dive"
+          title={entry.data.title}
+          summary={entry.data.summary}
+          date={entry.data.pubDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+          meta={entry.data.readTime ?? entry.data.geography}
+        />
+      ))}
+    </div>
+  </section>
+</BaseLayout>

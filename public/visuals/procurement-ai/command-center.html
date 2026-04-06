@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Procurement AI Command Center</title>
+  <style>
+    :root {
+      --bg-0: #06111f;
+      --bg-1: #0a1a32;
+      --bg-2: #102545;
+      --panel: rgba(10, 24, 47, 0.78);
+      --border: rgba(166, 212, 255, 0.12);
+      --ink: #ebf4ff;
+      --muted: #95aecb;
+      --problem: #ff6b6b;
+      --system: #4fd1c5;
+      --value: #ffd166;
+      --shadow: 0 18px 42px rgba(0, 0, 0, 0.28);
+      --radius: 24px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: "Segoe UI Variable Display", "Aptos", "IBM Plex Sans", sans-serif;
+      background:
+        radial-gradient(circle at 12% 16%, rgba(79, 209, 197, 0.12), transparent 23%),
+        radial-gradient(circle at 84% 18%, rgba(255, 107, 107, 0.14), transparent 18%),
+        radial-gradient(circle at 68% 88%, rgba(255, 209, 102, 0.1), transparent 24%),
+        linear-gradient(155deg, var(--bg-0), var(--bg-1) 44%, var(--bg-2));
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(166, 212, 255, 0.032) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(166, 212, 255, 0.032) 1px, transparent 1px);
+      background-size: 44px 44px;
+      mask-image: radial-gradient(circle at center, black 34%, transparent 86%);
+      opacity: 0.85;
+    }
+
+    .page {
+      max-width: 1680px;
+      margin: 0 auto;
+      padding: 18px 22px 24px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 14px 18px;
+      align-items: end;
+      margin-bottom: 14px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      padding: 8px 13px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--muted);
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      backdrop-filter: blur(10px);
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--system), var(--value));
+      box-shadow: 0 0 14px rgba(79, 209, 197, 0.45);
+    }
+
+    h1 {
+      margin: 12px 0 8px;
+      max-width: 920px;
+      font-size: clamp(34px, 4.2vw, 58px);
+      line-height: 0.94;
+      letter-spacing: -0.04em;
+      font-family: "Georgia", "Aptos Display", sans-serif;
+    }
+
+    .subtitle {
+      margin: 0;
+      max-width: 820px;
+      font-size: 15px;
+      line-height: 1.58;
+      color: var(--muted);
+    }
+
+    .meta-strip {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: flex-end;
+      align-self: start;
+      margin-top: 8px;
+    }
+
+    .meta-chip {
+      padding: 10px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.04);
+      font-size: 12px;
+      color: var(--ink);
+      box-shadow: var(--shadow);
+      white-space: nowrap;
+    }
+
+    .board {
+      display: grid;
+      grid-template-columns: 260px minmax(0, 1fr) 280px;
+      gap: 16px;
+      align-items: start;
+    }
+
+    .panel,
+    .canvas-shell {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(16px);
+    }
+
+    .panel {
+      padding: 16px;
+    }
+
+    .panel h2 {
+      margin: 4px 0 6px;
+      font-size: 22px;
+      letter-spacing: -0.03em;
+    }
+
+    .panel-intro {
+      margin: 0 0 12px;
+      font-size: 13px;
+      line-height: 1.55;
+      color: var(--muted);
+    }
+
+    .section-label {
+      margin: 0;
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .summary-list {
+      display: grid;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .summary-item {
+      display: block;
+      width: 100%;
+      padding: 11px 12px;
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--ink);
+      text-align: left;
+      cursor: pointer;
+      transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
+    }
+
+    .summary-item:hover,
+    .summary-item:focus-visible {
+      transform: translateY(-1px);
+      border-color: rgba(255, 255, 255, 0.18);
+      outline: none;
+    }
+
+    .summary-item.is-active {
+      background: rgba(255, 255, 255, 0.09);
+      border-color: rgba(255, 255, 255, 0.28);
+    }
+
+    .summary-item strong {
+      display: block;
+      font-size: 14px;
+      line-height: 1.25;
+      margin-bottom: 3px;
+    }
+
+    .summary-item span {
+      display: block;
+      font-size: 12px;
+      line-height: 1.45;
+      color: var(--muted);
+    }
+
+    .summary-item.problem strong::before,
+    .summary-item.system strong::before,
+    .summary-item.value strong::before {
+      content: "";
+      display: inline-block;
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      margin-right: 8px;
+      vertical-align: 0;
+    }
+
+    .summary-item.problem strong::before {
+      background: var(--problem);
+      box-shadow: 0 0 14px rgba(255, 107, 107, 0.45);
+    }
+
+    .summary-item.system strong::before {
+      background: var(--system);
+      box-shadow: 0 0 14px rgba(79, 209, 197, 0.45);
+    }
+
+    .summary-item.value strong::before {
+      background: var(--value);
+      box-shadow: 0 0 14px rgba(255, 209, 102, 0.4);
+    }
+
+    .stack-card {
+      margin-top: 14px;
+      padding: 13px 14px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .stack-card strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 13px;
+    }
+
+    .stack-card span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .canvas-shell {
+      padding: 14px;
+      overflow: hidden;
+    }
+
+    .canvas-head {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: end;
+      margin-bottom: 10px;
+    }
+
+    .canvas-head h2 {
+      margin: 0 0 4px;
+      font-size: 24px;
+      letter-spacing: -0.03em;
+    }
+
+    .canvas-head p {
+      margin: 0;
+      max-width: 600px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .system-strip {
+      display: grid;
+      grid-template-columns: repeat(8, minmax(0, 1fr));
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .chain-chip {
+      display: block;
+      width: 100%;
+      padding: 10px 8px;
+      border-radius: 15px;
+      border: 1px solid rgba(79, 209, 197, 0.18);
+      background: rgba(79, 209, 197, 0.07);
+      color: var(--ink);
+      text-align: center;
+      cursor: pointer;
+      transition: transform 160ms ease, background 160ms ease, border-color 160ms ease;
+    }
+
+    .chain-chip:hover,
+    .chain-chip:focus-visible {
+      transform: translateY(-1px);
+      outline: none;
+      border-color: rgba(79, 209, 197, 0.34);
+    }
+
+    .chain-chip.is-active {
+      background: rgba(79, 209, 197, 0.16);
+      border-color: rgba(79, 209, 197, 0.48);
+    }
+
+    .chain-chip strong {
+      display: block;
+      font-size: 12px;
+      line-height: 1.2;
+    }
+
+    .chain-chip span {
+      display: block;
+      margin-top: 3px;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .focus-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 12px;
+      align-items: center;
+      margin-bottom: 10px;
+      padding: 10px 12px;
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .focus-bar strong {
+      font-size: 13px;
+    }
+
+    .focus-bar span {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .viz-wrap {
+      position: relative;
+    }
+
+    svg {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    .zone-label {
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      fill: rgba(235, 244, 255, 0.56);
+    }
+
+    .viz-node {
+      cursor: pointer;
+      outline: none;
+    }
+
+    .node-shell {
+      transition: transform 180ms ease, stroke-width 180ms ease, filter 180ms ease, fill 180ms ease;
+      transform-box: fill-box;
+      transform-origin: center;
+    }
+
+    .viz-node:hover .node-shell,
+    .viz-node:focus-visible .node-shell,
+    .viz-node.is-active .node-shell {
+      transform: scale(1.03);
+      stroke-width: 3;
+      filter: url(#nodeGlow);
+    }
+
+    .node-title {
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      fill: var(--ink);
+      pointer-events: none;
+    }
+
+    .node-sub {
+      font-size: 10px;
+      fill: var(--muted);
+      pointer-events: none;
+    }
+
+    .flow-line {
+      fill: none;
+      stroke-width: 2.1;
+      stroke-linecap: round;
+      stroke-dasharray: 7 10;
+      opacity: 0.52;
+      transition: opacity 180ms ease, stroke-width 180ms ease;
+    }
+
+    .flow-system {
+      stroke: rgba(79, 209, 197, 0.6);
+      marker-end: url(#arrowSystem);
+    }
+
+    .flow-value {
+      stroke: rgba(255, 209, 102, 0.62);
+      marker-end: url(#arrowValue);
+    }
+
+    .flow-problem {
+      stroke: rgba(255, 107, 107, 0.42);
+      marker-end: url(#arrowProblem);
+    }
+
+    .link-group.is-active .flow-line {
+      opacity: 1;
+      stroke-width: 3;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .note-row {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .brief-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .brief-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(16px);
+      padding: 16px;
+    }
+
+    .brief-card h3 {
+      margin: 6px 0 8px;
+      font-size: 18px;
+      letter-spacing: -0.03em;
+    }
+
+    .brief-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.58;
+    }
+
+    @media (max-width: 1480px) {
+      .board {
+        grid-template-columns: 240px minmax(0, 1fr) 250px;
+      }
+
+      .system-strip {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+
+      .brief-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 1240px) {
+      .hero {
+        grid-template-columns: 1fr;
+      }
+
+      .board {
+        grid-template-columns: 1fr;
+      }
+
+      .system-strip {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 760px) {
+      .system-strip {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      h1 {
+        font-size: clamp(30px, 10vw, 44px);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <section class="hero">
+      <div>
+        <span class="eyebrow">Single-Screen Master Map</span>
+        <h1>Governed procurement AI, shown as one visible operating system.</h1>
+        <p class="subtitle">
+          Large enterprises still run sourcing and supplier decisions across fragmented systems, duplicated supplier records, manual event prep, and delayed savings tracking. This view keeps the business problem, operating design, and ROI case on one screen.
+        </p>
+      </div>
+    </section>
+
+    <section class="board">
+      <aside class="panel">
+        <p class="section-label">Business Problems</p>
+        <h2>Pressure entering the system</h2>
+        <p class="panel-intro">These are the operational constraints that create the need for procurement AI in the first place.</p>
+
+        <div class="summary-list">
+          <button class="summary-item problem" data-node="erp-fragmentation">
+            <strong>ERP Fragmentation</strong>
+            <span>Different schemas and taxonomies delay opportunity detection.</span>
+          </button>
+          <button class="summary-item problem" data-node="supplier-chaos">
+            <strong>Supplier Chaos</strong>
+            <span>Duplicate supplier identities weaken comparison and leverage.</span>
+          </button>
+          <button class="summary-item problem" data-node="manual-sourcing">
+            <strong>Manual Sourcing Prep</strong>
+            <span>RFx setup and coordination still consume high-value sourcing time.</span>
+          </button>
+          <button class="summary-item problem" data-node="weak-traceability">
+            <strong>Weak Traceability</strong>
+            <span>Decisions are hard to defend after the fact.</span>
+          </button>
+          <button class="summary-item problem" data-node="policy-drift">
+            <strong>Policy Drift</strong>
+            <span>Approvals and exceptions are inconsistent across categories.</span>
+          </button>
+          <button class="summary-item problem" data-node="delayed-savings">
+            <strong>Delayed Savings Visibility</strong>
+            <span>Value capture is spotted late and proven late.</span>
+          </button>
+        </div>
+
+        <div class="stack-card">
+          <strong>What this means</strong>
+          <span>Procurement does not have a model problem first. It has a context, control, and operating-design problem.</span>
+        </div>
+      </aside>
+
+      <main class="canvas-shell">
+        <div class="canvas-head">
+          <div>
+            <p class="section-label">Integrated Visualization</p>
+            <h2>Real flow from source systems to value capture</h2>
+            <p>The cyan line follows the actual architecture path. Red influence lines show where business pain enters the stack. Gold routes show value moving into ROI outcomes.</p>
+          </div>
+        </div>
+
+        <div class="system-strip">
+          <button class="chain-chip summary-item system" data-node="source-systems">
+            <strong>Source</strong>
+            <span>inputs</span>
+          </button>
+          <button class="chain-chip summary-item system" data-node="data-unification">
+            <strong>Data</strong>
+            <span>normalize</span>
+          </button>
+          <button class="chain-chip summary-item system" data-node="intelligence-layer">
+            <strong>Intelligence</strong>
+            <span>prioritize</span>
+          </button>
+          <button class="chain-chip summary-item system" data-node="agent-layer">
+            <strong>Agents</strong>
+            <span>draft</span>
+          </button>
+          <button class="chain-chip summary-item system" data-node="orchestration-layer">
+            <strong>Orchestration</strong>
+            <span>route</span>
+          </button>
+          <button class="chain-chip summary-item system" data-node="governance-layer">
+            <strong>Governance</strong>
+            <span>control</span>
+          </button>
+          <button class="chain-chip summary-item system" data-node="experience-layer">
+            <strong>Experience</strong>
+            <span>adopt</span>
+          </button>
+          <button class="chain-chip summary-item system" data-node="value-capture">
+            <strong>Value</strong>
+            <span>measure</span>
+          </button>
+        </div>
+
+        <div class="focus-bar">
+          <strong id="focus-title">Data Unification</strong>
+          <span id="focus-copy">Converts fragmented procurement records into reusable spend and supplier context.</span>
+        </div>
+
+        <div class="viz-wrap">
+          <svg viewBox="0 0 1120 700" role="img" aria-labelledby="vizTitle vizDesc">
+            <title id="vizTitle">Procurement AI master map</title>
+            <desc id="vizDesc">An always-visible procurement AI map showing business problems, system architecture, and value outcomes in one view.</desc>
+            <defs>
+              <filter id="nodeGlow" x="-50%" y="-50%" width="200%" height="200%">
+                <feDropShadow dx="0" dy="0" stdDeviation="9" flood-color="rgba(255,255,255,0.18)" />
+              </filter>
+
+              <marker id="arrowSystem" markerWidth="8" markerHeight="8" refX="6.5" refY="4" orient="auto">
+                <path d="M 0 0 L 8 4 L 0 8 z" fill="rgba(79,209,197,0.74)" />
+              </marker>
+              <marker id="arrowProblem" markerWidth="8" markerHeight="8" refX="6.5" refY="4" orient="auto">
+                <path d="M 0 0 L 8 4 L 0 8 z" fill="rgba(255,107,107,0.56)" />
+              </marker>
+              <marker id="arrowValue" markerWidth="8" markerHeight="8" refX="6.5" refY="4" orient="auto">
+                <path d="M 0 0 L 8 4 L 0 8 z" fill="rgba(255,209,102,0.72)" />
+              </marker>
+
+              <path id="path-system-main" d="M 460 120 C 480 120 485 120 500 120 S 700 120 720 120 C 800 120 800 190 800 255 C 800 285 720 285 690 285 C 620 285 560 285 470 285 C 390 285 400 360 500 460 C 580 460 650 460 720 460" />
+
+              <path id="path-erp-data" d="M 250 130 C 330 128 400 120 500 120" />
+              <path id="path-supplier-intel" d="M 250 223 C 430 165 620 128 720 120" />
+              <path id="path-policy-gov" d="M 250 502 C 285 450 315 360 340 285" />
+              <path id="path-delay-value" d="M 250 603 C 450 610 610 520 720 460" />
+              <path id="path-value-cycle" d="M 880 452 C 920 410 935 250 940 184" />
+              <path id="path-value-savings" d="M 880 476 C 915 514 932 514 930 504" />
+            </defs>
+
+            <rect x="0" y="0" width="1120" height="700" rx="24" fill="rgba(255,255,255,0.02)" />
+
+            <text x="140" y="36" class="zone-label">Problem pressure</text>
+            <text x="548" y="36" class="zone-label" text-anchor="middle">Governed architecture</text>
+            <text x="982" y="36" class="zone-label" text-anchor="middle">ROI outcomes</text>
+
+            <g class="link-group" data-related="source-systems data-unification intelligence-layer agent-layer orchestration-layer governance-layer experience-layer value-capture">
+              <path class="flow-line flow-system" d="M 460 120 C 480 120 485 120 500 120" />
+              <path class="flow-line flow-system" d="M 670 120 C 690 120 700 120 720 120" />
+              <path class="flow-line flow-system" d="M 800 150 C 800 190 800 225 800 255" />
+              <path class="flow-line flow-system" d="M 720 285 C 710 285 700 285 690 285" />
+              <path class="flow-line flow-system" d="M 500 285 C 490 285 480 285 470 285" />
+              <path class="flow-line flow-system" d="M 380 315 C 390 355 425 400 500 460" />
+              <path class="flow-line flow-system" d="M 690 460 C 700 460 710 460 720 460" />
+            </g>
+
+            <g class="link-group" data-related="erp-fragmentation source-systems data-unification">
+              <path class="flow-line flow-problem" d="M 250 122 C 270 122 290 120 310 120" />
+              <path class="flow-line flow-problem" d="M 250 130 C 330 128 400 120 500 120" />
+            </g>
+            <g class="link-group" data-related="supplier-chaos data-unification intelligence-layer">
+              <path class="flow-line flow-problem" d="M 250 217 C 330 200 420 150 500 130" />
+              <path class="flow-line flow-problem" d="M 250 223 C 430 165 620 128 720 120" />
+            </g>
+            <g class="link-group" data-related="manual-sourcing agent-layer orchestration-layer">
+              <path class="flow-line flow-problem" d="M 250 312 C 430 318 600 300 720 285" />
+              <path class="flow-line flow-problem" d="M 250 318 C 340 325 420 300 500 285" />
+            </g>
+            <g class="link-group" data-related="weak-traceability governance-layer">
+              <path class="flow-line flow-problem" d="M 250 407 C 300 390 320 332 360 285" />
+            </g>
+            <g class="link-group" data-related="policy-drift governance-layer orchestration-layer">
+              <path class="flow-line flow-problem" d="M 250 502 C 285 450 315 360 340 285" />
+              <path class="flow-line flow-problem" d="M 250 508 C 360 470 430 360 500 285" />
+            </g>
+            <g class="link-group" data-related="delayed-savings experience-layer value-capture">
+              <path class="flow-line flow-problem" d="M 250 597 C 360 590 420 520 500 460" />
+              <path class="flow-line flow-problem" d="M 250 603 C 450 610 610 520 720 460" />
+            </g>
+
+            <g class="link-group" data-related="value-capture admin-lift">
+              <path class="flow-line flow-value" d="M 880 446 C 920 390 932 180 930 104" />
+            </g>
+            <g class="link-group" data-related="value-capture cycle-time">
+              <path class="flow-line flow-value" d="M 880 452 C 920 410 935 250 940 184" />
+            </g>
+            <g class="link-group" data-related="value-capture throughput">
+              <path class="flow-line flow-value" d="M 880 458 C 920 445 935 308 940 264" />
+            </g>
+            <g class="link-group" data-related="value-capture policy-alignment">
+              <path class="flow-line flow-value" d="M 880 464 C 915 464 930 382 930 344" />
+            </g>
+            <g class="link-group" data-related="value-capture payback-window">
+              <path class="flow-line flow-value" d="M 880 470 C 915 478 935 440 940 424" />
+            </g>
+            <g class="link-group" data-related="value-capture savings-confidence">
+              <path class="flow-line flow-value" d="M 880 476 C 915 514 932 514 930 504" />
+            </g>
+
+            <g>
+              <circle r="4.6" fill="var(--system)">
+                <animateMotion dur="11s" repeatCount="indefinite" rotate="auto"><mpath href="#path-system-main" /></animateMotion>
+                <animate attributeName="opacity" values="0;1;1;0" dur="11s" repeatCount="indefinite" />
+              </circle>
+              <circle r="4.1" fill="var(--system)">
+                <animateMotion begin="-3.1s" dur="11s" repeatCount="indefinite" rotate="auto"><mpath href="#path-system-main" /></animateMotion>
+                <animate attributeName="opacity" values="0;1;1;0" dur="11s" repeatCount="indefinite" />
+              </circle>
+              <circle r="4.3" fill="var(--problem)">
+                <animateMotion dur="6.6s" repeatCount="indefinite" rotate="auto"><mpath href="#path-erp-data" /></animateMotion>
+                <animate attributeName="opacity" values="0;1;1;0" dur="6.6s" repeatCount="indefinite" />
+              </circle>
+              <circle r="3.8" fill="var(--problem)">
+                <animateMotion begin="-1.8s" dur="6.2s" repeatCount="indefinite" rotate="auto"><mpath href="#path-supplier-intel" /></animateMotion>
+                <animate attributeName="opacity" values="0;1;1;0" dur="6.2s" repeatCount="indefinite" />
+              </circle>
+              <circle r="3.8" fill="var(--problem)">
+                <animateMotion begin="-2.8s" dur="5.9s" repeatCount="indefinite" rotate="auto"><mpath href="#path-policy-gov" /></animateMotion>
+                <animate attributeName="opacity" values="0;1;1;0" dur="5.9s" repeatCount="indefinite" />
+              </circle>
+              <circle r="4.2" fill="var(--problem)">
+                <animateMotion begin="-4.2s" dur="6.5s" repeatCount="indefinite" rotate="auto"><mpath href="#path-delay-value" /></animateMotion>
+                <animate attributeName="opacity" values="0;1;1;0" dur="6.5s" repeatCount="indefinite" />
+              </circle>
+              <circle r="4" fill="var(--value)">
+                <animateMotion begin="-1.4s" dur="6.8s" repeatCount="indefinite" rotate="auto"><mpath href="#path-value-cycle" /></animateMotion>
+                <animate attributeName="opacity" values="0;1;1;0" dur="6.8s" repeatCount="indefinite" />
+              </circle>
+              <circle r="4" fill="var(--value)">
+                <animateMotion begin="-3.7s" dur="7.4s" repeatCount="indefinite" rotate="auto"><mpath href="#path-value-savings" /></animateMotion>
+                <animate attributeName="opacity" values="0;1;1;0" dur="7.4s" repeatCount="indefinite" />
+              </circle>
+            </g>
+
+            <g class="viz-node" data-node="erp-fragmentation" tabindex="0">
+              <rect class="node-shell" x="70" y="95" width="180" height="54" rx="18" fill="rgba(255,107,107,0.14)" stroke="var(--problem)" stroke-width="2.2" />
+              <text x="160" y="118" text-anchor="middle" class="node-title">ERP Fragmentation</text>
+              <text x="160" y="133" text-anchor="middle" class="node-sub">multi-system spend baseline</text>
+            </g>
+            <g class="viz-node" data-node="supplier-chaos" tabindex="0">
+              <rect class="node-shell" x="70" y="190" width="180" height="54" rx="18" fill="rgba(255,107,107,0.14)" stroke="var(--problem)" stroke-width="2.2" />
+              <text x="160" y="213" text-anchor="middle" class="node-title">Supplier Chaos</text>
+              <text x="160" y="228" text-anchor="middle" class="node-sub">duplicate entities and weak hierarchy</text>
+            </g>
+            <g class="viz-node" data-node="manual-sourcing" tabindex="0">
+              <rect class="node-shell" x="70" y="285" width="180" height="54" rx="18" fill="rgba(255,107,107,0.14)" stroke="var(--problem)" stroke-width="2.2" />
+              <text x="160" y="308" text-anchor="middle" class="node-title">Manual Sourcing</text>
+              <text x="160" y="323" text-anchor="middle" class="node-sub">RFx prep and stakeholder chasing</text>
+            </g>
+            <g class="viz-node" data-node="weak-traceability" tabindex="0">
+              <rect class="node-shell" x="70" y="380" width="180" height="54" rx="18" fill="rgba(255,107,107,0.14)" stroke="var(--problem)" stroke-width="2.2" />
+              <text x="160" y="403" text-anchor="middle" class="node-title">Weak Traceability</text>
+              <text x="160" y="418" text-anchor="middle" class="node-sub">hard to defend why decisions won</text>
+            </g>
+            <g class="viz-node" data-node="policy-drift" tabindex="0">
+              <rect class="node-shell" x="70" y="475" width="180" height="54" rx="18" fill="rgba(255,107,107,0.14)" stroke="var(--problem)" stroke-width="2.2" />
+              <text x="160" y="498" text-anchor="middle" class="node-title">Policy Drift</text>
+              <text x="160" y="513" text-anchor="middle" class="node-sub">approvals and exceptions vary by team</text>
+            </g>
+            <g class="viz-node" data-node="delayed-savings" tabindex="0">
+              <rect class="node-shell" x="70" y="570" width="180" height="54" rx="18" fill="rgba(255,107,107,0.14)" stroke="var(--problem)" stroke-width="2.2" />
+              <text x="160" y="593" text-anchor="middle" class="node-title">Delayed Savings</text>
+              <text x="160" y="608" text-anchor="middle" class="node-sub">value captured and proven too late</text>
+            </g>
+
+            <g class="viz-node" data-node="source-systems" tabindex="0">
+              <rect class="node-shell" x="310" y="90" width="150" height="60" rx="18" fill="rgba(79,209,197,0.12)" stroke="var(--system)" stroke-width="2.2" />
+              <text x="385" y="115" text-anchor="middle" class="node-title">Source Systems</text>
+              <text x="385" y="131" text-anchor="middle" class="node-sub">ERP - AP - P-card - CLM</text>
+            </g>
+            <g class="viz-node" data-node="data-unification" tabindex="0">
+              <rect class="node-shell" x="500" y="90" width="170" height="60" rx="18" fill="rgba(79,209,197,0.12)" stroke="var(--system)" stroke-width="2.2" />
+              <text x="585" y="115" text-anchor="middle" class="node-title">Data Unification</text>
+              <text x="585" y="131" text-anchor="middle" class="node-sub">normalize suppliers and taxonomies</text>
+            </g>
+            <g class="viz-node" data-node="intelligence-layer" tabindex="0">
+              <rect class="node-shell" x="720" y="90" width="160" height="60" rx="18" fill="rgba(79,209,197,0.12)" stroke="var(--system)" stroke-width="2.2" />
+              <text x="800" y="115" text-anchor="middle" class="node-title">Intelligence</text>
+              <text x="800" y="131" text-anchor="middle" class="node-sub">rank opportunities and compare suppliers</text>
+            </g>
+            <g class="viz-node" data-node="agent-layer" tabindex="0">
+              <rect class="node-shell" x="720" y="255" width="160" height="60" rx="18" fill="rgba(79,209,197,0.12)" stroke="var(--system)" stroke-width="2.2" />
+              <text x="800" y="280" text-anchor="middle" class="node-title">Agent Layer</text>
+              <text x="800" y="296" text-anchor="middle" class="node-sub">draft events and summarize context</text>
+            </g>
+            <g class="viz-node" data-node="orchestration-layer" tabindex="0">
+              <rect class="node-shell" x="500" y="255" width="190" height="60" rx="18" fill="rgba(79,209,197,0.12)" stroke="var(--system)" stroke-width="2.2" />
+              <text x="595" y="280" text-anchor="middle" class="node-title">Orchestration</text>
+              <text x="595" y="296" text-anchor="middle" class="node-sub">routing - approvals - exception handling</text>
+            </g>
+            <g class="viz-node" data-node="governance-layer" tabindex="0">
+              <rect class="node-shell" x="290" y="255" width="180" height="60" rx="18" fill="rgba(79,209,197,0.12)" stroke="var(--system)" stroke-width="2.2" />
+              <text x="380" y="280" text-anchor="middle" class="node-title">Governance</text>
+              <text x="380" y="296" text-anchor="middle" class="node-sub">policy, audit, access, deployment</text>
+            </g>
+            <g class="viz-node" data-node="experience-layer" tabindex="0">
+              <rect class="node-shell" x="500" y="430" width="190" height="60" rx="18" fill="rgba(79,209,197,0.12)" stroke="var(--system)" stroke-width="2.2" />
+              <text x="595" y="455" text-anchor="middle" class="node-title">Experience Layer</text>
+              <text x="595" y="471" text-anchor="middle" class="node-sub">buyer workbench and executive visibility</text>
+            </g>
+            <g class="viz-node" data-node="value-capture" tabindex="0">
+              <rect class="node-shell" x="720" y="430" width="160" height="60" rx="18" fill="rgba(79,209,197,0.12)" stroke="var(--system)" stroke-width="2.2" />
+              <text x="800" y="455" text-anchor="middle" class="node-title">Value Capture</text>
+              <text x="800" y="471" text-anchor="middle" class="node-sub">measure cycle time, throughput, ROI</text>
+            </g>
+
+            <g class="viz-node" data-node="admin-lift" tabindex="0">
+              <rect class="node-shell" x="930" y="80" width="160" height="48" rx="16" fill="rgba(255,209,102,0.14)" stroke="var(--value)" stroke-width="2.2" />
+              <text x="1010" y="100" text-anchor="middle" class="node-title">Admin Lift</text>
+              <text x="1010" y="115" text-anchor="middle" class="node-sub">8-25 percent less prep work</text>
+            </g>
+            <g class="viz-node" data-node="cycle-time" tabindex="0">
+              <rect class="node-shell" x="940" y="160" width="150" height="48" rx="16" fill="rgba(255,209,102,0.14)" stroke="var(--value)" stroke-width="2.2" />
+              <text x="1015" y="180" text-anchor="middle" class="node-title">Cycle Time</text>
+              <text x="1015" y="195" text-anchor="middle" class="node-sub">10-35 percent faster</text>
+            </g>
+            <g class="viz-node" data-node="throughput" tabindex="0">
+              <rect class="node-shell" x="940" y="240" width="150" height="48" rx="16" fill="rgba(255,209,102,0.14)" stroke="var(--value)" stroke-width="2.2" />
+              <text x="1015" y="260" text-anchor="middle" class="node-title">Throughput</text>
+              <text x="1015" y="275" text-anchor="middle" class="node-sub">5-20 percent more events</text>
+            </g>
+            <g class="viz-node" data-node="policy-alignment" tabindex="0">
+              <rect class="node-shell" x="930" y="320" width="160" height="48" rx="16" fill="rgba(255,209,102,0.14)" stroke="var(--value)" stroke-width="2.2" />
+              <text x="1010" y="340" text-anchor="middle" class="node-title">Policy Alignment</text>
+              <text x="1010" y="355" text-anchor="middle" class="node-sub">fewer off-policy exceptions</text>
+            </g>
+            <g class="viz-node" data-node="payback-window" tabindex="0">
+              <rect class="node-shell" x="940" y="400" width="150" height="48" rx="16" fill="rgba(255,209,102,0.14)" stroke="var(--value)" stroke-width="2.2" />
+              <text x="1015" y="420" text-anchor="middle" class="node-title">Payback</text>
+              <text x="1015" y="435" text-anchor="middle" class="node-sub">9-18 months modeled</text>
+            </g>
+            <g class="viz-node" data-node="savings-confidence" tabindex="0">
+              <rect class="node-shell" x="930" y="480" width="160" height="48" rx="16" fill="rgba(255,209,102,0.14)" stroke="var(--value)" stroke-width="2.2" />
+              <text x="1010" y="500" text-anchor="middle" class="node-title">Savings Confidence</text>
+              <text x="1010" y="515" text-anchor="middle" class="node-sub">better linkage to realized value</text>
+            </g>
+          </svg>
+        </div>
+
+        <div class="legend">
+          <span class="legend-item"><span class="legend-dot" style="background: var(--problem);"></span>problem influence</span>
+          <span class="legend-item"><span class="legend-dot" style="background: var(--system);"></span>actual architecture flow</span>
+          <span class="legend-item"><span class="legend-dot" style="background: var(--value);"></span>ROI outcome flow</span>
+        </div>
+
+        <div class="note-row">
+          Hover or click any node or summary item to highlight its exact connections. The diagram remains fully readable even without interaction.
+        </div>
+      </main>
+
+      <aside class="panel">
+        <p class="section-label">ROI Outcomes</p>
+        <h2>What the system is supposed to produce</h2>
+        <p class="panel-intro">These are the value pools the architecture should improve if the rollout stays disciplined.</p>
+
+        <div class="summary-list">
+          <button class="summary-item value" data-node="admin-lift">
+            <strong>Admin Lift</strong>
+            <span>Less analyst and category-manager time spent building context manually.</span>
+          </button>
+          <button class="summary-item value" data-node="cycle-time">
+            <strong>Cycle-Time Reduction</strong>
+            <span>Faster preparation, comparison, and approval movement.</span>
+          </button>
+          <button class="summary-item value" data-node="throughput">
+            <strong>Throughput Increase</strong>
+            <span>More sourcing events completed with the same team.</span>
+          </button>
+          <button class="summary-item value" data-node="policy-alignment">
+            <strong>Policy Alignment</strong>
+            <span>Lower off-policy risk and fewer undocumented exceptions.</span>
+          </button>
+          <button class="summary-item value" data-node="payback-window">
+            <strong>Payback Window</strong>
+            <span>Modeled 9-18 month range for large enterprises.</span>
+          </button>
+          <button class="summary-item value" data-node="savings-confidence">
+            <strong>Savings Confidence</strong>
+            <span>Better linkage from event outcome to booked value.</span>
+          </button>
+        </div>
+
+        <div class="stack-card">
+          <strong>Rollout rule</strong>
+          <span>Value is strongest when teams start with trusted data and governed workflows before making bigger autonomy claims.</span>
+        </div>
+      </aside>
+    </section>
+
+    <section class="brief-grid" aria-label="Procurement brief summary">
+      <article class="brief-card">
+        <p class="section-label">Problem</p>
+        <h3>What is broken today</h3>
+        <p>Spend and supplier data still lives across ERP, AP, card, contract, and supplier systems. Teams lose time cleaning records, rebuilding context, and defending decisions after the fact.</p>
+      </article>
+      <article class="brief-card">
+        <p class="section-label">Operating fit</p>
+        <h3>Where the model works best</h3>
+        <p>The best near-term fit is indirect and mixed-spend procurement where data unification, supplier comparison, approval routing, and savings follow-through matter more than full autonomy.</p>
+      </article>
+      <article class="brief-card">
+        <p class="section-label">ROI</p>
+        <h3>What value should show up</h3>
+        <p>Early value usually comes from less admin work, faster sourcing cycles, more event throughput, and stronger savings confidence. Human approval should remain mandatory for supplier selection and savings booking.</p>
+      </article>
+    </section>
+  </div>
+  <script>
+    const nodeData = {
+      "erp-fragmentation": {
+        title: "ERP Fragmentation",
+        copy: "Different schemas and taxonomies delay opportunity detection and force analysts to reconstruct the baseline."
+      },
+      "supplier-chaos": {
+        title: "Supplier Chaos",
+        copy: "Duplicate supplier identities weaken comparison quality, leverage, and risk visibility."
+      },
+      "manual-sourcing": {
+        title: "Manual Sourcing",
+        copy: "RFx preparation and stakeholder coordination still absorb high-value sourcing time."
+      },
+      "weak-traceability": {
+        title: "Weak Traceability",
+        copy: "Decisions remain hard to explain after the fact because rationale and evidence are not connected cleanly."
+      },
+      "policy-drift": {
+        title: "Policy Drift",
+        copy: "Approval rules and exceptions vary by team, which creates compliance risk and slows deployment trust."
+      },
+      "delayed-savings": {
+        title: "Delayed Savings Visibility",
+        copy: "Value capture gets identified late and proven late, which weakens the ROI story."
+      },
+      "source-systems": {
+        title: "Source Systems",
+        copy: "ERP, AP, card, contract, and supplier systems provide the raw operating record."
+      },
+      "data-unification": {
+        title: "Data Unification",
+        copy: "This is the foundation layer that turns fragmented procurement records into reusable context."
+      },
+      "intelligence-layer": {
+        title: "Intelligence Layer",
+        copy: "Opportunity ranking and supplier comparison become possible once the data is clean enough to trust."
+      },
+      "agent-layer": {
+        title: "Agent Layer",
+        copy: "Agents should accelerate preparation and recommendation work without silently committing outcomes."
+      },
+      "orchestration-layer": {
+        title: "Orchestration Layer",
+        copy: "Routing, approvals, and exception handling turn output into governed action."
+      },
+      "governance-layer": {
+        title: "Governance Layer",
+        copy: "Policy controls, auditability, and deployment boundaries make the system enterprise-ready."
+      },
+      "experience-layer": {
+        title: "Experience Layer",
+        copy: "Buyer workbench and executive views are where adoption and operating trust show up."
+      },
+      "value-capture": {
+        title: "Value Capture",
+        copy: "This is where the operating model links throughput, savings, and compliance back to measurable business value."
+      },
+      "admin-lift": {
+        title: "Admin Lift",
+        copy: "The clearest early ROI comes from reducing data prep, reporting, and event setup workload."
+      },
+      "cycle-time": {
+        title: "Cycle-Time Reduction",
+        copy: "Faster sourcing cycles are one of the best executive metrics because they reflect both system quality and team throughput."
+      },
+      "throughput": {
+        title: "Throughput Increase",
+        copy: "More sourcing events completed with the same headcount expands the achievable savings pipeline."
+      },
+      "policy-alignment": {
+        title: "Policy Alignment",
+        copy: "Governed workflows reduce off-policy buying and undocumented approval behavior."
+      },
+      "payback-window": {
+        title: "Payback Window",
+        copy: "The 9-18 month payback range depends on implementation discipline and realistic autonomy assumptions."
+      },
+      "savings-confidence": {
+        title: "Savings Confidence",
+        copy: "Booked value is more credible when sourcing decisions and realized outcomes stay connected."
+      }
+    };
+
+    const nodes = Array.from(document.querySelectorAll(".viz-node"));
+    const summaryItems = Array.from(document.querySelectorAll(".summary-item"));
+    const linkGroups = Array.from(document.querySelectorAll(".link-group"));
+    const focusTitle = document.getElementById("focus-title");
+    const focusCopy = document.getElementById("focus-copy");
+
+    function activateNode(id) {
+      const data = nodeData[id];
+      if (!data) return;
+
+      nodes.forEach((node) => node.classList.toggle("is-active", node.dataset.node === id));
+      summaryItems.forEach((item) => item.classList.toggle("is-active", item.dataset.node === id));
+      linkGroups.forEach((group) => {
+        const related = (group.dataset.related || "").split(" ");
+        group.classList.toggle("is-active", related.includes(id));
+      });
+
+      focusTitle.textContent = data.title;
+      focusCopy.textContent = data.copy;
+    }
+
+    function bindActivator(element) {
+      const id = element.dataset.node;
+      element.addEventListener("mouseenter", () => activateNode(id));
+      element.addEventListener("focus", () => activateNode(id));
+      element.addEventListener("click", () => activateNode(id));
+      element.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          activateNode(id);
+        }
+      });
+    }
+
+    nodes.forEach(bindActivator);
+    summaryItems.forEach(bindActivator);
+
+    activateNode("data-unification");
+  </script>
+</body>
+</html>

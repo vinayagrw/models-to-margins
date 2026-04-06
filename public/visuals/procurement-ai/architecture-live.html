@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Governed Procurement Architecture</title>
+  <style>
+    :root {
+      --bg-a: #f8efe2;
+      --bg-b: #d5eef2;
+      --bg-c: #f2d8d1;
+      --card: rgba(255, 255, 255, 0.68);
+      --card-strong: rgba(255, 255, 255, 0.82);
+      --ink: #102a43;
+      --muted: #536779;
+      --line: rgba(16, 42, 67, 0.1);
+      --shadow: 0 24px 60px rgba(15, 33, 52, 0.14);
+      --shadow-soft: 0 14px 32px rgba(15, 33, 52, 0.1);
+      --radius: 30px;
+      --ease: cubic-bezier(0.2, 0.9, 0.15, 1);
+      --source: #2563eb;
+      --data: #0f766e;
+      --intel: #b45309;
+      --agents: #d9485f;
+      --orchestration: #2f7d4f;
+      --governance: #155e75;
+      --experience: #7c5e10;
+      --active: #0f172a;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: "Segoe UI Variable Display", "Aptos", "IBM Plex Sans", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(255, 182, 92, 0.34), transparent 27%),
+        radial-gradient(circle at top right, rgba(90, 194, 235, 0.28), transparent 26%),
+        radial-gradient(circle at 50% 25%, rgba(255, 102, 102, 0.12), transparent 24%),
+        linear-gradient(145deg, var(--bg-a), var(--bg-b) 48%, var(--bg-c));
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    body::before,
+    body::after {
+      content: "";
+      position: fixed;
+      inset: auto;
+      border-radius: 999px;
+      pointer-events: none;
+      filter: blur(18px);
+      opacity: 0.7;
+    }
+
+    body::before {
+      width: 240px;
+      height: 240px;
+      left: -60px;
+      top: 120px;
+      background: rgba(255, 149, 0, 0.16);
+    }
+
+    body::after {
+      width: 320px;
+      height: 320px;
+      right: -110px;
+      top: 380px;
+      background: rgba(26, 115, 232, 0.14);
+    }
+
+    .page {
+      max-width: 1560px;
+      margin: 0 auto;
+      padding: 30px 28px 40px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 22px;
+      margin-bottom: 18px;
+    }
+
+    .hero-copy { max-width: 880px; }
+
+    .eyebrow {
+      display: inline-block;
+      padding: 9px 15px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.8);
+      border: 1px solid rgba(16, 42, 67, 0.08);
+      color: var(--muted);
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      box-shadow: var(--shadow-soft);
+    }
+
+    h1 {
+      margin: 12px 0 10px;
+      font-family: "Georgia", "Aptos Display", sans-serif;
+      font-size: clamp(38px, 4.7vw, 68px);
+      line-height: 0.94;
+      letter-spacing: -0.03em;
+      max-width: 900px;
+    }
+
+    .hero p {
+      margin: 0;
+      max-width: 820px;
+      font-size: 17px;
+      line-height: 1.6;
+      color: var(--muted);
+    }
+
+    .hero-stats {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(140px, 1fr));
+      gap: 12px;
+      min-width: 320px;
+      align-self: flex-start;
+    }
+
+    .story-strip {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin: 0 0 22px;
+    }
+
+    .story-card,
+    .stat,
+    .stage,
+    .panel {
+      background: var(--card);
+      border: 1px solid rgba(16, 42, 67, 0.08);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(16px);
+    }
+
+    .story-card {
+      padding: 18px 18px 16px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .story-card::before {
+      content: "";
+      position: absolute;
+      inset: 0 auto auto 0;
+      width: 100%;
+      height: 4px;
+      background: var(--accent, var(--source));
+    }
+
+    .story-kicker {
+      display: inline-block;
+      margin-bottom: 10px;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .story-card h3 {
+      margin: 0 0 8px;
+      font-size: 22px;
+      letter-spacing: -0.03em;
+      line-height: 1.05;
+    }
+
+    .story-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    .story-metric {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 14px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.72);
+      border: 1px solid rgba(16, 42, 67, 0.08);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--ink);
+    }
+
+    .stat {
+      padding: 18px;
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 28px;
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+
+    .stat span {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(720px, 1.35fr) minmax(320px, 0.65fr);
+      gap: 22px;
+      align-items: start;
+    }
+
+    .stage {
+      padding: 18px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .panel {
+      padding: 24px;
+      position: sticky;
+      top: 22px;
+    }
+
+    .panel-label {
+      display: inline-block;
+      margin-bottom: 12px;
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .panel h2 {
+      margin: 0 0 8px;
+      font-size: 30px;
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+    }
+
+    .panel .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+      color: white;
+      background: var(--source);
+    }
+
+    .panel p {
+      margin: 0 0 18px;
+      font-size: 15px;
+      line-height: 1.65;
+      color: var(--muted);
+    }
+
+    .panel h3 {
+      margin: 18px 0 8px;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+    }
+
+    .panel ul {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--ink);
+    }
+
+    .panel li {
+      margin-bottom: 8px;
+      line-height: 1.5;
+    }
+
+    .panel-note {
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(22, 48, 74, 0.08);
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .stage-head {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 14px;
+      align-items: flex-start;
+      margin-bottom: 14px;
+      padding: 6px 4px 0;
+    }
+
+    .stage-head h2 {
+      margin: 0 0 6px;
+      font-size: 26px;
+      line-height: 1.04;
+      letter-spacing: -0.03em;
+    }
+
+    .stage-head p {
+      margin: 0;
+      max-width: 620px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .stage-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.8);
+      border: 1px solid rgba(16, 42, 67, 0.08);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--ink);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .badge-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: currentColor;
+      opacity: 0.75;
+    }
+
+    svg {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    .node {
+      cursor: pointer;
+      outline: none;
+    }
+
+    .layer-shell,
+    .chip-shell {
+      fill: rgba(255, 255, 255, 0.88);
+      transition: stroke-width 160ms ease, transform 160ms ease, filter 160ms ease;
+    }
+
+    .layer-shell { stroke-width: 2; }
+    .chip-shell { stroke-width: 1.8; }
+
+    .layer-title {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      fill: var(--ink);
+    }
+
+    .layer-copy {
+      font-size: 14px;
+      fill: var(--muted);
+    }
+
+    .chip-label {
+      font-size: 13px;
+      font-weight: 600;
+      fill: var(--ink);
+    }
+
+    .hint-copy {
+      font-size: 12px;
+      fill: rgba(22, 48, 74, 0.55);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .flow-line {
+      fill: none;
+      stroke: rgba(22, 48, 74, 0.14);
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-dasharray: 7 10;
+    }
+
+    .arrow { fill: rgba(22, 48, 74, 0.2); }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 12px;
+      padding: 4px 2px 2px;
+    }
+
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.74);
+      border: 1px solid rgba(16, 42, 67, 0.08);
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .mini-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--dot, var(--source));
+      box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.55);
+    }
+
+    .card-in,
+    .chip-in {
+      opacity: 0;
+      transform-box: fill-box;
+      transform-origin: center;
+    }
+
+    .card-in {
+      animation: riseIn 820ms var(--ease) forwards;
+      animation-delay: var(--delay, 0ms);
+    }
+
+    .chip-in {
+      animation: chipIn 700ms var(--ease) forwards;
+      animation-delay: var(--delay, 0ms);
+    }
+
+    .node.is-active .layer-shell,
+    .node.is-active .chip-shell,
+    .node:focus-visible .layer-shell,
+    .node:focus-visible .chip-shell {
+      stroke: var(--active);
+      stroke-width: 3;
+      filter: url(#activeGlow);
+    }
+
+    .node:hover .layer-shell,
+    .node:hover .chip-shell {
+      transform: translateY(-2px);
+    }
+
+    .layer-source .layer-shell, .layer-source .chip-shell { stroke: var(--source); }
+    .layer-data .layer-shell, .layer-data .chip-shell { stroke: var(--data); }
+    .layer-intel .layer-shell, .layer-intel .chip-shell { stroke: var(--intel); }
+    .layer-agents .layer-shell, .layer-agents .chip-shell { stroke: var(--agents); }
+    .layer-orchestration .layer-shell, .layer-orchestration .chip-shell { stroke: var(--orchestration); }
+    .layer-governance .layer-shell, .layer-governance .chip-shell { stroke: var(--governance); }
+    .layer-experience .layer-shell, .layer-experience .chip-shell { stroke: var(--experience); }
+
+    @keyframes riseIn {
+      from { opacity: 0; transform: translateY(26px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    @keyframes chipIn {
+      from { opacity: 0; transform: translateY(14px) scale(0.96); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    @media (max-width: 1180px) {
+      .layout { grid-template-columns: 1fr; }
+      .panel { position: static; }
+      .story-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 760px) {
+      .story-strip,
+      .hero-stats {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <section class="hero">
+      <div class="hero-copy">
+        <span class="eyebrow">Executive Architecture Storyboard</span>
+        <h1>From fragmented procurement data to governed sourcing decisions.</h1>
+        <p>
+          This version is built to present, not just explain. It frames the operating problem, the delivery constraints, the modeled ROI, and the architecture pattern that makes agentic procurement usable inside real enterprise controls.
+        </p>
+      </div>
+      <div class="hero-stats">
+        <div class="stat"><strong>7</strong><span>Color-coded layers from source systems through buyer experience.</span></div>
+        <div class="stat"><strong>14</strong><span>Clickable nodes tied to the procurement decision chain.</span></div>
+        <div class="stat"><strong>9-18 mo</strong><span>Modeled payback range for large enterprise deployments.</span></div>
+        <div class="stat"><strong>HITL</strong><span>Human approval stays mandatory for supplier choice, policy exceptions, and savings capture.</span></div>
+      </div>
+    </section>
+
+    <section class="story-strip">
+      <article class="story-card" style="--accent: var(--source);">
+        <span class="story-kicker">Problem</span>
+        <h3>Procurement has data, but not trusted context.</h3>
+        <p>Spend, suppliers, contracts, and approvals are spread across systems, which makes sourcing slow, inconsistent, and hard to scale.</p>
+        <div class="story-metric">Fragmentation across ERP, AP, P-card, CLM, and supplier records</div>
+      </article>
+      <article class="story-card" style="--accent: var(--agents);">
+        <span class="story-kicker">Challenge</span>
+        <h3>AI alone does not solve broken operating design.</h3>
+        <p>If data is messy and approvals are unclear, procurement just gets a faster version of the same confusion.</p>
+        <div class="story-metric">Biggest risks: weak taxonomy, poor governance, low adoption</div>
+      </article>
+      <article class="story-card" style="--accent: var(--orchestration);">
+        <span class="story-kicker">Solution</span>
+        <h3>Use agents inside a governed workflow stack.</h3>
+        <p>Unify spend and supplier context first, then let agents handle event prep, supplier comparison, coordination, and follow-through.</p>
+        <div class="story-metric">Flow: data unification -> intelligence -> agents -> approvals</div>
+      </article>
+      <article class="story-card" style="--accent: var(--intel);">
+        <span class="story-kicker">ROI</span>
+        <h3>Value comes from throughput and decision quality.</h3>
+        <p>Modeled impact comes from less admin work, faster sourcing cycles, more completed events, and stronger savings capture discipline.</p>
+        <div class="story-metric">8-25% admin reduction | 10-35% faster cycles</div>
+      </article>
+    </section>
+
+    <section class="layout">
+      <div class="stage">
+        <div class="stage-head">
+          <div>
+            <h2>Governed procurement AI reference architecture</h2>
+            <p>Click a layer or chip to inspect what it handles, why it matters, and where the real enterprise value or risk lives.</p>
+          </div>
+          <div class="stage-badges">
+            <span class="badge" style="color: var(--data);"><span class="badge-dot"></span>Trusted Data First</span>
+            <span class="badge" style="color: var(--agents);"><span class="badge-dot"></span>Agentic Workflow</span>
+            <span class="badge" style="color: var(--governance);"><span class="badge-dot"></span>Policy Controlled</span>
+          </div>
+        </div>
+        <svg viewBox="0 0 980 980" aria-labelledby="title desc" role="img">
+          <title id="title">Governed procurement architecture</title>
+          <desc id="desc">An interactive, animated procurement architecture with seven color-coded layers, moving particles, and clickable nodes.</desc>
+          <defs>
+            <linearGradient id="bgGrid" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="rgba(255,255,255,0.58)" />
+              <stop offset="100%" stop-color="rgba(255,255,255,0.14)" />
+            </linearGradient>
+            <pattern id="gridPattern" width="48" height="48" patternUnits="userSpaceOnUse">
+              <path d="M 48 0 L 0 0 0 48" fill="none" stroke="rgba(22,48,74,0.06)" stroke-width="1" />
+            </pattern>
+            <filter id="activeGlow" x="-30%" y="-30%" width="160%" height="160%">
+              <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="rgba(17,37,61,0.18)" />
+            </filter>
+            <filter id="particleGlow" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur stdDeviation="1.8" result="blur" />
+              <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+            </filter>
+            <path id="flowCenter" d="M 490 135 C 490 170 490 185 490 220 S 490 285 490 320 S 490 385 490 420 S 490 485 490 520 S 490 585 490 620 S 490 685 490 720 S 490 785 490 820" />
+            <path id="flowLeft" d="M 265 140 C 250 200 250 255 270 315 S 280 430 250 520 S 250 660 280 820" />
+            <path id="flowRight" d="M 715 140 C 730 205 730 255 710 315 S 700 430 730 520 S 730 660 700 820" />
+          </defs>
+
+          <rect x="0" y="0" width="980" height="980" rx="30" fill="url(#bgGrid)" />
+          <rect x="0" y="0" width="980" height="980" rx="30" fill="url(#gridPattern)" />
+          <text x="40" y="34" class="hint-copy">Click a layer or chip to inspect inputs, outputs, and control points.</text>
+
+          <g opacity="0.72">
+            <path class="flow-line" d="M 490 138 L 490 820" />
+            <path class="flow-line" d="M 265 150 C 250 200 250 255 270 315 S 280 430 250 520 S 250 660 280 820" />
+            <path class="flow-line" d="M 715 150 C 730 205 730 255 710 315 S 700 430 730 520 S 730 660 700 820" />
+          </g>
+
+          <g filter="url(#particleGlow)">
+            <circle r="4.5" fill="#2563eb">
+              <animateMotion dur="8.5s" repeatCount="indefinite" rotate="auto"><mpath href="#flowCenter" /></animateMotion>
+              <animate attributeName="opacity" values="0;1;1;0" dur="8.5s" repeatCount="indefinite" />
+            </circle>
+            <circle r="5.5" fill="#0f766e">
+              <animateMotion begin="-2.1s" dur="7.2s" repeatCount="indefinite" rotate="auto"><mpath href="#flowLeft" /></animateMotion>
+              <animate attributeName="opacity" values="0;1;1;0" dur="7.2s" repeatCount="indefinite" />
+            </circle>
+            <circle r="4" fill="#d9485f">
+              <animateMotion begin="-4.3s" dur="6.8s" repeatCount="indefinite" rotate="auto"><mpath href="#flowRight" /></animateMotion>
+              <animate attributeName="opacity" values="0;1;1;0" dur="6.8s" repeatCount="indefinite" />
+            </circle>
+            <circle r="3.8" fill="#2f7d4f">
+              <animateMotion begin="-1.4s" dur="9.3s" repeatCount="indefinite" rotate="auto"><mpath href="#flowCenter" /></animateMotion>
+              <animate attributeName="opacity" values="0;1;1;0" dur="9.3s" repeatCount="indefinite" />
+            </circle>
+          </g>
+
+          <g class="node layer-source card-in" data-node="source-systems" tabindex="0" style="--delay: 60ms;">
+            <rect class="layer-shell" x="40" y="58" width="900" height="100" rx="30" />
+            <text x="76" y="102" class="layer-title">1. Source Systems</text>
+            <text x="76" y="128" class="layer-copy">ERP, P2P, contracts, supplier master, risk feeds, and data warehouse inputs.</text>
+          </g>
+          <g class="node layer-source chip-in" data-node="erp-p2p" tabindex="0" style="--delay: 160ms;">
+            <rect class="chip-shell" x="520" y="80" width="120" height="34" rx="17" />
+            <text x="580" y="101" class="chip-label" text-anchor="middle">ERP / P2P</text>
+          </g>
+          <g class="node layer-source chip-in" data-node="supplier-master" tabindex="0" style="--delay: 220ms;">
+            <rect class="chip-shell" x="654" y="80" width="142" height="34" rx="17" />
+            <text x="725" y="101" class="chip-label" text-anchor="middle">Supplier Master</text>
+          </g>
+          <polygon class="arrow" points="482,164 498,164 490,178" />
+
+          <g class="node layer-data card-in" data-node="data-unification" tabindex="0" style="--delay: 120ms;">
+            <rect class="layer-shell" x="40" y="172" width="900" height="100" rx="30" />
+            <text x="76" y="216" class="layer-title">2. Data Unification</text>
+            <text x="76" y="242" class="layer-copy">Ingestion, normalization, categorization, entity resolution, and the spend cube.</text>
+          </g>
+          <g class="node layer-data chip-in" data-node="normalization" tabindex="0" style="--delay: 260ms;">
+            <rect class="chip-shell" x="532" y="194" width="136" height="34" rx="17" />
+            <text x="600" y="215" class="chip-label" text-anchor="middle">Normalization</text>
+          </g>
+          <g class="node layer-data chip-in" data-node="spend-cube" tabindex="0" style="--delay: 320ms;">
+            <rect class="chip-shell" x="684" y="194" width="112" height="34" rx="17" />
+            <text x="740" y="215" class="chip-label" text-anchor="middle">Spend Cube</text>
+          </g>
+          <polygon class="arrow" points="482,278 498,278 490,292" />
+
+          <g class="node layer-intel card-in" data-node="intelligence-layer" tabindex="0" style="--delay: 180ms;">
+            <rect class="layer-shell" x="40" y="286" width="900" height="100" rx="30" />
+            <text x="76" y="330" class="layer-title">3. Intelligence Layer</text>
+            <text x="76" y="356" class="layer-copy">Opportunity detection, supplier scoring, benchmarks, and optimization logic.</text>
+          </g>
+          <g class="node layer-intel chip-in" data-node="opportunity-detection" tabindex="0" style="--delay: 360ms;">
+            <rect class="chip-shell" x="504" y="308" width="170" height="34" rx="17" />
+            <text x="589" y="329" class="chip-label" text-anchor="middle">Opportunity Detection</text>
+          </g>
+          <g class="node layer-intel chip-in" data-node="optimization" tabindex="0" style="--delay: 420ms;">
+            <rect class="chip-shell" x="690" y="308" width="126" height="34" rx="17" />
+            <text x="753" y="329" class="chip-label" text-anchor="middle">Optimization</text>
+          </g>
+          <polygon class="arrow" points="482,392 498,392 490,406" />
+
+          <g class="node layer-agents card-in" data-node="agent-layer" tabindex="0" style="--delay: 240ms;">
+            <rect class="layer-shell" x="40" y="400" width="900" height="100" rx="30" />
+            <text x="76" y="444" class="layer-title">4. Agent Layer</text>
+            <text x="76" y="470" class="layer-copy">Role-specific AI agents that assemble context, produce recommendations, and draft work.</text>
+          </g>
+          <g class="node layer-agents chip-in" data-node="sourcing-agent" tabindex="0" style="--delay: 460ms;">
+            <rect class="chip-shell" x="486" y="422" width="128" height="34" rx="17" />
+            <text x="550" y="443" class="chip-label" text-anchor="middle">Sourcing Agent</text>
+          </g>
+          <g class="node layer-agents chip-in" data-node="supplier-evaluation-agent" tabindex="0" style="--delay: 520ms;">
+            <rect class="chip-shell" x="628" y="422" width="208" height="34" rx="17" />
+            <text x="732" y="443" class="chip-label" text-anchor="middle">Supplier Evaluation Agent</text>
+          </g>
+          <polygon class="arrow" points="482,506 498,506 490,520" />
+
+          <g class="node layer-orchestration card-in" data-node="orchestration-layer" tabindex="0" style="--delay: 300ms;">
+            <rect class="layer-shell" x="40" y="514" width="900" height="100" rx="30" />
+            <text x="76" y="558" class="layer-title">5. Orchestration Layer</text>
+            <text x="76" y="584" class="layer-copy">Workflow engine, routing, approval chains, and controlled exception handling.</text>
+          </g>
+          <g class="node layer-orchestration chip-in" data-node="approval-flow" tabindex="0" style="--delay: 560ms;">
+            <rect class="chip-shell" x="508" y="536" width="132" height="34" rx="17" />
+            <text x="574" y="557" class="chip-label" text-anchor="middle">Approval Flow</text>
+          </g>
+          <g class="node layer-orchestration chip-in" data-node="exception-handling" tabindex="0" style="--delay: 620ms;">
+            <rect class="chip-shell" x="654" y="536" width="162" height="34" rx="17" />
+            <text x="735" y="557" class="chip-label" text-anchor="middle">Exception Handling</text>
+          </g>
+          <polygon class="arrow" points="482,620 498,620 490,634" />
+
+          <g class="node layer-governance card-in" data-node="governance-layer" tabindex="0" style="--delay: 360ms;">
+            <rect class="layer-shell" x="40" y="628" width="900" height="100" rx="30" />
+            <text x="76" y="672" class="layer-title">6. Governance Layer</text>
+            <text x="76" y="698" class="layer-copy">Policy controls, auditability, model gateways, residency, and access boundaries.</text>
+          </g>
+          <g class="node layer-governance chip-in" data-node="policy-controls" tabindex="0" style="--delay: 660ms;">
+            <rect class="chip-shell" x="512" y="650" width="132" height="34" rx="17" />
+            <text x="578" y="671" class="chip-label" text-anchor="middle">Policy Controls</text>
+          </g>
+          <g class="node layer-governance chip-in" data-node="audit-trail" tabindex="0" style="--delay: 720ms;">
+            <rect class="chip-shell" x="660" y="650" width="120" height="34" rx="17" />
+            <text x="720" y="671" class="chip-label" text-anchor="middle">Audit Trail</text>
+          </g>
+          <polygon class="arrow" points="482,734 498,734 490,748" />
+
+          <g class="node layer-experience card-in" data-node="experience-layer" tabindex="0" style="--delay: 420ms;">
+            <rect class="layer-shell" x="40" y="742" width="900" height="100" rx="30" />
+            <text x="76" y="786" class="layer-title">7. Experience Layer</text>
+            <text x="76" y="812" class="layer-copy">Buyer workbench, analyst console, executive dashboards, and procurement APIs.</text>
+          </g>
+          <g class="node layer-experience chip-in" data-node="buyer-workbench" tabindex="0" style="--delay: 760ms;">
+            <rect class="chip-shell" x="506" y="764" width="148" height="34" rx="17" />
+            <text x="580" y="785" class="chip-label" text-anchor="middle">Buyer Workbench</text>
+          </g>
+          <g class="node layer-experience chip-in" data-node="executive-dashboard" tabindex="0" style="--delay: 820ms;">
+            <rect class="chip-shell" x="668" y="764" width="168" height="34" rx="17" />
+            <text x="752" y="785" class="chip-label" text-anchor="middle">Executive Dashboard</text>
+          </g>
+
+          <text x="492" y="900" class="hint-copy" text-anchor="middle">Human approval remains mandatory for supplier selection, policy exceptions, and savings booking.</text>
+        </svg>
+        <div class="legend">
+          <span class="legend-item"><span class="mini-dot" style="--dot: var(--source);"></span>Source Systems</span>
+          <span class="legend-item"><span class="mini-dot" style="--dot: var(--data);"></span>Data Unification</span>
+          <span class="legend-item"><span class="mini-dot" style="--dot: var(--intel);"></span>Intelligence</span>
+          <span class="legend-item"><span class="mini-dot" style="--dot: var(--agents);"></span>Agents</span>
+          <span class="legend-item"><span class="mini-dot" style="--dot: var(--orchestration);"></span>Orchestration</span>
+          <span class="legend-item"><span class="mini-dot" style="--dot: var(--governance);"></span>Governance</span>
+          <span class="legend-item"><span class="mini-dot" style="--dot: var(--experience);"></span>Experience</span>
+        </div>
+      </div>
+
+      <aside class="panel">
+        <span class="panel-label">Node Details</span>
+        <h2 id="detail-title">Source Systems</h2>
+        <div id="detail-tag" class="tag">Input Layer</div>
+        <p id="detail-summary"></p>
+        <h3>What it handles</h3>
+        <ul id="detail-handles"></ul>
+        <h3>Why it matters</h3>
+        <ul id="detail-matters"></ul>
+        <div class="panel-note">
+          Architecture principle: agentic procurement only works when trusted data, human checkpoints, and value-capture logic are designed before autonomy claims.
+        </div>
+      </aside>
+    </section>
+  </div>
+  <script>
+    const nodeData = {
+      "source-systems": {
+        title: "Source Systems",
+        tag: "Input Layer",
+        color: "var(--source)",
+        summary: "This is the raw operating substrate. Procurement starts with fragmented data spread across ERP, P2P, contracts, supplier records, and external risk feeds, then converts that sprawl into something agents can use safely.",
+        handles: [
+          "Purchase orders, invoices, AP, card spend, and sourcing history",
+          "Supplier records, contracts, risk signals, and reference data"
+        ],
+        matters: [
+          "If this layer is incomplete, every downstream recommendation inherits blind spots",
+          "The biggest moat in procurement AI is often data trust, not model novelty"
+        ]
+      },
+      "erp-p2p": {
+        title: "ERP / P2P",
+        tag: "Source Node",
+        color: "var(--source)",
+        summary: "ERP and P2P systems contribute the transactions that define where money moved, who approved it, and how categories were actually consumed.",
+        handles: [
+          "POs, invoices, GL lines, approvals, receipts",
+          "Supplier names, entities, users, and business units"
+        ],
+        matters: [
+          "Without this, sourcing recommendations drift away from actual spend patterns",
+          "Multi-ERP complexity is one of the strongest reasons buyers adopt a governed procurement stack"
+        ]
+      },
+      "supplier-master": {
+        title: "Supplier Master",
+        tag: "Source Node",
+        color: "var(--source)",
+        summary: "Supplier identity and hierarchy are critical because sourcing teams cannot compare suppliers well when the same vendor appears as five records across regions and systems.",
+        handles: [
+          "Supplier IDs, parent-child hierarchy, certifications, and terms",
+          "Enrichment attributes used in sourcing and risk review"
+        ],
+        matters: [
+          "Entity resolution is a prerequisite for supplier scoring and savings attribution",
+          "Weak supplier master data quickly limits AI credibility"
+        ]
+      },
+      "data-unification": {
+        title: "Data Unification",
+        tag: "Foundation Layer",
+        color: "var(--data)",
+        summary: "This layer ingests, cleans, categorizes, and reconciles procurement records into a governed spend model. It is where the data foundation proves value first.",
+        handles: [
+          "Ingestion pipelines, taxonomy mapping, supplier resolution",
+          "Unified spend cube and reusable procurement context"
+        ],
+        matters: [
+          "Most procurement AI programs fail here, long before the model is the bottleneck",
+          "A trusted spend layer turns reporting work into reusable decision context"
+        ]
+      },
+      "normalization": {
+        title: "Normalization",
+        tag: "Foundation Node",
+        color: "var(--data)",
+        summary: "Normalization converts raw transactional noise into procurement-grade inputs that analysts and agents can interpret consistently.",
+        handles: [
+          "Category mapping, duplicate cleanup, unit and entity reconciliation",
+          "Cross-system harmonization for spend analysis"
+        ],
+        matters: [
+          "Normalization reduces analyst lift and improves recommendation quality",
+          "It is one of the clearest areas where procurement AI proves value first"
+        ]
+      },
+      "spend-cube": {
+        title: "Spend Cube",
+        tag: "Foundation Node",
+        color: "var(--data)",
+        summary: "The spend cube is the reusable analytical model that supports opportunity detection, category review, supplier concentration analysis, and savings tracking.",
+        handles: [
+          "Spend by category, supplier, region, business unit, and time",
+          "Baseline context for sourcing decisions and performance reporting"
+        ],
+        matters: [
+          "It gives procurement a stable object to reason over instead of ad hoc spreadsheets",
+          "Without it, AI outputs become isolated and hard to trust"
+        ]
+      },
+      "intelligence-layer": {
+        title: "Intelligence Layer",
+        tag: "Decision Layer",
+        color: "var(--intel)",
+        summary: "This layer turns procurement context into ranked opportunities, supplier comparisons, benchmarks, and economic trade-offs. It should stay evidence-first, not marketing-first.",
+        handles: [
+          "Opportunity detection, supplier scoring, benchmark logic, and scenario analysis",
+          "Savings forecasts and recommended sourcing focus areas"
+        ],
+        matters: [
+          "This is where decision support becomes materially useful to category teams",
+          "It is also where weak data or shallow optimization becomes visible very quickly"
+        ]
+      },
+      "opportunity-detection": {
+        title: "Opportunity Detection",
+        tag: "Decision Node",
+        color: "var(--intel)",
+        summary: "Opportunity detection identifies categories or suppliers with enough spend, fragmentation, risk, or price variance to justify sourcing attention.",
+        handles: [
+          "Savings candidate identification and prioritization",
+          "Category readiness signals for sourcing pipeline creation"
+        ],
+        matters: [
+          "It improves procurement focus and helps lean teams work the highest-value categories first",
+          "It is more valuable than generic chat if it is tied to real spend structure"
+        ]
+      },
+      "optimization": {
+        title: "Optimization",
+        tag: "Decision Node",
+        color: "var(--intel)",
+        summary: "Optimization compares suppliers or scenarios using price, terms, concentration, compliance, and risk trade-offs. Public proof is still thinner here than in the data foundation layer.",
+        handles: [
+          "Scenario comparison and weighted recommendation logic",
+          "Trade-off framing across cost, supplier fit, and policy constraints"
+        ],
+        matters: [
+          "This is a major upside area, but also where buyers should demand validation",
+          "Direct-material complexity makes this layer much harder in manufacturing contexts"
+        ]
+      },
+      "agent-layer": {
+        title: "Agent Layer",
+        tag: "Execution Support Layer",
+        color: "var(--agents)",
+        summary: "This is where agents matter most. They assemble context, draft work, summarize evidence, and route decisions, but they should not be allowed to silently commit procurement outcomes.",
+        handles: [
+          "Role-specific assistants for sourcing, supplier evaluation, contracts, and savings follow-through",
+          "Context assembly, drafting, summarization, and task acceleration"
+        ],
+        matters: [
+          "Agents create value when they remove prep work and coordination drag",
+          "They become risky when buyers confuse speed with governance"
+        ]
+      },
+      "sourcing-agent": {
+        title: "Sourcing Agent",
+        tag: "Agent Node",
+        color: "var(--agents)",
+        summary: "The sourcing agent packages demand history, supplier context, and prior events into a ready-to-run sourcing brief.",
+        handles: [
+          "Event briefs, RFx drafts, category summaries, and next-step recommendations",
+          "Preparation work that usually absorbs sourcing manager time"
+        ],
+        matters: [
+          "This is one of the most practical early AI use cases in procurement",
+          "It increases throughput without forcing buyers into full autonomy"
+        ]
+      },
+      "supplier-evaluation-agent": {
+        title: "Supplier Evaluation Agent",
+        tag: "Agent Node",
+        color: "var(--agents)",
+        summary: "This agent compares suppliers, summarizes submissions, flags risks, and prepares a rationale for shortlist and award decisions.",
+        handles: [
+          "Supplier scorecards, shortlist rationale, risk highlights, and comparison packs",
+          "Decision support before sourcing committee or stakeholder review"
+        ],
+        matters: [
+          "It reduces manual spreadsheet work and improves traceability",
+          "Human approval is still required because supplier choice carries policy and continuity risk"
+        ]
+      },
+      "orchestration-layer": {
+        title: "Orchestration Layer",
+        tag: "Control Layer",
+        color: "var(--orchestration)",
+        summary: "This is the operational spine that turns recommendations into governed work. It routes tasks, controls approvals, and makes sure nothing important happens without a checkpoint.",
+        handles: [
+          "Workflow engine, approval sequences, escalations, and exception handling",
+          "Task movement across sourcing stakeholders and systems"
+        ],
+        matters: [
+          "Without orchestration, AI stays trapped in a clever interface instead of changing throughput",
+          "This is where process design matters as much as software"
+        ]
+      },
+      "approval-flow": {
+        title: "Approval Flow",
+        tag: "Control Node",
+        color: "var(--orchestration)",
+        summary: "Approval flow captures where procurement, finance, legal, quality, or business owners must explicitly sign off before the process advances.",
+        handles: [
+          "Shortlist approval, award approval, policy approvals, and sign-off routing",
+          "Documented checkpoints before commitment-bearing actions"
+        ],
+        matters: [
+          "It keeps humans in the loop at the right decision boundaries",
+          "It is essential for change management and auditability"
+        ]
+      },
+      "exception-handling": {
+        title: "Exception Handling",
+        tag: "Control Node",
+        color: "var(--orchestration)",
+        summary: "Exception handling deals with incomplete data, policy conflicts, risk alerts, or business overrides that should pause or reroute agent output.",
+        handles: [
+          "Escalations, overrides, missing-data logic, and route-to-human rules",
+          "Fallback actions when model confidence or policy alignment is weak"
+        ],
+        matters: [
+          "This is where serious enterprise buyers will probe production readiness",
+          "Weak exception handling creates hidden operational and compliance risk"
+        ]
+      },
+      "governance-layer": {
+        title: "Governance Layer",
+        tag: "Safety Layer",
+        color: "var(--governance)",
+        summary: "Governance is what makes agentic procurement deployable in real enterprises. It defines who can see what, where models run, what gets logged, and how actions stay auditable.",
+        handles: [
+          "Policy controls, audit logs, model boundaries, data residency, and access controls",
+          "Human-in-the-loop requirements for sensitive decisions"
+        ],
+        matters: [
+          "This is one of the strongest reasons orchestration matters",
+          "Without it, high-value enterprises will stop at pilot stage"
+        ]
+      },
+      "policy-controls": {
+        title: "Policy Controls",
+        tag: "Safety Node",
+        color: "var(--governance)",
+        summary: "Policy controls define what recommendations are allowed, what needs review, and what can never be automated without approval.",
+        handles: [
+          "Thresholds, category restrictions, supplier policy checks, and role-based constraints",
+          "Guardrails for when agents can draft, recommend, or trigger downstream work"
+        ],
+        matters: [
+          "This keeps AI aligned with procurement governance rather than bypassing it",
+          "It is central to trust and scaled adoption"
+        ]
+      },
+      "audit-trail": {
+        title: "Audit Trail",
+        tag: "Safety Node",
+        color: "var(--governance)",
+        summary: "The audit trail records what data informed a recommendation, what the model suggested, who approved it, and what happened next.",
+        handles: [
+          "Decision history, source references, approvals, overrides, and outcome linkage",
+          "Evidence needed for compliance, post-mortems, and ROI analysis"
+        ],
+        matters: [
+          "It is the difference between an assistive system and an ungoverned black box",
+          "Savings credibility depends on traceability"
+        ]
+      },
+      "experience-layer": {
+        title: "Experience Layer",
+        tag: "Adoption Layer",
+        color: "var(--experience)",
+        summary: "The experience layer is where procurement teams actually live. If this is clumsy, the architecture can be technically sound and still fail adoption.",
+        handles: [
+          "Buyer workbench, analyst console, executive dashboarding, and APIs into procurement tools",
+          "Interfaces for day-to-day decision support and performance review"
+        ],
+        matters: [
+          "Adoption depends on making real work faster, not just making demos prettier",
+          "Executive visibility and frontline usability both matter here"
+        ]
+      },
+      "buyer-workbench": {
+        title: "Buyer Workbench",
+        tag: "Adoption Node",
+        color: "var(--experience)",
+        summary: "The buyer workbench is the operating cockpit for sourcing managers and category owners. It should show context, recommendations, and approvals in one place.",
+        handles: [
+          "Event briefs, supplier comparisons, actions, approvals, and next steps",
+          "A single surface for semi-automated sourcing execution"
+        ],
+        matters: [
+          "This is where time savings and workflow trust become tangible",
+          "Poor UX here will collapse adoption even if the model is strong"
+        ]
+      },
+      "executive-dashboard": {
+        title: "Executive Dashboard",
+        tag: "Adoption Node",
+        color: "var(--experience)",
+        summary: "The executive dashboard translates sourcing activity into portfolio visibility: savings pipeline, bottlenecks, coverage, and compliance progress.",
+        handles: [
+          "Initiative status, expected savings, cycle-time trends, and blocked decisions",
+          "Portfolio view for CPOs and finance stakeholders"
+        ],
+        matters: [
+          "It closes the loop between AI activity and business accountability",
+          "It helps procurement prove value beyond anecdotal wins"
+        ]
+      }
+    };
+
+    const nodes = Array.from(document.querySelectorAll("[data-node]"));
+    const detailTitle = document.getElementById("detail-title");
+    const detailTag = document.getElementById("detail-tag");
+    const detailSummary = document.getElementById("detail-summary");
+    const detailHandles = document.getElementById("detail-handles");
+    const detailMatters = document.getElementById("detail-matters");
+
+    function renderList(target, items) {
+      target.innerHTML = "";
+      items.forEach((item) => {
+        const li = document.createElement("li");
+        li.textContent = item;
+        target.appendChild(li);
+      });
+    }
+
+    function selectNode(id) {
+      const data = nodeData[id];
+      if (!data) return;
+      nodes.forEach((node) => node.classList.toggle("is-active", node.dataset.node === id));
+      detailTitle.textContent = data.title;
+      detailTag.textContent = data.tag;
+      detailTag.style.background = data.color;
+      detailSummary.textContent = data.summary;
+      renderList(detailHandles, data.handles);
+      renderList(detailMatters, data.matters);
+    }
+
+    nodes.forEach((node) => {
+      node.addEventListener("click", () => selectNode(node.dataset.node));
+      node.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          selectNode(node.dataset.node);
+        }
+      });
+    });
+
+    selectNode("source-systems");
+  </script>
+</body>
+</html>

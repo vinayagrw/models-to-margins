@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Private AI Control Plane</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(circle at top left, rgba(34, 211, 238, 0.12), transparent 30%),
+    radial-gradient(circle at bottom right, rgba(249, 115, 22, 0.10), transparent 24%),
+    linear-gradient(180deg, #040915 0%, #050b16 48%, #02050c 100%);
+  font-family: 'DM Sans', sans-serif;
+}
+.poster {
+  width: 1200px;
+  height: 680px;
+  overflow: hidden;
+  border-radius: 22px;
+  box-shadow: 0 24px 90px rgba(0, 0, 0, 0.42);
+}
+svg { display: block; width: 100%; height: 100%; }
+
+.node-g {
+  opacity: 0;
+  transform: scale(0.88) translateY(10px);
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: opacity 0.55s ease, transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.node-g.show {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+}
+.edge-g {
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+.edge-g.show {
+  opacity: 1;
+}
+
+@keyframes haloPulse {
+  0%, 100% { opacity: 0.16; }
+  50% { opacity: 0.32; }
+}
+
+@keyframes titleGlow {
+  0%, 100% { filter: drop-shadow(0 0 8px rgba(34, 211, 238, 0.45)); }
+  50% { filter: drop-shadow(0 0 18px rgba(34, 211, 238, 0.85)); }
+}
+
+@keyframes pulseDot {
+  0% { r: 4; opacity: 0.88; }
+  100% { r: 14; opacity: 0; }
+}
+
+.halo { animation: haloPulse 4s ease-in-out infinite; }
+.title-glow { animation: titleGlow 3s ease-in-out infinite; }
+.pulse-dot { animation: pulseDot 2s ease-out infinite; }
+.pulse-dot.delayed { animation-delay: 0.7s; }
+</style>
+</head>
+<body>
+<div class="poster">
+<svg viewBox="0 0 1200 680" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <filter id="softGlow" x="-80%" y="-80%" width="260%" height="260%">
+    <feGaussianBlur stdDeviation="6" result="blur"/>
+    <feMerge>
+      <feMergeNode in="blur"/>
+      <feMergeNode in="SourceGraphic"/>
+    </feMerge>
+  </filter>
+  <filter id="titleGlowFilter" x="-40%" y="-40%" width="180%" height="180%">
+    <feGaussianBlur stdDeviation="8" result="blur"/>
+    <feMerge>
+      <feMergeNode in="blur"/>
+      <feMergeNode in="SourceGraphic"/>
+    </feMerge>
+  </filter>
+
+  <radialGradient id="blueHalo" cx="50%" cy="50%" r="50%">
+    <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.18"/>
+    <stop offset="100%" stop-color="#3b82f6" stop-opacity="0"/>
+  </radialGradient>
+  <radialGradient id="orangeHalo" cx="50%" cy="50%" r="50%">
+    <stop offset="0%" stop-color="#f97316" stop-opacity="0.18"/>
+    <stop offset="100%" stop-color="#f97316" stop-opacity="0"/>
+  </radialGradient>
+
+  <linearGradient id="cyanFill" x1="0%" y1="0%" x2="100%" y2="100%">
+    <stop offset="0%" stop-color="#22d3ee" stop-opacity="0.24"/>
+    <stop offset="100%" stop-color="#0891b2" stop-opacity="0.08"/>
+  </linearGradient>
+  <linearGradient id="blueFill" x1="0%" y1="0%" x2="100%" y2="100%">
+    <stop offset="0%" stop-color="#60a5fa" stop-opacity="0.26"/>
+    <stop offset="100%" stop-color="#2563eb" stop-opacity="0.10"/>
+  </linearGradient>
+  <linearGradient id="greenFill" x1="0%" y1="0%" x2="100%" y2="100%">
+    <stop offset="0%" stop-color="#34d399" stop-opacity="0.24"/>
+    <stop offset="100%" stop-color="#059669" stop-opacity="0.08"/>
+  </linearGradient>
+  <linearGradient id="violetFill" x1="0%" y1="0%" x2="100%" y2="100%">
+    <stop offset="0%" stop-color="#a78bfa" stop-opacity="0.26"/>
+    <stop offset="100%" stop-color="#7c3aed" stop-opacity="0.10"/>
+  </linearGradient>
+  <linearGradient id="orangeFill" x1="0%" y1="0%" x2="100%" y2="100%">
+    <stop offset="0%" stop-color="#fb923c" stop-opacity="0.26"/>
+    <stop offset="100%" stop-color="#c2410c" stop-opacity="0.10"/>
+  </linearGradient>
+  <linearGradient id="roseFill" x1="0%" y1="0%" x2="100%" y2="100%">
+    <stop offset="0%" stop-color="#fb7185" stop-opacity="0.22"/>
+    <stop offset="100%" stop-color="#be123c" stop-opacity="0.08"/>
+  </linearGradient>
+
+  <pattern id="dotGrid" width="28" height="28" patternUnits="userSpaceOnUse">
+    <circle cx="1" cy="1" r="0.75" fill="rgba(255,255,255,0.04)"/>
+  </pattern>
+
+  <path id="p0" d="M145,340 L182,340"/>
+  <path id="p1" d="M300,340 L334,340"/>
+  <path id="p2" d="M484,322 L516,322 L516,108 L540,108"/>
+  <path id="p3" d="M484,338 L516,338 L516,228 L540,228"/>
+  <path id="p4" d="M484,348 L516,348 L516,366 L540,366"/>
+  <path id="p5" d="M484,358 L516,358 L516,506 L540,506"/>
+  <path id="p6" d="M484,368 L516,368 L516,608 L540,608"/>
+  <path id="p7" d="M690,228 L724,228"/>
+  <path id="p8" d="M690,366 L724,366"/>
+  <path id="p9" d="M690,506 L724,506"/>
+  <path id="p10" d="M884,458 L920,458"/>
+  <path id="p11" d="M884,554 L920,554"/>
+</defs>
+
+<rect width="1200" height="680" fill="#050b16"/>
+<rect width="1200" height="680" fill="url(#dotGrid)"/>
+<ellipse cx="408" cy="346" rx="236" ry="172" fill="url(#blueHalo)" class="halo"/>
+<ellipse cx="992" cy="506" rx="156" ry="120" fill="url(#orangeHalo)" class="halo"/>
+
+<circle cx="32" cy="30" r="64" fill="none" stroke="#22d3ee" stroke-width="0.5" opacity="0.12"/>
+<circle cx="32" cy="30" r="94" fill="none" stroke="#22d3ee" stroke-width="0.3" opacity="0.06"/>
+<circle cx="1168" cy="650" r="74" fill="none" stroke="#f97316" stroke-width="0.5" opacity="0.10"/>
+<circle cx="1168" cy="650" r="108" fill="none" stroke="#f97316" stroke-width="0.3" opacity="0.06"/>
+
+<line x1="158" y1="52" x2="158" y2="646" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+<line x1="324" y1="52" x2="324" y2="646" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+<line x1="514" y1="52" x2="514" y2="646" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+<line x1="704" y1="52" x2="704" y2="646" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+<line x1="920" y1="52" x2="920" y2="646" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+
+<text x="70" y="56" font-family="'DM Sans', sans-serif" font-size="9" font-weight="500" fill="rgba(255,255,255,0.20)" letter-spacing="2.5">ENTRY</text>
+<text x="372" y="56" font-family="'DM Sans', sans-serif" font-size="9" font-weight="500" fill="rgba(255,255,255,0.20)" letter-spacing="2.5">CONTROL</text>
+<text x="548" y="56" font-family="'DM Sans', sans-serif" font-size="9" font-weight="500" fill="rgba(255,255,255,0.20)" letter-spacing="2.5">POLICY AND DATA</text>
+<text x="740" y="56" font-family="'DM Sans', sans-serif" font-size="9" font-weight="500" fill="rgba(255,255,255,0.20)" letter-spacing="2.5">MODEL PATHS</text>
+<text x="948" y="56" font-family="'DM Sans', sans-serif" font-size="9" font-weight="500" fill="rgba(255,255,255,0.20)" letter-spacing="2.5">EXECUTION</text>
+
+<g class="edge-g" id="e0">
+  <use href="#p0" fill="none" stroke="#22d3ee" stroke-width="2" opacity="0.72" filter="url(#softGlow)"/>
+  <circle r="3.8" fill="#22d3ee"><animateMotion dur="1.1s" repeatCount="indefinite"><mpath href="#p0"/></animateMotion></circle>
+  <circle r="2.2" fill="#67e8f9" opacity="0.68"><animateMotion dur="1.1s" begin="-0.4s" repeatCount="indefinite"><mpath href="#p0"/></animateMotion></circle>
+  <polygon points="173,335 182,340 173,345" fill="#22d3ee"/>
+</g>
+<g class="edge-g" id="e1">
+  <use href="#p1" fill="none" stroke="#22d3ee" stroke-width="2" opacity="0.72" filter="url(#softGlow)"/>
+  <circle r="3.8" fill="#22d3ee"><animateMotion dur="1.0s" repeatCount="indefinite"><mpath href="#p1"/></animateMotion></circle>
+  <circle r="2.2" fill="#67e8f9" opacity="0.68"><animateMotion dur="1.0s" begin="-0.35s" repeatCount="indefinite"><mpath href="#p1"/></animateMotion></circle>
+  <polygon points="325,335 334,340 325,345" fill="#22d3ee"/>
+</g>
+<g class="edge-g" id="e2">
+  <use href="#p2" fill="none" stroke="#a78bfa" stroke-width="2" opacity="0.66" filter="url(#softGlow)"/>
+  <circle r="3.4" fill="#c4b5fd"><animateMotion dur="1.7s" repeatCount="indefinite"><mpath href="#p2"/></animateMotion></circle>
+  <circle r="2" fill="#8b5cf6" opacity="0.55"><animateMotion dur="1.7s" begin="-0.55s" repeatCount="indefinite"><mpath href="#p2"/></animateMotion></circle>
+  <polygon points="531,103 540,108 531,113" fill="#a78bfa"/>
+</g>
+<g class="edge-g" id="e3">
+  <use href="#p3" fill="none" stroke="#34d399" stroke-width="2" opacity="0.66" filter="url(#softGlow)"/>
+  <circle r="3.4" fill="#6ee7b7"><animateMotion dur="1.5s" repeatCount="indefinite"><mpath href="#p3"/></animateMotion></circle>
+  <circle r="2" fill="#10b981" opacity="0.55"><animateMotion dur="1.5s" begin="-0.5s" repeatCount="indefinite"><mpath href="#p3"/></animateMotion></circle>
+  <polygon points="531,223 540,228 531,233" fill="#34d399"/>
+</g>
+<g class="edge-g" id="e4">
+  <use href="#p4" fill="none" stroke="#34d399" stroke-width="2" opacity="0.66" filter="url(#softGlow)"/>
+  <circle r="3.4" fill="#6ee7b7"><animateMotion dur="1.5s" repeatCount="indefinite"><mpath href="#p4"/></animateMotion></circle>
+  <circle r="2" fill="#10b981" opacity="0.55"><animateMotion dur="1.5s" begin="-0.5s" repeatCount="indefinite"><mpath href="#p4"/></animateMotion></circle>
+  <polygon points="531,361 540,366 531,371" fill="#34d399"/>
+</g>
+<g class="edge-g" id="e5">
+  <use href="#p5" fill="none" stroke="#a78bfa" stroke-width="2" opacity="0.66" filter="url(#softGlow)"/>
+  <circle r="3.4" fill="#d8b4fe"><animateMotion dur="1.7s" repeatCount="indefinite"><mpath href="#p5"/></animateMotion></circle>
+  <circle r="2" fill="#a855f7" opacity="0.55"><animateMotion dur="1.7s" begin="-0.55s" repeatCount="indefinite"><mpath href="#p5"/></animateMotion></circle>
+  <polygon points="531,501 540,506 531,511" fill="#a78bfa"/>
+</g>
+<g class="edge-g" id="e6">
+  <use href="#p6" fill="none" stroke="#fb7185" stroke-width="2" opacity="0.60" filter="url(#softGlow)"/>
+  <circle r="3.4" fill="#fda4af"><animateMotion dur="2.1s" repeatCount="indefinite"><mpath href="#p6"/></animateMotion></circle>
+  <circle r="2" fill="#f43f5e" opacity="0.55"><animateMotion dur="2.1s" begin="-0.7s" repeatCount="indefinite"><mpath href="#p6"/></animateMotion></circle>
+  <polygon points="531,603 540,608 531,613" fill="#fb7185"/>
+</g>
+<g class="edge-g" id="e7">
+  <use href="#p7" fill="none" stroke="#22d3ee" stroke-width="2" opacity="0.66" filter="url(#softGlow)"/>
+  <circle r="3.4" fill="#67e8f9"><animateMotion dur="1.3s" repeatCount="indefinite"><mpath href="#p7"/></animateMotion></circle>
+  <circle r="2" fill="#22d3ee" opacity="0.55"><animateMotion dur="1.3s" begin="-0.43s" repeatCount="indefinite"><mpath href="#p7"/></animateMotion></circle>
+  <polygon points="715,223 724,228 715,233" fill="#22d3ee"/>
+</g>
+<g class="edge-g" id="e8">
+  <use href="#p8" fill="none" stroke="#22d3ee" stroke-width="2" opacity="0.66" filter="url(#softGlow)"/>
+  <circle r="3.4" fill="#67e8f9"><animateMotion dur="1.3s" repeatCount="indefinite"><mpath href="#p8"/></animateMotion></circle>
+  <circle r="2" fill="#22d3ee" opacity="0.55"><animateMotion dur="1.3s" begin="-0.43s" repeatCount="indefinite"><mpath href="#p8"/></animateMotion></circle>
+  <polygon points="715,361 724,366 715,371" fill="#22d3ee"/>
+</g>
+<g class="edge-g" id="e9">
+  <use href="#p9" fill="none" stroke="#a78bfa" stroke-width="2" opacity="0.66" filter="url(#softGlow)"/>
+  <circle r="3.4" fill="#d8b4fe"><animateMotion dur="1.5s" repeatCount="indefinite"><mpath href="#p9"/></animateMotion></circle>
+  <circle r="2" fill="#a855f7" opacity="0.55"><animateMotion dur="1.5s" begin="-0.5s" repeatCount="indefinite"><mpath href="#p9"/></animateMotion></circle>
+  <polygon points="715,501 724,506 715,511" fill="#a78bfa"/>
+</g>
+<g class="edge-g" id="e10">
+  <use href="#p10" fill="none" stroke="#f97316" stroke-width="2.5" opacity="0.82" filter="url(#softGlow)"/>
+  <circle r="4.3" fill="#fb923c"><animateMotion dur="0.95s" repeatCount="indefinite"><mpath href="#p10"/></animateMotion></circle>
+  <circle r="2.4" fill="#fdba74" opacity="0.72"><animateMotion dur="0.95s" begin="-0.3s" repeatCount="indefinite"><mpath href="#p10"/></animateMotion></circle>
+  <polygon points="911,453 920,458 911,463" fill="#f97316"/>
+</g>
+<g class="edge-g" id="e11">
+  <use href="#p11" fill="none" stroke="#f97316" stroke-width="2.5" opacity="0.82" filter="url(#softGlow)"/>
+  <circle r="4.3" fill="#fb923c"><animateMotion dur="0.95s" repeatCount="indefinite"><mpath href="#p11"/></animateMotion></circle>
+  <circle r="2.4" fill="#fdba74" opacity="0.72"><animateMotion dur="0.95s" begin="-0.3s" repeatCount="indefinite"><mpath href="#p11"/></animateMotion></circle>
+  <polygon points="911,549 920,554 911,559" fill="#f97316"/>
+</g>
+
+<g class="node-g" id="n0" filter="url(#softGlow)">
+  <rect x="35" y="318" width="110" height="44" rx="10" fill="url(#cyanFill)" stroke="#22d3ee" stroke-width="1.5"/>
+  <text x="90" y="340" text-anchor="middle" dominant-baseline="central" font-family="'DM Sans', sans-serif" font-size="12.5" font-weight="500" fill="#67e8f9">Users / Apps</text>
+</g>
+<g class="node-g" id="n1" filter="url(#softGlow)">
+  <rect x="182" y="318" width="118" height="44" rx="10" fill="url(#cyanFill)" stroke="#22d3ee" stroke-width="1.5"/>
+  <text x="241" y="340" text-anchor="middle" dominant-baseline="central" font-family="'DM Sans', sans-serif" font-size="12.5" font-weight="500" fill="#67e8f9">Policy Gateway</text>
+</g>
+<g class="node-g" id="n2" filter="url(#softGlow)">
+  <rect x="334" y="312" width="150" height="58" rx="11" fill="url(#blueFill)" stroke="#60a5fa" stroke-width="1.8"/>
+  <text x="409" y="332" text-anchor="middle" dominant-baseline="central" font-family="'Syne', sans-serif" font-size="13" font-weight="700" fill="#bfdbfe">Control Plane</text>
+  <text x="409" y="352" text-anchor="middle" dominant-baseline="central" font-family="'DM Sans', sans-serif" font-size="11" font-style="italic" fill="rgba(191,219,254,0.62)">orchestrator</text>
+</g>
+<g class="node-g" id="n3" filter="url(#softGlow)">
+  <rect x="540" y="86" width="140" height="44" rx="10" fill="url(#violetFill)" stroke="#a78bfa" stroke-width="1.4"/>
+  <text x="610" y="104" text-anchor="middle" dominant-baseline="central" font-family="'DM Sans', sans-serif" font-size="12" font-weight="500" fill="#ddd6fe">Auth / RBAC</text>
+  <text x="610" y="120" text-anchor="middle" dominant-baseline="central" font-family="'DM Sans', sans-serif" font-size="9.5" fill="rgba(221,214,254,0.55)">identity and access</text>
+</g>
+<g class="node-g" id="n4" filter="url(#softGlow)">
+  <rect x="540" y="206" width="150" height="44" rx="10" fill="url(#greenFill)" stroke="#34d399" stroke-width="1.4"/>
+  <text x="615" y="224" text-anchor="middle" dominant-baseline="central" font-family="'DM Sans', sans-serif" font-size="12" font-weight="500" fill="#a7f3d0">Retrieval Layer</text>
+  <text x="615" y="240" text-anchor="middle" dominant-baseline="central" font-family="'DM Sans', sans-serif" font-size="9.5" fill="rgba(167,243,208,0.55)">private knowledge path</text>
+</g>
+<g class="node-g" id="n5" filter="url(#softGlow)">
+  <rect x="540" y="344" width="150" height="44" rx="10" fill="url(#greenFill)" stroke="#34d399" stroke-width="1.4"/>
+  <text x="615" y="362" text-anchor="middle" dominant-baseline="central" font-family="'DM Sans', sans-serif" font-size="12" font-weight="500" fill="#a7f3d0">Business Tools</text>
+  <text x="615" y="378" text-anchor="middle" dominant-baseline="central" font-family="'DM Sans', sans-serif" font-size="9.5" fill="rgba(167,243,208,0.55)">CRM, ERP, tickets</text>
+</g>
+<g class="node-g" id="n6" filter="url(#softGlow)">
+  <rect x="540" y="484" width="150" height="44" rx="10" fill="url(#violetFill)" stroke="#a78bfa" stroke-width="1.4"/>
+  <text x="615" y="502" text-anchor="middle" dominant-baseline="central" font-family="'DM Sans', sans-serif" font-size="12" font-weight="500" fill="#ddd6fe">Model Router</text>
+  <text x="615" y="518" text-anchor="middle" dominant-baseline="central" font-family="'DM Sans', sans-serif" font-size="9.5" fill="rgba(221,214,254,0.55)">cost, policy, capability</text>
+</g>
+<g class="node-g" id="n7" filter="url(#softGlow)">
+  <rect x="540" y="586" width="150" height="46" rx="10" fill="url(#roseFill)" stroke="#fb7185" stroke-width="1.4"/>
+  <text x="615" y="604" text-anchor="middle" dominant-baseline="central" font-family="'DM Sans', sans-serif" font-size="12" font-weight="500" fill="#fecdd3">Logs / Evals</text>
+  <text x="615" y="621" text-anchor="middle" dominant-baseline="central" font-family="'DM Sans', sans-serif" font-size="9.5" fill="rgba(254,205,211,0.55)">observability and spend</text>
+</g>
+<g class="node-g" id="n8" filter="url(#softGlow)">
+  <rect x="724" y="206" width="160" height="44" rx="10" fill="url(#cyanFill)" stroke="#22d3ee" stroke-width="1.4"/>
+  <text x="804" y="224" text-anchor="middle" dominant-baseline="central" font-family="'DM Sans', sans-serif" font-size="12" font-weight="500" fill="#67e8f9">Docs / Search Index</text>
+  <text x="804" y="240" text-anchor="middle" dominant-baseline="central" font-family="'DM Sans', sans-serif" font-size="9.5" fill="rgba(103,232,249,0.55)">contracts, wiki, notes</text>
+</g>
+<g class="node-g" id="n9" filter="url(#softGlow)">
+  <rect x="724" y="344" width="160" height="44" rx="10" fill="url(#cyanFill)" stroke="#22d3ee" stroke-width="1.4"/>
+  <text x="804" y="362" text-anchor="middle" dominant-baseline="central" font-family="'DM Sans', sans-serif" font-size="12" font-weight="500" fill="#67e8f9">Live System Data</text>
+  <text x="804" y="378" text-anchor="middle" dominant-baseline="central" font-family="'DM Sans', sans-serif" font-size="9.5" fill="rgba(103,232,249,0.55)">orders, CRM, incidents</text>
+</g>
+<g class="node-g" id="n10" filter="url(#softGlow)">
+  <rect x="724" y="484" width="160" height="46" rx="10" fill="url(#violetFill)" stroke="#a78bfa" stroke-width="1.4"/>
+  <text x="804" y="502" text-anchor="middle" dominant-baseline="central" font-family="'Syne', sans-serif" font-size="12.5" font-weight="700" fill="#ddd6fe">Private Inference</text>
+  <text x="804" y="519" text-anchor="middle" dominant-baseline="central" font-family="'DM Sans', sans-serif" font-size="9.5" font-style="italic" fill="rgba(221,214,254,0.62)">open models you control</text>
+</g>
+<g class="node-g" id="n11" filter="url(#softGlow)">
+  <rect x="724" y="580" width="160" height="46" rx="10" fill="url(#violetFill)" stroke="#c084fc" stroke-width="1.4"/>
+  <text x="804" y="598" text-anchor="middle" dominant-baseline="central" font-family="'Syne', sans-serif" font-size="12.5" font-weight="700" fill="#e9d5ff">Premium Inference</text>
+  <text x="804" y="615" text-anchor="middle" dominant-baseline="central" font-family="'DM Sans', sans-serif" font-size="9.5" font-style="italic" fill="rgba(233,213,255,0.62)">closed models you rent</text>
+</g>
+<g class="node-g" id="n12" filter="url(#softGlow)">
+  <rect x="920" y="435" width="152" height="46" rx="10" fill="url(#orangeFill)" stroke="#fb923c" stroke-width="1.7"/>
+  <circle cx="940" cy="458" r="4" fill="#f97316" class="pulse-dot"/>
+  <circle cx="940" cy="458" r="4" fill="#f97316" class="pulse-dot delayed"/>
+  <text x="996" y="454" text-anchor="middle" dominant-baseline="central" font-family="'DM Sans', sans-serif" font-size="12.5" font-weight="500" fill="#fdba74">Private GPU</text>
+  <text x="996" y="471" text-anchor="middle" dominant-baseline="central" font-family="'DM Sans', sans-serif" font-size="9.5" fill="rgba(253,186,116,0.55)">self-hosted cluster</text>
+</g>
+<g class="node-g" id="n13" filter="url(#softGlow)">
+  <rect x="920" y="531" width="152" height="46" rx="10" fill="url(#orangeFill)" stroke="#fb923c" stroke-width="1.7"/>
+  <circle cx="940" cy="554" r="4" fill="#f97316" class="pulse-dot"/>
+  <circle cx="940" cy="554" r="4" fill="#f97316" class="pulse-dot delayed"/>
+  <text x="996" y="550" text-anchor="middle" dominant-baseline="central" font-family="'DM Sans', sans-serif" font-size="12.5" font-weight="500" fill="#fdba74">Managed APIs</text>
+  <text x="996" y="567" text-anchor="middle" dominant-baseline="central" font-family="'DM Sans', sans-serif" font-size="9.5" fill="rgba(253,186,116,0.55)">frontier services</text>
+</g>
+
+<g class="title-glow">
+  <text x="40" y="24" font-family="'Syne', sans-serif" font-size="24" font-weight="800" fill="#22d3ee" filter="url(#titleGlowFilter)">Private AI Control Plane</text>
+</g>
+<text x="40" y="50" font-family="'DM Sans', sans-serif" font-size="12.5" fill="rgba(255,255,255,0.45)">Open models as controllable infrastructure. Closed models as premium managed services.</text>
+<line x1="40" y1="62" x2="1160" y2="62" stroke="rgba(34,211,238,0.16)" stroke-width="0.9"/>
+
+<g opacity="0.76">
+  <circle cx="1086" cy="100" r="4" fill="#22d3ee"/>
+  <text x="1098" y="105" font-family="'DM Sans', sans-serif" font-size="10" fill="rgba(255,255,255,0.52)">Entry and policy</text>
+  <circle cx="1086" cy="120" r="4" fill="#60a5fa"/>
+  <text x="1098" y="125" font-family="'DM Sans', sans-serif" font-size="10" fill="rgba(255,255,255,0.52)">Control plane</text>
+  <circle cx="1086" cy="140" r="4" fill="#34d399"/>
+  <text x="1098" y="145" font-family="'DM Sans', sans-serif" font-size="10" fill="rgba(255,255,255,0.52)">Data and tools</text>
+  <circle cx="1086" cy="160" r="4" fill="#a78bfa"/>
+  <text x="1098" y="165" font-family="'DM Sans', sans-serif" font-size="10" fill="rgba(255,255,255,0.52)">Model paths</text>
+  <circle cx="1086" cy="180" r="4" fill="#fb923c"/>
+  <text x="1098" y="185" font-family="'DM Sans', sans-serif" font-size="10" fill="rgba(255,255,255,0.52)">Execution</text>
+  <circle cx="1086" cy="200" r="4" fill="#fb7185"/>
+  <text x="1098" y="205" font-family="'DM Sans', sans-serif" font-size="10" fill="rgba(255,255,255,0.52)">Observability</text>
+</g>
+
+<text x="40" y="650" font-family="'DM Sans', sans-serif" font-size="11.5" fill="rgba(255,255,255,0.28)">Portfolio strategy for routing sensitive, premium, and high-volume AI work</text>
+<rect x="0" y="0" width="1200" height="2.5" rx="1" fill="#22d3ee" opacity="0.6"/>
+</svg>
+</div>
+
+<script>
+const nodes = ['n0', 'n1', 'n2', 'n3', 'n4', 'n5', 'n6', 'n7', 'n8', 'n9', 'n10', 'n11', 'n12', 'n13'];
+const edges = ['e0', 'e1', 'e2', 'e3', 'e4', 'e5', 'e6', 'e7', 'e8', 'e9', 'e10', 'e11'];
+
+nodes.forEach((id, index) => {
+  setTimeout(() => {
+    const element = document.getElementById(id);
+    if (element) element.classList.add('show');
+  }, 120 + index * 130);
+});
+
+edges.forEach((id, index) => {
+  setTimeout(() => {
+    const element = document.getElementById(id);
+    if (element) element.classList.add('show');
+  }, 200 + index * 110);
+});
+</script>
+</body>
+</html>

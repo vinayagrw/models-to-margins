@@ -1,0 +1,33 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import CollectionCard from '../../components/CollectionCard.astro';
+
+const notes = (await getCollection('notes')).sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+---
+
+<BaseLayout
+  title="Signals | Models to Margins"
+  description="Short operator signals and field notes."
+  currentPath="/signals"
+>
+  <section class="article-shell">
+    <header>
+      <span class="eyebrow green">Signals</span>
+      <h1>Short takes worth keeping.</h1>
+      <p class="lead">Compact notes for sharp operating observations, narrative testing, and market signal snapshots.</p>
+    </header>
+    <div class="content-grid section-block">
+      {notes.map((entry) => (
+        <CollectionCard
+          href={`/signals/${entry.id}`}
+          kicker="Signal"
+          title={entry.data.title}
+          summary={entry.data.summary}
+          date={entry.data.pubDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+          meta={entry.data.signalType}
+        />
+      ))}
+    </div>
+  </section>
+</BaseLayout>

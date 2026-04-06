@@ -1,0 +1,69 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import VisualSummary from '../../components/VisualSummary.astro';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('visuals');
+  return entries.map((entry) => ({
+    params: { slug: entry.id },
+    props: { entry }
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+
+const defaultSummary = [
+  {
+    title: 'Publication wrapper',
+    body: 'Each interactive artifact sits behind a clean, shareable route instead of a raw export filename.'
+  },
+  {
+    title: 'Static delivery',
+    body: 'The interactive artifact stays in public/visuals so it deploys cleanly on Cloudflare Pages.'
+  },
+  {
+    title: 'Reusable pattern',
+    body: 'New maps and command centers can follow the same wrapper-plus-asset structure without new routing code.'
+  }
+];
+---
+
+<BaseLayout
+  title={`${entry.data.title} | Models to Margins`}
+  description={entry.data.summary}
+  currentPath="/visuals"
+>
+  <article class="visual-shell">
+    <header>
+      <span class="eyebrow warm">Interactive Brief</span>
+      <h1>{entry.data.title}</h1>
+      <p class="lead">{entry.data.summary}</p>
+      <div class="meta-row">
+        <span class="meta-pill">{entry.data.pubDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
+        <span class="meta-pill">{entry.data.visualType}</span>
+        <span class="meta-pill">{entry.data.status}</span>
+      </div>
+      <div class="cta-row">
+        <a class="button primary" href={entry.data.openPath} target="_blank" rel="noreferrer">Open full screen</a>
+      </div>
+    </header>
+
+    <div class="split-grid section-block">
+      <div class="visual-frame">
+        <iframe src={entry.data.embedPath} title={entry.data.title} loading="lazy"></iframe>
+      </div>
+      <div class="glass-card">
+        <span class="eyebrow">Why this exists</span>
+        <div class="section-block">
+          <VisualSummary items={defaultSummary} />
+        </div>
+      </div>
+    </div>
+
+    <div class="article-body">
+      <Content />
+    </div>
+  </article>
+</BaseLayout>

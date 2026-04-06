@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "summary": {
+      "type": "string"
+    },
+    "pubDate": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updatedDate": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "featured": {
+      "default": false,
+      "type": "boolean"
+    },
+    "listed": {
+      "default": true,
+      "type": "boolean"
+    },
+    "tags": {
+      "default": [],
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "audience": {
+      "type": "string"
+    },
+    "readTime": {
+      "type": "string"
+    },
+    "industry": {
+      "type": "string"
+    },
+    "lens": {
+      "default": [],
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "briefType": {
+      "default": "article",
+      "type": "string",
+      "enum": [
+        "article",
+        "interactive"
+      ]
+    },
+    "embedPath": {
+      "type": "string"
+    },
+    "openPath": {
+      "type": "string"
+    },
+    "supportingVisualPath": {
+      "type": "string"
+    },
+    "supportingVisualLabel": {
+      "type": "string"
+    },
+    "$schema": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "title",
+    "summary",
+    "pubDate",
+    "industry"
+  ]
+}

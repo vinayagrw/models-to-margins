@@ -1,0 +1,848 @@
+---
+import { getEntry } from 'astro:content';
+
+const entry = await getEntry('briefs', 'private-ai-vs-public-ai');
+
+if (!entry) {
+  throw new Error('Expected the private-ai-vs-public-ai brief to exist in the briefs collection.');
+}
+
+const metaDate = entry.data.pubDate.toLocaleDateString('en-US', {
+  month: 'long',
+  day: 'numeric',
+  year: 'numeric'
+});
+
+const openItems = [
+  {
+    id: 'sensitive-data',
+    title: 'Sensitive internal work',
+    copy: 'Contracts, code, support history, and proprietary documents are easier to govern when inference stays inside your boundary.'
+  },
+  {
+    id: 'unit-economics',
+    title: 'Predictable high-volume usage',
+    copy: 'Once workloads are stable and repetitive, self-hosted open models can change the cost curve.'
+  },
+  {
+    id: 'workflow-control',
+    title: 'Custom workflow behavior',
+    copy: 'Teams get tighter control over prompts, tool calls, routing, and fine-tuned behavior for narrow operating tasks.'
+  },
+  {
+    id: 'sovereign-deployment',
+    title: 'Sovereign deployment',
+    copy: 'Air-gapped, regional, or on-prem deployments push buyers toward private model paths.'
+  },
+  {
+    id: 'platform-leverage',
+    title: 'Platform reuse',
+    copy: 'The stack becomes an internal asset when policy, retrieval, and observability can be reused across many use cases.'
+  }
+];
+
+const closedItems = [
+  {
+    id: 'frontier-quality',
+    title: 'Frontier quality',
+    copy: 'Closed models still win when absolute reasoning, multimodality, or broad quality matters more than infrastructure control.'
+  },
+  {
+    id: 'speed-to-ship',
+    title: 'Speed to ship',
+    copy: 'Small teams can move faster when they do not need to own model serving, GPU capacity, or evaluation tooling.'
+  },
+  {
+    id: 'managed-reliability',
+    title: 'Managed reliability',
+    copy: 'Vendor SLAs, support, and procurement comfort still matter in high-stakes customer-facing workflows.'
+  },
+  {
+    id: 'multimodal-maturity',
+    title: 'Multimodal maturity',
+    copy: 'Managed vendors usually reach new model families, modalities, and platform features first.'
+  },
+  {
+    id: 'lean-team-fit',
+    title: 'Lean team fit',
+    copy: 'When platform engineering is thin, renting premium capability is often the better operating decision.'
+  }
+];
+
+const chainItems = [
+  {
+    id: 'policy-edge',
+    title: 'Policy edge',
+    sub: 'gate access'
+  },
+  {
+    id: 'control-plane',
+    title: 'Control plane',
+    sub: 'coordinate'
+  },
+  {
+    id: 'retrieval-layer',
+    title: 'Retrieval',
+    sub: 'ground context'
+  },
+  {
+    id: 'tool-layer',
+    title: 'Tools',
+    sub: 'take action'
+  },
+  {
+    id: 'router-layer',
+    title: 'Router',
+    sub: 'choose path'
+  },
+  {
+    id: 'private-path',
+    title: 'Private AI',
+    sub: 'own workloads'
+  },
+  {
+    id: 'public-path',
+    title: 'Public AI',
+    sub: 'rent frontier'
+  },
+  {
+    id: 'observability-layer',
+    title: 'Observability',
+    sub: 'measure'
+  }
+];
+
+const focusData = {
+  'policy-edge': {
+    title: 'Policy edge',
+    copy: 'Identity, access, and request policy should be enforced before model traffic reaches either the private or public path.'
+  },
+  'control-plane': {
+    title: 'Control plane',
+    copy: 'The control plane is the stable layer that keeps prompts, tools, routing, and governance consistent even when the model choice changes.'
+  },
+  'retrieval-layer': {
+    title: 'Retrieval layer',
+    copy: 'Search, vector lookup, and business context let both model paths reason with the same enterprise knowledge.'
+  },
+  'tool-layer': {
+    title: 'Tool layer',
+    copy: 'Tools turn the model stack into an operating system by letting it read, write, and act inside business workflows.'
+  },
+  'router-layer': {
+    title: 'Router layer',
+    copy: 'The router decides which jobs stay private, which jobs go to premium managed APIs, and where cost or policy thresholds should trigger a switch.'
+  },
+  'private-path': {
+    title: 'Private AI path',
+    copy: 'Open and open-weight models are strongest when the company wants tighter control over data locality, economics, and workflow behavior.'
+  },
+  'public-path': {
+    title: 'Public AI path',
+    copy: 'Closed model APIs stay valuable where premium capability, rapid access to new features, and managed reliability matter most.'
+  },
+  'observability-layer': {
+    title: 'Observability layer',
+    copy: 'Logs, traces, evals, and cost tracking are what make the portfolio strategy auditable instead of aspirational.'
+  },
+  'sensitive-data': {
+    title: 'Sensitive internal work',
+    copy: 'Private model paths make the most sense when the core constraint is data control, compliance boundary, or proprietary knowledge exposure.'
+  },
+  'unit-economics': {
+    title: 'Predictable high-volume usage',
+    copy: 'If the workload is repeatable and scaled, owning the inference path can create a better unit-cost story than staying fully API-based.'
+  },
+  'workflow-control': {
+    title: 'Custom workflow behavior',
+    copy: 'Open models become more attractive when teams want bespoke evaluation loops, tool logic, or narrow fine-tuned behavior.'
+  },
+  'sovereign-deployment': {
+    title: 'Sovereign deployment',
+    copy: 'Regional, on-prem, and air-gapped environments are less about model preference and more about where the inference must be allowed to run.'
+  },
+  'platform-leverage': {
+    title: 'Platform reuse',
+    copy: 'Once the control plane is in place, the same private stack can support many internal copilots and agents without repeating the whole architecture.'
+  },
+  'frontier-quality': {
+    title: 'Frontier quality',
+    copy: 'Closed models still dominate when the buyer wants the highest capability floor without owning serving infrastructure.'
+  },
+  'speed-to-ship': {
+    title: 'Speed to ship',
+    copy: 'The fastest path to a real product is often a managed API when the team needs to validate the use case before investing in platform depth.'
+  },
+  'managed-reliability': {
+    title: 'Managed reliability',
+    copy: 'Support, uptime expectations, and enterprise procurement posture still pull many buyers toward closed vendors.'
+  },
+  'multimodal-maturity': {
+    title: 'Multimodal maturity',
+    copy: 'The newest voice, vision, and reasoning features usually arrive first on managed platforms, which changes the decision for customer-facing use cases.'
+  },
+  'lean-team-fit': {
+    title: 'Lean team fit',
+    copy: 'If the organization does not want to own GPUs, eval loops, and runtime operations, premium external APIs can be the right answer.'
+  }
+};
+---
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{entry.data.title} | Models to Margins</title>
+    <meta name="description" content={entry.data.summary} />
+    <style>
+      :root {
+        --bg-0: #06111f;
+        --bg-1: #0a1a32;
+        --bg-2: #102545;
+        --panel: rgba(10, 24, 47, 0.78);
+        --border: rgba(166, 212, 255, 0.12);
+        --ink: #ebf4ff;
+        --muted: #95aecb;
+        --open: #4fd1c5;
+        --control: #9b8cff;
+        --closed: #ffd166;
+        --shadow: 0 18px 42px rgba(0, 0, 0, 0.28);
+        --radius: 24px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        color: var(--ink);
+        font-family: "Segoe UI Variable Display", "Aptos", "IBM Plex Sans", sans-serif;
+        background:
+          radial-gradient(circle at 12% 16%, rgba(79, 209, 197, 0.12), transparent 23%),
+          radial-gradient(circle at 84% 18%, rgba(155, 140, 255, 0.14), transparent 18%),
+          radial-gradient(circle at 68% 88%, rgba(255, 209, 102, 0.1), transparent 24%),
+          linear-gradient(155deg, var(--bg-0), var(--bg-1) 44%, var(--bg-2));
+        overflow-x: hidden;
+      }
+
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        background-image:
+          linear-gradient(rgba(166, 212, 255, 0.032) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(166, 212, 255, 0.032) 1px, transparent 1px);
+        background-size: 44px 44px;
+        mask-image: radial-gradient(circle at center, black 34%, transparent 86%);
+        opacity: 0.85;
+      }
+
+      .page {
+        max-width: 1680px;
+        margin: 0 auto;
+        padding: 18px 22px 24px;
+        position: relative;
+        z-index: 1;
+      }
+
+      .hero {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 14px 18px;
+        align-items: end;
+        margin-bottom: 14px;
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 9px;
+        padding: 8px 13px;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.04);
+        color: var(--muted);
+        font-size: 11px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        backdrop-filter: blur(10px);
+      }
+
+      .eyebrow::before {
+        content: "";
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--open), var(--closed));
+        box-shadow: 0 0 14px rgba(79, 209, 197, 0.45);
+      }
+
+      h1 {
+        margin: 12px 0 8px;
+        max-width: 980px;
+        font-size: clamp(34px, 4.2vw, 58px);
+        line-height: 0.94;
+        letter-spacing: -0.04em;
+        font-family: "Georgia", "Aptos Display", sans-serif;
+      }
+
+      .subtitle {
+        margin: 0;
+        max-width: 840px;
+        font-size: 15px;
+        line-height: 1.58;
+        color: var(--muted);
+      }
+
+      .meta-strip {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: flex-end;
+        align-self: start;
+        margin-top: 8px;
+      }
+
+      .meta-chip {
+        padding: 10px 12px;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.04);
+        font-size: 12px;
+        color: var(--ink);
+        box-shadow: var(--shadow);
+        white-space: nowrap;
+      }
+
+      .board {
+        display: grid;
+        grid-template-columns: 270px minmax(0, 1fr) 280px;
+        gap: 16px;
+        align-items: start;
+      }
+
+      .panel,
+      .canvas-shell {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        backdrop-filter: blur(16px);
+      }
+
+      .panel {
+        padding: 16px;
+      }
+
+      .panel h2 {
+        margin: 4px 0 6px;
+        font-size: 22px;
+        letter-spacing: -0.03em;
+      }
+
+      .panel-intro {
+        margin: 0 0 12px;
+        font-size: 13px;
+        line-height: 1.55;
+        color: var(--muted);
+      }
+
+      .section-label {
+        margin: 0;
+        font-size: 11px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+
+      .summary-list {
+        display: grid;
+        gap: 8px;
+        margin-top: 12px;
+      }
+
+      .summary-item {
+        display: block;
+        width: 100%;
+        padding: 11px 12px;
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        background: rgba(255, 255, 255, 0.03);
+        color: var(--ink);
+        text-align: left;
+        cursor: pointer;
+        transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
+      }
+
+      .summary-item:hover,
+      .summary-item:focus-visible {
+        transform: translateY(-1px);
+        border-color: rgba(255, 255, 255, 0.18);
+        outline: none;
+      }
+
+      .summary-item.is-active {
+        background: rgba(255, 255, 255, 0.09);
+        border-color: rgba(255, 255, 255, 0.28);
+      }
+
+      .summary-item strong {
+        display: block;
+        font-size: 14px;
+        line-height: 1.25;
+        margin-bottom: 3px;
+      }
+
+      .summary-item span {
+        display: block;
+        font-size: 12px;
+        line-height: 1.45;
+        color: var(--muted);
+      }
+
+      .summary-item.open strong::before,
+      .summary-item.control strong::before,
+      .summary-item.closed strong::before {
+        content: "";
+        display: inline-block;
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        margin-right: 8px;
+        vertical-align: 0;
+      }
+
+      .summary-item.open strong::before {
+        background: var(--open);
+        box-shadow: 0 0 14px rgba(79, 209, 197, 0.45);
+      }
+
+      .summary-item.control strong::before {
+        background: var(--control);
+        box-shadow: 0 0 14px rgba(155, 140, 255, 0.45);
+      }
+
+      .summary-item.closed strong::before {
+        background: var(--closed);
+        box-shadow: 0 0 14px rgba(255, 209, 102, 0.4);
+      }
+
+      .stack-card {
+        margin-top: 14px;
+        padding: 13px 14px;
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+      }
+
+      .stack-card strong {
+        display: block;
+        margin-bottom: 6px;
+        font-size: 13px;
+      }
+
+      .stack-card span {
+        display: block;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.5;
+      }
+
+      .canvas-shell {
+        padding: 14px;
+        overflow: hidden;
+      }
+
+      .canvas-head {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: end;
+        margin-bottom: 10px;
+      }
+
+      .canvas-head h2 {
+        margin: 0 0 4px;
+        font-size: 24px;
+        letter-spacing: -0.03em;
+      }
+
+      .canvas-head p {
+        margin: 0;
+        max-width: 640px;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.5;
+      }
+
+      .system-strip {
+        display: grid;
+        grid-template-columns: repeat(8, minmax(0, 1fr));
+        gap: 8px;
+        margin-bottom: 10px;
+      }
+
+      .chain-chip {
+        display: block;
+        width: 100%;
+        padding: 10px 8px;
+        border-radius: 15px;
+        border: 1px solid rgba(155, 140, 255, 0.18);
+        background: rgba(155, 140, 255, 0.08);
+        color: var(--ink);
+        text-align: center;
+        cursor: pointer;
+        transition: transform 160ms ease, background 160ms ease, border-color 160ms ease;
+      }
+
+      .chain-chip:hover,
+      .chain-chip:focus-visible {
+        transform: translateY(-1px);
+        outline: none;
+        border-color: rgba(155, 140, 255, 0.34);
+      }
+
+      .chain-chip.is-active {
+        background: rgba(155, 140, 255, 0.18);
+        border-color: rgba(155, 140, 255, 0.48);
+      }
+
+      .chain-chip strong {
+        display: block;
+        font-size: 12px;
+        line-height: 1.2;
+      }
+
+      .chain-chip span {
+        display: block;
+        margin-top: 3px;
+        font-size: 11px;
+        color: var(--muted);
+      }
+
+      .focus-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px 12px;
+        align-items: center;
+        margin-bottom: 12px;
+        padding: 10px 12px;
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        background: rgba(255, 255, 255, 0.03);
+      }
+
+      .focus-bar strong {
+        font-size: 13px;
+      }
+
+      .focus-bar span {
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.45;
+      }
+
+      .visual-frame {
+        position: relative;
+        overflow: hidden;
+        border-radius: 22px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(255, 255, 255, 0.03);
+        min-height: 720px;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+      }
+
+      .visual-frame iframe {
+        display: block;
+        width: 100%;
+        height: 720px;
+        border: 0;
+        background: #060b1a;
+      }
+
+      .legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 10px;
+      }
+
+      .legend-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 10px;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        background: rgba(255, 255, 255, 0.03);
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .legend-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+      }
+
+      .note-row {
+        margin-top: 10px;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.45;
+      }
+
+      .brief-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+        margin-top: 16px;
+      }
+
+      .brief-card {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        backdrop-filter: blur(16px);
+        padding: 16px;
+      }
+
+      .brief-card h3 {
+        margin: 6px 0 8px;
+        font-size: 18px;
+        letter-spacing: -0.03em;
+      }
+
+      .brief-card p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.58;
+      }
+
+      .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 12px;
+        color: var(--muted);
+        text-decoration: none;
+        font-size: 13px;
+      }
+
+      .back-link:hover {
+        color: var(--ink);
+      }
+
+      @media (max-width: 1480px) {
+        .board {
+          grid-template-columns: 250px minmax(0, 1fr) 260px;
+        }
+
+        .system-strip {
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+        }
+
+        .brief-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 1240px) {
+        .hero {
+          grid-template-columns: 1fr;
+        }
+
+        .board {
+          grid-template-columns: 1fr;
+        }
+
+        .system-strip {
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+        }
+
+        .visual-frame,
+        .visual-frame iframe {
+          min-height: 620px;
+          height: 620px;
+        }
+      }
+
+      @media (max-width: 760px) {
+        .system-strip {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        h1 {
+          font-size: clamp(30px, 10vw, 44px);
+        }
+
+        .visual-frame,
+        .visual-frame iframe {
+          min-height: 520px;
+          height: 520px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <section class="hero">
+        <div>
+          <span class="eyebrow">Live Brief</span>
+          <h1>Private AI vs public AI, shown as one portfolio operating model.</h1>
+          <p class="subtitle">
+            {entry.data.summary}
+          </p>
+          <a class="back-link" href="/briefs">&larr; Back to Brief</a>
+        </div>
+        <div class="meta-strip" aria-label="Brief metadata">
+          <span class="meta-chip">{metaDate}</span>
+          <span class="meta-chip">{entry.data.industry}</span>
+          {entry.data.readTime && <span class="meta-chip">{entry.data.readTime}</span>}
+        </div>
+      </section>
+
+      <section class="board">
+        <aside class="panel">
+          <p class="section-label">Private AI fit</p>
+          <h2>Where control creates value</h2>
+          <p class="panel-intro">Open and open-weight models win when the operating constraint is governance, economics, or custom workflow control rather than raw convenience.</p>
+
+          <div class="summary-list">
+            {openItems.map((item) => (
+              <button class="summary-item open" data-node={item.id}>
+                <strong>{item.title}</strong>
+                <span>{item.copy}</span>
+              </button>
+            ))}
+          </div>
+
+          <div class="stack-card">
+            <strong>Private path thesis</strong>
+            <span>Open models matter most when the company wants AI inside its own control boundary, not just cheaper access to the same external pattern.</span>
+          </div>
+        </aside>
+
+        <main class="canvas-shell">
+          <div class="canvas-head">
+            <div>
+              <p class="section-label">Portfolio Architecture</p>
+              <h2>One control plane, two model paths</h2>
+              <p>
+                The architecture stays stable while the model choice changes. Policy, retrieval, tools, routing, and observability create the decision layer that lets private and public AI coexist.
+              </p>
+            </div>
+          </div>
+
+          <div class="system-strip">
+            {chainItems.map((item) => (
+              <button class="chain-chip summary-item control" data-node={item.id}>
+                <strong>{item.title}</strong>
+                <span>{item.sub}</span>
+              </button>
+            ))}
+          </div>
+
+          <div class="focus-bar">
+            <strong id="focus-title">Router layer</strong>
+            <span id="focus-copy">The router decides which jobs stay private, which jobs go to premium managed APIs, and where cost or policy thresholds should trigger a switch.</span>
+          </div>
+
+          <div class="visual-frame">
+            <iframe
+              src={entry.data.supportingVisualPath}
+              title="Private AI control plane"
+              loading="eager"
+            ></iframe>
+          </div>
+
+          <div class="legend">
+            <span class="legend-item"><span class="legend-dot" style="background: var(--open);"></span>private model advantage</span>
+            <span class="legend-item"><span class="legend-dot" style="background: var(--control);"></span>shared control plane</span>
+            <span class="legend-item"><span class="legend-dot" style="background: var(--closed);"></span>managed public model advantage</span>
+          </div>
+
+          <div class="note-row">
+            Use the stage chips or the side panels to shift the focus copy while the live architecture stays visible in the middle of the page.
+          </div>
+        </main>
+
+        <aside class="panel">
+          <p class="section-label">Public AI fit</p>
+          <h2>Where managed capability wins</h2>
+          <p class="panel-intro">Closed model APIs stay valuable where speed, reliability, and premium model quality matter more than owning the full stack.</p>
+
+          <div class="summary-list">
+            {closedItems.map((item) => (
+              <button class="summary-item closed" data-node={item.id}>
+                <strong>{item.title}</strong>
+                <span>{item.copy}</span>
+              </button>
+            ))}
+          </div>
+
+          <div class="stack-card">
+            <strong>Public path thesis</strong>
+            <span>The best enterprise pattern is usually not open versus closed. It is knowing which workloads to own and which workloads to rent.</span>
+          </div>
+        </aside>
+      </section>
+
+      <section class="brief-grid" aria-label="Private AI brief summary">
+        <article class="brief-card">
+          <p class="section-label">Business problem</p>
+          <h3>The decision is not model ideology</h3>
+          <p>Teams are trying to balance data control, cost, speed, and capability at the same time. One model strategy usually cannot optimize all four.</p>
+        </article>
+        <article class="brief-card">
+          <p class="section-label">Architecture pattern</p>
+          <h3>The winner is the control plane</h3>
+          <p>Policy, retrieval, tools, routing, and observability are what let private and public model paths work together without creating operating chaos.</p>
+        </article>
+        <article class="brief-card">
+          <p class="section-label">Business outcome</p>
+          <h3>Own the repetitive work, rent the frontier</h3>
+          <p>Private paths fit sensitive and high-volume workloads. Public paths fit fast-moving premium capability. The ROI comes from routing each job to the right economics and governance boundary.</p>
+        </article>
+      </section>
+    </div>
+
+    <script define:vars={{ focusData }}>
+      const summaryItems = Array.from(document.querySelectorAll(".summary-item"));
+      const focusTitle = document.getElementById("focus-title");
+      const focusCopy = document.getElementById("focus-copy");
+
+      function activateNode(id) {
+        const data = focusData[id];
+        if (!data) return;
+
+        summaryItems.forEach((item) => item.classList.toggle("is-active", item.dataset.node === id));
+        focusTitle.textContent = data.title;
+        focusCopy.textContent = data.copy;
+      }
+
+      function bindActivator(element) {
+        const id = element.dataset.node;
+        element.addEventListener("mouseenter", () => activateNode(id));
+        element.addEventListener("focus", () => activateNode(id));
+        element.addEventListener("click", () => activateNode(id));
+        element.addEventListener("keydown", (event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            activateNode(id);
+          }
+        });
+      }
+
+      summaryItems.forEach(bindActivator);
+      activateNode("router-layer");
+    </script>
+  </body>
+</html>

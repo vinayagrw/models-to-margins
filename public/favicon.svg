@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title>Models to Margins</title>
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6ed8ff" />
+      <stop offset="100%" stop-color="#ffbf69" />
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="28" fill="#08111f" />
+  <path d="M28 92V36h10l16 25 16-25h10v56H70V56L54 80 38 56v36H28Z" fill="url(#grad)" />
+  <circle cx="92" cy="38" r="10" fill="#9cffc8" opacity="0.9" />
+</svg>

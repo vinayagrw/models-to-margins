@@ -1,0 +1,42 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+export async function getStaticPaths() {
+  const entries = (await getCollection('deep-dives')).filter((entry) => entry.data.listed);
+  return entries.map((entry) => ({
+    params: { slug: entry.id },
+    props: { entry }
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+---
+
+<BaseLayout
+  title={`${entry.data.title} | Models to Margins`}
+  description={entry.data.summary}
+  currentPath="/deep-dives"
+>
+  <article class="article-shell">
+    <header>
+      <span class="eyebrow">Deep Dive</span>
+      <h1>{entry.data.title}</h1>
+      <p class="lead">{entry.data.summary}</p>
+      <div class="meta-row">
+        <span class="meta-pill">{entry.data.pubDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
+        <span class="meta-pill">{entry.data.geography}</span>
+        {entry.data.horizon && <span class="meta-pill">{entry.data.horizon}</span>}
+      </div>
+      <div class="tag-row">
+        {entry.data.tags.map((tag: string) => (
+          <span class="tag">{tag}</span>
+        ))}
+      </div>
+    </header>
+    <div class="article-body">
+      <Content />
+    </div>
+  </article>
+</BaseLayout>

@@ -1,0 +1,24 @@
+---
+interface Props {
+  href: string;
+  kicker: string;
+  title: string;
+  summary: string;
+  date: string;
+  meta?: string;
+}
+
+const { href, kicker, title, summary, date, meta } = Astro.props;
+---
+
+<article class="glass-card">
+  <a class="card-link" href={href}>
+    <span class="card-kicker">{kicker}</span>
+    <h3 class="card-title">{title}</h3>
+    <p class="card-summary">{summary}</p>
+    <div class="card-footer">
+      <span>{date}</span>
+      <span>{meta ?? 'Open'}</span>
+    </div>
+  </a>
+</article>

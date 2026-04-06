@@ -1,0 +1,38 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import CollectionCard from '../../components/CollectionCard.astro';
+
+const briefs = (await getCollection('briefs'))
+  .filter((entry) => entry.data.listed)
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+const getBriefHref = (entry) => entry.data.briefType === 'interactive' && entry.data.openPath
+  ? entry.data.openPath
+  : `/briefs/${entry.id}`;
+---
+
+<BaseLayout
+  title="Brief | Models to Margins"
+  description="Curated flagship reads that synthesize the signal quickly and make the deeper operating questions easier to navigate."
+  currentPath="/briefs"
+>
+  <section class="article-shell">
+    <header>
+      <span class="eyebrow warm">Brief</span>
+      <h1>A faster read on the bigger shift.</h1>
+      <p class="lead">Curated flagship reads that synthesize the signal quickly and make the deeper operating questions easier to navigate.</p>
+    </header>
+    <div class="content-grid section-block">
+      {briefs.map((entry) => (
+        <CollectionCard
+          href={getBriefHref(entry)}
+          kicker="Brief"
+          title={entry.data.title}
+          summary={entry.data.summary}
+          date={entry.data.pubDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+          meta={entry.data.readTime ?? entry.data.industry}
+        />
+      ))}
+    </div>
+  </section>
+</BaseLayout>
