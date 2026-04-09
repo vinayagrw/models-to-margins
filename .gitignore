@@ -144,3 +144,11 @@ vite.config.ts.timestamp-*
 /.idea/models-to-margins.iml
 /.idea/modules.xml
 /.idea/vcs.xml
+
+# Workspace and generated residue
+.astro/
+.tmp/
+output/
+.playwright-cli/
+.idea/
+m2m-app/

@@ -2,13 +2,16 @@
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import EntryMeta from '../../components/EntryMeta.astro';
-import VisualSummary from '../../components/VisualSummary.astro';
 import BackLink from '../../components/BackLink.astro';
 
 export async function getStaticPaths() {
-  const reservedBriefRoutes = new Set(['private-ai-vs-public-ai']);
+  const reservedBriefRoutes = new Set([
+    'private-ai-vs-public-ai',
+    'governed-procurement-ai',
+    'ai-for-corporate-clarity'
+  ]);
   const entries = (await getCollection('briefs')).filter(
-    (entry) => entry.data.listed && !reservedBriefRoutes.has(entry.id)
+    (entry) => entry.data.briefType === 'article' && !reservedBriefRoutes.has(entry.id)
   );
   return entries.map((entry) => ({
     params: { slug: entry.id },
@@ -18,23 +21,6 @@ export async function getStaticPaths() {
 
 const { entry } = Astro.props;
 const { Content } = await render(entry);
-const isInteractive = entry.data.briefType === 'interactive';
-const hasSupportingVisual = !isInteractive && entry.data.supportingVisualPath;
-
-const interactiveSummary = [
-  {
-    title: 'Business problem',
-    body: 'This brief format works when the workflow is easier to understand as a live system than as a static article alone.'
-  },
-  {
-    title: 'Why it scales',
-    body: 'Interactive briefs now live inside the same Briefs collection as written studies, so future additions do not need separate public site sections.'
-  },
-  {
-    title: 'Reader experience',
-    body: 'The page still reads like a brief first, with the interactive artifact embedded as part of the argument instead of standing alone.'
-  }
-];
 ---
 
 <BaseLayout
@@ -42,7 +28,7 @@ const interactiveSummary = [
   description={entry.data.summary}
   currentPath="/briefs"
 >
-  <article class={isInteractive ? 'visual-shell' : 'article-shell'}>
+  <article class="article-shell">
     <header>
       <span class="eyebrow warm">Brief</span>
       <h1>{entry.data.title}</h1>
@@ -54,38 +40,7 @@ const interactiveSummary = [
           <span class="tag">{tag}</span>
         ))}
       </div>
-      {isInteractive && entry.data.openPath && (
-        <div class="cta-row">
-          <a class="button primary" href={entry.data.openPath} target="_blank" rel="noreferrer">Open full experience</a>
-        </div>
-      )}
-      {hasSupportingVisual && (
-        <div class="cta-row">
-          <a
-            class="button secondary"
-            href={entry.data.supportingVisualPath}
-            target="_blank"
-            rel="noreferrer"
-          >
-            {entry.data.supportingVisualLabel ?? 'Open supporting visual'}
-          </a>
-        </div>
-      )}
     </header>
-
-    {isInteractive && entry.data.embedPath && (
-      <div class="split-grid section-block">
-        <div class="visual-frame">
-          <iframe src={entry.data.embedPath} title={entry.data.title} loading="lazy"></iframe>
-        </div>
-        <div class="glass-card">
-          <span class="eyebrow warm">Inside the brief</span>
-          <div class="section-block">
-            <VisualSummary items={interactiveSummary} />
-          </div>
-        </div>
-      </div>
-    )}
 
     <div class="article-body">
       <Content />

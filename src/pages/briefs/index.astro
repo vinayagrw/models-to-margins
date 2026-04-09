@@ -1,14 +1,11 @@
 ---
-import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import CollectionCard from '../../components/CollectionCard.astro';
+import { formatDisplayDate } from '../../utils/formatDate';
+import { getVisibleBriefs, isPageVisible, getBriefHref } from '../../utils/site-data';
 
-const briefs = (await getCollection('briefs'))
-  .filter((entry) => entry.data.listed)
-  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
-const getBriefHref = (entry) => entry.data.briefType === 'interactive' && entry.data.openPath
-  ? entry.data.openPath
-  : `/briefs/${entry.id}`;
+const briefs = await getVisibleBriefs();
+const showCollectionLinkingNote = !isPageVisible('/briefs');
 ---
 
 <BaseLayout
@@ -22,6 +19,12 @@ const getBriefHref = (entry) => entry.data.briefType === 'interactive' && entry.
       <h1>A faster read on the bigger shift.</h1>
       <p class="lead">Curated flagship reads that synthesize the signal quickly and make the deeper operating questions easier to navigate.</p>
     </header>
+    {showCollectionLinkingNote && (
+      <div class="glass-card section-block">
+        <h3>Brief is hidden from app navigation right now.</h3>
+        <p>This index still works directly by URL, but the shared visibility config is currently removing `/briefs` from discovery surfaces elsewhere in the app.</p>
+      </div>
+    )}
     <div class="content-grid section-block">
       {briefs.map((entry) => (
         <CollectionCard
@@ -29,7 +32,7 @@ const getBriefHref = (entry) => entry.data.briefType === 'interactive' && entry.
           kicker="Brief"
           title={entry.data.title}
           summary={entry.data.summary}
-          date={entry.data.pubDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+          date={formatDisplayDate(entry.data.pubDate, 'short')}
           meta={entry.data.readTime ?? entry.data.industry}
         />
       ))}

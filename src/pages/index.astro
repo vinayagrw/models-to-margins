@@ -1,22 +1,56 @@
 ---
-import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import CollectionCard from '../components/CollectionCard.astro';
+import { formatDisplayDate } from '../utils/formatDate';
+import { getDeepDiveHref } from '../utils/routes';
+import {
+  getBriefHref,
+  getVisibleBriefs,
+  getVisibleDeepDives,
+  isPageVisible
+} from '../utils/site-data';
 
-const briefs = (await getCollection('briefs'))
-  .filter((entry) => entry.data.listed)
-  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
-const deepDives = (await getCollection('deep-dives'))
-  .filter((entry) => entry.data.listed)
-  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+const [briefs, deepDives] = await Promise.all([
+  getVisibleBriefs(),
+  getVisibleDeepDives()
+]);
+
+const showBriefs = isPageVisible('/briefs');
+const showDeepDives = isPageVisible('/deep-dives');
 
 const featuredBrief = briefs.find((entry) => entry.data.featured) ?? briefs[0];
 const featuredDeepDive = deepDives.find((entry) => entry.data.featured) ?? deepDives[0];
-const latestBriefs = briefs.slice(0, 2);
-const latestDeepDives = deepDives.slice(0, 2);
-const getBriefHref = (entry) => entry.data.briefType === 'interactive' && entry.data.openPath
-  ? entry.data.openPath
-  : `/briefs/${entry.id}`;
+
+const featuredPanels = [
+  showBriefs && featuredBrief
+    ? {
+        kicker: 'Featured Brief',
+        kickerClass: 'eyebrow warm',
+        title: featuredBrief.data.title,
+        summary: featuredBrief.data.summary,
+        href: getBriefHref(featuredBrief),
+        cta: 'Open brief'
+      }
+    : undefined,
+  showDeepDives && featuredDeepDive
+    ? {
+        kicker: 'Featured Deep Dive',
+        kickerClass: 'eyebrow',
+        title: featuredDeepDive.data.title,
+        summary: featuredDeepDive.data.summary,
+        href: getDeepDiveHref(featuredDeepDive.id),
+        cta: 'Open deep dive'
+      }
+    : undefined
+].filter(Boolean);
+
+const latestBriefs = showBriefs ? briefs.slice(0, 2) : [];
+const latestDeepDives = showDeepDives ? deepDives.slice(0, 2) : [];
+
+const heroLinks = [
+  showBriefs ? { href: '/briefs', label: 'Explore brief' } : undefined,
+  showDeepDives ? { href: '/deep-dives', label: 'Explore deep dives' } : undefined
+].filter(Boolean);
 ---
 
 <BaseLayout
@@ -27,83 +61,87 @@ const getBriefHref = (entry) => entry.data.briefType === 'interactive' && entry.
   <section class="hero-panel">
     <span class="eyebrow">Current Publication</span>
     <div class="section-block">
-      <h1>Built to scale with two collections.</h1>
+      <h1>Built to scale with briefs and deep dives.</h1>
       <p class="lead">
-        Models to Margins is organized into two reading modes. Brief is the faster, curated front door: flagship reads that frame the market,
-        explain the shift, and help you orient quickly. Deep Dives is where the operating detail lives: company breakdowns, workflow maps,
-        and interactive systems thinking built for readers who want to understand how the mechanics actually work.
+        Models to Margins is organized into two reading modes. Brief is the faster, curated front door: flagship reads that
+        frame the market, explain the shift, and help you orient quickly. Deep Dives is where the operating detail lives:
+        company breakdowns, workflow maps, and structured analysis for readers who want to understand how the mechanics
+        actually work.
       </p>
     </div>
-    <div class="cta-row">
-      <a class="button primary" href="/briefs">Explore brief</a>
-      <a class="button primary" href="/deep-dives">Explore deep dives</a>
-    </div>
-  </section>
-
-  <section class="section-block split-grid">
-    <div class="glass-card">
-      <span class="eyebrow warm">Featured Brief</span>
-      <div class="section-block">
-        <h2>{featuredBrief.data.title}</h2>
-        <p>{featuredBrief.data.summary}</p>
-      </div>
+    {heroLinks.length > 0 && (
       <div class="cta-row">
-        <a class="button secondary" href={getBriefHref(featuredBrief)}>Open brief</a>
+        {heroLinks.map((link) => (
+          <a class="button primary" href={link.href}>{link.label}</a>
+        ))}
       </div>
-    </div>
-    <div class="glass-card">
-      <span class="eyebrow">Featured Deep Dive</span>
-      <div class="section-block">
-        <h2>{featuredDeepDive.data.title}</h2>
-        <p>{featuredDeepDive.data.summary}</p>
-      </div>
-      <div class="cta-row">
-        <a class="button secondary" href={`/deep-dives/${featuredDeepDive.id}`}>Open deep dive</a>
-      </div>
-    </div>
+    )}
   </section>
 
-  <section class="section-block">
-    <div class="section-head">
-      <div>
-        <span class="eyebrow warm">Brief</span>
-        <h2>Current brief</h2>
-        <p>Curated flagship reads that synthesize the signal quickly and make the deeper operating questions easier to navigate.</p>
+  {featuredPanels.length > 0 && (
+    <section class="section-block">
+      <div class="content-grid featured-card-grid">
+        {featuredPanels.map((panel) => (
+          <article class="glass-card featured-card">
+            <span class={panel.kickerClass}>{panel.kicker}</span>
+            <div class="section-block featured-card__body">
+              <h2>{panel.title}</h2>
+              <p>{panel.summary}</p>
+            </div>
+            <div class="cta-row">
+              <a class="button secondary" href={panel.href}>{panel.cta}</a>
+            </div>
+          </article>
+        ))}
       </div>
-    </div>
-    <div class="content-grid">
-      {latestBriefs.map((entry) => (
-        <CollectionCard
-          href={getBriefHref(entry)}
-          kicker="Brief"
-          title={entry.data.title}
-          summary={entry.data.summary}
-          date={entry.data.pubDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-          meta={entry.data.readTime ?? entry.data.industry}
-        />
-      ))}
-    </div>
-  </section>
+    </section>
+  )}
 
-  <section class="section-block">
-    <div class="section-head">
-      <div>
-        <span class="eyebrow">Deep Dives</span>
-        <h2>Current deep dives</h2>
-        <p>Workflow-level analysis, interactive maps, and company-specific investigations for readers who want more than the headline.</p>
+  {showBriefs && latestBriefs.length > 0 && (
+    <section class="section-block">
+      <div class="section-head">
+        <div>
+          <span class="eyebrow warm">Brief</span>
+          <h2>Current brief</h2>
+          <p>Curated flagship reads that synthesize the signal quickly and make the deeper operating questions easier to navigate.</p>
+        </div>
       </div>
-    </div>
-    <div class="content-grid">
-      {latestDeepDives.map((entry) => (
-        <CollectionCard
-          href={`/deep-dives/${entry.id}`}
-          kicker="Deep Dive"
-          title={entry.data.title}
-          summary={entry.data.summary}
-          date={entry.data.pubDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-          meta={entry.data.readTime ?? entry.data.geography}
-        />
-      ))}
-    </div>
-  </section>
+      <div class="content-grid">
+        {latestBriefs.map((entry) => (
+          <CollectionCard
+            href={getBriefHref(entry)}
+            kicker="Brief"
+            title={entry.data.title}
+            summary={entry.data.summary}
+            date={formatDisplayDate(entry.data.pubDate, 'short')}
+            meta={entry.data.readTime ?? entry.data.industry}
+          />
+        ))}
+      </div>
+    </section>
+  )}
+
+  {showDeepDives && latestDeepDives.length > 0 && (
+    <section class="section-block">
+      <div class="section-head">
+        <div>
+          <span class="eyebrow">Deep Dives</span>
+          <h2>Current deep dives</h2>
+          <p>Workflow-level analysis, interactive maps, and company-specific investigations for readers who want more than the headline.</p>
+        </div>
+      </div>
+      <div class="content-grid">
+        {latestDeepDives.map((entry) => (
+          <CollectionCard
+            href={getDeepDiveHref(entry.id)}
+            kicker="Deep Dive"
+            title={entry.data.title}
+            summary={entry.data.summary}
+            date={formatDisplayDate(entry.data.pubDate, 'short')}
+            meta={entry.data.readTime ?? entry.data.geography}
+          />
+        ))}
+      </div>
+    </section>
+  )}
 </BaseLayout>

@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI for Corporate Clarity</title>
+  <script>
+    (() => {
+      const params = new URLSearchParams(window.location.search);
+      const storageKey = 'm2m-theme';
+      const root = document.documentElement;
+      const media = window.matchMedia('(prefers-color-scheme: dark)');
+      const normalizeTheme = (value) => value === 'dark' || value === 'light' ? value : null;
+      const getStoredTheme = () => {
+        try { return normalizeTheme(window.localStorage.getItem(storageKey)); } catch { return null; }
+      };
+      const getSystemTheme = () => media.matches ? 'dark' : 'light';
+      const getPreferredTheme = () => normalizeTheme(params.get('theme')) ?? getStoredTheme() ?? getSystemTheme();
+
+      root.dataset.embedded = params.get('embed') === '1' ? 'true' : 'false';
+      root.dataset.focusMode = 'translation';
+
+      window.__m2mApplyTheme = (theme, persist = false) => {
+        const nextTheme = normalizeTheme(theme) ?? getPreferredTheme();
+        root.dataset.theme = nextTheme;
+        root.style.colorScheme = nextTheme;
+        if (persist) {
+          try { window.localStorage.setItem(storageKey, nextTheme); } catch {}
+        }
+      };
+
+      window.__m2mApplyTheme(getPreferredTheme(), false);
+
+      window.addEventListener('message', (event) => {
+        if (event.origin !== window.location.origin) return;
+        if (event.data?.type === 'm2m:set-theme') window.__m2mApplyTheme(event.data.theme, false);
+        if (event.data?.type === 'm2m:set-focus' && typeof event.data.focus === 'string') {
+          root.dataset.focusMode = event.data.focus;
+          window.dispatchEvent(new CustomEvent('m2m:focuschange', { detail: { focus: event.data.focus } }));
+        }
+      });
+
+      const syncSystemTheme = (event) => {
+        if (getStoredTheme()) return;
+        window.__m2mApplyTheme(event.matches ? 'dark' : 'light', false);
+      };
+
+      if (typeof media.addEventListener === 'function') media.addEventListener('change', syncSystemTheme);
+      else if (typeof media.addListener === 'function') media.addListener(syncSystemTheme);
+    })();
+  </script>
+  <style>
+    :root,
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg-0: #f7efe5;
+      --bg-1: #e6f4fa;
+      --bg-2: #f5ebe5;
+      --panel: rgba(255, 255, 255, 0.82);
+      --panel-2: rgba(255, 255, 255, 0.9);
+      --border: rgba(16, 42, 67, 0.1);
+      --ink: #10263b;
+      --muted: #536779;
+      --blue: #1f90c4;
+      --green: #2e9567;
+      --gold: #f0a24d;
+      --rose: #c45b63;
+      --shadow: 0 18px 42px rgba(15, 33, 52, 0.16);
+      --grid-line: rgba(16, 42, 67, 0.05);
+      --chrome: rgba(255, 255, 255, 0.82);
+      --chrome-border: rgba(16, 42, 67, 0.12);
+      --toggle-shell: rgba(10, 17, 31, 0.92);
+      --toggle-border: rgba(16, 42, 67, 0.12);
+      --toggle-icon: rgba(238, 246, 255, 0.92);
+      --toggle-icon-inactive: rgba(238, 246, 255, 0.56);
+      --toggle-thumb: linear-gradient(135deg, #ffe2ad, #f4b24b);
+      --toggle-shadow: 0 10px 22px rgba(240, 162, 77, 0.28);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        color-scheme: dark;
+        --bg-0: #06111f;
+        --bg-1: #0a1a32;
+        --bg-2: #102545;
+        --panel: rgba(10, 24, 47, 0.84);
+        --panel-2: rgba(255, 255, 255, 0.06);
+        --border: rgba(166, 212, 255, 0.14);
+        --ink: #ebf4ff;
+        --muted: #95aecb;
+        --blue: #6ed8ff;
+        --green: #9cffc8;
+        --gold: #ffbf69;
+        --rose: #ff8a94;
+        --shadow: 0 18px 42px rgba(0, 0, 0, 0.28);
+        --grid-line: rgba(166, 212, 255, 0.04);
+        --chrome: rgba(10, 24, 47, 0.82);
+        --chrome-border: rgba(166, 212, 255, 0.14);
+        --toggle-shell: rgba(10, 17, 31, 0.92);
+        --toggle-border: rgba(166, 212, 255, 0.14);
+        --toggle-icon: rgba(235, 244, 255, 0.92);
+        --toggle-icon-inactive: rgba(235, 244, 255, 0.52);
+        --toggle-thumb: linear-gradient(135deg, #c48cff, #a56cff);
+        --toggle-shadow: 0 10px 22px rgba(165, 108, 255, 0.28);
+      }
+    }
+
+    :root[data-theme="dark"] {
+      color-scheme: dark;
+      --bg-0: #06111f;
+      --bg-1: #0a1a32;
+      --bg-2: #102545;
+      --panel: rgba(10, 24, 47, 0.84);
+      --panel-2: rgba(255, 255, 255, 0.06);
+      --border: rgba(166, 212, 255, 0.14);
+      --ink: #ebf4ff;
+      --muted: #95aecb;
+      --blue: #6ed8ff;
+      --green: #9cffc8;
+      --gold: #ffbf69;
+      --rose: #ff8a94;
+      --shadow: 0 18px 42px rgba(0, 0, 0, 0.28);
+      --grid-line: rgba(166, 212, 255, 0.04);
+      --chrome: rgba(10, 24, 47, 0.82);
+      --chrome-border: rgba(166, 212, 255, 0.14);
+      --toggle-shell: rgba(10, 17, 31, 0.92);
+      --toggle-border: rgba(166, 212, 255, 0.14);
+      --toggle-icon: rgba(235, 244, 255, 0.92);
+      --toggle-icon-inactive: rgba(235, 244, 255, 0.52);
+      --toggle-thumb: linear-gradient(135deg, #c48cff, #a56cff);
+      --toggle-shadow: 0 10px 22px rgba(165, 108, 255, 0.28);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(31, 144, 196, 0.18), transparent 30%),
+        radial-gradient(circle at top right, rgba(46, 149, 103, 0.16), transparent 24%),
+        radial-gradient(circle at bottom right, rgba(240, 162, 77, 0.16), transparent 26%),
+        linear-gradient(180deg, var(--bg-0) 0%, var(--bg-1) 46%, var(--bg-2) 100%);
+    }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(var(--grid-line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+      background-size: 44px 44px;
+      mask-image: radial-gradient(circle at center, black 32%, transparent 84%);
+      opacity: 0.9;
+    }
+    a { color: inherit; text-decoration: none; }
+    .site-header {
+      position: sticky;
+      top: 16px;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      margin: 20px auto 18px;
+      padding: 16px 18px;
+      width: min(calc(100% - 28px), 1560px);
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      backdrop-filter: blur(18px);
+      box-shadow: var(--shadow);
+    }
+    .brand, .site-header-actions, .site-nav { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .brand-mark {
+      width: 40px; height: 40px; border-radius: 14px; display: grid; place-items: center;
+      font-size: 0.9rem; font-weight: 700; letter-spacing: 0.08em; color: #0a1524;
+      background: linear-gradient(135deg, var(--blue), var(--gold));
+    }
+    .brand-copy strong, .brand-copy span { display: block; }
+    .brand-copy strong { font-size: 0.96rem; }
+    .brand-copy span { color: var(--muted); font-size: 0.78rem; }
+    .site-nav .nav-item { padding: 10px 14px; border-radius: 999px; color: var(--muted); }
+    .site-nav a:hover, .site-nav a[aria-current="page"] { color: var(--ink); background: color-mix(in srgb, var(--blue) 14%, transparent); }
+    .site-nav .is-disabled {
+      color: color-mix(in srgb, var(--muted) 56%, transparent);
+      background: color-mix(in srgb, var(--panel-2) 58%, transparent);
+      border: 1px solid color-mix(in srgb, var(--border) 55%, transparent);
+      cursor: not-allowed;
+    }
+    .theme-toggle { appearance: none; border: 0; background: transparent; padding: 0; cursor: pointer; line-height: 1; }
+    .theme-toggle__track {
+      position: relative; display: grid; grid-template-columns: repeat(2, 1fr); align-items: center; gap: 8px;
+      width: 92px; height: 48px; padding: 0 10px; border-radius: 999px; background: var(--toggle-shell);
+      border: 1px solid var(--toggle-border); box-shadow: var(--shadow); isolation: isolate;
+    }
+    .theme-toggle__icon { position: relative; z-index: 1; display: grid; place-items: center; color: var(--toggle-icon-inactive); }
+    .theme-toggle__icon svg { width: 18px; height: 18px; display: block; }
+    .theme-toggle__thumb {
+      position: absolute; top: 5px; left: 5px; width: 38px; height: 38px; border-radius: 50%;
+      background: var(--toggle-thumb); box-shadow: var(--toggle-shadow); transition: transform 220ms ease;
+    }
+    .theme-toggle[data-theme="light"] .theme-toggle__thumb { transform: translateX(0); }
+    .theme-toggle[data-theme="dark"] .theme-toggle__thumb { transform: translateX(44px); }
+    .theme-toggle[data-theme="light"] .theme-toggle__icon--sun,
+    .theme-toggle[data-theme="dark"] .theme-toggle__icon--moon { color: var(--toggle-icon); }
+    .page-shell { width: min(calc(100% - 28px), 1560px); margin: 0 auto; padding-bottom: 28px; position: relative; z-index: 1; }
+    .page-lead { display: grid; gap: 14px; padding: 12px 0 18px; }
+    .eyebrow {
+      display: inline-flex; align-items: center; gap: 8px; width: fit-content; padding: 7px 12px; border-radius: 999px;
+      color: var(--blue); font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase;
+      background: color-mix(in srgb, var(--blue) 12%, transparent);
+    }
+    .page-title { margin: 0; font-size: clamp(2.5rem, 5vw, 4.6rem); line-height: 0.98; letter-spacing: -0.05em; max-width: 16ch; }
+    .page-copy, .control-copy p, .card p, .card li, .outcome-chip span { margin: 0; color: var(--muted); line-height: 1.62; }
+    .back-link { display: inline-flex; align-items: center; gap: 8px; width: fit-content; color: var(--muted); font-size: 0.92rem; }
+    .control-row {
+      display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px;
+      padding: 12px 14px; border-radius: 22px; background: var(--chrome); border: 1px solid var(--chrome-border); box-shadow: var(--shadow);
+    }
+    .focus-strip, .zoom-controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .focus-button, .zoom-controls button {
+      appearance: none; border: 1px solid var(--chrome-border); background: color-mix(in srgb, var(--panel-2) 88%, transparent);
+      color: var(--ink); border-radius: 999px; padding: 0.58rem 0.9rem; font: inherit; cursor: pointer;
+    }
+    .focus-button.is-active { background: color-mix(in srgb, var(--blue) 16%, transparent); border-color: color-mix(in srgb, var(--blue) 42%, var(--chrome-border)); }
+    .poster-shell { padding: 16px; background: var(--panel); border: 1px solid var(--border); border-radius: 28px; box-shadow: var(--shadow); overflow: hidden; }
+    .poster-viewport { overflow: auto; border-radius: 24px; border: 1px solid color-mix(in srgb, var(--border) 92%, transparent); background: linear-gradient(180deg, color-mix(in srgb, var(--panel-2) 92%, transparent), color-mix(in srgb, var(--panel) 92%, transparent)); cursor: grab; }
+    .poster-viewport.is-dragging { cursor: grabbing; }
+    .poster { width: 1480px; min-height: 1120px; padding: 24px; transform-origin: top left; transition: transform 180ms ease; }
+    .board-grid { display: grid; gap: 18px; grid-template-columns: repeat(12, minmax(0, 1fr)); }
+    .card {
+      display: grid; gap: 12px; padding: 18px; border-radius: 24px; border: 1px solid color-mix(in srgb, var(--border) 96%, transparent);
+      background: color-mix(in srgb, var(--panel-2) 88%, transparent); box-shadow: var(--shadow);
+      transition: transform 180ms ease, opacity 180ms ease, border-color 180ms ease;
+    }
+    .card[data-kind="source"] { background: linear-gradient(180deg, color-mix(in srgb, var(--rose) 12%, transparent), color-mix(in srgb, var(--panel-2) 88%, transparent)); }
+    .card[data-kind="clarity"] { background: linear-gradient(180deg, color-mix(in srgb, var(--blue) 14%, transparent), color-mix(in srgb, var(--panel-2) 88%, transparent)); }
+    .card[data-kind="picture"] { background: linear-gradient(180deg, color-mix(in srgb, var(--gold) 14%, transparent), color-mix(in srgb, var(--panel-2) 88%, transparent)); }
+    .card[data-kind="decision"] { background: linear-gradient(180deg, color-mix(in srgb, var(--green) 12%, transparent), color-mix(in srgb, var(--panel-2) 88%, transparent)); }
+    .card[data-kind="outcome"] { background: linear-gradient(180deg, color-mix(in srgb, var(--green) 14%, transparent), color-mix(in srgb, var(--panel-2) 88%, transparent)); }
+    .card.is-muted { opacity: 0.34; transform: scale(0.99); box-shadow: none; }
+    .card.is-focus { transform: translateY(-1px); border-color: color-mix(in srgb, var(--blue) 42%, var(--border)); }
+    .span-3 { grid-column: span 3; }
+    .span-4 { grid-column: span 4; }
+    .span-12 { grid-column: span 12; }
+    .label {
+      display: inline-flex; align-items: center; gap: 8px; width: fit-content; padding: 6px 10px; border-radius: 999px;
+      color: var(--muted); background: color-mix(in srgb, var(--panel) 92%, transparent); font-size: 0.76rem;
+      letter-spacing: 0.08em; text-transform: uppercase;
+    }
+    .card h2, .card h3 { margin: 0; font-size: 1.28rem; line-height: 1.12; letter-spacing: -0.03em; }
+    .card ul { margin: 0; padding-left: 1.1rem; display: grid; gap: 8px; }
+    .outcome-grid { display: grid; gap: 14px; grid-template-columns: repeat(3, minmax(0, 1fr)); margin-top: 8px; }
+    .outcome-chip { padding: 14px; border-radius: 18px; background: color-mix(in srgb, var(--panel) 90%, transparent); border: 1px solid color-mix(in srgb, var(--border) 88%, transparent); }
+    .outcome-chip strong { display: block; margin-bottom: 6px; color: var(--ink); }
+    :root[data-embedded="true"] .site-header, :root[data-embedded="true"] .page-lead { display: none; }
+    :root[data-embedded="true"] .page-shell { width: 100%; padding: 0; }
+    :root[data-embedded="true"] .poster-shell { padding: 0; border: 0; border-radius: 0; box-shadow: none; background: transparent; }
+    :root[data-embedded="true"] .poster-viewport { border: 0; border-radius: 0; background: transparent; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="/">
+      <span class="brand-mark">M2M</span>
+      <span class="brand-copy">
+        <strong>Models to Margins</strong>
+        <span>Business-first AI research and operating maps</span>
+      </span>
+    </a>
+    <div class="site-header-actions">
+      <nav class="site-nav" aria-label="Primary">
+        <a class="nav-item" href="/briefs" aria-current="page">Brief</a>
+        <a class="nav-item" href="/deep-dives">Deep Dives</a>
+        <span class="nav-item is-disabled" aria-disabled="true">About</span>
+      </nav>
+      <button class="theme-toggle" type="button" data-theme-toggle aria-label="Toggle color theme" title="Toggle color theme">
+        <span class="theme-toggle__track" aria-hidden="true">
+          <span class="theme-toggle__icon theme-toggle__icon--sun">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.25" fill="none" stroke="currentColor" stroke-width="1.8"></circle><path d="M12 2.5v3M12 18.5v3M21.5 12h-3M5.5 12h-3M18.7 5.3l-2.1 2.1M7.4 16.6l-2.1 2.1M18.7 18.7l-2.1-2.1M7.4 7.4L5.3 5.3" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.8"></path></svg>
+          </span>
+          <span class="theme-toggle__icon theme-toggle__icon--moon">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.7 3.6a8.6 8.6 0 1 0 4.7 15.5a8 8 0 1 1-4.7-15.5Z" fill="none" stroke="currentColor" stroke-linejoin="round" stroke-width="1.8"></path></svg>
+          </span>
+          <span class="theme-toggle__thumb"></span>
+        </span>
+      </button>
+    </div>
+  </header>
+
+  <main class="page-shell">
+    <section class="page-lead">
+      <span class="eyebrow">Clarity Board</span>
+      <h1 class="page-title">AI for Corporate Clarity</h1>
+      <p class="page-copy">Turn dense corporate language into a visible operating sequence: source sentence, plain-language spine, mental picture, stakeholder reframes, pressure-test loop, and decision ask.</p>
+      <a class="back-link" href="/briefs/ai-for-corporate-clarity"><span aria-hidden="true">&larr;</span><span>Back to Brief</span></a>
+      <div class="control-row">
+        <div class="control-copy">
+          <p><strong>Reading note</strong>: follow the top row left to right, then use the stakeholder lanes and pressure-test cards to see how one business issue becomes a decision-ready message.</p>
+          <div class="focus-strip" aria-label="Clarity focus filters">
+            <button class="focus-button" type="button" data-focus="translation">Translation</button>
+            <button class="focus-button" type="button" data-focus="picture">Mental picture</button>
+            <button class="focus-button" type="button" data-focus="audience">Stakeholders</button>
+            <button class="focus-button" type="button" data-focus="decision">Decision ask</button>
+            <button class="focus-button" type="button" data-focus="pressure">Pressure-test</button>
+          </div>
+        </div>
+        <div class="zoom-controls" aria-label="Zoom controls">
+          <button type="button" data-zoom-out>-</button>
+          <button type="button" data-zoom-in>+</button>
+          <button type="button" data-zoom-reset>Reset</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="poster-shell">
+      <div class="poster-viewport" id="poster-viewport">
+        <div class="poster" id="poster">
+          <div class="board-grid">
+            <article class="card span-3" data-kind="source" data-focus-group="translation pressure">
+              <span class="label">1. Source language</span>
+              <h2>Start with the real sentence</h2>
+              <p>Paste the deck line or jargon-heavy note the team is already using.</p>
+              <ul>
+                <li>abstract nouns</li>
+                <li>missing mechanism</li>
+                <li>hidden assumptions</li>
+                <li>unclear action request</li>
+              </ul>
+            </article>
+
+            <article class="card span-3" data-kind="clarity" data-focus-group="translation">
+              <span class="label">2. Plain-language spine</span>
+              <h2>Translate to cause and effect</h2>
+              <p>Explain what is happening, where it is breaking, why it matters, and what is needed next.</p>
+              <ul>
+                <li>what changed</li>
+                <li>what is stuck</li>
+                <li>what risk follows</li>
+                <li>what move matters</li>
+              </ul>
+            </article>
+
+            <article class="card span-3" data-kind="picture" data-focus-group="picture">
+              <span class="label">3. Mental picture</span>
+              <h2>Give the audience something they can see</h2>
+              <p>Use a business-appropriate image such as a queue, relay race, hallway of half-open gates, or control tower.</p>
+              <ul>
+                <li>keep it concrete</li>
+                <li>map it to the mechanism</li>
+                <li>name where it breaks</li>
+              </ul>
+            </article>
+
+            <article class="card span-3" data-kind="decision" data-focus-group="decision audience">
+              <span class="label">4. Decision ask</span>
+              <h2>Land on the actual executive move</h2>
+              <p>Finish with the call: align, fund, approve, de-risk, unblock, or choose between two visible tradeoffs.</p>
+              <ul>
+                <li>what choice is in front of us</li>
+                <li>who owns it</li>
+                <li>what happens if we wait</li>
+              </ul>
+            </article>
+
+            <article class="card span-3" data-focus-group="audience">
+              <span class="label">CFO frame</span>
+              <h3>Time becomes cost</h3>
+              <p>Translate delay into spend leakage, slower savings realization, or weaker planning confidence.</p>
+            </article>
+
+            <article class="card span-3" data-focus-group="audience">
+              <span class="label">COO frame</span>
+              <h3>Handoffs become bottlenecks</h3>
+              <p>Show where workflow ownership breaks and why operating predictability suffers.</p>
+            </article>
+
+            <article class="card span-3" data-focus-group="audience">
+              <span class="label">Product frame</span>
+              <h3>The system path is unclear</h3>
+              <p>Map the issue to missing flow, tooling, status visibility, or escalation logic.</p>
+            </article>
+
+            <article class="card span-3" data-focus-group="audience">
+              <span class="label">Field frame</span>
+              <h3>The customer feels the delay</h3>
+              <p>Connect internal friction to slower responses, missed commitments, or inconsistent delivery.</p>
+            </article>
+
+            <article class="card span-4" data-focus-group="pressure">
+              <span class="label">Pressure-test loop</span>
+              <h2>Challenge the explanation before the room does</h2>
+              <ul>
+                <li>What jargon is still doing too much work?</li>
+                <li>What prerequisite is missing?</li>
+                <li>What would a skeptical stakeholder object to first?</li>
+                <li>Where is the analogy attractive but false?</li>
+              </ul>
+            </article>
+
+            <article class="card span-4" data-focus-group="pressure decision">
+              <span class="label">Guardrails</span>
+              <h2>"Explain it like I'm 10" does not mean childish</h2>
+              <ul>
+                <li>Do not flatten the real tradeoff.</li>
+                <li>Do not hide uncertainty behind simplification.</li>
+                <li>Do not let style outrun accuracy.</li>
+                <li>Do not end without the decision ask.</li>
+              </ul>
+            </article>
+
+            <article class="card span-4" data-focus-group="translation pressure audience">
+              <span class="label">Prompt operating system</span>
+              <h2>Keep ROLE, INPUTS, RULES, and OUTPUT FORMAT explicit</h2>
+              <p>That structure turns the model into a translator and clarity coach instead of a generic style machine.</p>
+            </article>
+
+            <article class="card span-12" data-kind="outcome" data-focus-group="decision picture audience">
+              <span class="label">Success test</span>
+              <h2>The explanation worked when the audience can see the issue, explain it back, and act on it.</h2>
+              <p>This is the real standard for corporate clarity: the message becomes visible in one pass, resonates with the right stakeholder, and lands on a decision rather than a vague update.</p>
+              <div class="outcome-grid">
+                <div class="outcome-chip">
+                  <strong>Visible</strong>
+                  <span>The issue is clear enough to picture without inside knowledge.</span>
+                </div>
+                <div class="outcome-chip">
+                  <strong>Resonant</strong>
+                  <span>Each stakeholder hears the same truth through the lens that matters to them.</span>
+                </div>
+                <div class="outcome-chip">
+                  <strong>Actionable</strong>
+                  <span>The next decision or alignment step is obvious by the end of the explanation.</span>
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    (() => {
+      const media = window.matchMedia('(prefers-color-scheme: dark)');
+      const viewport = document.getElementById('poster-viewport');
+      const poster = document.getElementById('poster');
+      const focusButtons = Array.from(document.querySelectorAll('[data-focus]'));
+      const cards = Array.from(document.querySelectorAll('[data-focus-group]'));
+      const zoomInButton = document.querySelector('[data-zoom-in]');
+      const zoomOutButton = document.querySelector('[data-zoom-out]');
+      const zoomResetButton = document.querySelector('[data-zoom-reset]');
+      const minScale = 0.7;
+      const maxScale = 1.4;
+      const step = 0.1;
+      const baseHeight = 1120;
+      let scale = window.matchMedia('(max-width: 900px)').matches ? 0.8 : 1;
+
+      const getTheme = () => document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
+      const syncToggle = () => {
+        const theme = getTheme();
+        document.querySelectorAll('[data-theme-toggle]').forEach((toggle) => {
+          toggle.dataset.theme = theme;
+          toggle.setAttribute('aria-pressed', theme === 'dark' ? 'true' : 'false');
+          const label = theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme';
+          toggle.setAttribute('aria-label', label);
+          toggle.setAttribute('title', label);
+        });
+      };
+
+      document.querySelectorAll('[data-theme-toggle]').forEach((toggle) => {
+        toggle.addEventListener('click', () => {
+          const nextTheme = getTheme() === 'dark' ? 'light' : 'dark';
+          window.__m2mApplyTheme?.(nextTheme, true);
+          syncToggle();
+        });
+      });
+
+      const applyScale = () => {
+        poster.style.transform = `scale(${scale})`;
+        poster.style.height = `${baseHeight * scale}px`;
+      };
+
+      const applyFocus = (focus) => {
+        document.documentElement.dataset.focusMode = focus;
+        focusButtons.forEach((button) => button.classList.toggle('is-active', button.getAttribute('data-focus') === focus));
+        cards.forEach((card) => {
+          const groups = (card.getAttribute('data-focus-group') || '').split(' ').filter(Boolean);
+          const active = focus === 'all' || groups.includes(focus);
+          card.classList.toggle('is-focus', active);
+          card.classList.toggle('is-muted', focus !== 'all' && !active);
+        });
+      };
+
+      focusButtons.forEach((button) => {
+        const focus = button.getAttribute('data-focus');
+        if (!focus) return;
+        button.addEventListener('click', () => applyFocus(focus));
+      });
+
+      zoomInButton?.addEventListener('click', () => { scale = Math.min(maxScale, Number((scale + step).toFixed(2))); applyScale(); });
+      zoomOutButton?.addEventListener('click', () => { scale = Math.max(minScale, Number((scale - step).toFixed(2))); applyScale(); });
+      zoomResetButton?.addEventListener('click', () => { scale = window.matchMedia('(max-width: 900px)').matches ? 0.8 : 1; applyScale(); });
+
+      if (viewport) {
+        let dragState = null;
+        viewport.addEventListener('pointerdown', (event) => {
+          dragState = { x: event.clientX, y: event.clientY, left: viewport.scrollLeft, top: viewport.scrollTop };
+          viewport.classList.add('is-dragging');
+          viewport.setPointerCapture(event.pointerId);
+        });
+        viewport.addEventListener('pointermove', (event) => {
+          if (!dragState) return;
+          viewport.scrollLeft = dragState.left - (event.clientX - dragState.x);
+          viewport.scrollTop = dragState.top - (event.clientY - dragState.y);
+        });
+        const clearDrag = (event) => {
+          if (!dragState) return;
+          dragState = null;
+          viewport.classList.remove('is-dragging');
+          if (event?.pointerId != null && viewport.hasPointerCapture(event.pointerId)) viewport.releasePointerCapture(event.pointerId);
+        };
+        viewport.addEventListener('pointerup', clearDrag);
+        viewport.addEventListener('pointerleave', clearDrag);
+        viewport.addEventListener('pointercancel', clearDrag);
+      }
+
+      syncToggle();
+      applyScale();
+      applyFocus(document.documentElement.dataset.focusMode || 'translation');
+
+      window.addEventListener('m2m:focuschange', (event) => applyFocus(event.detail?.focus || 'translation'));
+      window.addEventListener('storage', (event) => {
+        if (event.key !== 'm2m-theme') return;
+        const fallbackTheme = media.matches ? 'dark' : 'light';
+        window.__m2mApplyTheme?.(event.newValue ?? fallbackTheme, false);
+        syncToggle();
+      });
+    })();
+  </script>
+</body>
+</html>

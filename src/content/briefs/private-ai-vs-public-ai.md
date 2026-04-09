@@ -11,6 +11,8 @@ lens:
   - Architecture
   - Pricing
   - Governance
+briefType: interactive
+openPath: /briefs/private-ai-vs-public-ai
 tags:
   - private AI
   - public AI
@@ -21,7 +23,7 @@ audience: CTOs, platform teams, and AI operators
 readTime: 12 min read
 supportingVisualPath: /visuals/model-strategy/private-ai-vs-public-ai-architecture.html
 supportingVisualLabel: View the private AI control plane
----
+--- 
 
 ## Why This Matters Now
 

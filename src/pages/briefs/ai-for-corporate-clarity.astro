@@ -1,0 +1,309 @@
+---
+import { getEntry, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import EntryMeta from '../../components/EntryMeta.astro';
+import BackLink from '../../components/BackLink.astro';
+import '../../styles/live-brief.css';
+
+const entry = await getEntry('briefs', 'ai-for-corporate-clarity');
+
+if (!entry) {
+  throw new Error('Expected the ai-for-corporate-clarity brief to exist in the briefs collection.');
+}
+
+const { Content } = await render(entry);
+const visualPath = entry.data.supportingVisualPath ?? '/visuals/corporate-clarity/clarity-board.html';
+
+const clarityBreaks = [
+  {
+    title: 'Jargon pileup',
+    body: 'The sentence is technically true, but nobody outside the team can see what is actually happening.',
+    focus: 'translation'
+  },
+  {
+    title: 'No mental picture',
+    body: 'Abstract nouns stack up, but the audience never forms the right image of the mechanism or bottleneck.',
+    focus: 'picture'
+  },
+  {
+    title: 'Wrong audience frame',
+    body: 'One generic explanation tries to serve every stakeholder, so nobody hears the version tied to their incentives.',
+    focus: 'audience'
+  },
+  {
+    title: 'Hidden decision ask',
+    body: 'The update explains the issue but never makes clear what alignment, budget, or call is needed next.',
+    focus: 'decision'
+  }
+];
+
+const aiStrengths = [
+  {
+    title: 'Translation',
+    body: 'AI is strong at turning deck language into plain-language cause and effect without starting from scratch.',
+    focus: 'translation'
+  },
+  {
+    title: 'Mental pictures',
+    body: 'It can generate a cleaner image, analogy, or operating metaphor that helps the audience see the issue in one pass.',
+    focus: 'picture'
+  },
+  {
+    title: 'Stakeholder reframes',
+    body: 'The same core truth can be adapted for the CFO, COO, product lead, or field leader without changing the underlying mechanism.',
+    focus: 'audience'
+  },
+  {
+    title: 'Pressure-testing clarity',
+    body: 'AI can critique vagueness, reveal missing assumptions, and show where an explanation still breaks under scrutiny.',
+    focus: 'pressure'
+  }
+];
+
+const supportCards = [
+  {
+    label: 'Corporate example',
+    title: 'Turn one fuzzy sentence into a decision-ready story',
+    body: 'Start with the raw deck line, translate it into plain language, add one mental picture, then adapt the same issue for each stakeholder who needs to act.'
+  },
+  {
+    label: 'Guardrails',
+    title: 'Simple does not mean childish or false',
+    body: 'The standard is not cuteness. The standard is whether people can explain the issue back, see the tradeoff, and understand what decision follows.'
+  },
+  {
+    label: 'Prompt system',
+    title: 'Keep the prompt contract explicit',
+    body: 'The most reliable workflow is the same every time: ROLE, INPUTS, RULES, OUTPUT FORMAT. That structure turns the model into a clarity tool instead of a style machine.'
+  }
+];
+
+const focusData = {
+  translation: {
+    title: 'Translate the issue first',
+    copy: 'Start with the real business sentence, strip out abstract filler, and make the mechanism visible before you polish anything.'
+  },
+  picture: {
+    title: 'Build the right mental picture',
+    copy: 'A useful analogy is not a slogan. It is a clean picture of the bottleneck, relay, queue, or control failure the audience needs to see.'
+  },
+  audience: {
+    title: 'Reframe for the stakeholder',
+    copy: 'Different leaders need the same truth expressed through different incentives, risks, and decision rights.'
+  },
+  decision: {
+    title: 'End with the decision ask',
+    copy: 'A clarity workflow should make the next step obvious: approve the plan, align on the tradeoff, fund the fix, or unblock the team.'
+  },
+  pressure: {
+    title: 'Pressure-test before you present',
+    copy: 'Use AI to find the hidden jargon, the missing prerequisite, the weak analogy, and the unclear ask before the slide hits the room.'
+  }
+};
+---
+
+<BaseLayout
+  title={`${entry.data.title} | Models to Margins`}
+  description={entry.data.summary}
+  currentPath="/briefs"
+>
+  <article class="live-brief" data-tone="clarity">
+    <section class="live-brief__hero">
+      <span class="eyebrow live-brief__eyebrow">Live Brief</span>
+      <h1 class="live-brief__title">{entry.data.title}</h1>
+      <p class="lead live-brief__summary">{entry.data.summary}</p>
+      <BackLink href="/briefs" label="Back to Brief" />
+      <EntryMeta
+        date={entry.data.pubDate}
+        primary={entry.data.industry}
+        readTime={entry.data.readTime}
+      />
+    </section>
+
+    <section class="live-brief__board" aria-label="Corporate clarity board">
+      <aside class="live-brief__panel">
+        <p class="live-brief__label">Where Clarity Breaks</p>
+        <h2>Most corporate explanations fail before the slide design matters.</h2>
+        <p class="live-brief__intro">
+          Teams already know the issue too well, so they skip the translation step and jump straight to polished but low-visibility language.
+        </p>
+        <div class="clarity-rail">
+          {clarityBreaks.map((item) => (
+            <button class="live-brief__focus-button clarity-rail__button" type="button" data-clarity-focus={item.focus}>
+              <strong>{item.title}</strong>
+              <span>{item.body}</span>
+            </button>
+          ))}
+        </div>
+      </aside>
+
+      <section class="live-brief__canvas">
+        <div class="live-brief__canvas-head">
+          <div class="live-brief__canvas-copy">
+            <p class="live-brief__label">Clarity Board</p>
+            <h2>Make the problem visible, then make it resonate.</h2>
+            <p class="live-brief__intro">
+              The embedded board walks the issue from dense source language to a plain-language spine, the right mental picture, stakeholder-specific frames, and the final decision ask.
+            </p>
+            <div class="live-brief__focus-tabs" role="tablist" aria-label="Clarity lenses">
+              <button class="live-brief__focus-button" type="button" data-clarity-focus="translation">Translation</button>
+              <button class="live-brief__focus-button" type="button" data-clarity-focus="picture">Mental picture</button>
+              <button class="live-brief__focus-button" type="button" data-clarity-focus="audience">Stakeholders</button>
+              <button class="live-brief__focus-button" type="button" data-clarity-focus="decision">Decision ask</button>
+              <button class="live-brief__focus-button" type="button" data-clarity-focus="pressure">Pressure-test</button>
+            </div>
+          </div>
+          <div class="live-brief__toolbar">
+            <a class="button secondary" href={visualPath} target="_blank" rel="noreferrer">
+              Open full screen
+            </a>
+          </div>
+        </div>
+
+        <div class="live-brief__focus-bar">
+          <strong id="clarity-focus-title">Translate the issue first</strong>
+          <p class="live-brief__focus-copy" id="clarity-focus-copy">
+            Start with the real business sentence, strip out abstract filler, and make the mechanism visible before you polish anything.
+          </p>
+        </div>
+
+        <div class="live-brief__frame">
+            <iframe
+            id="corporate-clarity-frame"
+            src={`${visualPath}?embed=1`}
+            title="AI for corporate clarity board"
+            loading="eager"
+          ></iframe>
+        </div>
+
+        <p class="live-brief__note">
+          This is the working standard for "explain it like I'm 10" at work: not childish language, but a clearer mental model that executives and operators can actually act on.
+        </p>
+      </section>
+
+      <aside class="live-brief__panel">
+        <p class="live-brief__label">What AI Is Good At</p>
+        <h2>Use the model as a translator, reframer, and pressure-tester.</h2>
+        <p class="live-brief__intro">
+          The best result is not a nicer sentence. It is a truer explanation that survives different audiences, different questions, and a real decision meeting.
+        </p>
+        <div class="clarity-rail">
+          {aiStrengths.map((item) => (
+            <button class="live-brief__focus-button clarity-rail__button" type="button" data-clarity-focus={item.focus}>
+              <strong>{item.title}</strong>
+              <span>{item.body}</span>
+            </button>
+          ))}
+        </div>
+        <div class="live-brief__stack">
+          <strong>Clarity thesis</strong>
+          <span>
+            The communication worked when the audience can picture the issue, explain it back, and see why it matters to them without needing the original author in the room.
+          </span>
+        </div>
+      </aside>
+    </section>
+
+    <section class="live-brief__support-grid" aria-label="Corporate clarity summary">
+      {supportCards.map((card) => (
+        <article class="live-brief__support-card">
+          <p class="live-brief__label">{card.label}</p>
+          <h3>{card.title}</h3>
+          <p>{card.body}</p>
+        </article>
+      ))}
+    </section>
+
+    <section class="live-brief__article">
+      <p class="live-brief__article-intro">
+        The live board above is the visual operating layer. The editorial brief below remains the source of truth for the detailed workflow, prompt pack, failure modes, and source links.
+      </p>
+      <div class="article-body">
+        <Content />
+      </div>
+    </section>
+  </article>
+
+  <style>
+    .clarity-rail {
+      display: grid;
+      gap: 10px;
+    }
+
+    .clarity-rail__button {
+      width: 100%;
+      display: grid;
+      gap: 6px;
+      text-align: left;
+      justify-items: start;
+      border-radius: 18px;
+      padding: 13px 14px;
+    }
+
+    .clarity-rail__button strong {
+      color: var(--text);
+      font-size: 0.98rem;
+    }
+
+    .clarity-rail__button span {
+      color: var(--muted);
+      font-size: 0.95rem;
+      line-height: 1.58;
+    }
+  </style>
+
+  <script define:vars={{ focusData }}>
+    (() => {
+      const frame = document.getElementById('corporate-clarity-frame');
+      const focusTitle = document.getElementById('clarity-focus-title');
+      const focusCopy = document.getElementById('clarity-focus-copy');
+      const triggers = Array.from(document.querySelectorAll('[data-clarity-focus]'));
+
+      const syncTheme = () => {
+        if (!frame?.contentWindow) return;
+        frame.contentWindow.postMessage(
+          { type: 'm2m:set-theme', theme: window.__m2mGetTheme?.() ?? 'light' },
+          window.location.origin
+        );
+      };
+
+      const activateFocus = (focus) => {
+        const data = focusData[focus];
+        if (!data) return;
+
+        triggers.forEach((trigger) => {
+          trigger.classList.toggle('is-active', trigger.getAttribute('data-clarity-focus') === focus);
+        });
+
+        focusTitle.textContent = data.title;
+        focusCopy.textContent = data.copy;
+
+        if (frame?.contentWindow) {
+          frame.contentWindow.postMessage(
+            { type: 'm2m:set-focus', focus },
+            window.location.origin
+          );
+        }
+      };
+
+      triggers.forEach((trigger) => {
+        const focus = trigger.getAttribute('data-clarity-focus');
+        if (!focus) return;
+
+        trigger.addEventListener('click', () => activateFocus(focus));
+        trigger.addEventListener('mouseenter', () => activateFocus(focus));
+        trigger.addEventListener('focus', () => activateFocus(focus));
+      });
+
+      frame?.addEventListener('load', () => {
+        syncTheme();
+        activateFocus('translation');
+      });
+
+      window.addEventListener('m2m:themechange', syncTheme);
+
+      syncTheme();
+      activateFocus('translation');
+    })();
+  </script>
+</BaseLayout>

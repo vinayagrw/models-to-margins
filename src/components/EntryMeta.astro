@@ -1,4 +1,6 @@
 ---
+import { formatDisplayDate } from '../utils/formatDate';
+
 interface Props {
   date: Date;
   primary: string;
@@ -15,12 +17,7 @@ const {
   className = ''
 } = Astro.props;
 
-const formattedDate = new Intl.DateTimeFormat('en-US', {
-  month: 'long',
-  day: 'numeric',
-  year: 'numeric',
-  timeZone: 'UTC'
-}).format(date);
+const formattedDate = formatDisplayDate(date, 'long');
 
 const items = [
   formattedDate,

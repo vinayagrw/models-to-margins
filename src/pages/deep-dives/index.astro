@@ -1,11 +1,11 @@
 ---
-import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import CollectionCard from '../../components/CollectionCard.astro';
+import { formatDisplayDate } from '../../utils/formatDate';
+import { getVisibleDeepDives, isPageVisible } from '../../utils/site-data';
 
-const deepDives = (await getCollection('deep-dives'))
-  .filter((entry) => entry.data.listed)
-  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+const deepDives = await getVisibleDeepDives();
+const showCollectionLinkingNote = !isPageVisible('/deep-dives');
 ---
 
 <BaseLayout
@@ -19,6 +19,12 @@ const deepDives = (await getCollection('deep-dives'))
       <h1>Where the operating detail gets unpacked.</h1>
       <p class="lead">Workflow-level analysis, interactive maps, and company-specific investigations for readers who want more than the headline.</p>
     </header>
+    {showCollectionLinkingNote && (
+      <div class="glass-card section-block">
+        <h3>Deep Dives is hidden from app navigation right now.</h3>
+        <p>This index still works directly by URL, but the shared visibility config is currently removing `/deep-dives` from other managed surfaces.</p>
+      </div>
+    )}
     <div class="content-grid section-block">
       {deepDives.map((entry) => (
         <CollectionCard
@@ -26,7 +32,7 @@ const deepDives = (await getCollection('deep-dives'))
           kicker="Deep Dive"
           title={entry.data.title}
           summary={entry.data.summary}
-          date={entry.data.pubDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+          date={formatDisplayDate(entry.data.pubDate, 'short')}
           meta={entry.data.readTime ?? entry.data.geography}
         />
       ))}

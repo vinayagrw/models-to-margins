@@ -1,0 +1,55 @@
+<script is:inline>
+  (() => {
+    if (typeof window.__m2mInitTheme === 'function') {
+      window.__m2mInitTheme();
+      return;
+    }
+
+    window.__m2mInitTheme = () => {
+      const storageKey = 'm2m-theme';
+      const root = document.documentElement;
+      const media = window.matchMedia('(prefers-color-scheme: dark)');
+      const normalizeTheme = (value) => value === 'dark' || value === 'light' ? value : null;
+      const getStoredTheme = () => {
+        try {
+          return normalizeTheme(window.localStorage.getItem(storageKey));
+        } catch {
+          return null;
+        }
+      };
+      const getSystemTheme = () => media.matches ? 'dark' : 'light';
+      const getPreferredTheme = () => getStoredTheme() ?? getSystemTheme();
+
+      window.__m2mThemeKey = storageKey;
+      window.__m2mGetTheme = () => root.dataset.theme || getPreferredTheme();
+      window.__m2mApplyTheme = (theme, persist = false) => {
+        const nextTheme = normalizeTheme(theme) ?? getPreferredTheme();
+        root.dataset.theme = nextTheme;
+        root.style.colorScheme = nextTheme;
+        if (persist) {
+          try {
+            window.localStorage.setItem(storageKey, nextTheme);
+          } catch {
+            // Ignore storage errors so the page still works in restricted contexts.
+          }
+        }
+        window.dispatchEvent(new CustomEvent('m2m:themechange', { detail: { theme: nextTheme } }));
+      };
+
+      window.__m2mApplyTheme(getPreferredTheme(), false);
+
+      const syncSystemTheme = (event) => {
+        if (getStoredTheme()) return;
+        window.__m2mApplyTheme(event.matches ? 'dark' : 'light', false);
+      };
+
+      if (typeof media.addEventListener === 'function') {
+        media.addEventListener('change', syncSystemTheme);
+      } else if (typeof media.addListener === 'function') {
+        media.addListener(syncSystemTheme);
+      }
+    };
+
+    window.__m2mInitTheme();
+  })();
+</script>

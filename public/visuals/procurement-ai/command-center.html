@@ -37,6 +37,24 @@
       };
 
       window.__m2mApplyTheme(getPreferredTheme(), false);
+
+      window.addEventListener('message', (event) => {
+        if (event.origin !== window.location.origin) return;
+        if (event.data?.type === 'm2m:set-theme') {
+          window.__m2mApplyTheme(event.data.theme, false);
+        }
+      });
+
+      const syncSystemTheme = (event) => {
+        if (getStoredTheme()) return;
+        window.__m2mApplyTheme(event.matches ? 'dark' : 'light', false);
+      };
+
+      if (typeof media.addEventListener === 'function') {
+        media.addEventListener('change', syncSystemTheme);
+      } else if (typeof media.addListener === 'function') {
+        media.addListener(syncSystemTheme);
+      }
     })();
   </script>
   <style>
@@ -955,7 +973,7 @@
         <p class="subtitle">
           Large enterprises still run sourcing and supplier decisions across fragmented systems, duplicated supplier records, manual event prep, and delayed savings tracking. This view keeps the business problem, operating design, and ROI case on one screen.
         </p>
-        <a class="back-link" href="/briefs"><span aria-hidden="true">&larr;</span><span>Back to Brief</span></a>
+        <a class="back-link" href="/briefs/governed-procurement-ai"><span aria-hidden="true">&larr;</span><span>Back to Brief</span></a>
         <div class="meta-strip" aria-label="Page metadata">
           <span class="meta-chip">April 5, 2026</span>
           <span class="meta-chip">Procurement AI</span>

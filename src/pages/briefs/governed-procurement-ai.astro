@@ -1,0 +1,103 @@
+---
+import { getEntry } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const entry = await getEntry('briefs', 'governed-procurement-ai');
+
+if (!entry) {
+  throw new Error('Expected the governed-procurement-ai brief to exist in the briefs collection.');
+}
+
+const visualPath = entry.data.supportingVisualPath ?? '/visuals/procurement-ai/command-center.html';
+---
+
+<BaseLayout
+  title={`${entry.data.title} | Models to Margins`}
+  description={entry.data.summary}
+  currentPath="/briefs"
+>
+  <article class="procurement-brief-host">
+    <h1 class="procurement-brief-host__sr-only">{entry.data.title}</h1>
+    <p class="procurement-brief-host__sr-only">{entry.data.summary}</p>
+
+    <div class="procurement-brief-host__stage">
+      <iframe
+        id="procurement-command-center-frame"
+        src={`${visualPath}?embed=1`}
+        title="Governed procurement AI command center"
+        loading="eager"
+      ></iframe>
+    </div>
+  </article>
+
+  <script>
+    (() => {
+      const frame = document.getElementById('procurement-command-center-frame');
+
+      const syncTheme = () => {
+        if (!frame?.contentWindow) return;
+        frame.contentWindow.postMessage(
+          { type: 'm2m:set-theme', theme: window.__m2mGetTheme?.() ?? 'light' },
+          window.location.origin
+        );
+      };
+
+      frame?.addEventListener('load', syncTheme);
+      window.addEventListener('m2m:themechange', syncTheme);
+      syncTheme();
+    })();
+  </script>
+
+  <style>
+    .procurement-brief-host {
+      margin-top: 4px;
+    }
+
+    .procurement-brief-host__stage {
+      overflow: hidden;
+      border-radius: 28px;
+      border: 1px solid color-mix(in srgb, var(--line) 82%, transparent);
+      background: rgba(3, 9, 17, 0.8);
+      box-shadow: var(--shadow);
+    }
+
+    .procurement-brief-host__stage iframe {
+      display: block;
+      width: 100%;
+      height: calc(100vh - 152px);
+      min-height: 760px;
+      border: 0;
+      background: rgba(3, 9, 17, 0.82);
+    }
+
+    .procurement-brief-host__sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    @media (max-width: 900px) {
+      .procurement-brief-host__stage iframe {
+        height: calc(100vh - 124px);
+        min-height: 620px;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .procurement-brief-host__stage {
+        border-radius: 22px;
+      }
+
+      .procurement-brief-host__stage iframe {
+        height: calc(100vh - 104px);
+        min-height: 560px;
+      }
+    }
+  </style>
+</BaseLayout>

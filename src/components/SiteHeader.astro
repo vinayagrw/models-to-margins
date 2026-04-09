@@ -1,0 +1,37 @@
+---
+import ThemeToggle from './ThemeToggle.astro';
+import { isPageVisible, primaryNavPages } from '../utils/site-data';
+
+interface Props {
+  currentPath?: string;
+  className?: string;
+}
+
+const {
+  currentPath = '/',
+  className = ''
+} = Astro.props;
+
+const navItems = primaryNavPages.filter((page) => isPageVisible(page.route));
+---
+
+<header class:list={['site-header', className]}>
+  <a class="brand" href="/">
+    <span class="brand-mark">M2M</span>
+    <span class="brand-copy">
+      <strong>Models to Margins</strong>
+      <span>Business-first AI research and operating maps</span>
+    </span>
+  </a>
+  <div class="site-header-actions">
+    <nav class="site-nav" aria-label="Primary">
+      {navItems.map((item) => (
+        <a class="nav-item" href={item.route} aria-current={currentPath === item.route ? 'page' : undefined}>
+          {item.navLabel}
+        </a>
+      ))}
+      <span class="nav-item is-disabled" aria-disabled="true">About</span>
+    </nav>
+    <ThemeToggle />
+  </div>
+</header>

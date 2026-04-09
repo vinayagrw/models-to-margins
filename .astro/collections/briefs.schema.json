@@ -55,9 +55,6 @@
         "interactive"
       ]
     },
-    "embedPath": {
-      "type": "string"
-    },
     "openPath": {
       "type": "string"
     },

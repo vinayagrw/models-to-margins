@@ -21,7 +21,6 @@ const briefs = defineCollection({
     industry: z.string(),
     lens: z.array(z.string()).default([]),
     briefType: z.enum(['article', 'interactive']).default('article'),
-    embedPath: z.string().optional(),
     openPath: z.string().optional(),
     supportingVisualPath: z.string().optional(),
     supportingVisualLabel: z.string().optional()
@@ -37,28 +36,7 @@ const deepDives = defineCollection({
   })
 });
 
-const notes = defineCollection({
-  loader: glob({ base: './src/content/notes', pattern: '**/*.md' }),
-  schema: z.object({
-    ...sharedSchema,
-    signalType: z.string()
-  })
-});
-
-const visuals = defineCollection({
-  loader: glob({ base: './src/content/visuals', pattern: '**/*.md' }),
-  schema: z.object({
-    ...sharedSchema,
-    embedPath: z.string(),
-    openPath: z.string(),
-    visualType: z.string(),
-    status: z.enum(['live', 'draft']).default('live')
-  })
-});
-
 export const collections = {
   briefs,
-  'deep-dives': deepDives,
-  notes,
-  visuals
+  'deep-dives': deepDives
 };

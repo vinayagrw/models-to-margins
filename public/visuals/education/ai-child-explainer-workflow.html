@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Child Explainer Workflow</title>
+  <script>
+    (() => {
+      const params = new URLSearchParams(window.location.search);
+      const storageKey = 'm2m-theme';
+      const root = document.documentElement;
+      const media = window.matchMedia('(prefers-color-scheme: dark)');
+      const normalizeTheme = (value) => value === 'dark' || value === 'light' ? value : null;
+      const getStoredTheme = () => {
+        try {
+          return normalizeTheme(window.localStorage.getItem(storageKey));
+        } catch {
+          return null;
+        }
+      };
+      const getSystemTheme = () => media.matches ? 'dark' : 'light';
+      const getPreferredTheme = () => normalizeTheme(params.get('theme')) ?? getStoredTheme() ?? getSystemTheme();
+
+      root.dataset.embedded = params.get('embed') === '1' ? 'true' : 'false';
+
+      window.__m2mApplyTheme = (theme, persist = false) => {
+        const nextTheme = normalizeTheme(theme) ?? getPreferredTheme();
+        root.dataset.theme = nextTheme;
+        root.style.colorScheme = nextTheme;
+        if (persist) {
+          try {
+            window.localStorage.setItem(storageKey, nextTheme);
+          } catch {
+            // Ignore storage failures in restricted contexts.
+          }
+        }
+      };
+
+      window.__m2mApplyTheme(getPreferredTheme(), false);
+
+      window.addEventListener('message', (event) => {
+        if (event.origin !== window.location.origin) return;
+        if (event.data?.type === 'm2m:set-theme') {
+          window.__m2mApplyTheme(event.data.theme, false);
+        }
+      });
+
+      const syncSystemTheme = (event) => {
+        if (getStoredTheme()) return;
+        window.__m2mApplyTheme(event.matches ? 'dark' : 'light', false);
+      };
+
+      if (typeof media.addEventListener === 'function') {
+        media.addEventListener('change', syncSystemTheme);
+      } else if (typeof media.addListener === 'function') {
+        media.addListener(syncSystemTheme);
+      }
+    })();
+  </script>
+  <style>
+    :root,
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg-0: #f7efe5;
+      --bg-1: #e6f4fa;
+      --bg-2: #f5ebe5;
+      --panel: rgba(255, 255, 255, 0.78);
+      --panel-strong: rgba(255, 255, 255, 0.88);
+      --border: rgba(16, 42, 67, 0.1);
+      --ink: #10263b;
+      --muted: #536779;
+      --accent: #1f90c4;
+      --accent-2: #f0a24d;
+      --accent-3: #2e9567;
+      --accent-4: #c45b63;
+      --shadow: 0 18px 42px rgba(15, 33, 52, 0.16);
+      --shadow-soft: 0 12px 32px rgba(15, 33, 52, 0.1);
+      --grid-line: rgba(16, 42, 67, 0.05);
+      --stage-bg: rgba(255, 255, 255, 0.72);
+      --control-bg: rgba(255, 255, 255, 0.8);
+      --control-border: rgba(16, 42, 67, 0.12);
+      --theme-toggle-shell: rgba(10, 17, 31, 0.92);
+      --theme-toggle-border: rgba(16, 42, 67, 0.12);
+      --theme-toggle-icon: rgba(238, 246, 255, 0.92);
+      --theme-toggle-icon-inactive: rgba(238, 246, 255, 0.56);
+      --theme-toggle-thumb: linear-gradient(135deg, #ffe2ad, #f4b24b);
+      --theme-toggle-thumb-shadow: 0 10px 22px rgba(240, 162, 77, 0.28);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        color-scheme: dark;
+        --bg-0: #06111f;
+        --bg-1: #0a1a32;
+        --bg-2: #102545;
+        --panel: rgba(10, 24, 47, 0.8);
+        --panel-strong: rgba(255, 255, 255, 0.06);
+        --border: rgba(166, 212, 255, 0.14);
+        --ink: #ebf4ff;
+        --muted: #95aecb;
+        --accent: #6ed8ff;
+        --accent-2: #ffbf69;
+        --accent-3: #9cffc8;
+        --accent-4: #ff8a94;
+        --shadow: 0 18px 42px rgba(0, 0, 0, 0.28);
+        --shadow-soft: 0 12px 32px rgba(0, 0, 0, 0.2);
+        --grid-line: rgba(166, 212, 255, 0.04);
+        --stage-bg: rgba(255, 255, 255, 0.04);
+        --control-bg: rgba(10, 24, 47, 0.82);
+        --control-border: rgba(166, 212, 255, 0.14);
+        --theme-toggle-shell: rgba(10, 17, 31, 0.92);
+        --theme-toggle-border: rgba(166, 212, 255, 0.14);
+        --theme-toggle-icon: rgba(235, 244, 255, 0.92);
+        --theme-toggle-icon-inactive: rgba(235, 244, 255, 0.52);
+        --theme-toggle-thumb: linear-gradient(135deg, #c48cff, #a56cff);
+        --theme-toggle-thumb-shadow: 0 10px 22px rgba(165, 108, 255, 0.28);
+      }
+    }
+
+    :root[data-theme="dark"] {
+      color-scheme: dark;
+      --bg-0: #06111f;
+      --bg-1: #0a1a32;
+      --bg-2: #102545;
+      --panel: rgba(10, 24, 47, 0.8);
+      --panel-strong: rgba(255, 255, 255, 0.06);
+      --border: rgba(166, 212, 255, 0.14);
+      --ink: #ebf4ff;
+      --muted: #95aecb;
+      --accent: #6ed8ff;
+      --accent-2: #ffbf69;
+      --accent-3: #9cffc8;
+      --accent-4: #ff8a94;
+      --shadow: 0 18px 42px rgba(0, 0, 0, 0.28);
+      --shadow-soft: 0 12px 32px rgba(0, 0, 0, 0.2);
+      --grid-line: rgba(166, 212, 255, 0.04);
+      --stage-bg: rgba(255, 255, 255, 0.04);
+      --control-bg: rgba(10, 24, 47, 0.82);
+      --control-border: rgba(166, 212, 255, 0.14);
+      --theme-toggle-shell: rgba(10, 17, 31, 0.92);
+      --theme-toggle-border: rgba(166, 212, 255, 0.14);
+      --theme-toggle-icon: rgba(235, 244, 255, 0.92);
+      --theme-toggle-icon-inactive: rgba(235, 244, 255, 0.52);
+      --theme-toggle-thumb: linear-gradient(135deg, #c48cff, #a56cff);
+      --theme-toggle-thumb-shadow: 0 10px 22px rgba(165, 108, 255, 0.28);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(31, 144, 196, 0.18), transparent 30%),
+        radial-gradient(circle at top right, rgba(240, 162, 77, 0.16), transparent 24%),
+        radial-gradient(circle at bottom left, rgba(46, 149, 103, 0.14), transparent 22%),
+        linear-gradient(180deg, var(--bg-0) 0%, var(--bg-1) 46%, var(--bg-2) 100%);
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(var(--grid-line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+      background-size: 44px 44px;
+      mask-image: radial-gradient(circle at center, black 32%, transparent 84%);
+      opacity: 0.9;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .site-header {
+      position: sticky;
+      top: 16px;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      margin: 20px auto 18px;
+      padding: 16px 18px;
+      width: min(calc(100% - 28px), 1600px);
+      background: var(--panel-strong);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      backdrop-filter: blur(18px);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .brand-mark {
+      width: 40px;
+      height: 40px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      font-size: 0.9rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: #0a1524;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    }
+
+    .brand-copy strong,
+    .brand-copy span {
+      display: block;
+    }
+
+    .brand-copy strong {
+      font-size: 0.96rem;
+    }
+
+    .brand-copy span {
+      color: var(--muted);
+      font-size: 0.78rem;
+    }
+
+    .site-header-actions,
+    .site-nav {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .site-nav .nav-item {
+      padding: 10px 14px;
+      border-radius: 999px;
+      color: var(--muted);
+      transition: 180ms ease;
+    }
+
+    .site-nav a:hover,
+    .site-nav a[aria-current="page"] {
+      color: var(--ink);
+      background: color-mix(in srgb, var(--accent) 14%, transparent);
+    }
+
+    .site-nav .is-disabled {
+      color: color-mix(in srgb, var(--muted) 56%, transparent);
+      background: color-mix(in srgb, var(--panel-strong) 58%, transparent);
+      border: 1px solid color-mix(in srgb, var(--border) 55%, transparent);
+      cursor: not-allowed;
+    }
+
+    .theme-toggle {
+      appearance: none;
+      border: 0;
+      background: transparent;
+      padding: 0;
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    .theme-toggle__track {
+      position: relative;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      align-items: center;
+      gap: 8px;
+      width: 92px;
+      height: 48px;
+      padding: 0 10px;
+      border-radius: 999px;
+      background: var(--theme-toggle-shell);
+      border: 1px solid var(--theme-toggle-border);
+      box-shadow: var(--shadow-soft);
+      isolation: isolate;
+    }
+
+    .theme-toggle__icon {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      place-items: center;
+      color: var(--theme-toggle-icon-inactive);
+      transition: color 180ms ease;
+    }
+
+    .theme-toggle__icon svg {
+      width: 18px;
+      height: 18px;
+      display: block;
+    }
+
+    .theme-toggle__thumb {
+      position: absolute;
+      top: 5px;
+      left: 5px;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: var(--theme-toggle-thumb);
+      box-shadow: var(--theme-toggle-thumb-shadow);
+      transition: transform 220ms ease, background 180ms ease, box-shadow 180ms ease;
+    }
+
+    .theme-toggle[data-theme="light"] .theme-toggle__thumb {
+      transform: translateX(0);
+    }
+
+    .theme-toggle[data-theme="dark"] .theme-toggle__thumb {
+      transform: translateX(44px);
+    }
+
+    .theme-toggle[data-theme="light"] .theme-toggle__icon--sun,
+    .theme-toggle[data-theme="dark"] .theme-toggle__icon--moon {
+      color: var(--theme-toggle-icon);
+    }
+
+    .theme-toggle:focus-visible .theme-toggle__track {
+      outline: 2px solid var(--accent);
+      outline-offset: 3px;
+    }
+
+    .page-shell {
+      width: min(calc(100% - 28px), 1600px);
+      margin: 0 auto;
+      padding-bottom: 28px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .page-lead {
+      display: grid;
+      gap: 14px;
+      padding: 12px 0 18px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      color: var(--accent);
+      font-size: 0.78rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: color-mix(in srgb, var(--accent) 12%, transparent);
+      width: fit-content;
+    }
+
+    .page-title {
+      margin: 0;
+      font-size: clamp(2.5rem, 5vw, 4.6rem);
+      letter-spacing: -0.05em;
+      line-height: 0.98;
+    }
+
+    .page-copy {
+      margin: 0;
+      max-width: 78ch;
+      color: var(--muted);
+      line-height: 1.65;
+      font-size: 1.02rem;
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      width: fit-content;
+      color: var(--muted);
+      font-size: 0.92rem;
+      transition: color 180ms ease, transform 180ms ease;
+    }
+
+    .back-link:hover {
+      color: var(--ink);
+      transform: translateX(-1px);
+    }
+
+    .control-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 12px 14px;
+      border-radius: 22px;
+      background: var(--control-bg);
+      border: 1px solid var(--control-border);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .control-copy {
+      display: grid;
+      gap: 6px;
+      max-width: 70ch;
+    }
+
+    .control-copy p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.96rem;
+      line-height: 1.55;
+    }
+
+    .zoom-controls {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .zoom-controls button {
+      appearance: none;
+      border: 1px solid var(--control-border);
+      background: color-mix(in srgb, var(--panel-strong) 86%, transparent);
+      color: var(--ink);
+      border-radius: 999px;
+      padding: 0.58rem 0.9rem;
+      font: inherit;
+      cursor: pointer;
+      min-width: 3rem;
+      transition: transform 180ms ease, border-color 180ms ease;
+    }
+
+    .zoom-controls button:hover {
+      transform: translateY(-1px);
+      border-color: color-mix(in srgb, var(--accent) 42%, var(--control-border));
+    }
+
+    .poster-shell {
+      padding: 16px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .poster-viewport {
+      overflow: auto;
+      border-radius: 24px;
+      border: 1px solid color-mix(in srgb, var(--border) 92%, transparent);
+      background: linear-gradient(180deg, color-mix(in srgb, var(--panel-strong) 92%, transparent), color-mix(in srgb, var(--stage-bg) 96%, transparent));
+      cursor: grab;
+    }
+
+    .poster-viewport.is-dragging {
+      cursor: grabbing;
+    }
+
+    .poster {
+      width: 1460px;
+      min-height: 960px;
+      padding: 24px;
+      transform-origin: top left;
+      transition: transform 180ms ease;
+    }
+
+    .poster-grid {
+      display: grid;
+      gap: 18px;
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+    }
+
+    .stage-card,
+    .support-card,
+    .failure-card,
+    .outcome-card {
+      padding: 18px;
+      border-radius: 24px;
+      border: 1px solid color-mix(in srgb, var(--border) 96%, transparent);
+      box-shadow: var(--shadow-soft);
+      background: color-mix(in srgb, var(--panel-strong) 88%, transparent);
+    }
+
+    .stage-card {
+      display: grid;
+      gap: 12px;
+      min-height: 250px;
+    }
+
+    .stage-card--input { grid-column: span 2; }
+    .stage-card--diagnose { grid-column: span 2; }
+    .stage-card--explain { grid-column: span 3; }
+    .stage-card--check { grid-column: span 2; }
+    .stage-card--recall { grid-column: span 3; }
+
+    .support-card {
+      grid-column: span 6;
+      display: grid;
+      gap: 12px;
+    }
+
+    .failure-card {
+      grid-column: span 3;
+      background: linear-gradient(180deg, color-mix(in srgb, var(--accent-4) 14%, transparent), color-mix(in srgb, var(--panel-strong) 88%, transparent));
+    }
+
+    .outcome-card {
+      grid-column: span 12;
+      background: linear-gradient(180deg, color-mix(in srgb, var(--accent-3) 16%, transparent), color-mix(in srgb, var(--panel-strong) 88%, transparent));
+    }
+
+    .stage-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      width: fit-content;
+      padding: 6px 10px;
+      border-radius: 999px;
+      color: var(--muted);
+      background: color-mix(in srgb, var(--stage-bg) 92%, transparent);
+      font-size: 0.76rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .stage-card h2,
+    .support-card h2,
+    .failure-card h2,
+    .outcome-card h2 {
+      margin: 0;
+      font-size: 1.32rem;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+    }
+
+    .stage-card p,
+    .support-card p,
+    .failure-card p,
+    .outcome-card p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .stage-card ul,
+    .support-card ul,
+    .failure-card ul {
+      margin: 0;
+      padding-left: 1.1rem;
+      color: var(--muted);
+      display: grid;
+      gap: 8px;
+      line-height: 1.5;
+    }
+
+    .stage-arrow {
+      display: grid;
+      place-items: center;
+      font-size: 2rem;
+      color: color-mix(in srgb, var(--accent) 72%, var(--muted));
+    }
+
+    .stage-arrow--one { grid-column: 3; grid-row: 1; }
+    .stage-arrow--two { grid-column: 5; grid-row: 1; }
+    .stage-arrow--three { grid-column: 8; grid-row: 1; }
+    .stage-arrow--four { grid-column: 10; grid-row: 1; }
+
+    .support-card--left { grid-row: 2; }
+    .support-card--right { grid-row: 2; }
+
+    .failure-card--one { grid-column: span 3; grid-row: 3; }
+    .failure-card--two { grid-column: span 3; grid-row: 3; }
+    .failure-card--three { grid-column: span 3; grid-row: 3; }
+    .failure-card--four { grid-column: span 3; grid-row: 3; }
+
+    .outcome-grid {
+      display: grid;
+      gap: 14px;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      margin-top: 14px;
+    }
+
+    .outcome-chip {
+      padding: 14px;
+      border-radius: 18px;
+      background: color-mix(in srgb, var(--panel-strong) 90%, transparent);
+      border: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
+    }
+
+    .outcome-chip strong {
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    :root[data-embedded="true"] .site-header,
+    :root[data-embedded="true"] .page-lead {
+      display: none;
+    }
+
+    :root[data-embedded="true"] .page-shell {
+      width: 100%;
+      padding: 0;
+    }
+
+    :root[data-embedded="true"] .poster-shell {
+      padding: 0;
+      border-radius: 0;
+      border: 0;
+      box-shadow: none;
+      background: transparent;
+    }
+
+    :root[data-embedded="true"] .poster-viewport {
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+    }
+
+    @media (max-width: 900px) {
+      .site-header {
+        position: static;
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .page-shell {
+        width: min(calc(100% - 18px), 1600px);
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="/">
+      <span class="brand-mark">M2M</span>
+      <span class="brand-copy">
+        <strong>Models to Margins</strong>
+        <span>Business-first AI research and operating maps</span>
+      </span>
+    </a>
+    <div class="site-header-actions">
+      <nav class="site-nav" aria-label="Primary">
+        <a class="nav-item" href="/briefs">Brief</a>
+        <a class="nav-item" href="/deep-dives">Deep Dives</a>
+        <span class="nav-item is-disabled" aria-disabled="true">About</span>
+      </nav>
+      <button class="theme-toggle" type="button" data-theme-toggle aria-label="Toggle color theme" title="Toggle color theme">
+        <span class="theme-toggle__track" aria-hidden="true">
+          <span class="theme-toggle__icon theme-toggle__icon--sun">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="4.25" fill="none" stroke="currentColor" stroke-width="1.8"></circle>
+              <path d="M12 2.5v3M12 18.5v3M21.5 12h-3M5.5 12h-3M18.7 5.3l-2.1 2.1M7.4 16.6l-2.1 2.1M18.7 18.7l-2.1-2.1M7.4 7.4L5.3 5.3" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.8"></path>
+            </svg>
+          </span>
+          <span class="theme-toggle__icon theme-toggle__icon--moon">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M15.7 3.6a8.6 8.6 0 1 0 4.7 15.5a8 8 0 1 1-4.7-15.5Z" fill="none" stroke="currentColor" stroke-linejoin="round" stroke-width="1.8"></path>
+            </svg>
+          </span>
+          <span class="theme-toggle__thumb"></span>
+        </span>
+      </button>
+    </div>
+  </header>
+
+  <main class="page-shell">
+    <section class="page-lead">
+      <span class="eyebrow">Workflow Poster</span>
+      <h1 class="page-title">AI playbook for explaining a problem to a 10-year-old.</h1>
+      <p class="page-copy">This poster turns the explainer workflow into one visual loop: map the real problem, check missing prerequisites, simplify without distorting, run a worked example, ask for teach-back, and come back later for delayed recall.</p>
+      <a class="back-link" href="/deep-dives/ai-playbook-for-explaining-a-problem-to-a-10-year-old">
+        <span aria-hidden="true">&larr;</span>
+        <span>Back to Deep Dive</span>
+      </a>
+      <div class="control-row">
+        <div class="control-copy">
+          <p><strong>Reading note</strong>: the middle row shows the teaching loop, the support row shows the adult prompt contract, and the bottom rail captures the failure checks to keep the explanation honest.</p>
+        </div>
+        <div class="zoom-controls" aria-label="Zoom controls">
+          <button type="button" data-zoom-out>-</button>
+          <button type="button" data-zoom-in>+</button>
+          <button type="button" data-zoom-reset>Reset</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="poster-shell">
+      <div class="poster-viewport" id="poster-viewport">
+        <div class="poster" id="poster">
+          <div class="poster-grid">
+            <article class="stage-card stage-card--input">
+              <span class="stage-label">1. Inputs</span>
+              <h2>Start with the real problem</h2>
+              <p>Paste the actual worksheet, paragraph, screenshot, or prompt. Do not start from a polished summary.</p>
+              <ul>
+                <li>Child age or grade</li>
+                <li>Child interests</li>
+                <li>Success target</li>
+                <li>Hints only or full explanation</li>
+              </ul>
+            </article>
+
+            <div class="stage-arrow stage-arrow--one" aria-hidden="true">&rarr;</div>
+
+            <article class="stage-card stage-card--diagnose">
+              <span class="stage-label">2. Diagnose</span>
+              <h2>Map prerequisites first</h2>
+              <p>Weak explanations are often prerequisite problems in disguise.</p>
+              <ul>
+                <li>Main idea</li>
+                <li>Missing concepts</li>
+                <li>Likely misconceptions</li>
+                <li>What success looks like</li>
+              </ul>
+            </article>
+
+            <div class="stage-arrow stage-arrow--two" aria-hidden="true">&rarr;</div>
+
+            <article class="stage-card stage-card--explain">
+              <span class="stage-label">3. Explain</span>
+              <h2>Translate like a guided tutor, not an answer machine</h2>
+              <p>Keep the explanation fixed in order so the model cannot drift into generic tutoring monologues.</p>
+              <ul>
+                <li>One-sentence explanation</li>
+                <li>Three-step simple explanation</li>
+                <li>One analogy tied to interests</li>
+                <li>One worked example with think-aloud reasoning</li>
+                <li>One wrong answer and why it fails</li>
+              </ul>
+            </article>
+
+            <div class="stage-arrow stage-arrow--three" aria-hidden="true">&rarr;</div>
+
+            <article class="stage-card stage-card--check">
+              <span class="stage-label">4. Check</span>
+              <h2>Run a teach-back loop</h2>
+              <p>Do not ask, "Do you get it?" Ask the child to show the understanding.</p>
+              <ul>
+                <li>Explain it back</li>
+                <li>Solve one similar problem</li>
+                <li>Point to the wrong step</li>
+              </ul>
+            </article>
+
+            <div class="stage-arrow stage-arrow--four" aria-hidden="true">&rarr;</div>
+
+            <article class="stage-card stage-card--recall">
+              <span class="stage-label">5. Recall</span>
+              <h2>Come back later for delayed retrieval</h2>
+              <p>A short check after 24 to 48 hours is better than one long explanation now.</p>
+              <ul>
+                <li>Can they still explain the big idea?</li>
+                <li>Can they solve a similar problem?</li>
+                <li>Can they spot the common mistake?</li>
+              </ul>
+            </article>
+
+            <article class="support-card support-card--left">
+              <span class="stage-label">Prompt contract</span>
+              <h2>Every session uses the same four-part structure</h2>
+              <p><strong>ROLE</strong>: guided explainer for an adult helper. <strong>INPUTS</strong>: age, interests, success target, exact problem. <strong>RULES</strong>: define prerequisites, hold back the answer, explain where the analogy breaks. <strong>OUTPUT FORMAT</strong>: explanation, worked example, misconception check, questions, practice.</p>
+            </article>
+
+            <article class="support-card support-card--right">
+              <span class="stage-label">Adult job</span>
+              <h2>Stay in the loop</h2>
+              <p>The adult still checks truth, age fit, and safety. The model helps translate and scaffold, but the human decides what to trust and what to teach next.</p>
+            </article>
+
+            <article class="failure-card failure-card--one">
+              <span class="stage-label">Failure check</span>
+              <h2>Oversimplifies</h2>
+              <p>The explanation sounds clean but the real mechanism disappears.</p>
+            </article>
+
+            <article class="failure-card failure-card--two">
+              <span class="stage-label">Failure check</span>
+              <h2>Analogy goes false</h2>
+              <p>The metaphor is memorable, but it teaches the wrong thing.</p>
+            </article>
+
+            <article class="failure-card failure-card--three">
+              <span class="stage-label">Failure check</span>
+              <h2>Answers too early</h2>
+              <p>The child hears the answer before trying to reason through the steps.</p>
+            </article>
+
+            <article class="failure-card failure-card--four">
+              <span class="stage-label">Failure check</span>
+              <h2>No transfer</h2>
+              <p>The child can repeat the wording but cannot solve the next problem.</p>
+            </article>
+
+            <article class="outcome-card">
+              <span class="stage-label">Success test</span>
+              <h2>The explanation worked when the child can see the idea, say it back, and use it again.</h2>
+              <p>This is the real bar: not whether the explanation sounded simple, but whether the child formed the right mental picture and can apply it without copying the AI verbatim.</p>
+              <div class="outcome-grid">
+                <div class="outcome-chip">
+                  <strong>Teach-back</strong>
+                  <span>Explain the idea in their own words.</span>
+                </div>
+                <div class="outcome-chip">
+                  <strong>Near transfer</strong>
+                  <span>Solve one similar problem without step-by-step rescue.</span>
+                </div>
+                <div class="outcome-chip">
+                  <strong>Delayed recall</strong>
+                  <span>Still remember the big idea after a short gap.</span>
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    (() => {
+      const media = window.matchMedia('(prefers-color-scheme: dark)');
+      const viewport = document.getElementById('poster-viewport');
+      const poster = document.getElementById('poster');
+      const zoomInButton = document.querySelector('[data-zoom-in]');
+      const zoomOutButton = document.querySelector('[data-zoom-out]');
+      const zoomResetButton = document.querySelector('[data-zoom-reset]');
+      const minScale = 0.7;
+      const maxScale = 1.4;
+      const step = 0.1;
+      let scale = window.matchMedia('(max-width: 900px)').matches ? 0.78 : 1;
+
+      const getTheme = () => document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
+
+      const syncToggle = () => {
+        const theme = getTheme();
+        document.querySelectorAll('[data-theme-toggle]').forEach((toggle) => {
+          toggle.dataset.theme = theme;
+          toggle.setAttribute('aria-pressed', theme === 'dark' ? 'true' : 'false');
+          const label = theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme';
+          toggle.setAttribute('aria-label', label);
+          toggle.setAttribute('title', label);
+        });
+      };
+
+      const bindToggle = () => {
+        document.querySelectorAll('[data-theme-toggle]').forEach((toggle) => {
+          if (toggle.dataset.themeBound === 'true') return;
+          toggle.dataset.themeBound = 'true';
+          toggle.addEventListener('click', () => {
+            const nextTheme = getTheme() === 'dark' ? 'light' : 'dark';
+            window.__m2mApplyTheme?.(nextTheme, true);
+            syncToggle();
+          });
+        });
+      };
+
+      const applyScale = () => {
+        if (!poster) return;
+        poster.style.transform = `scale(${scale})`;
+        poster.style.height = `${960 * scale}px`;
+      };
+
+      zoomInButton?.addEventListener('click', () => {
+        scale = Math.min(maxScale, Number((scale + step).toFixed(2)));
+        applyScale();
+      });
+
+      zoomOutButton?.addEventListener('click', () => {
+        scale = Math.max(minScale, Number((scale - step).toFixed(2)));
+        applyScale();
+      });
+
+      zoomResetButton?.addEventListener('click', () => {
+        scale = window.matchMedia('(max-width: 900px)').matches ? 0.78 : 1;
+        applyScale();
+      });
+
+      if (viewport) {
+        let dragState = null;
+
+        viewport.addEventListener('pointerdown', (event) => {
+          dragState = {
+            x: event.clientX,
+            y: event.clientY,
+            left: viewport.scrollLeft,
+            top: viewport.scrollTop
+          };
+          viewport.classList.add('is-dragging');
+          viewport.setPointerCapture(event.pointerId);
+        });
+
+        viewport.addEventListener('pointermove', (event) => {
+          if (!dragState) return;
+          viewport.scrollLeft = dragState.left - (event.clientX - dragState.x);
+          viewport.scrollTop = dragState.top - (event.clientY - dragState.y);
+        });
+
+        const clearDrag = (event) => {
+          if (!dragState) return;
+          dragState = null;
+          viewport.classList.remove('is-dragging');
+          if (event?.pointerId != null && viewport.hasPointerCapture(event.pointerId)) {
+            viewport.releasePointerCapture(event.pointerId);
+          }
+        };
+
+        viewport.addEventListener('pointerup', clearDrag);
+        viewport.addEventListener('pointerleave', clearDrag);
+        viewport.addEventListener('pointercancel', clearDrag);
+      }
+
+      bindToggle();
+      syncToggle();
+      applyScale();
+
+      window.addEventListener('m2m:themechange', syncToggle);
+      window.addEventListener('storage', (event) => {
+        if (event.key !== 'm2m-theme') return;
+        const fallbackTheme = media.matches ? 'dark' : 'light';
+        window.__m2mApplyTheme?.(event.newValue ?? fallbackTheme, false);
+        syncToggle();
+      });
+    })();
+  </script>
+</body>
+</html>

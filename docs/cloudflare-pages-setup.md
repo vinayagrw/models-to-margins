@@ -2,6 +2,10 @@
 
 This repo is ready to deploy on Cloudflare Pages as a static Astro site.
 
+> [!NOTE]
+> The current public hostname for this project is `https://models-to-margins.vinayagrw.workers.dev`.
+> Keep internal routes and asset references root-relative so the same build works there cleanly without rewriting links.
+
 ## Prerequisites
 
 - A GitHub repo containing `C:\Users\viagr\Documents\Vinay\git\models-to-margins`
@@ -52,6 +56,8 @@ Click `Save and Deploy`.
 Cloudflare will build the site and give you a default URL like:
 
 - `https://models-to-margins.pages.dev`
+
+That `pages.dev` address is the Cloudflare-generated default. For this repo, treat `https://models-to-margins.vinayagrw.workers.dev` as the canonical public hostname in metadata, screenshots, and shared documentation unless you intentionally switch to a custom domain later.
 
 ## 5. Add a custom domain
 
@@ -110,3 +116,9 @@ If the build passes locally, Cloudflare Pages should be using the same output co
 
 - Astro builds the site
 - generated output goes to `dist`
+
+## 10. Hostname rule for this repo
+
+- Canonical metadata lives in `astro.config.mjs` and currently points to `https://models-to-margins.vinayagrw.workers.dev`
+- In app code, prefer root-relative paths like `/briefs`, `/deep-dives`, and `/visuals/...`
+- Avoid hardcoding `pages.dev` in page templates, raw visuals, or shared components

@@ -5,7 +5,7 @@ import EntryMeta from '../../components/EntryMeta.astro';
 import BackLink from '../../components/BackLink.astro';
 
 export async function getStaticPaths() {
-  const entries = (await getCollection('deep-dives')).filter((entry) => entry.data.listed);
+  const entries = await getCollection('deep-dives');
   return entries.map((entry) => ({
     params: { slug: entry.id },
     props: { entry }

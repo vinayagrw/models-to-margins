@@ -1,0 +1,532 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getHiddenRouteIds, getVisibilityCatalog } from '../../utils/site-data';
+
+const catalog = await getVisibilityCatalog();
+const initialConfig = {
+  hiddenRouteIds: getHiddenRouteIds()
+};
+const repoConfigPath = 'src/data/app-visibility.json';
+---
+
+<BaseLayout
+  title="Visibility Editor | Models to Margins"
+  description="Local editor for app visibility config."
+  currentPath="/admin/visibility"
+>
+  <section class="article-shell admin-shell">
+    <header>
+      <span class="eyebrow warm">Local Admin</span>
+      <h1>Visibility editor for app discovery surfaces.</h1>
+      <p class="lead">This page edits the local visibility config for app surfaces only. Direct URLs still work, but any saved changes need a rebuild and redeploy before they affect the shipped site.</p>
+    </header>
+
+    <div class="note-panel section-block">
+      <p><strong>Config file</strong>: <code>{repoConfigPath}</code></p>
+      <p><strong>What changes here</strong>: primary nav, homepage surfaces, collection indexes, and featured slots.</p>
+      <p><strong>What does not change</strong>: the route itself. Hidden pages still open directly by URL.</p>
+    </div>
+
+    <div class="admin-grid section-block">
+      <aside class="glass-card admin-sidebar">
+        <div class="admin-sidebar__section">
+          <span class="eyebrow">Live JSON</span>
+          <pre class="admin-json"><code id="visibility-json-preview"></code></pre>
+        </div>
+
+        <div class="admin-sidebar__section">
+          <span class="eyebrow green">Actions</span>
+          <div class="admin-actions">
+            <button class="button secondary" id="save-config" type="button">Save config file</button>
+            <button class="button secondary" id="download-json" type="button">Download JSON</button>
+            <button class="button secondary" id="copy-json" type="button">Copy JSON</button>
+            <button class="button secondary" id="reset-config" type="button">Reset to current</button>
+            <button class="button secondary" id="import-json" type="button">Import JSON</button>
+          </div>
+          <input id="import-json-input" type="file" accept="application/json,.json" hidden />
+          <p class="admin-status" id="admin-status" role="status" aria-live="polite"></p>
+        </div>
+      </aside>
+
+      <div class="admin-groups">
+        <section class="glass-card">
+          <div class="admin-group-head">
+            <span class="eyebrow">Top-level pages</span>
+            <p>These control whether primary surface links such as `/briefs` and `/deep-dives` are promoted elsewhere in the app.</p>
+          </div>
+          <div class="admin-list">
+            {catalog.pages.map((item) => (
+              <article class="admin-item">
+                <div class="admin-item__copy">
+                  <h3>{item.title}</h3>
+                  <p><strong>Route</strong>: <code>{item.route}</code></p>
+                  <p><strong>Route ID</strong>: <code>{item.routeId}</code></p>
+                  <p><strong>Default visibility</strong>: Visible by default</p>
+                  <p><strong>Effective visibility</strong>: <span class="admin-visibility-pill" data-effective-visibility={item.routeId}></span></p>
+                </div>
+                <label class="admin-toggle">
+                  <input
+                    class="admin-toggle__input"
+                    type="checkbox"
+                    data-route-id={item.routeId}
+                    data-default-visible={item.defaultVisible ? 'true' : 'false'}
+                  />
+                  <span class="admin-toggle__label">Visible in app</span>
+                </label>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section class="glass-card">
+          <div class="admin-group-head">
+            <span class="eyebrow warm">Briefs</span>
+            <p>Brief entries stay directly routable, but hidden ones disappear from homepage and collection discovery surfaces.</p>
+          </div>
+          <div class="admin-list">
+            {catalog.briefs.map((item) => (
+              <article class="admin-item">
+                <div class="admin-item__copy">
+                  <h3>{item.title}</h3>
+                  <p><strong>Route</strong>: <code>{item.route}</code></p>
+                  <p><strong>Route ID</strong>: <code>{item.routeId}</code></p>
+                  <p><strong>Default visibility</strong>: {item.defaultVisible ? 'Visible by default' : 'Hidden by content metadata'}</p>
+                  <p><strong>Effective visibility</strong>: <span class="admin-visibility-pill" data-effective-visibility={item.routeId}></span></p>
+                </div>
+                <label class="admin-toggle">
+                  <input
+                    class="admin-toggle__input"
+                    type="checkbox"
+                    data-route-id={item.routeId}
+                    data-default-visible={item.defaultVisible ? 'true' : 'false'}
+                  />
+                  <span class="admin-toggle__label">{item.defaultVisible ? 'Visible in app' : 'Hidden by content metadata'}</span>
+                </label>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section class="glass-card">
+          <div class="admin-group-head">
+            <span class="eyebrow">Deep dives</span>
+            <p>Flagship deep dives can be removed from discovery surfaces here without removing the direct detail route.</p>
+          </div>
+          <div class="admin-list">
+            {catalog.deepDives.map((item) => (
+              <article class="admin-item">
+                <div class="admin-item__copy">
+                  <h3>{item.title}</h3>
+                  <p><strong>Route</strong>: <code>{item.route}</code></p>
+                  <p><strong>Route ID</strong>: <code>{item.routeId}</code></p>
+                  <p><strong>Default visibility</strong>: {item.defaultVisible ? 'Visible by default' : 'Hidden by content metadata'}</p>
+                  <p><strong>Effective visibility</strong>: <span class="admin-visibility-pill" data-effective-visibility={item.routeId}></span></p>
+                </div>
+                <label class="admin-toggle">
+                  <input
+                    class="admin-toggle__input"
+                    type="checkbox"
+                    data-route-id={item.routeId}
+                    data-default-visible={item.defaultVisible ? 'true' : 'false'}
+                  />
+                  <span class="admin-toggle__label">{item.defaultVisible ? 'Visible in app' : 'Hidden by content metadata'}</span>
+                </label>
+              </article>
+            ))}
+          </div>
+        </section>
+      </div>
+    </div>
+  </section>
+
+  <script
+    is:inline
+    define:vars={{
+      initialCatalog: catalog,
+      initialConfig,
+      repoConfigPath
+    }}
+  >
+    (() => {
+      const saveButton = document.getElementById('save-config');
+      const downloadButton = document.getElementById('download-json');
+      const copyButton = document.getElementById('copy-json');
+      const resetButton = document.getElementById('reset-config');
+      const importButton = document.getElementById('import-json');
+      const importInput = document.getElementById('import-json-input');
+      const jsonPreview = document.getElementById('visibility-json-preview');
+      const status = document.getElementById('admin-status');
+      const toggles = Array.from(document.querySelectorAll('.admin-toggle__input'));
+
+      let hiddenRouteIds = new Set(initialConfig.hiddenRouteIds);
+      let importedFileHandle = null;
+
+      const setStatus = (message) => {
+        if (!status) return;
+        status.textContent = message;
+      };
+
+      const serializeConfig = () => ({
+        hiddenRouteIds: [...hiddenRouteIds].sort()
+      });
+
+      const serializeConfigText = () => JSON.stringify(serializeConfig(), null, 2);
+
+      const validateConfig = (value) => {
+        if (!value || typeof value !== 'object' || !Array.isArray(value.hiddenRouteIds)) {
+          throw new Error('Expected a JSON object with a hiddenRouteIds string array.');
+        }
+
+        const normalized = value.hiddenRouteIds.filter((routeId) => typeof routeId === 'string');
+
+        return {
+          hiddenRouteIds: [...new Set(normalized)]
+        };
+      };
+
+      const downloadConfig = () => {
+        const blob = new Blob([serializeConfigText()], { type: 'application/json' });
+        const href = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = href;
+        link.download = 'app-visibility.json';
+        document.body.append(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(href);
+      };
+
+      const fallbackCopy = (text) => {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.setAttribute('readonly', 'true');
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        textarea.style.pointerEvents = 'none';
+        document.body.append(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        textarea.remove();
+      };
+
+      const copyConfig = async () => {
+        const text = serializeConfigText();
+
+        if (navigator.clipboard?.writeText) {
+          await navigator.clipboard.writeText(text);
+          return;
+        }
+
+        fallbackCopy(text);
+      };
+
+      const updateUi = () => {
+        if (jsonPreview) {
+          jsonPreview.textContent = serializeConfigText();
+        }
+
+        toggles.forEach((toggle) => {
+          const routeId = toggle.dataset.routeId;
+          const defaultVisible = toggle.dataset.defaultVisible === 'true';
+          const effectiveVisible = defaultVisible && !hiddenRouteIds.has(routeId);
+          toggle.checked = effectiveVisible;
+          toggle.disabled = !defaultVisible;
+
+          const pill = document.querySelector(`[data-effective-visibility="${routeId}"]`);
+          if (pill) {
+            pill.textContent = effectiveVisible ? 'Visible in app' : 'Hidden from app';
+            pill.classList.toggle('is-hidden', !effectiveVisible);
+          }
+        });
+      };
+
+      const applyImportedConfig = (config, message) => {
+        hiddenRouteIds = new Set(config.hiddenRouteIds);
+        updateUi();
+        setStatus(message);
+      };
+
+      const importFromFile = async (file) => {
+        const text = await file.text();
+        const parsed = validateConfig(JSON.parse(text));
+        applyImportedConfig(parsed, 'Imported JSON into the editor. Save the repo file and rebuild to apply it.');
+      };
+
+      saveButton?.addEventListener('click', async () => {
+        try {
+          const nextText = serializeConfigText();
+
+          if ('showSaveFilePicker' in window) {
+            const handle = importedFileHandle ?? await window.showSaveFilePicker({
+              suggestedName: 'app-visibility.json',
+              types: [
+                {
+                  description: 'JSON files',
+                  accept: {
+                    'application/json': ['.json']
+                  }
+                }
+              ]
+            });
+            const writable = await handle.createWritable();
+            await writable.write(nextText);
+            await writable.close();
+            importedFileHandle = handle;
+            setStatus(`Saved visibility JSON. Rebuild and redeploy after replacing ${repoConfigPath}.`);
+            return;
+          }
+
+          downloadConfig();
+          setStatus(`Downloaded visibility JSON. Replace ${repoConfigPath} manually, then rebuild and redeploy.`);
+        } catch (error) {
+          if (error?.name === 'AbortError') return;
+          setStatus('Save failed. You can still use Download JSON and replace the repo file manually.');
+        }
+      });
+
+      downloadButton?.addEventListener('click', () => {
+        downloadConfig();
+        setStatus(`Downloaded visibility JSON. Replace ${repoConfigPath} before rebuilding.`);
+      });
+
+      copyButton?.addEventListener('click', async () => {
+        try {
+          await copyConfig();
+          setStatus('Copied the current visibility JSON to your clipboard.');
+        } catch {
+          setStatus('Copy failed in this browser. Use Download JSON instead.');
+        }
+      });
+
+      resetButton?.addEventListener('click', () => {
+        hiddenRouteIds = new Set(initialConfig.hiddenRouteIds);
+        updateUi();
+        setStatus("Reset the editor back to the repo's current saved config.");
+      });
+
+      importButton?.addEventListener('click', async () => {
+        try {
+          if ('showOpenFilePicker' in window) {
+            const [handle] = await window.showOpenFilePicker({
+              multiple: false,
+              types: [
+                {
+                  description: 'JSON files',
+                  accept: {
+                    'application/json': ['.json']
+                  }
+                }
+              ]
+            });
+
+            if (!handle) return;
+
+            importedFileHandle = handle;
+            const file = await handle.getFile();
+            await importFromFile(file);
+            return;
+          }
+
+          importInput?.click();
+        } catch (error) {
+          if (error?.name === 'AbortError') return;
+          setStatus('Import failed. Check that the file is valid JSON with a hiddenRouteIds array.');
+        }
+      });
+
+      importInput?.addEventListener('change', async (event) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        try {
+          await importFromFile(file);
+        } catch {
+          setStatus('Import failed. Check that the file is valid JSON with a hiddenRouteIds array.');
+        } finally {
+          importInput.value = '';
+        }
+      });
+
+      toggles.forEach((toggle) => {
+        toggle.addEventListener('change', () => {
+          const routeId = toggle.dataset.routeId;
+          const defaultVisible = toggle.dataset.defaultVisible === 'true';
+
+          if (!defaultVisible) {
+            toggle.checked = false;
+            return;
+          }
+
+          if (toggle.checked) {
+            hiddenRouteIds.delete(routeId);
+          } else {
+            hiddenRouteIds.add(routeId);
+          }
+
+          updateUi();
+        });
+      });
+
+      updateUi();
+      setStatus(`This is a local editor. Save ${repoConfigPath}, then rebuild and redeploy.`);
+    })();
+  </script>
+
+  <style>
+    .admin-shell {
+      padding-bottom: 34px;
+    }
+
+    .admin-grid {
+      display: grid;
+      grid-template-columns: 360px minmax(0, 1fr);
+      gap: 20px;
+      align-items: start;
+    }
+
+    .admin-sidebar {
+      position: sticky;
+      top: 110px;
+      display: grid;
+      gap: 16px;
+      padding: 20px;
+    }
+
+    .admin-sidebar__section {
+      display: grid;
+      gap: 12px;
+    }
+
+    .admin-json {
+      margin: 0;
+      min-height: 240px;
+      max-height: 460px;
+      overflow: auto;
+      padding: 1rem;
+      border-radius: 18px;
+      border: 1px solid color-mix(in srgb, var(--line) 78%, transparent);
+      background: color-mix(in srgb, var(--surface-muted) 88%, transparent);
+      color: var(--text);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .admin-actions {
+      display: grid;
+      gap: 10px;
+    }
+
+    .admin-status {
+      margin: 0;
+      min-height: 2.8rem;
+      font-size: 0.95rem;
+    }
+
+    .admin-groups {
+      display: grid;
+      gap: 20px;
+    }
+
+    .admin-group-head {
+      display: grid;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .admin-group-head p {
+      margin: 0;
+    }
+
+    .admin-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .admin-item {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 16px;
+      align-items: start;
+      padding: 16px;
+      border-radius: 20px;
+      border: 1px solid color-mix(in srgb, var(--line) 78%, transparent);
+      background: color-mix(in srgb, var(--surface-muted) 86%, transparent);
+    }
+
+    .admin-item__copy {
+      display: grid;
+      gap: 6px;
+    }
+
+    .admin-item__copy h3,
+    .admin-item__copy p {
+      margin: 0;
+    }
+
+    .admin-toggle {
+      display: grid;
+      gap: 10px;
+      justify-items: end;
+      min-width: 172px;
+    }
+
+    .admin-toggle__input {
+      width: 1.2rem;
+      height: 1.2rem;
+      margin: 0;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+
+    .admin-toggle__input:disabled {
+      cursor: not-allowed;
+      opacity: 0.55;
+    }
+
+    .admin-toggle__label {
+      font-size: 0.9rem;
+      text-align: right;
+      color: var(--muted);
+    }
+
+    .admin-visibility-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--accent-3) 16%, transparent);
+      border: 1px solid color-mix(in srgb, var(--accent-3) 26%, transparent);
+      color: var(--text);
+      font-size: 0.86rem;
+    }
+
+    .admin-visibility-pill.is-hidden {
+      background: color-mix(in srgb, var(--accent-2) 18%, transparent);
+      border-color: color-mix(in srgb, var(--accent-2) 28%, transparent);
+    }
+
+    @media (max-width: 1120px) {
+      .admin-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .admin-sidebar {
+        position: static;
+      }
+    }
+
+    @media (max-width: 820px) {
+      .admin-item {
+        grid-template-columns: 1fr;
+      }
+
+      .admin-toggle {
+        justify-items: start;
+      }
+
+      .admin-toggle__label {
+        text-align: left;
+      }
+    }
+  </style>
+</BaseLayout>

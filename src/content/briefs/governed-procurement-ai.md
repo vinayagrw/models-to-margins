@@ -11,8 +11,9 @@ lens:
   - Governance
   - ROI
 briefType: interactive
-embedPath: /visuals/procurement-ai/command-center.html
-openPath: /visuals/procurement-ai/command-center.html
+openPath: /briefs/governed-procurement-ai
+supportingVisualPath: /visuals/procurement-ai/command-center.html
+supportingVisualLabel: Open the procurement command center
 tags:
   - procurement
   - AI
@@ -20,10 +21,10 @@ tags:
   - governance
   - interactive brief
 audience: Procurement leaders, operators, and strategy teams
-readTime: Interactive brief
+readTime: Live brief
 ---
 
-This live brief wraps the procurement AI story in a command-center format instead of a static architecture slide.
+This procurement brief is served directly as the governed procurement command-center experience.
 
 ## What it shows
 
@@ -31,6 +32,6 @@ This live brief wraps the procurement AI story in a command-center format instea
 - The architecture chain from source systems to governed execution
 - The ROI and value outcomes the operating model is supposed to unlock
 
-## Why the wrapper matters
+## Implementation note
 
-The HTML artifact stays in the public assets layer, but the publication route gives it context, metadata, and a clean URL that is easier to share and keep organized over time.
+The public route stays at `/briefs/governed-procurement-ai`. The raw HTML file still lives under `public/visuals/...` as implementation infrastructure so the command center remains fast, portable, and easy to embed without becoming a separate public collection route.

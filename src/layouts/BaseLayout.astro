@@ -1,6 +1,7 @@
 ---
 import '../styles/global.css';
-import ThemeToggle from '../components/ThemeToggle.astro';
+import ThemeBootstrap from '../components/ThemeBootstrap.astro';
+import SiteHeader from '../components/SiteHeader.astro';
 
 interface Props {
   title?: string;
@@ -15,11 +16,6 @@ const {
 } = Astro.props;
 
 const canonical = new URL(Astro.url.pathname, Astro.site);
-const navItems = [
-  { href: '/briefs', label: 'Brief' },
-  { href: '/deep-dives', label: 'Deep Dives' },
-  { label: 'About', disabled: true }
-];
 ---
 
 <!doctype html>
@@ -36,77 +32,10 @@ const navItems = [
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="canonical" href={canonical.href} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <script is:inline>
-      (() => {
-        const storageKey = 'm2m-theme';
-        const root = document.documentElement;
-        const media = window.matchMedia('(prefers-color-scheme: dark)');
-        const normalizeTheme = (value) => value === 'dark' || value === 'light' ? value : null;
-        const getStoredTheme = () => {
-          try {
-            return normalizeTheme(window.localStorage.getItem(storageKey));
-          } catch {
-            return null;
-          }
-        };
-        const getSystemTheme = () => media.matches ? 'dark' : 'light';
-        const getPreferredTheme = () => getStoredTheme() ?? getSystemTheme();
-
-        window.__m2mThemeKey = storageKey;
-        window.__m2mGetTheme = () => root.dataset.theme || getPreferredTheme();
-        window.__m2mApplyTheme = (theme, persist = false) => {
-          const nextTheme = normalizeTheme(theme) ?? getPreferredTheme();
-          root.dataset.theme = nextTheme;
-          root.style.colorScheme = nextTheme;
-          if (persist) {
-            try {
-              window.localStorage.setItem(storageKey, nextTheme);
-            } catch {
-              // Ignore storage errors so theme switching still works in restricted contexts.
-            }
-          }
-          window.dispatchEvent(new CustomEvent('m2m:themechange', { detail: { theme: nextTheme } }));
-        };
-
-        window.__m2mApplyTheme(getPreferredTheme(), false);
-
-        const syncSystemTheme = (event) => {
-          if (getStoredTheme()) return;
-          window.__m2mApplyTheme(event.matches ? 'dark' : 'light', false);
-        };
-
-        if (typeof media.addEventListener === 'function') {
-          media.addEventListener('change', syncSystemTheme);
-        } else if (typeof media.addListener === 'function') {
-          media.addListener(syncSystemTheme);
-        }
-      })();
-    </script>
+    <ThemeBootstrap />
   </head>
   <body>
-    <header class="site-header">
-      <a class="brand" href="/">
-        <span class="brand-mark">M2M</span>
-        <span class="brand-copy">
-          <strong>Models to Margins</strong>
-          <span>Business-first AI research and operating maps</span>
-        </span>
-      </a>
-      <div class="site-header-actions">
-        <nav class="site-nav" aria-label="Primary">
-          {navItems.map((item) => (
-            item.disabled ? (
-              <span class="nav-item is-disabled" aria-disabled="true">{item.label}</span>
-            ) : (
-              <a class="nav-item" href={item.href} aria-current={currentPath === item.href ? 'page' : undefined}>
-                {item.label}
-              </a>
-            )
-          ))}
-        </nav>
-        <ThemeToggle />
-      </div>
-    </header>
+    <SiteHeader currentPath={currentPath} />
     <main class="site-shell">
       <slot />
     </main>
@@ -120,6 +49,7 @@ const navItems = [
         const media = window.matchMedia('(prefers-color-scheme: dark)');
 
         const getTheme = () => document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
+        const promptPattern = /\bROLE\b[\s\S]*\bINPUTS\b[\s\S]*\bRULES\b[\s\S]*\bOUTPUT FORMAT\b/;
 
         const syncToggles = () => {
           const theme = getTheme();
@@ -144,7 +74,83 @@ const navItems = [
           syncToggles();
         };
 
+        const fallbackCopy = (text) => {
+          const textarea = document.createElement('textarea');
+          textarea.value = text;
+          textarea.setAttribute('readonly', 'true');
+          textarea.style.position = 'fixed';
+          textarea.style.opacity = '0';
+          textarea.style.pointerEvents = 'none';
+          document.body.append(textarea);
+          textarea.select();
+          document.execCommand('copy');
+          textarea.remove();
+        };
+
+        const copyText = async (text) => {
+          if (navigator.clipboard?.writeText) {
+            await navigator.clipboard.writeText(text);
+            return;
+          }
+
+          fallbackCopy(text);
+        };
+
+        const enhanceCodeBlocks = () => {
+          document.querySelectorAll('.article-body pre').forEach((pre) => {
+            if (pre.dataset.codeEnhanced === 'true') return;
+
+            const code = pre.querySelector('code');
+            const text = code?.innerText ?? pre.innerText;
+
+            if (!text.trim()) return;
+
+            pre.dataset.codeEnhanced = 'true';
+
+            const shell = document.createElement('div');
+            shell.className = 'code-block-shell';
+
+            if (promptPattern.test(text)) {
+              shell.classList.add('is-prompt-block');
+            }
+
+            const toolbar = document.createElement('div');
+            toolbar.className = 'code-block-toolbar';
+
+            const label = document.createElement('span');
+            label.className = 'code-block-label';
+            label.textContent = shell.classList.contains('is-prompt-block') ? 'Prompt pack' : 'Code block';
+
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'code-copy-button';
+            button.textContent = 'Copy';
+            button.addEventListener('click', async () => {
+              try {
+                await copyText(text);
+                button.textContent = 'Copied';
+                button.classList.add('is-success');
+                window.setTimeout(() => {
+                  button.textContent = 'Copy';
+                  button.classList.remove('is-success');
+                }, 1800);
+              } catch {
+                button.textContent = 'Copy failed';
+                window.setTimeout(() => {
+                  button.textContent = 'Copy';
+                }, 1800);
+              }
+            });
+
+            toolbar.append(label, button);
+            shell.append(toolbar);
+            pre.parentNode?.insertBefore(shell, pre);
+            shell.append(pre);
+          });
+        };
+
         bindToggles();
+        enhanceCodeBlocks();
         window.addEventListener('m2m:themechange', syncToggles);
         window.addEventListener('storage', (event) => {
           if (event.key !== window.__m2mThemeKey) return;
