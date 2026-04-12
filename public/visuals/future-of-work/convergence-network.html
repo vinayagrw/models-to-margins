@@ -66,10 +66,52 @@
     .tooltip-box rect { fill: var(--tooltip-bg); stroke: var(--tooltip-border); rx: 8; }
     .tooltip-box text { fill: var(--text); font-size: 10px; }
     .tooltip-box .tt-title { font-weight: 700; font-size: 11px; }
+
+    /* Auto-play tour */
+    .tour-controls {
+      display: flex; align-items: center; justify-content: center;
+      gap: 8px; margin-top: 8px;
+      position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%);
+    }
+    .tour-btn {
+      background: none; border: 1px solid var(--edge-color);
+      color: var(--muted); font-size: 0.66rem; font-weight: 600;
+      padding: 3px 10px; border-radius: 10px; cursor: pointer;
+      letter-spacing: 0.04em; transition: all 0.18s;
+    }
+    .tour-btn:hover, .tour-btn.active { color: var(--text); border-color: var(--text); }
+    .tour-pips { display: flex; gap: 4px; }
+    .tour-pip { width: 18px; height: 3px; border-radius: 2px; background: var(--edge-color); transition: background 0.3s; }
+
+    .tour-card {
+      position: absolute; left: 12px; bottom: 40px;
+      width: 210px; padding: 12px 14px; border-radius: 12px;
+      background: var(--tooltip-bg); border: 1px solid var(--tooltip-border);
+      box-shadow: var(--tooltip-shadow); backdrop-filter: blur(14px);
+      opacity: 0; transform: translateY(6px);
+      transition: opacity 0.35s ease, transform 0.35s ease;
+      pointer-events: none; z-index: 10;
+    }
+    .tour-card.visible { opacity: 1; transform: translateY(0); }
+    .tour-card-label {
+      display: inline-block; padding: 2px 8px; border-radius: 6px;
+      font-size: 0.6rem; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase; margin-bottom: 6px;
+      background: var(--convergence-bg); color: var(--muted);
+    }
+    .tour-card-title { font-size: 0.82rem; font-weight: 700; margin-bottom: 4px; }
+    .tour-card-desc { font-size: 0.7rem; color: var(--muted); line-height: 1.4; }
   </style>
 </head>
 <body>
-  <svg id="svg" viewBox="0 0 600 420" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Sector convergence network showing connections between five workforce sectors"></svg>
+  <div style="position:relative;width:100%;height:100%">
+  <svg id="svg" viewBox="0 0 600 420" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Sector convergence network showing connections between five workforce sectors" style="width:100%;height:calc(100% - 28px)"></svg>
+  <div class="tour-card" id="tour-card"></div>
+  <div class="tour-controls">
+    <button class="tour-btn" id="tour-btn">&#9654; Tour</button>
+    <div class="tour-pips" id="tour-pips"></div>
+  </div>
+  </div>
   <script>
     const NODES = [
       { id: 'healthcare', label: 'Healthcare', color: { light: '#16825d', dark: '#22c07a' }, score: 4.37 },
@@ -164,6 +206,95 @@
     };
 
     window.__rebuild();
+
+    // ── Auto-play tour for convergence zones ──
+    // Cycles through each edge (convergence zone), highlighting both connected nodes
+    const TOUR_EDGES = EDGES.filter(e => !e.excluded); // Only ranked sector connections
+    const TOUR_MS = 4000;
+    let cTourTimer = null, cTourIdx = -1, cTourActive = false;
+
+    const cTourBtn = document.getElementById('tour-btn');
+    const cTourPips = document.getElementById('tour-pips');
+    const cTourCard = document.getElementById('tour-card');
+
+    function isDarkNow() { return document.documentElement.dataset.theme === 'dark' || (!document.documentElement.dataset.theme && window.matchMedia('(prefers-color-scheme: dark)').matches); }
+
+    function buildCTourPips() {
+      cTourPips.innerHTML = TOUR_EDGES.map((e, i) => {
+        const active = cTourIdx === i;
+        const dark = isDarkNow();
+        const fromNode = NODES.find(n => n.id === e.from);
+        const c = active && fromNode ? (dark ? fromNode.color.dark : fromNode.color.light) : '';
+        return `<div class="tour-pip" style="${active ? 'background:'+c : ''}"></div>`;
+      }).join('');
+    }
+
+    function showCTourCard(edge) {
+      const dark = isDarkNow();
+      const fromNode = NODES.find(n => n.id === edge.from);
+      const toNode = NODES.find(n => n.id === edge.to);
+      const c1 = fromNode ? (dark ? fromNode.color.dark : fromNode.color.light) : '#999';
+      const c2 = toNode ? (dark ? toNode.color.dark : toNode.color.light) : '#999';
+      cTourCard.innerHTML = `
+        <div class="tour-card-label">Convergence Zone</div>
+        <div class="tour-card-title" style="background:linear-gradient(90deg,${c1},${c2});-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">${edge.label}</div>
+        <div class="tour-card-desc">${edge.desc}</div>
+      `;
+      cTourCard.classList.add('visible');
+    }
+
+    function cTourStep() {
+      cTourIdx = (cTourIdx + 1) % TOUR_EDGES.length;
+      const edge = TOUR_EDGES[cTourIdx];
+      // Highlight from-node to show both connected sectors
+      activeNode = edge.from;
+      window.__rebuild();
+      showCTourCard(edge);
+      buildCTourPips();
+    }
+
+    function startCTour() {
+      if (cTourActive) { stopCTour(); return; }
+      cTourActive = true;
+      cTourBtn.textContent = '\u23F8 Pause';
+      cTourBtn.classList.add('active');
+      cTourIdx = -1;
+      cTourStep();
+      cTourTimer = setInterval(cTourStep, TOUR_MS);
+    }
+
+    function stopCTour() {
+      cTourActive = false;
+      clearInterval(cTourTimer);
+      cTourTimer = null;
+      cTourBtn.textContent = '\u25B6 Tour';
+      cTourBtn.classList.remove('active');
+      cTourCard.classList.remove('visible');
+      activeNode = null;
+      cTourIdx = -1;
+      buildCTourPips();
+      window.__rebuild();
+    }
+
+    cTourBtn.addEventListener('click', startCTour);
+
+    // Pause on SVG hover, resume on leave
+    document.getElementById('svg').addEventListener('mouseenter', () => {
+      if (cTourActive) { clearInterval(cTourTimer); cTourTimer = null; }
+    });
+    document.getElementById('svg').addEventListener('mouseleave', () => {
+      if (cTourActive && !cTourTimer) { cTourTimer = setInterval(cTourStep, TOUR_MS); }
+    });
+
+    buildCTourPips();
+
+    // Auto-start after 2s if no interaction
+    let cUserInteracted = false;
+    const cInteractionEvents = ['click', 'touchstart', 'mousemove'];
+    function cMarkInteraction() { cUserInteracted = true; cInteractionEvents.forEach(e => document.removeEventListener(e, cMarkInteraction)); }
+    cInteractionEvents.forEach(e => document.addEventListener(e, cMarkInteraction, { passive: true }));
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    setTimeout(() => { if (!cUserInteracted && !reducedMotion.matches) startCTour(); }, 2500);
   </script>
 </body>
 </html>

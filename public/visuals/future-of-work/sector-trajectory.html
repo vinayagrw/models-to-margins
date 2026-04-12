@@ -94,6 +94,60 @@
     .legend-item[aria-pressed="false"] { opacity: 0.3; text-decoration: line-through; }
     .legend-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
 
+    /* Auto-play controls */
+    .autoplay-bar {
+      display: flex; align-items: center; justify-content: center;
+      gap: 8px; margin-top: 6px;
+    }
+    .autoplay-btn {
+      background: none; border: 1px solid var(--grid-line);
+      color: var(--muted); font-size: 0.68rem; font-weight: 600;
+      padding: 3px 12px; border-radius: 10px; cursor: pointer;
+      letter-spacing: 0.04em; transition: all 0.18s;
+    }
+    .autoplay-btn:hover { color: var(--text); border-color: var(--text); }
+    .autoplay-btn.active { color: var(--text); border-color: var(--text); }
+    .autoplay-pips {
+      display: flex; gap: 4px; align-items: center;
+    }
+    .autoplay-pip {
+      width: 22px; height: 4px; border-radius: 2px;
+      background: var(--grid-line); transition: background 0.3s;
+    }
+    .autoplay-pip.active { background: var(--text); }
+    .autoplay-pip.done { background: var(--muted); }
+
+    /* Auto-play info card */
+    .auto-card {
+      position: absolute; left: 12px; top: 50px;
+      width: 200px; padding: 12px 14px; border-radius: 14px;
+      background: var(--tooltip-bg); border: 1px solid var(--tooltip-border);
+      box-shadow: var(--tooltip-shadow); backdrop-filter: blur(14px);
+      opacity: 0; transform: translateY(8px);
+      transition: opacity 0.35s ease, transform 0.35s ease;
+      pointer-events: none; z-index: 10;
+    }
+    .auto-card.visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
+    .auto-card.pos-right { left: auto; right: 12px; }
+    .auto-card-rank {
+      font-size: 2.2rem; font-weight: 800; line-height: 1;
+      margin-bottom: 4px;
+    }
+    .auto-card-name { font-size: 0.85rem; font-weight: 700; margin-bottom: 6px; }
+    .auto-card-score { font-size: 0.72rem; color: var(--muted); }
+    .auto-card-delta {
+      font-size: 0.7rem; color: var(--muted); font-style: italic;
+      margin-top: 6px; padding-top: 6px;
+      border-top: 1px solid var(--tooltip-border);
+      line-height: 1.4;
+    }
+    .auto-card-horizon {
+      display: inline-block; padding: 2px 8px; border-radius: 6px;
+      font-size: 0.62rem; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase; margin-bottom: 8px;
+      background: var(--convergence-bg); color: var(--muted);
+    }
+
     .tooltip {
       position: absolute; pointer-events: none;
       padding: 10px 14px; border-radius: 12px;
@@ -139,7 +193,12 @@
         </filter>
       </defs>
     </svg>
+    <div class="auto-card" id="auto-card"></div>
     <div class="legend" role="group" aria-label="Chart legend"></div>
+    <div class="autoplay-bar">
+      <button class="autoplay-btn" id="autoplay-btn" title="Auto-play sector tour">&#9654; Tour</button>
+      <div class="autoplay-pips" id="autoplay-pips"></div>
+    </div>
     <div class="tooltip" aria-live="polite"></div>
   </div>
 
@@ -422,6 +481,140 @@
     window.__rebuildChart = () => { render(); startAnimation(); };
     render();
     startAnimation();
+
+    // ── Auto-play guided tour ──
+    // Cycles through ALL 3 horizons, showing each sector sorted by rank per horizon.
+    // Sequence: 1-2yr (5 sectors #1→#5) → 3-5yr (5 sectors) → 5-10yr (5 sectors) = 15 steps
+    const HORIZON_LABELS = ['1–2 Year', '3–5 Year', '5–10 Year'];
+    const TOUR_INTERVAL_MS = 3500; // 3.5s per sector
+    let tourTimer = null;
+    let tourStep_i = -1; // global step counter (0–14)
+    let tourActive = false;
+
+    const autoBtn = document.getElementById('autoplay-btn');
+    const autoPips = document.getElementById('autoplay-pips');
+    const autoCard = document.getElementById('auto-card');
+
+    // Build the full tour sequence: 3 horizons × 5 sectors each, sorted by rank within each horizon
+    function buildTourSequence() {
+      const vs = SECTORS.filter(s => !hidden.has(s.id));
+      const seq = [];
+      for (let hi = 0; hi < 3; hi++) {
+        const sorted = vs.slice().sort((a, b) => a.ranks[hi] - b.ranks[hi]);
+        sorted.forEach(s => seq.push({ sector: s, horizon: hi }));
+      }
+      return seq;
+    }
+
+    function buildPips() {
+      const seq = buildTourSequence();
+      const vs = SECTORS.filter(s => !hidden.has(s.id));
+      const perHorizon = vs.length;
+      // Show 3 horizon groups, each with sector pips
+      let html = '';
+      for (let hi = 0; hi < 3; hi++) {
+        const startIdx = hi * perHorizon;
+        const isActiveHorizon = tourStep_i >= startIdx && tourStep_i < startIdx + perHorizon;
+        html += `<span style="font-size:8px;color:var(--muted);margin:0 2px;opacity:${isActiveHorizon ? 1 : 0.4}">${HORIZONS[hi]}</span>`;
+        for (let j = 0; j < perHorizon; j++) {
+          const globalIdx = startIdx + j;
+          const active = tourStep_i === globalIdx;
+          const entry = seq[globalIdx];
+          const c = active && entry ? col(entry.sector) : '';
+          html += `<div class="autoplay-pip" style="${active ? 'background:'+c : ''}"></div>`;
+        }
+      }
+      autoPips.innerHTML = html;
+    }
+
+    function showAutoCard(sector, hi) {
+      const c = col(sector);
+      autoCard.innerHTML = `
+        <div class="auto-card-horizon">${HORIZON_LABELS[hi]} Outlook</div>
+        <div class="auto-card-rank" style="color:${c}">#${sector.ranks[hi]}</div>
+        <div class="auto-card-name" style="color:${c}">${sector.label}</div>
+        <div class="auto-card-score">
+          Score ${sector.scores[hi]}/5 &nbsp;&middot;&nbsp; Grade ${sector.grades[hi]} &nbsp;&middot;&nbsp; ${sector.confidence[hi]}
+        </div>
+        <div class="auto-card-delta">${sector.delta}</div>
+      `;
+      // Position card on opposite side from the active horizon column to avoid overlap
+      // Horizon 0 (1-2yr) is on left → card goes right
+      // Horizon 1-2 (3-5yr, 5-10yr) are center/right → card goes left
+      if (hi === 0) {
+        autoCard.classList.add('pos-right');
+      } else {
+        autoCard.classList.remove('pos-right');
+      }
+      autoCard.classList.add('visible');
+    }
+
+    function tourStep() {
+      const seq = buildTourSequence();
+      if (seq.length === 0) { stopTour(); return; }
+      tourStep_i = (tourStep_i + 1) % seq.length;
+      const { sector, horizon } = seq[tourStep_i];
+
+      // Highlight this sector
+      highlighted = sector.id;
+      render();
+      startAnimation();
+
+      // Show card with the current horizon
+      showAutoCard(sector, horizon);
+      buildPips();
+    }
+
+    function startTour() {
+      if (tourActive) { stopTour(); return; }
+      tourActive = true;
+      autoBtn.textContent = '\u23F8 Pause';
+      autoBtn.classList.add('active');
+      tourStep_i = -1;
+      tourStep();
+      tourTimer = setInterval(tourStep, TOUR_INTERVAL_MS);
+    }
+
+    function stopTour() {
+      tourActive = false;
+      clearInterval(tourTimer);
+      tourTimer = null;
+      autoBtn.textContent = '\u25B6 Tour';
+      autoBtn.classList.remove('active');
+      autoCard.classList.remove('visible');
+      highlighted = null;
+      tourStep_i = -1;
+      buildPips();
+      render();
+      startAnimation();
+    }
+
+    autoBtn.addEventListener('click', startTour);
+
+    // Pause tour on manual hover, resume on leave
+    svg.addEventListener('mouseenter', () => {
+      if (tourActive) { clearInterval(tourTimer); tourTimer = null; }
+    });
+    svg.addEventListener('mouseleave', () => {
+      if (tourActive && !tourTimer) {
+        tourTimer = setInterval(tourStep, TOUR_INTERVAL_MS);
+      }
+    });
+
+    buildPips();
+
+    // Auto-start after 2.5s if no user interaction
+    let userInteracted = false;
+    const interactionEvents = ['click', 'touchstart', 'mousemove'];
+    function markInteraction() {
+      userInteracted = true;
+      interactionEvents.forEach(e => document.removeEventListener(e, markInteraction));
+    }
+    interactionEvents.forEach(e => document.addEventListener(e, markInteraction, { once: false, passive: true }));
+
+    setTimeout(() => {
+      if (!userInteracted && !reducedMotion.matches) startTour();
+    }, 2500);
   </script>
 </body>
 </html>
