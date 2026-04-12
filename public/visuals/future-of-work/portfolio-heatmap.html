@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Portfolio Heatmap — Future of Work</title>
+  <script>
+    (() => {
+      const params = new URLSearchParams(window.location.search);
+      const storageKey = 'm2m-theme';
+      const root = document.documentElement;
+      const media = window.matchMedia('(prefers-color-scheme: dark)');
+      const normalizeTheme = (v) => v === 'dark' || v === 'light' ? v : null;
+      const getStoredTheme = () => { try { return normalizeTheme(localStorage.getItem(storageKey)); } catch { return null; } };
+      const getSystemTheme = () => media.matches ? 'dark' : 'light';
+      const getPreferredTheme = () => normalizeTheme(params.get('theme')) ?? getStoredTheme() ?? getSystemTheme();
+      root.dataset.embedded = params.get('embed') === '1' ? 'true' : 'false';
+      window.__m2mApplyTheme = (theme, persist = false) => {
+        const next = normalizeTheme(theme) ?? getPreferredTheme();
+        root.dataset.theme = next;
+        root.style.colorScheme = next;
+        if (persist) try { localStorage.setItem(storageKey, next); } catch {}
+        if (typeof window.__rebuild === 'function') window.__rebuild();
+      };
+      window.__m2mApplyTheme(getPreferredTheme(), false);
+      window.addEventListener('message', (e) => {
+        if (e.origin !== location.origin) return;
+        if (e.data?.type === 'm2m:set-theme') window.__m2mApplyTheme(e.data.theme, false);
+      });
+      const sync = (e) => { if (!getStoredTheme()) window.__m2mApplyTheme(e.matches ? 'dark' : 'light', false); };
+      media.addEventListener?.('change', sync) ?? media.addListener?.(sync);
+    })();
+  </script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root, :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f4f1ec; --text: #1a1a2e; --muted: #6b7280;
+      --cell-bg: rgba(0,0,0,0.03); --header-bg: rgba(0,0,0,0.05);
+      --tooltip-bg: rgba(255,255,255,0.97); --tooltip-border: rgba(0,0,0,0.1);
+      --tooltip-shadow: 0 8px 32px rgba(0,0,0,0.14);
+      --arrow-color: rgba(0,0,0,0.25);
+    }
+    :root[data-theme="dark"] {
+      color-scheme: dark;
+      --bg: #0b1120; --text: #e2e8f0; --muted: #94a3b8;
+      --cell-bg: rgba(255,255,255,0.03); --header-bg: rgba(255,255,255,0.05);
+      --tooltip-bg: rgba(15,23,42,0.97); --tooltip-border: rgba(255,255,255,0.1);
+      --tooltip-shadow: 0 8px 32px rgba(0,0,0,0.5);
+      --arrow-color: rgba(255,255,255,0.2);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        color-scheme: dark;
+        --bg: #0b1120; --text: #e2e8f0; --muted: #94a3b8;
+        --cell-bg: rgba(255,255,255,0.03); --header-bg: rgba(255,255,255,0.05);
+        --tooltip-bg: rgba(15,23,42,0.97); --tooltip-border: rgba(255,255,255,0.1);
+        --tooltip-shadow: 0 8px 32px rgba(0,0,0,0.5);
+        --arrow-color: rgba(255,255,255,0.2);
+      }
+    }
+    html, body { width: 100%; height: 100%; overflow: hidden; background: var(--bg); font-family: system-ui, -apple-system, sans-serif; color: var(--text); }
+    html[data-embedded="true"] body { background: transparent; }
+
+    .grid { display: grid; grid-template-columns: 140px 1fr 24px 1fr 24px 1fr; grid-template-rows: 36px repeat(6, 1fr); gap: 4px; width: 100%; height: 100%; padding: 12px 16px; align-items: stretch; }
+    .row-excluded { opacity: 0.35; }
+    .row-excluded .row-label { border: 1px dashed var(--arrow-color); background: transparent; font-style: italic; }
+    .cell.excluded { border: 1px dashed var(--arrow-color); }
+
+    .header { display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); background: var(--header-bg); border-radius: 8px; }
+    .corner { grid-column: 1; grid-row: 1; }
+    .arrow-col { display: flex; align-items: center; justify-content: center; }
+    .arrow-col svg { width: 16px; height: 16px; }
+
+    .row-label { display: flex; align-items: center; padding: 0 10px; font-size: 12px; font-weight: 600; color: var(--text); border-radius: 10px; background: var(--cell-bg); }
+    .row-label .dot { width: 8px; height: 8px; border-radius: 50%; margin-right: 8px; flex-shrink: 0; }
+
+    .cell {
+      border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 2px; cursor: pointer; transition: transform 150ms ease, box-shadow 150ms ease;
+      position: relative; border: 1px solid transparent;
+    }
+    .cell:hover { transform: scale(1.04); z-index: 2; box-shadow: var(--tooltip-shadow); }
+    .cell .rank { font-size: 22px; font-weight: 800; color: #fff; line-height: 1; }
+    .cell .meta { font-size: 9px; font-weight: 500; color: rgba(255,255,255,0.8); letter-spacing: 0.04em; }
+
+    .tooltip {
+      display: none; position: absolute; top: calc(100% + 6px); left: 50%; transform: translateX(-50%);
+      background: var(--tooltip-bg); border: 1px solid var(--tooltip-border); border-radius: 12px;
+      padding: 10px 14px; width: 220px; box-shadow: var(--tooltip-shadow); z-index: 10;
+      font-size: 11px; color: var(--text); line-height: 1.45;
+    }
+    .cell:hover .tooltip { display: block; }
+    .tooltip strong { display: block; margin-bottom: 3px; font-size: 12px; }
+    .tooltip .tt-why { color: var(--muted); margin-top: 4px; font-style: italic; }
+
+    @media (max-width: 500px) {
+      .grid { grid-template-columns: 90px 1fr 16px 1fr 16px 1fr; padding: 8px; }
+      .row-label { font-size: 10px; padding: 0 6px; }
+      .cell .rank { font-size: 16px; }
+      .cell .meta { font-size: 8px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="grid" id="grid"></div>
+  <script>
+    const SECTORS = [
+      { id: 'healthcare', label: 'Healthcare', color: { light: '#16825d', dark: '#22c07a' },
+        ranks: [1,3,3], scores: [4.8,4.2,4.1], grades: ['A','B','B'], conf: ['High','High','High'],
+        why: 'Demand is demographic and durable, but long-term value shifts toward specialized and tech-enabled roles.' },
+      { id: 'ai', label: 'AI Infrastructure', color: { light: '#2563eb', dark: '#60a5fa' },
+        ranks: [2,1,5], scores: [4.7,4.8,3.8], grades: ['A','B','B'], conf: ['High','High','Medium'],
+        why: 'Stays large, but durable value moves toward infrastructure, economics, and domain integration.' },
+      { id: 'cyber', label: 'Cybersecurity', color: { light: '#7c3aed', dark: '#a78bfa' },
+        ranks: [3,4,4], scores: [4.1,4.0,3.9], grades: ['A','B','A'], conf: ['High','High','High'],
+        why: 'Security remains mandatory, but routine work automates faster than trust-heavy architecture.' },
+      { id: 'grid_elec', label: 'Electrification', color: { light: '#b8860b', dark: '#fbbf24' },
+        ranks: [4,2,1], scores: [4.0,4.6,4.9], grades: ['A','A','A'], conf: ['High','High','High'],
+        why: 'Power rises because it becomes a prerequisite constraint on AI, industry, buildings, and transport.' },
+      { id: 'mfg', label: 'Manufacturing', color: { light: '#be185d', dark: '#f472b6' },
+        ranks: [5,5,2], scores: [3.9,4.0,4.5], grades: ['B','B','B'], conf: ['Medium','Medium','High'],
+        why: 'Starts narrower, then rises as domestic production and robotics become strategic constraints.' },
+      // Excluded sector — rendered dimmed to show it was evaluated
+      { id: 'finance', label: 'Finance', color: { light: '#94a3b8', dark: '#64748b' },
+        ranks: [6,6,6], scores: [2.8,2.6,2.4], grades: ['C','C','C'], conf: ['Medium','Low','Low'],
+        why: 'Net job losses (-77K). Highest AI displacement risk of any knowledge sector. Durable niches exist in RegTech and compliance architecture.', excluded: true }
+    ];
+    const HORIZONS = ['1-2 yr','3-5 yr','5-10 yr'];
+
+    function isDark() { return document.documentElement.dataset.theme === 'dark' || (!document.documentElement.dataset.theme && window.matchMedia('(prefers-color-scheme: dark)').matches); }
+
+    function rankOpacity(r) { return 1.0 - (r - 1) * 0.16; }
+
+    function arrowSvg(from, to) {
+      if (from === to) return `<svg viewBox="0 0 16 16"><line x1="2" y1="8" x2="14" y2="8" stroke="var(--arrow-color)" stroke-width="1.5" stroke-dasharray="3 2"/></svg>`;
+      const up = to < from;
+      return `<svg viewBox="0 0 16 16"><path d="${up ? 'M8 14V4M4 7l4-4 4 4' : 'M8 2v10M4 9l4 4 4-4'}" fill="none" stroke="var(--arrow-color)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+    }
+
+    window.__rebuild = function() {
+      const dark = isDark();
+      const g = document.getElementById('grid');
+      let html = `<div class="corner header"></div>`;
+      // horizon headers (col 2, skip arrow col 3, col 4, skip 5, col 6)
+      html += `<div class="header" style="grid-column:2">${HORIZONS[0]}</div>`;
+      html += `<div class="arrow-col" style="grid-column:3;grid-row:1"></div>`;
+      html += `<div class="header" style="grid-column:4">${HORIZONS[1]}</div>`;
+      html += `<div class="arrow-col" style="grid-column:5;grid-row:1"></div>`;
+      html += `<div class="header" style="grid-column:6">${HORIZONS[2]}</div>`;
+
+      SECTORS.forEach((s, si) => {
+        const row = si + 2;
+        const c = dark ? s.color.dark : s.color.light;
+        const excl = s.excluded ? ' row-excluded' : '';
+        html += `<div class="row-label${excl}" style="grid-row:${row}"><span class="dot" style="background:${c}"></span>${s.label}${s.excluded ? ' <span style="font-size:9px;opacity:0.6">(excluded)</span>' : ''}</div>`;
+        for (let hi = 0; hi < 3; hi++) {
+          const col = hi * 2 + 2; // cols 2, 4, 6
+          const op = s.excluded ? 0.3 : rankOpacity(s.ranks[hi]);
+          html += `<div class="cell${s.excluded ? ' excluded' : ''}" style="grid-row:${row};grid-column:${col};background:color-mix(in srgb, ${c} ${Math.round(op*100)}%, var(--cell-bg));opacity:${s.excluded ? 0.4 : 0.55 + op*0.45}">
+            <span class="rank">${s.excluded ? '—' : '#' + s.ranks[hi]}</span>
+            <span class="meta">${s.scores[hi]} / ${s.grades[hi]} / ${s.conf[hi]}</span>
+            <div class="tooltip">
+              <strong>${s.label} — ${HORIZONS[hi]}</strong>
+              Rank #${s.ranks[hi]} &middot; Score ${s.scores[hi]} &middot; Grade ${s.grades[hi]} &middot; ${s.conf[hi]} confidence
+              <div class="tt-why">${s.why}</div>
+            </div>
+          </div>`;
+          // arrow between columns
+          if (hi < 2) {
+            const arrowCol = hi * 2 + 3; // cols 3, 5
+            html += `<div class="arrow-col" style="grid-row:${row};grid-column:${arrowCol}">${arrowSvg(s.ranks[hi], s.ranks[hi+1])}</div>`;
+          }
+        }
+      });
+      g.innerHTML = html;
+    };
+    window.__rebuild();
+  </script>
+</body>
+</html>

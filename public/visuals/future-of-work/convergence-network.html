@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Convergence Network — Future of Work</title>
+  <script>
+    (() => {
+      const params = new URLSearchParams(window.location.search);
+      const storageKey = 'm2m-theme';
+      const root = document.documentElement;
+      const media = window.matchMedia('(prefers-color-scheme: dark)');
+      const normalizeTheme = (v) => v === 'dark' || v === 'light' ? v : null;
+      const getStoredTheme = () => { try { return normalizeTheme(localStorage.getItem(storageKey)); } catch { return null; } };
+      const getSystemTheme = () => media.matches ? 'dark' : 'light';
+      const getPreferredTheme = () => normalizeTheme(params.get('theme')) ?? getStoredTheme() ?? getSystemTheme();
+      root.dataset.embedded = params.get('embed') === '1' ? 'true' : 'false';
+      window.__m2mApplyTheme = (theme, persist = false) => {
+        const next = normalizeTheme(theme) ?? getPreferredTheme();
+        root.dataset.theme = next;
+        root.style.colorScheme = next;
+        if (persist) try { localStorage.setItem(storageKey, next); } catch {}
+        if (typeof window.__rebuild === 'function') window.__rebuild();
+      };
+      window.__m2mApplyTheme(getPreferredTheme(), false);
+      window.addEventListener('message', (e) => {
+        if (e.origin !== location.origin) return;
+        if (e.data?.type === 'm2m:set-theme') window.__m2mApplyTheme(e.data.theme, false);
+      });
+      const sync = (e) => { if (!getStoredTheme()) window.__m2mApplyTheme(e.matches ? 'dark' : 'light', false); };
+      media.addEventListener?.('change', sync) ?? media.addListener?.(sync);
+    })();
+  </script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root, :root[data-theme="light"] {
+      color-scheme: light; --bg: #f4f1ec; --text: #1a1a2e; --muted: #6b7280;
+      --edge-color: rgba(0,0,0,0.12); --edge-active: rgba(0,0,0,0.35);
+      --tooltip-bg: rgba(255,255,255,0.97); --tooltip-border: rgba(0,0,0,0.1);
+      --tooltip-shadow: 0 8px 24px rgba(0,0,0,0.14); --label-bg: rgba(255,255,255,0.85);
+    }
+    :root[data-theme="dark"] {
+      color-scheme: dark; --bg: #0b1120; --text: #e2e8f0; --muted: #94a3b8;
+      --edge-color: rgba(255,255,255,0.08); --edge-active: rgba(255,255,255,0.3);
+      --tooltip-bg: rgba(15,23,42,0.97); --tooltip-border: rgba(255,255,255,0.1);
+      --tooltip-shadow: 0 8px 24px rgba(0,0,0,0.5); --label-bg: rgba(15,23,42,0.85);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        color-scheme: dark; --bg: #0b1120; --text: #e2e8f0; --muted: #94a3b8;
+        --edge-color: rgba(255,255,255,0.08); --edge-active: rgba(255,255,255,0.3);
+        --tooltip-bg: rgba(15,23,42,0.97); --tooltip-border: rgba(255,255,255,0.1);
+        --tooltip-shadow: 0 8px 24px rgba(0,0,0,0.5); --label-bg: rgba(15,23,42,0.85);
+      }
+    }
+    html, body { width: 100%; height: 100%; overflow: hidden; background: var(--bg); font-family: system-ui, -apple-system, sans-serif; color: var(--text); }
+    html[data-embedded="true"] body { background: transparent; }
+    svg { width: 100%; height: 100%; }
+    .node-group { cursor: pointer; }
+    .node-group:hover circle { filter: brightness(1.2); }
+    .edge { transition: opacity 200ms ease, stroke-width 200ms ease; }
+    .edge-label { font-size: 9px; fill: var(--muted); pointer-events: none; }
+    .node-label { font-size: 11px; font-weight: 600; fill: var(--text); text-anchor: middle; pointer-events: none; }
+    .dimmed { opacity: 0.08; }
+    .tooltip-box { pointer-events: none; }
+    .tooltip-box rect { fill: var(--tooltip-bg); stroke: var(--tooltip-border); rx: 8; }
+    .tooltip-box text { fill: var(--text); font-size: 10px; }
+    .tooltip-box .tt-title { font-weight: 700; font-size: 11px; }
+  </style>
+</head>
+<body>
+  <svg id="svg" viewBox="0 0 600 420" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Sector convergence network showing connections between five workforce sectors"></svg>
+  <script>
+    const NODES = [
+      { id: 'healthcare', label: 'Healthcare', color: { light: '#16825d', dark: '#22c07a' }, score: 4.37 },
+      { id: 'ai', label: 'AI Infra', color: { light: '#2563eb', dark: '#60a5fa' }, score: 4.43 },
+      { id: 'cyber', label: 'Cybersecurity', color: { light: '#7c3aed', dark: '#a78bfa' }, score: 4.0 },
+      { id: 'grid', label: 'Electrification', color: { light: '#b8860b', dark: '#fbbf24' }, score: 4.5 },
+      { id: 'mfg', label: 'Manufacturing', color: { light: '#be185d', dark: '#f472b6' }, score: 4.13 },
+      // Excluded sector — rendered dimmed to show it was evaluated
+      { id: 'finance', label: 'Finance', color: { light: '#94a3b8', dark: '#64748b' }, score: 2.8, excluded: true }
+    ];
+
+    const EDGES = [
+      { from: 'ai', to: 'healthcare', label: 'AI x Care', strength: 3, desc: 'Clinical AI, diagnostic workflow, AI-assisted triage' },
+      { from: 'ai', to: 'grid', label: 'AI x Power', strength: 3, desc: 'Grid optimization, power demand forecasting, datacenter cooling' },
+      { from: 'cyber', to: 'ai', label: 'Security x AI', strength: 2, desc: 'Model audit, adversarial robustness, AI compliance' },
+      { from: 'grid', to: 'mfg', label: 'Power x Mfg', strength: 2, desc: 'Factory energy systems, battery manufacturing, industrial power' },
+      { from: 'mfg', to: 'ai', label: 'Mfg x AI', strength: 2, desc: 'Predictive maintenance, industrial ML, robotic controls' },
+      { from: 'healthcare', to: 'cyber', label: 'Health x Sec', strength: 1, desc: 'Clinical cybersecurity, health data governance, HIPAA-AI' },
+      { from: 'finance', to: 'cyber', label: 'Fin x Sec', strength: 1, desc: 'RegTech, compliance architecture, AML/KYC investigation', excluded: true }
+    ];
+
+    const CX = 300, CY = 200, R = 140;
+
+    // Hexagon positions (top-center start, clockwise) — 5 ranked + 1 excluded
+    function nodePositions() {
+      const count = NODES.length;
+      return NODES.map((n, i) => {
+        const angle = -Math.PI / 2 + (2 * Math.PI * i) / count;
+        return { ...n, x: CX + R * Math.cos(angle), y: CY + R * Math.sin(angle) };
+      });
+    }
+
+    function isDark() { return document.documentElement.dataset.theme === 'dark' || (!document.documentElement.dataset.theme && window.matchMedia('(prefers-color-scheme: dark)').matches); }
+
+    let activeNode = null;
+
+    window.__rebuild = function() {
+      const dark = isDark();
+      const nodes = nodePositions();
+      const nodeMap = Object.fromEntries(nodes.map(n => [n.id, n]));
+      const svg = document.getElementById('svg');
+
+      let html = '<defs><filter id="glow"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>';
+
+      // Edges
+      EDGES.forEach((e, i) => {
+        const a = nodeMap[e.from], b = nodeMap[e.to];
+        const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+        const dimmed = activeNode && activeNode !== e.from && activeNode !== e.to;
+        const active = activeNode === e.from || activeNode === e.to;
+        const isExcluded = e.excluded;
+        const sw = isExcluded ? 1 : e.strength * 1.5 + (active ? 1 : 0);
+        const c1 = dark ? a.color.dark : a.color.light;
+        const c2 = dark ? b.color.dark : b.color.light;
+        const dashAttr = isExcluded ? ' stroke-dasharray="4 3"' : '';
+        const edgeOpacity = isExcluded ? 0.25 : 0.5;
+        html += `<line class="edge ${dimmed ? 'dimmed' : ''}" data-from="${e.from}" data-to="${e.to}" x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="url(#eg${i})" stroke-width="${sw}" stroke-linecap="round"${dashAttr}/>`;
+        html += `<linearGradient id="eg${i}" x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" gradientUnits="userSpaceOnUse"><stop stop-color="${c1}" stop-opacity="${edgeOpacity}"/><stop offset="1" stop-color="${c2}" stop-opacity="${edgeOpacity}"/></linearGradient>`;
+        if (!dimmed) {
+          // edge label background
+          const labelW = e.label.length * 5.5 + 12;
+          html += `<rect x="${mx - labelW/2}" y="${my - 8}" width="${labelW}" height="16" rx="8" fill="var(--label-bg)" opacity="0.9"/>`;
+          html += `<text class="edge-label" x="${mx}" y="${my + 3}" text-anchor="middle">${e.label}</text>`;
+        }
+      });
+
+      // Nodes
+      nodes.forEach(n => {
+        const c = dark ? n.color.dark : n.color.light;
+        const dimmed = activeNode && activeNode !== n.id;
+        const isExcluded = n.excluded;
+        // Node radius: proportional to score (range ~3.0–5.0), min 18px
+        const r = isExcluded ? 14 : 18 + (n.score - 3.9) * 8;
+        const nodeOp = isExcluded ? 0.3 : 0.85;
+        html += `<g class="node-group ${dimmed ? 'dimmed' : ''}" data-id="${n.id}" tabindex="0" onmouseenter="window.__highlight('${n.id}')" onmouseleave="window.__highlight(null)" onfocus="window.__highlight('${n.id}')" onblur="window.__highlight(null)">`;
+        if (isExcluded) {
+          html += `<circle cx="${n.x}" cy="${n.y}" r="${r}" fill="none" stroke="${c}" stroke-width="1.5" stroke-dasharray="3 2" opacity="0.4"/>`;
+        } else {
+          html += `<circle cx="${n.x}" cy="${n.y}" r="${r + 4}" fill="${c}" opacity="0.15" filter="url(#glow)"/>`;
+          html += `<circle cx="${n.x}" cy="${n.y}" r="${r}" fill="${c}" opacity="${nodeOp}"/>`;
+        }
+        html += `<text class="node-label" x="${n.x}" y="${n.y > CY ? n.y + r + 16 : n.y - r - 8}" fill="var(--text)" ${isExcluded ? 'opacity="0.4" font-style="italic"' : ''}>${n.label}</text>`;
+        html += `</g>`;
+      });
+
+      svg.innerHTML = html;
+    };
+
+    window.__highlight = function(id) {
+      activeNode = id;
+      window.__rebuild();
+    };
+
+    window.__rebuild();
+  </script>
+</body>
+</html>

@@ -16,6 +16,8 @@
     &middot;
     <a href="https://models-to-margins.vinayagrw.workers.dev/deep-dives">Deep Dives</a>
     &middot;
+    <a href="./docs/brief-visual-prompt-pack.md">Brief visual prompt pack</a>
+    &middot;
     <a href="./docs/cloudflare-pages-setup.md">Cloudflare guide</a>
     &middot;
     <a href="./docs/admin-visibility-how-to.md">Visibility guide</a>
@@ -192,6 +194,7 @@ npm run check
 
 Visibility and discovery docs:
 
+- [docs/brief-visual-prompt-pack.md](./docs/brief-visual-prompt-pack.md)
 - [docs/admin-visibility-how-to.md](./docs/admin-visibility-how-to.md)
 
 ## Deploy

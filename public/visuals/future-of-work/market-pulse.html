@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Market Pulse — March 2026</title>
+  <script>
+    (() => {
+      const params = new URLSearchParams(window.location.search);
+      const storageKey = 'm2m-theme';
+      const root = document.documentElement;
+      const media = window.matchMedia('(prefers-color-scheme: dark)');
+      const normalizeTheme = (v) => v === 'dark' || v === 'light' ? v : null;
+      const getStoredTheme = () => { try { return normalizeTheme(localStorage.getItem(storageKey)); } catch { return null; } };
+      const getSystemTheme = () => media.matches ? 'dark' : 'light';
+      const getPreferredTheme = () => normalizeTheme(params.get('theme')) ?? getStoredTheme() ?? getSystemTheme();
+      root.dataset.embedded = params.get('embed') === '1' ? 'true' : 'false';
+      window.__m2mApplyTheme = (theme, persist = false) => {
+        const next = normalizeTheme(theme) ?? getPreferredTheme();
+        root.dataset.theme = next;
+        root.style.colorScheme = next;
+        if (persist) try { localStorage.setItem(storageKey, next); } catch {}
+      };
+      window.__m2mApplyTheme(getPreferredTheme(), false);
+      window.addEventListener('message', (e) => {
+        if (e.origin !== location.origin) return;
+        if (e.data?.type === 'm2m:set-theme') window.__m2mApplyTheme(e.data.theme, false);
+      });
+      const sync = (e) => { if (!getStoredTheme()) window.__m2mApplyTheme(e.matches ? 'dark' : 'light', false); };
+      media.addEventListener?.('change', sync) ?? media.addListener?.(sync);
+    })();
+  </script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root, :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f4f1ec; --text: #1a1a2e; --muted: #6b7280;
+      --bar-bg: rgba(0,0,0,0.06); --card-bg: rgba(255,255,255,0.7);
+      --card-border: rgba(0,0,0,0.08);
+      --green: #16825d; --gold: #b8860b; --blue: #2563eb; --purple: #7c3aed;
+      --signal-accent: #16825d; --signal-accent2: #2563eb;
+      --arrow-up: #16825d; --trend-color: #b8860b;
+    }
+    :root[data-theme="dark"] {
+      color-scheme: dark;
+      --bg: #0b1120; --text: #e2e8f0; --muted: #94a3b8;
+      --bar-bg: rgba(255,255,255,0.06); --card-bg: rgba(255,255,255,0.04);
+      --card-border: rgba(255,255,255,0.08);
+      --green: #5ee8a8; --gold: #fbbf24; --blue: #60a5fa; --purple: #a78bfa;
+      --signal-accent: #5ee8a8; --signal-accent2: #60a5fa;
+      --arrow-up: #5ee8a8; --trend-color: #fbbf24;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        color-scheme: dark;
+        --bg: #0b1120; --text: #e2e8f0; --muted: #94a3b8;
+        --bar-bg: rgba(255,255,255,0.06); --card-bg: rgba(255,255,255,0.04);
+        --card-border: rgba(255,255,255,0.08);
+        --green: #5ee8a8; --gold: #fbbf24; --blue: #60a5fa; --purple: #a78bfa;
+        --signal-accent: #5ee8a8; --signal-accent2: #60a5fa;
+        --arrow-up: #5ee8a8; --trend-color: #fbbf24;
+      }
+    }
+
+    html, body { width: 100%; height: 100%; overflow: hidden; background: var(--bg); font-family: system-ui, -apple-system, sans-serif; color: var(--text); }
+    html[data-embedded="true"] body { background: transparent; }
+
+    .container { width: 100%; height: 100%; display: flex; flex-direction: column; padding: 16px 20px; gap: 14px; }
+
+    .section-title {
+      font-size: 10px; font-weight: 600; letter-spacing: 0.14em;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 2px;
+    }
+
+    /* Payroll bars */
+    .bars { display: flex; flex-direction: column; gap: 8px; flex: 1; justify-content: center; }
+    .bar-row { display: flex; align-items: center; gap: 10px; }
+    .bar-label { width: 110px; font-size: 12px; font-weight: 500; color: var(--text); text-align: right; flex-shrink: 0; }
+    .bar-track { flex: 1; height: 28px; background: var(--bar-bg); border-radius: 14px; position: relative; overflow: hidden; }
+    .bar-fill {
+      height: 100%; border-radius: 14px; width: 0;
+      transition: width 1s cubic-bezier(0.22, 1, 0.36, 1);
+      display: flex; align-items: center; justify-content: flex-end; padding-right: 10px;
+      font-size: 13px; font-weight: 700; color: #fff; min-width: 0;
+    }
+    .bar-fill.healthcare { background: linear-gradient(90deg, var(--green), color-mix(in srgb, var(--green) 80%, #fff)); }
+    .bar-fill.construction { background: linear-gradient(90deg, var(--gold), color-mix(in srgb, var(--gold) 80%, #fff)); }
+    .bar-fill.transport { background: linear-gradient(90deg, var(--blue), color-mix(in srgb, var(--blue) 80%, #fff)); }
+    .bar-fill.social { background: linear-gradient(90deg, var(--purple), color-mix(in srgb, var(--purple) 80%, #fff)); }
+    .bar-value {
+      position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+      font-size: 13px; font-weight: 700; color: var(--text); opacity: 0;
+      transition: opacity 0.4s ease 0.8s;
+    }
+    .bar-row.animated .bar-value { opacity: 1; }
+    .bar-row.animated .bar-fill .bar-inner-value { opacity: 1; }
+
+    /* Signal tiles */
+    .signals { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .signal-tile {
+      background: var(--card-bg); border: 1px solid var(--card-border);
+      border-radius: 14px; padding: 12px 14px; text-align: center;
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+    }
+    .signal-icon { width: 28px; height: 28px; margin-bottom: 2px; }
+    .signal-big { font-size: 20px; font-weight: 800; line-height: 1.1; }
+    .signal-big.green { color: var(--signal-accent); }
+    .signal-big.gold { color: var(--trend-color); }
+    .signal-big.blue { color: var(--signal-accent2); }
+    .signal-desc { font-size: 10px; color: var(--muted); line-height: 1.35; }
+
+    /* Divider */
+    .divider { height: 1px; background: var(--card-border); margin: 0 10px; }
+
+    @media (max-width: 420px) {
+      .bar-label { width: 80px; font-size: 11px; }
+      .signals { grid-template-columns: 1fr; }
+      .signal-tile { flex-direction: row; text-align: left; gap: 10px; padding: 10px; }
+      .signal-icon { margin-bottom: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="section-title">March 2026 Payroll Gains</div>
+    <div class="bars" id="bars">
+      <div class="bar-row" data-value="76000" data-pct="100">
+        <span class="bar-label">Healthcare</span>
+        <div class="bar-track">
+          <div class="bar-fill healthcare"></div>
+          <span class="bar-value">+76,000</span>
+        </div>
+      </div>
+      <div class="bar-row" data-value="26000" data-pct="34.2">
+        <span class="bar-label">Construction</span>
+        <div class="bar-track">
+          <div class="bar-fill construction"></div>
+          <span class="bar-value">+26,000</span>
+        </div>
+      </div>
+      <div class="bar-row" data-value="21000" data-pct="27.6">
+        <span class="bar-label">Transportation</span>
+        <div class="bar-track">
+          <div class="bar-fill transport"></div>
+          <span class="bar-value">+21,000</span>
+        </div>
+      </div>
+      <div class="bar-row" data-value="14000" data-pct="18.4">
+        <span class="bar-label">Social Assistance</span>
+        <div class="bar-track">
+          <div class="bar-fill social"></div>
+          <span class="bar-value">+14,000</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="section-title">Key Signals</div>
+    <div class="signals">
+      <div class="signal-tile">
+        <svg class="signal-icon" viewBox="0 0 28 28" fill="none">
+          <path d="M14 22V8M14 8l-5 5M14 8l5 5" stroke="var(--arrow-up)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span class="signal-big green" id="azure-val">+39%</span>
+        <span class="signal-desc">Azure revenue YoY — FY26 Q2</span>
+      </div>
+      <div class="signal-tile">
+        <svg class="signal-icon" viewBox="0 0 28 28" fill="none">
+          <path d="M3 20 L8 16 L13 18 L18 10 L25 6" stroke="var(--trend-color)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="25" cy="6" r="2.5" fill="var(--trend-color)">
+            <animate attributeName="r" values="2.5;3.5;2.5" dur="2s" repeatCount="indefinite"/>
+          </circle>
+        </svg>
+        <span class="signal-big gold">3.6%</span>
+        <span class="signal-desc">Annual electricity demand growth — strongest since 2000</span>
+      </div>
+      <div class="signal-tile">
+        <svg class="signal-icon" viewBox="0 0 28 28" fill="none">
+          <rect x="3" y="18" width="5" height="7" rx="1.5" fill="var(--signal-accent2)" opacity="0.5"/>
+          <rect x="11" y="12" width="5" height="13" rx="1.5" fill="var(--signal-accent2)" opacity="0.7"/>
+          <rect x="19" y="5" width="5" height="20" rx="1.5" fill="var(--signal-accent2)"/>
+        </svg>
+        <span class="signal-big blue">3 Clocks</span>
+        <span class="signal-desc">Hiring, bottlenecks, and buildouts move on different timelines</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const rows = document.querySelectorAll('.bar-row');
+
+    function animateBars() {
+      rows.forEach((row, i) => {
+        const fill = row.querySelector('.bar-fill');
+        const pct = parseFloat(row.dataset.pct);
+        const delay = prefersReduced ? 0 : i * 150;
+        setTimeout(() => {
+          fill.style.width = pct + '%';
+          row.classList.add('animated');
+        }, delay + 200);
+      });
+    }
+
+    // Use IntersectionObserver for lazy animation
+    if ('IntersectionObserver' in window) {
+      const obs = new IntersectionObserver(([entry]) => {
+        if (entry.isIntersecting) { animateBars(); obs.disconnect(); }
+      }, { threshold: 0.3 });
+      obs.observe(document.getElementById('bars'));
+    } else {
+      setTimeout(animateBars, 200);
+    }
+  </script>
+</body>
+</html>

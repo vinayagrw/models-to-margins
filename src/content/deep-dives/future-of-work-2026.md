@@ -1,213 +1,672 @@
-﻿---
+---
 title: Future of Work Deep Dive
-summary: A multi-horizon study of which sectors are best positioned to create durable jobs and value, with explicit separation between current facts and forward-looking inference.
-pubDate: 2026-04-05
-updatedDate: 2026-04-05
+summary: An evidence-led decision dashboard ranking the top five job-creation arenas across three horizons, with explicit scoring, confidence, and source traceability.
+pubDate: 2026-04-13
+updatedDate: 2026-04-13
 featured: true
 listed: true
-geography: United States with global capital-flow context
+geography: United States with clearly labeled global capital context
 horizon: 1 to 10 years
 tags:
   - future of work
   - labor markets
-  - AI infrastructure
+  - evidence dashboard
   - industrial policy
   - healthcare
-audience: Operators, investors, and strategy teams
-readTime: 20 min read
+audience: Mixed executive audience
+readTime: 18 min read
 ---
 
 <div class="note-panel">
-  <p><strong>Run date</strong>: April 5, 2026</p>
-  <p><strong>Geography focus</strong>: United States, with global capital-flow signals only where they change U.S. labor demand.</p>
-  <p><strong>Source policy</strong>: prioritize 2026-and-later official sources; where no 2026 replacement exists yet, retain the latest official baseline and label it clearly.</p>
+  <p><strong>Run date</strong>: April 13, 2026</p>
+  <p><strong>Geography focus</strong>: United States for labor outcomes, with global capital and technology signals labeled separately.</p>
+  <p><strong>Source policy</strong>: prioritize 2026 official sources; retain older official baselines only when no newer equivalent exists and mark them as baseline.</p>
 </div>
 
 <div class="signal-grid">
   <div class="signal-card">
+    <span class="signal-label">Core thesis</span>
+    <strong>Care, compute, power, trust, and industrial capacity are the durable stack.</strong>
+    <p>The strongest future-of-work opportunities come from regulated demand, physical bottlenecks, and capital-heavy systems, not generic AI narratives.</p>
+  </div>
+  <div class="signal-card">
     <span class="signal-label">Live hiring</span>
-    <strong>Health care led March job growth</strong>
-    <p>BLS reported on April 3, 2026 that March payroll gains were led by health care (+76,000), construction (+26,000), transportation and warehousing (+21,000), and social assistance (+14,000).</p>
+    <strong>Healthcare still leads the live U.S. hiring signal.</strong>
+    <p>BLS reported on April 3, 2026 that March job growth was led by health care, with construction, transportation, and social assistance also strong.</p>
   </div>
   <div class="signal-card">
-    <span class="signal-label">Capex signal</span>
-    <strong>Compute spend is still accelerating</strong>
-    <p>Microsoft, Alphabet, and Amazon all signaled continued AI and technical-infrastructure intensity into 2026 rather than a slowdown.</p>
+    <span class="signal-label">Constraint</span>
+    <strong>Electricity is becoming a system bottleneck.</strong>
+    <p>IEA and EIA both show power demand accelerating, with data centers acting as a major pressure point.</p>
   </div>
   <div class="signal-card">
-    <span class="signal-label">Physical bottleneck</span>
-    <strong>Electricity is becoming the constraint</strong>
-    <p>IEA and EIA both point to strong power-demand growth, with data centers acting as a major accelerator.</p>
-  </div>
-  <div class="signal-card">
-    <span class="signal-label">Industrial floor</span>
-    <strong>Care, power, security, and fabs are stickier than hype</strong>
-    <p>The strongest medium-term labor demand lives where software touches regulated systems, physical assets, and demographic demand.</p>
+    <span class="signal-label">Audit rule</span>
+    <strong>This page separates facts, inferences, and baselines.</strong>
+    <p>Proxy signals, direct job evidence, and older baselines are labeled so the ranking can be challenged and audited.</p>
   </div>
 </div>
 
 <nav class="reading-map" aria-label="Reading map">
   <p class="reading-map-label">Reading map</p>
   <div class="reading-map-grid">
-    <a class="reading-link" href="#executive-summary">
-      <strong>Executive Summary</strong>
-      <span>The short version of what is actually durable.</span>
-    </a>
-    <a class="reading-link" href="#ranked-top-5-sector-thesis-by-horizon">
-      <strong>Horizon Rankings</strong>
-      <span>What changes across 1 to 2, 3 to 5, and 5 to 10 years.</span>
-    </a>
-    <a class="reading-link" href="#role-family-and-hiring-map">
-      <strong>Role Maps</strong>
-      <span>Where hiring is likely to show up in actual job families.</span>
-    </a>
-    <a class="reading-link" href="#technology-and-investment-tracker">
-      <strong>Tracker</strong>
-      <span>The concrete capex, adoption, and labor signals behind the thesis.</span>
-    </a>
-    <a class="reading-link" href="#what-is-durable-vs-what-is-hype">
-      <strong>Durable vs Hype</strong>
-      <span>Where the market is building something real versus simply talking.</span>
-    </a>
-    <a class="reading-link" href="#source-links-with-exact-dates">
-      <strong>Source Links</strong>
-      <span>Primary and baseline references with exact dates.</span>
-    </a>
+    <a class="reading-link" href="#executive-overview"><strong>Executive overview</strong><span>The short version of what matters and why.</span></a>
+    <a class="reading-link" href="#scoring-model"><strong>Scoring model</strong><span>The weights behind the ranking.</span></a>
+    <a class="reading-link" href="#horizon-by-sector-portfolio-matrix"><strong>Portfolio matrix</strong><span>The primary cross-horizon story.</span></a>
+    <a class="reading-link" href="#sector-trajectory"><strong>Sector trajectory</strong><span>Visual rank change across horizons.</span></a>
+    <a class="reading-link" href="#evidence-ledger"><strong>Evidence ledger</strong><span>Dated sources with explicit evidence type.</span></a>
+    <a class="reading-link" href="#sector-drill-down"><strong>Sector drill-down</strong><span>Causal chains, role families, and scorecards.</span></a>
+    <a class="reading-link" href="#sector-convergence-zones"><strong>Convergence zones</strong><span>Where sectors overlap and compound expertise grows.</span></a>
+    <a class="reading-link" href="#durable-vs-hype-decision-aid"><strong>Decision aid</strong><span>How to separate durable opportunity from hype.</span></a>
   </div>
 </nav>
 
-<div class="callout warm">
-  <strong>Core thesis</strong>
-  <p>The durable future-of-work winners are not generic "AI jobs." They are care demand, compute infrastructure, electrification bottlenecks, security hardening, and strategic industrial capacity.</p>
+<div class="callout green">
+  <strong>Full evidence file</strong>
+  <p>This page is a visual summary. <a href="/evidence/future-of-work-2026.md" download>Download the full evidence markdown</a> for complete source data, claim schemas, and raw tables.</p>
 </div>
 
-## Executive Summary
+<div class="callout warm">
+  <strong>Executive framing</strong>
+  <p>This is an evidence-led decision story for a mixed executive audience. The goal is not to predict one future with certainty. The goal is to show which arenas have the strongest evidence of durable work creation, value capture, and defensible skill paths.</p>
+</div>
 
-The strongest durable job-and-value creation thesis across the next decade is not "AI" in the abstract. It is the combination of care demand, compute buildout, electrification bottlenecks, security/compliance hardening, and strategic industrial capacity.
+## Executive Overview
 
-Fact: BLS reported on April 3, 2026 that March payroll gains were led by health care (+76,000), construction (+26,000), transportation and warehousing (+21,000), and social assistance (+14,000), which is the clearest live U.S. hiring signal in the report.  
-Fact: Microsoft reported on January 29, 2026 that Azure revenue grew 39% year over year in FY26 Q2, with gross margin pressure from continued AI infrastructure investment; Alphabet's 2025 annual report, filed in February 2026, reported $91.4 billion in 2025 capex and said it expects to significantly increase technical infrastructure investment again in 2026; Amazon's 2025 annual report, filed in February 2026, reported $128.3 billion in 2025 cash capex, primarily for technology infrastructure, and said it expects this to increase in 2026.  
-Fact: The IEA's Electricity 2026 report, published February 6, 2026, forecasts global electricity demand growth averaging 3.6% annually from 2026 to 2030, while EIA said on January 13, 2026 that U.S. electricity demand is headed for its strongest four-year growth since 2000, driven largely by data centers.  
-Fact: CMS said on March 19, 2026 that its $50 billion Rural Health Transformation Program is moving into implementation across all 50 states, explicitly targeting workforce, technology, and care-model modernization.  
-Fact: Commerce announced on January 15, 2026 a U.S.-Taiwan trade and investment agreement tied to at least $250 billion of new direct investment in U.S. semiconductor, energy, and AI production capacity, with additional credit guarantees to expand the supply chain.
+<div class="stat-row">
+  <div class="stat-card">
+    <span class="stat-number">+76K</span>
+    <span class="stat-label">Healthcare jobs added in March</span>
+    <span class="stat-source">BLS, Apr. 3, 2026</span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-number">$311B</span>
+    <span class="stat-label">Combined 2025 capex: Alphabet + Amazon</span>
+    <span class="stat-source">SEC 10-K filings, Feb. 2026</span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-number">3.6%</span>
+    <span class="stat-label">Annual electricity demand growth through 2030</span>
+    <span class="stat-source">IEA Electricity 2026, Feb. 6, 2026</span>
+  </div>
+</div>
 
-Inference: The best top-5 ranking changes by horizon. In the next 1 to 2 years, care delivery and AI infrastructure dominate because demand is already present and hiring pipelines already exist. In 3 to 5 years, electrification/grid and cybersecurity move higher because hard bottlenecks and regulation compound. In 5 to 10 years, electrification/grid and strategic industrial capacity become even more important because physical systems, not software hype, constrain growth.
+<div class="visual-frame" style="--vf-h:340px">
+  <iframe
+    src="/visuals/future-of-work/market-pulse.html?embed=1"
+    title="March 2026 market pulse — payroll gains and key economic signals"
+    loading="lazy"
+  ></iframe>
+</div>
 
 <div class="thesis-grid">
-  <div class="thesis-card">
-    <em>1 to 2 years</em>
-    <strong>Care and compute are the clearest winners</strong>
-    <p>Live payroll demand and hyperscale capex already exist, which means these sectors do not need a narrative jump to create work.</p>
+  <div class="thesis-card"><em>1 to 2 years</em><strong>Care and compute dominate.</strong><p>Demand is already visible in payroll growth, capex, and regulated deployment.</p></div>
+  <div class="thesis-card"><em>3 to 5 years</em><strong>Power and trust move up.</strong><p>As adoption deepens, electricity, governance, and reliability become more binding.</p></div>
+  <div class="thesis-card"><em>5 to 10 years</em><strong>Physical systems outrun app-layer novelty.</strong><p>Grid, factories, robotics, and strategic capacity become the hardest things to build and therefore the most valuable.</p></div>
+</div>
+
+## Scoring Model
+
+<div class="weight-bar">
+  <div class="weight-segment" style="--w:25%;--seg-color:#16825d"><span class="weight-pct">25%</span><span class="weight-name">Job creation</span></div>
+  <div class="weight-segment" style="--w:20%;--seg-color:#2563eb"><span class="weight-pct">20%</span><span class="weight-name">Capital</span></div>
+  <div class="weight-segment" style="--w:15%;--seg-color:#7c3aed"><span class="weight-pct">15%</span><span class="weight-name">Adoption</span></div>
+  <div class="weight-segment" style="--w:15%;--seg-color:#b8860b"><span class="weight-pct">15%</span><span class="weight-name">Portability</span></div>
+  <div class="weight-segment" style="--w:15%;--seg-color:#e11d48"><span class="weight-pct">15%</span><span class="weight-name">Resilience</span></div>
+  <div class="weight-segment" style="--w:10%;--seg-color:#94a3b8"><span class="weight-pct">10%</span><span class="weight-name">Risk</span></div>
+</div>
+
+<details>
+  <summary>Full scoring table</summary>
+  <div class="expander-copy">
+
+| Metric | Weight | What it measures |
+|---|---:|---|
+| Job creation potential | 25% | Direct capacity to create sustained roles |
+| Capital intensity | 20% | Real spend underwriting the sector |
+| Adoption momentum | 15% | Evidence that deployment is already happening |
+| Skill portability | 15% | Transferability across employers and sub-sectors |
+| Displacement resilience | 15% | Resistance to commoditization and automation |
+| Execution and regulatory risk | 10% | Delays from permitting, reimbursement, policy, or timing |
+
   </div>
-  <div class="thesis-card">
-    <em>3 to 5 years</em>
-    <strong>Power and security climb as bottlenecks</strong>
-    <p>Once AI, cloud, and industrial digitization deepen, the limiting factors become electricity, auditability, resilience, and control.</p>
+</details>
+
+<details>
+  <summary>Why these weights?</summary>
+  <div class="expander-copy">
+
+Job creation potential is weighted highest (25%) because this is an employment-focused analysis — the primary question is where durable work is being created, not where capital is flowing or policy is signaling. Capital intensity (20%) is second because real spend is the strongest leading indicator that demand will convert to roles. Adoption momentum and skill portability share 15% each because both determine whether demand is actionable for workers today. Displacement resilience (15%) measures whether roles will survive the next automation cycle. Execution risk is lowest (10%) because it acts as a modifier on otherwise strong arenas, not a driver of new opportunity.
+
+**Sensitivity note:** If capital intensity were weighted at 25% instead of 20%, AI infrastructure would rank #1 in the near term with a wider margin over healthcare. If displacement resilience were weighted at 25%, electrification and grid would rank higher across all horizons due to the physical complexity of field work.
+
   </div>
-  <div class="thesis-card">
-    <em>5 to 10 years</em>
-    <strong>Physical systems matter more than app-layer novelty</strong>
-    <p>Grid, factories, semiconductors, and strategic industrial capacity become the hardest things to build and therefore the most valuable.</p>
-  </div>
+</details>
+
+<div class="grade-strip">
+  <div class="grade-row"><span class="grade-badge a">A</span><span class="grade-desc">Recent, official, and directly tied to hiring, capital spend, or deployment</span></div>
+  <div class="grade-row"><span class="grade-badge b">B</span><span class="grade-desc">Strong proxy evidence with clear directional relevance</span></div>
+  <div class="grade-row"><span class="grade-badge c">C</span><span class="grade-desc">Useful but inference-heavy or baseline-dependent</span></div>
 </div>
 
 <div class="callout green">
-  <strong>Fact vs inference discipline</strong>
-  <p><mark>Facts</mark> in this piece are tied to dated sources. <mark>Inference</mark> is where the ranking, career guidance, and durable-vs-hype judgment comes from. That distinction matters because labor stories often smuggle opinion in as certainty.</p>
+  <strong>Evidence taxonomy</strong>
+  <p><mark>direct_jobs</mark>, <mark>capital_proxy</mark>, <mark>adoption_proxy</mark>, <mark>policy_signal</mark>, and <mark>productivity_signal</mark> are separated below so signals are not mistaken for direct outcomes.</p>
 </div>
 
-## Ranked Top-5 Sector Thesis By Horizon
-
-<span class="section-kicker">The order changes because current hiring, medium-term bottlenecks, and long-cycle capacity buildouts do not move on the same clock.</span>
-
-<details open>
-  <summary>Horizon 1 - 1 to 2 years - already visible in hiring and capex</summary>
-
-1. Healthcare, eldercare, mental health, and healthtech  
-Fact: BLS reported on April 3, 2026 that health care added 76,000 jobs in March, the strongest category in that release. CMS said on March 19, 2026 that its $50 billion Rural Health Transformation Program is moving into implementation with explicit funding for workforce, infrastructure, and digital-health modernization. FDA updated its AI/ML-enabled devices page on March 4, 2026, reinforcing that healthtech deployment is continuing through regulated channels.  
-Inference: This is the clearest near-term labor absorber because it combines labor-intensive care roles with applied software, workflow, and device adoption.
-
-2. AI, data, software, cloud, and automation infrastructure  
-Fact: Microsoft reported on January 29, 2026 that Azure grew 39% year over year in FY26 Q2 while continued AI infrastructure investment pressured cloud margins. Alphabet's 2025 annual report, filed in February 2026, reported $91.4 billion in capex and said it expects a significant increase in 2026, primarily for servers and datacenters; Amazon's 2025 annual report, also filed in February 2026, reported $128.3 billion in cash capex, primarily for technology infrastructure, and expects more in 2026.  
-Inference: Near-term value accrues less to "prompting" and more to infrastructure, data engineering, model operations, cost optimization, and workflow integration.
-
-3. Cybersecurity, digital trust, and compliance tech  
-Fact: NIST's Cyber AI Profile moved through active 2026 review, including a January 14, 2026 workshop, and NIST updated post-quantum cryptography guidance on February 27, 2026. This is direct evidence that AI security, model governance, and cryptographic migration are moving from theory into operational standards work.  
-Inference: Security is a tax on digitization, but also a durable job creator because every AI rollout, cloud migration, and regulated workflow expands the attack surface and audit surface.
-
-4. Clean energy, grid, storage, and electrification  
-Fact: The IEA's Electricity 2026 report says global electricity demand is set to grow 3.6% annually from 2026 to 2030, while EIA said on January 13, 2026 that U.S. electricity demand is on track for its strongest four-year growth since 2000 because of data centers. EIA said again on March 12, 2026 that faster-than-expected data-center demand could force more generation growth.  
-Inference: Hiring is already strong in project development, interconnection, field operations, permitting, and power systems, but the pace is still partly gated by policy, siting, and utility processes.
-
-5. Advanced manufacturing, semiconductors, robotics, and industrial automation  
-Fact: Commerce's January 15, 2026 Taiwan trade-and-investment fact sheet tied at least $250 billion of new direct investment to U.S. semiconductor, energy, and AI production capacity, with additional credit guarantees. Micron's January 16, 2026 New York megafab groundbreaking kept the $100 billion scale and nearly 50,000-job framing visible in the market.  
-Inference: This ranks fifth near term because the capex is real but the job creation is more location-specific, slower to ramp, and more exposed to execution and policy timing than healthcare or software.
-</details>
-
-<details>
-  <summary>Horizon 2 - 3 to 5 years - bottlenecks and regulation compound</summary>
-
-1. AI, data, software, cloud, and automation infrastructure  
-Fact: WEF says broad shifts in technology, demographics, and the green transition are projected to create 170 million jobs and displace 92 million by 2030 globally, with technology, data, and AI roles among the fastest-growing categories.  
-Inference: By this horizon, the stack expands from model access to AI-native operations, data pipelines, orchestration, inference economics, vertical copilots, and industrial software.
-
-2. Clean energy, grid, storage, and electrification  
-Fact: The IEA frames this as the "Age of Electricity." Grid, transformer, and storage constraints are already visible, and data-center growth raises urgency.  
-Inference: Once interconnection, grid equipment, and financing pipelines clear, this arena should support durable jobs across engineering, skilled trades, software, project finance, and asset operations.
-
-3. Healthcare, eldercare, mental health, and healthtech  
-Fact: Demographic demand compounds into the early 2030s, and FDA-cleared AI devices signal tooling adoption rather than pure labor replacement.  
-Inference: Care remains large and durable, but wage pressure, reimbursement, and burnout risk can cap value capture for workers unless they move toward specialized, licensed, or tech-enabled roles.
-
-4. Cybersecurity, digital trust, and compliance tech  
-Fact: More regulated AI, more cloud concentration, and more critical-infrastructure digitization create sustained demand.  
-Inference: This remains top-tier, especially for workers who combine security with cloud, identity, GRC, or AI security.
-
-5. Advanced manufacturing, semiconductors, robotics, and industrial automation  
-Fact: CHIPS, NSTC, and factory automation have multiyear build timelines. BLS notes semiconductor demand across vehicles, medical equipment, and electronics.  
-Inference: This becomes stronger as fabs, packaging, automation, and industrial retrofits move from announcements to scaled operations.
-</details>
-
-<details>
-  <summary>Horizon 3 - 5 to 10 years - physical systems dominate the constraint set</summary>
-
-1. Clean energy, grid, storage, and electrification  
-Fact: Electrification pressure comes from transport, buildings, manufacturing, and data centers. The IEA notes new grid infrastructure often takes five to fifteen years from planning to completion.  
-Inference: Long-cycle bottlenecks create the strongest asymmetry here. The labor market should reward power engineers, grid software builders, field-service operators, and financing/permitting specialists for a long time.
-
-2. Advanced manufacturing, semiconductors, robotics, and industrial automation  
-Fact: Strategic supply-chain resilience, domestic production, and R&D institutions like NSTC are being funded now on multiyear timelines.  
-Inference: Over a decade, physical production capacity and robotics adoption should matter more than generic SaaS categories because national security, energy, and compute all depend on them.
-
-3. Healthcare, eldercare, mental health, and healthtech  
-Fact: Aging is structural and underwritten by demography.  
-Inference: This remains a durable jobs engine, but productivity gains may concentrate value in tech-enabled platforms, diagnostics, and care coordination rather than only in labor-hour expansion.
-
-4. Cybersecurity, digital trust, and compliance tech  
-Fact: Security demand persists as a system requirement.  
-Inference: It remains durable, but some routine tasks will be automated, so the advantage shifts to architecture, response, governance, identity, and AI safety/security.
-
-5. AI, data, software, cloud, and automation infrastructure  
-Fact: AI investment and adoption are already large.  
-Inference: The arena stays huge, but generic application-layer roles face the highest commoditization risk. The durable layer is infrastructure, data, reliability, economics, and domain integration, not "AI content" work.
-</details>
-
-## Role-Family And Hiring Map
-
-<div class="callout">
-  <strong>How to use this section</strong>
-  <p>Read the role maps as transition pathways, not just job titles. The strongest positions are the ones closest to budgets, uptime, regulated workflows, or physical assets.</p>
+<div class="callout warm">
+  <strong>Source scope note</strong>
+  <p>This dashboard uses official government and institutional sources. It does not yet incorporate real-time private-sector hiring signals (e.g., job postings from LinkedIn Economic Graph, Indeed Hiring Lab, or Lightcast). Adding these would corroborate BLS numbers and potentially surface emerging demand earlier.</p>
 </div>
 
-<details open>
-  <summary>Healthcare, eldercare, mental health, and healthtech</summary>
+<details>
+  <summary>Normalized claim schema used in this dashboard</summary>
   <div class="expander-copy">
 
-- Direct care: home health aide, personal care aide, CNA, behavioral health technician, care coordinator
-- Licensed clinical: RN, nurse practitioner, therapist, counselor, social worker
-- Tech-enabled clinical ops: clinical informatics analyst, EHR workflow specialist, medical device implementation specialist, revenue-cycle automation analyst
-- Healthtech product/build roles: ML for diagnostics, regulatory affairs, quality systems, medical imaging software, interoperability engineering
-- Skills and credentials: RN/LPN/CNA, LPC/LCSW/LMFT paths by state, Epic/Cerner workflow familiarity, HIPAA, medical coding basics, HL7/FHIR, clinical documentation, device QA/regulatory literacy
+| Field | Purpose |
+|---|---|
+| sector | Sector or arena being evaluated |
+| horizon | 1-2 years, 3-5 years, or 5-10 years |
+| rank | Position in the ranking for that horizon |
+| claim_text | The specific point being made |
+| claim_type | fact, inference, or editorial inference (author's analytical synthesis, not from an external institution) |
+| evidence_type | direct_jobs, capital_proxy, adoption_proxy, policy_signal, or productivity_signal |
+| date | Date of the underlying signal |
+| geography | U.S., global, or mixed context |
+| entity | Institution or company behind the signal |
+| technology | Underlying technology or system category |
+| role_families | Likely jobs created or reinforced |
+| skills | Relevant skills, tools, or certifications |
+| investment_value | Capital magnitude when available |
+| roi_or_productivity_signal | Verified or qualified outcome signal when available |
+| confidence | High, Medium, or Low confidence in the ranking implication |
+| source_url | Canonical link for verification |
+| source_date | Exact source publication or update date |
+| baseline_only | Whether the source is an older official baseline rather than a live 2026 source |
+
+  </div>
+</details>
+
+## Horizon-by-Sector Portfolio Matrix
+
+<div class="visual-frame" style="--vf-h:370px">
+  <iframe
+    src="/visuals/future-of-work/portfolio-heatmap.html?embed=1"
+    title="Portfolio heatmap — sector rankings across three time horizons"
+    loading="lazy"
+  ></iframe>
+</div>
+
+<details>
+  <summary>Portfolio matrix table</summary>
+  <div class="expander-copy">
+
+| Sector | 1-2 years | 3-5 years | 5-10 years | Why rank changes |
+|---|---|---|---|---|
+| Healthcare | #1 (4.8, A, High) | #3 (4.2, B, High) | #3 (4.1, B, High) | Demand is demographic and durable, but long-term value shifts toward specialized and tech-enabled roles. |
+| AI infrastructure | #2 (4.7, A, High) | #1 (4.8, B, High) | #5 (3.8, B, Medium) | The arena stays large, but durable value moves toward infrastructure, economics, and domain integration. |
+| Cybersecurity | #3 (4.1, A, High) | #4 (4.0, B, High) | #4 (3.9, A, High) | Security remains mandatory, but routine work automates faster than trust-heavy architecture and response. |
+| Electrification and grid | #4 (4.0, A, High) | #2 (4.6, A, High) | #1 (4.9, A, High) | Power rises because it becomes a prerequisite constraint on AI, industry, buildings, and transport. |
+| Advanced manufacturing | #5 (3.9, B, Medium) | #5 (4.0, B, Medium) | #2 (4.5, B, High) | It starts narrower than care or cloud, then rises as domestic production and robotics become strategic constraints. |
+
+  </div>
+</details>
+
+<details>
+  <summary>Healthcare detail by horizon</summary>
+  <div class="expander-copy">
+  <div class="thesis-grid">
+    <div class="thesis-card">
+      <em>1-2 years — Rank #1</em>
+      <strong>Score 4.8 / Grade A / Confidence High</strong>
+      <p>Primary roles: care, coordination, informatics</p>
+      <p>Bottleneck: labor supply and reimbursement</p>
+      <p>Displacement risk: admin automation</p>
+      <p>Sources: <a href="https://www.bls.gov/news.release/archives/empsit_04032026.htm">BLS Apr. 3, 2026</a>, <a href="https://www.cms.gov/newsroom/press-releases/readout-cms-convenes-first-rural-health-transformation-summit-advance-state-led-innovation">CMS Mar. 19, 2026</a></p>
+    </div>
+    <div class="thesis-card">
+      <em>3-5 years — Rank #3</em>
+      <strong>Score 4.2 / Grade B / Confidence High</strong>
+      <p>Primary roles: diagnostics workflow, nurses, counselors</p>
+      <p>Bottleneck: licensure and payment reform</p>
+      <p>Displacement risk: clerical compression</p>
+      <p>Sources: <a href="https://www.fda.gov/medical-devices/medical-devices-news-and-events/cdrhnew-news-and-updates">FDA Mar. 4, 2026</a>, <a href="https://www.census.gov/newsroom/press-releases/2025/older-adults-outnumber-children.html">Census Jun. 2025 (baseline)</a></p>
+    </div>
+    <div class="thesis-card">
+      <em>5-10 years — Rank #3</em>
+      <strong>Score 4.1 / Grade B / Confidence High</strong>
+      <p>Primary roles: eldercare platforms, clinical ops</p>
+      <p>Bottleneck: affordability and payment structures</p>
+      <p>Displacement risk: documentation automation</p>
+      <p>Sources: <a href="https://www.census.gov/newsroom/press-releases/2025/older-adults-outnumber-children.html">Census Jun. 2025 (baseline)</a>, <a href="https://www.bls.gov/ooh/healthcare/">BLS Healthcare (baseline)</a></p>
+    </div>
+  </div>
+  </div>
+</details>
+
+<details>
+  <summary>AI infrastructure detail by horizon</summary>
+  <div class="expander-copy">
+  <div class="thesis-grid">
+    <div class="thesis-card">
+      <em>1-2 years — Rank #2</em>
+      <strong>Score 4.7 / Grade A / Confidence High</strong>
+      <p>Primary roles: platform, data, SRE, datacenter ops</p>
+      <p>Bottleneck: power and economics</p>
+      <p>Displacement risk: thin app-layer compression</p>
+      <p>Sources: <a href="https://www.microsoft.com/en-us/Investor/earnings/FY-2026-Q2/intelligent-cloud-performance">Microsoft Jan. 29, 2026</a>, <a href="https://www.sec.gov/Archives/edgar/data/1652044/000165204426000018/goog-20251231.htm">Alphabet Feb. 2026</a></p>
+    </div>
+    <div class="thesis-card">
+      <em>3-5 years — Rank #1</em>
+      <strong>Score 4.8 / Grade B / Confidence High</strong>
+      <p>Primary roles: orchestration, workflow automation, inference ops</p>
+      <p>Bottleneck: governance and data quality</p>
+      <p>Displacement risk: generic builders</p>
+      <p>Sources: <a href="https://www.sec.gov/Archives/edgar/data/1018724/000101872426000004/amzn-20251231.htm">Amazon Feb. 2026</a>, <a href="https://www.weforum.org/reports/the-future-of-jobs-report-2025/">WEF Jan. 2025 (baseline)</a></p>
+    </div>
+    <div class="thesis-card">
+      <em>5-10 years — Rank #5</em>
+      <strong>Score 3.8 / Grade B / Confidence Medium</strong>
+      <p>Primary roles: infra economics, networking, scheduling</p>
+      <p>Bottleneck: margin compression</p>
+      <p>Displacement risk: highest at app layer</p>
+      <p>Sources: <a href="https://blogs.microsoft.com/blog/2026/01/26/maia-200-the-ai-accelerator-built-for-inference/">Microsoft Maia Jan. 2026</a>, <a href="https://hai.stanford.edu/ai-index/2025-ai-index-report">Stanford HAI (baseline)</a></p>
+    </div>
+  </div>
+  </div>
+</details>
+
+<details>
+  <summary>Cybersecurity detail by horizon</summary>
+  <div class="expander-copy">
+  <div class="thesis-grid">
+    <div class="thesis-card">
+      <em>1-2 years — Rank #3</em>
+      <strong>Score 4.1 / Grade A / Confidence High</strong>
+      <p>Primary roles: cloud security, IAM, GRC-tech, response</p>
+      <p>Bottleneck: enterprise complexity</p>
+      <p>Displacement risk: alert triage automation</p>
+      <p>Sources: <a href="https://csrc.nist.gov/pubs/ir/8596/iprd">NIST Cyber AI Profile (preliminary draft) Jan. 2026</a>, <a href="https://www.nist.gov/cybersecurity/what-post-quantum-cryptography">NIST PQC Feb. 27, 2026</a></p>
+    </div>
+    <div class="thesis-card">
+      <em>3-5 years — Rank #4</em>
+      <strong>Score 4.0 / Grade B / Confidence High</strong>
+      <p>Primary roles: AI security, governance, privacy</p>
+      <p>Bottleneck: procurement cycles</p>
+      <p>Displacement risk: low-skill monitoring work</p>
+      <p>Sources: <a href="https://www.nist.gov/cyberframework">NIST 2026 framework updates</a>, <a href="https://www.bls.gov/ooh/computer-and-information-technology/information-security-analysts.htm">BLS InfoSec (baseline)</a></p>
+    </div>
+    <div class="thesis-card">
+      <em>5-10 years — Rank #4</em>
+      <strong>Score 3.9 / Grade A / Confidence High</strong>
+      <p>Primary roles: architecture, trust, crypto migration</p>
+      <p>Bottleneck: proving ROI beyond compliance</p>
+      <p>Displacement risk: routine controls testing</p>
+      <p>Sources: <a href="https://www.nist.gov/cybersecurity/what-post-quantum-cryptography">NIST PQC Feb. 27, 2026</a>, <a href="https://csrc.nist.gov/pubs/ir/8596/iprd">NIST Cyber AI Profile (preliminary draft)</a></p>
+    </div>
+  </div>
+  </div>
+</details>
+
+<details>
+  <summary>Electrification and grid detail by horizon</summary>
+  <div class="expander-copy">
+  <div class="thesis-grid">
+    <div class="thesis-card">
+      <em>1-2 years — Rank #4</em>
+      <strong>Score 4.0 / Grade A / Confidence High</strong>
+      <p>Primary roles: utility ops, interconnection, field crews</p>
+      <p>Bottleneck: permitting and transformers</p>
+      <p>Displacement risk: low in field roles</p>
+      <p>Sources: <a href="https://www.eia.gov/pressroom/releases/press582.php">EIA Jan. 13, 2026</a>, <a href="https://www.iea.org/reports/electricity-2026">IEA Feb. 6, 2026</a></p>
+    </div>
+    <div class="thesis-card">
+      <em>3-5 years — Rank #2</em>
+      <strong>Score 4.6 / Grade A / Confidence High</strong>
+      <p>Primary roles: grid engineering, storage controls, finance, permitting</p>
+      <p>Bottleneck: transmission build speed</p>
+      <p>Displacement risk: routine project admin only</p>
+      <p>Sources: <a href="https://www.iea.org/reports/electricity-2026/executive-summary">IEA Executive Summary Feb. 6, 2026</a>, <a href="https://www.energy.gov/topics/grid-deployment-and-transmission">DOE Grid Nov. 2025 (baseline)</a></p>
+    </div>
+    <div class="thesis-card">
+      <em>5-10 years — Rank #1</em>
+      <strong>Score 4.9 / Grade A / Confidence High</strong>
+      <p>Primary roles: long-duration grid, field systems, power markets</p>
+      <p>Bottleneck: physical build time and siting</p>
+      <p>Displacement risk: low due to physical complexity</p>
+      <p>Sources: <a href="https://www.iea.org/reports/electricity-2026">IEA Feb. 6, 2026</a>, <a href="https://www.eia.gov/todayinenergy/detail.php?id=67344">EIA Mar. 12, 2026</a></p>
+    </div>
+  </div>
+  </div>
+</details>
+
+<details>
+  <summary>Advanced manufacturing detail by horizon</summary>
+  <div class="expander-copy">
+  <div class="thesis-grid">
+    <div class="thesis-card">
+      <em>1-2 years — Rank #5</em>
+      <strong>Score 3.9 / Grade B / Confidence Medium</strong>
+      <p>Primary roles: fab construction, technicians, controls</p>
+      <p>Bottleneck: site execution and talent pipelines</p>
+      <p>Displacement risk: repetitive line work</p>
+      <p>Sources: <a href="https://www.commerce.gov/news/fact-sheets/2026/01/fact-sheet-restoring-american-semiconductor-manufacturing-leadership">Commerce Jan. 15, 2026</a>, <a href="https://investors.micron.com/news-releases/news-release-details/micron-celebrates-official-groundbreaking-new-york-megafab-site">Micron Jan. 16, 2026</a></p>
+    </div>
+    <div class="thesis-card">
+      <em>3-5 years — Rank #5</em>
+      <strong>Score 4.0 / Grade B / Confidence Medium</strong>
+      <p>Primary roles: robotics integration, maintenance, yield</p>
+      <p>Bottleneck: construction timelines</p>
+      <p>Displacement risk: routine assembly tasks</p>
+      <p>Sources: <a href="https://www.commerce.gov/news/blog/tweets/micron-breaks-ground-100b-investment-us-secretary-commerce-howard-lutnick">Commerce Jan. 16, 2026</a>, <a href="https://www.bls.gov/ooh/production/semiconductor-processing-technicians.htm">BLS Semiconductor (baseline)</a></p>
+    </div>
+    <div class="thesis-card">
+      <em>5-10 years — Rank #2</em>
+      <strong>Score 4.5 / Grade B / Confidence High</strong>
+      <p>Primary roles: robotics, test, reliability, automation architecture</p>
+      <p>Bottleneck: supply-chain concentration</p>
+      <p>Displacement risk: lower in controls and engineering</p>
+      <p>Sources: <a href="https://www.commerce.gov/news/fact-sheets/2026/01/fact-sheet-restoring-american-semiconductor-manufacturing-leadership">Commerce Jan. 15, 2026</a>, <a href="https://www.commerce.gov/news/press-releases/2025/01/department-commerce-finalizes-long-term-partnership-natcast-operate">Natcast Jan. 2025 (baseline)</a></p>
+    </div>
+  </div>
+  </div>
+</details>
+
+## Sector Trajectory
+
+<div class="visual-frame">
+  <iframe
+    src="/visuals/future-of-work/sector-trajectory.html?embed=1"
+    title="Sector trajectory bump chart showing rank changes across three time horizons"
+    loading="lazy"
+  ></iframe>
+</div>
+
+## Scenario Sensitivity
+
+<div class="scenario-grid">
+  <div class="scenario-card">
+    <span class="scenario-label">AI Slows</span>
+    <strong>What changes</strong>
+    <p>AI infrastructure drops faster across all horizons; grid and healthcare relatively stronger.</p>
+    <strong>Rank impact</strong>
+    <p>Healthcare holds #1 across all horizons; electrification rises earlier.</p>
+  </div>
+  <div class="scenario-card">
+    <span class="scenario-label">Energy Reversal</span>
+    <strong>What changes</strong>
+    <p>Grid and electrification stalls in the 3-5 year horizon.</p>
+    <strong>Rank impact</strong>
+    <p>AI infrastructure stays #1 longer; manufacturing delayed further.</p>
+  </div>
+  <div class="scenario-card">
+    <span class="scenario-label">Admin Automation</span>
+    <strong>What changes</strong>
+    <p>Healthcare near-term rank holds but role mix shifts heavily toward clinical.</p>
+    <strong>Rank impact</strong>
+    <p>Net job count lower, but remaining roles are higher-quality and harder to displace.</p>
+  </div>
+</div>
+
+## Evidence Ledger
+
+<div class="callout green">
+  <strong>Evidence taxonomy</strong>
+  <p><mark>direct_jobs</mark>, <mark>capital_proxy</mark>, <mark>adoption_proxy</mark>, <mark>policy_signal</mark>, and <mark>productivity_signal</mark> are separated below so signals are not mistaken for direct outcomes. Entries marked <em>editorial inference</em> are the author's analytical synthesis, not sourced from an external institution.</p>
+</div>
+
+### Healthcare
+
+<div class="stack-list">
+  <div class="stack-item" data-strength="high">
+    <strong>Healthcare is the clearest live labor absorber</strong>
+    <p><mark>Fact</mark> <mark>direct_jobs</mark> | Apr. 3, 2026 | U.S. | BLS</p>
+    <p>Roles: Aides, coordinators, clinicians | Skills: Care ops, documentation, bedside workflows</p>
+    <p>Signal: March jobs: +76,000 in healthcare | Confidence: High</p>
+    <p><a href="https://www.bls.gov/news.release/archives/empsit_04032026.htm">Employment Situation</a></p>
+  </div>
+  <div class="stack-item" data-strength="medium">
+    <strong>CMS convened a Rural Health Transformation Summit to advance state-led innovation</strong>
+    <p><mark>Fact</mark> <mark>policy_signal</mark> | Mar. 19, 2026 | U.S. | CMS</p>
+    <p>Roles: Care ops, rural health admins, digital-health teams | Skills: Care coordination, program ops, reimbursement literacy</p>
+    <p>Signal: Summit convened; program scope under development | Confidence: High</p>
+    <p><a href="https://www.cms.gov/newsroom/press-releases/readout-cms-convenes-first-rural-health-transformation-summit-advance-state-led-innovation">Rural Health Transformation</a></p>
+  </div>
+</div>
+
+### AI infrastructure
+
+<div class="stack-list">
+  <div class="stack-item" data-strength="medium">
+    <strong>Hyperscale AI infrastructure spend remains elevated</strong>
+    <p><mark>Fact</mark> <mark>capital_proxy</mark> | Jan. 29, 2026 | Global / U.S.-heavy | Microsoft</p>
+    <p>Roles: Platform, SRE, datacenter ops | Skills: Cloud, infra, MLOps, reliability</p>
+    <p>Signal: Azure +39% YoY in FY26 Q2 | Confidence: High</p>
+    <p><a href="https://www.microsoft.com/en-us/Investor/earnings/FY-2026-Q2/intelligent-cloud-performance">FY26 Q2 Intelligent Cloud</a></p>
+  </div>
+  <div class="stack-item" data-strength="medium">
+    <strong>Large-scale technical infrastructure spend still supports mid-term expansion</strong>
+    <p><mark>Fact</mark> <mark>capital_proxy</mark> | Feb. 2026 | Global | Alphabet</p>
+    <p>Roles: Platform, networking, infra finance | Skills: Distributed systems, networking, cost engineering</p>
+    <p>Signal: $91.4B 2025 capex | Confidence: High</p>
+    <p><a href="https://www.sec.gov/Archives/edgar/data/1652044/000165204426000018/goog-20251231.htm">2025 Form 10-K</a></p>
+  </div>
+</div>
+
+### Cybersecurity
+
+<div class="stack-list">
+  <div class="stack-item" data-strength="medium">
+    <strong>NIST published an initial preliminary draft of a Cybersecurity Framework Profile for AI</strong>
+    <p><mark>Fact</mark> <mark>policy_signal</mark> | Jan. 2026 | U.S. | NIST</p>
+    <p>Roles: IAM, cloud security, governance | Skills: Identity, policy mapping, AI risk</p>
+    <p>Signal: Standards signal (preliminary draft), not direct ROI | Confidence: High</p>
+    <p><a href="https://csrc.nist.gov/pubs/ir/8596/iprd">Cyber AI Profile (initial preliminary draft)</a></p>
+  </div>
+</div>
+
+### Electrification and grid
+
+<div class="stack-list">
+  <div class="stack-item" data-strength="medium">
+    <strong>Power demand is accelerating with data centers as a major driver</strong>
+    <p><mark>Fact</mark> <mark>adoption_proxy</mark> | Jan. 13, 2026 | U.S. | EIA</p>
+    <p>Roles: Utility ops, interconnection, field work | Skills: Power systems, permitting, operations</p>
+    <p>Signal: Strongest four-year U.S. electricity demand growth since 2000 | Confidence: High</p>
+    <p><a href="https://www.eia.gov/pressroom/releases/press582.php">Electricity demand growth</a></p>
+  </div>
+  <div class="stack-item" data-strength="medium">
+    <strong>Electricity demand growth creates long-tail grid and storage demand</strong>
+    <p><mark>Fact</mark> <mark>capital_proxy</mark> | Feb. 6, 2026 | Global | IEA</p>
+    <p>Roles: Grid engineering, markets, storage controls | Skills: Power markets, grid software, controls</p>
+    <p>Signal: 3.6% annual demand growth forecast 2026-2030 | Confidence: High</p>
+    <p><a href="https://www.iea.org/reports/electricity-2026">Electricity 2026</a></p>
+  </div>
+</div>
+
+### Advanced manufacturing
+
+<div class="stack-list">
+  <div class="stack-item" data-strength="medium">
+    <strong>Industrial policy and direct investment support domestic semiconductor capacity</strong>
+    <p><mark>Fact</mark> <mark>policy_signal</mark> | Jan. 15, 2026 | U.S. / Taiwan | Commerce</p>
+    <p>Roles: Technicians, controls, fab construction | Skills: PLCs, process, controls, cleanroom ops</p>
+    <p>Signal: $250B direct investment plus guarantees | Confidence: Medium</p>
+    <p><a href="https://www.commerce.gov/news/fact-sheets/2026/01/fact-sheet-restoring-american-semiconductor-manufacturing-leadership">Taiwan investment fact sheet</a></p>
+  </div>
+  <div class="stack-item" data-strength="high">
+    <strong>Megafab construction makes long-cycle job creation tangible</strong>
+    <p><mark>Fact</mark> <mark>direct_jobs</mark> | Jan. 16, 2026 | New York, U.S. | Micron</p>
+    <p>Roles: Technicians, maintenance, field service | Skills: Semiconductor ops, automation, reliability</p>
+    <p>Signal: $100B megafab investment and large job framing | Confidence: Medium</p>
+    <p><a href="https://investors.micron.com/news-releases/news-release-details/micron-celebrates-official-groundbreaking-new-york-megafab-site">New York megafab groundbreaking</a></p>
+  </div>
+</div>
+
+### Editorial inferences
+
+<div class="stack-list">
+  <div class="stack-item" data-strength="low">
+    <strong><em>Electrification rises to number one because power becomes the prerequisite constraint for AI, industry, and buildings</em></strong>
+    <p><mark>Editorial inference</mark> <mark>inference</mark> | Apr. 5, 2026 | U.S. + Global | Models to Margins synthesis</p>
+    <p>Roles: Grid engineering, field systems, power markets | Confidence: High</p>
+    <p>Derived from EIA + IEA demand and constraint data. <a href="https://www.iea.org/reports/electricity-2026">IEA Electricity 2026</a></p>
+  </div>
+  <div class="stack-item" data-strength="low">
+    <strong><em>AI infrastructure stays important but app-layer roles face the highest commoditization pressure</em></strong>
+    <p><mark>Editorial inference</mark> <mark>inference</mark> | Apr. 5, 2026 | Global / U.S.-heavy | Models to Margins synthesis</p>
+    <p>Roles: Infra economics, networking, reliability | Confidence: Medium</p>
+    <p>Derived from capex + inference economics + adoption baselines. <a href="https://blogs.microsoft.com/blog/2026/01/26/maia-200-the-ai-accelerator-built-for-inference/">Microsoft Maia Jan. 26, 2026</a></p>
+  </div>
+</div>
+
+### Baselines
+
+<div class="stack-list">
+  <div class="stack-item" data-strength="low">
+    <strong>Technology, data, and AI roles remain among the fastest-growing global categories</strong>
+    <p><mark>Fact</mark> <mark>baseline</mark> | Jan. 7, 2025 | Global | WEF</p>
+    <p>Signal: Jobs projection baseline, not live hiring evidence | Confidence: Medium</p>
+    <p><a href="https://www.weforum.org/reports/the-future-of-jobs-report-2025/">Future of Jobs 2025</a></p>
+  </div>
+  <div class="stack-item" data-strength="low">
+    <strong>AI adoption and research support continued medium-term expansion</strong>
+    <p><mark>Fact</mark> <mark>baseline</mark> | Apr. 7, 2025 | Global | Stanford HAI</p>
+    <p>Signal: Adoption and productivity baseline, not direct jobs | Confidence: Medium</p>
+    <p><a href="https://hai.stanford.edu/ai-index/2025-ai-index-report">AI Index 2025</a></p>
+  </div>
+</div>
+
+<details>
+  <summary>Full evidence table (for reference or export)</summary>
+  <div class="expander-copy">
+
+| Sector | Horizon | Claim type | Claim text | Date | Geography | Entity | Evidence category | Confidence | Baseline | Source |
+|---|---|---|---|---|---|---|---|---|---|---|
+| Healthcare | 1-2 yr | Fact | Healthcare is the clearest live labor absorber | Apr. 3, 2026 | U.S. | BLS | direct_jobs | High | No | [Employment Situation](https://www.bls.gov/news.release/archives/empsit_04032026.htm) |
+| Healthcare | 1-2 yr | Fact | CMS convened Rural Health Transformation Summit | Mar. 19, 2026 | U.S. | CMS | policy_signal | High | No | [Rural Health Transformation](https://www.cms.gov/newsroom/press-releases/readout-cms-convenes-first-rural-health-transformation-summit-advance-state-led-innovation) |
+| AI infra | 1-2 yr | Fact | Hyperscale AI infrastructure spend remains elevated | Jan. 29, 2026 | Global / U.S.-heavy | Microsoft | capital_proxy | High | No | [FY26 Q2](https://www.microsoft.com/en-us/Investor/earnings/FY-2026-Q2/intelligent-cloud-performance) |
+| AI infra | 3-5 yr | Fact | Large-scale infra spend supports mid-term expansion | Feb. 2026 | Global | Alphabet | capital_proxy | High | No | [10-K](https://www.sec.gov/Archives/edgar/data/1652044/000165204426000018/goog-20251231.htm) |
+| Cybersecurity | 1-2 yr | Fact | NIST published initial preliminary draft of Cyber AI Profile | Jan. 2026 | U.S. | NIST | policy_signal | High | No | [Cyber AI Profile](https://csrc.nist.gov/pubs/ir/8596/iprd) |
+| Electrification | 1-2 yr | Fact | Power demand accelerating, data centers a major driver | Jan. 13, 2026 | U.S. | EIA | adoption_proxy | High | No | [EIA](https://www.eia.gov/pressroom/releases/press582.php) |
+| Electrification | 5-10 yr | Fact | Electricity demand creates long-tail grid demand | Feb. 6, 2026 | Global | IEA | capital_proxy | High | No | [IEA](https://www.iea.org/reports/electricity-2026) |
+| Manufacturing | 1-2 yr | Fact | Industrial policy supports domestic semiconductor capacity | Jan. 15, 2026 | U.S./Taiwan | Commerce | policy_signal | Medium | No | [Fact sheet](https://www.commerce.gov/news/fact-sheets/2026/01/fact-sheet-restoring-american-semiconductor-manufacturing-leadership) |
+| Manufacturing | 3-5 yr | Fact | Megafab construction makes job creation tangible | Jan. 16, 2026 | U.S. | Micron | direct_jobs | Medium | No | [Micron](https://investors.micron.com/news-releases/news-release-details/micron-celebrates-official-groundbreaking-new-york-megafab-site) |
+| Electrification | 5-10 yr | Editorial inference | Power becomes prerequisite constraint | Apr. 5, 2026 | U.S.+Global | Synthesis | inference | High | No | [IEA](https://www.iea.org/reports/electricity-2026) |
+| AI infra | 5-10 yr | Editorial inference | App-layer roles face highest commoditization | Apr. 5, 2026 | Global | Synthesis | inference | Medium | No | [Maia](https://blogs.microsoft.com/blog/2026/01/26/maia-200-the-ai-accelerator-built-for-inference/) |
+| Cross-sector | 3-5 yr | Fact | Tech and AI roles among fastest-growing categories | Jan. 7, 2025 | Global | WEF | baseline | Medium | Yes | [WEF](https://www.weforum.org/reports/the-future-of-jobs-report-2025/) |
+| Cross-sector | 3-5 yr | Fact | AI adoption supports medium-term expansion | Apr. 7, 2025 | Global | Stanford HAI | baseline | Medium | Yes | [HAI](https://hai.stanford.edu/ai-index/2025-ai-index-report) |
+
+  </div>
+</details>
+
+## Supply-Side Constraints
+
+<div class="callout warm">
+  <strong>Demand alone does not create workers.</strong>
+  <p>The gap between demand strength and supply constraint severity is where the real bottlenecks — and opportunities — emerge.</p>
+</div>
+
+<div class="gap-chart">
+  <div class="gap-row">
+    <span class="gap-sector">Healthcare</span>
+    <div class="gap-bars">
+      <div class="gap-demand" style="--d:92%"><span>Demand 4.4</span></div>
+      <div class="gap-supply" style="--s:85%"><span>Severe</span></div>
+    </div>
+    <span class="gap-bottleneck">Labor shortage, licensure, aging workforce</span>
+  </div>
+  <div class="gap-row">
+    <span class="gap-sector">AI Infrastructure</span>
+    <div class="gap-bars">
+      <div class="gap-demand" style="--d:88%"><span>Demand 4.4</span></div>
+      <div class="gap-supply" style="--s:45%"><span>Moderate</span></div>
+    </div>
+    <span class="gap-bottleneck">Power access, visa caps for engineers</span>
+  </div>
+  <div class="gap-row">
+    <span class="gap-sector">Cybersecurity</span>
+    <div class="gap-bars">
+      <div class="gap-demand" style="--d:80%"><span>Demand 4.0</span></div>
+      <div class="gap-supply" style="--s:50%"><span>Moderate</span></div>
+    </div>
+    <span class="gap-bottleneck">Clearance pipeline, training throughput</span>
+  </div>
+  <div class="gap-row">
+    <span class="gap-sector">Electrification</span>
+    <div class="gap-bars">
+      <div class="gap-demand" style="--d:90%"><span>Demand 4.5</span></div>
+      <div class="gap-supply" style="--s:88%"><span>Severe</span></div>
+    </div>
+    <span class="gap-bottleneck">Geographic mismatch, aging lineworkers, permitting</span>
+  </div>
+  <div class="gap-row">
+    <span class="gap-sector">Manufacturing</span>
+    <div class="gap-bars">
+      <div class="gap-demand" style="--d:82%"><span>Demand 4.1</span></div>
+      <div class="gap-supply" style="--s:72%"><span>High</span></div>
+    </div>
+    <span class="gap-bottleneck">Site-specific, nascent training pipelines</span>
+  </div>
+</div>
+
+## Sector Drill-Down
+
+<details open>
+  <summary>Healthcare and healthtech</summary>
+  <div class="expander-copy">
+
+<div class="causal-flow">
+  <div class="flow-stage drivers">
+    <span class="flow-label">Drivers</span>
+    <span class="flow-item">Demographic demand</span>
+    <span class="flow-item">Public funding</span>
+    <span class="flow-item">Regulated devices</span>
+  </div>
+  <div class="flow-arrow"></div>
+  <div class="flow-stage transform">
+    <span class="flow-label">Transformation</span>
+    <span class="flow-item">Care redesign</span>
+  </div>
+  <div class="flow-arrow"></div>
+  <div class="flow-stage roles">
+    <span class="flow-label">Roles Created</span>
+    <span class="flow-item">Direct care</span>
+    <span class="flow-item">Coordination</span>
+    <span class="flow-item">Diagnostics workflow</span>
+  </div>
+</div>
+
+<div class="scorecard-grid">
+  <div class="score-bar"><span class="score-label">Job creation</span><span class="score-fill" style="--fill:100%">5/5</span></div>
+  <div class="score-bar"><span class="score-label">Capital intensity</span><span class="score-fill" style="--fill:60%">3/5</span></div>
+  <div class="score-bar"><span class="score-label">Adoption</span><span class="score-fill" style="--fill:80%">4/5</span></div>
+  <div class="score-bar"><span class="score-label">Portability</span><span class="score-fill" style="--fill:80%">4/5</span></div>
+  <div class="score-bar"><span class="score-label">Resilience</span><span class="score-fill" style="--fill:80%">4/5</span></div>
+  <div class="score-bar"><span class="score-label">Exec. risk</span><span class="score-fill" style="--fill:60%">3/5</span></div>
+</div>
+
+<div class="role-chips">
+  <span class="role-chip">Direct care & behavioral health</span>
+  <span class="role-chip">Clinical ops & informatics</span>
+  <span class="role-chip">Device implementation</span>
+  <span class="role-chip">RN ~$86K</span>
+  <span class="role-chip">Aides ~$35K</span>
+  <span class="role-chip">FT, benefits-eligible</span>
+</div>
+
+<div class="signal-indicators">
+  <div class="signal-col durable">
+    <span class="si-label">Durable</span>
+    <span class="si-item">Demographic demand</span>
+    <span class="si-item">Regulated workflows</span>
+    <span class="si-item">Public funding</span>
+  </div>
+  <div class="signal-col hype">
+    <span class="si-label">Hype risk</span>
+    <span class="si-item">Generic wellness apps</span>
+    <span class="si-item">Automation narratives ignoring licensed care</span>
+  </div>
+</div>
 
   </div>
 </details>
@@ -216,10 +675,59 @@ Inference: The arena stays huge, but generic application-layer roles face the hi
   <summary>AI, data, software, cloud, and automation infrastructure</summary>
   <div class="expander-copy">
 
-- Core build roles: software engineer, site reliability engineer, data engineer, ML engineer, infra engineer, platform engineer
-- Cost and reliability roles: FinOps analyst, capacity planner, datacenter operations, network engineer, power/cooling operations
-- Enterprise deployment roles: solutions architect, AI platform admin, workflow automation lead, MLOps/platform ops
-- Skills and credentials: Python, SQL, distributed systems, Kubernetes, Terraform, Azure/AWS/GCP, observability, vector/data pipelines, security-by-design, cost optimization
+<div class="causal-flow">
+  <div class="flow-stage drivers">
+    <span class="flow-label">Drivers</span>
+    <span class="flow-item">Hyperscale capex</span>
+    <span class="flow-item">Enterprise AI deployment</span>
+    <span class="flow-item">Inference economics</span>
+  </div>
+  <div class="flow-arrow"></div>
+  <div class="flow-stage transform">
+    <span class="flow-label">Transformation</span>
+    <span class="flow-item">Datacenters & platforms</span>
+    <span class="flow-item">Workflow automation</span>
+  </div>
+  <div class="flow-arrow"></div>
+  <div class="flow-stage roles">
+    <span class="flow-label">Roles Created</span>
+    <span class="flow-item">Data & reliability eng</span>
+    <span class="flow-item">Cost engineering</span>
+    <span class="flow-item">Orchestration</span>
+  </div>
+</div>
+
+<div class="scorecard-grid">
+  <div class="score-bar"><span class="score-label">Job creation</span><span class="score-fill" style="--fill:80%">4/5</span></div>
+  <div class="score-bar"><span class="score-label">Capital intensity</span><span class="score-fill" style="--fill:100%">5/5</span></div>
+  <div class="score-bar"><span class="score-label">Adoption</span><span class="score-fill" style="--fill:100%">5/5</span></div>
+  <div class="score-bar"><span class="score-label">Portability</span><span class="score-fill" style="--fill:100%">5/5</span></div>
+  <div class="score-bar"><span class="score-label">Resilience</span><span class="score-fill" style="--fill:60%">2-4/5</span></div>
+  <div class="score-bar"><span class="score-label">Exec. risk</span><span class="score-fill" style="--fill:60%">3/5</span></div>
+</div>
+
+<div class="role-chips">
+  <span class="role-chip">Data eng & SRE</span>
+  <span class="role-chip">Datacenter ops</span>
+  <span class="role-chip">AI platform admin</span>
+  <span class="role-chip">Dev ~$130K</span>
+  <span class="role-chip">DC tech ~$60K</span>
+  <span class="role-chip">Infra: FTE / App: contract risk</span>
+</div>
+
+<div class="signal-indicators">
+  <div class="signal-col durable">
+    <span class="si-label">Durable</span>
+    <span class="si-item">Hyperscale capex</span>
+    <span class="si-item">Inference economics</span>
+    <span class="si-item">Enterprise workflow integration</span>
+  </div>
+  <div class="signal-col hype">
+    <span class="si-label">Hype risk</span>
+    <span class="si-item">Thin wrappers with no workflow moat</span>
+    <span class="si-item">Prompt-only labor arbitrage</span>
+  </div>
+</div>
 
   </div>
 </details>
@@ -228,10 +736,59 @@ Inference: The arena stays huge, but generic application-layer roles face the hi
   <summary>Cybersecurity, digital trust, and compliance tech</summary>
   <div class="expander-copy">
 
-- Security engineering: detection engineer, cloud security engineer, IAM engineer, application security engineer
-- Assurance and response: SOC analyst, incident responder, GRC analyst, privacy analyst, auditor, third-party risk
-- AI-era extensions: AI security, model governance, red teaming, identity and secrets management for AI pipelines
-- Skills and credentials: NICE work roles, Security+, CISSP, CCSP, GIAC tracks, SIEM/SOAR, IAM, cloud security, policy control mapping, FedRAMP/NIST/ISO 27001 familiarity
+<div class="causal-flow">
+  <div class="flow-stage drivers">
+    <span class="flow-label">Drivers</span>
+    <span class="flow-item">AI deployment</span>
+    <span class="flow-item">Cloud concentration</span>
+    <span class="flow-item">Regulatory pressure</span>
+  </div>
+  <div class="flow-arrow"></div>
+  <div class="flow-stage transform">
+    <span class="flow-label">Transformation</span>
+    <span class="flow-item">Bigger attack surfaces</span>
+    <span class="flow-item">Expanded audit scope</span>
+  </div>
+  <div class="flow-arrow"></div>
+  <div class="flow-stage roles">
+    <span class="flow-label">Roles Created</span>
+    <span class="flow-item">Identity & AI security</span>
+    <span class="flow-item">Governance & crypto</span>
+    <span class="flow-item">Response</span>
+  </div>
+</div>
+
+<div class="scorecard-grid">
+  <div class="score-bar"><span class="score-label">Job creation</span><span class="score-fill" style="--fill:80%">4/5</span></div>
+  <div class="score-bar"><span class="score-label">Capital intensity</span><span class="score-fill" style="--fill:60%">3/5</span></div>
+  <div class="score-bar"><span class="score-label">Adoption</span><span class="score-fill" style="--fill:80%">4/5</span></div>
+  <div class="score-bar"><span class="score-label">Portability</span><span class="score-fill" style="--fill:80%">4/5</span></div>
+  <div class="score-bar"><span class="score-label">Resilience</span><span class="score-fill" style="--fill:60%">2-4/5</span></div>
+  <div class="score-bar"><span class="score-label">Exec. risk</span><span class="score-fill" style="--fill:40%">2/5</span></div>
+</div>
+
+<div class="role-chips">
+  <span class="role-chip">Cloud security & IAM</span>
+  <span class="role-chip">Incident response</span>
+  <span class="role-chip">GRC & AI governance</span>
+  <span class="role-chip">InfoSec ~$120K</span>
+  <span class="role-chip">Strong FTE</span>
+  <span class="role-chip">Clearance premium</span>
+</div>
+
+<div class="signal-indicators">
+  <div class="signal-col durable">
+    <span class="si-label">Durable</span>
+    <span class="si-item">Mandatory trust work</span>
+    <span class="si-item">AI governance & crypto migration</span>
+    <span class="si-item">Rising audit surface</span>
+  </div>
+  <div class="signal-col hype">
+    <span class="si-label">Hype risk</span>
+    <span class="si-item">Overstating autonomous SOC replacement</span>
+    <span class="si-item">Policy signals mistaken for hiring booms</span>
+  </div>
+</div>
 
   </div>
 </details>
@@ -240,11 +797,58 @@ Inference: The arena stays huge, but generic application-layer roles face the hi
   <summary>Clean energy, grid, storage, and electrification</summary>
   <div class="expander-copy">
 
-- Project and field roles: electricians, lineworkers, relay technicians, substation techs, commissioning specialists
-- Engineering roles: power systems engineer, interconnection engineer, controls engineer, storage engineer
-- Commercial roles: project finance, permitting, utility partnerships, energy markets, PPA structuring
-- Software/data roles: DERMS, SCADA, grid analytics, battery telemetry, forecasting, asset performance
-- Skills and credentials: PE path for electrical/power, NABCEP in solar, utility interconnection literacy, protection and controls, PLC/SCADA, project delivery, permitting
+<div class="causal-flow">
+  <div class="flow-stage drivers">
+    <span class="flow-label">Drivers</span>
+    <span class="flow-item">Datacenter demand</span>
+    <span class="flow-item">Electrification</span>
+    <span class="flow-item">Slow transmission buildout</span>
+  </div>
+  <div class="flow-arrow"></div>
+  <div class="flow-stage transform">
+    <span class="flow-label">Transformation</span>
+    <span class="flow-item">Power bottlenecks</span>
+  </div>
+  <div class="flow-arrow"></div>
+  <div class="flow-stage roles">
+    <span class="flow-label">Roles Created</span>
+    <span class="flow-item">Grid engineering</span>
+    <span class="flow-item">Field operations</span>
+    <span class="flow-item">Storage & markets</span>
+  </div>
+</div>
+
+<div class="scorecard-grid">
+  <div class="score-bar"><span class="score-label">Job creation</span><span class="score-fill" style="--fill:80%">4/5</span></div>
+  <div class="score-bar"><span class="score-label">Capital intensity</span><span class="score-fill" style="--fill:100%">5/5</span></div>
+  <div class="score-bar"><span class="score-label">Adoption</span><span class="score-fill" style="--fill:80%">4/5</span></div>
+  <div class="score-bar"><span class="score-label">Portability</span><span class="score-fill" style="--fill:80%">4/5</span></div>
+  <div class="score-bar"><span class="score-label">Resilience</span><span class="score-fill" style="--fill:100%">5/5</span></div>
+  <div class="score-bar"><span class="score-label">Exec. risk</span><span class="score-fill" style="--fill:80%">4/5</span></div>
+</div>
+
+<div class="role-chips">
+  <span class="role-chip">Grid engineering</span>
+  <span class="role-chip">Field ops & substations</span>
+  <span class="role-chip">Storage & markets</span>
+  <span class="role-chip">EE ~$108K</span>
+  <span class="role-chip">Line ~$82K</span>
+  <span class="role-chip">Union, location-bound</span>
+</div>
+
+<div class="signal-indicators">
+  <div class="signal-col durable">
+    <span class="si-label">Durable</span>
+    <span class="si-item">Electricity demand growth</span>
+    <span class="si-item">Grid buildout bottlenecks</span>
+    <span class="si-item">Datacenter load pressure</span>
+  </div>
+  <div class="signal-col hype">
+    <span class="si-label">Hype risk</span>
+    <span class="si-item">Capital announcements ≠ deployment</span>
+    <span class="si-item">Utility and permitting delays</span>
+  </div>
+</div>
 
   </div>
 </details>
@@ -253,255 +857,272 @@ Inference: The arena stays huge, but generic application-layer roles face the hi
   <summary>Advanced manufacturing, semiconductors, robotics, and industrial automation</summary>
   <div class="expander-copy">
 
-- Factory roles: semiconductor processing technician, maintenance tech, automation technician, quality engineer, process engineer
-- Integration roles: robotics engineer, controls engineer, PLC programmer, industrial data engineer, manufacturing systems architect
-- Strategic roles: supplier quality, packaging/test, equipment reliability, advanced materials, yield engineering
-- Skills and credentials: PLCs, MES, robotics integration, cleanroom process basics, Six Sigma, IPC, metrology, industrial networking, safety systems
-
+<div class="causal-flow">
+  <div class="flow-stage drivers">
+    <span class="flow-label">Drivers</span>
+    <span class="flow-item">Industrial policy</span>
+    <span class="flow-item">Domestic production</span>
+    <span class="flow-item">Robotics adoption</span>
   </div>
-</details>
-
-## Technology And Investment Tracker
-
-| Theme | Exact date | Geography | Company / institution | Technology | Investment / adoption signal | Why it matters |
-|---|---|---|---|---|---|---|
-| Live U.S. hiring signal | Apr. 3, 2026 | U.S. | BLS | Payroll employment | March 2026 gains led by health care (+76k), construction (+26k), transportation/warehousing (+21k), social assistance (+14k) | Current labor demand confirms near-term ranking better than old projections alone |
-| AI cloud growth and infra demand | Jan. 29, 2026 | Global / U.S.-heavy | Microsoft | Azure / AI infrastructure | Azure +39% YoY in FY26 Q2; margin pressure from continued AI infrastructure investment | Demand is still compounding in compute, networking, and AI operations |
-| Hyperscale technical infrastructure | Feb. 2026 filing for FY2025 | Global | Alphabet | Technical infrastructure / AI | $91.4B 2025 capex; expects significant further increase in 2026 | Confirms capital intensity is still accelerating, not fading |
-| Cloud and fulfillment infrastructure | Feb. 2026 filing for FY2025 | Global | Amazon | Technology infrastructure / AWS | $128.3B 2025 cash capex, primarily technology infrastructure; expects increase in 2026 | Reinforces durable hiring in datacenters, power, networking, and platform operations |
-| Health AI deployment | Mar. 4, 2026 | U.S. | FDA | AI/ML-enabled medical devices | FDA updated the AI/ML-enabled medical devices page | Healthtech adoption is moving through regulated deployment, not just pilots |
-| Rural health modernization | Mar. 19, 2026 | U.S. | CMS | Care delivery, workforce, digital health | $50B program moving into implementation across all 50 states | Direct funding for workforce, tech, and care-model redesign supports durable health jobs |
-| Electricity demand acceleration | Jan. 13, 2026 | U.S. | EIA | Power demand / data centers | Strongest four-year U.S. electricity demand growth since 2000, driven largely by data centers | Power becomes a binding constraint on AI, manufacturing, and electrification growth |
-| Electricity system scaling | Feb. 6, 2026 | Global | IEA | Grids, flexibility, storage, power systems | 3.6% annual electricity demand growth forecast for 2026-2030; annual grid investment needs to rise roughly 50% by 2030 | Supports the long-duration thesis for grid, storage, and power-systems labor |
-| Semiconductor reshoring | Jan. 15, 2026 | U.S. / Taiwan | Commerce | Semiconductor manufacturing ecosystem | At least $250B direct investment plus $250B credit guarantees tied to U.S. semiconductor and adjacent capacity | Scaled industrial policy plus private capital raises the floor for domestic manufacturing demand |
-| Megafab job creation | Jan. 16, 2026 | New York, U.S. | Micron / Commerce | Memory manufacturing | $100B New York megafab investment; tens of thousands of jobs cited by Commerce | Tangible semiconductor and construction employment, not just roadmap slides |
-
-## ROI And Adoption Evidence
-
-Fact: Stanford HAI says research increasingly shows AI can raise productivity and often narrow skill gaps, but outcomes vary by task and implementation quality.  
-Fact: Microsoft reported Azure growth in FY25 Q2 was 31%, with 13 percentage points from AI services that grew 157%.  
-Fact: AWS says its latest data-center design delivers 12% more compute power with improved availability and efficiency, and reported 2024 global PUE of 1.15.  
-Fact: Microsoft said its Maia 200 inference accelerator, announced January 26, 2026, offers 30% better performance per dollar than the latest prior generation hardware in its fleet.
-
-Inference: The best validated ROI today is in infrastructure efficiency, coding/productivity assistance, analytics, targeted automation, and clinical/radiology augmentation.  
-Inference: Claims that every enterprise AI agent will quickly replace large swaths of knowledge work remain unsupported.  
-Flag: Most vendor ROI claims in generative AI are still not independently audited. Treat them as directional unless they are tied to audited filings, benchmarked cost curves, or measurable throughput/error-rate improvements.
-
-<div class="stack-list">
-  <div class="stack-item">
-    <strong>Most validated today</strong>
-    <span>Infrastructure efficiency, developer productivity, targeted workflow automation, and clinical augmentation.</span>
+  <div class="flow-arrow"></div>
+  <div class="flow-stage transform">
+    <span class="flow-label">Transformation</span>
+    <span class="flow-item">Fabs & automation</span>
+    <span class="flow-item">Supplier ecosystems</span>
   </div>
-  <div class="stack-item">
-    <strong>Least validated today</strong>
-    <span>Sweeping claims about broad autonomous knowledge-work replacement without audited labor or throughput evidence.</span>
-  </div>
-  <div class="stack-item">
-    <strong>What actually compounds</strong>
-    <span>Cost curves, reliability, compliance posture, and reduction of bottlenecks in regulated or asset-heavy systems.</span>
+  <div class="flow-arrow"></div>
+  <div class="flow-stage roles">
+    <span class="flow-label">Roles Created</span>
+    <span class="flow-item">Controls & process</span>
+    <span class="flow-item">Yield & equipment</span>
+    <span class="flow-item">Field service</span>
   </div>
 </div>
 
-## What Is Durable Vs What Is Hype
+<div class="scorecard-grid">
+  <div class="score-bar"><span class="score-label">Job creation</span><span class="score-fill" style="--fill:80%">3-5/5</span></div>
+  <div class="score-bar"><span class="score-label">Capital intensity</span><span class="score-fill" style="--fill:100%">5/5</span></div>
+  <div class="score-bar"><span class="score-label">Adoption</span><span class="score-fill" style="--fill:80%">4/5</span></div>
+  <div class="score-bar"><span class="score-label">Portability</span><span class="score-fill" style="--fill:80%">4/5</span></div>
+  <div class="score-bar"><span class="score-label">Resilience</span><span class="score-fill" style="--fill:80%">4/5</span></div>
+  <div class="score-bar"><span class="score-label">Exec. risk</span><span class="score-fill" style="--fill:80%">4/5</span></div>
+</div>
 
-<div class="decision-grid">
-  <div class="decision-card">
-    <strong>Durable</strong>
-    <ul>
-      <li>Demographic care demand</li>
-      <li>Security and compliance work tied to regulation and critical systems</li>
-      <li>Compute, datacenter, and power infrastructure</li>
-      <li>Grid modernization, storage, and electrification bottlenecks</li>
-      <li>Semiconductor and industrial capacity tied to national resilience</li>
-      <li>Cross-domain operators who combine software with a regulated or physical domain</li>
-    </ul>
+<div class="role-chips">
+  <span class="role-chip">Semiconductor techs</span>
+  <span class="role-chip">PLC & robotics</span>
+  <span class="role-chip">Equipment reliability</span>
+  <span class="role-chip">Semi ~$46K</span>
+  <span class="role-chip">IE ~$99K</span>
+  <span class="role-chip">FT, site-specific</span>
+</div>
+
+<div class="signal-indicators">
+  <div class="signal-col durable">
+    <span class="si-label">Durable</span>
+    <span class="si-item">Industrial policy</span>
+    <span class="si-item">Domestic capacity investment</span>
+    <span class="si-item">Robotics integration</span>
   </div>
-  <div class="decision-card">
-    <strong>Hype-prone</strong>
-    <ul>
-      <li>Generic "AI consultant" positioning without technical or domain depth</li>
-      <li>Prompt-only labor arbitrage</li>
-      <li>Consumer AI wrappers with no proprietary workflow, data, or distribution</li>
-      <li>Unverified ROI claims around fully autonomous enterprise agents</li>
-      <li>Commodity app-layer roles exposed to fast model improvement and price compression</li>
-    </ul>
-  </div>
-  <div class="decision-card">
-    <strong>Reader test</strong>
-    <p>If the work is tied to <mark>budgets, uptime, compliance, licensed skill, or physical assets</mark>, it is usually more durable than a role tied only to surface-level tool usage.</p>
+  <div class="signal-col hype">
+    <span class="si-label">Hype risk</span>
+    <span class="si-item">Announced jobs ≠ immediate demand</span>
+    <span class="si-item">Site-specific execution risk</span>
   </div>
 </div>
 
-## Learn / Build / Invest / Avoid Recommendations
+  </div>
+</details>
 
-<div class="action-grid">
-  <div class="action-card">
-    <strong>Learn</strong>
+## Sector Convergence Zones
+
+<div class="callout warm">
+  <strong>The missing dimension: compound expertise at sector intersections.</strong>
+  <p>The five sectors above don't exist in isolation. The fastest-growing and most defensible roles emerge where sectors overlap — requiring compound expertise that is harder to commoditize than single-sector skills.</p>
+</div>
+
+<div class="visual-frame" style="--vf-h:380px">
+  <iframe
+    src="/visuals/future-of-work/convergence-network.html?embed=1"
+    title="Sector convergence network — connections between five workforce sectors"
+    loading="lazy"
+  ></iframe>
+</div>
+
+<details>
+  <summary>Convergence zone details</summary>
+  <div class="expander-copy">
+  <div class="convergence-grid">
+    <div class="convergence-card">
+      <span class="convergence-label">AI x Healthcare</span>
+      <strong>Clinical AI and care automation</strong>
+      <p>Diagnostic workflow engineering, AI-assisted triage, care coordination platforms.</p>
+    </div>
+    <div class="convergence-card">
+      <span class="convergence-label">AI x Power</span>
+      <strong>Grid optimization and datacenter energy</strong>
+      <p>AI-driven grid management, power demand forecasting, datacenter cooling optimization.</p>
+    </div>
+    <div class="convergence-card">
+      <span class="convergence-label">Security x AI</span>
+      <strong>AI governance and trust engineering</strong>
+      <p>Model audit, adversarial robustness, AI-specific compliance frameworks.</p>
+    </div>
+    <div class="convergence-card">
+      <span class="convergence-label">Power x Manufacturing</span>
+      <strong>Industrial electrification</strong>
+      <p>Factory energy systems, battery manufacturing, industrial power electronics.</p>
+    </div>
+    <div class="convergence-card">
+      <span class="convergence-label">Manufacturing x AI</span>
+      <strong>Smart factory infrastructure</strong>
+      <p>Predictive maintenance, industrial ML, robotic controls with AI integration.</p>
+    </div>
+    <div class="convergence-card">
+      <span class="convergence-label">Healthcare x Security</span>
+      <strong>Health data privacy and HIPAA-AI</strong>
+      <p>Clinical cybersecurity, health data governance, AI compliance in care workflows.</p>
+    </div>
+  </div>
+  </div>
+</details>
+
+### Emerging: Climate Adaptation and Water Infrastructure
+
+Not yet ranked in this dashboard, but showing accelerating demand signals. Water stress is a binding constraint for data centers (cooling) and semiconductor fabs (ultra-pure water). FEMA and NOAA climate adaptation spending is rising. Wildfire, flood, and heat resilience create physical infrastructure jobs with skills that overlap heavily with electrification — permitting, engineering, field work. This sector may warrant inclusion in future updates as climate adaptation spending transitions from emergency response to systematic infrastructure investment.
+
+## Why Not Finance, Banking, and Audit?
+
+<div class="callout warm">
+  <strong>The counter-example that proves the model.</strong>
+  <p>Finance is the most common objection to leaving it off this list. The sector was evaluated — and excluded. Here is why, and what survives.</p>
+</div>
+
+<div class="stat-row">
+  <div class="stat-card">
+    <span class="stat-number">-77K</span>
+    <span class="stat-label">Financial activities jobs lost since May 2025</span>
+    <span class="stat-source">BLS, Mar. 2026</span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-number">~30%</span>
+    <span class="stat-label">Finance work hours automatable by AI</span>
+    <span class="stat-source">Goldman Sachs / BCG estimates</span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-number">$20.1B</span>
+    <span class="stat-label">RegTech market 2026 (21% CAGR to $112B)</span>
+    <span class="stat-source">Grand View Research</span>
+  </div>
+</div>
+
+<div class="causal-flow">
+  <div class="flow-stage drivers">
+    <span class="flow-label">Drivers</span>
+    <span class="flow-item">GenAI adoption</span>
+    <span class="flow-item">Digital-first banking</span>
+    <span class="flow-item">Regulatory automation</span>
+  </div>
+  <div class="flow-arrow"></div>
+  <div class="flow-stage transform">
+    <span class="flow-label">Transformation</span>
+    <span class="flow-item">Knowledge work displacement</span>
+    <span class="flow-item">Entry-level compression</span>
+  </div>
+  <div class="flow-arrow"></div>
+  <div class="flow-stage roles">
+    <span class="flow-label">What Survives</span>
+    <span class="flow-item">RegTech & compliance arch.</span>
+    <span class="flow-item">Financial crime (L2/L3)</span>
+    <span class="flow-item">ESG/climate reporting</span>
+  </div>
+</div>
+
+<div class="scorecard-grid">
+  <div class="score-bar"><span class="score-label">Job creation</span><span class="score-fill" style="--fill:40%">2/5</span></div>
+  <div class="score-bar"><span class="score-label">Capital intensity</span><span class="score-fill" style="--fill:60%">3/5</span></div>
+  <div class="score-bar"><span class="score-label">Adoption</span><span class="score-fill" style="--fill:100%">5/5</span></div>
+  <div class="score-bar"><span class="score-label">Portability</span><span class="score-fill" style="--fill:80%">4/5</span></div>
+  <div class="score-bar"><span class="score-label">Resilience</span><span class="score-fill" style="--fill:20%">1/5</span></div>
+  <div class="score-bar"><span class="score-label">Exec. risk</span><span class="score-fill" style="--fill:40%">2/5</span></div>
+</div>
+
+<div class="role-chips">
+  <span class="role-chip">RegTech & compliance architecture</span>
+  <span class="role-chip">Financial crime investigation</span>
+  <span class="role-chip">ESG/climate risk reporting</span>
+  <span class="role-chip">Quantitative risk modeling</span>
+  <span class="role-chip">Fintech infrastructure</span>
+</div>
+
+<div class="signal-indicators">
+  <div class="signal-col durable">
+    <span class="si-label">Durable niches</span>
+    <span class="si-item">RegTech ($20B → $112B by 2033)</span>
+    <span class="si-item">Complex AML/KYC investigation</span>
+    <span class="si-item">ESG compliance (CA SB 253, EU AMLA)</span>
+    <span class="si-item">Fintech infrastructure engineering</span>
+  </div>
+  <div class="signal-col hype">
+    <span class="si-label">Displacement signals</span>
+    <span class="si-item">Big 4 entry-level hiring cut by one-third</span>
+    <span class="si-item">Graduate listings down 44% YoY (UK)</span>
+    <span class="si-item">Routine audit and reporting automated</span>
+    <span class="si-item">First-year analyst work absorbed by GenAI</span>
+  </div>
+</div>
+
+<div class="callout green">
+  <strong>The takeaway</strong>
+  <p>Finance has the highest AI adoption momentum (5/5) but the lowest displacement resilience (1/5) of any sector evaluated. The durable roles — compliance architecture, financial crime, ESG reporting — mirror the same pattern as the ranked sectors: trust-heavy, judgment-intensive, and hard to fully automate. If you are in finance, the path is to move from information processing toward trust and system ownership.</p>
+</div>
+
+## Career And Investment Playbook
+
+<div class="playbook-router">
+  <input type="radio" name="playbook" id="pb-workers" class="playbook-radio" checked>
+  <input type="radio" name="playbook" id="pb-builders" class="playbook-radio">
+  <input type="radio" name="playbook" id="pb-investors" class="playbook-radio">
+  <div class="playbook-tabs">
+    <label class="playbook-tab" for="pb-workers">Workers</label>
+    <label class="playbook-tab" for="pb-builders">Builders</label>
+    <label class="playbook-tab" for="pb-investors">Operators & Investors</label>
+  </div>
+  <div class="playbook-panel">
+    <div class="playbook-section">
+      <span class="playbook-horizon">Near-term</span>
+      <p>Licensed care, care coordination, platform engineering, datacenter operations, cloud security, IAM, power systems, interconnection, industrial controls, semiconductor technician roles.</p>
+    </div>
+    <div class="playbook-section">
+      <span class="playbook-horizon">Medium-term positioning</span>
+      <p>Add a regulated or physical-world moat to software skills. Move from tool user to system owner in reliability, workflow, trust, economics, or uptime.</p>
+    </div>
+  </div>
+  <div class="playbook-panel">
+    <div class="playbook-section">
+      <span class="playbook-horizon">Best products</span>
+      <p>Software that removes labor bottlenecks in regulated workflows, reduces inference or power cost, improves auditability, and raises uptime in industrial or grid systems.</p>
+    </div>
+  </div>
+  <div class="playbook-panel">
+    <div class="playbook-section">
+      <span class="playbook-horizon">Near-term asymmetric</span>
+      <p>Picks-and-shovels infrastructure, grid and power equipment, trust layers, industrial automation, reimbursement-linked healthtech.</p>
+    </div>
+    <div class="playbook-section">
+      <span class="playbook-horizon">Long-term</span>
+      <p>Grid software and power markets, AI infrastructure economics, industrial autonomy, trust infrastructure, eldercare and behavioral-health platforms.</p>
+    </div>
+  </div>
+</div>
+
+<div class="callout warm">
+  <strong>What to avoid</strong>
+  <p>Avoid career or investment bets that depend on prompt-only differentiation, unaudited AI ROI claims, or thin app-layer products without workflow ownership.</p>
+</div>
+
+## Durable Vs Hype Decision Aid
+
+<div class="durable-hype-grid">
+  <div class="dh-card durable">
+    <span class="dh-label">Durable Signal</span>
     <ul>
-      <li>Power systems, grid economics, interconnection, storage controls</li>
-      <li>Cloud/platform engineering, data engineering, ML systems, cost optimization</li>
-      <li>Cybersecurity with identity, cloud, and AI security overlays</li>
-      <li>Clinical workflows, interoperability, regulated product development</li>
-      <li>Industrial controls, robotics integration, and semiconductor manufacturing basics</li>
+      <li><strong>Demand:</strong> Demographics, regulation, power demand, strategic production</li>
+      <li><strong>Evidence:</strong> Direct jobs, audited capex, binding regulation</li>
+      <li><strong>Skill moat:</strong> Licensed, domain-specific, physical systems</li>
+      <li><strong>Time:</strong> Improves as bottlenecks compound</li>
+      <li><strong>Margin:</strong> Owns workflow, uptime, trust, or physical constraints</li>
     </ul>
   </div>
-  <div class="action-card">
-    <strong>Build</strong>
+  <div class="dh-card hype">
+    <span class="dh-label">Hype Warning</span>
     <ul>
-      <li>Software that removes labor bottlenecks in regulated workflows</li>
-      <li>Tools that reduce power, cooling, or inference cost</li>
-      <li>Security, auditability, and policy control layers for AI deployments</li>
-      <li>Vertical systems for care coordination, staffing efficiency, and clinical documentation quality</li>
-      <li>Industrial software for uptime, yield, energy efficiency, and field operations</li>
-    </ul>
-  </div>
-  <div class="action-card">
-    <strong>Invest</strong>
-    <ul>
-      <li>Picks-and-shovels infrastructure rather than thin AI wrappers</li>
-      <li>Grid, storage, transformer, and power-equipment ecosystems</li>
-      <li>Industrial automation, test/measurement, and semiconductor tooling ecosystems</li>
-      <li>Security and compliance vendors with embedded workflow position</li>
-      <li>Healthtech tied to reimbursement, workflow, or device clearance rather than novelty alone</li>
-    </ul>
-  </div>
-  <div class="action-card">
-    <strong>Avoid</strong>
-    <ul>
-      <li>Career bets based only on model access</li>
-      <li>Roles with no domain moat, no customer proximity, and no ownership of systems or budgets</li>
-      <li>Businesses that depend on cheap generalized labor that automation clearly targets</li>
-      <li>Narratives with large TAM claims but no capex, no regulatory clearance, and no customer proof</li>
+      <li><strong>Demand:</strong> Consumer novelty or short-lived app fashion</li>
+      <li><strong>Evidence:</strong> Marketing ROI without audited proof</li>
+      <li><strong>Skill moat:</strong> Prompt-only or thin wrapper work</li>
+      <li><strong>Time:</strong> Requires perfect timing and constant novelty</li>
+      <li><strong>Margin:</strong> Depends on model access alone</li>
     </ul>
   </div>
 </div>
 
-## Best Near-Term Career Bets
-
-1. Direct care plus coordination roles with a path into supervision, informatics, or specialized clinical operations
-2. Data engineering, cloud/platform, SRE, and datacenter-adjacent infrastructure roles
-3. Security engineering, IAM, GRC-tech hybrids, and incident response
-4. Power systems, utility, storage, and interconnection roles
-5. Industrial automation, controls, semiconductor technician, and field-service roles
-
-## Best Medium-Term Positioning Moves
-
-1. Add a regulated or physical-domain moat to software skills
-2. Move from tool user to system owner: platform, workflow, reliability, security, or economics
-3. Build comfort with capex-heavy environments where software touches real assets
-4. Stack credentials that signal deployability, not just curiosity
-5. Prefer roles connected to budgets, uptime, compliance, or revenue-critical operations
-
-## Long-Term Asymmetric Opportunities
-
-1. Grid software plus power-market literacy
-2. AI infrastructure economics: inference, scheduling, cooling, networking, and energy procurement
-3. Industrial autonomy in factories, logistics, and field operations
-4. Tech-enabled eldercare and behavioral health platforms with reimbursement or employer distribution
-5. Security and trust infrastructure for AI-heavy enterprises and critical infrastructure
-
-## Frontier Watchlist: Important, But Not In The Current Top 5
-
-<details open>
-  <summary>Quantum</summary>
-  <div class="expander-copy">
-
-Fact: DOE announced on March 4, 2026 that it is advancing domestic capabilities for producing quantum materials, while NIST updated post-quantum cryptography guidance on February 27, 2026.  
-Inference: Quantum is strategically important and investable as a research, hardware, materials, control-systems, and security-adjacent ecosystem. It does not yet rank in the top 5 for broad U.S. job creation because hiring remains concentrated in labs, hardware startups, specialized vendors, and PhD-heavy roles rather than mass employment categories.
-
-Role families created:
-- Quantum hardware engineer
-- Cryogenics / control-systems engineer
-- Quantum algorithm researcher
-- Photonics / materials scientist
-- Quantum cybersecurity / post-quantum migration specialist
-
-Best career angle:
-- Enter through adjacent durable skills: photonics, RF, cryogenics, control systems, error correction, scientific computing, or post-quantum cryptography
-
-  </div>
-</details>
-
-<details>
-  <summary>Space</summary>
-  <div class="expander-copy">
-
-Fact: As of April 5, 2026, the FAA Commercial Space Transportation portal remains the current official operational source. The latest FAA milestone still in force is the Aug. 14, 2025 announcement of the 1,000th licensed or permitted commercial space operation; the latest BLS aerospace-engineer outlook page is still the Aug. 28, 2025 release.  
-Inference: Space is clearly growing, especially in launch, satellites, defense-linked systems, ground systems, and geospatial data. It remains outside the current top 5 because the labor base is smaller and more cyclical than healthcare, grid, security, or mainstream software infrastructure.
-
-Role families created:
-- Aerospace engineer
-- Mission operations / flight software engineer
-- Satellite systems and payload engineer
-- Ground systems / RF engineer
-- Geospatial data and remote-sensing analyst
-- Space regulatory, safety, and launch operations roles
-
-Best career angle:
-- Pair aerospace or RF systems with software, autonomy, computer vision, or defense/security clearance pathways
-
-  </div>
-</details>
-
-<details>
-  <summary>Other evolving industries worth tracking</summary>
-  <div class="expander-copy">
-
-- Biotech and computational biology: strong long-term value, but in this report much of it sits inside the healthcare / healthtech thesis
-- Fusion and advanced energy: strategically important, but still earlier and narrower in employment terms than grid, storage, and electrification
-- Defense tech and dual-use autonomy: increasingly important, but much of the role creation overlaps aerospace, cyber, manufacturing, and AI infrastructure rather than standing alone as a separate mass-employment bucket
-
-Bottom line: quantum and space are real growth arenas. They are better framed today as high-upside frontier specializations or watchlist sectors, not yet as top-5 broad labor-market winners.
-
-  </div>
-</details>
-
-## Source Links With Exact Dates
-
-<details open>
-  <summary>2026+ primary sources used for this refresh</summary>
-  <div class="expander-copy">
-
-- U.S. Bureau of Labor Statistics, The Employment Situation - March 2026, published Apr. 3, 2026: https://www.bls.gov/news.release/archives/empsit_04032026.htm
-- Centers for Medicare & Medicaid Services, Readout: CMS Convenes First Rural Health Transformation Summit to Advance State-Led Innovation, published Mar. 19, 2026: https://www.cms.gov/newsroom/press-releases/readout-cms-convenes-first-rural-health-transformation-summit-advance-state-led-innovation
-- Centers for Medicare & Medicaid Services, Rural Health Transformation Program overview, accessed Apr. 5, 2026: https://www.cms.gov/priorities/rural-health-transformation-rht-program/overview
-- U.S. Food and Drug Administration, CDRH New - News and Updates, including Mar. 4, 2026 AI/ML-enabled devices update: https://www.fda.gov/medical-devices/medical-devices-news-and-events/cdrhnew-news-and-updates
-- Microsoft Investor Relations, FY26 Q2 Intelligent Cloud Performance, released Jan. 29, 2026: https://www.microsoft.com/en-us/Investor/earnings/FY-2026-Q2/intelligent-cloud-performance
-- Alphabet Inc. 2025 Annual Report on Form 10-K, filed Feb. 2026: https://www.sec.gov/Archives/edgar/data/1652044/000165204426000018/goog-20251231.htm
-- Amazon.com, Inc. 2025 Annual Report on Form 10-K, filed Feb. 2026: https://www.sec.gov/Archives/edgar/data/1018724/000101872426000004/amzn-20251231.htm
-- International Energy Agency, Electricity 2026, published Feb. 6, 2026: https://www.iea.org/reports/electricity-2026
-- International Energy Agency, Electricity 2026 Executive Summary, published Feb. 6, 2026: https://www.iea.org/reports/electricity-2026/executive-summary
-- U.S. Energy Information Administration, EIA forecasts strongest four-year growth in U.S. electricity demand since 2000, fueled by data centers, published Jan. 13, 2026: https://www.eia.gov/pressroom/releases/press582.php
-- U.S. Energy Information Administration, Fossil generation could rise with faster-than-expected growth in data center power demand, published Mar. 12, 2026: https://www.eia.gov/todayinenergy/detail.php?id=67344
-- U.S. Department of Commerce, Fact Sheet: Restoring American Semiconductor Manufacturing Leadership Through an Agreement on Trade & Investment with Taiwan, published Jan. 15, 2026: https://www.commerce.gov/news/fact-sheets/2026/01/fact-sheet-restoring-american-semiconductor-manufacturing-leadership
-- Micron Technology, Micron Celebrates Official Groundbreaking at New York Megafab Site, published Jan. 16, 2026: https://investors.micron.com/news-releases/news-release-details/micron-celebrates-official-groundbreaking-new-york-megafab-site
-- U.S. Department of Commerce, Micron Breaks Ground in $100B investment with U.S. Secretary of Commerce Howard Lutnick, published Jan. 16, 2026: https://www.commerce.gov/news/blog/tweets/micron-breaks-ground-100b-investment-us-secretary-commerce-howard-lutnick
-- U.S. Department of Energy, U.S. Department of Energy Advances Domestic Capabilities for Producing Quantum Materials, published Mar. 4, 2026: https://www.energy.gov/science/articles/us-department-energy-advances-domestic-capabilities-producing-quantum-materials
-- NIST, Cybersecurity Framework, including updates dated Jan. 14, 2026 and Feb. 24, 2026: https://www.nist.gov/cyberframework
-- NIST CSRC, Cybersecurity Framework Profile for Artificial Intelligence (Cyber AI Profile) initial preliminary draft, public-comment window closing Jan. 30, 2026: https://csrc.nist.gov/pubs/ir/8596/iprd
-- NIST, What Is Post-Quantum Cryptography?, updated Feb. 27, 2026: https://www.nist.gov/cybersecurity/what-post-quantum-cryptography
-- Microsoft, Maia 200: The AI accelerator built for inference, published Jan. 26, 2026: https://blogs.microsoft.com/blog/2026/01/26/maia-200-the-ai-accelerator-built-for-inference/
-- Federal Aviation Administration, Commercial Space Transportation, accessed Apr. 5, 2026: https://www.faa.gov/space/
-
-  </div>
-</details>
-
-<details>
-  <summary>Latest official baseline retained where no 2026 replacement is available yet</summary>
-  <div class="expander-copy">
-
-- U.S. Bureau of Labor Statistics, Healthcare Occupations, last modified Aug. 28, 2025: https://www.bls.gov/ooh/healthcare/
-- U.S. Bureau of Labor Statistics, Home Health and Personal Care Aides, last modified Aug. 28, 2025: https://www.bls.gov/ooh/healthcare/home-health-aides-and-personal-care-aides.htm
-- U.S. Bureau of Labor Statistics, Substance Abuse, Behavioral Disorder, and Mental Health Counselors, last modified Aug. 28, 2025: https://www.bls.gov/ooh/community-and-social-service/substance-abuse-behavioral-disorder-and-mental-health-counselors.htm
-- U.S. Bureau of Labor Statistics, Information Security Analysts, last modified Aug. 28, 2025: https://www.bls.gov/ooh/computer-and-information-technology/information-security-analysts.htm
-- U.S. Bureau of Labor Statistics, Data Scientists, last modified Aug. 28, 2025: https://www.bls.gov/ooh/math/data-scientists.htm
-- U.S. Bureau of Labor Statistics, Software Developers, Quality Assurance Analysts, and Testers, last modified Aug. 28, 2025: https://www.bls.gov/ooh/Computer-and-Information-Technology/Software-developers.htm
-- U.S. Bureau of Labor Statistics, Semiconductor Processing Technicians, last modified Aug. 28, 2025: https://www.bls.gov/ooh/production/semiconductor-processing-technicians.htm
-- U.S. Bureau of Labor Statistics, Aerospace Engineers, last modified Aug. 28, 2025: https://www.bls.gov/ooh/architecture-and-engineering/aerospace-engineers.htm
-- World Economic Forum, The Future of Jobs Report 2025, published Jan. 7, 2025: https://www.weforum.org/reports/the-future-of-jobs-report-2025/
-- Stanford HAI, The 2025 AI Index Report, published Apr. 7, 2025: https://hai.stanford.edu/ai-index/2025-ai-index-report
-- U.S. Census Bureau, Older Adults Outnumber Children in 11 States and Nearly Half of U.S. Counties, published Jun. 26, 2025: https://www.census.gov/newsroom/press-releases/2025/older-adults-outnumber-children.html
-- U.S. Census Bureau, Demographic Turning Points for the United States, published Feb. 2020: https://www.census.gov/library/publications/2020/demo/p25-1144.html
-
-  </div>
-</details>

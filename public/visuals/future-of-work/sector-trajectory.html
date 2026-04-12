@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sector Trajectory — Future of Work</title>
+  <script>
+    (() => {
+      const params = new URLSearchParams(window.location.search);
+      const storageKey = 'm2m-theme';
+      const root = document.documentElement;
+      const media = window.matchMedia('(prefers-color-scheme: dark)');
+      const normalizeTheme = (v) => v === 'dark' || v === 'light' ? v : null;
+      const getStoredTheme = () => { try { return normalizeTheme(localStorage.getItem(storageKey)); } catch { return null; } };
+      const getSystemTheme = () => media.matches ? 'dark' : 'light';
+      const getPreferredTheme = () => normalizeTheme(params.get('theme')) ?? getStoredTheme() ?? getSystemTheme();
+      root.dataset.embedded = params.get('embed') === '1' ? 'true' : 'false';
+      window.__m2mApplyTheme = (theme, persist = false) => {
+        const next = normalizeTheme(theme) ?? getPreferredTheme();
+        root.dataset.theme = next;
+        root.style.colorScheme = next;
+        if (persist) try { localStorage.setItem(storageKey, next); } catch {}
+        if (typeof window.__rebuildChart === 'function') window.__rebuildChart();
+      };
+      window.__m2mApplyTheme(getPreferredTheme(), false);
+      window.addEventListener('message', (e) => {
+        if (e.origin !== location.origin) return;
+        if (e.data?.type === 'm2m:set-theme') window.__m2mApplyTheme(e.data.theme, false);
+      });
+      const sync = (e) => { if (!getStoredTheme()) window.__m2mApplyTheme(e.matches ? 'dark' : 'light', false); };
+      media.addEventListener?.('change', sync) ?? media.addListener?.(sync);
+    })();
+  </script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root, :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f4f1ec; --text: #1a1a2e; --muted: #6b7280;
+      --grid-line: rgba(0,0,0,0.06); --grid-col: rgba(0,0,0,0.04);
+      --tooltip-bg: rgba(255,255,255,0.96); --tooltip-border: rgba(0,0,0,0.08);
+      --tooltip-shadow: 0 8px 32px rgba(0,0,0,0.12);
+      --legend-bg: rgba(255,255,255,0.7); --convergence-bg: rgba(0,0,0,0.04);
+    }
+    :root[data-theme="dark"] {
+      color-scheme: dark;
+      --bg: #0b1120; --text: #e2e8f0; --muted: #94a3b8;
+      --grid-line: rgba(255,255,255,0.05); --grid-col: rgba(255,255,255,0.025);
+      --tooltip-bg: rgba(15,23,42,0.96); --tooltip-border: rgba(255,255,255,0.08);
+      --tooltip-shadow: 0 8px 32px rgba(0,0,0,0.5);
+      --legend-bg: rgba(15,23,42,0.7); --convergence-bg: rgba(255,255,255,0.03);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        color-scheme: dark;
+        --bg: #0b1120; --text: #e2e8f0; --muted: #94a3b8;
+        --grid-line: rgba(255,255,255,0.05); --grid-col: rgba(255,255,255,0.025);
+        --tooltip-bg: rgba(15,23,42,0.96); --tooltip-border: rgba(255,255,255,0.08);
+        --tooltip-shadow: 0 8px 32px rgba(0,0,0,0.5);
+        --legend-bg: rgba(15,23,42,0.7); --convergence-bg: rgba(255,255,255,0.03);
+      }
+    }
+
+    body {
+      font-family: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+      background: var(--bg); color: var(--text);
+      display: flex; align-items: center; justify-content: center;
+      min-height: 100vh; padding: 12px;
+    }
+
+    .chart-wrap { width: 100%; max-width: 920px; position: relative; }
+
+    .chart-title {
+      font-size: 0.72rem; font-weight: 600; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--muted);
+      margin-bottom: 8px; text-align: center;
+    }
+
+    svg.flow-chart { width: 100%; height: auto; display: block; }
+
+    .legend {
+      display: flex; flex-wrap: wrap; gap: 4px 14px;
+      justify-content: center; margin-top: 10px;
+      padding: 6px 12px; border-radius: 12px;
+      background: var(--legend-bg); backdrop-filter: blur(8px);
+    }
+    .legend-item {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 0.7rem; font-weight: 500; color: var(--text);
+      cursor: pointer; padding: 3px 5px; border-radius: 6px;
+      border: none; background: none; transition: opacity 0.2s; user-select: none;
+    }
+    .legend-item:hover { opacity: 0.8; }
+    .legend-item[aria-pressed="false"] { opacity: 0.3; text-decoration: line-through; }
+    .legend-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+
+    .tooltip {
+      position: absolute; pointer-events: none;
+      padding: 10px 14px; border-radius: 12px;
+      background: var(--tooltip-bg); border: 1px solid var(--tooltip-border);
+      box-shadow: var(--tooltip-shadow); backdrop-filter: blur(14px);
+      font-size: 0.74rem; line-height: 1.5; opacity: 0;
+      transition: opacity 0.18s; z-index: 10; max-width: 230px;
+    }
+    .tooltip.visible { opacity: 1; }
+    .tooltip-title { font-weight: 700; margin-bottom: 3px; font-size: 0.8rem; }
+    .tooltip-meta { color: var(--muted); }
+    .tooltip-delta {
+      margin-top: 5px; padding-top: 5px;
+      border-top: 1px solid var(--tooltip-border);
+      font-style: italic; color: var(--muted); font-size: 0.7rem;
+    }
+
+    .convergence-label {
+      font-size: 9px; font-weight: 600; letter-spacing: 0.08em;
+      text-transform: uppercase; fill: var(--muted);
+      pointer-events: none;
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% { r: 0; opacity: 0.5; }
+      50% { r: 22; opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="chart-wrap">
+    <div class="chart-title">Sector rank trajectory — where economic energy is flowing</div>
+    <svg class="flow-chart" id="chart" viewBox="0 0 900 480" preserveAspectRatio="xMidYMid meet"
+         role="img" aria-label="Animated flow chart showing five sectors changing rank across three time horizons. Electrification rises from rank 4 to rank 1. AI Infrastructure peaks at rank 1 mid-term then falls to rank 5.">
+      <defs>
+        <filter id="glow-soft" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur" />
+          <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+        </filter>
+        <filter id="particle-glow" x="-100%" y="-100%" width="300%" height="300%">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="2.5" result="blur" />
+          <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+        </filter>
+      </defs>
+    </svg>
+    <div class="legend" role="group" aria-label="Chart legend"></div>
+    <div class="tooltip" aria-live="polite"></div>
+  </div>
+
+  <script>
+    const SVG_NS = 'http://www.w3.org/2000/svg';
+
+    const SECTORS = [
+      {
+        id: 'healthcare', label: 'Healthcare',
+        color: { light: '#16825d', dark: '#5ee8a8' },
+        ranks: [1, 3, 3], scores: [4.8, 4.2, 4.1],
+        grades: ['A', 'B', 'B'], confidence: ['High', 'High', 'High'],
+        delta: 'Starts highest — demographic demand is live and durable'
+      },
+      {
+        id: 'ai-infra', label: 'AI Infrastructure',
+        color: { light: '#1a7ab5', dark: '#60c5f7' },
+        ranks: [2, 1, 5], scores: [4.7, 4.8, 3.8],
+        grades: ['A', 'B', 'B'], confidence: ['High', 'High', 'Medium'],
+        delta: 'Peaks mid-term on capex, then faces app-layer commoditization'
+      },
+      {
+        id: 'cybersecurity', label: 'Cybersecurity',
+        color: { light: '#7c3aed', dark: '#b794f6' },
+        ranks: [3, 4, 4], scores: [4.1, 4.0, 3.9],
+        grades: ['A', 'B', 'A'], confidence: ['High', 'High', 'High'],
+        delta: 'Durable but steady — does not outrun physical bottlenecks'
+      },
+      {
+        id: 'electrification', label: 'Electrification & Grid',
+        color: { light: '#d97706', dark: '#fbbf24' },
+        ranks: [4, 2, 1], scores: [4.0, 4.6, 4.9],
+        grades: ['A', 'A', 'A'], confidence: ['High', 'High', 'High'],
+        delta: 'Power becomes the prerequisite constraint for everything else'
+      },
+      {
+        id: 'manufacturing', label: 'Adv. Manufacturing',
+        color: { light: '#be3a4a', dark: '#f87171' },
+        ranks: [5, 5, 2], scores: [3.9, 4.0, 4.5],
+        grades: ['B', 'B', 'B'], confidence: ['Medium', 'Medium', 'High'],
+        delta: 'Slower now — stronger once fabs and robotics go operational'
+      }
+    ];
+
+    const HORIZONS = ['1–2 yr', '3–5 yr', '5–10 yr'];
+
+    const CONVERGENCE_ZONES = [
+      { label: 'AI × Power', horizonIdx: 1.5, rank: 2.8,
+        desc: 'Grid optimization, datacenter power engineering' },
+      { label: 'AI × Care', horizonIdx: 0.45, rank: 1.6,
+        desc: 'Clinical AI, diagnostic workflow engineering' },
+      { label: 'Industry × AI', horizonIdx: 1.6, rank: 4.2,
+        desc: 'Smart factory infrastructure, predictive maintenance' }
+    ];
+
+    // Layout
+    const W = 900, H = 480;
+    const ML = 52, MR = 52, MT = 52, MB = 28;
+    const chartW = W - ML - MR, chartH = H - MT - MB;
+    const colX = HORIZONS.map((_, i) => ML + (i / 2) * chartW);
+    const rankY = (r) => MT + ((r - 1) / 4) * chartH;
+    const convergenceX = (h) => ML + (h / 2) * chartW;
+
+    const svg = document.getElementById('chart');
+    const legendEl = document.querySelector('.legend');
+    const tooltipEl = document.querySelector('.tooltip');
+
+    let hidden = new Set();
+    let highlighted = null;
+    let particles = [];
+    let animId = null;
+    let lastTime = 0;
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+    function theme() { return document.documentElement.dataset.theme === 'light' ? 'light' : 'dark'; }
+    function col(s) { return s.color[theme()]; }
+
+    function buildPath(sector) {
+      const pts = sector.ranks.map((r, i) => ({ x: colX[i], y: rankY(r) }));
+      let d = `M ${pts[0].x} ${pts[0].y}`;
+      for (let i = 0; i < pts.length - 1; i++) {
+        const a = pts[i], b = pts[i + 1];
+        const dx = (b.x - a.x) * 0.42;
+        d += ` C ${a.x + dx} ${a.y}, ${b.x - dx} ${b.y}, ${b.x} ${b.y}`;
+      }
+      return d;
+    }
+
+    function scoreToWidth(score) { return (score - 3.0) * 3.2; }
+
+    function render() {
+      const t = theme();
+      const mutedFill = t === 'dark' ? '#94a3b8' : '#6b7280';
+      const gridColor = t === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.06)';
+      const colBg = t === 'dark' ? 'rgba(255,255,255,0.015)' : 'rgba(0,0,0,0.018)';
+      const dotTextFill = t === 'dark' ? '#0b1120' : '#ffffff';
+
+      let staticHTML = '';
+
+      // Horizon column backgrounds
+      const colHalfW = chartW / 5;
+      HORIZONS.forEach((label, i) => {
+        const cx = colX[i];
+        staticHTML += `<rect x="${cx - colHalfW}" y="${MT - 8}" width="${colHalfW * 2}" height="${chartH + 16}" rx="8" fill="${colBg}" />`;
+        staticHTML += `<text x="${cx}" y="${MT - 22}" text-anchor="middle" fill="${mutedFill}" font-size="12.5" font-weight="600" font-family="'Space Grotesk',system-ui,sans-serif" letter-spacing="0.04em">${label}</text>`;
+      });
+
+      // Rank labels and grid lines
+      for (let r = 1; r <= 5; r++) {
+        const y = rankY(r);
+        staticHTML += `<line x1="${ML}" y1="${y}" x2="${W - MR}" y2="${y}" stroke="${gridColor}" stroke-width="1" />`;
+        staticHTML += `<text x="${ML - 16}" y="${y + 4.5}" text-anchor="end" fill="${mutedFill}" font-size="11.5" font-weight="500" font-family="'Space Grotesk',system-ui,sans-serif">#${r}</text>`;
+      }
+
+      // Sector paths
+      SECTORS.forEach(sector => {
+        if (hidden.has(sector.id)) return;
+        const c = col(sector);
+        const isHL = highlighted === null || highlighted === sector.id;
+        const op = isHL ? 1 : 0.1;
+        const avgScore = sector.scores.reduce((a, b) => a + b) / 3;
+        const w = scoreToWidth(avgScore);
+
+        // Glow ribbon (wide, soft)
+        staticHTML += `<path d="${buildPath(sector)}" fill="none" stroke="${c}" stroke-width="${w + 10}" stroke-opacity="${op * 0.08}" stroke-linecap="round" filter="url(#glow-soft)" />`;
+        // Mid ribbon
+        staticHTML += `<path d="${buildPath(sector)}" fill="none" stroke="${c}" stroke-width="${w + 3}" stroke-opacity="${op * 0.18}" stroke-linecap="round" />`;
+        // Core path
+        staticHTML += `<path d="${buildPath(sector)}" fill="none" stroke="${c}" stroke-width="${w}" stroke-opacity="${op * 0.75}" stroke-linecap="round" id="path-${sector.id}" class="sector-path" data-sector="${sector.id}" style="cursor:pointer">
+          <title>${sector.label}: Rank ${sector.ranks.join(' → ')}</title>
+        </path>`;
+
+        // Rank dots with pulse ring
+        sector.ranks.forEach((rank, i) => {
+          const cx = colX[i], cy = rankY(rank);
+          const dotR = 13 + (sector.scores[i] - 3.8) * 4;
+          // Pulse ring (animated)
+          if (isHL && !reducedMotion.matches) {
+            staticHTML += `<circle cx="${cx}" cy="${cy}" fill="none" stroke="${c}" stroke-width="1.5" opacity="${op * 0.4}"><animate attributeName="r" values="0;${dotR + 12}" dur="2.5s" repeatCount="indefinite" /><animate attributeName="opacity" values="0.5;0" dur="2.5s" repeatCount="indefinite" /></circle>`;
+          }
+          // Solid dot
+          staticHTML += `<circle cx="${cx}" cy="${cy}" r="${dotR}" fill="${c}" opacity="${op}" class="sector-dot" data-sector="${sector.id}" data-horizon="${i}" style="cursor:pointer;transition:opacity 0.2s" />`;
+          // Rank number
+          staticHTML += `<text x="${cx}" y="${cy + 4.5}" text-anchor="middle" fill="${dotTextFill}" font-size="11" font-weight="700" font-family="'Space Grotesk',system-ui,sans-serif" pointer-events="none" opacity="${op}">${rank}</text>`;
+        });
+      });
+
+      // Convergence zone markers
+      if (highlighted === null) {
+        CONVERGENCE_ZONES.forEach(cz => {
+          const cx = convergenceX(cz.horizonIdx);
+          const cy = rankY(cz.rank);
+          staticHTML += `<g class="cz-marker" opacity="0.6">
+            <circle cx="${cx}" cy="${cy}" r="18" fill="${colBg}" stroke="${mutedFill}" stroke-width="0.5" stroke-dasharray="3 3" />
+            <text x="${cx}" y="${cy - 24}" text-anchor="middle" class="convergence-label" fill="${mutedFill}" font-family="'Space Grotesk',system-ui,sans-serif">${cz.label}</text>
+          </g>`;
+        });
+      }
+
+      // Particle container
+      staticHTML += '<g id="particle-layer"></g>';
+
+      svg.innerHTML = staticHTML;
+
+      // Bind events
+      svg.querySelectorAll('.sector-dot, .sector-path').forEach(el => {
+        el.addEventListener('mouseenter', (e) => { highlighted = el.dataset.sector; render(); showTooltip(e, el.dataset.sector, el.dataset.horizon ? +el.dataset.horizon : null); });
+        el.addEventListener('mouseleave', () => { highlighted = null; render(); tooltipEl.classList.remove('visible'); });
+        el.addEventListener('click', (e) => { e.stopPropagation(); });
+      });
+
+      buildLegend();
+      setupParticles();
+    }
+
+    function setupParticles() {
+      particles = [];
+      const layer = document.getElementById('particle-layer');
+      if (!layer || reducedMotion.matches) return;
+
+      SECTORS.forEach(sector => {
+        if (hidden.has(sector.id)) return;
+        const pathEl = document.getElementById(`path-${sector.id}`);
+        if (!pathEl) return;
+        const len = pathEl.getTotalLength();
+        const highConf = sector.confidence.filter(c => c === 'High').length;
+        // More particles for higher-confidence sectors (≥2 high-confidence horizons)
+        const count = highConf >= 2 ? 9 : 5;
+        // px/s — faster flow for high-confidence sectors to convey stronger signal
+        const baseSpeed = highConf >= 2 ? 60 : 38;
+
+        for (let i = 0; i < count; i++) {
+          const circle = document.createElementNS(SVG_NS, 'circle');
+          circle.setAttribute('r', String(2 + Math.random() * 1.5));
+          circle.setAttribute('fill', col(sector));
+          circle.setAttribute('filter', 'url(#particle-glow)');
+          layer.appendChild(circle);
+
+          particles.push({
+            sectorId: sector.id,
+            pathEl, len,
+            offset: (i / count) * len,
+            speed: baseSpeed + (Math.random() - 0.5) * 18,
+            el: circle,
+            baseOp: 0.65 + Math.random() * 0.35
+          });
+        }
+      });
+    }
+
+    function animateParticles(ts) {
+      if (!lastTime) lastTime = ts;
+      const dt = Math.min((ts - lastTime) / 1000, 0.1);
+      lastTime = ts;
+
+      particles.forEach(p => {
+        p.offset = (p.offset + p.speed * dt) % p.len;
+        const pt = p.pathEl.getPointAtLength(p.offset);
+        p.el.setAttribute('cx', pt.x);
+        p.el.setAttribute('cy', pt.y);
+        const dimmed = highlighted && highlighted !== p.sectorId;
+        p.el.setAttribute('opacity', dimmed ? '0.04' : String(p.baseOp));
+      });
+
+      animId = requestAnimationFrame(animateParticles);
+    }
+
+    function startAnimation() {
+      if (animId) cancelAnimationFrame(animId);
+      lastTime = 0;
+      if (!reducedMotion.matches) animId = requestAnimationFrame(animateParticles);
+    }
+
+    function buildLegend() {
+      legendEl.innerHTML = SECTORS.map(s =>
+        `<button class="legend-item" data-sector="${s.id}" aria-pressed="${!hidden.has(s.id)}" title="Toggle ${s.label}">
+          <span class="legend-dot" style="background:${col(s)}"></span>${s.label}
+        </button>`
+      ).join('');
+
+      legendEl.querySelectorAll('.legend-item').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = btn.dataset.sector;
+          hidden.has(id) ? hidden.delete(id) : hidden.add(id);
+          highlighted = null;
+          render();
+          startAnimation();
+        });
+      });
+    }
+
+    function showTooltip(e, sectorId, horizonIdx) {
+      const sector = SECTORS.find(s => s.id === sectorId);
+      if (!sector) return;
+      const c = col(sector);
+      let html = `<div class="tooltip-title" style="color:${c}">${sector.label}</div>`;
+      if (horizonIdx !== null && horizonIdx >= 0) {
+        html += `<div><strong>Horizon:</strong> ${HORIZONS[horizonIdx]}</div>`;
+        html += `<div><strong>Rank:</strong> #${sector.ranks[horizonIdx]}</div>`;
+        html += `<div class="tooltip-meta"><strong>Score:</strong> ${sector.scores[horizonIdx]}/5 &nbsp;<strong>Grade:</strong> ${sector.grades[horizonIdx]} &nbsp;<strong>Conf:</strong> ${sector.confidence[horizonIdx]}</div>`;
+      } else {
+        html += `<div class="tooltip-meta">Rank: ${sector.ranks.map(r => '#' + r).join(' → ')}</div>`;
+      }
+      html += `<div class="tooltip-delta">${sector.delta}</div>`;
+      tooltipEl.innerHTML = html;
+      tooltipEl.classList.add('visible');
+
+      const wrap = document.querySelector('.chart-wrap').getBoundingClientRect();
+      const ttW = tooltipEl.offsetWidth, ttH = tooltipEl.offsetHeight;
+      let left = e.clientX - wrap.left + 16;
+      let top = e.clientY - wrap.top - ttH - 12;
+      if (left + ttW > wrap.width) left -= ttW + 32;
+      if (top < 0) top = e.clientY - wrap.top + 16;
+      tooltipEl.style.left = left + 'px';
+      tooltipEl.style.top = top + 'px';
+    }
+
+    document.addEventListener('click', () => { highlighted = null; tooltipEl.classList.remove('visible'); render(); startAnimation(); });
+
+    window.__rebuildChart = () => { render(); startAnimation(); };
+    render();
+    startAnimation();
+  </script>
+</body>
+</html>
