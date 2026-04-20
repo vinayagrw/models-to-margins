@@ -1,0 +1,1016 @@
+---
+import { getEntry } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import EntryMeta from '../../components/EntryMeta.astro';
+import BackLink from '../../components/BackLink.astro';
+import '../../styles/live-brief.css';
+
+const entry = await getEntry('briefs', 'operator-grade-intelligence-engine');
+
+if (!entry) {
+  throw new Error('Expected the operator-grade-intelligence-engine brief to exist in the briefs collection.');
+}
+
+const visualPath = entry.data.supportingVisualPath ?? '/visuals/intelligence-engine/operator-grade-intelligence-engine.html';
+
+const heroSignals = [
+  'Proprietary operating data',
+  'Queue ownership',
+  'Execution writeback',
+  'Metric lift within the rail'
+];
+
+const focusData = {
+  thesis: {
+    title: 'AI margin stays where the system changes the operating queue',
+    copy: 'The durable AI business sees proprietary data, changes the next unit of work, and writes back into the rail before the metric moves.',
+    stats: ['Follow the queue', 'Follow the writeback path', 'Ask what changes tomorrow morning']
+  },
+  healthcare: {
+    title: 'Healthcare: reimbursement control beats elegant note-taking',
+    copy: 'The winner owns payer logic, document readiness, and revenue-queue priority so the next packet moves inside the auth workflow.',
+    stats: ['Operator: Auth lead', 'Control: Payer rules + queue priority', 'Metric: -18h auth cycle']
+  },
+  retail: {
+    title: 'Retail: margin sticks where the next floor task changes',
+    copy: 'The strong retail rail sees inventory truth, basket economics, and labor pressure, then commits the next store action in-system.',
+    stats: ['Operator: Store lead', 'Control: Inventory truth + store constraints', 'Metric: +34 bps basket margin']
+  },
+  logistics: {
+    title: 'Logistics: dispatch value compounds when the rail is continuous',
+    copy: 'The moat appears when live ETA, dock windows, and exception queues drive the next dispatch move inside the operating system.',
+    stats: ['Operator: Dispatch lead', 'Control: Telematics + dispatch board', 'Metric: -9% empty miles']
+  },
+  'weak-moat': {
+    title: 'Weak moat: smart presentation can still leak the economics',
+    copy: 'If the last-mile decision still gets re-entered into another system, the incumbent rail usually keeps the durable value.',
+    stats: ['Warning: manual handoff', 'Warning: no writeback', 'Warning: metric lift stays upstream']
+  },
+  method: {
+    title: 'Method: the evidence layer matters because it knows when to hold',
+    copy: 'The intelligence engine filtered named evidence, remembered what persisted, compared sectors, and downgraded claims when the control point stayed blurry.',
+    stats: ['Evidence over adjectives', 'Recurring memory over launch-week noise', 'Visible hold rule']
+  },
+  pattern: {
+    title: 'Why the thesis held: the same moat repeated under different operating realities',
+    copy: 'Different sectors surfaced the same pattern: the winning product saw live data, changed the next task, and captured the result on the existing rail.',
+    stats: ['Cross-sector repetition', 'Named operational evidence', 'Same control logic under new conditions']
+  },
+  advisory: {
+    title: 'What weak moats miss: explanation without control still leaks value',
+    copy: 'Advisory products can feel smart and still lose pricing power if the operator must re-enter the decision somewhere else.',
+    stats: ['Useful is not the same as durable', 'Manual handoff leaks economics', 'The incumbent rail keeps leverage']
+  },
+  falsify: {
+    title: 'What would falsify this: proof that thin layers keep the economics anyway',
+    copy: 'The thesis should weaken if repeated cases show presentation-layer products holding customer leverage without queue control or writeback.',
+    stats: ['Look for durable counterexamples', 'Separate usefulness from capture', 'Keep the failure condition visible']
+  },
+  hold: {
+    title: 'How the method kept us honest: the hold rule is part of the product',
+    copy: 'Thin signal is still information. When queue ownership or execution writeback stayed unclear, the right output was a hold instead of a bigger claim.',
+    stats: ['Hold is a valid verdict', 'Do not grade advisory as durable', 'Clarity beats premature certainty']
+  }
+};
+
+const comparisonRows = [
+  ['Operator', 'Auth lead', 'Store lead', 'Dispatch lead'],
+  ['Decision moment', 'Approve, hold, or escalate the payer packet', 'Substitute, replenish, or defer the next item', 'Reroute, resequence, or rebook the next move'],
+  ['Control point', 'Payer rules plus queue priority', 'Inventory truth plus store constraints', 'Telematics plus dispatch board'],
+  ['Writeback path', 'Authorization workflow', 'Pick, stock, and substitution tasks', 'Dispatch and appointment systems'],
+  ['Measured payoff', '-18h auth cycle', '+34 bps basket margin', '-9% empty miles'],
+  ['Wednesday morning', 'Cleaner packets move first', 'Higher-value picks land faster', 'Exceptions get corrected before drift compounds']
+];
+
+const decisionQuestions = [
+  'Does it own proprietary data?',
+  'Does it change the queue?',
+  'Does it write back into execution?'
+];
+
+const evidenceModules = [
+  {
+    id: 'pattern',
+    label: 'Why the thesis held',
+    title: 'Repeatable pattern across sectors',
+    body: 'Healthcare, retail, and logistics all cleared the same moat test under different operating conditions.',
+    spotlightTitle: 'The same moat logic repeated even when the workflows looked nothing alike',
+    spotlightCopy: 'That repetition matters more than any one demo. Each winning case had live operating data, queue control, and writeback inside the workflow that moved the metric.',
+    chips: ['Live operating surface', 'Queue changed in-system', 'Metric moved on the rail'],
+    path: ['See named operational evidence', 'Change the next unit of work', 'Capture lift before the handoff leaks out']
+  },
+  {
+    id: 'advisory',
+    label: 'What weak moats miss',
+    title: 'Why advisory products fail',
+    body: 'The interface can feel premium while the economics remain with the incumbent rail.',
+    spotlightTitle: 'A beautiful recommendation is still weak capture if someone else owns the final queue',
+    spotlightCopy: 'The weak product explains, predicts, or summarizes well, but it stops before the next action commits inside the system of record.',
+    chips: ['Smart suggestion', 'Manual re-entry', 'Incumbent keeps leverage'],
+    path: ['Explain the issue', 'Hand the decision back to the operator', 'Lose durable pricing power upstream']
+  },
+  {
+    id: 'falsify',
+    label: 'What would falsify this',
+    title: 'What would break the thesis',
+    body: 'A good market thesis should keep a visible failure condition, not just a louder conclusion.',
+    spotlightTitle: 'The thesis should weaken if thin layers repeatedly keep the customer relationship and margin anyway',
+    spotlightCopy: 'If thin copilots or analytics layers hold pricing power without controlling queues or writeback, this argument needs to be downgraded or split into narrower claims.',
+    chips: ['Look for repeat counterexamples', 'Watch retention and pricing', 'Test for rail independence'],
+    path: ['Observe durable success without queue control', 'See economics stay with the thin layer', 'Revise the thesis instead of protecting it']
+  },
+  {
+    id: 'hold',
+    label: 'How the method kept us honest',
+    title: 'Why the hold rule matters',
+    body: 'The research system is useful because it knows when the stronger story is not yet earned.',
+    spotlightTitle: 'Hold is a research product, not a failure state',
+    spotlightCopy: 'When the queue owner or writeback path stayed fuzzy, the method deliberately refused to overstate moat strength. That selectivity is part of the value.',
+    chips: ['Named evidence only', 'Cross-run memory', 'Hold before hype'],
+    path: ['Filter weak claims', 'Compare what persists across runs', 'Publish a hold when the rail is still blurry']
+  }
+];
+
+const deepReadSections = [
+  {
+    id: 'control-tests',
+    title: 'Control tests',
+    summary: 'Three checks screen out pretty demos that never reach the margin rail.',
+    items: [
+      'Proprietary data: does the product see a live operating surface instead of generic model access alone?',
+      'Queue ownership: does it change what gets approved, picked, rerouted, or escalated next?',
+      'Execution rail: does the decision write back into the workflow where margin, throughput, or risk actually moves?'
+    ]
+  },
+  {
+    id: 'method',
+    title: 'Method',
+    summary: 'The thesis came from recurring patterns, not one loud week of launches.',
+    items: [
+      'Filter hype down to named operational evidence.',
+      'Remember what persisted across recurring runs instead of resetting every week.',
+      'Route patterns across sectors until the same control point shows up under different operating realities.',
+      'Hold or downgrade the claim when queue ownership or writeback stays unclear.'
+    ]
+  },
+  {
+    id: 'falsification',
+    title: 'Falsification',
+    summary: 'A real thesis keeps a visible way to fail.',
+    items: [
+      'If thin copilots keep pricing power without owning the queue, the thesis weakens.',
+      'If analytics layers repeatedly move economics without a writeback path, the rail argument needs to be revised.',
+      'If weak data positions still control the customer relationship and durable margin across sectors, the claim should be narrowed.'
+    ]
+  }
+];
+---
+
+<BaseLayout
+  title={`${entry.data.title} | Models to Margins`}
+  description={entry.data.summary}
+  currentPath="/briefs"
+>
+  <article class="scroll-brief" data-tone="margin">
+    <section class="scroll-brief__hero">
+      <span class="eyebrow scroll-brief__eyebrow">Live Brief</span>
+      <h1 class="scroll-brief__title">{entry.data.title}</h1>
+      <p class="lead scroll-brief__summary">{entry.data.summary}</p>
+      <BackLink href="/briefs" label="Back to Brief" />
+      <EntryMeta
+        date={entry.data.pubDate}
+        primary={entry.data.industry}
+        readTime={entry.data.readTime}
+      />
+      <div class="scroll-brief__signal-row" aria-label="Margin signals">
+        {heroSignals.map((signal) => (
+          <span class="scroll-brief__signal-chip">{signal}</span>
+        ))}
+      </div>
+    </section>
+
+    <section class="scroll-brief__visual" aria-label="AI margin comparison brief">
+      <div class="scroll-brief__visual-head">
+        <div class="scroll-brief__visual-copy">
+          <p class="scroll-brief__label">Scenario triptych</p>
+          <h2>Read the three operating scenes first, then pressure-test the moat.</h2>
+          <p class="scroll-brief__intro">
+            The visual shows the operating picture. The controls below it let you switch between scene reads, failure modes, and the supporting method without dropping back into article mode.
+          </p>
+          <div class="scroll-brief__focus-tabs" aria-label="Comparison lenses">
+            <button class="scroll-brief__focus-button" type="button" aria-pressed="false" data-margin-focus="thesis">Core thesis</button>
+            <button class="scroll-brief__focus-button" type="button" aria-pressed="false" data-margin-focus="healthcare">Healthcare</button>
+            <button class="scroll-brief__focus-button" type="button" aria-pressed="false" data-margin-focus="retail">Retail</button>
+            <button class="scroll-brief__focus-button" type="button" aria-pressed="false" data-margin-focus="logistics">Logistics</button>
+            <button class="scroll-brief__focus-button" type="button" aria-pressed="false" data-margin-focus="weak-moat">Weak moat</button>
+            <button class="scroll-brief__focus-button" type="button" aria-pressed="false" data-margin-focus="method">Method</button>
+          </div>
+        </div>
+
+        <div class="scroll-brief__toolbar">
+          <a class="button secondary" href={visualPath} target="_blank" rel="noreferrer">
+            Open full screen
+          </a>
+        </div>
+      </div>
+
+      <div class="scroll-brief__focus-bar">
+        <strong id="margin-focus-title">AI margin stays where the system changes the operating queue</strong>
+        <p class="scroll-brief__focus-copy" id="margin-focus-copy">
+          The durable AI business sees proprietary data, changes the next unit of work, and writes back into the rail before the metric moves.
+        </p>
+        <div class="scroll-brief__focus-stats" id="margin-focus-stats"></div>
+      </div>
+
+      <div class="scroll-brief__frame">
+        <iframe
+          id="operator-grade-intelligence-engine-frame"
+          src={`${visualPath}?embed=1`}
+          title="Where AI Margin Actually Accrues brief"
+          loading="eager"
+        ></iframe>
+      </div>
+    </section>
+
+    <section class="scroll-brief__shared" aria-label="Shared read comparison table">
+      <div class="scroll-brief__shared-head">
+        <div>
+          <p class="scroll-brief__label">Shared read</p>
+          <h2>Keep the same six questions visible while the examples change.</h2>
+        </div>
+        <p class="scroll-brief__bridge">
+          This is the comparison layer. The sections below turn it into proof and pressure-test instead of more reading.
+        </p>
+      </div>
+
+      <div class="scroll-brief__comparison-scroll">
+        <div class="scroll-brief__comparison">
+          <div class="scroll-brief__comparison-row scroll-brief__comparison-row--head">
+            <strong>Test</strong>
+            <span data-margin-col="healthcare">Healthcare</span>
+            <span data-margin-col="retail">Retail</span>
+            <span data-margin-col="logistics">Logistics</span>
+          </div>
+
+          {comparisonRows.map(([label, healthcare, retail, logistics]) => (
+            <div class="scroll-brief__comparison-row">
+              <strong>{label}</strong>
+              <span data-margin-col="healthcare">{healthcare}</span>
+              <span data-margin-col="retail">{retail}</span>
+              <span data-margin-col="logistics">{logistics}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <section class="scroll-brief__evidence" aria-label="Evidence board">
+      <div class="scroll-brief__evidence-head">
+        <div>
+          <p class="scroll-brief__label">Proof + pressure-test</p>
+          <h2>The lower half should challenge the thesis, not repeat it.</h2>
+        </div>
+        <p class="scroll-brief__intro">
+          Use the evidence modules like a board: activate one question, read the spotlight, then open the deeper drawer only if you need more proof.
+        </p>
+      </div>
+
+      <div class="scroll-brief__decision-strip" aria-label="Core decision strip">
+        {decisionQuestions.map((question) => (
+          <div class="scroll-brief__decision-chip">
+            <span>{question}</span>
+          </div>
+        ))}
+      </div>
+
+      <div class="scroll-brief__board">
+        <div class="scroll-brief__modules" aria-label="Evidence modules">
+          {evidenceModules.map((module) => (
+            <button
+              class="scroll-brief__module"
+              type="button"
+              aria-pressed="false"
+              data-margin-focus={module.id}
+              data-margin-module={module.id}
+            >
+              <span class="scroll-brief__module-label">{module.label}</span>
+              <strong>{module.title}</strong>
+              <span>{module.body}</span>
+            </button>
+          ))}
+        </div>
+
+        <aside class="scroll-brief__spotlight" aria-live="polite">
+          <p class="scroll-brief__label" id="margin-spotlight-label">Why the thesis held</p>
+          <h3 id="margin-spotlight-title">The same moat logic repeated even when the workflows looked nothing alike</h3>
+          <p class="scroll-brief__spotlight-copy" id="margin-spotlight-copy">
+            That repetition matters more than any one demo. Each winning case had live operating data, queue control, and writeback inside the workflow that moved the metric.
+          </p>
+          <div class="scroll-brief__spotlight-chips" id="margin-spotlight-chips"></div>
+          <div class="scroll-brief__spotlight-path" id="margin-spotlight-path"></div>
+        </aside>
+      </div>
+
+      <div class="scroll-brief__deep-read">
+        <article class="scroll-brief__summary-card">
+          <p class="scroll-brief__label">Operating question</p>
+          <h3>What queue changes, what system gets updated, and what metric moves if this actually works?</h3>
+          <p>
+            If the answer is still abstract after the triptych, the comparison rows, and the evidence board, the moat claim is probably still too soft.
+          </p>
+        </article>
+
+        <div class="scroll-brief__accordion-list">
+          {deepReadSections.map((section) => (
+            <details class="scroll-brief__accordion" data-print-accordion>
+              <summary>
+                <span>{section.title}</span>
+                <small>{section.summary}</small>
+              </summary>
+              <div class="scroll-brief__accordion-body">
+                <ul>
+                  {section.items.map((item) => (
+                    <li>{item}</li>
+                  ))}
+                </ul>
+              </div>
+            </details>
+          ))}
+        </div>
+      </div>
+    </section>
+  </article>
+
+  <style>
+    .scroll-brief {
+      display: grid;
+      gap: clamp(20px, 2.4vw, 34px);
+    }
+
+    .scroll-brief__hero,
+    .scroll-brief__visual,
+    .scroll-brief__shared,
+    .scroll-brief__evidence {
+      display: grid;
+      gap: 16px;
+    }
+
+    .scroll-brief__signal-row,
+    .scroll-brief__focus-tabs,
+    .scroll-brief__focus-stats,
+    .scroll-brief__spotlight-chips {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .scroll-brief__signal-chip,
+    .scroll-brief__decision-chip {
+      display: inline-flex;
+      align-items: center;
+      min-height: 2.5rem;
+      padding: 0.55rem 0.9rem;
+      border-radius: 999px;
+      border: 1px solid color-mix(in srgb, var(--line) 82%, transparent);
+      background: color-mix(in srgb, var(--surface-soft) 76%, transparent);
+      color: var(--text);
+      line-height: 1.35;
+    }
+
+    .scroll-brief__visual,
+    .scroll-brief__shared,
+    .scroll-brief__evidence {
+      padding: clamp(18px, 2vw, 28px);
+      border-radius: 28px;
+      border: 1px solid color-mix(in srgb, var(--line) 84%, transparent);
+      background:
+        radial-gradient(circle at top left, color-mix(in srgb, var(--accent-cyan) 9%, transparent), transparent 36%),
+        color-mix(in srgb, var(--surface) 94%, transparent);
+      box-shadow: var(--shadow);
+    }
+
+    .scroll-brief__visual-head,
+    .scroll-brief__shared-head,
+    .scroll-brief__evidence-head {
+      display: grid;
+      gap: 14px;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: start;
+    }
+
+    .scroll-brief__visual-copy,
+    .scroll-brief__board,
+    .scroll-brief__spotlight,
+    .scroll-brief__summary-card {
+      display: grid;
+      gap: 12px;
+    }
+
+    .scroll-brief__toolbar {
+      display: flex;
+      justify-content: flex-end;
+      align-items: start;
+    }
+
+    .scroll-brief__focus-tabs {
+      margin-top: 6px;
+    }
+
+    .scroll-brief__focus-button,
+    .scroll-brief__module {
+      appearance: none;
+      width: fit-content;
+      max-width: 100%;
+      border: 1px solid color-mix(in srgb, var(--line) 82%, transparent);
+      background: color-mix(in srgb, var(--surface-soft) 74%, transparent);
+      color: var(--text);
+      border-radius: 18px;
+      padding: 0.8rem 0.95rem;
+      font: inherit;
+      text-align: left;
+      cursor: pointer;
+      transition: border-color 0.18s ease, background 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .scroll-brief__focus-button:hover,
+    .scroll-brief__focus-button:focus-visible,
+    .scroll-brief__focus-button.is-active,
+    .scroll-brief__module:hover,
+    .scroll-brief__module:focus-visible,
+    .scroll-brief__module.is-active {
+      transform: translateY(-1px);
+      border-color: color-mix(in srgb, var(--accent-cyan) 42%, var(--line));
+      background: color-mix(in srgb, var(--accent-cyan) 10%, var(--surface-soft));
+      box-shadow: 0 14px 28px rgba(3, 9, 17, 0.12);
+      outline: none;
+    }
+
+    .scroll-brief__focus-bar {
+      display: grid;
+      gap: 12px;
+      padding: 16px 18px;
+      border-radius: 24px;
+      border: 1px solid color-mix(in srgb, var(--line) 84%, transparent);
+      background: color-mix(in srgb, var(--surface-soft) 74%, transparent);
+    }
+
+    .scroll-brief__focus-bar strong {
+      font-size: clamp(1.1rem, 1.55vw, 1.35rem);
+      line-height: 1.18;
+      color: var(--text);
+      text-wrap: balance;
+    }
+
+    .scroll-brief__focus-copy {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.65;
+      max-width: 78ch;
+    }
+
+    .scroll-brief__focus-stats span,
+    .scroll-brief__spotlight-chips span {
+      display: inline-flex;
+      align-items: center;
+      min-height: 2.15rem;
+      padding: 0.5rem 0.78rem;
+      border-radius: 999px;
+      border: 1px solid color-mix(in srgb, var(--line) 76%, transparent);
+      background: color-mix(in srgb, var(--surface) 80%, transparent);
+      color: var(--text);
+      line-height: 1.35;
+    }
+
+    .scroll-brief__frame {
+      overflow: hidden;
+      border-radius: 24px;
+      border: 1px solid color-mix(in srgb, var(--line) 84%, transparent);
+      background: rgba(3, 9, 17, 0.8);
+      box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--line) 26%, transparent);
+    }
+
+    .scroll-brief__frame iframe {
+      display: block;
+      width: 100%;
+      min-height: 1100px;
+      height: 1100px;
+      border: 0;
+      background: transparent;
+    }
+
+    .scroll-brief__comparison-scroll {
+      overflow-x: auto;
+      padding-bottom: 4px;
+      scrollbar-width: thin;
+    }
+
+    .scroll-brief__comparison {
+      display: grid;
+      gap: 8px;
+      min-width: 940px;
+    }
+
+    .scroll-brief__comparison-row {
+      display: grid;
+      grid-template-columns: minmax(200px, 0.96fr) repeat(3, minmax(215px, 1fr));
+      gap: 12px;
+      align-items: start;
+      padding-top: 12px;
+      border-top: 1px solid color-mix(in srgb, var(--line) 78%, transparent);
+    }
+
+    .scroll-brief__comparison-row--head {
+      padding-top: 0;
+      border-top: 0;
+    }
+
+    .scroll-brief__comparison-row strong {
+      position: sticky;
+      left: 0;
+      z-index: 2;
+      display: block;
+      padding-right: 0.5rem;
+      background: color-mix(in srgb, var(--surface) 94%, transparent);
+      color: var(--text);
+      font-size: 0.95rem;
+      line-height: 1.52;
+    }
+
+    .scroll-brief__comparison-row span {
+      min-width: 0;
+      padding: 0.18rem 0;
+      border-radius: 16px;
+      color: var(--muted);
+      line-height: 1.58;
+      transition: background 0.18s ease, padding 0.18s ease, color 0.18s ease;
+    }
+
+    .scroll-brief__comparison-row span.is-active {
+      padding: 0.48rem 0.72rem;
+      background: color-mix(in srgb, var(--accent-cyan) 10%, transparent);
+      color: var(--text);
+    }
+
+    .scroll-brief__decision-strip {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .scroll-brief__decision-chip {
+      justify-content: center;
+      min-height: 3rem;
+      background:
+        linear-gradient(180deg, color-mix(in srgb, var(--accent-gold) 9%, transparent), transparent),
+        color-mix(in srgb, var(--surface-soft) 84%, transparent);
+      text-align: center;
+    }
+
+    .scroll-brief__board {
+      grid-template-columns: minmax(0, 1.02fr) minmax(320px, 0.98fr);
+      align-items: start;
+      gap: clamp(14px, 1.8vw, 22px);
+    }
+
+    .scroll-brief__modules {
+      display: grid;
+      gap: 12px;
+    }
+
+    .scroll-brief__module {
+      width: 100%;
+      display: grid;
+      gap: 6px;
+      justify-items: start;
+      align-content: start;
+      min-height: 0;
+      padding: 1rem 1.02rem;
+      border-radius: 22px;
+    }
+
+    .scroll-brief__module strong {
+      font-size: 1.02rem;
+      line-height: 1.24;
+      color: var(--text);
+      text-wrap: balance;
+    }
+
+    .scroll-brief__module span:last-child {
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .scroll-brief__module-label {
+      display: inline-flex;
+      align-items: center;
+      min-height: 1.8rem;
+      padding: 0.26rem 0.6rem;
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--accent-cyan) 12%, transparent);
+      color: var(--accent-cyan);
+      font-size: 0.78rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .scroll-brief__spotlight {
+      min-height: 100%;
+      padding: clamp(16px, 1.8vw, 22px);
+      border-radius: 24px;
+      border: 1px solid color-mix(in srgb, var(--line) 84%, transparent);
+      background:
+        radial-gradient(circle at top right, color-mix(in srgb, var(--accent-violet) 11%, transparent), transparent 34%),
+        color-mix(in srgb, var(--surface-soft) 82%, transparent);
+    }
+
+    .scroll-brief__spotlight h3 {
+      margin: 0;
+      font-size: clamp(1.3rem, 1.95vw, 1.65rem);
+      line-height: 1.08;
+      color: var(--text);
+      text-wrap: balance;
+    }
+
+    .scroll-brief__spotlight-copy {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.68;
+    }
+
+    .scroll-brief__spotlight-path {
+      display: grid;
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    .scroll-brief__spotlight-path div {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 10px;
+      align-items: start;
+      padding: 11px 12px;
+      border-radius: 18px;
+      border: 1px solid color-mix(in srgb, var(--line) 78%, transparent);
+      background: color-mix(in srgb, var(--surface) 78%, transparent);
+    }
+
+    .scroll-brief__spotlight-path span:first-child {
+      width: 1.8rem;
+      height: 1.8rem;
+      display: inline-grid;
+      place-items: center;
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--accent-cyan) 14%, transparent);
+      color: var(--accent-cyan);
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .scroll-brief__deep-read {
+      display: grid;
+      gap: 14px;
+      grid-template-columns: minmax(260px, 0.88fr) minmax(0, 1.12fr);
+      align-items: start;
+    }
+
+    .scroll-brief__summary-card,
+    .scroll-brief__accordion {
+      padding: 16px 18px;
+      border-radius: 22px;
+      border: 1px solid color-mix(in srgb, var(--line) 82%, transparent);
+      background: color-mix(in srgb, var(--surface-soft) 82%, transparent);
+    }
+
+    .scroll-brief__summary-card h3 {
+      margin: 0;
+      font-size: 1.18rem;
+      line-height: 1.16;
+      color: var(--text);
+      text-wrap: balance;
+    }
+
+    .scroll-brief__summary-card p:last-child {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.66;
+    }
+
+    .scroll-brief__accordion-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .scroll-brief__accordion summary {
+      list-style: none;
+      cursor: pointer;
+      display: grid;
+      gap: 6px;
+      padding-right: 2.5rem;
+      position: relative;
+    }
+
+    .scroll-brief__accordion summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .scroll-brief__accordion summary span {
+      color: var(--text);
+      font: 700 1rem/1.2 "Space Grotesk", system-ui, sans-serif;
+      text-wrap: balance;
+    }
+
+    .scroll-brief__accordion summary small {
+      color: var(--muted);
+      line-height: 1.55;
+      font-size: 0.92rem;
+    }
+
+    .scroll-brief__accordion summary::after {
+      content: '+';
+      position: absolute;
+      top: 0.1rem;
+      right: 0;
+      width: 1.9rem;
+      height: 1.9rem;
+      display: grid;
+      place-items: center;
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--accent-cyan) 12%, transparent);
+      color: var(--accent-cyan);
+      font: 700 1.1rem/1 "Space Grotesk", system-ui, sans-serif;
+    }
+
+    .scroll-brief__accordion[open] summary::after {
+      content: '-';
+    }
+
+    .scroll-brief__accordion-body {
+      padding-top: 12px;
+    }
+
+    .scroll-brief__accordion-body ul {
+      display: grid;
+      gap: 10px;
+      margin: 0;
+      padding-left: 1.15rem;
+      color: var(--muted);
+    }
+
+    .scroll-brief__accordion-body li {
+      line-height: 1.62;
+    }
+
+    .scroll-brief__bridge {
+      max-width: 44ch;
+      color: var(--muted);
+      line-height: 1.62;
+    }
+
+    @media (max-width: 1080px) {
+      .scroll-brief__visual-head,
+      .scroll-brief__shared-head,
+      .scroll-brief__evidence-head,
+      .scroll-brief__board,
+      .scroll-brief__deep-read {
+        grid-template-columns: 1fr;
+      }
+
+      .scroll-brief__toolbar {
+        justify-content: flex-start;
+      }
+    }
+
+    @media (max-width: 860px) {
+      .scroll-brief__decision-strip {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .scroll-brief__visual,
+      .scroll-brief__shared,
+      .scroll-brief__evidence {
+        padding: 16px;
+        border-radius: 22px;
+      }
+
+      .scroll-brief__frame {
+        border-radius: 20px;
+      }
+
+      .scroll-brief__frame iframe {
+        min-height: 920px;
+        height: 920px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .scroll-brief__focus-button,
+      .scroll-brief__module,
+      .scroll-brief__comparison-row span {
+        transition: none;
+      }
+
+      .scroll-brief__focus-button:hover,
+      .scroll-brief__focus-button:focus-visible,
+      .scroll-brief__focus-button.is-active,
+      .scroll-brief__module:hover,
+      .scroll-brief__module:focus-visible,
+      .scroll-brief__module.is-active {
+        transform: none;
+      }
+    }
+
+    @media print {
+      .scroll-brief__frame {
+        display: none;
+      }
+
+      .scroll-brief__visual,
+      .scroll-brief__shared,
+      .scroll-brief__evidence {
+        box-shadow: none;
+        background: #fff;
+      }
+
+      .scroll-brief__accordion {
+        break-inside: avoid;
+      }
+
+      .scroll-brief__accordion:not([open]) .scroll-brief__accordion-body {
+        display: block;
+      }
+    }
+  </style>
+
+  <script define:vars={{ focusData, evidenceModules }}>
+    (() => {
+      const frame = document.getElementById('operator-grade-intelligence-engine-frame');
+      const focusTitle = document.getElementById('margin-focus-title');
+      const focusCopy = document.getElementById('margin-focus-copy');
+      const focusStats = document.getElementById('margin-focus-stats');
+      const spotlightLabel = document.getElementById('margin-spotlight-label');
+      const spotlightTitle = document.getElementById('margin-spotlight-title');
+      const spotlightCopy = document.getElementById('margin-spotlight-copy');
+      const spotlightChips = document.getElementById('margin-spotlight-chips');
+      const spotlightPath = document.getElementById('margin-spotlight-path');
+      const triggers = Array.from(document.querySelectorAll('[data-margin-focus]'));
+      const modules = Array.from(document.querySelectorAll('[data-margin-module]'));
+      const comparisonCells = Array.from(document.querySelectorAll('[data-margin-col]'));
+      const accordions = Array.from(document.querySelectorAll('[data-print-accordion]'));
+
+      const moduleMap = {
+        thesis: 'pattern',
+        healthcare: 'pattern',
+        retail: 'pattern',
+        logistics: 'pattern',
+        'weak-moat': 'advisory',
+        method: 'hold',
+        pattern: 'pattern',
+        advisory: 'advisory',
+        falsify: 'falsify',
+        hold: 'hold'
+      };
+
+      const moduleIndex = Object.fromEntries(evidenceModules.map((module) => [module.id, module]));
+      let currentFocus = 'thesis';
+      let printState = [];
+
+      const syncTheme = () => {
+        if (!frame?.contentWindow) return;
+        frame.contentWindow.postMessage(
+          { type: 'm2m:set-theme', theme: window.__m2mGetTheme?.() ?? 'light' },
+          window.location.origin
+        );
+      };
+
+      const postFocus = (focus) => {
+        if (!frame?.contentWindow) return;
+        frame.contentWindow.postMessage({ type: 'm2m:set-focus', focus }, window.location.origin);
+      };
+
+      const renderStats = (stats = []) => {
+        focusStats.innerHTML = '';
+        stats.forEach((item) => {
+          const chip = document.createElement('span');
+          chip.textContent = item;
+          focusStats.appendChild(chip);
+        });
+      };
+
+      const renderSpotlight = (moduleKey) => {
+        const module = moduleIndex[moduleKey] ?? moduleIndex.pattern;
+        spotlightLabel.textContent = module.label;
+        spotlightTitle.textContent = module.spotlightTitle;
+        spotlightCopy.textContent = module.spotlightCopy;
+        spotlightChips.innerHTML = '';
+        module.chips.forEach((item) => {
+          const chip = document.createElement('span');
+          chip.textContent = item;
+          spotlightChips.appendChild(chip);
+        });
+        spotlightPath.innerHTML = '';
+        module.path.forEach((step, index) => {
+          const row = document.createElement('div');
+          const count = document.createElement('span');
+          count.textContent = String(index + 1);
+          const label = document.createElement('span');
+          label.textContent = step;
+          row.append(count, label);
+          spotlightPath.appendChild(row);
+        });
+      };
+
+      const setComparisonState = (focus) => {
+        const colFocus = ['healthcare', 'retail', 'logistics'].includes(focus) ? focus : null;
+        const boardFocus = moduleMap[focus];
+        comparisonCells.forEach((cell) => {
+          const shouldHighlight = colFocus
+            ? cell.dataset.marginCol === colFocus
+            : boardFocus === 'pattern' && focus !== 'weak-moat' && focus !== 'method'
+              ? true
+              : false;
+          cell.classList.toggle('is-active', shouldHighlight);
+        });
+      };
+
+      const applyFocus = (focus, { send = true } = {}) => {
+        const nextFocus = focusData[focus] ? focus : 'thesis';
+        currentFocus = nextFocus;
+        const next = focusData[nextFocus];
+        focusTitle.textContent = next.title;
+        focusCopy.textContent = next.copy;
+        renderStats(next.stats);
+
+        triggers.forEach((trigger) => {
+          const isActive = trigger.dataset.marginFocus === nextFocus;
+          trigger.classList.toggle('is-active', isActive);
+          trigger.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+        });
+
+        const activeModule = moduleMap[nextFocus] ?? 'pattern';
+        modules.forEach((module) => {
+          const isActive = module.dataset.marginModule === activeModule;
+          module.classList.toggle('is-active', isActive);
+          module.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+        });
+
+        renderSpotlight(activeModule);
+        setComparisonState(nextFocus);
+
+        if (send) {
+          postFocus(nextFocus);
+        }
+      };
+
+      document.addEventListener('click', (event) => {
+        const trigger = event.target.closest('[data-margin-focus]');
+        if (!trigger) return;
+        applyFocus(trigger.dataset.marginFocus);
+      });
+
+      document.addEventListener('keydown', (event) => {
+        const trigger = event.target.closest('[data-margin-focus]');
+        if (!trigger) return;
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          applyFocus(trigger.dataset.marginFocus);
+        }
+      });
+
+      frame?.addEventListener('load', () => {
+        syncTheme();
+        postFocus(currentFocus);
+      });
+
+      window.addEventListener('m2m:themechange', syncTheme);
+
+      window.addEventListener('message', (event) => {
+        if (event.origin !== window.location.origin) return;
+        if (event.data?.type === 'm2m:focuschange' && focusData[event.data.focus]) {
+          applyFocus(event.data.focus, { send: false });
+        }
+        if (event.data?.type === 'm2m:resize' && typeof event.data.height === 'number' && frame) {
+          frame.style.height = `${Math.ceil(event.data.height)}px`;
+        }
+      });
+
+      window.addEventListener('beforeprint', () => {
+        printState = accordions.map((item) => item.open);
+        accordions.forEach((item) => {
+          item.open = true;
+        });
+      });
+
+      window.addEventListener('afterprint', () => {
+        accordions.forEach((item, index) => {
+          item.open = printState[index];
+        });
+      });
+
+      syncTheme();
+      applyFocus(currentFocus, { send: false });
+    })();
+  </script>
+</BaseLayout>

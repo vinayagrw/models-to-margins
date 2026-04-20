@@ -8,7 +8,8 @@ export async function getStaticPaths() {
   const reservedBriefRoutes = new Set([
     'private-ai-vs-public-ai',
     'governed-procurement-ai',
-    'ai-for-corporate-clarity'
+    'ai-for-corporate-clarity',
+    'operator-grade-intelligence-engine'
   ]);
   const entries = (await getCollection('briefs')).filter(
     (entry) => entry.data.briefType === 'article' && !reservedBriefRoutes.has(entry.id)

@@ -162,6 +162,133 @@ Use this topic framing:
 - Subtitle: [SUBTITLE]
 ```
 
+### Story-Map / Workshop-Atlas HTML Template
+
+Use this when the deliverable should be a premium multi-chapter HTML story map rather than a single brief visual:
+
+- for pictorial-first scrollytelling pages
+- for workshop/executive explainers that need both narrative and interaction
+- for story-led operating maps where the diagram owns the canvas and detail sharpens on click
+
+Use this placeholder set:
+
+- `[TOPIC]`
+- `[AUDIENCE]`
+- `[THESIS]`
+- `[LAYMAN_METAPHOR]`
+- `[CHAPTER_2_FOCUS]`
+- `[CHAPTER_3_FOCUS]`
+- `[RUN_TRACE_TASK]`
+- `[BOUNDARY_MODEL]`
+- `[OPTIONAL_SIGNAL_LAYER]`
+- `[TITLE]`
+- `[SUBTITLE]`
+
+```text
+Create a premium standalone HTML story map for [TOPIC].
+
+Build it as a pictorial-first, chaptered scrollytelling page for [AUDIENCE], not as a static poster and not as a generic product site.
+
+The page should feel like a Models to Margins style workshop atlas:
+- strategic, elegant, business-first
+- diagram-led before text-led
+- interactive, but fully understandable with no interaction
+- premium editorial motion, never noisy motion
+
+Core framing:
+- Thesis: [THESIS]
+- Layman metaphor: [LAYMAN_METAPHOR]
+- Title: [TITLE]
+- Subtitle: [SUBTITLE]
+
+Output requirements:
+- return one self-contained HTML file with inline CSS and JS
+- use a compact sticky chapter rail, not a large sticky overlay
+- include a collapsible explorer tray for dense filters and drill-downs
+- support `?embed=1` mode that hides standalone-only chrome
+- keep the page understandable even if interaction, animation, or web fonts fail
+
+Narrative structure:
+
+Chapter 1 - Layman thesis layer
+- Build a switchable layman layer with 3 views:
+  - Executive Diagram
+  - Workshop Analogy
+  - Premium Visual
+- Make the model read as the brain and the harness read as the operating system around it
+- Keep this chapter simple enough for an executive to understand in seconds
+
+Chapter 2 - Architecture
+- Focus: [CHAPTER_2_FOCUS]
+- Make the control loop the heartbeat
+- Show the surrounding harness components as trust systems around the loop
+- Keep the main diagram full-width with short support bands below it
+
+Chapter 3 - Translation
+- Focus: [CHAPTER_3_FOCUS]
+- Show how harness components translate into enterprise beats, personas, and control-plane capability
+- Keep the bridge visually dense and operational, not abstract
+
+Chapter 4 - Run trace
+- Use this concrete task trace: [RUN_TRACE_TASK]
+- Build a full-width 3-act run:
+  - prepare
+  - execute
+  - govern
+- Make checkpoints, retries, evidence, and human handoff explicit
+
+Chapter 5 - Boundary
+- Use this decision model: [BOUNDARY_MODEL]
+- The boundary must read as operating choice, not as “AI or no AI”
+- Show where agentic work fits, where deterministic controls fit, and where human authority must remain explicit
+
+Optional Chapter 6 - Signals
+- Add only if useful: [OPTIONAL_SIGNAL_LAYER]
+- Use source-linked cards to show what changed recently and what the page should capture because of it
+
+Design language:
+- premium editorial feel, not cartoonish
+- full-width diagram stages with support bands below
+- strong visual hierarchy, rounded surfaces, curved connectors, soft glows, restrained gradients, sharp typography
+- Space Grotesk + Syne + DM Sans or a very close equivalent
+- light/dark theme aware
+- cyan, teal, violet, gold, and warm accents used intentionally by operating layer
+- subtle glow sweeps, staged reveal, and calm emphasis motion only where it improves comprehension
+
+Critical layout rules:
+- HTML-first layout, not a fixed SVG poster
+- all readable text must live in normal HTML/CSS containers
+- use SVG only for decorative geometry, connectors, halos, backgrounds, and glow effects
+- do not use `foreignObject`
+- do not place paragraph text, cards, or labels with fixed SVG x/y positioning
+- do not use fixed-height text boxes for variable copy
+- do not keep left/right side text columns competing with the main visual
+- every card, rail, chip group, panel, and support band must expand naturally with content
+- use CSS grid/flex, wrapping chips, and `min-height` only where necessary
+- keep inactive content readable; never dim the page into illegibility
+
+Anti-overlap rules:
+- no text clipping in headers, chips, cards, rails, inspectors, or labels
+- no connector or glow layer may obscure readable text
+- if content gets dense, move detail into a secondary drawer or inspector instead of shrinking type
+- the layout must remain readable with fallback fonts, browser zoom, and print/PDF output
+
+Interaction requirements:
+- hover or click any relevant node, card, chip, step, or lane to highlight its exact connected meaning
+- include a focus panel or active-lens surface with a short explanation for the current selection
+- keep explorer controls secondary; the main chapters must feel complete without opening the explorer
+- support URL state where useful:
+  - chapter
+  - active lens / focus
+  - local chapter view state
+
+Validation requirements:
+- test the finished page in a real browser, not only by reading source
+- capture screenshots at multiple widths, including desktop and mobile
+- verify there is no oversized sticky overlay, no dead canvas, and no overlap in diagrams or support bands
+- make sure the page still reads clearly as a static poster when the user does not interact
+```
+
 ## Filled Examples
 
 ### Procurement-Style Example
@@ -238,6 +365,113 @@ Interaction requirements:
 Use this title and subtitle:
 - Title: Private AI Control Plane
 - Subtitle: Open models as controllable infrastructure. Closed models as premium managed services.
+```
+
+### Harness-Story-Map Example
+
+```text
+Create a premium standalone HTML story map for AI-led SDLC harness engineering.
+
+Build it as a pictorial-first, chaptered scrollytelling page for enterprise AI, architecture, product, engineering, QA, security, and platform leaders, not as a static poster and not as a generic product site.
+
+The page should feel like a Models to Margins style workshop atlas:
+- strategic, elegant, business-first
+- diagram-led before text-led
+- interactive, but fully understandable with no interaction
+- premium editorial motion, never noisy motion
+
+Core framing:
+- Thesis: stronger prompts are not enough; the missing operating layer is harness engineering
+- Layman metaphor: the model is the brain, and the harness is the steering, brakes, memory, tools, guardrails, and review loop around it
+- Title: AI-Led SDLC Harness Story Map
+- Subtitle: From model capability to governed delivery, evidence, and human authority.
+
+Output requirements:
+- return one self-contained HTML file with inline CSS and JS
+- use a compact sticky chapter rail, not a large sticky overlay
+- include a collapsible explorer tray for dense filters and drill-downs
+- support `?embed=1` mode that hides standalone-only chrome
+- keep the page understandable even if interaction, animation, or web fonts fail
+
+Narrative structure:
+
+Chapter 1 - Layman thesis layer
+- Build a switchable layman layer with 3 views:
+  - Executive Diagram
+  - Workshop Analogy
+  - Premium Visual
+- Make the model read as the brain and the harness read as the operating system around it
+- Keep this chapter simple enough for an executive to understand in seconds
+
+Chapter 2 - Architecture
+- Focus: the control loop is the heartbeat; the surrounding harness components are the trust systems that make the loop trustworthy
+- Make the control loop the heartbeat
+- Show the surrounding harness components as trust systems around the loop
+- Keep the main diagram full-width with short support bands below it
+
+Chapter 3 - Translation
+- Focus: show how the literal harness becomes enterprise AI-led SDLC through enterprise beats, personas, evidence rails, and control-plane visibility
+- Show how harness components translate into enterprise beats, personas, and control-plane capability
+- Keep the bridge visually dense and operational, not abstract
+
+Chapter 4 - Run trace
+- Use this concrete task trace: a governed release-readiness / evidence-pack flow for an enterprise service change
+- Build a full-width 3-act run:
+  - prepare
+  - execute
+  - govern
+- Make checkpoints, retries, evidence, and human handoff explicit
+
+Chapter 5 - Boundary
+- Use this decision model: agentic vs deterministic vs human authority
+- The boundary must read as operating choice, not as “AI or no AI”
+- Show where agentic work fits, where deterministic controls fit, and where human authority must remain explicit
+
+Optional Chapter 6 - Signals
+- Add only if useful: recent top-company harness, observability, control-plane, and evaluation signals with source-linked cards
+- Use source-linked cards to show what changed recently and what the page should capture because of it
+
+Design language:
+- premium editorial feel, not cartoonish
+- full-width diagram stages with support bands below
+- strong visual hierarchy, rounded surfaces, curved connectors, soft glows, restrained gradients, sharp typography
+- Space Grotesk + Syne + DM Sans or a very close equivalent
+- light/dark theme aware
+- cyan, teal, violet, gold, and warm accents used intentionally by operating layer
+- subtle glow sweeps, staged reveal, and calm emphasis motion only where it improves comprehension
+
+Critical layout rules:
+- HTML-first layout, not a fixed SVG poster
+- all readable text must live in normal HTML/CSS containers
+- use SVG only for decorative geometry, connectors, halos, backgrounds, and glow effects
+- do not use `foreignObject`
+- do not place paragraph text, cards, or labels with fixed SVG x/y positioning
+- do not use fixed-height text boxes for variable copy
+- do not keep left/right side text columns competing with the main visual
+- every card, rail, chip group, panel, and support band must expand naturally with content
+- use CSS grid/flex, wrapping chips, and `min-height` only where necessary
+- keep inactive content readable; never dim the page into illegibility
+
+Anti-overlap rules:
+- no text clipping in headers, chips, cards, rails, inspectors, or labels
+- no connector or glow layer may obscure readable text
+- if content gets dense, move detail into a secondary drawer or inspector instead of shrinking type
+- the layout must remain readable with fallback fonts, browser zoom, and print/PDF output
+
+Interaction requirements:
+- hover or click any relevant node, card, chip, step, or lane to highlight its exact connected meaning
+- include a focus panel or active-lens surface with a short explanation for the current selection
+- keep explorer controls secondary; the main chapters must feel complete without opening the explorer
+- support URL state where useful:
+  - chapter
+  - active lens / focus
+  - local chapter view state
+
+Validation requirements:
+- test the finished page in a real browser, not only by reading source
+- capture screenshots at multiple widths, including desktop and mobile
+- verify there is no oversized sticky overlay, no dead canvas, and no overlap in diagrams or support bands
+- make sure the page still reads clearly as a static poster when the user does not interact
 ```
 
 ## Quality Check
