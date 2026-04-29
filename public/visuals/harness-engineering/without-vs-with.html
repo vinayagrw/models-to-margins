@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Without vs With a Harness</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Syne:wght@600;700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
 <script src="./_theme-bootstrap.js"></script>
 <link rel="stylesheet" href="./_theme.css">
 <style>
@@ -39,13 +39,14 @@ body {
   height: clamp(120px, 22vh, 220px); flex-shrink: 0;
 }
 :root[data-embedded="true"] .bullets {
-  gap: clamp(6px, 1vh, 10px);
-  /* Bullets list absorbs slack so panel content stays tight to top */
+  /* Bullets fill the panel — each <li> takes equal share of available height */
   flex: 1; min-height: 0;
-  display: flex; flex-direction: column; justify-content: flex-start;
+  display: grid; grid-auto-rows: 1fr;
+  gap: clamp(6px, 1vh, 12px);
 }
 :root[data-embedded="true"] .bullets li {
-  font-size: clamp(0.84rem, 1.45vh, 0.96rem); line-height: 1.42;
+  font-size: clamp(0.86rem, 1.5vh, 1rem); line-height: 1.4;
+  align-items: center;
 }
 :root[data-embedded="true"] .takeaway {
   font-size: clamp(0.78rem, 1.3vh, 0.9rem);
@@ -55,7 +56,7 @@ body {
 
 .head { text-align: center; margin-bottom: 20px; }
 .head h1 {
-  font-family: "Syne", sans-serif; font-weight: 800;
+  font-family: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif; font-weight: 800;
   font-size: clamp(1.4rem, 2.4vw, 1.95rem); line-height: 1.18;
   letter-spacing: -0.01em; color: var(--text-strong); margin-top: 6px;
 }
@@ -67,7 +68,7 @@ body {
   transform: translate(-50%, -50%);
   background: var(--surface-strong); border: 1px solid var(--border);
   border-radius: 999px; padding: 6px 14px;
-  font-family: "Syne", sans-serif; font-size: 0.78rem; font-weight: 700;
+  font-family: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif; font-size: 0.78rem; font-weight: 700;
   letter-spacing: 0.18em; color: var(--text-strong);
 }
 .panel {
@@ -93,7 +94,7 @@ body {
 .panel-without .panel-tag { color: var(--warn); background: color-mix(in srgb, var(--warn) 16%, transparent); }
 .panel-with .panel-tag { color: var(--good); background: color-mix(in srgb, var(--good) 16%, transparent); }
 .panel-title {
-  font-family: "Syne", sans-serif; font-weight: 700;
+  font-family: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif; font-weight: 700;
   font-size: 1.18rem; color: var(--text-strong); letter-spacing: -0.005em;
 }
 .scene {

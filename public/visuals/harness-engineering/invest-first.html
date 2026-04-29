@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Where to Invest First</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Syne:wght@600;700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
 <script src="./_theme-bootstrap.js"></script>
 <link rel="stylesheet" href="./_theme.css">
 <style>
@@ -30,9 +30,15 @@ body {
 :root[data-embedded="true"] .tree, :root[data-embedded="true"] .coverage {
   padding: clamp(12px, 1.8vh, 20px) clamp(12px, 1.4vw, 18px);
   min-height: 0;
-  display: flex; flex-direction: column; gap: clamp(8px, 1.2vh, 14px);
-  justify-content: flex-start;
+  display: flex; flex-direction: column; gap: clamp(8px, 1.4vh, 16px);
+  /* Distribute children evenly so panel fills without big bottom gap */
+  justify-content: space-between;
 }
+:root[data-embedded="true"] .tree-branches {
+  /* Branches grow to absorb slack between consecutive question rows */
+  display: grid; grid-auto-rows: 1fr; gap: clamp(8px, 1vw, 12px);
+}
+:root[data-embedded="true"] .heatmap { flex: 1; align-content: stretch; }
 :root[data-embedded="true"] .tree-title, :root[data-embedded="true"] .coverage-title {
   font-size: clamp(0.92rem, 1.6vh, 1.1rem);
 }
@@ -73,7 +79,7 @@ body {
 
 .head { margin-bottom: 18px; }
 .head h1 {
-  font-family: "Syne", sans-serif; font-weight: 800;
+  font-family: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif; font-weight: 800;
   font-size: clamp(1.4rem, 2.4vw, 1.95rem); line-height: 1.18;
   letter-spacing: -0.01em; color: var(--text-strong); margin-top: 6px;
 }
@@ -84,7 +90,7 @@ body {
   border-radius: 22px; padding: 22px; box-shadow: var(--shadow);
 }
 .tree-title {
-  font-family: "Syne", sans-serif; font-weight: 700; font-size: 1.1rem;
+  font-family: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif; font-weight: 700; font-size: 1.1rem;
   color: var(--text-strong); margin-bottom: 4px;
 }
 .tree-sub { color: var(--muted); font-size: 0.88rem; margin-bottom: 18px; }
@@ -97,7 +103,7 @@ body {
   display: grid; place-items: center;
   background: color-mix(in srgb, var(--accent) 18%, transparent);
   color: var(--accent);
-  font-family: "Syne", sans-serif; font-weight: 800; font-size: 0.86rem;
+  font-family: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif; font-weight: 800; font-size: 0.86rem;
 }
 .tree-q-text { font-weight: 700; color: var(--text-strong); font-size: 1rem; line-height: 1.35; }
 .tree-q-text small { display: block; font-weight: 400; color: var(--muted); font-size: 0.82rem; margin-top: 2px; }
@@ -140,7 +146,7 @@ body {
   border-radius: 22px; padding: 22px; box-shadow: var(--shadow);
 }
 .coverage-title {
-  font-family: "Syne", sans-serif; font-weight: 700; font-size: 1.1rem;
+  font-family: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif; font-weight: 700; font-size: 1.1rem;
   color: var(--text-strong); margin-bottom: 4px;
 }
 .coverage-sub { color: var(--muted); font-size: 0.88rem; margin-bottom: 18px; }
@@ -162,7 +168,7 @@ body {
 .h-row-label {
   background: transparent; border: 1px solid transparent;
   color: var(--text-strong); text-align: left; justify-content: start;
-  font-family: "Syne", sans-serif; font-weight: 700;
+  font-family: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif; font-weight: 700;
   font-size: 0.86rem; padding: 12px 0;
 }
 .h-row-label small {

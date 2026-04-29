@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Three Decision Lanes</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Syne:wght@600;700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
 <script src="./_theme-bootstrap.js"></script>
 <link rel="stylesheet" href="./_theme.css">
 <style>
@@ -56,6 +56,13 @@ body {
 :root[data-embedded="true"] .lane-section {
   flex: 1; min-height: 0;
   padding-top: clamp(8px, 1.2vh, 12px);
+  display: flex; flex-direction: column;
+}
+:root[data-embedded="true"] .lane-section ul {
+  /* Items fill the section — equal share of height */
+  flex: 1; display: grid; grid-auto-rows: 1fr;
+  gap: clamp(4px, 0.8vh, 8px);
+  align-items: center;
 }
 :root[data-embedded="true"] .lane-icon {
   width: clamp(36px, 4.5vh, 48px); height: clamp(36px, 4.5vh, 48px);
@@ -86,7 +93,7 @@ body {
 
 .head { margin-bottom: 18px; text-align: center; }
 .head h1 {
-  font-family: "Syne", sans-serif; font-weight: 800;
+  font-family: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif; font-weight: 800;
   font-size: clamp(1.4rem, 2.4vw, 1.95rem); line-height: 1.18;
   letter-spacing: -0.01em; color: var(--text-strong); margin-top: 6px;
 }
@@ -128,7 +135,7 @@ body {
 }
 .lane-icon svg { width: 32px; height: 32px; color: var(--lane-c); }
 .lane-title {
-  font-family: "Syne", sans-serif; font-weight: 700;
+  font-family: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif; font-weight: 700;
   font-size: 1.25rem; color: var(--text-strong); letter-spacing: -0.01em;
   line-height: 1.2;
 }
@@ -172,7 +179,7 @@ body {
   display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 14px; align-items: center;
 }
 .foot-label {
-  font-family: "Syne", sans-serif; font-weight: 800;
+  font-family: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif; font-weight: 800;
   font-size: 0.86rem; letter-spacing: 0.06em;
   padding: 6px 12px; border-radius: 999px;
   background: linear-gradient(135deg, var(--lane-agentic), var(--lane-human));
