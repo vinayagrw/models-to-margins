@@ -95,7 +95,8 @@
 
 ## Deep Dive Presentation
 
-- `src/content/deep-dives/future-of-work-2026.md` is the reference style for a premium editorial deep dive.
+- `src/content/deep-dives/future-of-work-2026.md` is the reference style for a premium editorial deep dive backed by small inline data-vis iframes.
+- `src/content/deep-dives/harness-engineering.md` is the reference style for a premium deep dive that embeds a family of larger interactive visuals (10x iframes between 520-680px tall) inline within the same article-shell pattern. Use it when the deep dive carries a coordinated visual narrative.
 - Reuse these CSS patterns for future high-value deep dives:
   - `.note-panel`
   - `.signal-grid`
@@ -105,8 +106,22 @@
   - `.decision-grid`
   - `.action-grid`
   - `.stack-list`
+  - `.visual-frame` with `style="--vf-h:<px>"` for inline iframes
 - Keep section summaries and jump links useful, not decorative.
 - Long source sections should use collapsible blocks to keep the main reading flow clean.
+- For named principles, keep visible terminology consistent across the markdown and every embedded visual. The harness-engineering deep dive uses "The Agentic Principle" everywhere visible to the reader; CSS class names that reference an older term are kept for stability but visible text never reintroduces it.
+
+### Optional slide-deck sub-route
+
+- A deep dive may have an optional alternate presentation at `src/pages/deep-dives/<slug>/present.astro` (a static Astro route that lives in a sub-directory matching the slug).
+- The article-shell page at `/deep-dives/<slug>` is always the canonical entry point — it stays in the site index, navigation, and OG metadata.
+- The `/present` sub-route is for single-viewport, keyboard-navigable slide-deck consumption (talks, screen shares). It must:
+  - Bypass `BaseLayout` to take the full viewport (slim custom chrome only).
+  - Reuse the same `public/visuals/...` iframes as the canonical article — never fork the visuals.
+  - Link back to the canonical article (`/deep-dives/<slug>`), not to the deep-dives listing, so users return where they came from.
+  - Be discoverable from the article via a small inline link inside the article's `note-panel` block.
+- Reference: `src/pages/deep-dives/harness-engineering/present.astro` and the matching link inside `src/content/deep-dives/harness-engineering.md`.
+- Do not promote the `/present` URL as the canonical share URL; the article-shell page is canonical.
 
 ## Raw Visuals
 
@@ -127,6 +142,15 @@
   - `Reset`
 - If a raw visual is embedded in another page, keep theme toggles out of the visual panel itself; the shared page shell is the theme control surface.
 - Use the same surrounding UI typography as the home page and shared shell. Special SVG title treatments are optional, but the page chrome should not drift.
+
+### Visual families (shared theme + bootstrap)
+
+- When a deep dive or brief embeds a coordinated family of visuals (e.g. the 10 visuals under `public/visuals/harness-engineering/`), put the shared CSS tokens and shared theme bootstrap into two underscore-prefixed files in the same directory:
+  - `_theme.css` — color tokens, body background, base typography, layer/tone variables, embed-mode shell rules
+  - `_theme-bootstrap.js` — the synchronous theme/embed-init IIFE that reads `?theme=`, `?embed=1`, and `localStorage`, then sets `data-theme` and `data-embedded` on `<html>`
+- Each visual in the family loads them via `<link rel="stylesheet" href="./_theme.css">` and `<script src="./_theme-bootstrap.js">` — eliminates ~200 lines of duplicated theme code per visual.
+- Use `:root[data-embedded="true"]` selectors with `clamp(min, vh-based, max)` font sizes and padding so each visual scales fluidly inside whatever iframe height the host page assigns. Do not hard-code pixel sizes that assume a single iframe height.
+- Family visuals must use the site's typography (`Space Grotesk` for body and headings) — do not introduce display fonts that the rest of the site does not use.
 
 ## Private AI Control Plane
 
