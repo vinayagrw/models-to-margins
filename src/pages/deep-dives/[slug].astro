@@ -5,19 +5,11 @@ import EntryMeta from '../../components/EntryMeta.astro';
 import BackLink from '../../components/BackLink.astro';
 
 export async function getStaticPaths() {
-  // Slugs that have their own dedicated route file in this directory.
-  // Skip them here so the build doesn't try to generate the same path twice.
-  // (Defined inside getStaticPaths because Astro hoists this function
-  // into a separate scope at build time and cannot reach module-level consts.)
-  const DEDICATED_SLUGS = new Set(['harness-engineering']);
-
   const entries = await getCollection('deep-dives');
-  return entries
-    .filter((entry) => !DEDICATED_SLUGS.has(entry.id))
-    .map((entry) => ({
-      params: { slug: entry.id },
-      props: { entry }
-    }));
+  return entries.map((entry) => ({
+    params: { slug: entry.id },
+    props: { entry }
+  }));
 }
 
 const { entry } = Astro.props;
