@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>One Governed Run — 9 Steps in 3 Acts</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Syne:wght@600;700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+/* Scene-specific: 9-step run trace in 3 acts */
+:root, :root[data-theme="light"] {
+  --act-prepare: #0a8aab; --act-execute: #f97316; --act-govern: #16825d;
+}
+:root[data-theme="dark"] {
+  --act-prepare: #22d3ee; --act-execute: #f97316; --act-govern: #4edab5;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --act-prepare: #22d3ee; --act-execute: #f97316; --act-govern: #4edab5;
+  }
+}
+body {
+  background:
+    radial-gradient(circle at 16% 12%, rgba(34, 211, 238, 0.08), transparent 28%),
+    radial-gradient(circle at 78% 90%, rgba(78, 218, 181, 0.10), transparent 30%),
+    linear-gradient(180deg, var(--bg-start) 0%, var(--bg-mid) 48%, var(--bg-end) 100%);
+}
+.head { margin-bottom: 18px; }
+.head h1 {
+  font-family: "Syne", sans-serif; font-weight: 800;
+  font-size: clamp(1.4rem, 2.4vw, 1.95rem); line-height: 1.18;
+  letter-spacing: -0.01em; color: var(--text-strong); margin-top: 6px;
+}
+.head p { margin-top: 8px; color: var(--muted); font-size: 0.96rem; max-width: 70ch; }
+.acts {
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px; align-items: stretch;
+}
+.act {
+  position: relative;
+  border-radius: 22px; padding: 18px;
+  border: 1px solid color-mix(in srgb, var(--act-color) 30%, var(--border));
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--act-color) 10%, transparent), transparent 30%),
+    var(--surface);
+  box-shadow: var(--shadow);
+  display: flex; flex-direction: column; gap: 14px;
+}
+.act-prepare { --act-color: var(--act-prepare); }
+.act-execute { --act-color: var(--act-execute); }
+.act-govern { --act-color: var(--act-govern); }
+.act-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.act-tag {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 0.7rem; font-weight: 700; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--act-color);
+}
+.act-tag::before { content: ""; width: 10px; height: 10px; border-radius: 3px; background: var(--act-color); }
+.act-num { font-family: "DM Sans", sans-serif; font-size: 0.74rem; color: var(--muted); letter-spacing: 0.12em; }
+.act-title {
+  font-family: "Syne", sans-serif; font-weight: 700;
+  font-size: 1.15rem; color: var(--text-strong);
+}
+.act-summary { font-size: 0.88rem; color: var(--muted); line-height: 1.45; }
+.steps { display: grid; gap: 10px; }
+.step {
+  appearance: none; text-align: left;
+  border: 1px solid var(--border); background: var(--surface-strong);
+  border-radius: 14px; padding: 12px 14px;
+  font: inherit; color: var(--text);
+  cursor: pointer; transition: 180ms ease;
+  display: grid; grid-template-columns: 32px minmax(0, 1fr); gap: 12px; align-items: start;
+}
+.step:hover { border-color: var(--act-color); transform: translateY(-1px); }
+.step:focus-visible { outline: 2px solid var(--act-color); outline-offset: 2px; }
+.step[aria-selected="true"] {
+  border-color: var(--act-color);
+  background: color-mix(in srgb, var(--act-color) 10%, var(--surface-strong));
+  box-shadow: 0 12px 32px color-mix(in srgb, var(--act-color) 18%, transparent);
+}
+.step-num {
+  font-family: "Syne", sans-serif; font-weight: 800;
+  font-size: 1.12rem; color: var(--act-color);
+  width: 32px; height: 32px;
+  display: grid; place-items: center;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--act-color) 14%, transparent);
+}
+.step-body { display: grid; gap: 4px; }
+.step-title { font-weight: 700; color: var(--text-strong); font-size: 0.95rem; line-height: 1.25; }
+.step-meta { font-size: 0.78rem; color: var(--muted); line-height: 1.4; }
+.detail {
+  margin-top: 18px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface-strong);
+  border-radius: 22px; padding: 20px 22px;
+  display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 22px;
+  box-shadow: var(--shadow);
+}
+.detail-head { display: flex; flex-direction: column; gap: 6px; }
+.detail-tag {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 0.7rem; font-weight: 700; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--detail-color, var(--accent));
+}
+.detail-tag::before { content: ""; width: 10px; height: 10px; border-radius: 3px; background: var(--detail-color, var(--accent)); }
+.detail-title {
+  font-family: "Syne", sans-serif; font-weight: 700;
+  font-size: 1.3rem; color: var(--text-strong);
+}
+.detail-copy { color: var(--text); font-size: 0.96rem; line-height: 1.55; }
+.detail-aside { display: flex; flex-direction: column; gap: 12px; }
+.detail-card {
+  border: 1px solid var(--border); border-radius: 14px;
+  padding: 12px 14px; background: var(--surface);
+}
+.detail-card h4 {
+  font-size: 0.68rem; font-weight: 700; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--detail-color, var(--accent)); margin-bottom: 6px;
+}
+.detail-card p { font-size: 0.86rem; line-height: 1.45; color: var(--text); }
+.detail-card.failure { border-left: 3px solid var(--warn); }
+.detail-card.evidence { border-left: 3px solid var(--accent-3); }
+.layer-pills { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.layer-pill {
+  font-size: 0.7rem; font-weight: 600; letter-spacing: 0.04em;
+  padding: 3px 9px; border-radius: 999px;
+  border: 1px solid var(--border); background: var(--surface);
+  color: var(--muted);
+}
+@media (max-width: 980px) {
+  .acts { grid-template-columns: 1fr; }
+  .detail { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<main class="shell">
+  <header class="head">
+    <span class="eyebrow">One governed run, end to end</span>
+    <h1>What an agent run actually looks like — 9 steps, 3 acts.</h1>
+    <p>Click any step to see what the harness is doing, what evidence proves it ran, and what fails when this step is missing. Three acts: <strong>Prepare</strong> (frame the work), <strong>Execute</strong> (do the work inside policy), <strong>Govern</strong> (prove it, escalate, and close the loop).</p>
+  </header>
+
+  <section class="acts">
+    <article class="act act-prepare">
+      <div class="act-head">
+        <span class="act-tag">Act 1 · Prepare</span>
+        <span class="act-num">Steps 1–3</span>
+      </div>
+      <div>
+        <div class="act-title">Frame the work</div>
+        <div class="act-summary">Bound the goal, draft a plan, load only the context worth trusting. Misframing here scales bad output faster than later steps can recover.</div>
+      </div>
+      <div class="steps" data-act="prepare" role="tablist" aria-label="Act 1 steps"></div>
+    </article>
+
+    <article class="act act-execute">
+      <div class="act-head">
+        <span class="act-tag">Act 2 · Execute</span>
+        <span class="act-num">Steps 4–6</span>
+      </div>
+      <div>
+        <div class="act-title">Do the work inside policy</div>
+        <div class="act-summary">Use sandboxed tools to inspect the system, update state, and verify each step proved itself instead of just narrating progress.</div>
+      </div>
+      <div class="steps" data-act="execute" role="tablist" aria-label="Act 2 steps"></div>
+    </article>
+
+    <article class="act act-govern">
+      <div class="act-head">
+        <span class="act-tag">Act 3 · Govern</span>
+        <span class="act-num">Steps 7–9</span>
+      </div>
+      <div>
+        <div class="act-title">Prove it, escalate, close the loop</div>
+        <div class="act-summary">Handle exceptions explicitly, package decision-ready evidence, and return final authority to a named human owner. Memory carries the lesson forward.</div>
+      </div>
+      <div class="steps" data-act="govern" role="tablist" aria-label="Act 3 steps"></div>
+    </article>
+  </section>
+
+  <section class="detail" id="detail" style="--detail-color: var(--act-prepare)" role="tabpanel" aria-live="polite">
+    <div>
+      <div class="detail-head">
+        <span class="detail-tag" id="detailTag">Act 1 · Prepare · Step 1</span>
+        <h2 class="detail-title" id="detailTitle">Bounded goal is accepted</h2>
+      </div>
+      <p class="detail-copy" id="detailCopy">Click any step above to open its detail.</p>
+      <div class="layer-pills" id="detailPills" aria-label="Harness layers responsible"></div>
+    </div>
+    <aside class="detail-aside">
+      <div class="detail-card evidence">
+        <h4>What proves it ran</h4>
+        <p id="detailEvidence">—</p>
+      </div>
+      <div class="detail-card failure">
+        <h4>What fails without it</h4>
+        <p id="detailFailure">—</p>
+      </div>
+    </aside>
+  </section>
+</main>
+<script>
+(() => {
+  const steps = [
+    { act: 'prepare', n: 1, title: 'Bounded goal accepted',
+      meta: 'Task is named, scoped, and given a stop condition.',
+      copy: 'The first control gate. The harness refuses to start a run that has no clear bound, no owner, and no success condition. Fuzzy scope here compounds waste in every later step.',
+      evidence: 'Bounded task packet, named owner, success condition, stop conditions.',
+      failure: 'The run feels busy but never becomes decision-ready.',
+      layers: ['L2 Context', 'L4 Verification'] },
+    { act: 'prepare', n: 2, title: 'Plan file is created',
+      meta: 'Work is broken into named packets with progress markers.',
+      copy: 'The plan turns private model intent into a shared contract. Each packet has an interface and an acceptance check, not just a description.',
+      evidence: 'Named work packets, progress markers, acceptance checkpoints.',
+      failure: 'Execution turns into narration because nothing proves which step really finished.',
+      layers: ['L1 Constraint', 'L4 Verification'] },
+    { act: 'prepare', n: 3, title: 'Context and memory loaded',
+      meta: 'Approved sources, prior outcomes, runbooks injected.',
+      copy: 'Governed context beats prompt stuffing. The harness picks what to load, summarize, or leave out — driven by source-of-truth metadata, not the model\'s curiosity.',
+      evidence: 'Approved sources, prior outcomes, freshness rules, retrieved deltas.',
+      failure: 'The goal gets buried under stale or irrelevant context.',
+      layers: ['L2 Context'] },
+    { act: 'execute', n: 4, title: 'Sandboxed tools inspect',
+      meta: 'Approved queries, CI signals, traces, repo metadata.',
+      copy: 'Action surface is bounded by the tool contract. The model can choose, chain, and parallelize — but only inside the approved sandbox.',
+      evidence: 'Sandbox policy, approved tools, audit trail, runtime checkpoints.',
+      failure: 'The run either guesses blindly or reaches too far.',
+      layers: ['L3 Execution', 'L1 Constraint'] },
+    { act: 'execute', n: 5, title: 'State and checkpoints update',
+      meta: 'Completed checks, blockers, outputs recorded.',
+      copy: 'Without a state record, the system repeats work and contradicts itself. Checkpoints make crash recovery and post-hoc audit possible.',
+      evidence: 'Checkpoint ids, retry counters, blockers, replayable metadata.',
+      failure: 'The harness forgets what already happened and starts to loop.',
+      layers: ['L5 Lifecycle'] },
+    { act: 'execute', n: 6, title: 'Verification and evals run',
+      meta: 'Parity, NFR evidence, dependency confirmation, policy.',
+      copy: 'This is where the run proves the path. Pre-stop hooks, golden tests, and parity checks fire — success silent, failure loud.',
+      evidence: 'Parity checks, NFR evidence, dependency confirmation, policy outcomes.',
+      failure: 'The answer sounds good, but the proof stack stays thin.',
+      layers: ['L4 Verification'] },
+    { act: 'govern', n: 7, title: 'Exception path is explicit',
+      meta: 'Retry inside policy, fallback, or escalate cleanly.',
+      copy: 'When confidence drops or a tool fails, the harness has a defined behavior — never a silent retry. Escalations carry a usable summary.',
+      evidence: 'Retry policy, fallback rule, escalation path, checkpoint-safe resume.',
+      failure: 'The run hides failure behind fluency or stops without a usable handoff.',
+      layers: ['L5 Lifecycle', 'L4 Verification'] },
+    { act: 'govern', n: 8, title: 'Evidence pack assembled',
+      meta: 'Traces, deltas, rollback notes, unresolved items.',
+      copy: 'The output is not just an answer — it\'s a packet a real owner can act on: traces, deltas, rollback notes, and unresolved items.',
+      evidence: 'Evidence pack, change summary, rollback posture, unresolved issues.',
+      failure: 'Humans inherit a vague status instead of a decision-ready packet.',
+      layers: ['L4 Verification', 'L2 Context'] },
+    { act: 'govern', n: 9, title: 'Named human decides',
+      meta: 'Approve, loop back, or escalate. Memory updated.',
+      copy: 'The harness accelerates preparation, but the authority line stays visible and named. The outcome and next-run lessons are stored in memory.',
+      evidence: 'Named approver, decision trace, stored outcome, next-run lessons.',
+      failure: 'Authority blurs and post-release learning is lost.',
+      layers: ['L5 Lifecycle', 'L1 Constraint'] }
+  ];
+
+  const actLabels = { prepare: 'Act 1 · Prepare', execute: 'Act 2 · Execute', govern: 'Act 3 · Govern' };
+  const actColors = { prepare: 'var(--act-prepare)', execute: 'var(--act-execute)', govern: 'var(--act-govern)' };
+
+  const detail = document.getElementById('detail');
+  const detailTag = document.getElementById('detailTag');
+  const detailTitle = document.getElementById('detailTitle');
+  const detailCopy = document.getElementById('detailCopy');
+  const detailEvidence = document.getElementById('detailEvidence');
+  const detailFailure = document.getElementById('detailFailure');
+  const detailPills = document.getElementById('detailPills');
+
+  const showStep = (step) => {
+    detail.style.setProperty('--detail-color', actColors[step.act]);
+    detailTag.textContent = `${actLabels[step.act]} · Step ${step.n}`;
+    detailTitle.textContent = step.title;
+    detailCopy.textContent = step.copy;
+    detailEvidence.textContent = step.evidence;
+    detailFailure.textContent = step.failure;
+    detailPills.innerHTML = step.layers.map((l) => `<span class="layer-pill">${l}</span>`).join('');
+    document.querySelectorAll('.step').forEach((s) => s.setAttribute('aria-selected', String(Number(s.dataset.n) === step.n)));
+  };
+
+  const stepBtn = (step) => {
+    const b = document.createElement('button');
+    b.className = 'step';
+    b.type = 'button';
+    b.setAttribute('role', 'tab');
+    b.dataset.n = String(step.n);
+    b.setAttribute('aria-selected', step.n === 1 ? 'true' : 'false');
+    b.innerHTML = `
+      <span class="step-num">${step.n}</span>
+      <span class="step-body">
+        <span class="step-title">${step.title}</span>
+        <span class="step-meta">${step.meta}</span>
+      </span>
+    `;
+    b.addEventListener('click', () => showStep(step));
+    return b;
+  };
+
+  document.querySelectorAll('.steps').forEach((container) => {
+    const act = container.dataset.act;
+    steps.filter((s) => s.act === act).forEach((s) => container.appendChild(stepBtn(s)));
+  });
+
+  showStep(steps[0]);
+})();
+</script>
+</body>
+</html>

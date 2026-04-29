@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Three Decision Lanes</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Syne:wght@600;700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+/* Scene-specific: 3 decision lanes — Agentic / Deterministic / Human authority */
+:root, :root[data-theme="light"] {
+  --lane-agentic: #0a8aab;
+  --lane-deterministic: #b8860b;
+  --lane-human: #d2451e;
+}
+:root[data-theme="dark"] {
+  --lane-agentic: #22d3ee;
+  --lane-deterministic: #f4cb73;
+  --lane-human: #ff776c;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --lane-agentic: #22d3ee;
+    --lane-deterministic: #f4cb73;
+    --lane-human: #ff776c;
+  }
+}
+body {
+  background:
+    radial-gradient(circle at 18% 12%, rgba(34, 211, 238, 0.10), transparent 30%),
+    radial-gradient(circle at 82% 88%, rgba(255, 119, 108, 0.08), transparent 32%),
+    linear-gradient(180deg, var(--bg-start) 0%, var(--bg-mid) 48%, var(--bg-end) 100%);
+}
+.head { margin-bottom: 18px; text-align: center; }
+.head h1 {
+  font-family: "Syne", sans-serif; font-weight: 800;
+  font-size: clamp(1.4rem, 2.4vw, 1.95rem); line-height: 1.18;
+  letter-spacing: -0.01em; color: var(--text-strong); margin-top: 6px;
+}
+.head h1 em { font-style: normal; color: var(--lane-human); }
+.head p { margin: 8px auto 0; color: var(--muted); font-size: 0.96rem; max-width: 64ch; }
+.lanes {
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px; align-items: stretch;
+}
+.lane {
+  position: relative;
+  border-radius: 22px; padding: 20px;
+  border: 1px solid color-mix(in srgb, var(--lane-c) 32%, var(--border));
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--lane-c) 10%, transparent), transparent 40%),
+    var(--surface);
+  box-shadow: var(--shadow);
+  display: flex; flex-direction: column; gap: 14px;
+  overflow: hidden;
+}
+.lane::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: var(--lane-c); }
+.lane-agentic { --lane-c: var(--lane-agentic); }
+.lane-deterministic { --lane-c: var(--lane-deterministic); }
+.lane-human { --lane-c: var(--lane-human); }
+.lane-head { display: flex; flex-direction: column; gap: 6px; }
+.lane-tag {
+  display: inline-flex; align-items: center; gap: 8px; align-self: flex-start;
+  font-size: 0.7rem; font-weight: 700; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--lane-c);
+  padding: 4px 10px; border-radius: 999px;
+  background: color-mix(in srgb, var(--lane-c) 14%, transparent);
+}
+.lane-icon {
+  width: 56px; height: 56px;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--lane-c) 18%, transparent);
+  display: grid; place-items: center;
+  margin-bottom: 4px;
+}
+.lane-icon svg { width: 32px; height: 32px; color: var(--lane-c); }
+.lane-title {
+  font-family: "Syne", sans-serif; font-weight: 700;
+  font-size: 1.25rem; color: var(--text-strong); letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+.lane-sub { color: var(--muted); font-size: 0.92rem; line-height: 1.45; }
+.lane-section {
+  border-top: 1px dashed color-mix(in srgb, var(--lane-c) 30%, var(--border));
+  padding-top: 12px;
+}
+.lane-section h4 {
+  font-size: 0.7rem; font-weight: 700; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--lane-c); margin-bottom: 8px;
+}
+.lane-section ul { list-style: none; display: grid; gap: 6px; }
+.lane-section li {
+  display: grid; grid-template-columns: 16px minmax(0, 1fr); gap: 8px;
+  font-size: 0.88rem; line-height: 1.4; color: var(--text);
+}
+.lane-section li::before {
+  content: ""; width: 6px; height: 6px; border-radius: 50%;
+  background: var(--lane-c); margin-top: 8px;
+}
+.lane-owner {
+  margin-top: auto;
+  padding: 10px 12px; border-radius: 14px;
+  background: color-mix(in srgb, var(--lane-c) 12%, transparent);
+  font-size: 0.84rem; line-height: 1.4;
+  border-left: 3px solid var(--lane-c);
+}
+.lane-owner strong { display: block; margin-bottom: 2px; color: var(--text-strong); font-size: 0.7rem; letter-spacing: 0.14em; text-transform: uppercase; }
+.lane-trap {
+  padding: 10px 12px; border-radius: 14px;
+  background: color-mix(in srgb, var(--lane-human) 8%, transparent);
+  border: 1px dashed color-mix(in srgb, var(--lane-human) 40%, transparent);
+  font-size: 0.82rem; line-height: 1.4; color: var(--text);
+}
+.lane-trap strong { display: block; margin-bottom: 2px; color: var(--lane-human); font-size: 0.7rem; letter-spacing: 0.14em; text-transform: uppercase; }
+.foot {
+  margin-top: 18px;
+  padding: 14px 18px; border-radius: 18px;
+  border: 1px solid var(--border-strong); background: var(--surface-strong);
+  display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 14px; align-items: center;
+}
+.foot-label {
+  font-family: "Syne", sans-serif; font-weight: 800;
+  font-size: 0.86rem; letter-spacing: 0.06em;
+  padding: 6px 12px; border-radius: 999px;
+  background: linear-gradient(135deg, var(--lane-agentic), var(--lane-human));
+  color: #ffffff;
+}
+.foot-text { font-size: 0.92rem; line-height: 1.5; color: var(--text); }
+.foot-text strong { color: var(--text-strong); }
+@media (max-width: 980px) {
+  .lanes { grid-template-columns: 1fr; }
+  .foot { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<main class="shell">
+  <header class="head">
+    <span class="eyebrow" style="color: var(--lane-agentic)">Pick the right lane — not everything wants a harness</span>
+    <h1>The right boundary is not "AI or no AI."<br>It's <em>agentic vs deterministic vs human authority</em>.</h1>
+    <p>A governed operating model uses all three lanes. Picking the wrong lane is how teams overspend on harnesses for work that should have been a script — or hand authority to an agent that should have stayed with a human.</p>
+  </header>
+
+  <section class="lanes">
+    <article class="lane lane-agentic">
+      <div class="lane-icon" aria-hidden="true">
+        <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="16" cy="16" r="6"/>
+          <path d="M16 4v3M16 25v3M4 16h3M25 16h3M7.5 7.5l2 2M22.5 22.5l2 2M7.5 24.5l2-2M22.5 9.5l2-2"/>
+        </svg>
+      </div>
+      <div class="lane-head">
+        <span class="lane-tag">Lane 1 · Agentic</span>
+        <h2 class="lane-title">Adaptive, tool-using, exploratory work</h2>
+        <p class="lane-sub">When the task needs search, synthesis, iterative inspection, and multi-step judgment against approved tools.</p>
+      </div>
+      <div class="lane-section">
+        <h4>Use it for</h4>
+        <ul>
+          <li>Discovery, analysis, comparison</li>
+          <li>Drafting and bounded implementation</li>
+          <li>Evidence preparation</li>
+          <li>Guided remediation</li>
+          <li>Runtime diagnosis support</li>
+        </ul>
+      </div>
+      <div class="lane-owner">
+        <strong>Owned through</strong>
+        A governed control loop, bounded tools, visible stop conditions, and the full 5-layer harness.
+      </div>
+      <div class="lane-trap">
+        <strong>Trap to avoid</strong>
+        "Agent" for work that's actually deterministic. You'll spend more on tokens than the script would have cost.
+      </div>
+    </article>
+
+    <article class="lane lane-deterministic">
+      <div class="lane-icon" aria-hidden="true">
+        <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="5" y="5" width="22" height="22" rx="3"/>
+          <path d="M10 12h12M10 16h12M10 20h8"/>
+        </svg>
+      </div>
+      <div class="lane-head">
+        <span class="lane-tag">Lane 2 · Deterministic</span>
+        <h2 class="lane-title">Known-path, rule-heavy, repeatable work</h2>
+        <p class="lane-sub">When the rules are already known and you want consistency more than open-ended reasoning.</p>
+      </div>
+      <div class="lane-section">
+        <h4>Use it for</h4>
+        <ul>
+          <li>Code mods and transforms</li>
+          <li>Policy and conformance checks</li>
+          <li>Schema and contract validation</li>
+          <li>Static analysis</li>
+          <li>Repeatable evidence assembly</li>
+        </ul>
+      </div>
+      <div class="lane-owner">
+        <strong>Owned by</strong>
+        Encoded rules, thresholds, predictable traces. No LLM in the loop unless it earns its place.
+      </div>
+      <div class="lane-trap">
+        <strong>Trap to avoid</strong>
+        Letting "agent" replace this lane just because it's faster to build a prompt. Repeatability and policy posture drift fast.
+      </div>
+    </article>
+
+    <article class="lane lane-human">
+      <div class="lane-icon" aria-hidden="true">
+        <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="16" cy="11" r="4"/>
+          <path d="M8 26c0-4.5 3.5-8 8-8s8 3.5 8 8"/>
+          <path d="M22 11l3 3M19 14l3-3"/>
+        </svg>
+      </div>
+      <div class="lane-head">
+        <span class="lane-tag">Lane 3 · Human authority</span>
+        <h2 class="lane-title">Approval, exceptions, risk acceptance</h2>
+        <p class="lane-sub">Wherever the cost of error or ambiguity is material, the final word stays with a named human.</p>
+      </div>
+      <div class="lane-section">
+        <h4>Use it for</h4>
+        <ul>
+          <li>Release approval</li>
+          <li>Rollback decisions</li>
+          <li>Policy exceptions</li>
+          <li>Production access changes</li>
+          <li>High-risk customer outcomes</li>
+        </ul>
+      </div>
+      <div class="lane-owner">
+        <strong>Owned by</strong>
+        Named humans with visible authority and accountability. The harness packages evidence; humans decide.
+      </div>
+      <div class="lane-trap">
+        <strong>Trap to avoid</strong>
+        Collapsing this lane into automation "because the agent looked confident." That's how authority quietly transfers without anyone signing off.
+      </div>
+    </article>
+  </section>
+
+  <div class="foot">
+    <div class="foot-label">The rule</div>
+    <div class="foot-text"><strong>Match the lane to the work, not the work to the lane you already invested in.</strong> A harness only earns its keep when the underlying work is genuinely agentic. Use deterministic pipelines for rule-heavy work and keep authority with named humans for risky or ambiguous decisions.</div>
+  </div>
+</main>
+</body>
+</html>

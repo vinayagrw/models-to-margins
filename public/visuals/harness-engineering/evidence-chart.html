@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Why Now — Hard Evidence</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Syne:wght@600;700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+/* Scene-specific: hard evidence bar chart */
+:root, :root[data-theme="light"] { --bar-bg: rgba(16, 42, 67, 0.08); }
+:root[data-theme="dark"] { --bar-bg: rgba(166, 212, 255, 0.08); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bar-bg: rgba(166, 212, 255, 0.08); }
+}
+body {
+  background:
+    radial-gradient(circle at 80% 10%, rgba(34, 211, 238, 0.10), transparent 32%),
+    radial-gradient(circle at 10% 90%, rgba(249, 115, 22, 0.10), transparent 32%),
+    linear-gradient(180deg, var(--bg-start) 0%, var(--bg-mid) 48%, var(--bg-end) 100%);
+}
+.head { margin-bottom: 18px; }
+.head h1 {
+  font-family: "Syne", sans-serif; font-weight: 800;
+  font-size: clamp(1.4rem, 2.4vw, 1.95rem);
+  letter-spacing: -0.01em; color: var(--text-strong); margin-top: 6px;
+  line-height: 1.18;
+}
+.head h1 em { font-style: normal;
+  background: linear-gradient(135deg, var(--accent), var(--L1));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.head p { margin-top: 8px; color: var(--muted); font-size: 0.95rem; max-width: 60ch; }
+.card {
+  border: 1px solid var(--border); background: var(--surface);
+  border-radius: 22px; padding: 22px; box-shadow: var(--shadow);
+}
+.rows { display: grid; gap: 18px; margin-top: 8px; }
+.row { display: grid; grid-template-columns: minmax(220px, 1.05fr) minmax(0, 2.4fr); gap: 18px; align-items: center; }
+.row-meta { display: flex; flex-direction: column; gap: 4px; }
+.row-source {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--src);
+}
+.row-source::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--src); }
+.row-claim {
+  font-family: "Syne", sans-serif; font-weight: 700;
+  font-size: 1.08rem; line-height: 1.25;
+  color: var(--text-strong); letter-spacing: -0.005em;
+}
+.row-detail { font-size: 0.84rem; color: var(--muted); line-height: 1.4; }
+.bar-frame {
+  position: relative;
+  height: 56px; border-radius: 14px;
+  background: var(--bar-bg);
+  overflow: hidden;
+  display: flex; align-items: center;
+}
+.bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--src), color-mix(in srgb, var(--src) 50%, var(--accent)));
+  border-radius: 14px 0 0 14px;
+  transform-origin: left center;
+  transform: scaleX(0);
+  animation: grow 1.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  box-shadow: inset 0 -6px 20px rgba(255, 255, 255, 0.08);
+}
+.bar.delay-1 { animation-delay: 0.12s; }
+.bar.delay-2 { animation-delay: 0.24s; }
+.bar.delay-3 { animation-delay: 0.36s; }
+.bar.delay-4 { animation-delay: 0.48s; }
+@keyframes grow { to { transform: scaleX(var(--w, 0.5)); } }
+@media (prefers-reduced-motion: reduce) {
+  .bar { animation: none; transform: scaleX(var(--w, 0.5)); }
+}
+.bar-numbers {
+  position: absolute; left: 18px; right: 18px; top: 50%;
+  transform: translateY(-50%);
+  display: flex; align-items: center; justify-content: space-between;
+  pointer-events: none;
+}
+.bar-stat {
+  font-family: "Syne", sans-serif; font-weight: 800;
+  font-size: clamp(1.25rem, 2vw, 1.55rem);
+  color: #ffffff; letter-spacing: -0.01em;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+.bar-arrow {
+  font-family: "DM Sans", sans-serif; font-weight: 600;
+  font-size: 0.84rem; letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.92);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+.foot {
+  margin-top: 18px;
+  padding: 14px 16px; border-radius: 16px;
+  border: 1px dashed var(--border);
+  font-size: 0.88rem; color: var(--muted); line-height: 1.5;
+}
+.foot strong { color: var(--text-strong); }
+@media (max-width: 720px) {
+  .row { grid-template-columns: 1fr; gap: 8px; }
+  .bar-frame { height: 50px; }
+  .bar-stat { font-size: 1.15rem; }
+}
+</style>
+</head>
+<body>
+<main class="shell">
+  <header class="head">
+    <span class="eyebrow">Why now — same model, different harness</span>
+    <h1>Four independent teams, four setups, <em>same conclusion</em>.</h1>
+    <p>The harness moves the needle far more than the next model upgrade. The bars below show what changed when teams re-engineered the system around the model.</p>
+  </header>
+  <section class="card">
+    <div class="rows">
+      <div class="row" style="--src: var(--L2)">
+        <div class="row-meta">
+          <span class="row-source">LangChain · 2026</span>
+          <div class="row-claim">+13.7 points on Terminal Bench 2.0</div>
+          <div class="row-detail">Same model. Harness-only tweaks. 52.8% → 66.5% pass rate.</div>
+        </div>
+        <div class="bar-frame" aria-label="Bar showing 66.5% with prior 52.8%">
+          <div class="bar delay-1" style="--w: 0.82"></div>
+          <div class="bar-numbers">
+            <span class="bar-stat">52.8% → 66.5%</span>
+            <span class="bar-arrow">harness only</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="row" style="--src: var(--L1)">
+        <div class="row-meta">
+          <span class="row-source">Vercel v0 · 2026</span>
+          <div class="row-claim">−80% available tools improved completion</div>
+          <div class="row-detail">Trim the toolbelt; escape the "dumb zone" where the model burns tokens reasoning about tools.</div>
+        </div>
+        <div class="bar-frame" aria-label="Bar showing 80% tool reduction">
+          <div class="bar delay-2" style="--w: 0.94"></div>
+          <div class="bar-numbers">
+            <span class="bar-stat">−80%</span>
+            <span class="bar-arrow">tools removed</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="row" style="--src: var(--L4)">
+        <div class="row-meta">
+          <span class="row-source">Boris Cherny · Claude Code</span>
+          <div class="row-claim">2 to 3× output quality from verification</div>
+          <div class="row-detail">Effective verification methods (pre-stop hooks, golden tests) multiply final output quality.</div>
+        </div>
+        <div class="bar-frame" aria-label="Bar showing 2x to 3x quality gain">
+          <div class="bar delay-3" style="--w: 0.66"></div>
+          <div class="bar-numbers">
+            <span class="bar-stat">2× — 3×</span>
+            <span class="bar-arrow">quality multiplier</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="row" style="--src: var(--L3)">
+        <div class="row-meta">
+          <span class="row-source">OpenAI Codex · Feb 2026</span>
+          <div class="row-claim">~1M lines, ~1,500 PRs, 0 hand-written</div>
+          <div class="row-detail">Five months. Real product. Humans built the harness; agents wrote the code.</div>
+        </div>
+        <div class="bar-frame" aria-label="Bar showing one million lines with zero hand written">
+          <div class="bar delay-4" style="--w: 1"></div>
+          <div class="bar-numbers">
+            <span class="bar-stat">1,000,000 lines · 0 hand-written</span>
+            <span class="bar-arrow">harness shipped it</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="foot">
+      <strong>The pattern.</strong> None of these teams beat the next model. They beat the previous version of <em>themselves</em> by re-engineering the system around the model — fewer tools, tighter verification, durable session state, hand-written context. The harness is the leverage.
+    </div>
+  </section>
+</main>
+</body>
+</html>

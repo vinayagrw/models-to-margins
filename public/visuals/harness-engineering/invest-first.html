@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Where to Invest First</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Syne:wght@600;700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+/* Scene-specific: invest-first decision tree + coverage heatmap */
+body {
+  background:
+    radial-gradient(circle at 14% 14%, rgba(34, 211, 238, 0.10), transparent 32%),
+    radial-gradient(circle at 88% 88%, rgba(78, 218, 181, 0.10), transparent 32%),
+    linear-gradient(180deg, var(--bg-start) 0%, var(--bg-mid) 48%, var(--bg-end) 100%);
+}
+.head { margin-bottom: 18px; }
+.head h1 {
+  font-family: "Syne", sans-serif; font-weight: 800;
+  font-size: clamp(1.4rem, 2.4vw, 1.95rem); line-height: 1.18;
+  letter-spacing: -0.01em; color: var(--text-strong); margin-top: 6px;
+}
+.head p { margin-top: 8px; color: var(--muted); font-size: 0.96rem; max-width: 70ch; }
+.body { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+.tree {
+  border: 1px solid var(--border); background: var(--surface);
+  border-radius: 22px; padding: 22px; box-shadow: var(--shadow);
+}
+.tree-title {
+  font-family: "Syne", sans-serif; font-weight: 700; font-size: 1.1rem;
+  color: var(--text-strong); margin-bottom: 4px;
+}
+.tree-sub { color: var(--muted); font-size: 0.88rem; margin-bottom: 18px; }
+.tree-question {
+  display: grid; grid-template-columns: 24px minmax(0, 1fr); gap: 12px;
+  align-items: start; margin-bottom: 12px;
+}
+.tree-q-icon {
+  width: 24px; height: 24px; border-radius: 50%;
+  display: grid; place-items: center;
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+  color: var(--accent);
+  font-family: "Syne", sans-serif; font-weight: 800; font-size: 0.86rem;
+}
+.tree-q-text { font-weight: 700; color: var(--text-strong); font-size: 1rem; line-height: 1.35; }
+.tree-q-text small { display: block; font-weight: 400; color: var(--muted); font-size: 0.82rem; margin-top: 2px; }
+.tree-branches { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0 18px; }
+.branch {
+  border: 1px solid var(--branch-c, var(--border));
+  background: color-mix(in srgb, var(--branch-c, var(--accent)) 8%, var(--surface));
+  border-radius: 16px; padding: 14px;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.branch-yes { --branch-c: var(--accent-3); }
+.branch-no { --branch-c: var(--accent-2); }
+.branch-tag {
+  font-size: 0.7rem; font-weight: 700; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--branch-c);
+}
+.branch-arrow {
+  font-family: "DM Sans", sans-serif; font-size: 0.86rem; color: var(--muted);
+}
+.branch-recommend { display: flex; flex-wrap: wrap; gap: 6px; }
+.layer-chip {
+  font-size: 0.74rem; font-weight: 700; letter-spacing: 0.06em;
+  padding: 5px 10px; border-radius: 999px;
+  border: 1px solid var(--c);
+  background: color-mix(in srgb, var(--c) 14%, transparent);
+  color: var(--text-strong);
+}
+.layer-chip.priority {
+  background: var(--c); color: #ffffff;
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--c) 32%, transparent);
+}
+.tree-foot {
+  margin-top: 14px; padding: 12px 14px; border-radius: 14px;
+  background: var(--surface-strong); border: 1px dashed var(--border-strong);
+  font-size: 0.86rem; line-height: 1.45; color: var(--text);
+}
+.tree-foot strong { color: var(--text-strong); }
+.coverage {
+  border: 1px solid var(--border); background: var(--surface);
+  border-radius: 22px; padding: 22px; box-shadow: var(--shadow);
+}
+.coverage-title {
+  font-family: "Syne", sans-serif; font-weight: 700; font-size: 1.1rem;
+  color: var(--text-strong); margin-bottom: 4px;
+}
+.coverage-sub { color: var(--muted); font-size: 0.88rem; margin-bottom: 18px; }
+.heatmap {
+  display: grid;
+  grid-template-columns: 140px repeat(5, minmax(0, 1fr));
+  gap: 6px;
+}
+.h-cell {
+  text-align: center; padding: 12px 6px; border-radius: 10px;
+  font-size: 0.78rem; font-weight: 600;
+  display: grid; place-items: center; min-height: 56px;
+}
+.h-header {
+  background: transparent; border: 1px solid transparent;
+  color: var(--c); font-weight: 700; letter-spacing: 0.06em; font-size: 0.78rem;
+  text-transform: uppercase; flex-direction: column;
+}
+.h-row-label {
+  background: transparent; border: 1px solid transparent;
+  color: var(--text-strong); text-align: left; justify-content: start;
+  font-family: "Syne", sans-serif; font-weight: 700;
+  font-size: 0.86rem; padding: 12px 0;
+}
+.h-row-label small {
+  display: block; font-weight: 400; color: var(--muted); font-size: 0.74rem; margin-top: 2px;
+}
+.h-empty { background: var(--heat-empty); color: var(--muted); }
+.h-partial {
+  background: color-mix(in srgb, var(--heat-partial) 32%, transparent);
+  color: var(--text-strong);
+  border: 1px solid color-mix(in srgb, var(--heat-partial) 50%, transparent);
+}
+.h-strong {
+  background: color-mix(in srgb, var(--heat-strong) 36%, transparent);
+  color: var(--text-strong);
+  border: 1px solid color-mix(in srgb, var(--heat-strong) 60%, transparent);
+}
+.h-strong::before { content: "✓ "; }
+.h-partial::before { content: "≈ "; }
+.h-empty::before { content: "—"; }
+.coverage-legend {
+  display: flex; gap: 12px; margin-top: 14px; flex-wrap: wrap;
+  font-size: 0.78rem; color: var(--muted);
+}
+.coverage-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.coverage-legend i { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+.coverage-foot {
+  margin-top: 14px; padding: 12px 14px; border-radius: 14px;
+  background: var(--surface-strong); border-left: 3px solid var(--accent);
+  font-size: 0.86rem; line-height: 1.45; color: var(--text);
+}
+.coverage-foot strong { color: var(--text-strong); }
+@media (max-width: 980px) {
+  .body { grid-template-columns: 1fr; }
+  .heatmap { grid-template-columns: 110px repeat(5, minmax(0, 1fr)); font-size: 0.72rem; }
+  .h-cell { padding: 10px 4px; min-height: 48px; }
+}
+</style>
+</head>
+<body>
+<main class="shell">
+  <header class="head">
+    <span class="eyebrow">Where to invest first</span>
+    <h1>Don't try to build all five layers at once. Pick the one with the highest marginal return.</h1>
+    <p>The right first investment depends on whether you're on a managed platform (where layers 2, 3, 5 are already provided) or self-hosting your own harness from scratch. The coverage heatmap on the right shows where most teams actually are today.</p>
+  </header>
+
+  <div class="body">
+    <section class="tree" aria-label="Investment decision tree">
+      <div class="tree-title">Investment decision tree</div>
+      <div class="tree-sub">Start here. Two questions get you to your first sprint of harness work.</div>
+      <div class="tree-question">
+        <span class="tree-q-icon">?</span>
+        <span class="tree-q-text">Are you on a managed agent platform?<small>e.g. Anthropic Managed Agents, OpenAI Assistants, a vendor stack</small></span>
+      </div>
+      <div class="tree-branches">
+        <article class="branch branch-yes">
+          <span class="branch-tag">Yes — managed</span>
+          <span class="branch-arrow">L2 / L3 / L5 are platform-shipped. You inherit them.</span>
+          <div class="branch-recommend">
+            <span class="layer-chip priority" style="--c: var(--L1)">1st: L1 Constraint</span>
+            <span class="layer-chip priority" style="--c: var(--L4)">2nd: L4 Verification</span>
+          </div>
+          <div style="font-size: 0.84rem; color: var(--muted); line-height: 1.45;">L1 prevents the agent from violating your architectural rules; L4 catches what slips through. Highest ROI on a managed platform.</div>
+        </article>
+        <article class="branch branch-no">
+          <span class="branch-tag">No — self-hosted</span>
+          <span class="branch-arrow">You're on the hook for all five.</span>
+          <div class="branch-recommend">
+            <span class="layer-chip priority" style="--c: var(--L4)">1st: L4 Verification</span>
+            <span class="layer-chip" style="--c: var(--L1)">2nd: L1 Constraint</span>
+            <span class="layer-chip" style="--c: var(--L5)">3rd: L5 Lifecycle</span>
+          </div>
+          <div style="font-size: 0.84rem; color: var(--muted); line-height: 1.45;">Verification is the fastest reliability win you can ship in a sprint. Then constraints. Then add lifecycle as scale forces it.</div>
+        </article>
+      </div>
+
+      <div class="tree-question">
+        <span class="tree-q-icon">?</span>
+        <span class="tree-q-text">Could you staff five layers cross-functionally today?<small>L1 architecture · L2 dev · L3 platform · L4 QA · L5 SRE</small></span>
+      </div>
+      <div class="tree-branches">
+        <article class="branch branch-yes">
+          <span class="branch-tag">Yes</span>
+          <span class="branch-arrow">Assign each layer a named owner.</span>
+          <div style="font-size: 0.84rem; color: var(--muted); line-height: 1.45;">L1 in arch reviews. L2 in sprints. L3 on platform roadmap. L4 in DoD. L5 in runbooks.</div>
+        </article>
+        <article class="branch branch-no">
+          <span class="branch-tag">No</span>
+          <span class="branch-arrow">Focus on L4 only. Revisit later.</span>
+          <div style="font-size: 0.84rem; color: var(--muted); line-height: 1.45;">A single pre-stop hook + golden-case suite outperforms five half-built layers.</div>
+        </article>
+      </div>
+
+      <div class="tree-foot">
+        <strong>The default answer for most teams:</strong> ship L4 (Verification) first. It's the fastest path from "demo works" to "production reliable" — Boris Cherny: 2-3× output quality.
+      </div>
+    </section>
+
+    <section class="coverage" aria-label="Coverage heatmap">
+      <div class="coverage-title">Coverage heatmap — where most teams actually are</div>
+      <div class="coverage-sub">Read across each row to see what a team profile typically has built. Look for empty cells; that's your gap.</div>
+      <div class="heatmap" role="table" aria-label="Layer coverage by team profile">
+        <div class="h-cell h-header" style="--c: transparent" role="rowheader"></div>
+        <div class="h-cell h-header" style="--c: var(--L1)">L1<br><small style="font-weight: 400; opacity: 0.7;">Constraint</small></div>
+        <div class="h-cell h-header" style="--c: var(--L2)">L2<br><small style="font-weight: 400; opacity: 0.7;">Context</small></div>
+        <div class="h-cell h-header" style="--c: var(--L3)">L3<br><small style="font-weight: 400; opacity: 0.7;">Execution</small></div>
+        <div class="h-cell h-header" style="--c: var(--L4)">L4<br><small style="font-weight: 400; opacity: 0.7;">Verification</small></div>
+        <div class="h-cell h-header" style="--c: var(--L5)">L5<br><small style="font-weight: 400; opacity: 0.7;">Lifecycle</small></div>
+
+        <div class="h-cell h-row-label">Most teams<small>2026</small></div>
+        <div class="h-cell h-empty"></div>
+        <div class="h-cell h-partial"></div>
+        <div class="h-cell h-empty"></div>
+        <div class="h-cell h-partial"></div>
+        <div class="h-cell h-empty"></div>
+
+        <div class="h-cell h-row-label">Median team<small>1 yr in</small></div>
+        <div class="h-cell h-partial"></div>
+        <div class="h-cell h-partial"></div>
+        <div class="h-cell h-partial"></div>
+        <div class="h-cell h-strong"></div>
+        <div class="h-cell h-empty"></div>
+
+        <div class="h-cell h-row-label">Mature team<small>OpenAI/Anthropic class</small></div>
+        <div class="h-cell h-strong"></div>
+        <div class="h-cell h-strong"></div>
+        <div class="h-cell h-strong"></div>
+        <div class="h-cell h-strong"></div>
+        <div class="h-cell h-strong"></div>
+      </div>
+      <div class="coverage-legend">
+        <span><i style="background: var(--heat-empty)"></i> Empty / ad-hoc</span>
+        <span><i style="background: color-mix(in srgb, var(--heat-partial) 50%, transparent)"></i> Partial</span>
+        <span><i style="background: color-mix(in srgb, var(--heat-strong) 60%, transparent)"></i> Built</span>
+      </div>
+      <div class="coverage-foot">
+        <strong>The pattern.</strong> Most teams are partial on L2 (some agentfile exists) and L4 (some tests run), and empty on L1, L3, L5. Naming the gap is the first move — not adding more tools.
+      </div>
+    </section>
+  </div>
+</main>
+</body>
+</html>
