@@ -30,7 +30,8 @@ body {
 :root[data-embedded="true"] .tree, :root[data-embedded="true"] .coverage {
   padding: clamp(12px, 1.8vh, 20px) clamp(12px, 1.4vw, 18px);
   min-height: 0;
-  display: flex; flex-direction: column; gap: clamp(6px, 0.8vh, 10px);
+  display: flex; flex-direction: column; gap: clamp(8px, 1.2vh, 14px);
+  justify-content: flex-start;
 }
 :root[data-embedded="true"] .tree-title, :root[data-embedded="true"] .coverage-title {
   font-size: clamp(0.92rem, 1.6vh, 1.1rem);
@@ -53,8 +54,8 @@ body {
 :root[data-embedded="true"] .layer-chip { font-size: clamp(0.62rem, 1vh, 0.7rem); padding: 3px 8px; }
 :root[data-embedded="true"] .tree-foot, :root[data-embedded="true"] .coverage-foot {
   padding: clamp(8px, 1.2vh, 12px) clamp(10px, 1vw, 14px);
-  font-size: clamp(0.74rem, 1.2vh, 0.84rem);
-  margin-top: auto;
+  font-size: clamp(0.76rem, 1.3vh, 0.88rem);
+  margin-top: 0;
 }
 :root[data-embedded="true"] .heatmap {
   grid-template-columns: clamp(90px, 12vw, 130px) repeat(5, minmax(0, 1fr));

@@ -39,15 +39,18 @@ body {
 :root[data-embedded="true"] .rows {
   min-height: 0;
   gap: clamp(8px, 1.4vh, 18px);
-  /* No row stretching — bars stay readable; gap distributes the slack */
-  grid-template-rows: repeat(4, auto);
-  align-content: space-evenly;
+  /* Each row stretches to equal share of card height — no blank between */
+  grid-template-rows: repeat(4, 1fr);
+  align-content: stretch;
 }
-:root[data-embedded="true"] .row { gap: clamp(10px, 1.6vw, 18px); align-items: center; }
-:root[data-embedded="true"] .row-claim { font-size: clamp(0.92rem, 1.7vh, 1.1rem); }
-:root[data-embedded="true"] .row-detail { font-size: clamp(0.74rem, 1.25vh, 0.86rem); }
-:root[data-embedded="true"] .bar-frame { height: clamp(40px, 6vh, 64px); }
-:root[data-embedded="true"] .bar-stat { font-size: clamp(1rem, 2vh, 1.45rem); }
+:root[data-embedded="true"] .row { gap: clamp(10px, 1.6vw, 18px); align-items: center; min-height: 0; }
+:root[data-embedded="true"] .row-claim { font-size: clamp(0.94rem, 1.8vh, 1.15rem); }
+:root[data-embedded="true"] .row-detail { font-size: clamp(0.76rem, 1.3vh, 0.88rem); }
+:root[data-embedded="true"] .bar-frame {
+  /* Bar fills row height; clamps prevent extreme stretch */
+  height: 100%; min-height: 44px; max-height: 96px;
+}
+:root[data-embedded="true"] .bar-stat { font-size: clamp(1.05rem, 2.2vh, 1.55rem); }
 :root[data-embedded="true"] .foot {
   margin-top: 0; padding: clamp(8px, 1.2vh, 14px) clamp(12px, 1.4vw, 18px);
   font-size: clamp(0.78rem, 1.3vh, 0.9rem);

@@ -81,15 +81,17 @@ html, body { height: 100%; overflow: hidden; }
 }
 .meta-chip strong { color: var(--text-strong); margin-right: 4px; font-weight: 700; }
 .panel-purpose {
-  font-size: clamp(0.84rem, 1.5vh, 1rem); line-height: 1.5; color: var(--text);
+  font-size: clamp(0.86rem, 1.55vh, 1.04rem); line-height: 1.5; color: var(--text);
+  /* Purpose paragraph absorbs vertical slack so info column fills naturally */
+  flex: 1;
 }
 .panel-purpose strong { color: var(--text-strong); }
 .panel-mvv {
   padding: clamp(8px, 1.2vh, 12px) clamp(10px, 1vw, 14px); border-radius: 12px;
   background: color-mix(in srgb, var(--c) 12%, transparent);
   border-left: 3px solid var(--c);
-  font-size: clamp(0.78rem, 1.35vh, 0.9rem); line-height: 1.45;
-  margin-top: auto;
+  font-size: clamp(0.8rem, 1.4vh, 0.92rem); line-height: 1.45;
+  margin-top: 0;
 }
 .panel-mvv strong {
   display: block; margin-bottom: 2px;

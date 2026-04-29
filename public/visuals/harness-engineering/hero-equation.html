@@ -22,24 +22,32 @@
 :root[data-embedded="true"] .hero-shell {
   width: 100%; height: 100%;
   padding: clamp(12px, 2vh, 24px) clamp(16px, 2.4vw, 28px);
-  align-items: center;
+  align-items: stretch;
   gap: clamp(20px, 3vw, 36px);
 }
-:root[data-embedded="true"] .copy { display: flex; flex-direction: column; gap: clamp(8px, 1.2vh, 14px); }
+:root[data-embedded="true"] .copy {
+  display: flex; flex-direction: column;
+  gap: clamp(8px, 1.4vh, 16px);
+  justify-content: center;
+}
 :root[data-embedded="true"] .eyebrow { font-size: clamp(0.66rem, 1.1vh, 0.78rem); }
 :root[data-embedded="true"] .headline {
-  font-size: clamp(1.3rem, 3.6vh, 2.6rem); margin-top: 0;
+  font-size: clamp(1.4rem, 4vh, 3rem); margin-top: 0;
   line-height: 1.08;
 }
 :root[data-embedded="true"] .tagline {
-  margin-top: 0; font-size: clamp(0.84rem, 1.5vh, 1rem);
+  margin-top: 0; font-size: clamp(0.86rem, 1.6vh, 1.05rem);
 }
-:root[data-embedded="true"] .legend { margin-top: 0; gap: clamp(4px, 0.8vh, 8px); }
-:root[data-embedded="true"] .legend-row { font-size: clamp(0.78rem, 1.3vh, 0.9rem); }
+:root[data-embedded="true"] .legend { margin-top: 0; gap: clamp(6px, 1vh, 10px); }
+:root[data-embedded="true"] .legend-row { font-size: clamp(0.82rem, 1.4vh, 0.96rem); }
 :root[data-embedded="true"] .canvas {
-  max-width: min(560px, 80vh);
-  width: 100%; aspect-ratio: 1;
+  /* Canvas grows to fill its column up to a generous max */
+  width: 100%;
+  max-width: min(720px, calc(100vh - 80px));
+  max-height: calc(100vh - 80px);
+  aspect-ratio: 1;
   align-self: center;
+  justify-self: center;
 }
 .headline {
   font-family: "Syne", "Space Grotesk", sans-serif;

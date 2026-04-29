@@ -46,11 +46,16 @@ body {
   align-items: stretch;
 }
 :root[data-embedded="true"] .lane {
-  padding: clamp(10px, 1.6vh, 16px) clamp(12px, 1.2vw, 16px);
-  gap: clamp(6px, 0.9vh, 12px);
+  padding: clamp(12px, 1.8vh, 18px) clamp(12px, 1.2vw, 16px);
+  gap: clamp(8px, 1.2vh, 14px);
   min-height: 0; overflow: hidden;
   display: flex; flex-direction: column;
-  justify-content: space-between;
+  /* Stack tight from top — let lane-section grow to absorb slack */
+  justify-content: flex-start;
+}
+:root[data-embedded="true"] .lane-section {
+  flex: 1; min-height: 0;
+  padding-top: clamp(8px, 1.2vh, 12px);
 }
 :root[data-embedded="true"] .lane-icon {
   width: clamp(36px, 4.5vh, 48px); height: clamp(36px, 4.5vh, 48px);
