@@ -32,6 +32,28 @@ body {
     radial-gradient(circle at 82% 88%, rgba(255, 119, 108, 0.08), transparent 32%),
     linear-gradient(180deg, var(--bg-start) 0%, var(--bg-mid) 48%, var(--bg-end) 100%);
 }
+/* Embed mode: 3 lanes + foot, fits viewport */
+:root[data-embedded="true"] .shell {
+  display: grid; grid-template-rows: auto 1fr auto; gap: 8px; min-height: 0;
+}
+:root[data-embedded="true"] .head { margin-bottom: 0; }
+:root[data-embedded="true"] .head h1 { font-size: clamp(1.05rem, 1.8vw, 1.3rem); }
+:root[data-embedded="true"] .head p { font-size: 0.84rem; max-width: none; }
+:root[data-embedded="true"] .lanes { gap: 10px; min-height: 0; }
+:root[data-embedded="true"] .lane { padding: 12px 14px; gap: 8px; min-height: 0; overflow: hidden; }
+:root[data-embedded="true"] .lane-icon { width: 40px; height: 40px; }
+:root[data-embedded="true"] .lane-icon svg { width: 24px; height: 24px; }
+:root[data-embedded="true"] .lane-title { font-size: 1rem; }
+:root[data-embedded="true"] .lane-sub { font-size: 0.8rem; line-height: 1.32; }
+:root[data-embedded="true"] .lane-section { padding-top: 8px; }
+:root[data-embedded="true"] .lane-section h4 { margin-bottom: 5px; font-size: 0.62rem; }
+:root[data-embedded="true"] .lane-section li { font-size: 0.76rem; line-height: 1.3; }
+:root[data-embedded="true"] .lane-owner, :root[data-embedded="true"] .lane-trap {
+  font-size: 0.74rem; padding: 8px 10px; line-height: 1.3;
+}
+:root[data-embedded="true"] .foot { margin-top: 0; padding: 10px 14px; flex-shrink: 0; }
+:root[data-embedded="true"] .foot-text { font-size: 0.82rem; line-height: 1.4; }
+
 .head { margin-bottom: 18px; text-align: center; }
 .head h1 {
   font-family: "Syne", sans-serif; font-weight: 800;

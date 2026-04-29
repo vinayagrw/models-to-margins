@@ -125,13 +125,30 @@ body {
   color: var(--text);
 }
 
+/* Embed mode (?embed=1) — visual is loaded inside an iframe.
+   Lock to viewport height and never scroll the document; each visual
+   is responsible for distributing its content via grid/flex internally. */
+:root[data-embedded="true"],
+:root[data-embedded="true"] body {
+  height: 100%;
+  overflow: hidden;
+}
+:root[data-embedded="true"] body {
+  min-height: 0;
+}
+
 /* Shared shell layout */
 .shell {
   width: min(calc(100% - 32px), 1280px);
   margin: 0 auto;
   padding: 28px 0 36px;
 }
-:root[data-embedded="true"] .shell { padding: 16px 16px 22px; }
+:root[data-embedded="true"] .shell {
+  width: 100%;
+  height: 100%;
+  padding: 14px 18px;
+  /* Each visual's own .shell rule sets display + grid/flex template. */
+}
 
 /* Shared typography utilities */
 .eyebrow {

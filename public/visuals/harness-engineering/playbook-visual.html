@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Implementation Playbook</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Syne:wght@600;700;800&family=DM+Sans:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+/* Scene-specific: implementation playbook — tabbed L1-L5 cards */
+html, body { height: 100%; overflow: hidden; }
+.shell {
+  width: 100%; height: 100%;
+  margin: 0; padding: 14px 18px;
+  display: grid; grid-template-rows: auto 1fr; gap: 10px;
+  max-width: none;
+}
+.head { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: end; }
+.head h1 {
+  font-family: "Syne", sans-serif; font-weight: 800;
+  font-size: clamp(1.05rem, 1.8vw, 1.35rem); color: var(--text-strong);
+  letter-spacing: -0.01em; line-height: 1.2;
+}
+.head p { color: var(--muted); font-size: 0.84rem; margin-top: 4px; max-width: 64ch; }
+.tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+.tab {
+  appearance: none; border: 1px solid var(--border); background: var(--surface);
+  color: var(--muted); font: inherit; cursor: pointer;
+  padding: 6px 12px; border-radius: 999px;
+  font-size: 0.78rem; font-weight: 700; letter-spacing: 0.04em;
+  transition: 160ms ease;
+}
+.tab:hover { color: var(--text-strong); border-color: var(--border-strong); }
+.tab[aria-selected="true"] {
+  color: #ffffff;
+  background: var(--c, var(--accent));
+  border-color: var(--c, var(--accent));
+  box-shadow: 0 6px 18px color-mix(in srgb, var(--c, var(--accent)) 28%, transparent);
+}
+.tab-num {
+  display: inline-block; margin-right: 6px;
+  font-family: "DM Sans", sans-serif; font-weight: 800; opacity: 0.9;
+}
+
+.panel {
+  min-height: 0;
+  border: 1px solid var(--border); border-radius: 16px;
+  background: var(--surface);
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  overflow: hidden; box-shadow: var(--shadow);
+}
+.panel-info { padding: 16px 18px;
+  display: grid; grid-template-rows: auto auto auto auto auto 1fr; gap: 10px;
+  border-right: 1px solid var(--border);
+}
+.panel-tag {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 0.7rem; font-weight: 700; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--c);
+}
+.panel-tag::before { content: ""; width: 10px; height: 10px; border-radius: 3px; background: var(--c); }
+.panel-title {
+  font-family: "Syne", sans-serif; font-weight: 800;
+  font-size: 1.5rem; line-height: 1.15; color: var(--text-strong);
+  letter-spacing: -0.01em;
+}
+.panel-meta {
+  display: flex; flex-wrap: wrap; gap: 8px;
+}
+.meta-chip {
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.04em;
+  padding: 4px 10px; border-radius: 999px;
+  border: 1px solid var(--border); background: var(--surface-strong);
+  color: var(--muted);
+}
+.meta-chip strong { color: var(--text-strong); margin-right: 4px; font-weight: 700; }
+.panel-purpose {
+  font-size: 0.94rem; line-height: 1.5; color: var(--text);
+}
+.panel-purpose strong { color: var(--text-strong); }
+.panel-mvv {
+  padding: 10px 12px; border-radius: 12px;
+  background: color-mix(in srgb, var(--c) 12%, transparent);
+  border-left: 3px solid var(--c);
+  font-size: 0.86rem; line-height: 1.45;
+}
+.panel-mvv strong {
+  display: block; margin-bottom: 2px;
+  font-size: 0.66rem; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--c);
+}
+.panel-anti {
+  padding: 10px 12px; border-radius: 12px;
+  background: color-mix(in srgb, var(--warn) 8%, transparent);
+  border: 1px dashed color-mix(in srgb, var(--warn) 40%, transparent);
+  font-size: 0.84rem; line-height: 1.45; color: var(--text);
+}
+.panel-anti strong {
+  display: block; margin-bottom: 2px;
+  font-size: 0.66rem; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--warn);
+}
+
+.panel-examples {
+  padding: 16px 18px; min-height: 0;
+  display: grid; grid-template-rows: auto 1fr;
+}
+.examples-label {
+  font-size: 0.7rem; font-weight: 700; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--c); margin-bottom: 10px;
+}
+.examples-list {
+  list-style: none; display: grid; gap: 8px; min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+.example {
+  border: 1px solid var(--border); border-radius: 12px;
+  background: var(--surface-strong);
+  padding: 10px 12px;
+  display: grid; grid-template-rows: auto auto; gap: 4px;
+}
+.example-head {
+  font-family: "DM Sans", sans-serif; font-weight: 700;
+  font-size: 0.86rem; color: var(--text-strong);
+  display: flex; align-items: center; gap: 8px;
+}
+.example-head::before {
+  content: "→"; color: var(--c); font-weight: 800;
+}
+.example-detail { font-size: 0.8rem; color: var(--muted); line-height: 1.4; padding-left: 18px; }
+.example-code {
+  margin-top: 6px; padding: 8px 10px; border-radius: 8px;
+  background: color-mix(in srgb, var(--text) 8%, transparent);
+  border: 1px solid var(--border);
+  font-family: "JetBrains Mono", "Consolas", monospace;
+  font-size: 0.72rem; line-height: 1.5;
+  color: var(--text); white-space: pre; overflow-x: auto;
+}
+
+@media (max-width: 880px) {
+  .panel { grid-template-columns: 1fr; }
+  .panel-info { border-right: 0; border-bottom: 1px solid var(--border); }
+}
+</style>
+</head>
+<body>
+<main class="shell" id="playbook">
+  <header class="head">
+    <div>
+      <span class="eyebrow">Implementation playbook</span>
+      <h1>One min-viable move per layer. Ship this sprint.</h1>
+    </div>
+    <nav class="tabs" id="tabs" role="tablist" aria-label="Harness layers"></nav>
+  </header>
+
+  <section class="panel" id="panel" role="tabpanel" aria-live="polite">
+    <!-- populated by JS -->
+  </section>
+</main>
+<script>
+(() => {
+  const layers = [
+    {
+      id: 'L1', name: 'Constraint', color: 'var(--L1)',
+      owner: 'Architecture', rate: 'Slow', shipped: 'Developer-owned',
+      purpose: 'Encode the rules the agent is not allowed to break, mechanically. No LLM in the loop. Cheap to run, zero false positives, prevents whole categories of failure without burning a single token.',
+      mvv: 'One custom linter rule per architectural decision you actually care about, with a Fix: and a Reference: line in every error message.',
+      anti: 'Leaving rules in human-readable wikis and hoping the agent reads them. If a rule isn\'t enforced mechanically, it isn\'t a constraint — it\'s a wish.',
+      examples: [
+        { h: 'Custom linter with actionable remediation', d: 'Every violation tells the agent how to fix it and where to read more.', code: 'ERROR: Naming convention violation\n  File: modules/billing/src/invoice_handler.py\n  Line: 47\n  Found: `processInvoice`\n  Fix: Rename to `process_invoice`\n  Reference: modules/billing/CONVENTIONS.md#naming' },
+        { h: 'ArchUnit-style structural tests', d: 'Module boundaries and dependency directions enforced at every commit ("billing may not import from auth").' },
+        { h: 'API contract validation', d: 'Shapes at module boundaries are parsed and checked at every commit.' }
+      ]
+    },
+    {
+      id: 'L2', name: 'Context', color: 'var(--L2)',
+      owner: 'Dev team', rate: 'Medium', shipped: 'Platform helps',
+      purpose: 'Control what the model sees at each step. Curated and relevant beats comprehensive and stale, every time.',
+      mvv: 'A hand-written AGENTS.md under 100 lines that describes only what a new engineer would need on day one.',
+      anti: 'A 2,000-line LLM-generated AGENTS.md. ETH Zurich studied 138 agentfiles — LLM-generated ones hurt performance and cost +20% in tokens.',
+      examples: [
+        { h: 'Brief map at the repo root', d: 'A short hand-written AGENTS.md or CLAUDE.md — a map of the system, not an essay.', code: '# Project Brief\nBilling platform with three core modules.\n\n## Modules\n- modules/auth/          OAuth2 + API keys\n- modules/billing/       Subscriptions, invoicing, payments\n- modules/notifications/ Email, SMS, webhooks\n\n## Key Conventions\n- REST conventions in ARCHITECTURE.md\n- Module-specific patterns in each CONVENTIONS.md' },
+        { h: 'Progressive disclosure via per-module READMEs', d: 'The brief map points at modules; module READMEs hold the detail. Nothing loads unless the agent navigates there.' },
+        { h: 'Progress files as durable scratchpads', d: 'A structured scratchpad recording completed steps, blockers, and next actions. Survives compaction and crashes.' }
+      ]
+    },
+    {
+      id: 'L3', name: 'Execution', color: 'var(--L3)',
+      owner: 'Platform engineering', rate: 'Medium', shipped: 'Platform helps',
+      purpose: 'Give the agent the right hands for this task — no more. More tools usually produces worse results. This is where the "dumb zone" lives.',
+      mvv: 'Name the 6-10 tools each task type actually needs, expose only those, and put everything heavier behind a sub-agent.',
+      anti: 'Connecting every MCP server you have because "the model can decide." It can — and it will spend more tokens deciding than doing.',
+      examples: [
+        { h: 'Dynamic tool scoping per task', d: 'HumanLayer replaced the full Linear MCP server (dozens of tools) with a custom CLI exposing six operations and saved thousands of tokens from tool definitions alone.' },
+        { h: 'Per-worktree sandbox isolation', d: 'Every agent session runs in its own worktree / sandbox / disposable container. State from one run cannot bleed into another.' },
+        { h: 'Sub-agent context firewall', d: 'Heavy tasks dispatch to a sub-agent so intermediate tool calls do not pollute the parent agent\'s context window.' }
+      ]
+    },
+    {
+      id: 'L4', name: 'Verification', color: 'var(--L4)',
+      owner: 'Dev + QA', rate: 'Fast', shipped: 'Developer-owned',
+      purpose: 'Prove the agent\'s output actually works before anything ships. Highest-leverage layer most teams skip.',
+      mvv: 'One pre-stop hook that runs your existing test command and exits non-zero on failure. Boris Cherny: 2-3× output quality.',
+      anti: 'Trusting the agent\'s own claim that "everything works." The model is fluent. Fluency is not correctness.',
+      examples: [
+        { h: 'Pre-stop hooks: success silent, failure loud', d: 'Run formatters, type checkers, tests before the agent finishes a step. Swallow passing output, only surface errors.', code: '#!/bin/bash\n# .agent/hooks/pre-stop.sh\nset -e\nnpm run lint --silent || { echo "LINT FAILED"; exit 1; }\nnpm test --silent       || { echo "TESTS FAILED"; exit 1; }\n# Silent on success.' },
+        { h: 'Golden-case eval suite', d: 'A small but real fixed set of input/output pairs the agent must pass before any change merges. Updated every time you find a new failure mode.' },
+        { h: 'Parity manifest for migrations', d: 'The new system is correct only when its outputs match the old system on a fixed regression set.' }
+      ]
+    },
+    {
+      id: 'L5', name: 'Lifecycle', color: 'var(--L5)',
+      owner: 'SRE / DevOps', rate: 'Slow once built', shipped: 'Platform helps',
+      purpose: 'Keep the agent alive as a running process — startup, health, graceful shutdown, crash recovery, cost ceilings, escalation. Once built, this layer doesn\'t change much.',
+      mvv: 'A session budget, a per-file edit cap, and one human you can wake up if either trips.',
+      anti: 'Starting an agent on a long task with no budget, no checkpoint, and no loop detection. The horror stories all live here.',
+      examples: [
+        { h: 'Checkpoint + resume via durable session log', d: 'The session is a durable event log living outside the model\'s context window. wake(sessionId) fetches the log and resumes from the last event. (Anthropic Managed Agents virtualizes this.)' },
+        { h: 'Loop detection middleware', d: 'LangChain\'s LoopDetectionMiddleware caps per-file edits in a session. When the cap trips, escalate to a human instead of burning more tokens. Prevents the doom loop.' },
+        { h: 'Cost ceilings + escalation', d: 'Every session has a budget; every budget exceedance triggers a named human, not a silent retry.' }
+      ]
+    }
+  ];
+
+  const tabsEl = document.getElementById('tabs');
+  const panelEl = document.getElementById('panel');
+
+  const renderPanel = (layer) => {
+    panelEl.style.setProperty('--c', layer.color);
+    panelEl.innerHTML = `
+      <div class="panel-info">
+        <span class="panel-tag">Layer ${layer.id.slice(1)} · ${layer.name}</span>
+        <h2 class="panel-title">${layer.name}</h2>
+        <div class="panel-meta">
+          <span class="meta-chip"><strong>Owner</strong>${layer.owner}</span>
+          <span class="meta-chip"><strong>Rate</strong>${layer.rate}</span>
+          <span class="meta-chip"><strong>${layer.shipped}</strong></span>
+        </div>
+        <p class="panel-purpose">${layer.purpose}</p>
+        <div class="panel-mvv">
+          <strong>Minimum viable</strong>
+          ${layer.mvv}
+        </div>
+        <div class="panel-anti">
+          <strong>Anti-pattern</strong>
+          ${layer.anti}
+        </div>
+      </div>
+      <div class="panel-examples">
+        <span class="examples-label">Examples</span>
+        <ul class="examples-list">
+          ${layer.examples.map((ex) => `
+            <li class="example">
+              <div class="example-head">${ex.h}</div>
+              <div class="example-detail">${ex.d}</div>
+              ${ex.code ? `<pre class="example-code">${ex.code.replace(/</g, '&lt;')}</pre>` : ''}
+            </li>
+          `).join('')}
+        </ul>
+      </div>
+    `;
+  };
+
+  layers.forEach((layer, i) => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'tab';
+    btn.setAttribute('role', 'tab');
+    btn.setAttribute('aria-selected', i === 0 ? 'true' : 'false');
+    btn.style.setProperty('--c', layer.color);
+    btn.innerHTML = `<span class="tab-num">${layer.id}</span>${layer.name}`;
+    btn.addEventListener('click', () => {
+      tabsEl.querySelectorAll('.tab').forEach((t) => t.setAttribute('aria-selected', 'false'));
+      btn.setAttribute('aria-selected', 'true');
+      renderPanel(layer);
+    });
+    tabsEl.appendChild(btn);
+  });
+
+  renderPanel(layers[0]);
+})();
+</script>
+</body>
+</html>

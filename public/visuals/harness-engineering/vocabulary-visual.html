@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hashimoto Principle · Vocabulary · Sources</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Syne:wght@600;700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+/* Closing slide: Hashimoto principle + flippable vocab cards + sources strip */
+html, body { height: 100%; overflow: hidden; }
+.shell {
+  width: 100%; height: 100%;
+  margin: 0; padding: 14px 18px;
+  display: grid; grid-template-rows: auto 1fr auto; gap: 12px;
+  max-width: none;
+}
+
+/* Hashimoto hero quote */
+.hashimoto {
+  border-radius: 18px; padding: 16px 22px;
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--accent) 14%, transparent), color-mix(in srgb, var(--accent-2) 14%, transparent)),
+    var(--surface);
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--border));
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 18px; align-items: center;
+}
+.hashimoto-mark {
+  font-family: "Syne", sans-serif; font-weight: 800;
+  font-size: 3rem; line-height: 0.8;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.hashimoto-body {
+  display: grid; gap: 4px;
+}
+.hashimoto-eyebrow {
+  font-size: 0.66rem; letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--accent); font-weight: 700;
+}
+.hashimoto-quote {
+  font-family: "Syne", sans-serif; font-weight: 700;
+  font-size: clamp(1rem, 1.5vw, 1.18rem); line-height: 1.32;
+  color: var(--text-strong); letter-spacing: -0.005em;
+}
+.hashimoto-quote em { font-style: normal; color: var(--accent-2); }
+.hashimoto-attr {
+  font-family: "DM Sans", sans-serif;
+  font-size: 0.78rem; color: var(--muted);
+}
+
+/* Vocabulary grid (flip cards) */
+.vocab-section { min-height: 0; display: grid; grid-template-rows: auto 1fr; gap: 8px; }
+.vocab-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.vocab-head h2 {
+  font-family: "Syne", sans-serif; font-weight: 700;
+  font-size: 1.05rem; color: var(--text-strong); letter-spacing: -0.005em;
+}
+.vocab-hint { font-size: 0.74rem; color: var(--muted); }
+.vocab-grid {
+  min-height: 0;
+  display: grid; gap: 8px;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  grid-auto-rows: 88px;
+  overflow-y: auto;
+  padding: 2px;
+  scrollbar-width: thin;
+}
+.vocab-card {
+  perspective: 800px; cursor: pointer;
+  background: transparent; border: 0; padding: 0;
+  font: inherit; color: inherit;
+}
+.vocab-inner {
+  position: relative; width: 100%; height: 100%;
+  transform-style: preserve-3d; transition: transform 360ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  border-radius: 12px;
+}
+.vocab-card[aria-pressed="true"] .vocab-inner { transform: rotateY(180deg); }
+@media (prefers-reduced-motion: reduce) { .vocab-inner { transition: none; } }
+.vocab-face {
+  position: absolute; inset: 0; padding: 10px 12px;
+  border: 1px solid var(--border); border-radius: 12px;
+  background: var(--surface-strong); backface-visibility: hidden;
+  display: flex; flex-direction: column; justify-content: center;
+  text-align: left;
+}
+.vocab-front .vocab-term {
+  font-family: "Syne", sans-serif; font-weight: 700; font-size: 0.96rem;
+  color: var(--text-strong); letter-spacing: -0.005em; line-height: 1.2;
+}
+.vocab-front .vocab-tip {
+  margin-top: 4px;
+  font-size: 0.7rem; color: var(--muted);
+  letter-spacing: 0.04em;
+}
+.vocab-back {
+  transform: rotateY(180deg);
+  background: color-mix(in srgb, var(--c, var(--accent)) 10%, var(--surface-strong));
+  border-color: color-mix(in srgb, var(--c, var(--accent)) 40%, var(--border));
+}
+.vocab-back .vocab-def {
+  font-size: 0.8rem; line-height: 1.4; color: var(--text);
+}
+.vocab-back .vocab-source {
+  margin-top: 4px;
+  font-size: 0.66rem; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--c, var(--accent)); font-weight: 700;
+}
+
+/* Sources strip */
+.sources {
+  border-radius: 14px; padding: 10px 14px;
+  background: var(--surface-strong); border: 1px solid var(--border);
+  display: grid; grid-template-columns: auto 1fr; gap: 14px; align-items: center;
+}
+.sources-label {
+  font-size: 0.66rem; font-weight: 700; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--accent);
+}
+.sources-list {
+  display: flex; flex-wrap: wrap; gap: 8px 14px;
+  font-size: 0.78rem;
+}
+.sources-list a {
+  color: var(--text); text-decoration: none;
+  border-bottom: 1px dashed var(--border-strong);
+  padding-bottom: 1px;
+}
+.sources-list a:hover { color: var(--accent); border-bottom-color: var(--accent); }
+
+@media (max-width: 720px) {
+  .hashimoto { grid-template-columns: 1fr; gap: 8px; padding: 12px 14px; }
+  .hashimoto-mark { font-size: 2rem; }
+  .vocab-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+}
+</style>
+</head>
+<body>
+<main class="shell">
+  <section class="hashimoto" aria-label="The Hashimoto Principle">
+    <span class="hashimoto-mark" aria-hidden="true">"</span>
+    <div class="hashimoto-body">
+      <span class="hashimoto-eyebrow">The single rule that compounds harness quality</span>
+      <p class="hashimoto-quote">Anytime you find an agent makes a mistake, you take the time to engineer a solution such that the agent <em>never makes that mistake again</em>.</p>
+      <span class="hashimoto-attr">— </span>
+    </div>
+    <div style="font-family: 'DM Sans', sans-serif; font-size: 0.78rem; color: var(--muted); text-align: right; align-self: end;">
+      Every other rule in this deck<br>is downstream of that one.
+    </div>
+  </section>
+
+  <section class="vocab-section" aria-label="Vocabulary cheat sheet">
+    <div class="vocab-head">
+      <h2>Vocabulary cheat sheet</h2>
+      <span class="vocab-hint">Tap a card to flip · 13 terms</span>
+    </div>
+    <div class="vocab-grid" id="vocabGrid" role="list"></div>
+  </section>
+
+  <section class="sources" aria-label="Sources">
+    <span class="sources-label">Sources</span>
+    <div class="sources-list">
+      <a href="https://ai.gopubby.com/harness-engineering-what-every-ai-engineer-needs-to-know-in-2026-0ab649e5686a" target="_blank" rel="noreferrer">2026 primer (gopubby)</a>
+      <a href="https://pub.towardsai.net/openais-harness-engineering-experiment-zero-manually-written-code-100a24ad04cf" target="_blank" rel="noreferrer">OpenAI experiment writeup (towards AI)</a>
+      <a href="https://medium.com/data-science-collective/anthropic-just-shipped-three-of-the-five-harness-layers-for-managed-agent-and-the-other-two-are-on-14979cb4cf00" target="_blank" rel="noreferrer">Anthropic 3 of 5 layers (data-sci collective)</a>
+      <a href="https://openai.com/index/harness-engineering/" target="_blank" rel="noreferrer">OpenAI: Harness engineering</a>
+      <a href="https://www.anthropic.com/engineering/building-effective-agents" target="_blank" rel="noreferrer">Anthropic: Building effective agents</a>
+      <a href="https://www.anthropic.com/engineering/building-c-compiler" target="_blank" rel="noreferrer">Anthropic: C compiler with parallel Claudes</a>
+    </div>
+  </section>
+</main>
+
+<script>
+(() => {
+  const vocab = [
+    { term: 'Agent = Model + Harness', tip: 'Equation', def: 'The foundational equation. The agent is not the model — it\'s the model plus everything around it.', source: 'Anthropic, OpenAI, LangChain', color: 'var(--accent)' },
+    { term: 'Harness engineering', tip: 'The discipline', def: 'Designing the load-bearing system around the model. The 2026 inflection.', source: 'Anthropic', color: 'var(--accent-2)' },
+    { term: 'Meta-harness', tip: 'Platform pattern', def: 'A platform that virtualizes parts of the harness so you don\'t build them. Anthropic Managed Agents is one.', source: 'Anthropic', color: 'var(--L3)' },
+    { term: 'The dumb zone', tip: 'Failure mode', def: 'When the model spends more tokens reasoning about tools than doing the work. Caused by exposing too many tools.', source: 'Vercel v0', color: 'var(--L3)' },
+    { term: 'Context rot', tip: 'Failure mode', def: 'Gradual goal-drift in long-running sessions as the original task gets buried under tool output.', source: 'LangChain', color: 'var(--L2)' },
+    { term: 'Doom loop', tip: 'Failure mode', def: 'An infinite retry pattern that burns thousands of dollars overnight. Prevented by L5 loop detection.', source: 'LangChain', color: 'var(--L5)' },
+    { term: 'Success silent, failure loud', tip: 'Design principle', def: 'Verification design rule: pre-stop hooks should exit 0 silently and exit non-zero with detail. Exit code, not narration.', source: 'HumanLayer', color: 'var(--L4)' },
+    { term: 'Repository-as-truth', tip: 'OpenAI pattern', def: 'The repo is the agent\'s only source of ground truth. If it\'s not in the repo, it doesn\'t exist.', source: 'OpenAI Codex', color: 'var(--L1)' },
+    { term: 'Progressive disclosure', tip: 'OpenAI pattern', def: 'A short brief map points at module-level docs; nothing is loaded unless the agent navigates there.', source: 'OpenAI Codex', color: 'var(--L2)' },
+    { term: 'Application legibility', tip: 'OpenAI pattern', def: 'The running system is observable enough that the agent (and a human) can inspect real behavior, not just code.', source: 'OpenAI Codex', color: 'var(--L4)' },
+    { term: 'Mechanical enforcement', tip: 'OpenAI pattern', def: 'Architecture and coding "taste" turned into rules a linter or structural test can enforce — no human in the loop.', source: 'OpenAI Codex', color: 'var(--L1)' },
+    { term: 'Merge fast, fix fast', tip: 'OpenAI pattern', def: 'The merge philosophy that follows from high-throughput agent output. Quality is recaptured post-merge, not pre-merge.', source: 'OpenAI Codex', color: 'var(--L4)' },
+    { term: 'Hashimoto Principle', tip: 'The compounding rule', def: 'Every agent mistake gets engineered out so it never happens again.', source: '', color: 'var(--accent)' }
+  ];
+
+  const grid = document.getElementById('vocabGrid');
+  vocab.forEach((v) => {
+    const card = document.createElement('button');
+    card.type = 'button';
+    card.className = 'vocab-card';
+    card.setAttribute('role', 'listitem');
+    card.setAttribute('aria-pressed', 'false');
+    card.setAttribute('aria-label', `${v.term}: ${v.def}`);
+    card.style.setProperty('--c', v.color);
+    card.innerHTML = `
+      <div class="vocab-inner">
+        <div class="vocab-face vocab-front">
+          <div class="vocab-term">${v.term}</div>
+          <div class="vocab-tip">${v.tip} — tap to flip</div>
+        </div>
+        <div class="vocab-face vocab-back">
+          <div class="vocab-def">${v.def}</div>
+          <div class="vocab-source">${v.source}</div>
+        </div>
+      </div>
+    `;
+    card.addEventListener('click', () => {
+      const next = card.getAttribute('aria-pressed') === 'true' ? 'false' : 'true';
+      card.setAttribute('aria-pressed', next);
+    });
+    grid.appendChild(card);
+  });
+})();
+</script>
+</body>
+</html>

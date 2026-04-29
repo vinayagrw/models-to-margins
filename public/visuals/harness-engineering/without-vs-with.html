@@ -15,6 +15,20 @@ body {
     radial-gradient(circle at 88% 80%, rgba(78, 218, 181, 0.10), transparent 32%),
     linear-gradient(180deg, var(--bg-start) 0%, var(--bg-mid) 48%, var(--bg-end) 100%);
 }
+/* Embed mode: shell becomes flex column, split fills remaining height */
+:root[data-embedded="true"] .shell {
+  display: flex; flex-direction: column; gap: 10px; min-height: 0;
+}
+:root[data-embedded="true"] .head { margin-bottom: 0; }
+:root[data-embedded="true"] .head h1 { font-size: clamp(1.05rem, 1.8vw, 1.3rem); }
+:root[data-embedded="true"] .head p { font-size: 0.84rem; margin-top: 4px; }
+:root[data-embedded="true"] .split { flex: 1; min-height: 0; align-items: stretch; }
+:root[data-embedded="true"] .panel { padding: 14px 16px; gap: 8px; }
+:root[data-embedded="true"] .scene { height: 130px; flex-shrink: 0; }
+:root[data-embedded="true"] .bullets { gap: 4px; }
+:root[data-embedded="true"] .bullets li { font-size: 0.84rem; line-height: 1.35; }
+:root[data-embedded="true"] .takeaway { font-size: 0.78rem; padding: 8px 12px; }
+
 .head { text-align: center; margin-bottom: 20px; }
 .head h1 {
   font-family: "Syne", sans-serif; font-weight: 800;

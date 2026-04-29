@@ -18,7 +18,15 @@
   gap: 36px;
   align-items: center;
 }
-:root[data-embedded="true"] .hero-shell { padding: 18px 16px; }
+:root[data-embedded="true"] .hero-shell {
+  width: 100%; height: 100%;
+  padding: 14px 22px; align-content: center; gap: 28px;
+}
+:root[data-embedded="true"] .headline { font-size: clamp(1.4rem, 3.2vw, 2.4rem); margin-top: 6px; }
+:root[data-embedded="true"] .tagline { margin-top: 8px; font-size: 0.92rem; }
+:root[data-embedded="true"] .legend { margin-top: 12px; gap: 6px; }
+:root[data-embedded="true"] .legend-row { font-size: 0.84rem; }
+:root[data-embedded="true"] .canvas { max-width: 480px; }
 .headline {
   font-family: "Syne", "Space Grotesk", sans-serif;
   font-weight: 800; font-size: clamp(2rem, 4.4vw, 3.4rem);
