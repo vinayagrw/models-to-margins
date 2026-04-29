@@ -148,17 +148,25 @@ const slides = [
       .slide {
         height: calc(100vh - 52px);
         scroll-snap-align: start; scroll-snap-stop: always;
-        /* Single row: stage fills the entire slide. No head row, no padding gaps. */
+        /* Side padding only — no top/bottom gap. Stage fills full slide height. */
         display: grid; grid-template-rows: 1fr;
-        padding: 0;
+        padding: 0 clamp(16px, 2.4vw, 36px);
       }
       .slide-stage {
         position: relative; min-height: 0;
-        width: 100%; height: 100%;
-        /* Fill the entire slide — no max-height cap, no centering gap */
+        /* Centered card with max-width gutters; fills slide vertically */
+        width: 100%; max-width: 1400px;
+        height: 100%;
+        margin: 0 auto;
         overflow: hidden;
-        border: 0;
+        border-left: 1px solid var(--border);
+        border-right: 1px solid var(--border);
         background: var(--surface);
+        /* Tone-colored top accent line marks the slide's color */
+        border-top: 3px solid var(--tone, var(--accent));
+        box-shadow:
+          0 0 0 1px color-mix(in srgb, var(--tone, var(--accent)) 10%, transparent),
+          0 18px 42px color-mix(in srgb, var(--text-strong) 10%, transparent);
       }
       .slide-stage iframe {
         width: 100%; height: 100%; display: block;
