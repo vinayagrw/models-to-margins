@@ -3,12 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Hashimoto Principle · Vocabulary · Sources</title>
+<title>The Agentic Principle · Vocabulary · Sources</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
 <script src="./_theme-bootstrap.js"></script>
 <link rel="stylesheet" href="./_theme.css">
 <style>
-/* Closing slide: Hashimoto principle + flippable vocab cards + sources strip. Fluid sizing. */
+/* Closing slide: Agentic Principle quote + flippable vocab cards + sources strip. Fluid sizing.
+   Note: the .hashimoto-* CSS class names are kept for git-history continuity; visible text says "Agentic". */
 html, body { height: 100%; overflow: hidden; }
 .shell {
   width: 100%; height: 100%;
@@ -19,7 +20,7 @@ html, body { height: 100%; overflow: hidden; }
   max-width: none;
 }
 
-/* Hashimoto hero quote */
+/* Agentic Principle hero quote (class names kept for stability) */
 .hashimoto {
   border-radius: 18px;
   padding: clamp(12px, 1.8vh, 20px) clamp(16px, 2vw, 26px);
@@ -151,7 +152,7 @@ html, body { height: 100%; overflow: hidden; }
 </head>
 <body>
 <main class="shell">
-  <section class="hashimoto" aria-label="The Hashimoto Principle">
+  <section class="hashimoto" aria-label="The Agentic Principle">
     <span class="hashimoto-mark" aria-hidden="true">"</span>
     <div class="hashimoto-body">
       <span class="hashimoto-eyebrow">The single rule that compounds harness quality</span>
@@ -199,7 +200,7 @@ html, body { height: 100%; overflow: hidden; }
     { term: 'Application legibility', tip: 'OpenAI pattern', def: 'The running system is observable enough that the agent (and a human) can inspect real behavior, not just code.', source: 'OpenAI Codex', color: 'var(--L4)' },
     { term: 'Mechanical enforcement', tip: 'OpenAI pattern', def: 'Architecture and coding "taste" turned into rules a linter or structural test can enforce — no human in the loop.', source: 'OpenAI Codex', color: 'var(--L1)' },
     { term: 'Merge fast, fix fast', tip: 'OpenAI pattern', def: 'The merge philosophy that follows from high-throughput agent output. Quality is recaptured post-merge, not pre-merge.', source: 'OpenAI Codex', color: 'var(--L4)' },
-    { term: 'Hashimoto Principle', tip: 'The compounding rule', def: 'Every agent mistake gets engineered out so it never happens again.', source: '', color: 'var(--accent)' }
+    { term: 'The Agentic Principle', tip: 'The compounding rule', def: 'Every agent mistake gets engineered out so it never happens again.', source: '', color: 'var(--accent)' }
   ];
 
   const grid = document.getElementById('vocabGrid');

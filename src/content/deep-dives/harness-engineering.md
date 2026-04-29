@@ -1,8 +1,8 @@
 ---
 title: Harness Engineering — The Discipline Around the Model
 summary: Agent = Model + Harness. The model does the thinking; the harness decides what's true, what tools exist, what gets verified, and what survives a crash. Ten interactive scenes that take you from the equation to the implementation playbook.
-pubDate: 2026-04-29
-updatedDate: 2026-04-29
+pubDate: 2026-04-30
+updatedDate: 2026-04-30
 featured: true
 listed: true
 geography: Vendor-neutral, generic enterprise
@@ -22,6 +22,7 @@ readTime: 14 min read
   <p><strong>One-line idea</strong>: <code>Agent = Model + Harness</code>. The model is the brain; the harness is the skeleton, memory, hands, immune system, and nervous system around it.</p>
   <p><strong>Who this is for</strong>: an exec who needs the analogy and the decision (sections 1-3); a tech lead who needs the framework (sections 4-5); an engineer who needs the patterns (sections 6 onward).</p>
   <p><strong>Vendor stance</strong>: neutral. Examples reference OpenAI Codex, Anthropic Claude Code and Managed Agents, MCP, LangChain, Vercel v0, and HumanLayer where the public evidence comes from those teams.</p>
+  <p style="margin-top: 4px;"><strong>Prefer a slide deck?</strong> <a href="/deep-dives/harness-engineering/present">▶ Open in Present mode</a> — single-viewport, 10 slides, keyboard-navigable.</p>
 </div>
 
 <div class="signal-grid">
@@ -42,8 +43,8 @@ readTime: 14 min read
   </div>
   <div class="signal-card">
     <span class="signal-label">The compounding rule</span>
-    <strong>The Hashimoto Principle.</strong>
-    <p>"Anytime an agent makes a mistake, engineer it so the agent never makes that mistake again." A team that runs Hashimoto for six months ends up with a harness no one else can copy quickly.</p>
+    <strong>The Agentic Principle.</strong>
+    <p>"Anytime an agent makes a mistake, engineer it so the agent never makes that mistake again." A team that runs for six months ends up with a harness no one else can copy quickly.</p>
   </div>
 </div>
 
@@ -59,7 +60,7 @@ readTime: 14 min read
     <a class="reading-link" href="#scene-7-where-to-invest"><strong>7 · Where to invest</strong><span>Decision tree + coverage heatmap.</span></a>
     <a class="reading-link" href="#scene-8-three-decision-lanes"><strong>8 · Decision lanes</strong><span>Agentic vs deterministic vs human.</span></a>
     <a class="reading-link" href="#scene-9-implementation-playbook"><strong>9 · Playbook</strong><span>One min-viable move per layer.</span></a>
-    <a class="reading-link" href="#scene-10-vocabulary-and-sources"><strong>10 · Vocab + sources</strong><span>Hashimoto + 13 terms + sources.</span></a>
+    <a class="reading-link" href="#scene-10-vocabulary-and-sources"><strong>10 · Vocab + sources</strong><span> 13 terms + sources.</span></a>
   </div>
 </nav>
 
@@ -226,20 +227,20 @@ One minimum-viable move per layer. Click any layer tab to see the goal, two or t
 
 ## Scene 10 — Vocabulary and sources
 
-The Hashimoto Principle in a sentence, 13 flippable vocabulary cards (tap to flip), and a sources strip — all in one closing scene.
+The Principle in a sentence, 13 flippable vocabulary cards (tap to flip), and a sources strip — all in one closing scene.
 
 <div class="visual-frame" style="--vf-h:620px">
   <iframe
     src="/visuals/harness-engineering/vocabulary-visual.html?embed=1"
-    title="Hashimoto Principle, vocabulary cheat sheet, and sources"
+    title="Principle, vocabulary cheat sheet, and sources"
     loading="lazy"
     sandbox="allow-scripts allow-same-origin"
   ></iframe>
 </div>
 
 <div class="callout warm">
-  <strong>The Hashimoto Principle</strong>
-  <p>Mitchell Hashimoto: "Anytime you find an agent makes a mistake, you take the time to engineer a solution such that the agent never makes that mistake again." Every other rule in this deep dive is downstream of that one.</p>
+  <strong>Principle</strong>
+  <p>Principle: "Anytime you find an agent makes a mistake, you take the time to engineer a solution such that the agent never makes that mistake again." Every other rule in this deep dive is downstream of that one.</p>
 </div>
 
 ## How this relates to the older 7-component view
@@ -289,12 +290,6 @@ A harness costs real engineering time. Five situations where it's the wrong move
 
 ## Sources
 
-Primary articles this deep dive synthesizes:
-
-- [*Harness Engineering: What every AI engineer needs to know in 2026*](https://ai.gopubby.com/harness-engineering-what-every-ai-engineer-needs-to-know-in-2026-0ab649e5686a) — overview and timeline.
-- [*OpenAI's Harness Engineering Experiment: Zero Manually Written Code*](https://pub.towardsai.net/openais-harness-engineering-experiment-zero-manually-written-code-100a24ad04cf) — the OpenAI Codex experiment, the five OpenAI patterns, the layman analogies.
-- [*Anthropic Just Shipped Three of the Five Harness Layers for Managed Agent*](https://medium.com/data-science-collective/anthropic-just-shipped-three-of-the-five-harness-layers-for-managed-agent-and-the-other-two-are-on-14979cb4cf00) — the 5-layer model, ownership, rates of change, hard evidence numbers, vocabulary.
-
 Primary references those articles draw on:
 
 - OpenAI, [*Harness engineering: leveraging Codex in an agent-first world*](https://openai.com/index/harness-engineering/) (February 11, 2026).
@@ -302,4 +297,4 @@ Primary references those articles draw on:
 - Anthropic Managed Agents platform announcement (April 2026).
 - LangChain Terminal Bench 2.0 results, HumanLayer practical guides, Vercel v0 tool-scoping write-up, ETH Zurich agentfile study, Boris Cherny on Claude Code verification — find these via the three synthesis articles above.
 
-This deep dive is vendor-neutral. The patterns work on any modern coding agent — Claude Code, Codex, Cursor, Copilot Workspace, or your own — provided you name the five layers, give each one an owner, and run the Hashimoto Principle for long enough to compound.
+This deep dive is vendor-neutral. The patterns work on any modern coding agent — Claude Code, Codex, Cursor, Copilot Workspace, or your own — provided you name the five layers, give each one an owner, and run the Principle for long enough to compound.

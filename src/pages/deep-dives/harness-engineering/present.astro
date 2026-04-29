@@ -1,0 +1,406 @@
+---
+import { getEntry } from 'astro:content';
+
+const entry = await getEntry('deep-dives', 'harness-engineering');
+const title = entry?.data.title ?? 'Harness Engineering';
+const description = entry?.data.summary ?? 'Agent = Model + Harness — single-viewport slide deck.';
+const canonical = new URL(Astro.url.pathname, Astro.site);
+
+// Slides — kept here so the deck markup stays declarative and adding a slide
+// is one line. `tone` drives the color of the side-dot indicator.
+const slides = [
+  { id: 'equation',     label: '1 · Equation',         visual: 'hero-equation.html',   eyebrow: 'The one-line idea',           title: 'Agent = Model + Harness',                                  tone: 'cyan'   },
+  { id: 'without-with', label: '2 · Without / With',    visual: 'without-vs-with.html', eyebrow: 'Same brain, two outcomes',    title: 'A model alone is fluent. Inside a harness, useful.',       tone: 'orange' },
+  { id: 'evidence',     label: '3 · Why now',           visual: 'evidence-chart.html',  eyebrow: 'Hard evidence — 2026',        title: 'Same model, different harness. Same conclusion.',          tone: 'cyan'   },
+  { id: 'layers',       label: '4 · 5 layers',          visual: 'harness-explorer.html',eyebrow: 'The framework spine',         title: 'Five layers, five owners, five rates of change.',          tone: 'violet' },
+  { id: 'run',          label: '5 · One run',           visual: 'run-trace.html',       eyebrow: 'A real agent run',            title: '9 steps in 3 acts — Prepare, Execute, Govern.',            tone: 'jade'   },
+  { id: 'failures',     label: '6 · Failure modes',     visual: 'failure-modes.html',   eyebrow: 'When the harness is missing', title: '9 failures, mapped to the layer that prevents each.',      tone: 'red'    },
+  { id: 'invest',       label: '7 · Where to invest',   visual: 'invest-first.html',    eyebrow: 'Action — start Monday',       title: 'Pick the layer with the highest marginal return.',         tone: 'jade'   },
+  { id: 'lanes',        label: '8 · Decision lanes',    visual: 'decision-lanes.html',  eyebrow: 'Pick the right lane',         title: 'Agentic vs deterministic vs human authority.',             tone: 'amber'  },
+  { id: 'playbook',     label: '9 · Playbook',          visual: 'playbook-visual.html', eyebrow: 'Implementation patterns',     title: 'One min-viable move per layer. Ship this sprint.',         tone: 'cyan'   },
+  { id: 'closer',       label: '10 · Vocab + Sources',  visual: 'vocabulary-visual.html', eyebrow: 'The Agentic Principle',     title: 'Engineer every mistake out, forever.',                     tone: 'orange' }
+];
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title} | Models to Margins</title>
+    <meta name="description" content={description} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content={canonical.href} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="canonical" href={canonical.href} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet" />
+    <script is:inline>
+      // Theme bootstrap — synchronous, prevents FOUC.
+      (() => {
+        const params = new URLSearchParams(window.location.search);
+        const root = document.documentElement;
+        const media = window.matchMedia('(prefers-color-scheme: dark)');
+        const storageKey = 'm2m-theme';
+        const norm = (v) => (v === 'dark' || v === 'light' ? v : null);
+        const stored = (() => { try { return norm(localStorage.getItem(storageKey)); } catch { return null; } })();
+        const theme = norm(params.get('theme')) ?? stored ?? (media.matches ? 'dark' : 'light');
+        root.dataset.theme = theme;
+        root.style.colorScheme = theme;
+      })();
+    </script>
+    <style is:global>
+      :root, :root[data-theme="light"] {
+        color-scheme: light;
+        --bg: #f7efe5; --bg-mid: #e8f5fa; --bg-end: #f4e7e2;
+        --surface: rgba(255, 255, 255, 0.86);
+        --surface-strong: rgba(255, 255, 255, 0.94);
+        --border: rgba(16, 42, 67, 0.14);
+        --border-strong: rgba(16, 42, 67, 0.26);
+        --text: #0d2138; --text-strong: #051324; --muted: rgba(16, 42, 67, 0.62);
+        --accent: #0a8aab; --accent-2: #f97316;
+        --tone-cyan: #0a8aab; --tone-orange: #f97316; --tone-violet: #a56cff;
+        --tone-jade: #16825d; --tone-red: #d2451e; --tone-amber: #b8860b;
+      }
+      :root[data-theme="dark"] {
+        color-scheme: dark;
+        --bg: #040915; --bg-mid: #050b16; --bg-end: #02050c;
+        --surface: rgba(11, 21, 38, 0.86);
+        --surface-strong: rgba(13, 24, 42, 0.94);
+        --border: rgba(166, 212, 255, 0.16);
+        --border-strong: rgba(166, 212, 255, 0.36);
+        --text: #ebf4ff; --text-strong: #ffffff; --muted: rgba(235, 244, 255, 0.66);
+        --accent: #22d3ee; --accent-2: #f97316;
+        --tone-cyan: #22d3ee; --tone-orange: #f97316; --tone-violet: #a56cff;
+        --tone-jade: #4edab5; --tone-red: #ff776c; --tone-amber: #f4cb73;
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body {
+        height: 100%; overflow: hidden;
+        font-family: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif;
+        background:
+          radial-gradient(circle at 12% 18%, rgba(34, 211, 238, 0.08), transparent 28%),
+          radial-gradient(circle at 88% 82%, rgba(249, 115, 22, 0.08), transparent 28%),
+          linear-gradient(180deg, var(--bg) 0%, var(--bg-mid) 48%, var(--bg-end) 100%);
+        color: var(--text);
+      }
+
+      /* Top chrome — slim bar with brand, deck title, theme toggle, exit */
+      .deck-chrome {
+        position: fixed; top: 0; left: 0; right: 0; z-index: 20;
+        height: 52px;
+        display: grid; grid-template-columns: auto 1fr auto; align-items: center;
+        gap: 16px; padding: 0 18px;
+        background: color-mix(in srgb, var(--bg) 88%, transparent);
+        backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--border);
+      }
+      .chrome-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
+      .brand-mark {
+        width: 28px; height: 28px; border-radius: 9px;
+        display: grid; place-items: center;
+        background: linear-gradient(135deg, var(--accent), var(--accent-2));
+        color: #0a1524; font-weight: 700; letter-spacing: 0.06em; font-size: 0.7rem;
+        text-decoration: none;
+      }
+      .back-link {
+        color: var(--muted); text-decoration: none; font-size: 0.84rem;
+        display: inline-flex; align-items: center; gap: 6px;
+      }
+      .back-link:hover { color: var(--text-strong); }
+      .chrome-mid {
+        text-align: center; overflow: hidden;
+        display: grid; grid-template-rows: auto auto;
+      }
+      .chrome-eyebrow {
+        font-size: 0.66rem; letter-spacing: 0.16em; text-transform: uppercase;
+        color: var(--accent); font-weight: 700;
+      }
+      .chrome-title {
+        font-family: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif; font-weight: 700; color: var(--text-strong);
+        font-size: 0.95rem; line-height: 1.15;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      }
+      .chrome-right { display: flex; align-items: center; gap: 12px; }
+      .theme-toggle {
+        appearance: none; border: 1px solid var(--border); background: var(--surface);
+        color: var(--muted); padding: 6px 10px; border-radius: 999px;
+        font-size: 0.74rem; font-weight: 600; letter-spacing: 0.06em;
+        cursor: pointer; font-family: inherit;
+      }
+      .theme-toggle:hover { color: var(--text-strong); border-color: var(--border-strong); }
+      .slide-counter {
+        font-family: "DM Sans", sans-serif; font-variant-numeric: tabular-nums;
+        font-size: 0.78rem; color: var(--muted); font-weight: 600;
+      }
+      .slide-counter strong { color: var(--text-strong); }
+
+      /* Deck — vertical scroll-snap */
+      .deck {
+        height: 100vh; padding-top: 52px;
+        overflow-y: scroll; scroll-snap-type: y mandatory;
+        scroll-behavior: smooth;
+        scrollbar-width: none;
+      }
+      .deck::-webkit-scrollbar { display: none; }
+
+      .slide {
+        height: calc(100vh - 52px);
+        scroll-snap-align: start; scroll-snap-stop: always;
+        /* Side padding only — no top/bottom gap. Stage fills full slide height. */
+        display: grid; grid-template-rows: 1fr;
+        padding: 0 clamp(16px, 2.4vw, 36px);
+      }
+      .slide-stage {
+        position: relative; min-height: 0;
+        /* Centered card with max-width gutters; fills slide vertically */
+        width: 100%; max-width: 1400px;
+        height: 100%;
+        margin: 0 auto;
+        overflow: hidden;
+        border-left: 1px solid var(--border);
+        border-right: 1px solid var(--border);
+        background: var(--surface);
+        /* Tone-colored top accent line marks the slide's color */
+        border-top: 3px solid var(--tone, var(--accent));
+        box-shadow:
+          0 0 0 1px color-mix(in srgb, var(--tone, var(--accent)) 10%, transparent),
+          0 18px 42px color-mix(in srgb, var(--text-strong) 10%, transparent);
+      }
+      .slide-stage iframe {
+        width: 100%; height: 100%; display: block;
+        border: 0;
+      }
+
+      /* Per-tone accents */
+      .slide[data-tone="cyan"]    { --tone: var(--tone-cyan); }
+      .slide[data-tone="orange"]  { --tone: var(--tone-orange); }
+      .slide[data-tone="violet"]  { --tone: var(--tone-violet); }
+      .slide[data-tone="jade"]    { --tone: var(--tone-jade); }
+      .slide[data-tone="red"]     { --tone: var(--tone-red); }
+      .slide[data-tone="amber"]   { --tone: var(--tone-amber); }
+      .slide[data-tone="cyan"]   .slide-stage { border-color: color-mix(in srgb, var(--tone-cyan) 30%, var(--border)); }
+      .slide[data-tone="orange"] .slide-stage { border-color: color-mix(in srgb, var(--tone-orange) 30%, var(--border)); }
+      .slide[data-tone="violet"] .slide-stage { border-color: color-mix(in srgb, var(--tone-violet) 30%, var(--border)); }
+      .slide[data-tone="jade"]   .slide-stage { border-color: color-mix(in srgb, var(--tone-jade) 30%, var(--border)); }
+      .slide[data-tone="red"]    .slide-stage { border-color: color-mix(in srgb, var(--tone-red) 30%, var(--border)); }
+      .slide[data-tone="amber"]  .slide-stage { border-color: color-mix(in srgb, var(--tone-amber) 30%, var(--border)); }
+
+      /* Right-side dot navigation */
+      .deck-dots {
+        position: fixed; right: 14px; top: 50%; transform: translateY(-50%);
+        z-index: 25; display: flex; flex-direction: column; gap: 10px;
+      }
+      .deck-dot {
+        appearance: none; border: 0; padding: 0;
+        width: 10px; height: 10px; border-radius: 50%;
+        background: color-mix(in srgb, var(--text) 20%, transparent);
+        cursor: pointer; transition: 180ms ease;
+        position: relative;
+      }
+      .deck-dot:hover { background: var(--text); }
+      .deck-dot[aria-current="true"] {
+        background: var(--dot-c, var(--accent));
+        transform: scale(1.5);
+        box-shadow: 0 0 0 4px color-mix(in srgb, var(--dot-c, var(--accent)) 20%, transparent);
+      }
+      .deck-dot[data-tone="cyan"]   { --dot-c: var(--tone-cyan); }
+      .deck-dot[data-tone="orange"] { --dot-c: var(--tone-orange); }
+      .deck-dot[data-tone="violet"] { --dot-c: var(--tone-violet); }
+      .deck-dot[data-tone="jade"]   { --dot-c: var(--tone-jade); }
+      .deck-dot[data-tone="red"]    { --dot-c: var(--tone-red); }
+      .deck-dot[data-tone="amber"]  { --dot-c: var(--tone-amber); }
+      .deck-dot::after {
+        content: attr(data-label); position: absolute; right: 22px; top: 50%;
+        transform: translateY(-50%) translateX(-4px);
+        background: var(--surface-strong); color: var(--text);
+        border: 1px solid var(--border);
+        padding: 4px 9px; border-radius: 8px;
+        font-size: 0.72rem; font-weight: 600; white-space: nowrap;
+        opacity: 0; pointer-events: none;
+        transition: opacity 160ms ease, transform 160ms ease;
+      }
+      .deck-dot:hover::after, .deck-dot:focus-visible::after {
+        opacity: 1; transform: translateY(-50%) translateX(0);
+      }
+
+      /* Bottom hint — fades after first interaction */
+      .nav-hint {
+        position: fixed; bottom: 14px; left: 50%; transform: translateX(-50%);
+        z-index: 25;
+        font-size: 0.74rem; color: var(--muted);
+        background: var(--surface-strong); border: 1px solid var(--border);
+        padding: 6px 12px; border-radius: 999px;
+        display: inline-flex; align-items: center; gap: 8px;
+        transition: opacity 400ms ease;
+      }
+      .nav-hint kbd {
+        display: inline-block; padding: 1px 5px; border-radius: 4px;
+        background: var(--surface); border: 1px solid var(--border);
+        font-family: "DM Sans", sans-serif; font-size: 0.72rem;
+        color: var(--text-strong);
+      }
+      body.deck-engaged .nav-hint { opacity: 0; }
+
+      @media (max-width: 720px) {
+        .chrome-mid { display: none; }
+        .deck-dots { right: 8px; }
+        .deck-dot::after { display: none; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .deck { scroll-behavior: auto; }
+        .deck-dot { transition: none; }
+        .nav-hint { transition: none; }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="deck-chrome" aria-label="Deck chrome">
+      <div class="chrome-left">
+        <a href="/" class="brand-mark" aria-label="Models to Margins home">M2M</a>
+        <a href="/deep-dives/harness-engineering" class="back-link">
+          <span aria-hidden="true">←</span> Back to article view
+        </a>
+      </div>
+      <div class="chrome-mid">
+        <span class="chrome-eyebrow">Deep Dive</span>
+        <span class="chrome-title">Harness Engineering — Agent = Model + Harness</span>
+      </div>
+      <div class="chrome-right">
+        <span class="slide-counter" aria-live="polite"><strong id="slideCounter">1</strong> / {slides.length}</span>
+        <button type="button" class="theme-toggle" data-theme-toggle>Theme</button>
+      </div>
+    </header>
+
+    <nav class="deck-dots" aria-label="Slide navigation">
+      {slides.map((s, i) => (
+        <button
+          type="button"
+          class="deck-dot"
+          data-target={s.id}
+          data-tone={s.tone}
+          data-label={s.label}
+          aria-label={`Go to slide ${i + 1}: ${s.label}`}
+          aria-current={i === 0 ? 'true' : 'false'}
+        />
+      ))}
+    </nav>
+
+    <main class="deck" id="deck" tabindex="-1">
+      {slides.map((s, i) => (
+        <section
+          class="slide"
+          id={`slide-${s.id}`}
+          data-tone={s.tone}
+          data-index={i}
+          aria-label={`Slide ${i + 1} of ${slides.length}: ${s.label} — ${s.title}`}
+        >
+          <div class="slide-stage">
+            <iframe
+              src={`/visuals/harness-engineering/${s.visual}?embed=1`}
+              title={`${s.label} — ${s.title}`}
+              loading={i < 2 ? 'eager' : 'lazy'}
+              scrolling="no"
+              sandbox="allow-scripts allow-same-origin"
+            />
+          </div>
+        </section>
+      ))}
+    </main>
+
+    <div class="nav-hint" aria-hidden="true">
+      <kbd>↓</kbd> next · <kbd>↑</kbd> prev · scroll, swipe, or dot
+    </div>
+
+    <script is:inline>
+      (() => {
+        const deck = document.getElementById('deck');
+        const dots = Array.from(document.querySelectorAll('.deck-dot'));
+        const slides = Array.from(document.querySelectorAll('.slide'));
+        const counter = document.getElementById('slideCounter');
+        const total = slides.length;
+
+        let current = 0;
+
+        const setCurrent = (i) => {
+          current = Math.max(0, Math.min(total - 1, i));
+          counter.textContent = String(current + 1);
+          dots.forEach((d, idx) => d.setAttribute('aria-current', idx === current ? 'true' : 'false'));
+        };
+
+        const goto = (i) => {
+          const target = slides[Math.max(0, Math.min(total - 1, i))];
+          if (!target) return;
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        };
+
+        // Update on scroll via IntersectionObserver
+        const io = new IntersectionObserver((entries) => {
+          let best = null;
+          for (const entry of entries) {
+            if (entry.isIntersecting && (!best || entry.intersectionRatio > best.intersectionRatio)) {
+              best = entry;
+            }
+          }
+          if (best) setCurrent(Number(best.target.dataset.index));
+        }, { root: deck, threshold: [0.5, 0.75, 1] });
+        slides.forEach((s) => io.observe(s));
+
+        // Dot clicks
+        dots.forEach((dot, idx) => {
+          dot.addEventListener('click', () => {
+            document.body.classList.add('deck-engaged');
+            goto(idx);
+          });
+        });
+
+        // Keyboard
+        const keyHandler = (e) => {
+          if (['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) return;
+          let handled = true;
+          switch (e.key) {
+            case 'ArrowDown':
+            case 'PageDown':
+            case ' ':
+            case 'j':
+              goto(current + 1); break;
+            case 'ArrowUp':
+            case 'PageUp':
+            case 'k':
+              goto(current - 1); break;
+            case 'Home':
+              goto(0); break;
+            case 'End':
+              goto(total - 1); break;
+            default:
+              handled = false;
+          }
+          if (handled) {
+            e.preventDefault();
+            document.body.classList.add('deck-engaged');
+          }
+        };
+        window.addEventListener('keydown', keyHandler);
+
+        // First scroll dismisses hint
+        deck.addEventListener('scroll', () => {
+          document.body.classList.add('deck-engaged');
+        }, { once: true, passive: true });
+
+        // Theme toggle
+        const themeBtn = document.querySelector('[data-theme-toggle]');
+        themeBtn?.addEventListener('click', () => {
+          const root = document.documentElement;
+          const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+          root.dataset.theme = next;
+          root.style.colorScheme = next;
+          try { localStorage.setItem('m2m-theme', next); } catch {}
+        });
+
+        // Focus deck so keyboard shortcuts work immediately
+        deck.focus({ preventScroll: true });
+      })();
+    </script>
+  </body>
+</html>
