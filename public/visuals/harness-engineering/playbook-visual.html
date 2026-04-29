@@ -8,27 +8,30 @@
 <script src="./_theme-bootstrap.js"></script>
 <link rel="stylesheet" href="./_theme.css">
 <style>
-/* Scene-specific: implementation playbook — tabbed L1-L5 cards */
+/* Scene-specific: implementation playbook — tabbed L1-L5 cards. Fluid sizing. */
 html, body { height: 100%; overflow: hidden; }
 .shell {
   width: 100%; height: 100%;
-  margin: 0; padding: 14px 18px;
-  display: grid; grid-template-rows: auto 1fr; gap: 10px;
+  margin: 0;
+  padding: clamp(10px, 1.6vh, 18px) clamp(14px, 2vw, 22px);
+  display: grid; grid-template-rows: auto 1fr;
+  gap: clamp(8px, 1.2vh, 14px);
   max-width: none;
 }
 .head { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: end; }
 .head h1 {
   font-family: "Syne", sans-serif; font-weight: 800;
-  font-size: clamp(1.05rem, 1.8vw, 1.35rem); color: var(--text-strong);
+  font-size: clamp(1rem, 2.2vh, 1.5rem); color: var(--text-strong);
   letter-spacing: -0.01em; line-height: 1.2;
 }
-.head p { color: var(--muted); font-size: 0.84rem; margin-top: 4px; max-width: 64ch; }
+.head p { color: var(--muted); font-size: clamp(0.78rem, 1.4vh, 0.92rem); margin-top: 4px; max-width: 64ch; }
 .tabs { display: flex; gap: 6px; flex-wrap: wrap; }
 .tab {
   appearance: none; border: 1px solid var(--border); background: var(--surface);
   color: var(--muted); font: inherit; cursor: pointer;
-  padding: 6px 12px; border-radius: 999px;
-  font-size: 0.78rem; font-weight: 700; letter-spacing: 0.04em;
+  padding: clamp(5px, 0.9vh, 8px) clamp(10px, 1.2vw, 14px);
+  border-radius: 999px;
+  font-size: clamp(0.72rem, 1.2vh, 0.84rem); font-weight: 700; letter-spacing: 0.04em;
   transition: 160ms ease;
 }
 .tab:hover { color: var(--text-strong); border-color: var(--border-strong); }
@@ -50,92 +53,99 @@ html, body { height: 100%; overflow: hidden; }
   display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
   overflow: hidden; box-shadow: var(--shadow);
 }
-.panel-info { padding: 16px 18px;
-  display: grid; grid-template-rows: auto auto auto auto auto 1fr; gap: 10px;
+.panel-info {
+  padding: clamp(12px, 1.8vh, 20px) clamp(14px, 1.4vw, 20px);
+  display: flex; flex-direction: column; gap: clamp(8px, 1.2vh, 14px);
   border-right: 1px solid var(--border);
+  justify-content: flex-start;
 }
 .panel-tag {
   display: inline-flex; align-items: center; gap: 8px;
-  font-size: 0.7rem; font-weight: 700; letter-spacing: 0.16em;
+  font-size: clamp(0.66rem, 1.05vh, 0.74rem); font-weight: 700; letter-spacing: 0.16em;
   text-transform: uppercase; color: var(--c);
 }
 .panel-tag::before { content: ""; width: 10px; height: 10px; border-radius: 3px; background: var(--c); }
 .panel-title {
   font-family: "Syne", sans-serif; font-weight: 800;
-  font-size: 1.5rem; line-height: 1.15; color: var(--text-strong);
+  font-size: clamp(1.2rem, 2.4vh, 1.7rem); line-height: 1.15; color: var(--text-strong);
   letter-spacing: -0.01em;
 }
 .panel-meta {
-  display: flex; flex-wrap: wrap; gap: 8px;
+  display: flex; flex-wrap: wrap; gap: clamp(5px, 0.7vw, 8px);
 }
 .meta-chip {
-  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.04em;
+  font-size: clamp(0.68rem, 1.05vh, 0.76rem); font-weight: 600; letter-spacing: 0.04em;
   padding: 4px 10px; border-radius: 999px;
   border: 1px solid var(--border); background: var(--surface-strong);
   color: var(--muted);
 }
 .meta-chip strong { color: var(--text-strong); margin-right: 4px; font-weight: 700; }
 .panel-purpose {
-  font-size: 0.94rem; line-height: 1.5; color: var(--text);
+  font-size: clamp(0.84rem, 1.5vh, 1rem); line-height: 1.5; color: var(--text);
 }
 .panel-purpose strong { color: var(--text-strong); }
 .panel-mvv {
-  padding: 10px 12px; border-radius: 12px;
+  padding: clamp(8px, 1.2vh, 12px) clamp(10px, 1vw, 14px); border-radius: 12px;
   background: color-mix(in srgb, var(--c) 12%, transparent);
   border-left: 3px solid var(--c);
-  font-size: 0.86rem; line-height: 1.45;
+  font-size: clamp(0.78rem, 1.35vh, 0.9rem); line-height: 1.45;
+  margin-top: auto;
 }
 .panel-mvv strong {
   display: block; margin-bottom: 2px;
-  font-size: 0.66rem; letter-spacing: 0.16em; text-transform: uppercase;
+  font-size: clamp(0.6rem, 0.95vh, 0.68rem); letter-spacing: 0.16em; text-transform: uppercase;
   color: var(--c);
 }
 .panel-anti {
-  padding: 10px 12px; border-radius: 12px;
+  padding: clamp(8px, 1.2vh, 12px) clamp(10px, 1vw, 14px); border-radius: 12px;
   background: color-mix(in srgb, var(--warn) 8%, transparent);
   border: 1px dashed color-mix(in srgb, var(--warn) 40%, transparent);
-  font-size: 0.84rem; line-height: 1.45; color: var(--text);
+  font-size: clamp(0.76rem, 1.3vh, 0.86rem); line-height: 1.45; color: var(--text);
 }
 .panel-anti strong {
   display: block; margin-bottom: 2px;
-  font-size: 0.66rem; letter-spacing: 0.16em; text-transform: uppercase;
+  font-size: clamp(0.6rem, 0.95vh, 0.68rem); letter-spacing: 0.16em; text-transform: uppercase;
   color: var(--warn);
 }
 
 .panel-examples {
-  padding: 16px 18px; min-height: 0;
+  padding: clamp(12px, 1.8vh, 20px) clamp(14px, 1.4vw, 20px); min-height: 0;
   display: grid; grid-template-rows: auto 1fr;
+  gap: clamp(8px, 1.2vh, 12px);
 }
 .examples-label {
-  font-size: 0.7rem; font-weight: 700; letter-spacing: 0.16em;
-  text-transform: uppercase; color: var(--c); margin-bottom: 10px;
+  font-size: clamp(0.66rem, 1.05vh, 0.74rem); font-weight: 700; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--c);
 }
 .examples-list {
-  list-style: none; display: grid; gap: 8px; min-height: 0;
-  overflow-y: auto;
-  scrollbar-width: thin;
+  list-style: none; display: grid;
+  /* No row stretch — examples size to content; gap absorbs slack */
+  grid-template-rows: repeat(auto-fit, max-content);
+  gap: clamp(6px, 1vh, 10px); min-height: 0;
+  overflow-y: auto; scrollbar-width: thin;
+  align-content: start;
 }
 .example {
   border: 1px solid var(--border); border-radius: 12px;
   background: var(--surface-strong);
-  padding: 10px 12px;
+  padding: clamp(8px, 1.2vh, 12px) clamp(10px, 1vw, 14px);
   display: grid; grid-template-rows: auto auto; gap: 4px;
 }
 .example-head {
   font-family: "DM Sans", sans-serif; font-weight: 700;
-  font-size: 0.86rem; color: var(--text-strong);
+  font-size: clamp(0.78rem, 1.35vh, 0.9rem); color: var(--text-strong);
   display: flex; align-items: center; gap: 8px;
 }
 .example-head::before {
   content: "→"; color: var(--c); font-weight: 800;
 }
-.example-detail { font-size: 0.8rem; color: var(--muted); line-height: 1.4; padding-left: 18px; }
+.example-detail { font-size: clamp(0.74rem, 1.2vh, 0.84rem); color: var(--muted); line-height: 1.4; padding-left: 18px; }
 .example-code {
-  margin-top: 6px; padding: 8px 10px; border-radius: 8px;
+  margin-top: 6px; padding: clamp(6px, 1vh, 10px) clamp(8px, 1vw, 12px); border-radius: 8px;
   background: color-mix(in srgb, var(--text) 8%, transparent);
   border: 1px solid var(--border);
   font-family: "JetBrains Mono", "Consolas", monospace;
-  font-size: 0.72rem; line-height: 1.5;
+  font-size: clamp(0.66rem, 1.1vh, 0.78rem); line-height: 1.5;
   color: var(--text); white-space: pre; overflow-x: auto;
 }
 

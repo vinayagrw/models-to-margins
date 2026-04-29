@@ -171,7 +171,13 @@ const slides = [
       }
       .slide-stage {
         position: relative; min-height: 0;
-        max-width: 1400px; width: 100%; margin: 0 auto;
+        width: 100%; max-width: 1400px;
+        height: 100%;
+        /* Cap stage so iframes never get absurdly tall on big monitors,
+           and never collapse below a useful working area on short ones. */
+        max-height: clamp(420px, calc(100vh - 130px), 820px);
+        margin: 0 auto;
+        align-self: center;
         border-radius: 18px; overflow: hidden;
         border: 1px solid var(--border);
         background: var(--surface);

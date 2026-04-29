@@ -18,15 +18,29 @@
   gap: 36px;
   align-items: center;
 }
+/* Embed mode: 2-col grid, fluid sizing fills iframe; canvas scales with height */
 :root[data-embedded="true"] .hero-shell {
   width: 100%; height: 100%;
-  padding: 14px 22px; align-content: center; gap: 28px;
+  padding: clamp(12px, 2vh, 24px) clamp(16px, 2.4vw, 28px);
+  align-items: center;
+  gap: clamp(20px, 3vw, 36px);
 }
-:root[data-embedded="true"] .headline { font-size: clamp(1.4rem, 3.2vw, 2.4rem); margin-top: 6px; }
-:root[data-embedded="true"] .tagline { margin-top: 8px; font-size: 0.92rem; }
-:root[data-embedded="true"] .legend { margin-top: 12px; gap: 6px; }
-:root[data-embedded="true"] .legend-row { font-size: 0.84rem; }
-:root[data-embedded="true"] .canvas { max-width: 480px; }
+:root[data-embedded="true"] .copy { display: flex; flex-direction: column; gap: clamp(8px, 1.2vh, 14px); }
+:root[data-embedded="true"] .eyebrow { font-size: clamp(0.66rem, 1.1vh, 0.78rem); }
+:root[data-embedded="true"] .headline {
+  font-size: clamp(1.3rem, 3.6vh, 2.6rem); margin-top: 0;
+  line-height: 1.08;
+}
+:root[data-embedded="true"] .tagline {
+  margin-top: 0; font-size: clamp(0.84rem, 1.5vh, 1rem);
+}
+:root[data-embedded="true"] .legend { margin-top: 0; gap: clamp(4px, 0.8vh, 8px); }
+:root[data-embedded="true"] .legend-row { font-size: clamp(0.78rem, 1.3vh, 0.9rem); }
+:root[data-embedded="true"] .canvas {
+  max-width: min(560px, 80vh);
+  width: 100%; aspect-ratio: 1;
+  align-self: center;
+}
 .headline {
   font-family: "Syne", "Space Grotesk", sans-serif;
   font-weight: 800; font-size: clamp(2rem, 4.4vw, 3.4rem);

@@ -15,19 +15,37 @@ body {
     radial-gradient(circle at 88% 80%, rgba(78, 218, 181, 0.10), transparent 32%),
     linear-gradient(180deg, var(--bg-start) 0%, var(--bg-mid) 48%, var(--bg-end) 100%);
 }
-/* Embed mode: shell becomes flex column, split fills remaining height */
+/* Embed mode: shell flex column; panels fill, scene + bullets + takeaway scale */
 :root[data-embedded="true"] .shell {
-  display: flex; flex-direction: column; gap: 10px; min-height: 0;
+  display: flex; flex-direction: column;
+  gap: clamp(6px, 1vh, 12px); min-height: 0;
+  padding: clamp(10px, 1.6vh, 18px) clamp(14px, 2vw, 22px);
 }
 :root[data-embedded="true"] .head { margin-bottom: 0; }
-:root[data-embedded="true"] .head h1 { font-size: clamp(1.05rem, 1.8vw, 1.3rem); }
-:root[data-embedded="true"] .head p { font-size: 0.84rem; margin-top: 4px; }
-:root[data-embedded="true"] .split { flex: 1; min-height: 0; align-items: stretch; }
-:root[data-embedded="true"] .panel { padding: 14px 16px; gap: 8px; }
-:root[data-embedded="true"] .scene { height: 130px; flex-shrink: 0; }
-:root[data-embedded="true"] .bullets { gap: 4px; }
-:root[data-embedded="true"] .bullets li { font-size: 0.84rem; line-height: 1.35; }
-:root[data-embedded="true"] .takeaway { font-size: 0.78rem; padding: 8px 12px; }
+:root[data-embedded="true"] .head h1 { font-size: clamp(1rem, 2.2vh, 1.5rem); }
+:root[data-embedded="true"] .head p { font-size: clamp(0.78rem, 1.4vh, 0.92rem); margin-top: 4px; }
+:root[data-embedded="true"] .split {
+  flex: 1; min-height: 0; align-items: stretch;
+  gap: clamp(8px, 1.4vw, 16px);
+}
+:root[data-embedded="true"] .panel {
+  padding: clamp(12px, 1.6vh, 18px) clamp(12px, 1.4vw, 18px);
+  gap: clamp(8px, 1.2vh, 14px);
+  /* Distribute content evenly — no margin-top: auto gap */
+  justify-content: space-between;
+}
+:root[data-embedded="true"] .scene {
+  height: clamp(110px, 18vh, 180px); flex-shrink: 0;
+}
+:root[data-embedded="true"] .bullets { gap: clamp(4px, 0.7vh, 8px); }
+:root[data-embedded="true"] .bullets li {
+  font-size: clamp(0.8rem, 1.35vh, 0.92rem); line-height: 1.4;
+}
+:root[data-embedded="true"] .takeaway {
+  font-size: clamp(0.76rem, 1.25vh, 0.86rem);
+  padding: clamp(8px, 1.2vh, 12px) clamp(10px, 1.2vw, 14px);
+  margin-top: 0;
+}
 
 .head { text-align: center; margin-bottom: 20px; }
 .head h1 {

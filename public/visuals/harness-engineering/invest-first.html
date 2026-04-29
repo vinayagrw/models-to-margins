@@ -15,27 +15,60 @@ body {
     radial-gradient(circle at 88% 88%, rgba(78, 218, 181, 0.10), transparent 32%),
     linear-gradient(180deg, var(--bg-start) 0%, var(--bg-mid) 48%, var(--bg-end) 100%);
 }
-/* Embed mode: tight layout, fits viewport */
+/* Embed mode: head + 2-col body, fluid sizing */
 :root[data-embedded="true"] .shell {
-  display: grid; grid-template-rows: auto 1fr; gap: 8px; min-height: 0;
+  display: grid; grid-template-rows: auto 1fr;
+  gap: clamp(6px, 1vh, 12px); min-height: 0;
+  padding: clamp(10px, 1.6vh, 18px) clamp(14px, 2vw, 22px);
 }
 :root[data-embedded="true"] .head { margin-bottom: 0; }
-:root[data-embedded="true"] .head h1 { font-size: clamp(1.05rem, 1.8vw, 1.3rem); }
-:root[data-embedded="true"] .head p { font-size: 0.84rem; max-width: none; }
-:root[data-embedded="true"] .body { gap: 10px; min-height: 0; align-items: stretch; }
-:root[data-embedded="true"] .tree, :root[data-embedded="true"] .coverage { padding: 14px 16px; min-height: 0; overflow: hidden; }
-:root[data-embedded="true"] .tree-title, :root[data-embedded="true"] .coverage-title { font-size: 0.96rem; }
-:root[data-embedded="true"] .tree-sub, :root[data-embedded="true"] .coverage-sub { font-size: 0.78rem; margin-bottom: 10px; }
-:root[data-embedded="true"] .tree-question { gap: 8px; margin-bottom: 8px; }
-:root[data-embedded="true"] .tree-q-text { font-size: 0.86rem; }
-:root[data-embedded="true"] .tree-q-text small { font-size: 0.74rem; }
-:root[data-embedded="true"] .tree-branches { gap: 8px; margin: 8px 0 12px; }
-:root[data-embedded="true"] .branch { padding: 10px 11px; gap: 6px; }
-:root[data-embedded="true"] .layer-chip { font-size: 0.66rem; padding: 3px 8px; }
-:root[data-embedded="true"] .tree-foot, :root[data-embedded="true"] .coverage-foot { padding: 8px 10px; font-size: 0.78rem; margin-top: 8px; }
-:root[data-embedded="true"] .heatmap { grid-template-columns: 110px repeat(5, minmax(0, 1fr)); gap: 4px; }
-:root[data-embedded="true"] .h-cell { padding: 8px 4px; min-height: 36px; font-size: 0.72rem; }
-:root[data-embedded="true"] .coverage-legend { font-size: 0.7rem; gap: 8px; margin-top: 8px; }
+:root[data-embedded="true"] .head h1 { font-size: clamp(1rem, 2.2vh, 1.5rem); }
+:root[data-embedded="true"] .head p { font-size: clamp(0.78rem, 1.4vh, 0.92rem); max-width: none; }
+:root[data-embedded="true"] .body {
+  gap: clamp(8px, 1.2vw, 14px); min-height: 0; align-items: stretch;
+}
+:root[data-embedded="true"] .tree, :root[data-embedded="true"] .coverage {
+  padding: clamp(12px, 1.8vh, 20px) clamp(12px, 1.4vw, 18px);
+  min-height: 0;
+  display: flex; flex-direction: column; gap: clamp(6px, 0.8vh, 10px);
+}
+:root[data-embedded="true"] .tree-title, :root[data-embedded="true"] .coverage-title {
+  font-size: clamp(0.92rem, 1.6vh, 1.1rem);
+}
+:root[data-embedded="true"] .tree-sub, :root[data-embedded="true"] .coverage-sub {
+  font-size: clamp(0.74rem, 1.2vh, 0.86rem); margin-bottom: clamp(4px, 0.6vh, 8px);
+}
+:root[data-embedded="true"] .tree-question {
+  gap: clamp(6px, 0.9vw, 12px); margin-bottom: clamp(4px, 0.6vh, 8px);
+}
+:root[data-embedded="true"] .tree-q-text { font-size: clamp(0.82rem, 1.4vh, 0.94rem); }
+:root[data-embedded="true"] .tree-q-text small { font-size: clamp(0.7rem, 1.15vh, 0.78rem); }
+:root[data-embedded="true"] .tree-branches { gap: clamp(6px, 0.9vw, 10px); margin: clamp(4px, 0.6vh, 8px) 0; }
+:root[data-embedded="true"] .branch {
+  padding: clamp(8px, 1.2vh, 12px) clamp(9px, 1vw, 12px);
+  gap: clamp(4px, 0.7vh, 7px);
+}
+:root[data-embedded="true"] .branch-tag { font-size: clamp(0.62rem, 1vh, 0.7rem); }
+:root[data-embedded="true"] .branch-arrow { font-size: clamp(0.74rem, 1.2vh, 0.84rem); }
+:root[data-embedded="true"] .layer-chip { font-size: clamp(0.62rem, 1vh, 0.7rem); padding: 3px 8px; }
+:root[data-embedded="true"] .tree-foot, :root[data-embedded="true"] .coverage-foot {
+  padding: clamp(8px, 1.2vh, 12px) clamp(10px, 1vw, 14px);
+  font-size: clamp(0.74rem, 1.2vh, 0.84rem);
+  margin-top: auto;
+}
+:root[data-embedded="true"] .heatmap {
+  grid-template-columns: clamp(90px, 12vw, 130px) repeat(5, minmax(0, 1fr));
+  gap: 4px;
+}
+:root[data-embedded="true"] .h-cell {
+  padding: clamp(6px, 1vh, 10px) 4px;
+  min-height: clamp(32px, 5vh, 48px);
+  font-size: clamp(0.66rem, 1.1vh, 0.76rem);
+}
+:root[data-embedded="true"] .coverage-legend {
+  font-size: clamp(0.66rem, 1.05vh, 0.74rem); gap: clamp(6px, 0.8vw, 10px);
+  margin-top: clamp(4px, 0.6vh, 8px);
+}
 
 .head { margin-bottom: 18px; }
 .head h1 {

@@ -20,21 +20,38 @@ body {
     radial-gradient(circle at 10% 90%, rgba(249, 115, 22, 0.10), transparent 32%),
     linear-gradient(180deg, var(--bg-start) 0%, var(--bg-mid) 48%, var(--bg-end) 100%);
 }
-/* Embed mode: shell becomes flex column, card fills, rows distribute */
+/* Embed mode: shell flex column, card fills, rows scale fluidly with iframe height */
 :root[data-embedded="true"] .shell {
-  display: flex; flex-direction: column; gap: 8px; min-height: 0;
+  display: flex; flex-direction: column;
+  gap: clamp(6px, 1vh, 12px); min-height: 0;
+  padding: clamp(10px, 1.6vh, 18px) clamp(14px, 2vw, 22px);
 }
 :root[data-embedded="true"] .head { margin-bottom: 0; }
-:root[data-embedded="true"] .head h1 { font-size: clamp(1.05rem, 1.8vw, 1.3rem); }
-:root[data-embedded="true"] .head p { font-size: 0.84rem; max-width: none; }
-:root[data-embedded="true"] .card { flex: 1; min-height: 0; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
-:root[data-embedded="true"] .rows { flex: 1; min-height: 0; gap: 10px; align-content: stretch; grid-template-rows: repeat(4, 1fr); }
-:root[data-embedded="true"] .row { gap: 14px; align-items: center; min-height: 0; }
-:root[data-embedded="true"] .row-claim { font-size: 0.94rem; }
-:root[data-embedded="true"] .row-detail { font-size: 0.78rem; }
-:root[data-embedded="true"] .bar-frame { height: 100%; min-height: 44px; }
-:root[data-embedded="true"] .bar-stat { font-size: clamp(1rem, 1.5vw, 1.3rem); }
-:root[data-embedded="true"] .foot { margin-top: 0; padding: 10px 12px; font-size: 0.8rem; flex-shrink: 0; }
+:root[data-embedded="true"] .head h1 { font-size: clamp(1rem, 2.2vh, 1.5rem); }
+:root[data-embedded="true"] .head p { font-size: clamp(0.78rem, 1.4vh, 0.92rem); max-width: none; }
+:root[data-embedded="true"] .card {
+  flex: 1; min-height: 0;
+  padding: clamp(12px, 2vh, 22px) clamp(14px, 1.6vw, 22px);
+  display: grid;
+  grid-template-rows: 1fr auto;
+  gap: clamp(8px, 1.4vh, 16px);
+}
+:root[data-embedded="true"] .rows {
+  min-height: 0;
+  gap: clamp(8px, 1.4vh, 18px);
+  /* No row stretching — bars stay readable; gap distributes the slack */
+  grid-template-rows: repeat(4, auto);
+  align-content: space-evenly;
+}
+:root[data-embedded="true"] .row { gap: clamp(10px, 1.6vw, 18px); align-items: center; }
+:root[data-embedded="true"] .row-claim { font-size: clamp(0.92rem, 1.7vh, 1.1rem); }
+:root[data-embedded="true"] .row-detail { font-size: clamp(0.74rem, 1.25vh, 0.86rem); }
+:root[data-embedded="true"] .bar-frame { height: clamp(40px, 6vh, 64px); }
+:root[data-embedded="true"] .bar-stat { font-size: clamp(1rem, 2vh, 1.45rem); }
+:root[data-embedded="true"] .foot {
+  margin-top: 0; padding: clamp(8px, 1.2vh, 14px) clamp(12px, 1.4vw, 18px);
+  font-size: clamp(0.78rem, 1.3vh, 0.9rem);
+}
 
 .head { margin-bottom: 18px; }
 .head h1 {
