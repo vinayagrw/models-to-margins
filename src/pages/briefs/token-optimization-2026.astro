@@ -1,0 +1,103 @@
+---
+import { getEntry } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const entry = await getEntry('briefs', 'token-optimization-2026');
+
+if (!entry) {
+  throw new Error('Expected the token-optimization-2026 brief to exist in the briefs collection.');
+}
+
+const visualPath = entry.data.supportingVisualPath ?? '/visuals/token-optimizer/master-token-optimization-2026.html';
+---
+
+<BaseLayout
+  title={`${entry.data.title} | Models to Margins`}
+  description={entry.data.summary}
+  currentPath="/briefs"
+>
+  <article class="token-brief-host">
+    <h1 class="token-brief-host__sr-only">{entry.data.title}</h1>
+    <p class="token-brief-host__sr-only">{entry.data.summary}</p>
+
+    <div class="token-brief-host__stage">
+      <iframe
+        id="token-mission-control-frame"
+        src={`${visualPath}?embed=1`}
+        title="Token Mission Control 2026"
+        loading="eager"
+      ></iframe>
+    </div>
+  </article>
+
+  <script>
+    (() => {
+      const frame = document.getElementById('token-mission-control-frame');
+
+      const syncTheme = () => {
+        if (!frame?.contentWindow) return;
+        frame.contentWindow.postMessage(
+          { type: 'm2m:set-theme', theme: window.__m2mGetTheme?.() ?? 'dark' },
+          window.location.origin
+        );
+      };
+
+      frame?.addEventListener('load', syncTheme);
+      window.addEventListener('m2m:themechange', syncTheme);
+      syncTheme();
+    })();
+  </script>
+
+  <style>
+    .token-brief-host {
+      margin-top: 4px;
+    }
+
+    .token-brief-host__stage {
+      overflow: hidden;
+      border-radius: 28px;
+      border: 1px solid color-mix(in srgb, var(--line) 82%, transparent);
+      background: #020617;
+      box-shadow: var(--shadow);
+    }
+
+    .token-brief-host__stage iframe {
+      display: block;
+      width: 100%;
+      height: calc(100vh - 152px);
+      min-height: 760px;
+      border: 0;
+      background: #020617;
+    }
+
+    .token-brief-host__sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    @media (max-width: 900px) {
+      .token-brief-host__stage iframe {
+        height: calc(100vh - 124px);
+        min-height: 620px;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .token-brief-host__stage {
+        border-radius: 22px;
+      }
+
+      .token-brief-host__stage iframe {
+        height: calc(100vh - 104px);
+        min-height: 560px;
+      }
+    }
+  </style>
+</BaseLayout>

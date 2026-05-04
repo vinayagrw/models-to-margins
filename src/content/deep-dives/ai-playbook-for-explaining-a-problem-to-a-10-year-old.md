@@ -439,38 +439,3 @@ If you want the safest default that still works well, do this:
 The best result does **not** come from asking for a simpler answer.
 
 It comes from designing a better learning loop.
-
-## Source Links
-
-<details open>
-  <summary>Product and policy sources</summary>
-  <div class="expander-copy">
-
-- [OpenAI Terms of Use](https://platform.openai.com/policies/terms-of-use)
-- [ChatGPT Study Mode - FAQ](https://help.openai.com/en/articles/11780217-chatgpt-study-mode-faq)
-- [Guided Learning in Gemini](https://blog.google/products-and-platforms/products/education/guided-learning/)
-- [Guide your child's Gemini Apps experience](https://support.google.com/gemini/answer/16109150)
-- [Learn about NotebookLM](https://support.google.com/notebooklm/answer/16164461?hl=en)
-- [Create a notebook in NotebookLM](https://support.google.com/notebooklm/answer/16206563?hl=en)
-- [Khanmigo usage guidelines for educators](https://support.khanacademy.org/hc/en-us/articles/25358718125837-Khanmigo-Usage-Guidelines)
-- [Can I give my students access to Khanmigo?](https://support.khanacademy.org/hc/en-us/articles/14799155077261-Can-I-give-my-students-access-to-Khanmigo)
-- [What Khanmigo tools are available to parents?](https://support.khanacademy.org/hc/en-us/articles/21823169137037-What-Khanmigo-tools-are-available-to-parents)
-- [How do I enable or disable Khanmigo on my child's account?](https://support.khanacademy.org/hc/en-us/articles/14394695651597-How-do-I-enable-or-disable-Khanmigo-on-my-child-s-account)
-- [Introducing Claude for Education](https://www.anthropic.com/news/introducing-claude-for-education)
-
-  </div>
-</details>
-
-<details>
-  <summary>Evidence and safety sources</summary>
-  <div class="expander-copy">
-
-- [IES practice guide: Organizing Instruction and Study to Improve Student Learning](https://ies.ed.gov/ncee/wwc/PracticeGuide/1)
-- [EEF: Working with worked examples](https://educationendowmentfoundation.org.uk/news/eef-blog-working-with-worked-examples-simple-techniques-to-enhance-their-effectiveness)
-- [UNICEF: Policy Guidance on AI for Children](https://www.unicef.org/innocenti/reports/policy-guidance-ai-children)
-- [Common Sense Media AI resources](https://www.commonsensemedia.org/ai)
-- [Google Research: Learn Your Way](https://research.google/blog/learn-your-way-reimagining-textbooks-with-generative-ai/)
-- [LearnLM in Gemini](https://cloud.google.com/solutions/learnlm)
-
-  </div>
-</details>

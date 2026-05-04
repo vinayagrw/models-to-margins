@@ -1,0 +1,2056 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Token Mission Control 2026 — The Master Atlas</title>
+    <meta name="description" content="The unified 2026 atlas of token optimization for LLM coding agents. Crisis · Economics · Frontier Map · Sawtooth · Pruning Lab · Resolution Path · Economic Armor · Solution Matrix.">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        (() => {
+            const params = new URLSearchParams(window.location.search);
+            const root = document.documentElement;
+            const normalizeTheme = (value) => value === 'dark' || value === 'light' ? value : null;
+            const getStoredTheme = () => {
+                try {
+                    return normalizeTheme(window.localStorage.getItem('m2m-theme'));
+                } catch {
+                    return null;
+                }
+            };
+            const getPreferredTheme = () => normalizeTheme(params.get('theme')) ?? getStoredTheme() ?? 'dark';
+
+            root.dataset.embedded = params.get('embed') === '1' ? 'true' : 'false';
+
+            window.__m2mApplyTheme = (theme, persist = false) => {
+                const nextTheme = normalizeTheme(theme) ?? getPreferredTheme();
+                root.dataset.theme = nextTheme;
+                root.style.colorScheme = nextTheme;
+                if (persist) {
+                    try {
+                        window.localStorage.setItem('m2m-theme', nextTheme);
+                    } catch {
+                        // Ignore storage failures.
+                    }
+                }
+            };
+
+            window.__m2mApplyTheme(getPreferredTheme(), false);
+
+            window.addEventListener('message', (event) => {
+                if (event.origin !== window.location.origin) return;
+                if (event.data?.type === 'm2m:set-theme') {
+                    window.__m2mApplyTheme(event.data.theme, false);
+                }
+            });
+        })();
+    </script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap');
+
+        :root {
+            color-scheme: dark;
+            --standalone-chrome-height: 76px;
+            --mission-top-offset: var(--standalone-chrome-height);
+            --bg-obsidian: #020617;
+            --bg-deep: #060d1d;
+            --accent-cyan: #22d3ee;
+            --accent-violet: #8b5cf6;
+            --accent-lime: #a3e635;
+            --accent-rose: #fb7185;
+            --accent-emerald: #10b981;
+            --accent-amber: #fbbf24;
+            --glass: rgba(15, 23, 42, 0.86);
+            --glass-soft: rgba(15, 23, 42, 0.55);
+            --line: rgba(255, 255, 255, 0.06);
+        }
+
+        :root[data-embedded="true"] {
+            --mission-top-offset: 0px;
+        }
+
+        * { box-sizing: border-box; }
+
+        html, body {
+            background-color: var(--bg-obsidian);
+            color: #f1f5f9;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow-x: hidden;
+            margin: 0;
+        }
+
+        h1, h2, h3, h4, .display { font-family: 'Outfit', sans-serif; }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+
+        body {
+            background-image:
+                radial-gradient(1200px 600px at 80% -10%, rgba(34, 211, 238, 0.10), transparent 60%),
+                radial-gradient(900px 500px at -10% 30%, rgba(139, 92, 246, 0.10), transparent 60%),
+                radial-gradient(800px 500px at 60% 110%, rgba(163, 230, 53, 0.06), transparent 60%);
+            background-attachment: fixed;
+        }
+
+        .standalone-site-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 70;
+            min-height: var(--standalone-chrome-height);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+            padding: 16px clamp(18px, 3vw, 34px);
+            background: rgba(2, 6, 23, 0.92);
+            border-bottom: 1px solid var(--line);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+        }
+        .standalone-site-header__brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+            color: #f8fafc;
+            text-decoration: none;
+        }
+        .standalone-site-header__mark {
+            width: 34px;
+            height: 34px;
+            border-radius: 11px;
+            display: grid;
+            place-items: center;
+            flex: 0 0 auto;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-violet));
+            color: #020617;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 900;
+            font-size: 0.72rem;
+            letter-spacing: 0.08em;
+        }
+        .standalone-site-header__copy {
+            display: grid;
+            gap: 2px;
+            min-width: 0;
+        }
+        .standalone-site-header__copy strong {
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.95rem;
+            line-height: 1.1;
+        }
+        .standalone-site-header__copy span {
+            color: #94a3b8;
+            font-size: 0.78rem;
+            line-height: 1.25;
+        }
+        .standalone-site-header__back {
+            flex: 0 0 auto;
+            color: #a3e635;
+            border: 1px solid rgba(163, 230, 53, 0.26);
+            border-radius: 999px;
+            padding: 0.58rem 0.9rem;
+            background: rgba(163, 230, 53, 0.08);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.72rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            text-decoration: none;
+        }
+        .standalone-site-header__back:hover {
+            border-color: rgba(163, 230, 53, 0.56);
+            background: rgba(163, 230, 53, 0.14);
+            color: #d9f99d;
+        }
+
+        :root[data-embedded="true"] .standalone-site-header {
+            display: none;
+        }
+
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-obsidian); }
+        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #334155; }
+
+        /* ============ GLASS PRIMITIVES ============ */
+        .glass {
+            background: var(--glass);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border: 1px solid var(--line);
+        }
+        .glass-soft {
+            background: var(--glass-soft);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--line);
+        }
+        .glass-card {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--line);
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+        .glass-card:hover {
+            border-color: rgba(34, 211, 238, 0.5);
+            box-shadow: 0 0 50px rgba(34, 211, 238, 0.12);
+            transform: translateY(-4px);
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #fff 0%, var(--accent-cyan) 50%, var(--accent-violet) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .gradient-rainbow {
+            background: linear-gradient(to right, #22d3ee, #8b5cf6, #a3e635);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .step-number {
+            font-family: 'Outfit', sans-serif;
+            font-size: 7rem;
+            line-height: 1;
+            font-weight: 900;
+            opacity: 0.05;
+            position: absolute;
+            right: 1.5rem;
+            top: 0.5rem;
+            pointer-events: none;
+            user-select: none;
+        }
+
+        .chart-wrap { position: relative; width: 100%; height: 360px; }
+        .chart-wrap-tall { position: relative; width: 100%; height: 460px; }
+
+        /* ============ HUD: COMPASS STRIP (top) ============ */
+        .compass {
+            position: fixed; top: var(--mission-top-offset); left: 0; right: 0;
+            z-index: 60;
+            background: rgba(2, 6, 23, 0.78);
+            backdrop-filter: blur(22px);
+            -webkit-backdrop-filter: blur(22px);
+            border-bottom: 1px solid var(--line);
+            height: 64px;
+        }
+        .compass-inner {
+            max-width: 1700px; margin: 0 auto; padding: 0 28px;
+            height: 100%; display: flex; align-items: center; justify-content: space-between; gap: 18px;
+        }
+        .brand {
+            display: flex; align-items: center; gap: 12px;
+            font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase;
+            font-size: 13px;
+        }
+        .brand-mark {
+            width: 32px; height: 32px; border-radius: 9px;
+            background: linear-gradient(135deg, #22d3ee, #8b5cf6);
+            display: grid; place-items: center;
+            color: #fff; font-weight: 900; font-size: 13px;
+        }
+        .pip-row { display: flex; gap: 10px; }
+        .pip {
+            width: 30px; height: 6px; border-radius: 3px;
+            background: rgba(255, 255, 255, 0.08);
+            cursor: pointer; transition: all 0.3s;
+            border: 0; padding: 0;
+        }
+        .pip:hover { background: rgba(34, 211, 238, 0.4); }
+        .pip.active {
+            background: linear-gradient(to right, var(--accent-cyan), var(--accent-violet));
+            box-shadow: 0 0 14px rgba(34, 211, 238, 0.55);
+        }
+        .compass-clock {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px; letter-spacing: 0.18em;
+            color: #94a3b8; text-transform: uppercase;
+        }
+        .compass-clock .dot {
+            display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+            background: var(--accent-cyan); margin-right: 8px;
+            box-shadow: 0 0 10px var(--accent-cyan);
+            animation: pulse 2s ease-in-out infinite;
+        }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+
+        /* ============ HUD: LEFT TIMELINE RAIL ============ */
+        .timeline {
+            position: fixed; left: 18px; top: 50%; transform: translateY(-50%);
+            z-index: 50;
+            display: flex; flex-direction: column; gap: 4px;
+            padding: 14px 10px; border-radius: 18px;
+            background: rgba(2, 6, 23, 0.55);
+            backdrop-filter: blur(14px);
+            border: 1px solid var(--line);
+        }
+        .timeline button {
+            background: transparent; border: 0; cursor: pointer;
+            display: flex; align-items: center; gap: 10px;
+            padding: 8px 10px; border-radius: 10px;
+            color: #475569; transition: all 0.3s;
+            text-align: left;
+        }
+        .timeline button:hover { color: #cbd5e1; background: rgba(255, 255, 255, 0.03); }
+        .timeline button.active { color: var(--accent-cyan); background: rgba(34, 211, 238, 0.08); }
+        .timeline .num {
+            width: 22px; height: 22px; border-radius: 6px;
+            display: grid; place-items: center;
+            font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700;
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .timeline button.active .num {
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-violet));
+            color: #02060f;
+        }
+        .timeline .label {
+            font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
+            text-transform: uppercase; opacity: 0; max-width: 0;
+            overflow: hidden; transition: all 0.3s;
+            white-space: nowrap;
+        }
+        .timeline:hover .label { opacity: 1; max-width: 220px; }
+        .timeline button.active .label { opacity: 1; max-width: 220px; }
+
+        /* ============ HUD: RIGHT KPI RAIL ============ */
+        .kpi-rail {
+            position: fixed; right: 18px; top: 50%; transform: translateY(-50%);
+            z-index: 50;
+            display: flex; flex-direction: column; gap: 12px;
+            padding: 16px 14px; border-radius: 20px;
+            background: rgba(2, 6, 23, 0.55);
+            backdrop-filter: blur(14px);
+            border: 1px solid var(--line);
+            width: 196px;
+        }
+        .kpi-rail .kpi-value { font-size: 18px; }
+        .kpi-rail h5 {
+            font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase;
+            color: #64748b; font-weight: 700; margin: 0 0 6px 0;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .kpi-dial { display: flex; flex-direction: column; gap: 4px; }
+        .kpi-label { font-size: 9px; color: #94a3b8; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; font-family: 'JetBrains Mono', monospace; }
+        .kpi-value { font-family: 'Outfit', sans-serif; font-size: 22px; font-weight: 800; color: #f8fafc; line-height: 1; transition: color 0.5s; }
+        .kpi-value.cyan { color: var(--accent-cyan); }
+        .kpi-value.violet { color: var(--accent-violet); }
+        .kpi-value.lime { color: var(--accent-lime); }
+        .kpi-bar { height: 4px; border-radius: 2px; background: rgba(255, 255, 255, 0.06); overflow: hidden; margin-top: 4px; }
+        .kpi-bar-fill { height: 100%; border-radius: 2px; background: linear-gradient(to right, var(--accent-cyan), var(--accent-violet)); width: 0%; transition: width 1.2s cubic-bezier(0.23, 1, 0.32, 1); }
+
+        /* ============ SCANLINE TRACER ============ */
+        .scan-tracer {
+            position: fixed; left: 0; right: 0; top: calc(var(--mission-top-offset) + 64px);
+            height: 1px; pointer-events: none; z-index: 45;
+            background: linear-gradient(to right, transparent, rgba(34, 211, 238, 0.7), transparent);
+            animation: tracer 6s linear infinite;
+            will-change: transform;
+        }
+        @keyframes tracer {
+            0% { transform: translateY(0); opacity: 0; }
+            8% { opacity: 0.55; }
+            92% { opacity: 0.55; }
+            100% { transform: translateY(calc(100vh - 64px)); opacity: 0; }
+        }
+
+        /* ============ MAIN LAYOUT ============ */
+        main {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: calc(var(--mission-top-offset) + 96px) 28px 64px;
+        }
+        @media (max-width: 1280px) {
+            main { padding-left: 100px; padding-right: 28px; }
+            .kpi-rail { display: none; }
+        }
+        @media (max-width: 980px) {
+            main { padding-left: 28px; padding-right: 28px; }
+            .timeline { display: none; }
+            .scan-tracer { display: none; }
+        }
+
+        @media (max-width: 720px) {
+            :root {
+                --standalone-chrome-height: 92px;
+            }
+            .standalone-site-header {
+                align-items: flex-start;
+                flex-direction: column;
+                gap: 10px;
+            }
+            .standalone-site-header__back {
+                width: fit-content;
+            }
+            .compass-inner {
+                padding: 0 16px;
+            }
+            .brand span {
+                display: none;
+            }
+            .pip-row {
+                gap: 7px;
+            }
+            .pip {
+                width: 20px;
+            }
+        }
+
+        section.chapter { padding: 80px 0 64px; scroll-margin-top: 80px; position: relative; }
+        section.chapter + section.chapter { border-top: 1px solid var(--line); }
+
+        .eyebrow {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px; letter-spacing: 0.28em; text-transform: uppercase;
+            color: #64748b; font-weight: 700;
+            display: inline-flex; align-items: center; gap: 12px;
+        }
+        .eyebrow .dash { display: inline-block; width: 36px; height: 1px; background: var(--accent-cyan); }
+        .eyebrow.violet .dash { background: var(--accent-violet); }
+        .eyebrow.lime .dash { background: var(--accent-lime); }
+        .eyebrow.rose .dash { background: var(--accent-rose); }
+        .eyebrow.emerald .dash { background: var(--accent-emerald); }
+        .eyebrow.amber .dash { background: var(--accent-amber); }
+
+        h2.chapter-title {
+            font-size: clamp(2rem, 5vw, 3.4rem); font-weight: 800;
+            letter-spacing: -0.025em; line-height: 1.05; margin: 18px 0 14px;
+        }
+        .chapter-lede { font-size: 1.05rem; color: #94a3b8; line-height: 1.6; max-width: 760px; }
+
+        .pill {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 6px 14px; border-radius: 999px;
+            font-size: 11px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase;
+            font-family: 'JetBrains Mono', monospace;
+            background: rgba(255, 255, 255, 0.04); border: 1px solid var(--line);
+        }
+        .pill .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent-cyan); }
+        .pill.violet .dot { background: var(--accent-violet); }
+        .pill.lime .dot { background: var(--accent-lime); }
+        .pill.rose .dot { background: var(--accent-rose); }
+
+        .stat-card {
+            padding: 24px; border-radius: 22px;
+            background: var(--glass); border: 1px solid var(--line);
+            position: relative; overflow: hidden;
+        }
+        .stat-card .stat-num { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: clamp(2rem, 4vw, 3rem); line-height: 1; }
+        .stat-card .stat-label { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: #64748b; font-weight: 700; margin-bottom: 10px; font-family: 'JetBrains Mono', monospace; }
+        .stat-card .stat-sub { font-size: 13px; color: #94a3b8; margin-top: 10px; line-height: 1.5; }
+
+        /* small section scanner inside cards */
+        .scanner-line {
+            position: absolute; left: 0; right: 0; top: -1px; height: 1px;
+            background: linear-gradient(to right, transparent, var(--accent-cyan), transparent);
+            opacity: 0.55;
+        }
+
+        /* ============ HERO ============ */
+        .hero {
+            padding: 120px 0 56px; text-align: center; position: relative;
+        }
+        .hero h1 {
+            font-size: clamp(2.6rem, 7vw, 6rem); line-height: 0.95; font-weight: 800;
+            letter-spacing: -0.04em; margin: 0 auto 24px; max-width: 1100px;
+        }
+        .hero .lede {
+            font-size: clamp(1.05rem, 1.6vw, 1.4rem); color: #94a3b8;
+            line-height: 1.55; max-width: 820px; margin: 0 auto 28px;
+        }
+        .hero-pills { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+
+        /* ============ CHAPTER 1: BRIEFING ============ */
+        .crisis-grid {
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
+        }
+        @media (max-width: 1024px) { .crisis-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 540px) { .crisis-grid { grid-template-columns: 1fr; } }
+
+        /* ============ CHAPTER 2: ECONOMICS ============ */
+        .pricing-table {
+            width: 100%; border-collapse: collapse; font-size: 13px;
+        }
+        .pricing-table thead th {
+            text-align: left; padding: 14px 18px;
+            background: rgba(255, 255, 255, 0.04);
+            font-family: 'JetBrains Mono', monospace; font-size: 10px;
+            letter-spacing: 0.22em; text-transform: uppercase; color: #64748b; font-weight: 700;
+        }
+        .pricing-table tbody td {
+            padding: 14px 18px; border-top: 1px solid var(--line);
+            font-family: 'JetBrains Mono', monospace; font-size: 12px;
+        }
+        .pricing-table tbody tr:hover { background: rgba(34, 211, 238, 0.04); }
+        .pricing-table .model-name { color: #f1f5f9; font-weight: 700; }
+
+        /* ============ CHAPTER 3: FRONTIER MAP ============ */
+        .frontier-grid {
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
+        }
+        @media (max-width: 1100px) { .frontier-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 600px) { .frontier-grid { grid-template-columns: 1fr; } }
+        .frontier-card { padding: 22px; border-radius: 22px; position: relative; overflow: hidden; }
+        .frontier-card.cyan { border-left: 4px solid var(--accent-cyan); }
+        .frontier-card.violet { border-left: 4px solid var(--accent-violet); }
+        .frontier-card.blue { border-left: 4px solid #3b82f6; }
+        .frontier-card.emerald { border-left: 4px solid var(--accent-emerald); background: rgba(16, 185, 129, 0.06); }
+        .frontier-card.lime { border-left: 4px solid var(--accent-lime); }
+        .frontier-card .vendor { font-size: 9px; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.2em; text-transform: uppercase; font-weight: 700; margin-bottom: 12px; }
+        .frontier-card .name { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 1.25rem; margin: 0 0 4px; font-style: italic; }
+        .frontier-card .role { font-size: 10px; color: #64748b; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 14px; }
+        .frontier-card .desc { font-size: 13px; color: #94a3b8; line-height: 1.55; min-height: 96px; }
+        .frontier-card .meta {
+            display: flex; justify-content: space-between; padding-top: 14px; margin-top: 14px;
+            border-top: 1px solid var(--line);
+            font-size: 10px; font-family: 'JetBrains Mono', monospace; font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em;
+            color: #64748b;
+        }
+
+        /* OckScore Table */
+        .ock-table { width: 100%; border-collapse: collapse; }
+        .ock-table thead th {
+            background: rgba(255, 255, 255, 0.05);
+            text-align: left; padding: 18px 22px;
+            font-family: 'JetBrains Mono', monospace; font-size: 10px;
+            letter-spacing: 0.22em; text-transform: uppercase; color: #64748b; font-weight: 700;
+        }
+        .ock-table tbody td {
+            padding: 18px 22px; border-top: 1px solid var(--line);
+            font-family: 'JetBrains Mono', monospace; font-size: 13px;
+        }
+        .ock-table tbody tr:hover { background: rgba(34, 211, 238, 0.04); }
+        .ock-table tbody tr:hover td:first-child { color: var(--accent-cyan); }
+        .ock-table .ock-score { font-weight: 900; color: var(--accent-cyan); font-size: 16px; }
+        .ock-table .row-dim td { color: #475569; }
+        .ock-table .row-dim .ock-score { color: #475569; }
+
+        /* ============ CHAPTER 4: SAWTOOTH LAB ============ */
+        .saw-grid {
+            display: grid; grid-template-columns: 5fr 7fr; gap: 36px; align-items: center;
+        }
+        @media (max-width: 1100px) { .saw-grid { grid-template-columns: 1fr; } }
+        .phase-card { padding: 22px; border-radius: 18px; }
+        .phase-card.explore { border-left: 4px solid var(--accent-cyan); }
+        .phase-card.consolidate { border-left: 4px solid var(--accent-violet); }
+        .phase-card .phase-label {
+            font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; font-weight: 700;
+            font-family: 'JetBrains Mono', monospace; margin-bottom: 8px;
+        }
+        .phase-card.explore .phase-label { color: var(--accent-cyan); }
+        .phase-card.consolidate .phase-label { color: var(--accent-violet); }
+
+        .saw-canvas { padding: 36px; border-radius: 32px; position: relative; overflow: hidden; }
+        .saw-canvas .scan {
+            position: absolute; left: 0; right: 0; top: 0; height: 2px;
+            background: linear-gradient(to right, transparent, var(--accent-cyan), transparent);
+            animation: sawscan 4s linear infinite;
+        }
+        @keyframes sawscan {
+            0% { transform: translateY(0); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(360px); opacity: 0; }
+        }
+
+        .supplementary {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 28px;
+        }
+        @media (max-width: 720px) { .supplementary { grid-template-columns: 1fr; } }
+
+        /* ============ CHAPTER 5: PRUNING LAB ============ */
+        .pruning-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px;
+        }
+        @media (max-width: 1024px) { .pruning-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 640px) { .pruning-grid { grid-template-columns: 1fr; } }
+        .pruning-card { padding: 26px; border-radius: 22px; position: relative; overflow: hidden; }
+        .pruning-card .badge {
+            position: absolute; top: 0; right: 0; width: 56px; height: 56px;
+            border-bottom-left-radius: 22px; display: grid; place-items: center;
+            font-size: 24px;
+        }
+        .pruning-card.cyan .badge { background: rgba(34, 211, 238, 0.12); }
+        .pruning-card.violet .badge { background: rgba(139, 92, 246, 0.12); }
+        .pruning-card.lime .badge { background: rgba(163, 230, 53, 0.12); }
+        .pruning-card.rose .badge { background: rgba(251, 113, 133, 0.12); }
+        .pruning-card.amber .badge { background: rgba(251, 191, 36, 0.12); }
+        .pruning-card.indigo .badge { background: rgba(99, 102, 241, 0.12); }
+        .pruning-card h3 { font-size: 1.15rem; font-weight: 700; margin: 0 0 10px; }
+        .pruning-card p { font-size: 13px; color: #94a3b8; line-height: 1.55; margin-bottom: 22px; }
+        .pruning-card .savings {
+            display: flex; justify-content: space-between; padding-top: 12px;
+            border-top: 1px solid var(--line);
+            font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700;
+            letter-spacing: 0.16em; text-transform: uppercase;
+        }
+        .pruning-card.cyan .savings .left { color: var(--accent-cyan); }
+        .pruning-card.violet .savings .left { color: var(--accent-violet); }
+        .pruning-card.lime .savings .left { color: var(--accent-lime); }
+        .pruning-card.rose .savings .left { color: var(--accent-rose); }
+        .pruning-card.amber .savings .left { color: var(--accent-amber); }
+        .pruning-card.indigo .savings .left { color: #818cf8; }
+        .pruning-card .savings .right { color: #64748b; }
+
+        .pipeline {
+            display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
+            gap: 14px; margin-top: 32px;
+        }
+        .pipe-stage {
+            padding: 18px; border-radius: 16px; min-width: 180px;
+            background: var(--glass); border: 1px solid var(--line);
+            text-align: center;
+        }
+        .pipe-stage .icon { font-size: 22px; margin-bottom: 6px; }
+        .pipe-stage .lbl { font-size: 10px; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.18em; text-transform: uppercase; color: #64748b; font-weight: 700; margin-bottom: 4px; }
+        .pipe-stage .name { font-size: 13px; font-weight: 700; }
+        .pipe-stage.s1 { border-top: 2px solid var(--accent-cyan); }
+        .pipe-stage.s2 { border-top: 2px solid var(--accent-violet); }
+        .pipe-stage.s3 { border-top: 2px solid var(--accent-lime); }
+        .pipe-stage.s4 { border-top: 2px solid #fff; }
+        .pipe-arrow { color: #334155; font-size: 22px; }
+
+        /* ============ CHAPTER 6: RESOLUTION PATH ============ */
+        .resolution-list { display: flex; flex-direction: column; gap: 18px; }
+        .resolution-card {
+            padding: 32px; border-radius: 28px; position: relative; overflow: hidden;
+            border-top: 3px solid var(--accent-cyan);
+        }
+        .resolution-card.violet { border-top-color: var(--accent-violet); }
+        .resolution-card.lime { border-top-color: var(--accent-lime); }
+        .resolution-card.emerald { border-top-color: var(--accent-emerald); }
+        .resolution-card.rose { border-top-color: var(--accent-rose); }
+        .resolution-card.amber { border-top-color: var(--accent-amber); }
+        .resolution-card.indigo { border-top-color: #818cf8; }
+        .resolution-card .step-num {
+            font-family: 'Outfit', sans-serif; font-size: 7rem; line-height: 1;
+            font-weight: 900; opacity: 0.05; position: absolute;
+            right: 22px; top: 12px; pointer-events: none; user-select: none;
+        }
+        .resolution-card h4 {
+            font-family: 'Outfit', sans-serif; font-size: 1.6rem; font-weight: 800;
+            font-style: italic; letter-spacing: -0.01em; margin: 0 0 14px;
+            text-transform: uppercase;
+        }
+        .resolution-card p { font-size: 15px; color: #cbd5e1; line-height: 1.65; max-width: 720px; margin-bottom: 16px; }
+        .resolution-card code {
+            font-family: 'JetBrains Mono', monospace; font-size: 12px;
+            background: rgba(0, 0, 0, 0.45); padding: 2px 8px; border-radius: 6px;
+            border: 1px solid var(--line); color: var(--accent-cyan);
+        }
+        .code-block {
+            background: rgba(0, 0, 0, 0.55); border: 1px solid var(--line);
+            border-radius: 14px; padding: 16px 18px;
+            font-family: 'JetBrains Mono', monospace; font-size: 12px;
+            color: var(--accent-cyan); line-height: 1.7;
+            max-width: 520px;
+        }
+        .code-block.lime { color: var(--accent-lime); }
+        .code-block.emerald { color: var(--accent-emerald); }
+
+        .checklist {
+            margin-top: 36px; padding: 28px; border-radius: 22px;
+            background: rgba(0, 0, 0, 0.55); border: 1px solid var(--line);
+        }
+        .checklist h5 {
+            font-family: 'JetBrains Mono', monospace; font-size: 11px;
+            letter-spacing: 0.24em; text-transform: uppercase; color: var(--accent-emerald);
+            margin: 0 0 14px;
+        }
+        .checklist ul { list-style: none; padding: 0; margin: 0; }
+        .checklist li {
+            display: flex; align-items: flex-start; gap: 12px;
+            font-family: 'JetBrains Mono', monospace; font-size: 12px;
+            color: #cbd5e1; padding: 6px 0;
+        }
+        .checklist li i { color: var(--accent-emerald); margin-top: 2px; }
+
+        /* ============ CHAPTER 7: ECONOMIC ARMOR ============ */
+        .armor-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px;
+        }
+        @media (max-width: 900px) { .armor-grid { grid-template-columns: 1fr; } }
+        .armor-card {
+            padding: 28px; border-radius: 26px; border-top: 3px solid var(--accent-rose);
+        }
+        .armor-card h4 {
+            font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 1.05rem;
+            text-transform: uppercase; letter-spacing: -0.01em; margin: 0 0 14px;
+        }
+        .armor-card p { font-size: 14px; color: #94a3b8; line-height: 1.6; margin: 0; }
+        .armor-card .metric {
+            margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line);
+            font-family: 'JetBrains Mono', monospace; font-size: 11px;
+            letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent-rose); font-weight: 700;
+        }
+
+        /* ============ CHAPTER 8: SOLUTION MATRIX + GAPS ============ */
+        .filter-row {
+            display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px;
+        }
+        .filter-btn {
+            padding: 8px 16px; border-radius: 999px;
+            font-family: 'JetBrains Mono', monospace; font-size: 10px;
+            letter-spacing: 0.18em; text-transform: uppercase; font-weight: 700;
+            background: rgba(255, 255, 255, 0.04); border: 1px solid var(--line);
+            color: #94a3b8; cursor: pointer; transition: all 0.25s;
+        }
+        .filter-btn:hover { color: #f1f5f9; border-color: rgba(34, 211, 238, 0.4); }
+        .filter-btn.active {
+            background: linear-gradient(135deg, rgba(34, 211, 238, 0.2), rgba(139, 92, 246, 0.2));
+            color: var(--accent-cyan); border-color: rgba(34, 211, 238, 0.5);
+        }
+
+        .matrix-table { width: 100%; border-collapse: collapse; }
+        .matrix-table thead th {
+            background: rgba(255, 255, 255, 0.04);
+            text-align: left; padding: 14px 16px;
+            font-family: 'JetBrains Mono', monospace; font-size: 10px;
+            letter-spacing: 0.22em; text-transform: uppercase; color: #64748b; font-weight: 700;
+        }
+        .matrix-table tbody td {
+            padding: 16px; border-top: 1px solid var(--line);
+            font-size: 13px; color: #cbd5e1;
+        }
+        .matrix-table tbody tr.hidden-row { display: none; }
+        .matrix-table tbody tr:hover { background: rgba(34, 211, 238, 0.04); }
+        .matrix-table .badge {
+            display: inline-block; padding: 3px 10px; border-radius: 999px;
+            font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700;
+            letter-spacing: 0.14em; text-transform: uppercase;
+        }
+        .badge-savings-h { background: rgba(34, 211, 238, 0.12); color: var(--accent-cyan); }
+        .badge-savings-m { background: rgba(139, 92, 246, 0.12); color: var(--accent-violet); }
+        .badge-savings-l { background: rgba(100, 116, 139, 0.12); color: #94a3b8; }
+        .badge-effort-l { background: rgba(16, 185, 129, 0.12); color: var(--accent-emerald); }
+        .badge-effort-m { background: rgba(251, 191, 36, 0.12); color: var(--accent-amber); }
+        .badge-effort-h { background: rgba(251, 113, 133, 0.12); color: var(--accent-rose); }
+        .badge-risk-l { background: rgba(16, 185, 129, 0.12); color: var(--accent-emerald); }
+        .badge-risk-m { background: rgba(251, 191, 36, 0.12); color: var(--accent-amber); }
+        .badge-risk-h { background: rgba(251, 113, 133, 0.12); color: var(--accent-rose); }
+
+        .gaps-grid {
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
+        }
+        @media (max-width: 1024px) { .gaps-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 540px) { .gaps-grid { grid-template-columns: 1fr; } }
+        .gap-card { padding: 22px; border-radius: 20px; }
+        .gap-card .icon { font-size: 22px; margin-bottom: 12px; }
+        .gap-card h4 { font-size: 14px; font-weight: 700; margin: 0 0 8px; }
+        .gap-card p { font-size: 12px; color: #94a3b8; line-height: 1.55; margin: 0; }
+
+        /* ============ CODA ============ */
+        .coda {
+            margin-top: 80px; padding: 80px 28px; text-align: center;
+            border-top: 1px solid var(--line);
+        }
+        .coda blockquote {
+            font-family: 'Outfit', sans-serif; font-size: clamp(1.4rem, 2.5vw, 2.4rem);
+            font-weight: 600; line-height: 1.3; max-width: 1000px;
+            margin: 0 auto 30px; font-style: italic;
+            color: #f1f5f9;
+            letter-spacing: -0.02em;
+        }
+        .coda-pip-row { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; }
+        .coda-pip {
+            display: flex; align-items: center; gap: 8px;
+            padding: 8px 14px; border-radius: 999px;
+            background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.3);
+            font-family: 'JetBrains Mono', monospace; font-size: 10px;
+            letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent-emerald);
+            font-weight: 700;
+        }
+        .coda-pip .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent-emerald); box-shadow: 0 0 8px var(--accent-emerald); }
+
+        /* ============ MOTION SAFETY ============ */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+            .scan-tracer, .scanner-line, .saw-canvas .scan { display: none; }
+            .compass-clock .dot { animation: none; }
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-cyan-500/30">
+    <header class="standalone-site-header" aria-label="Models to Margins visual header">
+        <a class="standalone-site-header__brand" href="/">
+            <span class="standalone-site-header__mark">M2M</span>
+            <span class="standalone-site-header__copy">
+                <strong>Models to Margins</strong>
+                <span>Business-first AI research and operating maps</span>
+            </span>
+        </a>
+        <a class="standalone-site-header__back" href="/briefs/token-optimization-2026">Back to Brief</a>
+    </header>
+
+    <!-- ============ COMPASS STRIP ============ -->
+    <header class="compass" aria-label="Mission compass">
+        <div class="compass-inner">
+            <div class="brand">
+                <div class="brand-mark">Φ</div>
+                <span>Token Mission Control · 2026</span>
+            </div>
+            <nav class="pip-row" aria-label="Chapter navigation">
+                <button class="pip" data-pip="1" aria-label="Chapter 1: Briefing"></button>
+                <button class="pip" data-pip="2" aria-label="Chapter 2: Economics"></button>
+                <button class="pip" data-pip="3" aria-label="Chapter 3: Frontier Map"></button>
+                <button class="pip" data-pip="4" aria-label="Chapter 4: Sawtooth Lab"></button>
+                <button class="pip" data-pip="5" aria-label="Chapter 5: Pruning Lab"></button>
+                <button class="pip" data-pip="6" aria-label="Chapter 6: Resolution Path"></button>
+                <button class="pip" data-pip="7" aria-label="Chapter 7: Economic Armor"></button>
+                <button class="pip" data-pip="8" aria-label="Chapter 8: Matrix &amp; Frontier"></button>
+            </nav>
+            <div class="compass-clock"><span class="dot"></span><span id="liveClock">SYS · LIVE</span></div>
+        </div>
+    </header>
+
+    <div class="scan-tracer" aria-hidden="true"></div>
+
+    <!-- ============ LEFT TIMELINE RAIL ============ -->
+    <aside class="timeline" aria-label="Mission timeline">
+        <button data-jump="ch1" class="active"><span class="num">01</span><span class="label">Briefing</span></button>
+        <button data-jump="ch2"><span class="num">02</span><span class="label">Economics</span></button>
+        <button data-jump="ch3"><span class="num">03</span><span class="label">Frontier Map</span></button>
+        <button data-jump="ch4"><span class="num">04</span><span class="label">Sawtooth Lab</span></button>
+        <button data-jump="ch5"><span class="num">05</span><span class="label">Pruning Lab</span></button>
+        <button data-jump="ch6"><span class="num">06</span><span class="label">Resolution Path</span></button>
+        <button data-jump="ch7"><span class="num">07</span><span class="label">Economic Armor</span></button>
+        <button data-jump="ch8"><span class="num">08</span><span class="label">Matrix &amp; Frontier</span></button>
+    </aside>
+
+    <!-- ============ RIGHT KPI RAIL ============ -->
+    <aside class="kpi-rail" aria-label="Live mission KPIs">
+        <h5>Live Telemetry</h5>
+        <div class="kpi-dial">
+            <span class="kpi-label">Tokens Saved</span>
+            <span class="kpi-value cyan" id="kpiSaved">0%</span>
+            <div class="kpi-bar"><div class="kpi-bar-fill" id="kpiSavedBar"></div></div>
+        </div>
+        <div class="kpi-dial">
+            <span class="kpi-label">Cost Multiplier</span>
+            <span class="kpi-value violet" id="kpiCost">1×</span>
+            <div class="kpi-bar"><div class="kpi-bar-fill" id="kpiCostBar"></div></div>
+        </div>
+        <div class="kpi-dial">
+            <span class="kpi-label">Context Headroom</span>
+            <span class="kpi-value lime" id="kpiHeadroom">0%</span>
+            <div class="kpi-bar"><div class="kpi-bar-fill" id="kpiHeadroomBar"></div></div>
+        </div>
+    </aside>
+
+    <main>
+
+        <!-- ============ HERO ============ -->
+        <section class="hero">
+            <div class="eyebrow"><span class="dash"></span><span>Master Atlas · April 2026</span></div>
+            <h1>The <span class="gradient-text">Token Mission Control</span><br>for the Agent Era</h1>
+            <p class="lede">
+                Eight chapters. One live console. Every framework, metric, model, and tactic for surviving the 2026 capacity crunch — without context rot, without parallel-request traps, without burning a quarter's budget on a single Opus refactor.
+            </p>
+            <div class="hero-pills">
+                <span class="pill"><span class="dot"></span>SAWTOOTH v4.3 ACTIVE</span>
+                <span class="pill violet"><span class="dot"></span>OCKSCORE BOUND</span>
+                <span class="pill lime"><span class="dot"></span>ZERO-ROT CERTIFIED</span>
+                <span class="pill rose"><span class="dot"></span>HITL MANDATORY</span>
+            </div>
+        </section>
+
+        <!-- ============ CHAPTER 1: BRIEFING ============ -->
+        <section id="ch1" class="chapter">
+            <div class="eyebrow"><span class="dash"></span><span>01 · Briefing</span></div>
+            <h2 class="chapter-title">The Token Crisis is an <span class="gradient-text">Operating Crisis</span></h2>
+            <p class="chapter-lede">
+                Sessions hit a 19-minute ceiling against a 300-minute expectation. Coding agents waste 70% of their tokens on redundant tool output and resubmitted history. The fix is not a bigger context window — it is a smarter one.
+            </p>
+
+            <div class="crisis-grid" style="margin-top: 36px;">
+                <div class="stat-card">
+                    <div class="scanner-line"></div>
+                    <div class="stat-label">Agent Loop Tax</div>
+                    <div class="stat-num gradient-rainbow">70%</div>
+                    <p class="stat-sub">of tokens in autonomous cycles wasted on redundant tool outputs and resubmitted history.</p>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Token ROI</div>
+                    <div class="stat-num gradient-rainbow">0.05</div>
+                    <p class="stat-sub">100-token output produced from a 2,000-token prompt — the typical ROI for unmanaged copilot work.</p>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Token Inflation</div>
+                    <div class="stat-num gradient-rainbow">3–5×</div>
+                    <p class="stat-sub">more tokens consumed than necessary for equal accuracy — the "Token Furnace Effect."</p>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Enterprise Waste</div>
+                    <div class="stat-num gradient-rainbow">50%</div>
+                    <p class="stat-sub">of enterprise copilot spend is wasted; firm-wide policies have documented halving costs.</p>
+                </div>
+            </div>
+
+            <div class="glass" style="margin-top: 28px; padding: 32px; border-radius: 28px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: center;">
+                    <div>
+                        <div class="eyebrow" style="margin-bottom: 14px;"><span class="dash"></span><span>Case Study · Claude Code Max</span></div>
+                        <h3 style="font-size: 1.45rem; font-weight: 700; margin: 0 0 14px;">300 minutes expected. 19 minutes delivered.</h3>
+                        <p style="color: #94a3b8; line-height: 1.6; font-size: 14px;">
+                            The advertised session frontier collides with opaque rate limits and "Context Rot" — the quadratic decay of attention as the window grows past <strong>~100K tokens</strong>. Background noise (build artifacts, <code style="font-family: 'JetBrains Mono'; color: var(--accent-cyan);">node_modules</code>, binaries) accounts for 35–45% of every project load before any real work begins.
+                        </p>
+                        <div style="display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap;">
+                            <span class="pill"><span class="dot"></span>Token Furnace Effect</span>
+                            <span class="pill rose"><span class="dot"></span>Context Rot &gt; 100K</span>
+                            <span class="pill lime"><span class="dot"></span>35–45% noise floor</span>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="chart-wrap"><canvas id="crisisChart"></canvas></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass" style="margin-top: 28px; padding: 32px; border-radius: 28px; border-left: 4px solid var(--accent-rose);">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: center;" class="ctx-tax-grid">
+                    <div>
+                        <div class="eyebrow rose" style="margin-bottom: 14px;"><span class="dash"></span><span>The Context Tax · Rohan Mistry, April 2026</span></div>
+                        <h3 style="font-size: 1.45rem; font-weight: 700; margin: 0 0 14px;">Every turn re-reads the entire conversation.</h3>
+                        <p style="color: #94a3b8; line-height: 1.65; font-size: 14px;">
+                            Claude re-reads the full conversation from scratch <em>every single turn</em>. The same question costs <strong style="color: var(--accent-rose);">30× more</strong> at message 30 than at message 1 — not because the model got harder, because the input quietly grew. One developer burned a $200 plan in 2 hours and clocked <strong style="color: var(--accent-rose);">98.5% token waste</strong>. The fix is structural: <code style="font-family: 'JetBrains Mono'; color: var(--accent-cyan); background: rgba(0,0,0,0.4); padding: 1px 6px; border-radius: 4px;">/clear</code> on topic shifts, <code style="font-family: 'JetBrains Mono'; color: var(--accent-cyan); background: rgba(0,0,0,0.4); padding: 1px 6px; border-radius: 4px;">/compact</code> at breakpoints, and tool-output discipline (Ch.6).
+                        </p>
+                    </div>
+                    <div>
+                        <table style="width: 100%; font-family: 'JetBrains Mono', monospace; font-size: 13px; border-collapse: collapse;">
+                            <thead>
+                                <tr style="background: rgba(255,255,255,0.04);">
+                                    <th style="text-align: left; padding: 12px 16px; font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: #64748b; font-weight: 700;">Message #</th>
+                                    <th style="text-align: right; padding: 12px 16px; font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: #64748b; font-weight: 700;">Input Tokens / Turn</th>
+                                    <th style="text-align: right; padding: 12px 16px; font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: #64748b; font-weight: 700;">Cumulative Multiplier</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td style="padding: 12px 16px; border-top: 1px solid var(--line);">1</td><td style="padding: 12px 16px; border-top: 1px solid var(--line); text-align: right; color: var(--accent-cyan);">500</td><td style="padding: 12px 16px; border-top: 1px solid var(--line); text-align: right; color: #94a3b8;">1×</td></tr>
+                                <tr><td style="padding: 12px 16px; border-top: 1px solid var(--line);">10</td><td style="padding: 12px 16px; border-top: 1px solid var(--line); text-align: right; color: var(--accent-amber);">6,000</td><td style="padding: 12px 16px; border-top: 1px solid var(--line); text-align: right; color: var(--accent-amber);">12×</td></tr>
+                                <tr><td style="padding: 12px 16px; border-top: 1px solid var(--line);">30</td><td style="padding: 12px 16px; border-top: 1px solid var(--line); text-align: right; color: var(--accent-rose);">15,000</td><td style="padding: 12px 16px; border-top: 1px solid var(--line); text-align: right; color: var(--accent-rose); font-weight: 700;">30×</td></tr>
+                            </tbody>
+                        </table>
+                        <p style="margin-top: 12px; font-size: 11px; color: #64748b; font-style: italic; font-family: 'JetBrains Mono', monospace;">// the 40th message pays for everything that came before it</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass" style="margin-top: 18px; padding: 32px; border-radius: 28px;">
+                <div class="eyebrow"><span class="dash"></span><span>10 Token Sins · April 2026 audit composite</span></div>
+                <h3 style="font-size: 1.3rem; font-weight: 700; margin: 12px 0 8px;">The recurring patterns behind 90%+ token waste</h3>
+                <p style="color: #94a3b8; font-size: 13px; line-height: 1.6; max-width: 800px; margin: 0 0 22px;">
+                    Synthesized from the Context Tax case + April 2026 token-audit literature (Mistry · Mehul Gupta · BuildToLaunch). The original 10-fix list is paywalled; below are the 10 most-cited sins and their counter-tactics — each links to the chapter that fixes it.
+                </p>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;" class="sins-grid">
+                    <div style="display: flex; gap: 14px; padding: 14px; border-radius: 12px; background: rgba(251, 113, 133, 0.04); border: 1px solid rgba(251, 113, 133, 0.15);">
+                        <div style="font-family: 'Outfit'; font-size: 22px; font-weight: 800; color: var(--accent-rose); min-width: 28px;">01</div>
+                        <div><div style="font-size: 13px; font-weight: 700; color: #f1f5f9; margin-bottom: 4px;">Mixing topics in one chat</div><div style="font-size: 12px; color: #94a3b8;">→ Ch.6 step 08 · <code style="font-family: 'JetBrains Mono'; color: var(--accent-cyan);">/clear</code> on switch</div></div>
+                    </div>
+                    <div style="display: flex; gap: 14px; padding: 14px; border-radius: 12px; background: rgba(251, 113, 133, 0.04); border: 1px solid rgba(251, 113, 133, 0.15);">
+                        <div style="font-family: 'Outfit'; font-size: 22px; font-weight: 800; color: var(--accent-rose); min-width: 28px;">02</div>
+                        <div><div style="font-size: 13px; font-weight: 700; color: #f1f5f9; margin-bottom: 4px;">5,000-token root <code style="font-family: 'JetBrains Mono'; color: var(--accent-cyan);">CLAUDE.md</code></div><div style="font-size: 12px; color: #94a3b8;">→ Ch.5 · subdirectory stacking ≤500</div></div>
+                    </div>
+                    <div style="display: flex; gap: 14px; padding: 14px; border-radius: 12px; background: rgba(251, 113, 133, 0.04); border: 1px solid rgba(251, 113, 133, 0.15);">
+                        <div style="font-family: 'Outfit'; font-size: 22px; font-weight: 800; color: var(--accent-rose); min-width: 28px;">03</div>
+                        <div><div style="font-size: 13px; font-weight: 700; color: #f1f5f9; margin-bottom: 4px;">No <code style="font-family: 'JetBrains Mono'; color: var(--accent-cyan);">.claudeignore</code> — full repo loads</div><div style="font-size: 12px; color: #94a3b8;">→ Ch.6 step 01 · 35–45% noise floor</div></div>
+                    </div>
+                    <div style="display: flex; gap: 14px; padding: 14px; border-radius: 12px; background: rgba(251, 113, 133, 0.04); border: 1px solid rgba(251, 113, 133, 0.15);">
+                        <div style="font-family: 'Outfit'; font-size: 22px; font-weight: 800; color: var(--accent-rose); min-width: 28px;">04</div>
+                        <div><div style="font-size: 13px; font-weight: 700; color: #f1f5f9; margin-bottom: 4px;">MCP servers connected, never used</div><div style="font-size: 12px; color: #94a3b8;">→ Ch.6 step 09 · disconnect + CLI &gt; MCP</div></div>
+                    </div>
+                    <div style="display: flex; gap: 14px; padding: 14px; border-radius: 12px; background: rgba(251, 113, 133, 0.04); border: 1px solid rgba(251, 113, 133, 0.15);">
+                        <div style="font-family: 'Outfit'; font-size: 22px; font-weight: 800; color: var(--accent-rose); min-width: 28px;">05</div>
+                        <div><div style="font-size: 13px; font-weight: 700; color: #f1f5f9; margin-bottom: 4px;">Default extended-thinking 31,999 tokens</div><div style="font-size: 12px; color: #94a3b8;">→ Ch.6 step 10 · <code style="font-family: 'JetBrains Mono'; color: var(--accent-cyan);">MAX_THINKING_TOKENS=8000</code></div></div>
+                    </div>
+                    <div style="display: flex; gap: 14px; padding: 14px; border-radius: 12px; background: rgba(251, 113, 133, 0.04); border: 1px solid rgba(251, 113, 133, 0.15);">
+                        <div style="font-family: 'Outfit'; font-size: 22px; font-weight: 800; color: var(--accent-rose); min-width: 28px;">06</div>
+                        <div><div style="font-size: 13px; font-weight: 700; color: #f1f5f9; margin-bottom: 4px;">Opus on tasks Sonnet would pass</div><div style="font-size: 12px; color: #94a3b8;">→ Ch.6 step 07 · MECW-tiered routing</div></div>
+                    </div>
+                    <div style="display: flex; gap: 14px; padding: 14px; border-radius: 12px; background: rgba(251, 113, 133, 0.04); border: 1px solid rgba(251, 113, 133, 0.15);">
+                        <div style="font-family: 'Outfit'; font-size: 22px; font-weight: 800; color: var(--accent-rose); min-width: 28px;">07</div>
+                        <div><div style="font-size: 13px; font-weight: 700; color: #f1f5f9; margin-bottom: 4px;">Tool outputs piling up silently</div><div style="font-size: 12px; color: #94a3b8;">→ Ch.4 · Sawtooth Withdraw <code style="font-family: 'JetBrains Mono'; color: var(--accent-cyan);">/compact</code></div></div>
+                    </div>
+                    <div style="display: flex; gap: 14px; padding: 14px; border-radius: 12px; background: rgba(251, 113, 133, 0.04); border: 1px solid rgba(251, 113, 133, 0.15);">
+                        <div style="font-family: 'Outfit'; font-size: 22px; font-weight: 800; color: var(--accent-rose); min-width: 28px;">08</div>
+                        <div><div style="font-size: 13px; font-weight: 700; color: #f1f5f9; margin-bottom: 4px;">Asking Claude to read what a script could</div><div style="font-size: 12px; color: #94a3b8;">→ Ch.5 · <code style="font-family: 'JetBrains Mono'; color: var(--accent-cyan);">git show</code> oracle / subagent</div></div>
+                    </div>
+                    <div style="display: flex; gap: 14px; padding: 14px; border-radius: 12px; background: rgba(251, 113, 133, 0.04); border: 1px solid rgba(251, 113, 133, 0.15);">
+                        <div style="font-family: 'Outfit'; font-size: 22px; font-weight: 800; color: var(--accent-rose); min-width: 28px;">09</div>
+                        <div><div style="font-size: 13px; font-weight: 700; color: #f1f5f9; margin-bottom: 4px;">Full file rewrites instead of diffs</div><div style="font-size: 12px; color: #94a3b8;">→ Ch.6 step 06 · <code style="font-family: 'JetBrains Mono'; color: var(--accent-cyan);">apply_patch</code> = 1/100</div></div>
+                    </div>
+                    <div style="display: flex; gap: 14px; padding: 14px; border-radius: 12px; background: rgba(251, 113, 133, 0.04); border: 1px solid rgba(251, 113, 133, 0.15);">
+                        <div style="font-family: 'Outfit'; font-size: 22px; font-weight: 800; color: var(--accent-rose); min-width: 28px;">10</div>
+                        <div><div style="font-size: 13px; font-weight: 700; color: #f1f5f9; margin-bottom: 4px;">Parallel calls without cache warm-up</div><div style="font-size: 12px; color: #94a3b8;">→ Ch.7 · Sequential Warm-up flips −60% → +60%</div></div>
+                    </div>
+                </div>
+            </div>
+
+            <p style="margin-top: 28px; font-style: italic; color: #64748b; font-size: 14px; max-width: 720px;">
+                "The frontier is not a bigger context window. It is a smarter one."
+            </p>
+        </section>
+
+        <!-- ============ CHAPTER 2: ECONOMICS ============ -->
+        <section id="ch2" class="chapter">
+            <div class="eyebrow violet"><span class="dash"></span><span>02 · Economics</span></div>
+            <h2 class="chapter-title">The <span class="gradient-text">Cost of Intelligence</span></h2>
+            <p class="chapter-lede">
+                Frontier models scale price by ~50× across one tier. Output costs up to 5× more than input. Caching changes the math by 50–90%. These three facts shape every routing decision in this atlas.
+            </p>
+
+            <div class="glass" style="margin-top: 32px; padding: 32px; border-radius: 28px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 36px; align-items: center;">
+                    <div>
+                        <h3 style="font-size: 1.15rem; font-weight: 700; margin: 0 0 8px;">Cost Ratio (vs Haiku 4.7 baseline)</h3>
+                        <p style="color: #64748b; font-size: 12px; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.18em; text-transform: uppercase;">Per 1M tokens · Frontier tier</p>
+                        <div class="chart-wrap" style="margin-top: 18px;"><canvas id="costRatioChart"></canvas></div>
+                        <p style="margin-top: 14px; font-size: 12px; color: #64748b; font-style: italic;">* Opus-class is ~50× the cost premium of Haiku — for refactor-grade tasks only.</p>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 14px;">
+                        <div class="glass-soft" style="padding: 20px; border-radius: 18px; border-left: 3px solid var(--accent-cyan);">
+                            <h4 style="font-size: 13px; font-weight: 700; margin: 0 0 8px; letter-spacing: 0.05em;">Output is the bottleneck</h4>
+                            <p style="font-size: 13px; color: #94a3b8; line-height: 1.55; margin: 0;">
+                                Output tokens cost up to <strong>5× more than input</strong>. Constrain via <code style="font-family: 'JetBrains Mono'; color: var(--accent-cyan); background: rgba(0,0,0,0.4); padding: 1px 6px; border-radius: 4px;">max_tokens</code> aggressively; Chain-of-Draft (Ch.6 step 04) keeps thinking output to 7.6% of CoT cost.
+                            </p>
+                        </div>
+                        <div class="glass-soft" style="padding: 20px; border-radius: 18px; border-left: 3px solid var(--accent-violet);">
+                            <h4 style="font-size: 13px; font-weight: 700; margin: 0 0 8px; letter-spacing: 0.05em;">Caching changes the math</h4>
+                            <p style="font-size: 13px; color: #94a3b8; line-height: 1.55; margin: 0;">
+                                Provider Prompt Caching delivers <strong>50–90% input cost reduction</strong> on static prompts (system prompts, repo skeleton, agent rules). The warm-up step in Ch.6 establishes the cache before parallel calls.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass" style="margin-top: 24px; border-radius: 24px; overflow: hidden;">
+                <table class="pricing-table">
+                    <thead>
+                        <tr>
+                            <th>Provider · Model</th>
+                            <th>Input ($/1M)</th>
+                            <th>Output ($/1M)</th>
+                            <th>Context</th>
+                            <th>Headline Benchmark</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td class="model-name">OpenAI · GPT-5.5 (Worker)</td><td>$5.00</td><td>$30.00</td><td>1M (922K in / 128K out)</td><td>82.7% Terminal-Bench 2.0 · 84.9% GDPval · 58.6% SWE-Bench Pro</td></tr>
+                        <tr><td class="model-name">OpenAI · GPT-5.5 Pro</td><td>$30.00</td><td>$180.00</td><td>1M+</td><td>Deep-reasoning tier · highest-stakes only</td></tr>
+                        <tr><td class="model-name">Anthropic · Claude Opus 4.7</td><td>$5.00</td><td>$25.00</td><td>1M (standard pricing)</td><td>64.3% SWE-Bench Pro · 92% honesty · April 16 release</td></tr>
+                        <tr><td class="model-name">Anthropic · Claude Sonnet 4.6</td><td>$3.00</td><td>$15.00</td><td>1M (standard pricing)</td><td>Daily-driver coding · default workhorse</td></tr>
+                        <tr><td class="model-name">Anthropic · Claude Haiku 4.5</td><td>$1.00</td><td>$5.00</td><td>200K</td><td>Cost king · ~5× cheaper input than Opus</td></tr>
+                        <tr><td class="model-name">Google · Gemini 3.1 Pro</td><td>$2.00 <span style="color: #64748b; font-weight: 400;">(↑$4 above 200K)</span></td><td>$12.00 <span style="color: #64748b; font-weight: 400;">(↑$18 above 200K)</span></td><td>2M</td><td>94.3% GPQA reasoning · matches GPT-5.4 quality</td></tr>
+                        <tr><td class="model-name">Google · Gemini 3.1 Flash-Lite</td><td>$0.25</td><td>$1.50</td><td>1M</td><td>1432 Elo Arena · 86.9% GPQA Diamond · 76.8% MMMU Pro</td></tr>
+                        <tr><td class="model-name">DeepSeek · V4 Pro (1.6T MoE)</td><td>$1.74 <span style="color: var(--accent-emerald); font-weight: 400;">(75% off → 5/31)</span></td><td>$3.48</td><td>1M native</td><td>80.6% SWE-bench Verified · 67.9% Terminal-Bench 2.0 · 49B active</td></tr>
+                        <tr><td class="model-name">Meta · Llama 4 Maverick</td><td>$0.15</td><td>$0.60</td><td>1M</td><td>17B active / 400B total · 128 experts · multimodal</td></tr>
+                        <tr><td class="model-name">Meta · Llama 4 Scout</td><td>$0.08–$0.15</td><td>—</td><td>10M</td><td>17B active / 109B total · largest open-weight context</td></tr>
+                        <tr style="opacity: 0.55;"><td class="model-name">OpenAI · GPT-4o (128K) <span style="color: #475569; font-weight: 400;">— legacy</span></td><td>$2.50</td><td>$10.00</td><td>128K</td><td>Pre-agent tier</td></tr>
+                        <tr style="opacity: 0.55;"><td class="model-name">Anthropic · Opus 4.6 <span style="color: #475569; font-weight: 400;">— superseded</span></td><td>$5.00</td><td>$25.00</td><td>—</td><td>Replaced by Opus 4.7 on April 16</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- ============ CHAPTER 3: FRONTIER MAP ============ -->
+        <section id="ch3" class="chapter">
+            <div class="eyebrow lime"><span class="dash"></span><span>03 · Frontier Map</span></div>
+            <h2 class="chapter-title">The 2026 <span class="gradient-text">Model Landscape</span></h2>
+            <p class="chapter-lede">
+                Four reigning architectures. Each optimized for a different shape of work. Below: the radar of trade-offs and the OckScore ranking that measures intelligence per token, not just per dollar.
+            </p>
+
+            <div class="frontier-grid" style="margin-top: 32px;">
+                <article class="glass-card frontier-card cyan">
+                    <div class="scanner-line"></div>
+                    <div class="vendor" style="color: var(--accent-cyan);">OpenAI · GPT-5.5 (Worker)</div>
+                    <h3 class="name">Agentic Sovereign</h3>
+                    <p class="role">Released April 23 · 1M context (922K in / 128K out)</p>
+                    <p class="desc">Unified Codex architecture. <strong style="color: var(--accent-cyan);">82.7% Terminal-Bench 2.0</strong> · 84.9% GDPval · 58.6% SWE-Bench Pro. Built to finish tasks, not answer questions.</p>
+                    <div class="meta"><span>$5.00 in / $30.00 out / 1M</span><span style="color: var(--accent-cyan);">Pro: $30 / $180</span></div>
+                </article>
+                <article class="glass-card frontier-card violet">
+                    <div class="vendor" style="color: var(--accent-violet);">Anthropic · Claude Opus 4.7</div>
+                    <h3 class="name">Agent Architect</h3>
+                    <p class="role">Released April 16 · 1M standard pricing</p>
+                    <p class="desc"><strong style="color: var(--accent-violet);">64.3% SWE-Bench Pro</strong> — coding crown holder. 92% honesty rate. Same list price as 4.6, but the new tokenizer maps the same input to <strong>1.0×–1.35×</strong> more tokens — effective cost crept up.</p>
+                    <div class="meta"><span>$5.00 in / $25.00 out / 1M</span><span style="color: var(--accent-violet);">Honesty 92%</span></div>
+                </article>
+                <article class="glass-card frontier-card blue">
+                    <div class="vendor" style="color: #60a5fa;">Google · Gemini 3.1 Pro</div>
+                    <h3 class="name">Reasoning Leader</h3>
+                    <p class="role">2M context · matches GPT-5.4 quality</p>
+                    <p class="desc"><strong style="color: #60a5fa;">94.3% GPQA</strong> reasoning lead · widest context of any frontier model. Pricing tiers at 200K: $2/$12 below, $4/$18 above. Native Memory Bank protocol.</p>
+                    <div class="meta"><span>$2.00 in / $12.00 out / 1M</span><span style="color: #60a5fa;">2M Context</span></div>
+                </article>
+                <article class="glass-card frontier-card emerald">
+                    <div class="vendor" style="color: var(--accent-emerald);">Google · Gemini 3.1 Flash-Lite</div>
+                    <h3 class="name">Economy Driver</h3>
+                    <p class="role">GA April 22 · 1M context · 50% cheaper than Flash</p>
+                    <p class="desc"><strong style="color: var(--accent-emerald);">1432 Elo</strong> on Arena · 86.9% GPQA Diamond · 76.8% MMMU Pro. The ideal sub-agent for RAG, search, and tier-1 routing — Ch.6 step 07.</p>
+                    <div class="meta"><span>$0.25 in / $1.50 out / 1M</span><span style="color: var(--accent-emerald);">120× cheaper than Pro</span></div>
+                </article>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 5fr 7fr; gap: 28px; margin-top: 32px;" class="lg-collapse">
+                <div class="glass" style="padding: 28px; border-radius: 28px;">
+                    <h3 style="text-align: center; font-size: 13px; letter-spacing: 0.18em; text-transform: uppercase; color: #94a3b8; font-weight: 700; margin: 0 0 12px;">2026 Provider Efficiency Matrix</h3>
+                    <div class="chart-wrap-tall"><canvas id="radarChart"></canvas></div>
+                    <p style="font-size: 12px; color: #64748b; margin-top: 12px; font-style: italic; text-align: center;">Reasoning · Token Efficiency · Context · Speed · Affordability (higher = cheaper)</p>
+                </div>
+
+                <div>
+                    <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 18px;">
+                        <div class="glass-soft" style="padding: 16px; border-radius: 14px; border-left: 3px solid var(--accent-cyan);">
+                            <h4 style="font-size: 13px; font-weight: 700; margin: 0 0 4px;">GPT-5.5 Worker · Agentic Lead</h4>
+                            <p style="font-size: 12px; color: #94a3b8; margin: 0; font-style: italic;">Best at planning + tool coordination — 82.7% Terminal-Bench 2.0. The Pro tier ($30/$180) is reasoning-only and 6× the cost of Worker; reserve for high-stakes audits.</p>
+                        </div>
+                        <div class="glass-soft" style="padding: 16px; border-radius: 14px; border-left: 3px solid var(--accent-violet);">
+                            <h4 style="font-size: 13px; font-weight: 700; margin: 0 0 4px;">Claude Opus 4.7 · Coding Architect</h4>
+                            <p style="font-size: 12px; color: #94a3b8; margin: 0; font-style: italic;">Highest SWE-Bench Pro score in the index (64.3%). Same $5/$25 list price as 4.6, but the updated tokenizer can charge 1.0×–1.35× more on the same prompt body.</p>
+                        </div>
+                        <div class="glass-soft" style="padding: 16px; border-radius: 14px; border-left: 3px solid var(--accent-lime);">
+                            <h4 style="font-size: 13px; font-weight: 700; margin: 0 0 4px;">Gemini 3.1 Pro · Volume + Reasoning</h4>
+                            <p style="font-size: 12px; color: #94a3b8; margin: 0; font-style: italic;">2M context — widest of any frontier model — at $2/$12 below 200K, $4/$18 above. Leads GPQA at 94.3%. The default if you need both reasoning depth and document scale.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h3 style="font-size: 1.4rem; font-weight: 700; margin: 40px 0 18px;">OckScore — Intelligence per Token</h3>
+            <div class="glass" style="border-radius: 28px; overflow: hidden;">
+                <table class="ock-table">
+                    <thead>
+                        <tr>
+                            <th>Model Architecture</th>
+                            <th>Intelligence Density</th>
+                            <th>MECW %</th>
+                            <th style="text-align: right;">OckScore</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td class="model-name" style="color: #f1f5f9; font-weight: 700;">Gemini 3.1 Pro (Preview)</td><td>High Density</td><td>97%</td><td style="text-align: right;" class="ock-score">67.21</td></tr>
+                        <tr><td class="model-name" style="color: #f1f5f9; font-weight: 700;">GPT-5.5 Worker High</td><td>Adaptive Reasoning</td><td>94%</td><td style="text-align: right;" class="ock-score">61.30</td></tr>
+                        <tr><td class="model-name" style="color: #f1f5f9; font-weight: 700;">Claude Opus 4.7</td><td>Context Sovereign</td><td>88%</td><td style="text-align: right;" class="ock-score">58.90</td></tr>
+                        <tr><td class="model-name" style="color: #f1f5f9; font-weight: 700;">DeepSeek V4 Pro <span style="color: #64748b; font-weight: 400;">*est.</span></td><td>MoE Open-Weight</td><td>85%</td><td style="text-align: right;" class="ock-score">52.40</td></tr>
+                        <tr class="row-dim"><td>Llama 4 Maverick (open) <span style="color: #475569; font-weight: 400;">*est.</span></td><td>Volume-First</td><td>76%</td><td style="text-align: right;" class="ock-score">34.91</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <p style="margin-top: 16px; font-size: 12px; color: #64748b; font-style: italic; line-height: 1.55;">
+                <strong style="color: #94a3b8;">MECW (Maximum Effective Context Window):</strong> the real performance ceiling where accuracy stays &gt;90%. Effective context often falls 99% below advertised limits on multi-document reasoning.
+                <strong style="color: #94a3b8;">OckBench</strong> measures the variance: <strong style="color: var(--accent-cyan);">3.3× token variance factor</strong> and <strong style="color: var(--accent-cyan);">5.0× latency delta</strong> on hard tasks across providers.
+                <span style="color: var(--accent-amber);">*est.</span> rows are author-derived from public benchmarks pending an official OckBench listing.
+            </p>
+        </section>
+
+        <!-- ============ CHAPTER 4: SAWTOOTH LAB ============ -->
+        <section id="ch4" class="chapter">
+            <div class="eyebrow rose"><span class="dash"></span><span>04 · Sawtooth Lab</span></div>
+            <h2 class="chapter-title">Focus Architecture &amp; <span class="gradient-text">Autonomous Memory</span></h2>
+            <p class="chapter-lede">
+                Passive summarization is dead. The 2026 standard treats memory as an autonomous agent-controlled resource. Two phases — Explore and Consolidate (Withdraw) — alternate to keep the active context healthy.
+            </p>
+
+            <div class="saw-grid" style="margin-top: 32px;">
+                <div style="display: flex; flex-direction: column; gap: 16px;">
+                    <div class="glass-card phase-card explore">
+                        <div class="phase-label">Phase 1 · Explore</div>
+                        <p style="margin: 0; color: #cbd5e1; font-size: 14px; line-height: 1.6;">Agent declares a sub-task (<code style="font-family: 'JetBrains Mono'; color: var(--accent-cyan); background: rgba(0,0,0,0.4); padding: 1px 6px; border-radius: 4px;">start_focus</code>), reads logs, file chunks, runs CLI tests. Active context grows linearly during task discovery — usually 10–15 tool calls.</p>
+                    </div>
+                    <div class="glass-card phase-card consolidate">
+                        <div class="phase-label">Phase 2 · Consolidate (Withdraw)</div>
+                        <p style="margin: 0; color: #cbd5e1; font-size: 14px; line-height: 1.6;">Agent invokes <code style="font-family: 'JetBrains Mono'; color: var(--accent-violet); background: rgba(0,0,0,0.4); padding: 1px 6px; border-radius: 4px;">complete_focus</code>, generates a 200-token Knowledge Block, appends it to a persistent store, and the system <strong>physically deletes</strong> the raw exploration logs.</p>
+                    </div>
+                    <div style="display: flex; gap: 14px; flex-wrap: wrap; margin-top: 6px;">
+                        <span class="pill"><span class="dot"></span>22.7% total reduction</span>
+                        <span class="pill violet"><span class="dot"></span>57% on exploration</span>
+                        <span class="pill lime"><span class="dot"></span>SAWTOOTH v4.3</span>
+                    </div>
+                </div>
+
+                <div class="glass-card saw-canvas">
+                    <div class="scan"></div>
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; flex-wrap: wrap; gap: 12px;">
+                        <div>
+                            <h3 style="font-family: 'Outfit'; font-weight: 800; font-style: italic; font-size: 1.5rem; margin: 0;">Token Optimizer 1.0</h3>
+                            <p style="font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.18em; color: #64748b; text-transform: uppercase; margin: 4px 0 0;">Live Session Visualizer</p>
+                        </div>
+                        <div style="display: flex; gap: 18px; font-family: 'JetBrains Mono'; font-size: 10px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase;">
+                            <div style="display: flex; align-items: center; gap: 8px;"><span style="width: 9px; height: 9px; border-radius: 50%; background: var(--accent-cyan); box-shadow: 0 0 10px var(--accent-cyan);"></span> Accumulation</div>
+                            <div style="display: flex; align-items: center; gap: 8px;"><span style="width: 9px; height: 9px; border-radius: 50%; background: var(--accent-violet); box-shadow: 0 0 10px var(--accent-violet);"></span> Pruning Event</div>
+                        </div>
+                    </div>
+                    <div class="chart-wrap"><canvas id="sawtoothChart"></canvas></div>
+                </div>
+            </div>
+
+            <div class="supplementary">
+                <div class="glass-card" style="padding: 26px; border-radius: 22px; border-top: 3px solid var(--accent-amber);">
+                    <h4 style="font-family: 'Outfit'; font-weight: 800; font-size: 1.05rem; margin: 0 0 10px; text-transform: uppercase; letter-spacing: -0.01em;">TurboQuant KV Compression</h4>
+                    <p style="font-size: 13px; color: #94a3b8; line-height: 1.55; margin: 0 0 12px;">Two-step KV cache compression: <strong>PolarQuant Mapping → QJL Residual Check</strong>. Yields <strong>8× faster logit processing</strong> with negligible accuracy drift.</p>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <span class="pill"><span class="dot" style="background: var(--accent-amber);"></span>Polar Quant</span>
+                        <span class="pill"><span class="dot" style="background: var(--accent-amber);"></span>QJL Residual</span>
+                        <span class="pill"><span class="dot" style="background: var(--accent-amber);"></span>8× Logits</span>
+                    </div>
+                </div>
+                <div class="glass-card" style="padding: 26px; border-radius: 22px; border-top: 3px solid var(--accent-emerald);">
+                    <h4 style="font-family: 'Outfit'; font-weight: 800; font-size: 1.05rem; margin: 0 0 10px; text-transform: uppercase; letter-spacing: -0.01em;">Codex Multi-Agent Worktrees</h4>
+                    <p style="font-size: 13px; color: #94a3b8; line-height: 1.55; margin: 0 0 12px;">Git worktrees parallelize agents on the same repo without context collision. One agent on Auth, one on API, one on Docs — each in an isolated branch and isolated context.</p>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <span class="pill emerald" style="--dot:var(--accent-emerald);"><span class="dot" style="background: var(--accent-emerald);"></span>Auth Agent</span>
+                        <span class="pill"><span class="dot" style="background: var(--accent-emerald);"></span>API Agent</span>
+                        <span class="pill"><span class="dot" style="background: var(--accent-emerald);"></span>Docs Agent</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============ CHAPTER 5: PRUNING LAB ============ -->
+        <section id="ch5" class="chapter">
+            <div class="eyebrow amber"><span class="dash"></span><span>05 · Pruning Lab</span></div>
+            <h2 class="chapter-title">Six Strategies to Fit <span class="gradient-text">1 GB into 1 MB</span></h2>
+            <p class="chapter-lede">
+                Each strategy compresses what enters the context window. Combine two or three to stack the savings — Just-In-Time RAG + AST Folding + Recursive Distillation routinely lands a 1M-token codebase below the 16K raw-history ceiling.
+            </p>
+
+            <div class="pruning-grid" style="margin-top: 32px;">
+                <article class="glass-card pruning-card cyan">
+                    <div class="badge">⚡</div>
+                    <h3>Semantic Hashing</h3>
+                    <p>Code blocks become fixed-length semantic hashes. The LLM references the hash; local middleware expands it only when the model focuses on a specific block.</p>
+                    <div class="savings"><span class="left">Savings: 92%</span><span class="right">Complexity: High</span></div>
+                </article>
+                <article class="glass-card pruning-card violet">
+                    <div class="badge">🧠</div>
+                    <h3>Entropy-Based Pruning</h3>
+                    <p>An algorithm strips low-information tokens (boilerplate, repetitive logs, filler). Only high-entropy logic tokens remain. <strong>80% of intermediate thinking steps are prunable.</strong></p>
+                    <div class="savings"><span class="left">Savings: 45%</span><span class="right">Complexity: Low</span></div>
+                </article>
+                <article class="glass-card pruning-card lime">
+                    <div class="badge">🔄</div>
+                    <h3>Recursive Distillation</h3>
+                    <p>The LLM bakes its own history into a Knowledge Snapshot. Old messages are deleted; the snapshot lives in the System Prompt. <strong>SparseKD improves quality 39% during refactors.</strong></p>
+                    <div class="savings"><span class="left">Savings: 70%</span><span class="right">Complexity: Medium</span></div>
+                </article>
+                <article class="glass-card pruning-card rose">
+                    <div class="badge">🛡️</div>
+                    <h3>Cross-Model Arbitration</h3>
+                    <p>A cheap model (Gemini Flash-Lite) acts as a Gatekeeper. It summarizes and filters the user query and codebase before passing the refined nectar to the expensive frontier model.</p>
+                    <div class="savings"><span class="left">Savings: 60%</span><span class="right">Complexity: Low</span></div>
+                </article>
+                <article class="glass-card pruning-card amber">
+                    <div class="badge">🖇️</div>
+                    <h3>AST Context Folding</h3>
+                    <p>Using Abstract Syntax Trees, fold any code not immediately relevant to the cursor position into a one-liner (<code style="font-family: 'JetBrains Mono'; color: var(--accent-amber); background: rgba(0,0,0,0.4); padding: 1px 6px; border-radius: 4px;">// 142 lines omitted</code>). Models retain structure without bloat.</p>
+                    <div class="savings"><span class="left">Savings: 80%</span><span class="right">Complexity: High</span></div>
+                </article>
+                <article class="glass-card pruning-card indigo">
+                    <div class="badge">📡</div>
+                    <h3>Just-In-Time RAG</h3>
+                    <p>Don't load files. Provide a File Oracle tool. The LLM explicitly requests file chunks based on its own analysis, pulling only what is necessary for the next reasoning step.</p>
+                    <div class="savings"><span class="left">Savings: 95%</span><span class="right">Complexity: Medium</span></div>
+                </article>
+            </div>
+
+            <div class="glass" style="margin-top: 36px; padding: 36px; border-radius: 32px;">
+                <h3 style="text-align: center; font-size: 1.45rem; font-weight: 700; margin: 0 0 6px;">The Neural Pipeline · Quantum SnapShot Architecture</h3>
+                <p style="text-align: center; font-size: 12px; color: #64748b; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.18em; text-transform: uppercase; margin: 0 0 24px;">Raw Context → Entropy Filter → Distillation → Inference</p>
+                <div class="pipeline">
+                    <div class="pipe-stage s1">
+                        <div class="icon">📥</div>
+                        <div class="lbl">Stage 1</div>
+                        <div class="name">Raw Context Ingestion</div>
+                    </div>
+                    <span class="pipe-arrow">→</span>
+                    <div class="pipe-stage s2">
+                        <div class="icon">✂️</div>
+                        <div class="lbl">Stage 2</div>
+                        <div class="name">Entropy Pruning Engine</div>
+                    </div>
+                    <span class="pipe-arrow">→</span>
+                    <div class="pipe-stage s3">
+                        <div class="icon">🧪</div>
+                        <div class="lbl">Stage 3</div>
+                        <div class="name">Recursive Distillation</div>
+                    </div>
+                    <span class="pipe-arrow">→</span>
+                    <div class="pipe-stage s4">
+                        <div class="icon">🚀</div>
+                        <div class="lbl">Stage 4</div>
+                        <div class="name">Frontier Inference</div>
+                    </div>
+                </div>
+                <div style="max-width: 720px; margin: 28px auto 0; padding: 18px 22px; border-radius: 18px; background: rgba(34, 211, 238, 0.06); border: 1px solid rgba(34, 211, 238, 0.18);">
+                    <p style="margin: 0; font-size: 13px; color: #93dcf2; line-height: 1.55;">
+                        <strong style="color: var(--accent-cyan);">Pipeline contract:</strong> the Frontier Model never sees more than <strong>16K tokens of raw history</strong>. The Distillation Engine maintains a persistent semantic map of the entire 1M-token session.
+                    </p>
+                </div>
+            </div>
+
+            <h3 style="font-size: 1.4rem; font-weight: 700; margin: 48px 0 18px;">Intelligence-per-Dollar (IPD) Curve</h3>
+            <div class="glass" style="border-radius: 28px; padding: 8px;">
+                <div id="ipdPlot" style="width: 100%; height: 460px; border-radius: 24px; overflow: hidden; background: rgba(255,255,255,0.96);"></div>
+            </div>
+            <p style="text-align: center; color: #64748b; margin-top: 14px; font-size: 12px; font-style: italic;">
+                Plotly WebGL · bubble size = input price · log x-axis · 9-model April 2026 dataset
+            </p>
+
+            <h3 style="font-size: 1.4rem; font-weight: 700; margin: 56px 0 6px;">Git in Practice — applying the six strategies to your repo</h3>
+            <p style="color: #94a3b8; font-size: 14px; max-width: 760px; margin: 0 0 28px;">
+                The strategies above are theory until they meet a real codebase. Below: each strategy mapped to a concrete git tactic, with the exact command, file pattern, or workflow to use today.
+            </p>
+
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;" class="git-grid">
+                <article class="glass-card" style="padding: 24px; border-radius: 22px; border-top: 3px solid var(--accent-cyan);">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+                        <span style="font-size: 20px;">⚡</span>
+                        <span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--accent-cyan); font-weight: 700;">Strategy 1 · Semantic Hashing</span>
+                    </div>
+                    <h4 style="font-size: 1.05rem; font-weight: 700; margin: 0 0 10px;">Git tactic: hash blobs, expand on demand</h4>
+                    <p style="font-size: 13px; color: #94a3b8; line-height: 1.55; margin: 0 0 12px;">Replace pasted code with <code style="font-family: 'JetBrains Mono'; color: var(--accent-cyan); background: rgba(0,0,0,0.4); padding: 1px 6px; border-radius: 4px;">git rev-parse HEAD:src/auth.ts</code> hashes in the prompt. The agent calls <code style="font-family: 'JetBrains Mono'; color: var(--accent-cyan); background: rgba(0,0,0,0.4); padding: 1px 6px; border-radius: 4px;">git cat-file -p &lt;sha&gt;</code> only when it needs the body.</p>
+                    <div style="background: rgba(0,0,0,0.55); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--accent-cyan); line-height: 1.6;">
+                        $ git ls-tree -r HEAD --object-only<br>
+                        # → 40 SHAs instead of 40 file bodies<br>
+                        # agent expands only on focus
+                    </div>
+                </article>
+
+                <article class="glass-card" style="padding: 24px; border-radius: 22px; border-top: 3px solid var(--accent-violet);">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+                        <span style="font-size: 20px;">🧠</span>
+                        <span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--accent-violet); font-weight: 700;">Strategy 2 · Entropy-Based Pruning</span>
+                    </div>
+                    <h4 style="font-size: 1.05rem; font-weight: 700; margin: 0 0 10px;">Git tactic: <code style="font-family: 'JetBrains Mono'; color: var(--accent-violet);">.gitignore</code> + <code style="font-family: 'JetBrains Mono'; color: var(--accent-violet);">.claudeignore</code> as a pair</h4>
+                    <p style="font-size: 13px; color: #94a3b8; line-height: 1.55; margin: 0 0 12px;">Build artifacts, lockfiles, and logs are <em>pure noise tokens</em>. Mirror your <code style="font-family: 'JetBrains Mono'; color: var(--accent-violet); background: rgba(0,0,0,0.4); padding: 1px 6px; border-radius: 4px;">.gitignore</code> into <code style="font-family: 'JetBrains Mono'; color: var(--accent-violet); background: rgba(0,0,0,0.4); padding: 1px 6px; border-radius: 4px;">.claudeignore</code> + extend with vendored dirs and snapshot fixtures.</p>
+                    <div style="background: rgba(0,0,0,0.55); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--accent-violet); line-height: 1.6;">
+                        # .claudeignore (mirror .gitignore + extras)<br>
+                        node_modules/<br>
+                        dist/ build/ .next/ coverage/<br>
+                        *.lock *.log *.snap<br>
+                        __pycache__/ *.pyc<br>
+                        vendor/ third_party/
+                    </div>
+                </article>
+
+                <article class="glass-card" style="padding: 24px; border-radius: 22px; border-top: 3px solid var(--accent-lime);">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+                        <span style="font-size: 20px;">🔄</span>
+                        <span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--accent-lime); font-weight: 700;">Strategy 3 · Recursive Distillation</span>
+                    </div>
+                    <h4 style="font-size: 1.05rem; font-weight: 700; margin: 0 0 10px;">Git tactic: <code style="font-family: 'JetBrains Mono'; color: var(--accent-lime);">git log --oneline</code> as the knowledge block</h4>
+                    <p style="font-size: 13px; color: #94a3b8; line-height: 1.55; margin: 0 0 12px;">After <code style="font-family: 'JetBrains Mono'; color: var(--accent-lime); background: rgba(0,0,0,0.4); padding: 1px 6px; border-radius: 4px;">/compact</code>, write a single-line conventional commit. Next session, <code style="font-family: 'JetBrains Mono'; color: var(--accent-lime); background: rgba(0,0,0,0.4); padding: 1px 6px; border-radius: 4px;">git log --oneline -20</code> rebuilds the entire decision history in &lt;200 tokens.</p>
+                    <div style="background: rgba(0,0,0,0.55); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--accent-lime); line-height: 1.6;">
+                        $ git log --oneline -20<br>
+                        a3f9c12 feat(auth): JWT rotation w/ refresh<br>
+                        9b1e4d2 fix(api): rate-limit middleware order<br>
+                        e7c2a01 refactor(db): pool config to env<br>
+                        # ↑ 3 sessions of context in 60 tokens
+                    </div>
+                </article>
+
+                <article class="glass-card" style="padding: 24px; border-radius: 22px; border-top: 3px solid var(--accent-rose);">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+                        <span style="font-size: 20px;">🛡️</span>
+                        <span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--accent-rose); font-weight: 700;">Strategy 4 · Cross-Model Arbitration</span>
+                    </div>
+                    <h4 style="font-size: 1.05rem; font-weight: 700; margin: 0 0 10px;">Git tactic: Flash-Lite as the <code style="font-family: 'JetBrains Mono'; color: var(--accent-rose);">git grep</code> oracle</h4>
+                    <p style="font-size: 13px; color: #94a3b8; line-height: 1.55; margin: 0 0 12px;">Send the cheap model the repo + query. It runs <code style="font-family: 'JetBrains Mono'; color: var(--accent-rose); background: rgba(0,0,0,0.4); padding: 1px 6px; border-radius: 4px;">git grep -n</code>, returns 5 file:line refs. Only those refs (and their bodies) reach Opus / GPT-5.5 Pro.</p>
+                    <div style="background: rgba(0,0,0,0.55); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--accent-rose); line-height: 1.6;">
+                        # gemini-flash-lite ($0.25/1M)<br>
+                        $ git grep -n "TODO" -- '*.ts'<br>
+                        # → 12 hits @ 5 paths<br>
+                        # opus 4.7 sees only those 5 paths
+                    </div>
+                </article>
+
+                <article class="glass-card" style="padding: 24px; border-radius: 22px; border-top: 3px solid var(--accent-amber);">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+                        <span style="font-size: 20px;">🖇️</span>
+                        <span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--accent-amber); font-weight: 700;">Strategy 5 · AST Context Folding</span>
+                    </div>
+                    <h4 style="font-size: 1.05rem; font-weight: 700; margin: 0 0 10px;">Git tactic: <code style="font-family: 'JetBrains Mono'; color: var(--accent-amber);">git diff -U2</code> instead of full files</h4>
+                    <p style="font-size: 13px; color: #94a3b8; line-height: 1.55; margin: 0 0 12px;">Pass <code style="font-family: 'JetBrains Mono'; color: var(--accent-amber); background: rgba(0,0,0,0.4); padding: 1px 6px; border-radius: 4px;">git diff -U2 main..HEAD</code> for review tasks — 2-line context windows fold the rest. For new features, ask for <code style="font-family: 'JetBrains Mono'; color: var(--accent-amber); background: rgba(0,0,0,0.4); padding: 1px 6px; border-radius: 4px;">apply_patch</code> output (Ch.6 step 06): a 10-line patch ≈ 1/100 the tokens of a rewrite.</p>
+                    <div style="background: rgba(0,0,0,0.55); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--accent-amber); line-height: 1.6;">
+                        $ git diff -U2 main..feat/auth<br>
+                        --- a/src/auth.ts<br>
+                        +++ b/src/auth.ts<br>
+                        @@ -42,2 +42,4 @@<br>
+                        # 4-line diff vs 200-line file
+                    </div>
+                </article>
+
+                <article class="glass-card" style="padding: 24px; border-radius: 22px; border-top: 3px solid #818cf8;">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+                        <span style="font-size: 20px;">📡</span>
+                        <span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: #818cf8; font-weight: 700;">Strategy 6 · Just-In-Time RAG</span>
+                    </div>
+                    <h4 style="font-size: 1.05rem; font-weight: 700; margin: 0 0 10px;">Git tactic: <code style="font-family: 'JetBrains Mono'; color: #818cf8;">git show</code> as the file oracle</h4>
+                    <p style="font-size: 13px; color: #94a3b8; line-height: 1.55; margin: 0 0 12px;">Don't load <code style="font-family: 'JetBrains Mono'; color: #818cf8; background: rgba(0,0,0,0.4); padding: 1px 6px; border-radius: 4px;">src/</code>. Expose <code style="font-family: 'JetBrains Mono'; color: #818cf8; background: rgba(0,0,0,0.4); padding: 1px 6px; border-radius: 4px;">git show HEAD:&lt;path&gt;</code> as a tool. Agent pulls only files it explicitly references — and at exact revisions. Saves 95% on large repos.</p>
+                    <div style="background: rgba(0,0,0,0.55); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #818cf8; line-height: 1.6;">
+                        # tool: read_at_rev<br>
+                        $ git show HEAD~3:src/auth.ts<br>
+                        # exact bytes at exact commit<br>
+                        # no working-dir contamination
+                    </div>
+                </article>
+            </div>
+
+            <div class="glass" style="margin-top: 28px; padding: 32px; border-radius: 28px; border-left: 4px solid var(--accent-emerald);">
+                <div class="eyebrow emerald" style="margin-bottom: 14px;"><span class="dash"></span><span>Multi-Agent · Git Worktrees in Anger</span></div>
+                <h3 style="font-size: 1.45rem; font-weight: 700; margin: 0 0 12px;">Three agents · one repo · zero context collision</h3>
+                <p style="color: #94a3b8; line-height: 1.65; font-size: 14px; max-width: 800px; margin: 0 0 18px;">
+                    When two agents share one working directory, they read the same files, generate edits independently, and the second write erases the first. Worktrees give each agent its own filesystem path + branch + git index — sharing one object store. Tools: <strong style="color: var(--accent-emerald);">Worktrunk</strong> (CLI), <strong style="color: var(--accent-emerald);">JetBrains 2026.1</strong> (native), <strong style="color: var(--accent-emerald);">VS Code</strong> (since July 2025).
+                </p>
+                <div style="background: rgba(0,0,0,0.55); border: 1px solid var(--line); border-radius: 14px; padding: 18px 20px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--accent-emerald); line-height: 1.75;">
+                    <span style="color: #64748b;"># spin up 3 isolated agents</span><br>
+                    $ git worktree add ../app-auth   feat/auth-v2<br>
+                    $ git worktree add ../app-api    feat/api-rate-limit<br>
+                    $ git worktree add ../app-docs   docs/april-release<br>
+                    <br>
+                    <span style="color: #64748b;"># each agent gets isolated context</span><br>
+                    $ cd ../app-auth   &amp;&amp; claude    <span style="color: #64748b;">// agent A · Auth only</span><br>
+                    $ cd ../app-api    &amp;&amp; claude    <span style="color: #64748b;">// agent B · API only</span><br>
+                    $ cd ../app-docs   &amp;&amp; claude    <span style="color: #64748b;">// agent C · Docs only</span><br>
+                    <br>
+                    <span style="color: #64748b;"># merge through git, not through context</span><br>
+                    $ git checkout main &amp;&amp; git merge feat/auth-v2 feat/api-rate-limit
+                </div>
+                <div style="display: flex; gap: 12px; margin-top: 18px; flex-wrap: wrap;">
+                    <span class="pill"><span class="dot" style="background: var(--accent-emerald);"></span>Each agent: own context window</span>
+                    <span class="pill"><span class="dot" style="background: var(--accent-emerald);"></span>Branch-isolated reads + writes</span>
+                    <span class="pill"><span class="dot" style="background: var(--accent-emerald);"></span>Conflict resolution via git, not LLM</span>
+                </div>
+            </div>
+
+            <div class="glass" style="margin-top: 18px; padding: 32px; border-radius: 28px;">
+                <div class="eyebrow"><span class="dash"></span><span>Repo-Wide · Subdirectory CLAUDE.md Stacking</span></div>
+                <h3 style="font-size: 1.3rem; font-weight: 700; margin: 12px 0 12px;">Skills architecture, not a 5,000-token monolith</h3>
+                <p style="color: #94a3b8; line-height: 1.6; font-size: 14px; margin: 0 0 16px; max-width: 800px;">
+                    A single root <code style="font-family: 'JetBrains Mono'; color: var(--accent-cyan); background: rgba(0,0,0,0.4); padding: 1px 6px; border-radius: 4px;">CLAUDE.md</code> loads on every turn whether you need it or not. Split into directory-local files: the agent loads <code style="font-family: 'JetBrains Mono'; color: var(--accent-cyan); background: rgba(0,0,0,0.4); padding: 1px 6px; border-radius: 4px;">api/CLAUDE.md</code> only when it navigates into <code style="font-family: 'JetBrains Mono'; color: var(--accent-cyan); background: rgba(0,0,0,0.4); padding: 1px 6px; border-radius: 4px;">api/</code>. Recovers up to 82% per session.
+                </p>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;" class="ctx-tax-grid">
+                    <div style="background: rgba(251, 113, 133, 0.06); border: 1px solid rgba(251, 113, 133, 0.2); border-radius: 12px; padding: 16px;">
+                        <div style="font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent-rose); font-weight: 700; margin-bottom: 10px;">// anti-pattern</div>
+                        <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #94a3b8; line-height: 1.6;">
+                            CLAUDE.md (5,000 tokens)<br>
+                            ├── api/<br>
+                            ├── auth/<br>
+                            ├── billing/<br>
+                            └── frontend/
+                        </div>
+                    </div>
+                    <div style="background: rgba(16, 185, 129, 0.06); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 12px; padding: 16px;">
+                        <div style="font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent-emerald); font-weight: 700; margin-bottom: 10px;">// stacked pattern</div>
+                        <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #94a3b8; line-height: 1.6;">
+                            CLAUDE.md (≤500 tokens)<br>
+                            ├── api/CLAUDE.md (rules + key files)<br>
+                            ├── auth/CLAUDE.md (lazy-loaded)<br>
+                            ├── billing/CLAUDE.md (lazy-loaded)<br>
+                            └── frontend/CLAUDE.md (lazy-loaded)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============ CHAPTER 6: RESOLUTION PATH ============ -->
+        <section id="ch6" class="chapter">
+            <div class="eyebrow"><span class="dash"></span><span>06 · Resolution Path</span></div>
+            <h2 class="chapter-title">The Unified <span class="gradient-text">10-Step Protocol</span></h2>
+            <p class="chapter-lede">
+                Apply these in order. Each step compounds the previous. Together they reduce token consumption by up to 90% in agentic coding workflows — without sacrificing accuracy. Steps 1–7 fix the input. Steps 8–10 fix the conversation shape.
+            </p>
+
+            <div class="resolution-list" style="margin-top: 32px;">
+                <div class="glass-card resolution-card">
+                    <span class="step-num">01</span>
+                    <h4>The Metadata Audit</h4>
+                    <p>Establish a <code>.claudeignore</code> or <code>.copilotignore</code> file. Baseline project loads waste 35–45% of the window on build noise, <code>node_modules</code>, and binaries. <strong>Reduces project-load tax by ~35%.</strong></p>
+                    <div class="code-block">
+                        # .claudeignore<br>
+                        dist/**/*<br>
+                        **/node_modules/**<br>
+                        **/*.log<br>
+                        bin/
+                    </div>
+                </div>
+
+                <div class="glass-card resolution-card violet">
+                    <span class="step-num">02</span>
+                    <h4>Stack Sub-Instructions</h4>
+                    <p>Replace a single 5,000-token <code>CLAUDE.md</code> with <strong>Subdirectory Stacking</strong>. Split agent rules across folder-level files — they load only as the agent navigates there. The unused 4,000 tokens stay out of the active window.</p>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <span class="pill violet"><span class="dot"></span>Impact: High</span>
+                        <span class="pill"><span class="dot"></span>@filename references stay live</span>
+                    </div>
+                </div>
+
+                <div class="glass-card resolution-card lime">
+                    <span class="step-num">03</span>
+                    <h4>Recursive Focus Loop</h4>
+                    <p>Run <code>/compact</code> at natural breakpoints to summarize progress and purge verbose tool logs. Replace monotonic context growth with the Sawtooth pattern from Chapter 4. <strong>Target: stop session "Context Rot" after turn 20.</strong></p>
+                </div>
+
+                <div class="glass-card resolution-card emerald">
+                    <span class="step-num">04</span>
+                    <h4>Chain-of-Draft (5-Word Rule)</h4>
+                    <p>Force the model into <strong>CoD Mode</strong>: keep all internal reasoning to ≤5 words per step. Matches Chain-of-Thought accuracy at <strong>7.6% of CoT cost</strong>. Cuts thinking tokens by <strong>92%</strong>.</p>
+                    <div class="code-block lime">
+                        system: "Think step-by-step, but only keep<br>
+                        a minimum draft for each thinking step,<br>
+                        5 words at most."
+                    </div>
+                </div>
+
+                <div class="glass-card resolution-card rose">
+                    <span class="step-num">05</span>
+                    <h4>Cache Warm-up</h4>
+                    <p>Avoid the <strong>Parallel Request Trap</strong> (Thomson Reuters Labs). Send one minimal synchronous request to establish prompt cache <em>before</em> launching parallel agent swarms. Without this, parallel calls all miss cache and each pays full input price.</p>
+                    <div class="code-block emerald">
+                        # establishment call<br>
+                        llm.create(prompt, cache=True)<br>
+                        # then fan out
+                    </div>
+                    <div style="display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap;">
+                        <span class="pill rose"><span class="dot"></span>60% cost reduction</span>
+                        <span class="pill"><span class="dot"></span>vs 60% surcharge</span>
+                    </div>
+                </div>
+
+                <div class="glass-card resolution-card amber">
+                    <span class="step-num">06</span>
+                    <h4>Unified Diff / apply_patch</h4>
+                    <p>Demand output as a <strong>Unified Diff</strong> via the <code>apply_patch</code> tool, not a full file rewrite. A 10-line patch uses <strong>1/100th the tokens</strong> of regenerating the whole file. The single biggest output-side win.</p>
+                </div>
+
+                <div class="glass-card resolution-card indigo">
+                    <span class="step-num">07</span>
+                    <h4>Tiered Logic Routing</h4>
+                    <p>Route by MECW. Use <strong>Gemini 3.1 Flash-Lite ($0.25/1M)</strong> for search and indexing. Reserve <strong>GPT-5.5 Worker / Opus 4.7 ($5/1M)</strong> strictly for architectural refactors and multi-file reasoning. The Pruning-Lab Cross-Model Arbitration pattern is this step in production.</p>
+                </div>
+            </div>
+
+                <div class="glass-card resolution-card violet">
+                    <span class="step-num">08</span>
+                    <h4>Topic Segregation · /clear</h4>
+                    <p>The article's #1 finding: <strong>new topic = new chat. No exceptions.</strong> <code>/clear</code> wipes the entire conversation; <code>/compact</code> summarizes-and-restarts. Use <code>/clear</code> when the task <em>changes</em>, <code>/compact</code> when the task <em>continues</em>. Skipping this is what burns the $200 plan in 2 hours.</p>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px;">
+                        <span class="pill"><span class="dot"></span>/clear → topic switch</span>
+                        <span class="pill violet"><span class="dot"></span>/compact → continuation</span>
+                        <span class="pill"><span class="dot"></span>/cost → measure both</span>
+                    </div>
+                </div>
+
+                <div class="glass-card resolution-card emerald">
+                    <span class="step-num">09</span>
+                    <h4>MCP Pruning &amp; CLI &gt; MCP</h4>
+                    <p>Every connected MCP server adds to what the model has to reason about at session start <em>even if you never call it</em>. Audit and disconnect unused servers. Then prefer CLI for targeted output: <strong>a shell command that returns 10 lines costs ~10 tokens; the same query through an MCP server returns structured JSON ~100× larger</strong>. Tactic ceiling: 50–90% MCP-token reduction on tool-active sessions.</p>
+                    <div class="code-block emerald">
+                        # audit:<br>
+                        $ claude config show --mcp<br>
+                        # disconnect everything not used this week<br>
+                        # prefer: $ git grep -n "X" | head -10<br>
+                        # over: mcp_search_code({query: "X"}) → 5KB JSON
+                    </div>
+                </div>
+
+                <div class="glass-card resolution-card rose">
+                    <span class="step-num">10</span>
+                    <h4>Subagent Delegation &amp; Thinking Budget</h4>
+                    <p>Anything that requires reading more than 3–4 large files belongs in a subagent — its context accumulates in an isolated session and never pollutes the parent. Pair with <code>/effort low</code> for non-reasoning tasks. The default extended-thinking budget is up to <strong>31,999 output tokens per request</strong>; capping it at 8,000 cuts hidden cost by ~70%, and setting it to 0 disables it for trivial tasks.</p>
+                    <div class="code-block">
+                        # parent agent stays clean<br>
+                        Task({ subagent: "explore", prompt: "..." })<br>
+                        # subagent runs in isolated context<br>
+                        # parent receives only the summary
+                    </div>
+                </div>
+            </div>
+
+            <div class="checklist">
+                <h5>// Professional's Checklist</h5>
+                <ul>
+                    <li><i class="fas fa-check-circle"></i> Set <code style="font-family: 'JetBrains Mono'; color: var(--accent-cyan);">MAX_THINKING_TOKENS=8000</code> at the platform level (default is 31,999)</li>
+                    <li><i class="fas fa-check-circle"></i> Use subdirectory <code style="font-family: 'JetBrains Mono'; color: var(--accent-cyan);">CLAUDE.md</code> stacking instead of one 5,000-token root file (≤500-token root)</li>
+                    <li><i class="fas fa-check-circle"></i> Default to Sonnet 4.6 / Worker; escalate to Opus only when MECW &gt;88% is required</li>
+                    <li><i class="fas fa-check-circle"></i> Cap autonomous runs at <code style="font-family: 'JetBrains Mono'; color: var(--accent-cyan);">max-turns ≤ 25</code></li>
+                    <li><i class="fas fa-check-circle"></i> Mirror <code style="font-family: 'JetBrains Mono'; color: var(--accent-cyan);">.gitignore</code> into <code style="font-family: 'JetBrains Mono'; color: var(--accent-cyan);">.claudeignore</code>; extend with vendor/snapshot/lock dirs</li>
+                    <li><i class="fas fa-check-circle"></i> Run <code style="font-family: 'JetBrains Mono'; color: var(--accent-cyan);">/cost</code> after every long session — treat <code style="font-family: 'JetBrains Mono'; color: var(--accent-cyan);">ECONNRESET</code> / <code style="font-family: 'JetBrains Mono'; color: var(--accent-cyan);">EPIPE</code> as a context-overload red flag</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- ============ CHAPTER 7: ECONOMIC ARMOR ============ -->
+        <section id="ch7" class="chapter">
+            <div class="eyebrow rose"><span class="dash"></span><span>07 · Economic Armor</span></div>
+            <h2 class="chapter-title">Three <span class="gradient-text">Control Planes</span> Around Every Agent</h2>
+            <p class="chapter-lede">
+                The Resolution Path lives inside the agent. Economic Armor lives outside it — the routing, judging, and warming layer that survives a bad day from any one model.
+            </p>
+
+            <div class="armor-grid" style="margin-top: 32px;">
+                <article class="glass-card armor-card">
+                    <h4>Chain-of-Draft (CoD)</h4>
+                    <p>Cut thinking tokens by <strong>92%</strong>. Constraint: "ALL immediate thinking MUST follow 5 words per step." Matches CoT accuracy at <strong>7.6% of CoT cost</strong>.</p>
+                    <div class="metric">// reduction: 92%</div>
+                </article>
+                <article class="glass-card armor-card">
+                    <h4>CrabTrap Proxy</h4>
+                    <p>Intercept agent HTTP calls. Apply LLM-as-a-judge to block redundant or risky tool chains before they reach the model. Activates on <strong>&lt;3% of requests</strong> in production.</p>
+                    <div class="metric">// activation: &lt;3%</div>
+                </article>
+                <article class="glass-card armor-card">
+                    <h4>Sequential Warm-up</h4>
+                    <p>Establish prompt cache via a minimal synchronous request <em>before</em> firing parallel batch calls. Fixes the "Parallel Request Trap" — the 60% surcharge that turns into a 60% saving.</p>
+                    <div class="metric">// flip: −60% → +60%</div>
+                </article>
+            </div>
+
+            <h3 style="font-size: 1.4rem; font-weight: 700; margin: 56px 0 6px;">Bonus Levers — production cost mechanics most teams miss</h3>
+            <p style="color: #94a3b8; font-size: 14px; max-width: 800px; margin: 0 0 22px;">
+                Five mechanics buried in vendor docs. Each one is worth a measurable line in your monthly bill — and none of them require rewriting the agent.
+            </p>
+
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px;" class="bonus-grid">
+                <article class="glass-card" style="padding: 22px; border-radius: 18px; border-top: 3px solid var(--accent-emerald);">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+                        <span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--accent-emerald); font-weight: 700;">Anthropic Batch API</span>
+                        <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--accent-emerald); font-weight: 700;">−50% flat</span>
+                    </div>
+                    <h4 style="font-size: 1rem; font-weight: 700; margin: 0 0 8px;">Batch Processing — both sides discounted</h4>
+                    <p style="font-size: 13px; color: #94a3b8; line-height: 1.55; margin: 0;">A flat 50% discount on <em>both input and output</em> for non-real-time workloads. Use it for nightly summarization runs, eval suites, doc rewriting — anything that can wait up to 24h.</p>
+                </article>
+
+                <article class="glass-card" style="padding: 22px; border-radius: 18px; border-top: 3px solid var(--accent-cyan);">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+                        <span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--accent-cyan); font-weight: 700;">Cached-Input Rate</span>
+                        <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--accent-cyan); font-weight: 700;">~10% of list</span>
+                    </div>
+                    <h4 style="font-size: 1rem; font-weight: 700; margin: 0 0 8px;">Cache hits ≠ "free" — they cost ~10%</h4>
+                    <p style="font-size: 13px; color: #94a3b8; line-height: 1.55; margin: 0;">Cached input runs at roughly 10% of standard input rate, not zero. Combine with Sequential Warm-up: warm once at $5/1M, then 10K subsequent calls each pay $0.50/1M for the same prefix.</p>
+                </article>
+
+                <article class="glass-card" style="padding: 22px; border-radius: 18px; border-top: 3px solid var(--accent-amber);">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+                        <span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--accent-amber); font-weight: 700;">Opus 4.7 Tokenizer</span>
+                        <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--accent-amber); font-weight: 700;">+0–35%</span>
+                    </div>
+                    <h4 style="font-size: 1rem; font-weight: 700; margin: 0 0 8px;">Hidden cost: same prompt, more tokens</h4>
+                    <p style="font-size: 13px; color: #94a3b8; line-height: 1.55; margin: 0;">List price unchanged at $5/$25, but the new tokenizer maps the same input body to <strong>1.0×–1.35× more tokens</strong> depending on content type (heaviest on code/CJK). Re-baseline your cost dashboards after migrating from Opus 4.6.</p>
+                </article>
+
+                <article class="glass-card" style="padding: 22px; border-radius: 18px; border-top: 3px solid var(--accent-violet);">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+                        <span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--accent-violet); font-weight: 700;">Cowork Strategy</span>
+                        <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--accent-violet); font-weight: 700;">$20 vs $200</span>
+                    </div>
+                    <h4 style="font-size: 1rem; font-weight: 700; margin: 0 0 8px;">Think in Chat. Build in Code.</h4>
+                    <p style="font-size: 13px; color: #94a3b8; line-height: 1.55; margin: 0;">Exploration in claude.ai Chat ($20/mo) is functionally free; building in Claude Code with full repo context is the expensive surface. Plan, brainstorm, draft prompts in Chat — then hand the locked spec to Code only for the build.</p>
+                </article>
+
+                <article class="glass-card" style="padding: 22px; border-radius: 18px; border-top: 3px solid var(--accent-lime); grid-column: span 2;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+                        <span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--accent-lime); font-weight: 700;">context-mode (open source MCP plugin)</span>
+                        <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--accent-lime); font-weight: 700;">−50–90% MCP tokens</span>
+                    </div>
+                    <h4 style="font-size: 1rem; font-weight: 700; margin: 0 0 8px;">Route MCP tool output to a sandbox knowledge base</h4>
+                    <p style="font-size: 13px; color: #94a3b8; line-height: 1.55; margin: 0 0 10px;"><a href="https://github.com/mksglu/context-mode" target="_blank" rel="noopener" style="color: var(--accent-lime); font-family: 'JetBrains Mono', monospace; text-decoration: none;">github.com/mksglu/context-mode</a> — the named tool behind Ch.6 step 09. Tool outputs land in an indexed sandbox; Claude searches the index instead of hauling raw JSON into the active context. Cuts MCP-related token usage 50–90% on tool-active sessions without changing the agent's behavior.</p>
+                </article>
+            </div>
+        </section>
+
+        <!-- ============ CHAPTER 8: SOLUTION MATRIX + OPEN FRONTIER ============ -->
+        <section id="ch8" class="chapter">
+            <div class="eyebrow lime"><span class="dash"></span><span>08 · Matrix &amp; Open Frontier</span></div>
+            <h2 class="chapter-title">The <span class="gradient-text">Solution Matrix</span></h2>
+            <p class="chapter-lede">
+                Every tactic in this atlas, in one filterable table — savings, latency cost, accuracy risk, dev effort, and the workload it's best for. Filter to a problem, get a tactic.
+            </p>
+
+            <div class="filter-row" style="margin-top: 28px;">
+                <button class="filter-btn active" data-filter="all">All</button>
+                <button class="filter-btn" data-filter="high-savings">High Savings</button>
+                <button class="filter-btn" data-filter="low-effort">Low Effort</button>
+                <button class="filter-btn" data-filter="live">Live Sessions</button>
+                <button class="filter-btn" data-filter="autonomous">Autonomous Agents</button>
+            </div>
+
+            <div class="glass" style="border-radius: 24px; overflow: hidden; overflow-x: auto;">
+                <table class="matrix-table">
+                    <thead>
+                        <tr>
+                            <th>Technique</th>
+                            <th>Savings</th>
+                            <th>Latency</th>
+                            <th>Risk</th>
+                            <th>Effort</th>
+                            <th>Best Target</th>
+                        </tr>
+                    </thead>
+                    <tbody id="matrixBody">
+                        <tr data-tags="high-savings,live"><td><strong>Tactical Hygiene</strong> (<code>/compact</code>, <code>@filename</code>)</td><td><span class="badge badge-savings-h">40–85%</span></td><td>Low</td><td><span class="badge badge-risk-l">Low</span></td><td><span class="badge badge-effort-l">Low</span></td><td>Live coding sessions</td></tr>
+                        <tr data-tags="high-savings,autonomous"><td><strong>Focus Architecture</strong> (Sawtooth)</td><td><span class="badge badge-savings-h">22.7–57%</span></td><td>Low</td><td><span class="badge badge-risk-l">Low</span></td><td><span class="badge badge-effort-m">Medium</span></td><td>Autonomous agents</td></tr>
+                        <tr data-tags="low-effort,autonomous"><td><strong>Dynamic Tool Loadout</strong> (lazy MCP)</td><td><span class="badge badge-savings-m">15–30%</span></td><td>Low</td><td><span class="badge badge-risk-l">Low</span></td><td><span class="badge badge-effort-l">Low</span></td><td>Tool-heavy agents</td></tr>
+                        <tr data-tags="low-effort,live,autonomous"><td><strong>Model Routing</strong> (MECW-tiered)</td><td><span class="badge badge-savings-h">50–95%</span></td><td>Low</td><td><span class="badge badge-risk-m">Medium</span></td><td><span class="badge badge-effort-l">Low</span></td><td>Workspace spend</td></tr>
+                        <tr data-tags="high-savings,low-effort,live,autonomous"><td><strong>Prompt Caching</strong> (warm-up + static prompt)</td><td><span class="badge badge-savings-h">50–90%</span></td><td>Low</td><td><span class="badge badge-risk-l">Low</span></td><td><span class="badge badge-effort-l">Low</span></td><td>Recurring prompts</td></tr>
+                        <tr data-tags="autonomous"><td><strong>Recursive Summarization</strong></td><td><span class="badge badge-savings-m">40–70%</span></td><td>Medium</td><td><span class="badge badge-risk-m">Medium</span></td><td><span class="badge badge-effort-m">Medium</span></td><td>Long horizon tasks</td></tr>
+                        <tr data-tags="low-effort,live"><td><strong>Chunking</strong> (semantic / AST)</td><td><span class="badge badge-savings-m">30–55%</span></td><td>Low</td><td><span class="badge badge-risk-l">Low</span></td><td><span class="badge badge-effort-l">Low</span></td><td>Large repo grep</td></tr>
+                        <tr data-tags="high-savings,live"><td><strong>AST Diffs / apply_patch</strong></td><td><span class="badge badge-savings-h">~99%</span></td><td>Low</td><td><span class="badge badge-risk-l">Low</span></td><td><span class="badge badge-effort-m">Medium</span></td><td>Code editing output</td></tr>
+                        <tr data-tags="high-savings,autonomous"><td><strong>Just-In-Time RAG</strong></td><td><span class="badge badge-savings-h">95%</span></td><td>Medium</td><td><span class="badge badge-risk-m">Medium</span></td><td><span class="badge badge-effort-m">Medium</span></td><td>Agent on huge codebase</td></tr>
+                        <tr data-tags="low-effort,live,autonomous"><td><strong>Model Choice</strong> (Haiku / Flash-Lite default)</td><td><span class="badge badge-savings-h">80–95%</span></td><td>Low</td><td><span class="badge badge-risk-m">Medium</span></td><td><span class="badge badge-effort-l">Low</span></td><td>Search &amp; indexing</td></tr>
+                        <tr data-tags="high-savings,autonomous"><td><strong>Chain-of-Draft (CoD)</strong></td><td><span class="badge badge-savings-h">92%</span></td><td>Low</td><td><span class="badge badge-risk-l">Low</span></td><td><span class="badge badge-effort-l">Low</span></td><td>Reasoning-heavy agents</td></tr>
+                        <tr data-tags="autonomous"><td><strong>CrabTrap Proxy</strong> (LLM-as-judge)</td><td><span class="badge badge-savings-m">10–25%</span></td><td>Medium</td><td><span class="badge badge-risk-l">Low</span></td><td><span class="badge badge-effort-h">High</span></td><td>Risky tool chains</td></tr>
+                        <tr data-tags="high-savings,low-effort,live"><td><strong>Topic Segregation</strong> (<code>/clear</code> on switch)</td><td><span class="badge badge-savings-h">~97%</span></td><td>Low</td><td><span class="badge badge-risk-l">Low</span></td><td><span class="badge badge-effort-l">Low</span></td><td>Long-running chats</td></tr>
+                        <tr data-tags="low-effort,live,autonomous"><td><strong>MCP Pruning</strong> (disconnect unused)</td><td><span class="badge badge-savings-h">50–90%</span></td><td>Low</td><td><span class="badge badge-risk-l">Low</span></td><td><span class="badge badge-effort-l">Low</span></td><td>Tool-active sessions</td></tr>
+                        <tr data-tags="low-effort,live"><td><strong>CLI &gt; MCP</strong> (10-line shell vs 5KB JSON)</td><td><span class="badge badge-savings-h">~90%</span></td><td>Low</td><td><span class="badge badge-risk-l">Low</span></td><td><span class="badge badge-effort-l">Low</span></td><td>File &amp; repo queries</td></tr>
+                        <tr data-tags="high-savings,autonomous"><td><strong>Subagent Delegation</strong> (isolated context)</td><td><span class="badge badge-savings-h">60–90%</span></td><td>Medium</td><td><span class="badge badge-risk-l">Low</span></td><td><span class="badge badge-effort-m">Medium</span></td><td>Multi-file exploration</td></tr>
+                        <tr data-tags="high-savings,low-effort,live,autonomous"><td><strong>Subdirectory CLAUDE.md</strong> (lazy load)</td><td><span class="badge badge-savings-h">~82%</span></td><td>Low</td><td><span class="badge badge-risk-l">Low</span></td><td><span class="badge badge-effort-l">Low</span></td><td>Multi-domain repos</td></tr>
+                        <tr data-tags="high-savings,autonomous"><td><strong>Git Worktrees</strong> (parallel agents)</td><td><span class="badge badge-savings-h">3× throughput</span></td><td>Low</td><td><span class="badge badge-risk-l">Low</span></td><td><span class="badge badge-effort-m">Medium</span></td><td>Multi-feature workstreams</td></tr>
+                        <tr data-tags="low-effort,live,autonomous"><td><strong>Thinking Budget Cap</strong> (<code>MAX_THINKING_TOKENS=8000</code>)</td><td><span class="badge badge-savings-h">~70%</span></td><td>Low</td><td><span class="badge badge-risk-m">Medium</span></td><td><span class="badge badge-effort-l">Low</span></td><td>Trivial / mechanical work</td></tr>
+                        <tr data-tags="high-savings,low-effort,autonomous"><td><strong>Anthropic Batch API</strong> (24h SLA)</td><td><span class="badge badge-savings-h">−50% flat</span></td><td>High (24h)</td><td><span class="badge badge-risk-l">Low</span></td><td><span class="badge badge-effort-l">Low</span></td><td>Eval suites, summarization runs</td></tr>
+                        <tr data-tags="low-effort,live"><td><strong>Cowork Strategy</strong> (Chat $20 / Code $200)</td><td><span class="badge badge-savings-h">~90%</span></td><td>Low</td><td><span class="badge badge-risk-l">Low</span></td><td><span class="badge badge-effort-l">Low</span></td><td>Exploratory / planning work</td></tr>
+                        <tr data-tags="high-savings,low-effort,autonomous"><td><strong>context-mode plugin</strong> (MCP sandbox)</td><td><span class="badge badge-savings-h">50–90%</span></td><td>Low</td><td><span class="badge badge-risk-l">Low</span></td><td><span class="badge badge-effort-l">Low</span></td><td>MCP-heavy agents</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3 style="font-size: 1.45rem; font-weight: 700; margin: 56px 0 18px;">Open Frontier · Research Gaps</h3>
+            <div class="gaps-grid">
+                <div class="glass-card gap-card">
+                    <div class="icon" style="color: var(--accent-cyan);"><i class="fas fa-bolt"></i></div>
+                    <h4>Agent Output Explosion</h4>
+                    <p>No standard for the asymmetric blow-up of output tokens in autonomous loops. Agent traces grow faster than the input that triggered them.</p>
+                </div>
+                <div class="glass-card gap-card">
+                    <div class="icon" style="color: var(--accent-violet);"><i class="fas fa-sitemap"></i></div>
+                    <h4>Org-Level Governance</h4>
+                    <p>Firm-wide token policies cut spend in half but the playbook is ad hoc. No portable governance schema exists across vendors.</p>
+                </div>
+                <div class="glass-card gap-card">
+                    <div class="icon" style="color: var(--accent-lime);"><i class="fas fa-flask"></i></div>
+                    <h4>Evaluation Standards</h4>
+                    <p><strong>OckBench</strong> measures the 3.3× token variance and 5.0× latency delta but is not yet a portable benchmark across providers.</p>
+                </div>
+                <div class="glass-card gap-card">
+                    <div class="icon" style="color: var(--accent-rose);"><i class="fas fa-photo-film"></i></div>
+                    <h4>Multimodal Cost Models</h4>
+                    <p>Image, audio, and video tokens price wildly differently per provider with no standard accounting. The matrix above is text-first.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============ CODA ============ -->
+        <section class="coda" id="coda">
+            <blockquote>
+                "From a 19-minute ceiling to an architected loop. Models commoditize. Optimization compounds."
+            </blockquote>
+            <div class="coda-pip-row">
+                <span class="coda-pip"><span class="dot"></span>Sawtooth Engaged</span>
+                <span class="coda-pip"><span class="dot"></span>OckScore Aligned</span>
+                <span class="coda-pip"><span class="dot"></span>HITL Mandatory</span>
+                <span class="coda-pip"><span class="dot"></span>Zero-Rot Certified</span>
+            </div>
+            <p style="margin-top: 32px; font-size: 11px; font-family: 'JetBrains Mono', monospace; color: #475569; letter-spacing: 0.18em; text-transform: uppercase;">
+                Master Atlas · Token Mission Control · April 2026 · 8 chapters · 1 console
+            </p>
+        </section>
+
+
+    </main>
+
+    <script>
+        // ============ LIVE CLOCK (UTC) ============
+        function tickClock() {
+            const now = new Date();
+            const hh = String(now.getUTCHours()).padStart(2, '0');
+            const mm = String(now.getUTCMinutes()).padStart(2, '0');
+            const ss = String(now.getUTCSeconds()).padStart(2, '0');
+            const el = document.getElementById('liveClock');
+            if (el) el.textContent = `UTC ${hh}:${mm}:${ss}`;
+        }
+        tickClock(); setInterval(tickClock, 1000);
+
+        // ============ HUD: PIPS + TIMELINE + KPI DIALS ============
+        const chapters = ['ch1', 'ch2', 'ch3', 'ch4', 'ch5', 'ch6', 'ch7', 'ch8'];
+
+        // KPI states per chapter
+        // Tokens Saved %, Cost Multiplier (label varies by chapter), Context Headroom %
+        const KPIs = {
+            ch1: { saved: 1.5,  savedTxt: '1.5%',   cost: 30, costTxt: '30× re-read', costPct: 100, head: 0,  headTxt: '0%' },
+            ch2: { saved: 50,   savedTxt: '50%',    cost: 36, costTxt: '36× spread',  costPct: 95,  head: 10, headTxt: '10%' },
+            ch3: { saved: 50,   savedTxt: '50%',    cost: 6,  costTxt: '6× output',   costPct: 30,  head: 22, headTxt: '22%' },
+            ch4: { saved: 23,   savedTxt: '22.7%',  cost: 6,  costTxt: '6× output',   costPct: 30,  head: 57, headTxt: '57%' },
+            ch5: { saved: 95,   savedTxt: '95%',    cost: 1,  costTxt: '0.05× cheap', costPct: 5,   head: 90, headTxt: '90%' },
+            ch6: { saved: 90,   savedTxt: '90%',    cost: 1,  costTxt: '1× Haiku',    costPct: 5,   head: 92, headTxt: '92%' },
+            ch7: { saved: 92,   savedTxt: '92%',    cost: 1,  costTxt: '1× Haiku',    costPct: 3,   head: 94, headTxt: '94%' },
+            ch8: { saved: 99,   savedTxt: '99%',    cost: 1,  costTxt: '1× Haiku',    costPct: 2,   head: 99, headTxt: '99%' }
+        };
+
+        const pips = document.querySelectorAll('.pip');
+        const tlBtns = document.querySelectorAll('.timeline button');
+
+        function setActive(chId) {
+            const idx = chapters.indexOf(chId);
+            pips.forEach((p, i) => p.classList.toggle('active', i <= idx));
+            tlBtns.forEach((b, i) => b.classList.toggle('active', chapters[i] === chId));
+            const k = KPIs[chId];
+            if (!k) return;
+            const ksv = document.getElementById('kpiSaved');
+            const kct = document.getElementById('kpiCost');
+            const khr = document.getElementById('kpiHeadroom');
+            const ksvb = document.getElementById('kpiSavedBar');
+            const kctb = document.getElementById('kpiCostBar');
+            const khrb = document.getElementById('kpiHeadroomBar');
+            if (ksv) ksv.textContent = k.savedTxt;
+            if (kct) kct.textContent = k.costTxt;
+            if (khr) khr.textContent = k.headTxt;
+            if (ksvb) ksvb.style.width = k.saved + '%';
+            if (kctb) kctb.style.width = (100 - k.costPct) + '%';
+            if (khrb) khrb.style.width = k.head + '%';
+        }
+
+        // Pip + timeline click handlers
+        pips.forEach((p, i) => {
+            p.addEventListener('click', () => {
+                const el = document.getElementById(chapters[i]);
+                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        });
+        tlBtns.forEach(b => {
+            b.addEventListener('click', () => {
+                const id = b.getAttribute('data-jump');
+                const el = document.getElementById(id);
+                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        });
+
+        // IntersectionObserver scroll-spy
+        const ioOpts = { rootMargin: '-30% 0px -55% 0px', threshold: 0 };
+        const io = new IntersectionObserver((entries) => {
+            entries.forEach(e => { if (e.isIntersecting) setActive(e.target.id); });
+        }, ioOpts);
+        chapters.forEach(id => { const el = document.getElementById(id); if (el) io.observe(el); });
+
+        // ============ CHART 1: CRISIS (300 vs 19 min) ============
+        (function () {
+            const el = document.getElementById('crisisChart');
+            if (!el) return;
+            const ctx = el.getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Expected Use (mins)', 'Actual Limit Hit (mins)'],
+                    datasets: [{
+                        label: 'Session Duration',
+                        data: [300, 19],
+                        backgroundColor: ['rgba(34, 211, 238, 0.78)', 'rgba(251, 113, 133, 0.78)'],
+                        borderColor: ['#22d3ee', '#fb7185'],
+                        borderWidth: 1,
+                        borderRadius: 10
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#0f172a', titleColor: '#22d3ee',
+                            borderColor: 'rgba(255,255,255,0.06)', borderWidth: 1, padding: 12,
+                            callbacks: { label: (c) => `${c.parsed.x} min` }
+                        }
+                    },
+                    scales: {
+                        x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#64748b', font: { weight: 'bold' } } },
+                        y: { grid: { display: false }, ticks: { color: '#cbd5e1', font: { weight: 'bold', size: 12 } } }
+                    }
+                }
+            });
+        })();
+
+        // ============ CHART 2: COST RATIO (vs Haiku) ============
+        (function () {
+            const el = document.getElementById('costRatioChart');
+            if (!el) return;
+            const ctx = el.getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Haiku 4.7', 'Sonnet 4.6', 'Opus 4.7', 'GPT-5.3'],
+                    datasets: [{
+                        label: 'Cost Ratio',
+                        data: [1, 15, 50, 48],
+                        backgroundColor: ['rgba(148, 163, 184, 0.7)', 'rgba(34, 211, 238, 0.7)', 'rgba(139, 92, 246, 0.7)', 'rgba(251, 113, 133, 0.7)'],
+                        borderColor: ['#94a3b8', '#22d3ee', '#8b5cf6', '#fb7185'],
+                        borderWidth: 1,
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#0f172a', titleColor: '#22d3ee',
+                            callbacks: { label: (c) => `${c.parsed.y}× cost vs Haiku` }
+                        }
+                    },
+                    scales: {
+                        x: { grid: { display: false }, ticks: { color: '#cbd5e1', font: { weight: 'bold' } } },
+                        y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#64748b', callback: (v) => v + '×' } }
+                    }
+                }
+            });
+        })();
+
+        // ============ CHART 3: PROVIDER RADAR ============
+        (function () {
+            const el = document.getElementById('radarChart');
+            if (!el) return;
+            const ctx = el.getContext('2d');
+            const wrap = (s) => s.length > 16 ? s.split(' ') : s;
+            new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: [wrap('Reasoning'), wrap('Token Efficiency'), wrap('Context Length'), wrap('Inference Speed'), wrap('Affordability')],
+                    datasets: [
+                        { label: 'GPT-5.5 Worker', data: [95, 60, 60, 70, 30], borderColor: '#22d3ee', backgroundColor: 'rgba(34, 211, 238, 0.18)', pointBackgroundColor: '#22d3ee' },
+                        { label: 'Claude Opus 4.7', data: [92, 55, 60, 60, 35], borderColor: '#8b5cf6', backgroundColor: 'rgba(139, 92, 246, 0.18)', pointBackgroundColor: '#8b5cf6' },
+                        { label: 'Gemini 3.1 Pro', data: [96, 75, 100, 85, 75], borderColor: '#a3e635', backgroundColor: 'rgba(163, 230, 53, 0.18)', pointBackgroundColor: '#a3e635' }
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: { color: 'rgba(255,255,255,0.08)' },
+                            grid: { color: 'rgba(255,255,255,0.08)' },
+                            pointLabels: { color: '#94a3b8', font: { size: 11, weight: 'bold' } },
+                            ticks: { display: false }
+                        }
+                    },
+                    plugins: {
+                        legend: { labels: { color: '#f1f5f9', font: { weight: 'bold', size: 11 }, usePointStyle: true } },
+                        tooltip: { backgroundColor: '#0f172a', titleColor: '#22d3ee', borderColor: 'rgba(255,255,255,0.06)', borderWidth: 1 }
+                    }
+                }
+            });
+        })();
+
+        // ============ CHART 4: SAWTOOTH ============
+        (function () {
+            const el = document.getElementById('sawtoothChart');
+            if (!el) return;
+            const ctx = el.getContext('2d');
+            const grad = ctx.createLinearGradient(0, 0, 0, 360);
+            grad.addColorStop(0, 'rgba(34, 211, 238, 0.35)');
+            grad.addColorStop(1, 'rgba(34, 211, 238, 0)');
+            const data = [10, 25, 45, 60, 15, 30, 55, 75, 20, 40, 65, 85, 25];
+            const labels = data.map((_, i) => `Step ${i + 1}`);
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [{
+                        label: 'Active Context (K)',
+                        data,
+                        borderColor: '#22d3ee',
+                        backgroundColor: grad,
+                        fill: true,
+                        tension: 0.3,
+                        pointRadius: function (c) {
+                            const v = c.raw; const p = c.dataset.data[c.dataIndex - 1];
+                            return (p && v < p) ? 9 : 4;
+                        },
+                        pointBackgroundColor: function (c) {
+                            const v = c.raw; const p = c.dataset.data[c.dataIndex - 1];
+                            return (p && v < p) ? '#8b5cf6' : '#22d3ee';
+                        },
+                        pointBorderColor: '#020617',
+                        borderWidth: 3
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#0f172a', titleColor: '#22d3ee',
+                            borderColor: 'rgba(255,255,255,0.06)', borderWidth: 1, padding: 12,
+                            callbacks: {
+                                label: function (c) {
+                                    const v = c.raw; const p = c.dataset.data[c.dataIndex - 1];
+                                    if (p && v < p) return 'WITHDRAWAL: raw logs purged, knowledge snapshot updated';
+                                    return `EXPLORATION: ${v}K active context`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { display: false },
+                        y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#64748b', font: { size: 10, weight: 'bold' } } }
+                    }
+                }
+            });
+        })();
+
+        // ============ CHART 5: PLOTLY IPD SCATTER ============
+        (function () {
+            const el = document.getElementById('ipdPlot');
+            if (!el || typeof Plotly === 'undefined') return;
+            const models = ['GPT-5.5 Worker', 'GPT-5.5 Pro', 'Opus 4.7', 'Sonnet 4.6', 'Haiku 4.5', 'Gemini 3.1 Pro', 'Flash-Lite', 'DeepSeek V4 Pro', 'Llama 4 Maverick'];
+            // Output cost $/1M (proxy for cost-per-turn)
+            const cost = [30, 180, 25, 15, 5, 12, 1.5, 3.48, 0.6];
+            // Headline benchmark % (Terminal-Bench / SWE-Pro / GPQA / Arena-derived)
+            const accuracy = [82.7, 88, 87, 80, 70, 94.3, 72, 80.6, 68];
+            // Bubble size scales with input price
+            const sizes = [60, 200, 60, 45, 25, 35, 12, 30, 10];
+            const colors = ['#22d3ee', '#fb7185', '#8b5cf6', '#a78bfa', '#94a3b8', '#a3e635', '#10b981', '#fbbf24', '#60a5fa'];
+            const trace = {
+                x: cost, y: accuracy, mode: 'markers+text', type: 'scattergl',
+                text: models, textposition: 'top center',
+                marker: {
+                    size: sizes, color: colors,
+                    opacity: 0.85, line: { color: '#020617', width: 2 }
+                },
+                hovertemplate: '<b>%{text}</b><br>Output: $%{x}/1M<br>Headline benchmark: %{y}%<extra></extra>'
+            };
+            const layout = {
+                title: { text: 'Intelligence-per-Dollar · April 2026', font: { size: 16, weight: 700 } },
+                paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)',
+                font: { color: '#1e293b', family: 'Plus Jakarta Sans' },
+                xaxis: { title: 'Output cost ($ / 1M tokens, log)', type: 'log', gridcolor: '#e2e8f0' },
+                yaxis: { title: 'Headline benchmark (%)', gridcolor: '#e2e8f0', range: [60, 100] },
+                margin: { t: 60, b: 60, l: 60, r: 30 }
+            };
+            Plotly.newPlot('ipdPlot', [trace], layout, { responsive: true, displayModeBar: false });
+        })();
+
+        // ============ MATRIX FILTER ============
+        (function () {
+            const btns = document.querySelectorAll('.filter-btn');
+            const rows = document.querySelectorAll('#matrixBody tr');
+            btns.forEach(b => b.addEventListener('click', () => {
+                btns.forEach(x => x.classList.remove('active'));
+                b.classList.add('active');
+                const f = b.getAttribute('data-filter');
+                rows.forEach(r => {
+                    const tags = (r.getAttribute('data-tags') || '').split(',');
+                    r.classList.toggle('hidden-row', !(f === 'all' || tags.includes(f)));
+                });
+            }));
+        })();
+
+        // initial state
+        setActive('ch1');
+    </script>
+</body>
+</html>

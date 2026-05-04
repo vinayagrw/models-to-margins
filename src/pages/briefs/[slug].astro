@@ -9,7 +9,8 @@ export async function getStaticPaths() {
     'private-ai-vs-public-ai',
     'governed-procurement-ai',
     'ai-for-corporate-clarity',
-    'operator-grade-intelligence-engine'
+    'operator-grade-intelligence-engine',
+    'token-optimization-2026'
   ]);
   const entries = (await getCollection('briefs')).filter(
     (entry) => entry.data.briefType === 'article' && !reservedBriefRoutes.has(entry.id)
