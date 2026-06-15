@@ -159,5 +159,8 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
         });
       })();
     </script>
+    {!currentPath.startsWith('/admin') && (
+      <script src="/scripts/beacon.js" defer is:inline></script>
+    )}
   </body>
 </html>
