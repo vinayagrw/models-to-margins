@@ -166,6 +166,10 @@
     .weak{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
     .weak__node{display:grid;gap:6px;padding:12px 14px;border-radius:18px;background:color-mix(in srgb,var(--panel-strong) 72%,transparent);border:1px solid color-mix(in srgb,var(--line) 76%,transparent)}
     .weak__node.warn{background:linear-gradient(180deg,color-mix(in srgb,var(--rose) 12%,transparent),transparent),color-mix(in srgb,var(--panel-strong) 72%,transparent)}
+    .back-link{display:inline-flex;align-items:center;gap:8px;width:fit-content;color:var(--muted);font-size:.92rem;text-decoration:none;margin-bottom:16px;transition:color .2s}
+    .back-link:hover{color:var(--text)}
+    .back-link span:first-child{font-size:1.05em;line-height:1}
+    html[data-embedded="true"] .back-link{display:none}
     html[data-embedded="true"] .top{display:none} html[data-embedded="true"] .page{width:min(100%,1560px);padding-top:0}
     @media (max-width:1280px){.scene__summary{grid-template-columns:1fr}}
     @media (max-width:1200px){.triptych,.ribbon,.evidence,.proof__grid,.delta,.secondary,.board__surface,.board__deep{grid-template-columns:1fr}.lead,.board__head{grid-template-columns:1fr}.lensbar,.decision-strip{justify-content:flex-start}.ribbon{gap:10px;padding:0;border-top:0}.ribbon__card{padding:12px 14px;border:1px solid color-mix(in srgb,var(--line) 78%,transparent);border-radius:18px;background:color-mix(in srgb,var(--panel-strong) 78%,transparent)}.ribbon__card:first-child{padding-left:14px;border-left:1px solid color-mix(in srgb,var(--line) 78%,transparent)}}
@@ -183,6 +187,7 @@
     </header>
     <section class="lead">
       <div class="lead__copy">
+        <a class="back-link" href="/briefs/operator-grade-intelligence-engine"><span aria-hidden="true">&larr;</span><span>Back to Brief</span></a>
         <span class="eyebrow">Where AI Margin Actually Accrues</span>
         <h1>The moat shows up where the queue changes, not where the demo shines.</h1>
         <p>Read the scenes first. Then test the same business pattern against shared rows, proof cues, and a visible hold rule.</p>

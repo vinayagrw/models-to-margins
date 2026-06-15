@@ -1,0 +1,2162 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>The Margin Reckoning — AI-Led SDLC & The Great Modernization</title>
+<meta name="description" content="The margin was mortgaged by legacy long before AI arrived — then AI multiplied the output without moving the value. An interactive reckoning of modernization, the AI-led SDLC, and where the margin actually accrues." />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<script>
+/* Theme + embed bootstrap — synchronous, prevents FOUC. Mirrors the M2M site contract. */
+(() => {
+  const params = new URLSearchParams(window.location.search);
+  const root = document.documentElement;
+  const media = window.matchMedia('(prefers-color-scheme: dark)');
+  const key = 'm2m-theme';
+  const norm = (v) => (v === 'dark' || v === 'light' ? v : null);
+  const stored = (() => { try { return norm(localStorage.getItem(key)); } catch { return null; } })();
+  const theme = norm(params.get('theme')) ?? stored ?? (media.matches ? 'dark' : 'light');
+  root.dataset.theme = theme;
+  root.style.colorScheme = theme;
+  root.dataset.embedded = params.get('embed') === '1' ? 'true' : 'false';
+})();
+</script>
+<style>
+/* ============ M2M tokens + the gold "margin" accent ============ */
+:root, :root[data-theme="light"] {
+  color-scheme: light;
+  --bg-start:#f7efe5; --bg-mid:#eef0e6; --bg-end:#f4e7e2;
+  --text:#0d2138; --text-strong:#051324; --muted:rgba(16,42,67,.68); --muted-soft:rgba(16,42,67,.54);
+  --surface:rgba(255,255,255,.82); --surface-strong:rgba(255,255,255,.95);
+  --border:rgba(16,42,67,.14); --border-strong:rgba(16,42,67,.26);
+  --accent:#0a8aab; --warn:#c0391a; --good:#16825d; --violet:#7a4fd0;
+  --gold:#9a7b1f; --gold-bright:#caa53a; --gold-soft:rgba(154,123,31,.14);
+  --volume:#c0391a; --value:#9a7b1f; --pan-shadow:rgba(16,42,67,.16);
+  --grid-empty:rgba(16,42,67,.09); --grid-line:rgba(16,42,67,.06);
+  --shadow:0 22px 60px rgba(16,42,67,.14); --shadow-soft:0 12px 30px rgba(16,42,67,.10);
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg-start:#070a12; --bg-mid:#090d18; --bg-end:#03050b;
+  --text:#e9f1fb; --text-strong:#ffffff; --muted:rgba(220,232,248,.72); --muted-soft:rgba(220,232,248,.54);
+  --surface:rgba(13,21,38,.78); --surface-strong:rgba(15,25,44,.94);
+  --border:rgba(176,206,244,.16); --border-strong:rgba(176,206,244,.34);
+  --accent:#22d3ee; --warn:#ff7a63; --good:#52dcb4; --violet:#b08cff;
+  --gold:#e9c870; --gold-bright:#ffdc84; --gold-soft:rgba(233,200,112,.13);
+  --volume:#ff7a63; --value:#e9c870; --pan-shadow:rgba(0,0,0,.5);
+  --grid-empty:rgba(176,206,244,.08); --grid-line:rgba(176,206,244,.05);
+  --shadow:0 26px 70px rgba(0,0,0,.55); --shadow-soft:0 14px 34px rgba(0,0,0,.4);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+/* scrolling uses the browser default (no smooth-scroll override) */
+/* a11y — visible keyboard focus on every custom control (WCAG 2.4.7) */
+:focus-visible{ outline:2px solid var(--gold-bright); outline-offset:3px; border-radius:5px; }
+.stage:focus-visible, .chip:focus-visible, .seg button:focus-visible, .fwalk:focus-visible, .toggle:focus-visible, a:focus-visible{ outline:2px solid var(--gold-bright); outline-offset:3px; }
+/* perf — ambient motion is paused while its section is off-screen (set by JS) */
+.govfac.anim-paused .fnode.bn, .govfac.anim-paused .fflow .fdot{ animation-play-state:paused; }
+/* identity — editorial display face for headers only (mono stays for data/labels) */
+h1, h2{ font-family:"Fraunces","Georgia",serif; font-optical-sizing:auto; font-weight:600; letter-spacing:-.012em; }
+body {
+  font-family:"Space Grotesk","Avenir Next","Segoe UI",sans-serif; color:var(--text);
+  background:
+    radial-gradient(circle at 12% 6%, color-mix(in srgb,var(--gold) 11%,transparent), transparent 28%),
+    radial-gradient(circle at 88% 94%, color-mix(in srgb,var(--volume) 9%,transparent), transparent 30%),
+    linear-gradient(180deg,var(--bg-start) 0%,var(--bg-mid) 50%,var(--bg-end) 100%);
+  background-attachment:fixed; -webkit-font-smoothing:antialiased; overflow-x:hidden;
+}
+body::before{
+  content:""; position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.5;
+  background:repeating-linear-gradient(180deg, transparent 0 38px, var(--grid-line) 38px 39px);
+  mask:linear-gradient(180deg,transparent,#000 10%,#000 90%,transparent);
+}
+.wrap{ position:relative; z-index:1; width:min(100% - 44px,1280px); margin:0 auto; }
+
+/* ---- progress rail ---- */
+#prog{ position:fixed; top:0; left:0; height:3px; width:0; z-index:60; background:linear-gradient(90deg,var(--gold),var(--accent)); transition:width .1s linear; }
+
+/* ---- chrome ---- */
+.chrome{ position:sticky; top:0; z-index:40; display:flex; align-items:center; justify-content:space-between; gap:16px; padding:14px 0; margin-bottom:6px; backdrop-filter:blur(10px); }
+.chrome::after{ content:""; position:absolute; left:0; right:0; bottom:0; height:1px; background:linear-gradient(90deg,transparent,var(--border-strong),transparent); }
+.brand{ display:flex; align-items:center; gap:10px; text-decoration:none; color:var(--text-strong); }
+.brand .mark{ width:30px;height:30px;border-radius:9px;display:grid;place-items:center;font-weight:700;font-size:.66rem;letter-spacing:.04em;color:#0a1524; background:linear-gradient(135deg,var(--gold-bright),var(--accent)); }
+.brand b{ font-weight:700; font-size:.92rem; letter-spacing:-.01em; }
+.brand span{ color:var(--muted); font-size:.74rem; }
+.toggle{ appearance:none; cursor:pointer; font-family:inherit; font-weight:600; font-size:.74rem; letter-spacing:.04em; color:var(--muted); background:var(--surface); border:1px solid var(--border); border-radius:999px; padding:7px 13px; }
+.toggle:hover{ color:var(--text-strong); border-color:var(--border-strong); }
+.back-link{ display:inline-flex; align-items:center; gap:8px; width:fit-content; color:var(--muted); font-size:.92rem; text-decoration:none; margin-bottom:20px; transition:color .2s; }
+.back-link:hover{ color:var(--text-strong); }
+.back-link span:first-child{ font-size:1.05em; line-height:1; }
+:root[data-embedded="true"] .back-link{ display:none; }   /* hidden inside the brief's iframe — the Astro page owns the back nav */
+
+/* ---- furniture ---- */
+.eyebrow{ font-size:.7rem; font-weight:700; letter-spacing:.2em; text-transform:uppercase; color:var(--gold); font-family:"DM Mono",monospace; }
+.reveal{ opacity:0; transform:translateY(26px); transition:opacity .8s cubic-bezier(.2,.7,.2,1), transform .8s cubic-bezier(.2,.7,.2,1); }
+.reveal.in{ opacity:1; transform:none; }
+section{ padding:clamp(32px,5vh,64px) 0; }
+.kicker-row{ display:flex; align-items:baseline; gap:14px; flex-wrap:wrap; margin-bottom:10px; }
+.kicker-row .num{ font-family:"DM Mono",monospace; font-size:.72rem; color:var(--muted-soft); letter-spacing:.1em; }
+h2.head{ font-size:clamp(1.5rem,3.4vw,2.5rem); line-height:1.1; letter-spacing:-.02em; color:var(--text-strong); font-weight:700; max-width:46ch; text-wrap:balance; }
+.sub{ color:var(--muted); font-size:1rem; max-width:92ch; margin-top:12px; line-height:1.5; text-wrap:pretty; }
+.tnum{ font-variant-numeric:tabular-nums; font-family:"DM Mono",monospace; }
+b.vol{ color:var(--volume); } b.val{ color:var(--value); } b.gd{ color:var(--good); }
+
+/* ===== signature river flow — work dams at the human review gate ===== */
+.flowstage{ margin:24px 0 6px; }
+.flowcap{ font-family:"DM Mono",monospace; font-size:.66rem; letter-spacing:.1em; text-transform:uppercase; color:var(--muted-soft); display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:8px; }
+.flowcap .hot{ color:var(--volume); }
+.flowsvg{ width:100%; height:auto; display:block; overflow:visible; }
+.flowsvg .slbl{ font-family:"DM Mono",monospace; font-size:12px; fill:var(--muted); letter-spacing:.02em; }
+.flowsvg .slbl.hot{ fill:var(--volume); }
+.flowsvg .ssub{ font-family:"DM Mono",monospace; font-size:9px; fill:var(--muted-soft); letter-spacing:.06em; }
+.flowsvg .ssub.hot{ fill:var(--volume); } .flowsvg .ssub.gate{ fill:var(--gold-bright); }
+.flowsvg .bank{ fill:color-mix(in srgb,var(--accent) 7%,transparent); stroke:color-mix(in srgb,var(--accent) 26%,transparent); }
+.flowsvg .gline{ stroke:var(--gold-bright); } .flowsvg .gring{ stroke:var(--volume); }
+.flowsvg .dot-a{ fill:var(--accent); } .flowsvg .dot-g{ fill:var(--good); }
+.flowsvg .pa{ fill:var(--accent); } .flowsvg .pg{ fill:var(--good); }
+.gs-a{ stop-color:var(--accent); } .gs-g{ stop-color:var(--good); } .gs-y{ stop-color:var(--gold-bright); } .gs-r{ stop-color:var(--volume); }
+
+/* ============ folded-in measurement scenes (the honest-instrument layer) ============ */
+.head .em, h2.head em{ color:var(--value); font-style:normal; }
+
+/* — 03 · perception gap — */
+.pgap{ display:grid; grid-template-columns:1.15fr .85fr; gap:30px; align-items:center; margin-top:26px; }
+@media(max-width:820px){ .pgap{ grid-template-columns:1fr; } }
+.pgap-chart{ background:var(--surface); border:1px solid var(--border); border-radius:18px; padding:24px 26px; box-shadow:var(--shadow-soft); }
+.pgap-row{ display:flex; align-items:center; gap:14px; margin:16px 0; }
+.pgap-row .pl{ width:84px; flex:none; font-family:"DM Mono",monospace; font-size:.72rem; letter-spacing:.04em; color:var(--muted); text-align:right; text-transform:uppercase; }
+.pgap-track{ position:relative; flex:1; height:32px; border-radius:9px; background:var(--grid-empty); }
+.pgap-mid{ position:absolute; left:50%; top:-7px; bottom:-7px; width:1px; background:var(--border-strong); z-index:2; }
+.pgap-fill{ position:absolute; top:0; bottom:0; width:0; border-radius:9px; transition:width 1.1s cubic-bezier(.2,.7,.2,1); }
+.pgap-fill.felt{ left:50%; background:linear-gradient(90deg,color-mix(in srgb,var(--good) 26%,transparent),var(--good)); }
+.pgap-fill.meas{ right:50%; background:linear-gradient(270deg,color-mix(in srgb,var(--volume) 26%,transparent),var(--volume)); }
+.pgap-v{ flex:none; width:58px; font-family:"DM Mono",monospace; font-size:.84rem; font-weight:600; }
+.pgap-v.gd{ color:var(--good); } .pgap-v.vol{ color:var(--volume); text-align:right; }
+.pgap-illusion{ text-align:center; font-family:"DM Mono",monospace; font-size:.72rem; color:var(--gold-bright); letter-spacing:.08em; margin-top:6px; }
+.pgap-aside .big{ font-size:clamp(2.6rem,6vw,4rem); font-weight:700; letter-spacing:-.02em; color:var(--value); line-height:1; font-variant-numeric:tabular-nums; }
+.pgap-aside p{ color:var(--muted); margin-top:12px; max-width:52ch; line-height:1.5; text-wrap:pretty; }
+.trustline{ display:flex; align-items:baseline; gap:9px; flex-wrap:wrap; margin-top:18px; font-family:"DM Mono",monospace; font-size:.78rem; color:var(--muted); }
+.trustline b{ color:var(--volume); font-weight:600; }
+
+/* — 05 · altitudes — */
+.alt-stack{ display:flex; flex-direction:column; gap:9px; margin-top:24px; }
+.alt{ display:grid; grid-template-columns:auto clamp(190px,22vw,280px) 1fr; align-items:center; column-gap:24px; row-gap:6px; padding:14px 18px; border:1px solid var(--border); border-left:3px solid var(--ac,var(--accent)); border-radius:12px; background:var(--surface); box-shadow:var(--shadow-soft); }
+@media(max-width:720px){ .alt{ grid-template-columns:auto 1fr; } .alt-pair{ grid-column:1/-1; } }
+.alt-c{ font-family:"DM Mono",monospace; font-weight:600; font-size:.78rem; color:var(--ac,var(--accent)); width:30px; }
+.alt-b h4{ font-size:1rem; color:var(--text-strong); letter-spacing:-.01em; }
+.alt-b .alt-q{ display:block; font-size:.82rem; color:var(--muted); margin-top:2px; }
+.alt-b .promo{ font-family:"DM Mono",monospace; font-size:.56rem; letter-spacing:.1em; text-transform:uppercase; color:var(--muted-soft); }
+.alt-pair{ font-family:"DM Sans","Space Grotesk",sans-serif; font-size:.82rem; color:var(--muted); text-align:left; max-width:66ch; line-height:1.5; }
+.alt-pair b{ color:var(--volume); font-weight:600; font-family:"DM Mono",monospace; font-size:.94em; }
+.alt-cross{ margin-top:14px; padding:14px 18px; border:1px dashed color-mix(in srgb,var(--gold) 44%,var(--border)); border-radius:12px; background:var(--gold-soft); font-size:.9rem; color:var(--muted); line-height:1.5; }
+.alt-cross b{ color:var(--gold); }
+.alt-blind{ margin-top:18px; }
+.alt-blind h5{ font-family:"DM Mono",monospace; font-size:.7rem; letter-spacing:.1em; text-transform:uppercase; color:var(--muted-soft); margin-bottom:10px; }
+.alt-bg{ display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:9px; }
+.alt-bg span{ font-size:.8rem; color:var(--muted); padding:11px 13px; border:1px solid var(--border); border-radius:10px; background:var(--surface); line-height:1.4; }
+.alt-bg b{ color:var(--text-strong); font-weight:600; }
+
+/* — 06 · scorecard — */
+.vkey{ display:flex; flex-wrap:wrap; gap:8px; margin:22px 0 14px; }
+.vchip{ display:inline-flex; align-items:center; gap:7px; font-family:"DM Mono",monospace; font-size:.66rem; letter-spacing:.04em; text-transform:uppercase; color:var(--muted); border:1px solid var(--border); border-radius:999px; padding:5px 11px; }
+.vchip::before{ content:""; width:7px; height:7px; border-radius:50%; background:var(--vc,var(--muted-soft)); }
+.vchip.acc{ --vc:var(--good); } .vchip.neu{ --vc:var(--muted-soft); } .vchip.shi{ --vc:var(--gold-bright); } .vchip.dec{ --vc:var(--volume); } .vchip.unp{ --vc:var(--accent); }
+.score{ border:1px solid var(--border); border-radius:16px; overflow:hidden; background:var(--surface); box-shadow:var(--shadow-soft); }
+.score-h, .scrow{ display:grid; grid-template-columns:1fr 1.7fr 1.7fr auto; gap:16px; align-items:center; padding:13px 18px; }
+.score-h{ font-family:"DM Mono",monospace; font-size:.64rem; letter-spacing:.08em; text-transform:uppercase; color:var(--muted-soft); background:color-mix(in srgb,var(--text) 4%,transparent); }
+.scrow{ border-top:1px solid var(--border); border-left:3px solid var(--vc,var(--accent)); }
+.scrow .ph{ font-weight:600; color:var(--text-strong); font-size:.92rem; }
+.scrow .ph i{ display:block; font-family:"DM Mono",monospace; font-style:normal; font-size:.6rem; letter-spacing:.08em; text-transform:uppercase; color:var(--muted-soft); margin-top:2px; }
+.scrow .lead, .scrow .ctr{ font-size:.8rem; color:var(--muted); line-height:1.4; }
+.scrow .ctr{ color:color-mix(in srgb,var(--volume) 64%,var(--muted)); }
+@media(max-width:760px){ .score-h{ display:none; } .scrow{ grid-template-columns:1fr; gap:6px; } .scrow .verdict{ justify-self:start; } }
+.vrule{ margin-top:18px; font-size:.96rem; color:var(--text); line-height:1.55; max-width:94ch; text-wrap:pretty; }
+.vrule b{ color:var(--text-strong); }
+.recipe-cols{ display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-top:22px; }
+@media(max-width:820px){ .recipe-cols{ grid-template-columns:1fr; } }
+.steps, .spine-card{ border:1px solid var(--border); border-radius:16px; padding:20px 22px; background:var(--surface); box-shadow:var(--shadow-soft); }
+.steps h5, .spine-card h5{ font-family:"DM Mono",monospace; font-size:.7rem; letter-spacing:.1em; text-transform:uppercase; color:var(--gold); margin-bottom:12px; }
+.steps ol{ margin:0; padding-left:20px; display:flex; flex-direction:column; gap:9px; }
+.steps li{ font-size:.84rem; color:var(--muted); line-height:1.45; }
+.steps li b{ color:var(--text-strong); font-weight:600; }
+.spine-flow{ display:flex; align-items:stretch; gap:10px; flex-wrap:wrap; }
+.sbox{ flex:1 1 130px; border:1px solid var(--border); border-radius:12px; padding:13px 14px; background:color-mix(in srgb,var(--surface) 60%,transparent); }
+.sbox.hub{ border-color:color-mix(in srgb,var(--accent) 40%,var(--border)); } .sbox.out{ border-color:color-mix(in srgb,var(--good) 40%,var(--border)); }
+.sbox .st{ font-family:"DM Mono",monospace; font-size:.6rem; letter-spacing:.08em; text-transform:uppercase; color:var(--muted-soft); margin-bottom:8px; }
+.sbox h4{ font-size:.9rem; color:var(--text-strong); } .sbox p{ font-size:.78rem; color:var(--muted); margin-top:5px; line-height:1.4; }
+.schips{ display:flex; flex-wrap:wrap; gap:5px; }
+.schips span{ font-family:"DM Mono",monospace; font-size:.62rem; color:var(--muted); border:1px solid var(--border); border-radius:6px; padding:3px 7px; }
+.spine-flow .ar{ align-self:center; color:var(--muted-soft); font-size:1.1rem; }
+
+/* — 09 · readiness questions — */
+.gateq{ display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:12px; margin-top:24px; }
+.gq{ display:flex; gap:14px; padding:18px 20px; border:1px solid var(--border); border-radius:14px; background:var(--surface); box-shadow:var(--shadow-soft); }
+.gq .gnum{ flex:none; width:34px; height:34px; border-radius:50%; display:grid; place-items:center; font-family:"DM Mono",monospace; font-weight:600; font-size:.9rem; color:var(--gold); border:1px solid color-mix(in srgb,var(--gold) 44%,var(--border)); background:var(--gold-soft); }
+.gq h4{ font-size:.96rem; color:var(--text-strong); letter-spacing:-.01em; }
+.gq p{ font-size:.82rem; color:var(--muted); margin-top:6px; line-height:1.45; }
+.gq .good{ margin-top:9px; font-size:.78rem; color:var(--good); line-height:1.4; }
+.gq .good b{ color:var(--good); font-weight:600; }
+
+/* — 12 · responsibility lanes (appended to the shift) — */
+.lanes-head{ display:flex; justify-content:space-between; align-items:baseline; gap:14px; flex-wrap:wrap; margin:30px 0 12px; font-size:.86rem; color:var(--muted); }
+.lanes-head b{ color:var(--text-strong); } .lanes-head .spine{ font-family:"DM Mono",monospace; font-size:.68rem; letter-spacing:.06em; color:var(--muted-soft); }
+.lanes{ display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+@media(max-width:880px){ .lanes{ grid-template-columns:repeat(2,1fr); } }
+@media(max-width:520px){ .lanes{ grid-template-columns:1fr; } }
+.lane{ border:1px solid var(--border); border-top:3px solid var(--lnc,var(--accent)); border-radius:14px; padding:16px 17px; background:var(--surface); box-shadow:var(--shadow-soft); }
+.lane .ln-k{ font-family:"DM Mono",monospace; font-size:.62rem; letter-spacing:.08em; text-transform:uppercase; color:var(--lnc,var(--accent)); }
+.lane h4{ font-size:.94rem; color:var(--text-strong); margin-top:6px; letter-spacing:-.01em; }
+.lane p{ font-size:.8rem; color:var(--muted); margin-top:7px; line-height:1.45; }
+.lane .own{ margin-top:10px; font-family:"DM Mono",monospace; font-size:.62rem; letter-spacing:.04em; color:var(--muted-soft); }
+
+/* — 13 · the mandate — */
+.specgrid{ display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-top:24px; }
+@media(max-width:900px){ .specgrid{ grid-template-columns:repeat(2,1fr); } }
+@media(max-width:520px){ .specgrid{ grid-template-columns:1fr; } }
+.spec{ position:relative; border:1px solid var(--border); border-radius:14px; padding:16px 17px 17px; background:var(--surface); box-shadow:var(--shadow-soft); }
+.spec .led{ position:absolute; top:15px; right:15px; width:8px; height:8px; border-radius:50%; background:var(--good); box-shadow:0 0 0 4px color-mix(in srgb,var(--good) 22%,transparent); }
+.spec .fc{ font-family:"DM Mono",monospace; font-size:.64rem; letter-spacing:.06em; text-transform:uppercase; color:var(--gold); }
+.spec h4{ font-size:.92rem; color:var(--text-strong); margin-top:7px; letter-spacing:-.01em; }
+.spec p{ font-size:.78rem; color:var(--muted); margin-top:6px; line-height:1.42; }
+.nfrband{ display:flex; flex-wrap:wrap; gap:8px; margin-top:16px; }
+.nfrband .nfr{ font-size:.78rem; color:var(--muted); border:1px solid var(--border); border-radius:999px; padding:7px 13px; background:var(--surface); }
+.nfrband .nfr b{ color:var(--text-strong); font-weight:600; }
+
+/* — glossary — */
+.gloss{ display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:10px; margin-top:24px; }
+.gloss .gterm{ border:1px solid var(--border); border-radius:12px; padding:14px 16px; background:var(--surface); }
+.gloss dt{ font-family:"DM Mono",monospace; font-size:.74rem; font-weight:500; color:var(--gold); letter-spacing:.02em; }
+.gloss dd{ font-size:.82rem; color:var(--muted); margin-top:6px; line-height:1.45; }
+.gloss dd b{ color:var(--text-strong); font-weight:600; }
+
+/* — condensed governed delivery factory (folded into the governed line) — */
+.govfac{ margin-top:34px; border-top:1px solid var(--border); padding-top:26px; }
+.factory-head{ display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; margin-bottom:16px; }
+.factory-head .fk{ font-family:"DM Mono",monospace; font-size:.7rem; letter-spacing:.14em; text-transform:uppercase; color:var(--gold); }
+.factory-head .fs{ font-size:.88rem; color:var(--muted); max-width:82ch; text-wrap:pretty; }
+.factory-grid{ display:grid; grid-template-columns:178px 1fr 178px; gap:14px; align-items:stretch; }
+@media(max-width:980px){ .factory-grid{ grid-template-columns:1fr; } }
+.frail{ display:flex; flex-direction:column; gap:7px; }
+.frail h6{ font-family:"DM Mono",monospace; font-size:.58rem; letter-spacing:.1em; text-transform:uppercase; color:var(--muted-soft); }
+.frail .fr{ font-size:.74rem; color:var(--text); padding:9px 11px; border:1px solid var(--border); border-left:2px solid var(--frc,var(--muted-soft)); border-radius:8px; background:var(--surface); line-height:1.25; }
+.frail.ins .fr{ --frc:var(--accent); } .frail.out .fr{ --frc:var(--good); }
+@media(max-width:980px){ .frail{ flex-flow:row wrap; } .frail h6{ width:100%; } .frail .fr{ flex:1 1 150px; } }
+.fcore{ border:1px solid var(--border); border-radius:16px; padding:16px; background:color-mix(in srgb,var(--surface) 70%,transparent); }
+.fcaps{ display:flex; flex-wrap:wrap; gap:6px; margin-bottom:14px; }
+.fcaps span{ font-family:"DM Mono",monospace; font-size:.62rem; color:var(--accent); border:1px solid color-mix(in srgb,var(--accent) 34%,var(--border)); border-radius:999px; padding:4px 10px; background:color-mix(in srgb,var(--accent) 8%,transparent); }
+.fmoves{ display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
+@media(max-width:760px){ .fmoves{ grid-template-columns:repeat(2,1fr); } }
+@media(max-width:460px){ .fmoves{ grid-template-columns:1fr; } }
+.fmove{ border-top:2px solid var(--mc,var(--accent)); padding-top:8px; }
+.fmove .mk{ font-family:"DM Mono",monospace; font-size:.56rem; letter-spacing:.08em; text-transform:uppercase; color:var(--mc,var(--accent)); }
+.fmove h5{ font-size:.84rem; color:var(--text-strong); margin:2px 0 8px; letter-spacing:-.01em; }
+.fnode{ border:1px solid var(--border); border-radius:9px; padding:8px 10px; margin-bottom:7px; background:var(--surface); }
+.fnode.bn{ border-color:color-mix(in srgb,var(--volume) 50%,var(--border)); box-shadow:0 0 0 1px color-mix(in srgb,var(--volume) 14%,transparent); }
+.fnode .nt{ display:flex; align-items:center; justify-content:space-between; gap:6px; }
+.fnode .nt b{ font-size:.77rem; color:var(--text-strong); font-weight:600; }
+.fnode .g{ font-family:"DM Mono",monospace; font-size:.5rem; letter-spacing:.06em; text-transform:uppercase; color:var(--gold-bright); border:1px solid color-mix(in srgb,var(--gold) 40%,var(--border)); border-radius:5px; padding:1px 5px; flex:none; }
+.fnode .g.bn{ color:var(--volume); border-color:color-mix(in srgb,var(--volume) 50%,var(--border)); }
+.fnode .own{ font-family:"DM Mono",monospace; font-size:.58rem; color:var(--muted-soft); margin-top:3px; }
+.fnode .gv{ font-size:.66rem; color:var(--muted); margin-top:2px; line-height:1.3; }
+.fext{ margin-top:12px; border:1px dashed var(--border-strong); border-radius:10px; padding:10px 13px; background:color-mix(in srgb,var(--volume) 5%,transparent); }
+.fext .ek{ font-family:"DM Mono",monospace; font-size:.56rem; letter-spacing:.08em; text-transform:uppercase; color:var(--volume); }
+.fext .ev{ font-size:.74rem; color:var(--muted); margin-top:4px; line-height:1.4; }
+.fext .ev b{ color:var(--text-strong); }
+/* — factory: interactive + animated layer — */
+.govfac .fr, .govfac .fcaps span, .govfac .fmove, .govfac .fnode, .govfac .fext{ transition:opacity .55s ease, transform .55s cubic-bezier(.2,.7,.2,1), border-color .25s, box-shadow .25s, background .25s, color .2s; }
+/* staggered entrance — children stay hidden until JS lights them */
+.govfac.staged .fr, .govfac.staged .fcaps span, .govfac.staged .fmove, .govfac.staged .fnode, .govfac.staged .fext{ opacity:0; transform:translateY(12px); }
+.govfac.staged .frail.ins .fr{ transform:translateX(-16px); }
+.govfac.staged .frail.out .fr{ transform:translateX(16px); }
+.govfac .fr.lit, .govfac .fcaps span.lit, .govfac .fmove.lit, .govfac .fnode.lit, .govfac .fext.lit{ opacity:1; transform:none; }
+/* hover inspect — stage nodes */
+.fnode{ position:relative; cursor:default; }
+.fnode::before{ content:""; position:absolute; left:-1px; top:-1px; bottom:-1px; width:3px; background:var(--mc,var(--accent)); border-radius:9px 0 0 9px; transform:scaleY(0); transform-origin:center; transition:transform .3s ease; }
+.fnode:hover{ transform:translateY(-2px); border-color:color-mix(in srgb,var(--mc,var(--accent)) 60%,var(--border)); box-shadow:0 8px 22px -10px color-mix(in srgb,var(--mc,var(--accent)) 50%,transparent); }
+.fnode:hover::before{ transform:scaleY(1); }
+.fnode:hover .nt b{ color:var(--mc,var(--text-strong)); }
+.fnode:hover .gv{ color:var(--text); }
+/* hover — input / outcome chips */
+.frail.ins .fr:hover{ transform:translateX(3px); border-color:color-mix(in srgb,var(--accent) 42%,var(--border)); background:color-mix(in srgb,var(--accent) 7%,var(--surface)); }
+.frail.out .fr:hover{ transform:translateX(-3px); border-color:color-mix(in srgb,var(--good) 42%,var(--border)); background:color-mix(in srgb,var(--good) 7%,var(--surface)); }
+/* hover — capability tags */
+.fcaps span{ cursor:default; transition:transform .25s, background .25s, box-shadow .25s, border-color .25s; }
+.fcaps span:hover{ transform:translateY(-2px); background:color-mix(in srgb,var(--accent) 16%,transparent); border-color:var(--accent); box-shadow:0 5px 16px -7px color-mix(in srgb,var(--accent) 55%,transparent); }
+/* bottleneck — continuous breathing (it's the constraint) */
+.fnode.bn{ animation:bnPulse 2.8s ease-in-out infinite; }
+@keyframes bnPulse{ 0%,100%{ box-shadow:0 0 0 1px color-mix(in srgb,var(--volume) 14%,transparent); } 50%{ box-shadow:0 0 0 1px color-mix(in srgb,var(--volume) 42%,transparent), 0 0 20px -2px color-mix(in srgb,var(--volume) 45%,transparent); } }
+/* flowing current — inputs → outcomes */
+.fflow{ position:relative; height:2px; margin:-2px 0 14px; border-radius:2px; background:linear-gradient(90deg, color-mix(in srgb,var(--accent) 32%,transparent), color-mix(in srgb,var(--violet) 32%,transparent), color-mix(in srgb,var(--gold) 32%,transparent), color-mix(in srgb,var(--good) 32%,transparent)); }
+.fflow .fdot{ position:absolute; top:50%; left:0; width:7px; height:7px; margin:-3.5px 0 0 -3.5px; border-radius:50%; background:var(--accent); box-shadow:0 0 10px 2px color-mix(in srgb,var(--accent) 70%,transparent); animation:fflow 4.4s linear infinite; }
+@keyframes fflow{ 0%{ left:0; background:var(--accent);} 33%{ background:var(--violet);} 66%{ background:var(--gold-bright);} 100%{ left:100%; background:var(--good);} }
+/* walk-the-line control + active step */
+.fwalk{ margin-left:auto; appearance:none; cursor:pointer; font-family:"DM Mono",monospace; font-size:.62rem; letter-spacing:.08em; text-transform:uppercase; color:var(--gold); background:color-mix(in srgb,var(--gold) 8%,transparent); border:1px solid color-mix(in srgb,var(--gold) 34%,var(--border)); border-radius:999px; padding:5px 13px; transition:.25s; }
+.fwalk:hover{ background:color-mix(in srgb,var(--gold) 16%,transparent); border-color:var(--gold); transform:translateY(-1px); }
+.fwalk .fw-ico{ display:inline-block; transform:translateY(.5px); }
+.fwalk[aria-pressed="true"]{ color:var(--volume); border-color:color-mix(in srgb,var(--volume) 45%,var(--border)); background:color-mix(in srgb,var(--volume) 10%,transparent); }
+.fwalk[aria-pressed="true"] .fw-ico{ color:var(--volume); }
+.govfac.walking .fnode:not(.step){ opacity:.38; }
+.fnode.step{ border-color:var(--mc,var(--accent)); box-shadow:0 0 0 2px color-mix(in srgb,var(--mc,var(--accent)) 38%,transparent), 0 10px 28px -8px color-mix(in srgb,var(--mc,var(--accent)) 55%,transparent); transform:translateY(-3px) scale(1.015); z-index:2; }
+.fnode.step::before{ transform:scaleY(1); }
+
+/* ================= HERO (balance) ================= */
+.hero{ min-height:100svh; display:grid; grid-template-rows:auto 1fr auto; padding-top:8px; padding-bottom:26px; }
+.hero-top{ max-width:84ch; }
+.hero-eyebrow{ display:inline-flex; align-items:center; gap:9px; }
+.hero-eyebrow .dot{ width:7px;height:7px;border-radius:50%;background:var(--volume); box-shadow:0 0 0 4px color-mix(in srgb,var(--volume) 24%,transparent); animation:beat 2.4s infinite; }
+@keyframes beat{ 0%,100%{opacity:1} 50%{opacity:.35} }
+.hero h1{ font-size:clamp(1.9rem,4.9vw,3.6rem); line-height:1.06; letter-spacing:-.03em; color:var(--text-strong); font-weight:700; margin:14px 0 0; }
+.hero h1 .hl{ display:block; white-space:nowrap; }
+@media(max-width:580px){ .hero h1{ font-size:clamp(1.7rem,7.4vw,2.3rem); } .hero h1 .hl{ white-space:normal; } }
+.hero h1 .gold{ color:var(--value); } .hero h1 .strike{ color:var(--muted-soft); }
+.hero-lede{ color:var(--muted); margin-top:16px; font-size:1.05rem; line-height:1.5; max-width:84ch; text-wrap:pretty; }
+.hero-prov{ color:var(--muted-soft); margin-top:10px; font-size:.78rem; line-height:1.5; max-width:74ch; font-style:italic; }
+:root[data-embedded="true"] .hero-prov{ font-size:.8rem; }
+.scale-stage{ align-self:center; width:100%; display:grid; place-items:center; }
+.scale-wrap{ width:min(100%,760px); aspect-ratio:760/430; position:relative; }
+.scale-wrap svg{ width:100%; height:100%; overflow:visible; }
+#beam{ transform-box:fill-box; transform-origin:380px 92px; transition:transform 1.9s cubic-bezier(.34,1.2,.3,1); }
+.pan-grp{ transition:transform 1.9s cubic-bezier(.34,1.2,.3,1); }
+.pan-load{ opacity:0; transition:opacity 1s ease 1.1s; } .lit .pan-load{ opacity:1; }
+.col-label{ font-family:"DM Mono",monospace; font-weight:500; }
+.readout{ display:flex; justify-content:space-between; gap:18px; flex-wrap:wrap; margin-top:6px; }
+.read{ flex:1 1 200px; }
+.read .cap{ font-family:"DM Mono",monospace; font-size:.7rem; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); display:flex; align-items:center; gap:7px; }
+.read .cap i{ width:9px;height:9px;border-radius:2px; display:inline-block; }
+.read.vol .cap i{ background:var(--volume); } .read.val .cap i{ background:var(--value); }
+.read .big{ font-size:clamp(2.2rem,5vw,3.4rem); font-weight:700; letter-spacing:-.02em; line-height:1; margin-top:6px; color:var(--text-strong); }
+.read.vol .big{ color:var(--volume); } .read.val .big{ color:var(--value); }
+.read .note{ color:var(--muted); font-size:.86rem; margin-top:6px; max-width:56ch; text-wrap:pretty; }
+/* right pan ("what reached the margin") anchors to the rightmost edge, mirroring the balance */
+.read.val{ text-align:right; }
+.read.val .cap{ justify-content:flex-end; }
+.read.val .note{ margin-left:auto; }
+@media(max-width:560px){ .read.val{ text-align:left; } .read.val .cap{ justify-content:flex-start; } .read.val .note{ margin-left:0; } }
+.verdict-bar{ margin:34px 0; display:flex; align-items:center; gap:clamp(12px,2.4vw,22px); font-family:"DM Mono",monospace; font-size:clamp(.84rem,1.5vw,1rem); letter-spacing:.04em; color:var(--muted); }
+.verdict-bar::before, .verdict-bar::after{ content:""; flex:1 1 0; height:2px; border-radius:2px; background:linear-gradient(90deg, transparent, color-mix(in srgb,var(--volume) 60%,transparent)); }
+.verdict-bar::after{ background:linear-gradient(90deg, color-mix(in srgb,var(--volume) 60%,transparent), transparent); }
+.verdict-bar .vb-text{ flex:0 0 auto; text-align:center; max-width:min(100%,54ch); }
+.verdict-bar b{ color:var(--volume); font-weight:700; }
+.scrollcue{ text-align:center; color:var(--muted-soft); font-size:.74rem; letter-spacing:.18em; text-transform:uppercase; font-family:"DM Mono",monospace; margin-top:16px; }
+.scrollcue span{ display:block; font-size:1.1rem; animation:bob 1.8s infinite; }
+@keyframes bob{ 0%,100%{transform:translateY(0);opacity:.5} 50%{transform:translateY(5px);opacity:1} }
+
+/* ================= 01 — THE MORTGAGE (O&M tax) ================= */
+.mortgage{ background:
+    radial-gradient(circle at 80% 0%, color-mix(in srgb,var(--volume) 8%,transparent), transparent 45%); }
+.meter-card{ margin-top:26px; background:var(--surface); border:1px solid var(--border); border-radius:20px; box-shadow:var(--shadow-soft); padding:24px; position:relative; overflow:hidden; }
+.meter-top{ display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:14px; }
+.meter-big{ font-size:clamp(2.6rem,7vw,4.6rem); font-weight:700; letter-spacing:-.03em; line-height:.9; color:var(--volume); }
+.meter-big small{ font-size:.34em; color:var(--muted); font-weight:600; letter-spacing:.02em; display:block; margin-top:6px; font-family:"DM Mono",monospace; }
+.meter-cap{ font-family:"DM Mono",monospace; font-size:.72rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); text-align:right; max-width:34ch; }
+.budget{ margin-top:22px; }
+.budget .bl{ display:flex; justify-content:space-between; font-family:"DM Mono",monospace; font-size:.72rem; color:var(--muted); margin-bottom:7px; }
+.budget .track{ height:30px; border-radius:9px; overflow:hidden; display:flex; background:var(--grid-empty); border:1px solid var(--border); }
+.budget .seg{ height:100%; width:0; transition:width 1.3s cubic-bezier(.3,.8,.3,1); display:flex; align-items:center; padding:0 12px; font-family:"DM Mono",monospace; font-size:.68rem; font-weight:600; white-space:nowrap; }
+.budget .keep{ background:linear-gradient(90deg,color-mix(in srgb,var(--volume) 78%,transparent),var(--volume)); color:#fff; }
+.budget .new{ background:linear-gradient(90deg,var(--gold),var(--gold-bright)); color:#1a1405; justify-content:flex-end; }
+.mort-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-top:22px; }
+@media (max-width:760px){ .mort-grid{ grid-template-columns:repeat(2,1fr); } }
+.mort-stat{ background:var(--surface-strong); border:1px solid var(--border); border-radius:13px; padding:14px; }
+.mort-stat .v{ font-size:1.5rem; font-weight:700; color:var(--text-strong); letter-spacing:-.02em; }
+.mort-stat.bad .v{ color:var(--volume); }
+.mort-stat .l{ font-size:.74rem; color:var(--muted); margin-top:4px; line-height:1.35; }
+.mort-foot{ margin-top:18px; font-size:.86rem; color:var(--muted); line-height:1.55; }
+.mort-foot b{ color:var(--text-strong); }
+
+/* ================= 02 — FOUR WAYS OUT (4 R's) ================= */
+.rrrr{ display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-top:28px; }
+@media (max-width:880px){ .rrrr{ grid-template-columns:repeat(2,1fr); } }
+@media (max-width:480px){ .rrrr{ grid-template-columns:1fr; } }
+.rcard{ background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:18px; box-shadow:var(--shadow-soft); position:relative; transition:.25s; }
+.rcard:hover{ transform:translateY(-3px); border-color:var(--border-strong); }
+.rcard .rk{ font-family:"DM Mono",monospace; font-size:.64rem; letter-spacing:.14em; text-transform:uppercase; color:var(--gold); }
+.rcard h3{ font-size:1.18rem; color:var(--text-strong); margin:5px 0 4px; letter-spacing:-.01em; }
+.rcard p{ font-size:.82rem; color:var(--muted); line-height:1.45; min-height:3.6em; }
+.rmeters{ margin-top:14px; display:grid; gap:8px; }
+.rm{ display:grid; grid-template-columns:54px 1fr; align-items:center; gap:9px; font-family:"DM Mono",monospace; font-size:.62rem; color:var(--muted); letter-spacing:.04em; }
+.rm .t{ height:8px; border-radius:5px; background:var(--grid-empty); overflow:hidden; }
+.rm .t i{ display:block; height:100%; width:0; border-radius:5px; transition:width 1.1s cubic-bezier(.3,.8,.3,1); }
+.rm .t i.spd{ background:var(--accent); } .rm .t i.val{ background:var(--value); } .rm .t i.rsk{ background:var(--volume); }
+.strangler{ margin-top:18px; display:flex; gap:11px; align-items:center; background:var(--surface); border:1px dashed var(--border-strong); border-radius:13px; padding:13px 16px; font-size:.85rem; color:var(--muted); line-height:1.5; }
+.strangler b{ color:var(--good); }
+
+/* ================= 03 — GOVERNED LINE + lever ================= */
+.line-head{ display:flex; justify-content:space-between; align-items:flex-end; gap:24px; flex-wrap:wrap; }
+.lever{ margin-top:22px; background:var(--surface); border:1px solid var(--border); border-radius:16px; box-shadow:var(--shadow-soft); padding:16px 18px; }
+.lever-top{ display:flex; justify-content:space-between; align-items:center; gap:14px; flex-wrap:wrap; }
+.lever-top .lt-lbl{ font-family:"DM Mono",monospace; font-size:.7rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); }
+.seg{ display:inline-flex; background:var(--grid-empty); border:1px solid var(--border); border-radius:999px; padding:3px; }
+.seg button{ appearance:none; cursor:pointer; font-family:"DM Mono",monospace; font-size:.74rem; font-weight:500; color:var(--muted); background:transparent; border:0; border-radius:999px; padding:7px 15px; transition:.2s; letter-spacing:.02em; }
+.seg button[aria-pressed="true"]{ color:#0a1524; background:var(--gold); }
+.lever-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-top:16px; }
+@media (max-width:680px){ .lever-grid{ grid-template-columns:repeat(2,1fr); } }
+.lv{ background:var(--surface-strong); border:1px solid var(--border); border-radius:12px; padding:12px 13px; }
+.lv .lvl{ font-family:"DM Mono",monospace; font-size:.6rem; letter-spacing:.1em; text-transform:uppercase; color:var(--muted-soft); }
+.lv .lvv{ font-size:1.15rem; font-weight:700; margin-top:3px; color:var(--text-strong); transition:color .3s; }
+.lv.up .lvv{ color:var(--volume); } .lv.down .lvv{ color:var(--gold); } .lv.good .lvv{ color:var(--good); }
+.lever-note{ margin-top:13px; font-size:.84rem; color:var(--muted); line-height:1.5; }
+.lever-note b{ color:var(--text-strong); }
+
+.persona-rail{ display:flex; gap:8px; flex-wrap:wrap; margin-top:20px; }
+.chip{ appearance:none; cursor:pointer; font-family:"DM Mono",monospace; font-size:.74rem; font-weight:500; color:var(--muted); background:var(--surface); border:1px solid var(--border); border-radius:999px; padding:7px 13px; transition:.2s; letter-spacing:.02em; }
+.chip:hover{ color:var(--text-strong); border-color:var(--border-strong); }
+.chip[aria-pressed="true"]{ color:var(--bg-start); background:var(--gold); border-color:var(--gold); }
+.factory{ margin-top:22px; display:grid; grid-template-columns:1.55fr 1fr; gap:22px; align-items:stretch; }
+@media (max-width:880px){ .factory{ grid-template-columns:1fr; } }
+.belt-card{ background:var(--surface); border:1px solid var(--border); border-radius:18px; padding:20px 18px 16px; box-shadow:var(--shadow-soft); position:relative; overflow:hidden; }
+.belt-card::before{ content:""; position:absolute; inset:0; background:radial-gradient(circle at 50% -10%, var(--gold-soft), transparent 60%); pointer-events:none; }
+.belt-title{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:14px; }
+.belt-title .t{ font-family:"DM Mono",monospace; font-size:.72rem; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); }
+.belt-title .legend{ display:flex; gap:12px; font-family:"DM Mono",monospace; font-size:.66rem; color:var(--muted); }
+.belt-title .legend i{ width:8px;height:8px;border-radius:2px;display:inline-block;margin-right:5px;vertical-align:middle; }
+.belt{ display:flex; align-items:stretch; gap:0; position:relative; }
+.stage{ appearance:none; cursor:pointer; font-family:inherit; text-align:left; flex:1 1 0; min-width:0; background:transparent; border:0; padding:0 4px; position:relative; transition:.25s; }
+.stage .bar{ height:64px; border-radius:8px; position:relative; overflow:hidden; border:1px solid var(--border); background:var(--surface-strong); display:flex; align-items:flex-end; transition:.3s; }
+.stage .fill{ width:100%; border-radius:0 0 7px 7px; transition:height 1s cubic-bezier(.3,.8,.3,1), background .3s; background:linear-gradient(180deg, color-mix(in srgb,var(--accent) 55%,transparent), color-mix(in srgb,var(--accent) 78%,transparent)); }
+.stage[data-kind="gate"] .fill{ background:linear-gradient(180deg, color-mix(in srgb,var(--violet) 60%,transparent), var(--violet)); }
+.stage[data-kind="bottleneck"] .fill{ background:linear-gradient(180deg, color-mix(in srgb,var(--volume) 60%,transparent), var(--volume)); }
+.stage .lbl{ display:block; font-family:"DM Mono",monospace; font-size:.66rem; color:var(--muted); margin-top:8px; letter-spacing:.02em; line-height:1.25; }
+.stage .ph{ display:block; font-size:.6rem; color:var(--muted-soft); letter-spacing:.14em; text-transform:uppercase; margin-top:3px; }
+.stage:hover .bar{ border-color:var(--border-strong); transform:translateY(-2px); }
+.stage[aria-selected="true"] .bar{ border-color:var(--gold); box-shadow:0 0 0 2px var(--gold-soft), var(--shadow-soft); }
+.stage[aria-selected="true"] .lbl{ color:var(--text-strong); }
+.stage.dim{ opacity:.32; filter:saturate(.5); }
+.gateflag{ position:absolute; top:-13px; left:50%; transform:translateX(-50%); z-index:3; font-family:"DM Mono",monospace; font-size:.56rem; letter-spacing:.1em; text-transform:uppercase; color:var(--violet); white-space:nowrap; pointer-events:none; }
+.stage[data-kind="bottleneck"] .gateflag{ color:var(--volume); }
+.flow-note{ margin-top:16px; font-size:.82rem; color:var(--muted); line-height:1.5; display:flex; gap:10px; }
+.flow-note b{ color:var(--text-strong); font-weight:600; } .flow-note .pipe{ color:var(--volume); }
+.deck{ background:var(--surface); border:1px solid var(--border); border-radius:18px; padding:20px; box-shadow:var(--shadow-soft); display:flex; flex-direction:column; min-height:0; }
+.deck .dk-ph{ font-family:"DM Mono",monospace; font-size:.66rem; letter-spacing:.16em; text-transform:uppercase; color:var(--gold); }
+.deck .dk-title{ font-size:1.22rem; font-weight:700; color:var(--text-strong); letter-spacing:-.01em; margin:5px 0 2px; }
+.deck .dk-verdict{ font-family:"DM Mono",monospace; font-size:.76rem; margin-bottom:14px; }
+.deck .dk-verdict.flow{ color:var(--good); } .deck .dk-verdict.gate{ color:var(--violet); } .deck .dk-verdict.bottleneck{ color:var(--volume); }
+.rows{ display:grid; gap:9px; }
+.row{ display:grid; grid-template-columns:auto 1fr; gap:11px; align-items:start; font-size:.85rem; line-height:1.4; }
+.row .tag{ font-family:"DM Mono",monospace; font-size:.6rem; letter-spacing:.08em; text-transform:uppercase; padding:3px 6px; border-radius:5px; white-space:nowrap; margin-top:1px; }
+.tag.ai{ color:var(--accent); background:color-mix(in srgb,var(--accent) 13%,transparent); }
+.tag.hu{ color:var(--violet); background:color-mix(in srgb,var(--violet) 14%,transparent); }
+.tag.pf{ color:var(--good); background:color-mix(in srgb,var(--good) 13%,transparent); }
+.tag.out{ color:var(--muted); background:color-mix(in srgb,var(--muted) 16%,transparent); }
+.row span{ color:var(--text); }
+.metrics{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:16px; padding-top:14px; border-top:1px solid var(--border); }
+.metric .ml{ font-family:"DM Mono",monospace; font-size:.6rem; letter-spacing:.1em; text-transform:uppercase; color:var(--muted-soft); }
+.metric .mv{ font-size:.92rem; color:var(--text-strong); font-weight:600; margin-top:3px; line-height:1.25; }
+.metric.counter .mv{ color:var(--volume); }
+
+/* ================= 04 — DORA instruments ================= */
+.dora-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-top:28px; }
+@media (max-width:820px){ .dora-grid{ grid-template-columns:repeat(2,1fr); } }
+.gauge{ background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:18px; box-shadow:var(--shadow-soft); text-align:center; }
+.gauge svg{ width:100%; height:84px; overflow:visible; }
+.gauge .arc-bg{ fill:none; stroke:var(--grid-empty); stroke-width:9; stroke-linecap:round; }
+.gauge .arc-fg{ fill:none; stroke:var(--good); stroke-width:9; stroke-linecap:round; stroke-dasharray:1; stroke-dashoffset:1; transition:stroke-dashoffset 1.3s cubic-bezier(.3,.8,.3,1); }
+.gauge .gv{ font-size:1.18rem; font-weight:700; color:var(--text-strong); letter-spacing:-.01em; }
+.gauge .gl{ font-family:"DM Mono",monospace; font-size:.64rem; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-top:4px; }
+.gauge .gt{ font-family:"DM Mono",monospace; font-size:.58rem; color:var(--good); margin-top:7px; letter-spacing:.1em; }
+.dora-note{ margin-top:18px; font-size:.86rem; color:var(--muted); line-height:1.55; max-width:94ch; text-wrap:pretty; }
+.dora-note b{ color:var(--text-strong); }
+
+/* ================= 05 — 5% verdict ================= */
+.verdict-sec{ text-align:center; }
+.verdict-sec .head{ margin:0 auto; } .verdict-sec .sub{ margin:12px auto 0; }
+.coingrid{ --c:10; display:grid; grid-template-columns:repeat(var(--c),1fr); gap:clamp(5px,1vw,10px); width:min(100%,560px); margin:34px auto 0; }
+.coin{ aspect-ratio:1; border-radius:50%; background:var(--grid-empty); border:1px solid var(--grid-line); transform:scale(.6); opacity:0; transition:transform .5s, opacity .5s, background .5s, box-shadow .5s; }
+.coin.show{ transform:scale(1); opacity:1; }
+.coin.win{ background:radial-gradient(circle at 38% 32%, var(--gold-bright), var(--value)); border-color:var(--gold); box-shadow:0 0 14px color-mix(in srgb,var(--value) 60%,transparent); }
+.coin-legend{ display:flex; gap:26px; justify-content:center; margin-top:24px; font-family:"DM Mono",monospace; font-size:.8rem; color:var(--muted); flex-wrap:wrap; }
+.coin-legend i{ width:11px;height:11px;border-radius:50%;display:inline-block;margin-right:7px;vertical-align:middle; }
+.coin-legend .e{ background:var(--grid-empty); border:1px solid var(--grid-line); } .coin-legend .w{ background:var(--value); }
+.coin-legend b{ color:var(--text-strong); }
+
+/* ================= 06 — risk matrix (heat quadrant) ================= */
+.matrix-wrap{ display:grid; grid-template-columns:auto 1fr; gap:10px; margin-top:30px; align-items:stretch; }
+@media (max-width:620px){ .matrix-wrap{ grid-template-columns:1fr; } }
+.yaxis{ writing-mode:vertical-rl; transform:rotate(180deg); display:flex; align-items:center; justify-content:space-between; font-family:"DM Mono",monospace; font-size:.62rem; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); padding:6px 0; }
+.yaxis .ahi,.yaxis .alo{ color:var(--muted-soft); letter-spacing:.06em; }
+@media (max-width:620px){ .yaxis{ writing-mode:horizontal-tb; transform:none; justify-content:flex-start; gap:8px; } }
+.matrix{ position:relative; }
+.mgrid{ position:relative; display:grid; grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr; gap:12px; aspect-ratio:2.5/1; max-height:440px; padding:12px; border:1px solid var(--border); border-radius:16px; background:var(--surface); overflow:hidden; box-shadow:var(--shadow-soft); }
+.mgrid .heat{ position:absolute; inset:0; pointer-events:none; z-index:0;
+  background:linear-gradient(to top right, color-mix(in srgb,var(--good) 17%,transparent), transparent 46%, color-mix(in srgb,var(--volume) 26%,transparent)); }
+.mgrid .frontier{ position:absolute; left:-12%; right:-12%; top:50%; height:1px; transform:rotate(-31deg); transform-origin:center; z-index:0; pointer-events:none; opacity:.5;
+  background:repeating-linear-gradient(90deg,var(--border-strong) 0 7px,transparent 7px 15px); }
+.quad{ position:relative; z-index:1; border:1px solid var(--border); border-radius:12px; padding:14px; background:color-mix(in srgb,var(--surface) 66%,transparent); backdrop-filter:blur(2px); display:flex; flex-direction:column; justify-content:flex-end; min-height:116px; transition:transform .35s, border-color .35s; }
+.quad:hover{ transform:translateY(-3px); }
+.quad .qt{ font-family:"DM Mono",monospace; font-size:.58rem; letter-spacing:.1em; text-transform:uppercase; color:var(--muted-soft); }
+.quad h4{ font-size:1.02rem; color:var(--text-strong); margin-top:4px; letter-spacing:-.01em; }
+.quad p{ font-size:.78rem; color:var(--muted); margin-top:5px; line-height:1.42; }
+.quad.hot{ border-color:color-mix(in srgb,var(--volume) 52%,var(--border)); box-shadow:0 0 0 1px color-mix(in srgb,var(--volume) 16%,transparent), 0 0 32px -12px color-mix(in srgb,var(--volume) 60%,transparent); }
+.quad.go{ border-color:color-mix(in srgb,var(--gold) 38%,var(--border)); }
+.quad.care{ border-color:color-mix(in srgb,var(--gold) 28%,var(--border)); }
+.quad.cool{ border-color:color-mix(in srgb,var(--good) 34%,var(--border)); }
+.you{ position:absolute; top:11px; right:11px; z-index:2; font-family:"DM Mono",monospace; font-size:.56rem; color:var(--volume); border:1px solid var(--volume); border-radius:999px; padding:3px 10px 3px 19px; white-space:nowrap; opacity:0; transform:translateY(-4px); transition:opacity .6s ease .5s, transform .6s ease .5s; }
+.you::before{ content:""; position:absolute; left:8px; top:50%; width:6px; height:6px; margin-top:-3px; border-radius:50%; background:var(--volume); animation:youpulse 2.4s infinite; }
+@keyframes youpulse{ 0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--volume) 55%,transparent)} 70%{box-shadow:0 0 0 9px transparent} 100%{box-shadow:0 0 0 0 transparent} }
+.matrix.in-view .you{ opacity:1; transform:none; }
+.xaxis{ display:flex; align-items:center; justify-content:space-between; font-family:"DM Mono",monospace; font-size:.62rem; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin-top:10px; padding:0 4px; }
+.xaxis .ahi,.xaxis .alo{ color:var(--muted-soft); letter-spacing:.06em; }
+
+/* ================= 07 — proof + sprint ================= */
+.proof-grid{ display:grid; grid-template-columns:1fr 1.4fr; gap:18px; margin-top:30px; }
+@media (max-width:820px){ .proof-grid{ grid-template-columns:1fr; } }
+.proof-card{ background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:22px; box-shadow:var(--shadow-soft); }
+.proof-card .pc-lbl{ font-family:"DM Mono",monospace; font-size:.64rem; letter-spacing:.14em; text-transform:uppercase; color:var(--good); }
+.proof-stats{ display:flex; gap:26px; flex-wrap:wrap; margin-top:14px; }
+.proof-stats .ps .v{ font-size:2.2rem; font-weight:700; color:var(--good); letter-spacing:-.02em; }
+.proof-stats .ps .l{ font-size:.76rem; color:var(--muted); margin-top:2px; }
+.proof-card.win-note{ border-color:color-mix(in srgb,var(--gold) 36%,var(--border)); }
+.proof-card p{ font-size:.86rem; color:var(--muted); line-height:1.55; margin-top:12px; }
+.proof-card p b{ color:var(--text-strong); }
+.sprint{ margin-top:18px; }
+.sprint .sl{ font-family:"DM Mono",monospace; font-size:.66rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin-bottom:9px; }
+.sbar{ display:flex; height:46px; border-radius:11px; overflow:hidden; border:1px solid var(--border); }
+.sphase{ height:100%; width:0; transition:width 1.1s cubic-bezier(.3,.8,.3,1); display:flex; flex-direction:column; justify-content:center; padding:0 12px; color:#0a1524; overflow:hidden; }
+.sphase b{ font-size:.72rem; font-weight:700; white-space:nowrap; } .sphase span{ font-family:"DM Mono",monospace; font-size:.58rem; opacity:.8; white-space:nowrap; }
+.sphase.p1{ background:color-mix(in srgb,var(--accent) 72%,#fff); } .sphase.p2{ background:color-mix(in srgb,var(--violet) 60%,#fff); }
+.sphase.p3{ background:color-mix(in srgb,var(--good) 64%,#fff); } .sphase.p4{ background:var(--gold-bright); }
+
+/* ================= 08 — the shift ================= */
+.shift-grid{ display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-top:30px; }
+@media (max-width:760px){ .shift-grid{ grid-template-columns:1fr; } }
+.shift-card{ background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:22px; box-shadow:var(--shadow-soft); position:relative; }
+.shift-card .era{ font-family:"DM Mono",monospace; font-size:.66rem; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); }
+.shift-card h3{ font-size:1.15rem; color:var(--text-strong); margin:6px 0 16px; letter-spacing:-.01em; }
+.bars{ display:grid; gap:11px; }
+.brow{ display:grid; grid-template-columns:120px 1fr; align-items:center; gap:12px; font-size:.8rem; }
+.brow .bn{ font-family:"DM Mono",monospace; color:var(--muted); font-size:.72rem; }
+.track{ height:14px; border-radius:7px; background:var(--grid-empty); overflow:hidden; }
+.track .v{ height:100%; border-radius:7px; width:0; transition:width 1.2s cubic-bezier(.3,.8,.3,1); }
+.track .v.code{ background:linear-gradient(90deg,var(--accent),color-mix(in srgb,var(--accent) 60%,var(--violet))); }
+.track .v.orch{ background:linear-gradient(90deg,var(--value),var(--gold-bright)); }
+.shift-card.now{ border-color:color-mix(in srgb,var(--gold) 40%,var(--border)); }
+.shift-card.now::after{ content:"2026"; position:absolute; top:16px; right:18px; font-family:"DM Mono",monospace; font-size:.64rem; color:var(--gold); letter-spacing:.1em; }
+
+/* ================= closing ================= */
+.close{ text-align:center; padding-bottom:clamp(60px,14vh,140px); }
+.close h2{ font-size:clamp(1.6rem,4.4vw,3rem); line-height:1.12; letter-spacing:-.02em; color:var(--text-strong); max-width:40ch; margin:0 auto; font-weight:700; }
+.close h2 .gold{ color:var(--value); }
+.close p{ color:var(--muted); max-width:80ch; margin:18px auto 0; line-height:1.55; text-wrap:pretty; }
+.sources{ margin-top:30px; font-family:"DM Mono",monospace; font-size:.7rem; color:var(--muted-soft); letter-spacing:.04em; line-height:1.8; }
+
+:root[data-embedded="true"] .chrome{ display:none; }
+:root[data-embedded="true"] .dotnav{ display:none; }
+:root[data-embedded="true"] .hero{ min-height:auto; padding-top:30px; }
+
+/* — credibility: footnotes · glossary links · sources block — */
+sup.fn{ font-size:.6em; line-height:0; font-weight:700; }
+sup.fn a{ color:var(--gold); text-decoration:none; padding:0 1px; font-family:"DM Mono",monospace; }
+sup.fn a:hover{ text-decoration:underline; }
+a.gloss-link{ color:inherit; text-decoration:none; border-bottom:1px dotted color-mix(in srgb,currentColor 50%,transparent); }
+a.gloss-link:hover{ border-bottom-color:currentColor; color:var(--gold); }
+.srcbox{ margin-top:30px; border:1px solid var(--border); border-radius:16px; padding:22px 24px; background:var(--surface); text-align:left; box-shadow:var(--shadow-soft); }
+.srcbox h3{ font-family:"DM Mono",monospace; font-size:.66rem; letter-spacing:.14em; text-transform:uppercase; color:var(--gold); margin-bottom:15px; }
+.srcbox ol{ list-style:none; counter-reset:src; display:grid; gap:11px; }
+.srcbox li{ counter-increment:src; position:relative; padding-left:32px; font-size:.84rem; color:var(--muted); line-height:1.45; }
+.srcbox li::before{ content:counter(src); position:absolute; left:0; top:1px; width:21px; height:21px; border-radius:50%; display:grid; place-items:center; font-family:"DM Mono",monospace; font-size:.62rem; color:var(--gold); border:1px solid color-mix(in srgb,var(--gold) 42%,var(--border)); }
+.srcbox li b{ color:var(--text-strong); font-weight:600; }
+.srcbox li a{ color:var(--accent); text-decoration:none; border-bottom:1px solid color-mix(in srgb,var(--accent) 42%,transparent); }
+.srcbox li a:hover{ border-bottom-color:var(--accent); }
+.srcbox .method{ margin-top:15px; font-size:.78rem; color:var(--muted-soft); line-height:1.55; border-top:1px solid var(--border); padding-top:13px; }
+.srcbox .method b{ color:var(--muted); }
+/* — exec layer: chrome actions · TL;DR band · section dot-nav · toast — */
+.chrome-actions{ display:flex; gap:8px; align-items:center; }
+.tldr{ width:min(100% - 44px,1280px); margin:2px auto 10px; }
+.tldr-card{ border:1px solid var(--border); border-radius:18px; background:var(--surface); box-shadow:var(--shadow-soft); padding:22px 24px; position:relative; overflow:hidden; }
+.tldr-card::before{ content:""; position:absolute; top:0; bottom:0; left:0; width:4px; background:linear-gradient(180deg,var(--gold-bright),var(--accent)); }
+.tldr-k{ font-family:"DM Mono",monospace; font-size:.64rem; letter-spacing:.16em; text-transform:uppercase; color:var(--gold); margin-bottom:15px; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.tldr-k .mins{ color:var(--muted-soft); }
+.tldr-stats{ display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:16px; }
+@media(max-width:760px){ .tldr-stats{ grid-template-columns:repeat(2,1fr); } }
+@media(max-width:430px){ .tldr-stats{ grid-template-columns:1fr; } }
+.tstat{ border-left:2px solid var(--ts,var(--accent)); padding-left:13px; }
+.tstat .v{ font-family:"DM Mono",monospace; font-size:1.5rem; font-weight:600; color:var(--text-strong); line-height:1; letter-spacing:-.02em; }
+.tstat .l{ font-size:.76rem; color:var(--muted); margin-top:6px; line-height:1.3; }
+.tldr-verdict{ font-size:.96rem; color:var(--text); line-height:1.5; border-top:1px solid var(--border); padding-top:14px; }
+.tldr-verdict b{ color:var(--text-strong); }
+.tldr-move{ margin-top:9px; font-size:.86rem; color:var(--muted); line-height:1.5; }
+.tldr-move .mv{ color:var(--gold); font-family:"DM Mono",monospace; font-size:.6rem; letter-spacing:.12em; text-transform:uppercase; margin-right:7px; }
+.tldr-jumps{ display:flex; flex-wrap:wrap; gap:8px; margin-top:15px; }
+.tldr-jumps a{ font-family:"DM Mono",monospace; font-size:.66rem; letter-spacing:.04em; text-transform:uppercase; color:var(--accent); text-decoration:none; border:1px solid color-mix(in srgb,var(--accent) 32%,var(--border)); border-radius:999px; padding:5px 12px; transition:.2s; }
+.tldr-jumps a:hover{ background:color-mix(in srgb,var(--accent) 10%,transparent); border-color:var(--accent); }
+.dotnav{ position:fixed; right:18px; top:50%; transform:translateY(-50%); z-index:45; display:flex; flex-direction:column; gap:9px; }
+@media(max-width:1380px){ .dotnav{ display:none; } }
+.dotnav a{ position:relative; width:11px; height:11px; border-radius:50%; border:1px solid var(--border-strong); background:var(--surface); transition:transform .2s, background .2s, border-color .2s; }
+.dotnav a:hover{ border-color:var(--gold); }
+.dotnav a.on{ background:var(--gold); border-color:var(--gold); transform:scale(1.3); }
+.dotnav a .dn-t{ position:absolute; right:20px; top:50%; transform:translateY(-50%); white-space:nowrap; font-family:"DM Mono",monospace; font-size:.6rem; letter-spacing:.04em; text-transform:uppercase; color:var(--text-strong); background:var(--surface-strong); border:1px solid var(--border); border-radius:6px; padding:3px 8px; opacity:0; pointer-events:none; transition:opacity .18s; box-shadow:var(--shadow-soft); }
+.dotnav a:hover .dn-t, .dotnav a.on .dn-t{ opacity:1; }
+#toast{ position:fixed; left:50%; bottom:28px; transform:translate(-50%,18px); z-index:70; background:var(--surface-strong); border:1px solid var(--border-strong); border-radius:10px; padding:10px 16px; font-size:.8rem; color:var(--text-strong); box-shadow:var(--shadow); opacity:0; pointer-events:none; transition:opacity .3s, transform .3s; }
+#toast.show{ opacity:1; transform:translate(-50%,0); }
+/* — CFO margin model — */
+.cfo{ margin-top:24px; border:1px solid var(--border); border-radius:18px; background:var(--surface); box-shadow:var(--shadow-soft); padding:22px 24px; }
+.cfo-h{ display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; margin-bottom:6px; }
+.cfo-h .ck{ font-family:"DM Mono",monospace; font-size:.62rem; letter-spacing:.14em; text-transform:uppercase; color:var(--gold); }
+.cfo-h h4{ font-size:1.06rem; color:var(--text-strong); letter-spacing:-.01em; }
+.cfo-sub{ font-size:.83rem; color:var(--muted); margin-bottom:20px; max-width:82ch; line-height:1.5; text-wrap:pretty; }
+.cfo-grid{ display:grid; grid-template-columns:1fr 1fr; gap:28px; }
+@media(max-width:760px){ .cfo-grid{ grid-template-columns:1fr; gap:22px; } }
+.cfo-controls{ display:grid; gap:17px; align-content:start; }
+.cfo-ctrl label{ display:flex; justify-content:space-between; align-items:baseline; font-size:.8rem; color:var(--muted); margin-bottom:7px; }
+.cfo-ctrl label b{ font-family:"DM Mono",monospace; color:var(--text-strong); font-size:.92rem; }
+.cfo-ctrl input[type=range]{ width:100%; accent-color:var(--accent); height:4px; cursor:pointer; }
+.cfo-out{ display:flex; flex-direction:column; gap:15px; }
+.cfo-reads{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+.cfo-read .rv{ font-family:"DM Mono",monospace; font-size:1.18rem; font-weight:600; color:var(--text-strong); line-height:1; letter-spacing:-.01em; }
+.cfo-read .rl{ font-size:.66rem; color:var(--muted-soft); margin-top:6px; line-height:1.25; }
+.cfo-bar{ height:30px; border-radius:8px; overflow:hidden; display:flex; border:1px solid var(--border); }
+.cfo-bar i{ display:flex; align-items:center; justify-content:center; font-family:"DM Mono",monospace; font-size:.6rem; color:#06121f; font-style:normal; transition:width .35s cubic-bezier(.3,.8,.3,1); overflow:hidden; white-space:nowrap; }
+.cfo-bar .seg-ai{ background:color-mix(in srgb,var(--accent) 72%,transparent); }
+.cfo-bar .seg-rev{ background:color-mix(in srgb,var(--volume) 72%,transparent); }
+.cfo-legend{ display:flex; gap:16px; font-family:"DM Mono",monospace; font-size:.64rem; color:var(--muted); }
+.cfo-legend i{ width:9px; height:9px; border-radius:2px; display:inline-block; margin-right:6px; vertical-align:middle; }
+.cfo-verdict{ font-size:.86rem; line-height:1.5; color:var(--text); border-left:3px solid var(--cvc,var(--gold)); padding-left:13px; }
+.cfo-verdict b{ color:var(--cvc,var(--text-strong)); }
+.cfo-note{ margin-top:15px; font-size:.68rem; color:var(--muted-soft); font-family:"DM Mono",monospace; letter-spacing:.02em; line-height:1.5; }
+
+/* ===== 14 — the AI dilemma walkthrough ===== */
+.dilemma{ display:grid; grid-template-columns:1.22fr .82fr; gap:clamp(18px,2.4vw,34px); align-items:start; margin-top:26px; }
+@media(max-width:880px){ .dilemma{ grid-template-columns:1fr; } }
+.dil-steps{ display:flex; flex-direction:column; gap:14px; }
+.dil-step{ border:1px solid var(--border); background:var(--surface); border-radius:16px; padding:clamp(15px,2vw,22px); transition:opacity .5s, transform .5s, border-color .3s, filter .4s; }
+.dil-step[hidden]{ display:none; }
+.dil-step.locked{ opacity:.45; filter:saturate(.55); pointer-events:none; }
+.dil-step.active{ border-color:var(--border-strong); box-shadow:var(--shadow-soft); }
+.dil-q{ display:flex; align-items:baseline; gap:11px; margin-bottom:4px; }
+.dil-q .qn{ font-family:"DM Mono",monospace; font-size:.64rem; letter-spacing:.14em; text-transform:uppercase; color:var(--gold); flex:none; }
+.dil-q h4{ font-size:1.02rem; line-height:1.25; color:var(--text-strong); font-weight:700; letter-spacing:-.01em; }
+.dil-scene{ font-size:.84rem; color:var(--muted); line-height:1.45; margin:6px 0 14px; max-width:62ch; text-wrap:pretty; }
+.dil-opts{ display:flex; flex-direction:column; gap:9px; }
+.dil-opt{ position:relative; text-align:left; cursor:pointer; font-family:inherit; display:flex; gap:12px; align-items:flex-start; border:1px solid var(--border); background:var(--surface-strong); border-radius:11px; padding:11px 14px; color:var(--text); transition:border-color .2s, transform .12s, background .2s; }
+.dil-opt:hover{ border-color:var(--ac,var(--gold)); transform:translateX(3px); }
+.dil-opt:focus-visible{ outline:2px solid var(--ac,var(--gold)); outline-offset:2px; }
+.dil-opt .ok{ font-family:"DM Mono",monospace; font-size:.7rem; font-weight:700; color:var(--ac,var(--gold)); border:1px solid var(--border-strong); border-radius:6px; padding:1px 7px; flex:none; margin-top:1px; transition:.2s; }
+.dil-opt .ob{ display:block; }
+.dil-opt .ob b{ color:var(--text-strong); font-weight:600; font-size:.9rem; }
+.dil-opt .ob span{ display:block; font-size:.78rem; color:var(--muted); line-height:1.4; margin-top:2px; }
+.dil-opt.sel{ border-color:var(--ac,var(--gold)); background:color-mix(in srgb,var(--ac,var(--gold)) 12%,var(--surface-strong)); }
+.dil-opt.sel .ok{ background:var(--ac,var(--gold)); color:#0a1524; border-color:transparent; }
+.dil-panel{ position:sticky; top:84px; border:1px solid var(--border-strong); background:var(--surface-strong); border-radius:18px; padding:clamp(16px,2vw,22px); box-shadow:var(--shadow-soft); }
+.dil-panel .pt{ font-family:"DM Mono",monospace; font-size:.6rem; letter-spacing:.16em; text-transform:uppercase; color:var(--muted-soft); }
+.dil-meters{ display:flex; flex-direction:column; gap:13px; margin:15px 0 4px; }
+.dil-m .mh{ display:flex; justify-content:space-between; align-items:baseline; font-size:.78rem; margin-bottom:5px; }
+.dil-m .mh b{ color:var(--text-strong); font-weight:600; }
+.dil-m .mh .mv{ font-family:"DM Mono",monospace; font-size:.82rem; color:var(--mc,var(--gold)); }
+.dil-track{ height:8px; border-radius:99px; background:color-mix(in srgb,var(--mc,var(--gold)) 16%,transparent); overflow:hidden; }
+.dil-fill{ display:block; height:100%; width:0%; border-radius:99px; background:var(--mc,var(--gold)); transition:width .7s cubic-bezier(.2,.7,.2,1); }
+.dil-verdict{ margin-top:16px; border-top:1px solid var(--border); padding-top:14px; }
+.dil-verdict .vh{ font-family:"Fraunces",serif; font-size:1.12rem; line-height:1.2; color:var(--text-strong); font-weight:600; }
+.dil-verdict p{ font-size:.83rem; color:var(--muted); line-height:1.5; margin-top:7px; }
+.dil-verdict.empty .vh{ color:var(--muted-soft); font-family:inherit; font-size:.84rem; font-weight:500; }
+.dil-replay{ appearance:none; cursor:pointer; font-family:"DM Mono",monospace; font-size:.64rem; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); background:var(--surface); border:1px solid var(--border); border-radius:999px; padding:7px 14px; margin-top:14px; transition:.2s; }
+.dil-replay:hover{ color:var(--text-strong); border-color:var(--border-strong); }
+.dil-replay[hidden]{ display:none; }
+
+/* ===== 15 — the translation story (code walkthrough) ===== */
+.story{ border:1px solid var(--border-strong); background:var(--surface-strong); border-radius:20px; padding:clamp(18px,2.4vw,30px); box-shadow:var(--shadow-soft); margin-top:26px; }
+.story-head{ display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; border-bottom:1px solid var(--border); padding-bottom:16px; margin-bottom:18px; }
+.story-tabs{ display:flex; gap:8px; flex-wrap:wrap; }
+.story-tab{ appearance:none; cursor:pointer; font-family:inherit; display:flex; align-items:center; gap:9px; border:1px solid var(--border); background:var(--surface); border-radius:11px; padding:8px 14px; color:var(--muted); transition:.2s; }
+.story-tab .sn{ font-family:"DM Mono",monospace; font-weight:700; font-size:.74rem; width:22px; height:22px; border-radius:50%; display:grid; place-items:center; background:var(--grid-empty); color:var(--muted); flex:none; transition:.2s; }
+.story-tab .stt{ font-size:.82rem; font-weight:600; }
+.story-tab:hover{ border-color:var(--border-strong); color:var(--text-strong); }
+.story-tab.on{ border-color:var(--ac,var(--gold)); color:var(--text-strong); background:color-mix(in srgb,var(--ac,var(--gold)) 10%,var(--surface)); }
+.story-tab.on .sn{ background:var(--ac,var(--gold)); color:#0a1524; }
+.story-where{ font-family:"DM Mono",monospace; font-size:.7rem; letter-spacing:.14em; text-transform:uppercase; color:var(--muted-soft); }
+.story-step{ display:none; }
+.story-step.on{ display:block; animation:storyfade .4s ease; }
+@keyframes storyfade{ from{ opacity:0; transform:translateY(8px);} to{ opacity:1; transform:none;} }
+.story-step h4{ font-size:1.06rem; color:var(--ac,var(--text-strong)); font-weight:700; letter-spacing:-.01em; margin-bottom:6px; }
+.story-step .ssc{ font-size:.88rem; color:var(--muted); line-height:1.5; max-width:78ch; margin-bottom:14px; text-wrap:pretty; }
+.story-code{ font-family:"DM Mono",monospace; font-size:.8rem; line-height:1.7; background:color-mix(in srgb,var(--ac,var(--gold)) 5%,var(--surface)); border:1px solid var(--border); border-left:3px solid var(--ac,var(--gold)); border-radius:12px; padding:16px 18px; overflow-x:auto; color:var(--text); white-space:pre; }
+.story-code .cm{ color:var(--muted-soft); }
+.story-code .ad{ color:var(--good); background:color-mix(in srgb,var(--good) 14%,transparent); border-radius:3px; }
+.story-code .rm{ color:var(--volume); background:color-mix(in srgb,var(--volume) 12%,transparent); border-radius:3px; }
+.story-code .kw{ color:var(--accent); } .story-code .vn{ color:var(--violet); }
+.story-take{ margin-top:16px; display:flex; gap:12px; align-items:flex-start; border-top:1px solid var(--border); padding-top:16px; font-size:.86rem; color:var(--text); line-height:1.5; }
+.story-take .ti{ flex:none; width:24px; height:24px; border-radius:7px; display:grid; place-items:center; background:var(--gold-soft); color:var(--gold-bright); font-weight:700; }
+.story-take b{ color:var(--text-strong); }
+.story-nav{ display:flex; justify-content:space-between; gap:10px; margin-top:16px; }
+.story-btn{ appearance:none; cursor:pointer; font-family:"DM Mono",monospace; font-size:.7rem; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); background:var(--surface); border:1px solid var(--border); border-radius:999px; padding:8px 16px; transition:.2s; }
+.story-btn:hover{ color:var(--text-strong); border-color:var(--border-strong); }
+.story-btn[disabled]{ opacity:.32; pointer-events:none; }
+
+/* ===== 16 — the reality check (opportunity vs governance) ===== */
+.rcheck{ display:grid; grid-template-columns:1fr 1fr; gap:clamp(16px,2vw,26px); margin-top:26px; align-items:start; }
+@media(max-width:900px){ .rcheck{ grid-template-columns:1fr; } }
+.rc-card{ border:1px solid var(--border); background:var(--surface); border-radius:18px; padding:clamp(18px,2.2vw,26px); box-shadow:var(--shadow-soft); }
+.rc-card.opp{ border-top:3px solid var(--good); }
+.rc-card.gov{ border-top:3px solid var(--volume); }
+.rc-h{ display:flex; align-items:center; gap:10px; font-size:1.02rem; font-weight:700; color:var(--text-strong); letter-spacing:-.01em; margin-bottom:4px; }
+.rc-h .ico{ width:26px; height:26px; border-radius:8px; display:grid; place-items:center; font-size:.92rem; flex:none; }
+.rc-card.opp .rc-h .ico{ background:color-mix(in srgb,var(--good) 18%,transparent); color:var(--good); }
+.rc-card.gov .rc-h .ico{ background:color-mix(in srgb,var(--volume) 18%,transparent); color:var(--volume); }
+.rc-sub{ font-size:.8rem; color:var(--muted-soft); margin-bottom:16px; line-height:1.4; }
+.rc-bar{ margin:14px 0; }
+.rc-bl{ display:flex; justify-content:space-between; align-items:baseline; font-size:.84rem; margin-bottom:3px; }
+.rc-bl b{ color:var(--text-strong); font-weight:600; } .rc-bl .pct{ font-family:"DM Mono",monospace; font-size:.78rem; color:var(--good); }
+.rc-bd{ font-size:.76rem; color:var(--muted); line-height:1.4; margin-bottom:7px; }
+.rc-track{ height:9px; border-radius:99px; background:var(--grid-empty); overflow:hidden; }
+.rc-fill{ display:block; height:100%; width:0%; border-radius:99px; background:linear-gradient(90deg,color-mix(in srgb,var(--accent) 60%,transparent),var(--good)); transition:width 1.1s cubic-bezier(.2,.7,.2,1); }
+.rc-runwrap{ margin-top:20px; }
+.rc-run{ appearance:none; cursor:pointer; font-family:inherit; font-weight:600; font-size:.86rem; color:#0a1524; background:linear-gradient(135deg,var(--gold-bright),var(--accent)); border:none; border-radius:999px; padding:11px 22px; display:inline-flex; align-items:center; gap:9px; box-shadow:var(--shadow-soft); transition:transform .12s; width:100%; justify-content:center; }
+.rc-run:hover{ transform:translateY(-1px); }
+.rc-run:active{ transform:translateY(0); }
+.rc-matrix{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:18px; }
+@media(max-width:480px){ .rc-matrix{ grid-template-columns:1fr; } }
+.rc-risk{ border:1px solid var(--border); border-radius:11px; padding:11px 13px; background:var(--surface-strong); }
+.rc-risk .rt{ font-family:"DM Mono",monospace; font-size:.62rem; letter-spacing:.1em; text-transform:uppercase; color:var(--volume); font-weight:700; margin-bottom:4px; }
+.rc-risk p{ font-size:.76rem; color:var(--muted); line-height:1.4; }
+.rc-sim{ display:flex; align-items:center; gap:16px; flex-wrap:wrap; border-top:1px solid var(--border); padding-top:16px; }
+.rc-donut{ flex:none; position:relative; width:118px; height:118px; }
+.rc-donut svg{ width:118px; height:118px; display:block; transform:rotate(-90deg); }
+.rc-donut .ring-bg{ fill:none; stroke:color-mix(in srgb,var(--good) 22%,transparent); stroke-width:13; }
+.rc-donut .ring-vol{ fill:none; stroke:var(--volume); stroke-width:13; stroke-linecap:round; transition:stroke-dashoffset 1.2s cubic-bezier(.2,.7,.2,1); }
+.rc-donut .dcen{ position:absolute; inset:0; display:grid; place-items:center; text-align:center; }
+.rc-donut .dcen b{ font-family:"DM Mono",monospace; font-size:1.5rem; color:var(--volume); line-height:1; }
+.rc-donut .dcen span{ display:block; font-size:.56rem; letter-spacing:.08em; text-transform:uppercase; color:var(--muted-soft); margin-top:3px; max-width:78px; }
+.rc-simbody{ flex:1; min-width:190px; }
+.rc-simout{ font-size:.83rem; color:var(--muted); line-height:1.5; }
+.rc-simout b{ color:var(--text-strong); } .rc-simout .leak{ color:var(--volume); font-family:"DM Mono",monospace; } .rc-simout .keep{ color:var(--value); font-family:"DM Mono",monospace; }
+
+/* ===== 17 — empirical outcomes (ROI payback + case studies) ===== */
+.emp{ display:grid; grid-template-columns:.82fr 1.18fr; gap:clamp(18px,2.4vw,30px); margin-top:26px; align-items:stretch; }
+@media(max-width:940px){ .emp{ grid-template-columns:1fr; } }
+.emp-cases{ display:flex; flex-direction:column; gap:16px; }
+.emp-case{ border:1px solid var(--border); border-radius:16px; padding:clamp(16px,2vw,22px); background:var(--surface); }
+.emp-case.fail{ border-left:3px solid var(--volume); }
+.emp-case.win{ border-left:3px solid var(--good); }
+.emp-case .ec-k{ display:flex; justify-content:space-between; align-items:baseline; gap:10px; margin-bottom:8px; }
+.emp-case .ec-tag{ font-family:"DM Mono",monospace; font-size:.62rem; letter-spacing:.14em; text-transform:uppercase; font-weight:700; }
+.emp-case.fail .ec-tag{ color:var(--volume); } .emp-case.win .ec-tag{ color:var(--good); }
+.emp-case .ec-id{ font-family:"DM Mono",monospace; font-size:.66rem; color:var(--muted-soft); }
+.emp-case h4{ font-size:1.04rem; color:var(--text-strong); font-weight:700; letter-spacing:-.01em; margin-bottom:6px; }
+.emp-case p{ font-size:.84rem; color:var(--muted); line-height:1.5; }
+.emp-case p b{ color:var(--text-strong); }
+.emp-chart{ border:1px solid var(--border-strong); background:var(--surface-strong); border-radius:18px; padding:clamp(16px,2vw,24px); box-shadow:var(--shadow-soft); display:flex; flex-direction:column; }
+.emp-chart .ech-h{ display:flex; align-items:center; gap:9px; font-weight:700; color:var(--text-strong); font-size:.98rem; margin-bottom:4px; }
+.emp-legend{ display:flex; gap:18px; flex-wrap:wrap; font-family:"DM Mono",monospace; font-size:.68rem; color:var(--muted); margin:6px 0 10px; }
+.emp-legend i{ width:14px; height:3px; border-radius:2px; display:inline-block; margin-right:6px; vertical-align:middle; }
+.emp-svg{ width:100%; height:auto; display:block; overflow:visible; }
+.emp-svg .grid{ stroke:var(--grid-line); stroke-width:1; }
+.emp-svg .zero{ stroke:var(--border-strong); stroke-width:1; stroke-dasharray:3 4; }
+.emp-svg .axt{ font-family:"DM Mono",monospace; font-size:11px; fill:var(--muted-soft); }
+.emp-svg .ln{ fill:none; stroke-width:2.5; stroke-linecap:round; stroke-linejoin:round; transition:stroke-dashoffset 1.6s ease; }
+.emp-svg .ln.cost{ stroke:var(--volume); } .emp-svg .ln.roi{ stroke:var(--value); }
+.emp-svg .pt{ fill:var(--surface-strong); stroke-width:2; opacity:0; transition:opacity .4s ease; }
+.emp-svg.drawn .pt{ opacity:1; }
+.emp-svg .pt.cost{ stroke:var(--volume); } .emp-svg .pt.roi{ stroke:var(--value); }
+.emp-svg .jzone{ fill:color-mix(in srgb,var(--volume) 10%,transparent); opacity:0; transition:opacity .8s ease; }
+.emp-svg.drawn .jzone{ opacity:1; }
+.emp-svg .xover{ fill:var(--good); opacity:0; transition:opacity .5s ease .9s; } .emp-svg.drawn .xover{ opacity:1; }
+.emp-svg .xlbl{ font-family:"DM Mono",monospace; font-size:10.5px; fill:var(--good); opacity:0; transition:opacity .5s ease 1s; } .emp-svg.drawn .xlbl{ opacity:1; }
+.emp-note{ font-size:.72rem; color:var(--muted-soft); font-family:"DM Mono",monospace; line-height:1.5; margin-top:12px; }
+
+@media print{
+  #prog, .dotnav, .chrome-actions, #toast, .fwalk, .scrollcue, .persona-rail{ display:none !important; }
+  .reveal{ opacity:1 !important; transform:none !important; }
+  *{ animation:none !important; box-shadow:none !important; }
+  .chrome{ position:static; }
+  section{ break-inside:avoid; }
+}
+@media (prefers-reduced-motion:reduce){
+  html{ scroll-behavior:auto; }
+  *{ transition-duration:.001ms !important; animation:none !important; }
+  .reveal{ opacity:1; transform:none; }
+}
+</style>
+</head>
+<body>
+<div id="prog"></div>
+
+<header class="chrome wrap" style="width:min(100% - 44px,1280px)">
+  <a class="brand" href="/" aria-label="Models to Margins home">
+    <span class="mark">M2M</span><b>The Margin Reckoning</b><span>· AI-Led SDLC</span>
+  </a>
+  <div class="chrome-actions">
+    <button class="toggle ic" type="button" id="shareBtn" aria-label="Copy a link to this brief">Share</button>
+    <button class="toggle ic" type="button" id="printBtn" aria-label="Print or save this brief as PDF">Print</button>
+    <button class="toggle" type="button" id="themeBtn">Theme</button>
+  </div>
+</header>
+<nav class="dotnav" id="dotnav" aria-label="Jump to section"></nav>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<!-- ===== HERO ===== -->
+<section class="hero wrap" id="top">
+  <a class="back-link" href="/briefs/ai-led-sdlc"><span aria-hidden="true">&larr;</span><span>Back to Brief</span></a>
+  <div class="hero-top reveal in">
+    <span class="eyebrow hero-eyebrow"><span class="dot"></span> The reckoning · 2026</span>
+    <h1><span class="hl">AI multiplied the <span class="strike">output</span>.</span><span class="hl">The <span class="gold">margin</span> didn't move.</span></h1>
+    <p class="hero-lede">Two years of AI-led delivery, weighed on one balance. One pan filled with volume. The other was supposed to fill with value — but it was mortgaged long before AI arrived.</p>
+    <p class="hero-prov">Figures are modelled from the cited 2026 research, not a single audited deployment — the argument here is the method, not any one number.</p>
+  </div>
+  <div class="scale-stage reveal in">
+    <div class="scale-wrap" id="scaleWrap">
+      <svg viewBox="0 0 760 430" role="img" aria-label="A balance scale: the Volume pan has crashed down under AI output while the Margin pan barely lifts.">
+        <defs>
+          <linearGradient id="goldgrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--gold-bright)"/><stop offset="1" stop-color="var(--value)"/></linearGradient>
+          <linearGradient id="volgrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--volume)"/><stop offset="1" stop-color="color-mix(in srgb,var(--volume) 55%,transparent)"/></linearGradient>
+        </defs>
+        <rect x="372" y="92" width="16" height="286" rx="5" fill="var(--surface-strong)" stroke="var(--border-strong)"/>
+        <ellipse cx="380" cy="384" rx="92" ry="14" fill="var(--surface)" stroke="var(--border)"/>
+        <circle cx="380" cy="92" r="11" fill="var(--gold)"/>
+        <g id="beam">
+          <rect x="120" y="84" width="520" height="13" rx="6" fill="var(--surface-strong)" stroke="var(--border-strong)"/>
+          <circle cx="140" cy="90" r="6" fill="var(--volume)"/><circle cx="620" cy="90" r="6" fill="var(--value)"/>
+          <g class="pan-grp" id="panVol">
+            <line x1="140" y1="90" x2="100" y2="150" stroke="var(--border-strong)" stroke-width="2"/>
+            <line x1="140" y1="90" x2="180" y2="150" stroke="var(--border-strong)" stroke-width="2"/>
+            <path d="M86 150 Q140 214 194 150 Z" fill="color-mix(in srgb,var(--volume) 16%,var(--surface))" stroke="var(--volume)" stroke-width="1.5"/>
+            <g class="pan-load">
+              <rect x="104" y="118" width="22" height="22" rx="3" fill="url(#volgrad)"/><rect x="130" y="118" width="22" height="22" rx="3" fill="url(#volgrad)"/>
+              <rect x="156" y="124" width="20" height="16" rx="3" fill="url(#volgrad)"/><rect x="116" y="98" width="22" height="20" rx="3" fill="url(#volgrad)"/>
+              <rect x="142" y="100" width="20" height="18" rx="3" fill="url(#volgrad)"/><rect x="128" y="82" width="20" height="18" rx="3" fill="url(#volgrad)"/>
+            </g>
+            <text x="140" y="234" text-anchor="middle" class="col-label" fill="var(--volume)" font-size="13" font-weight="600">VOLUME</text>
+          </g>
+          <g class="pan-grp" id="panVal">
+            <line x1="620" y1="90" x2="580" y2="150" stroke="var(--border-strong)" stroke-width="2"/>
+            <line x1="620" y1="90" x2="660" y2="150" stroke="var(--border-strong)" stroke-width="2"/>
+            <path d="M566 150 Q620 214 674 150 Z" fill="color-mix(in srgb,var(--value) 14%,var(--surface))" stroke="var(--value)" stroke-width="1.5"/>
+            <g class="pan-load"><circle cx="620" cy="140" r="11" fill="url(#goldgrad)"/></g>
+            <text x="620" y="234" text-anchor="middle" class="col-label" fill="var(--value)" font-size="13" font-weight="600">MARGIN</text>
+          </g>
+        </g>
+      </svg>
+    </div>
+  </div>
+  <div class="reveal in">
+    <div class="readout">
+      <div class="read vol">
+        <div class="cap"><i></i> What AI added to the pan</div>
+        <div class="big tnum"><span data-count="66" data-suffix="%" data-prefix="+">+0%</span></div>
+        <div class="note">more work shipped per developer — and <b class="vol tnum">+<span data-count="34">0</span>%</b> raw delivery throughput.<sup class="fn"><a href="#fn5">5</a></sup></div>
+      </div>
+      <div class="read val">
+        <div class="cap"><i></i> What reached the margin</div>
+        <div class="big tnum"><span data-count="0" data-suffix="%" data-prefix="+">+0%</span></div>
+        <div class="note"><b class="val tnum">95%</b> of enterprise AI pilots show no measurable P&amp;L return.<sup class="fn"><a href="#fn1">1</a></sup></div>
+      </div>
+    </div>
+    <div class="verdict-bar"><span class="vb-text">the bottleneck didn't disappear — <b>it moved to human review.</b></span></div>
+    <div class="scrollcue">weigh the whole story<span>↓</span></div>
+  </div>
+</section>
+
+<!-- ===== TL;DR — exec band ===== -->
+<div class="tldr reveal in" id="tldr">
+  <div class="tldr-card">
+    <div class="tldr-k">The reckoning in 30 seconds <span class="mins">· for the time-pressed</span></div>
+    <div class="tldr-stats">
+      <div class="tstat" style="--ts:var(--volume)"><div class="v">95%</div><div class="l">of enterprise AI pilots show no measurable P&amp;L return<sup class="fn"><a href="#fn1">1</a></sup></div></div>
+      <div class="tstat" style="--ts:var(--accent)"><div class="v">~19%</div><div class="l">slower in METR's 2025 trial — while devs felt faster<sup class="fn"><a href="#fn2">2</a></sup></div></div>
+      <div class="tstat" style="--ts:var(--violet)"><div class="v">1 gate</div><div class="l">the bottleneck moved from writing code to reviewing it</div></div>
+      <div class="tstat" style="--ts:var(--gold-bright)"><div class="v">~39%</div><div class="l">modelled Y1 ROI — but only on a mature platform<sup class="fn"><a href="#fn3">3</a></sup></div></div>
+    </div>
+    <div class="tldr-verdict">AI made output cheap, but <b>output was never the scarce thing.</b> The margin was mortgaged by legacy long before AI arrived — and AI multiplies volume without moving value unless the work is <b>governed, reviewed, and measured at the business altitude.</b></div>
+    <div class="tldr-move"><span class="mv">Monday move</span>Instrument the margin, not the output: freeze a pre-AI baseline, tag work by author, pair every speed metric with a counter-metric, and gate by risk — then judge AI by what reaches the P&amp;L.</div>
+    <div class="tldr-jumps">
+      <a href="#verdict">↓ The 5% verdict</a>
+      <a href="#risk">↓ The decision</a>
+      <a href="#mandate">↓ The mandate</a>
+      <a href="#sources">↓ Sources</a>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 01 — THE MORTGAGE ===== -->
+<section class="wrap mortgage" id="mortgage">
+  <div class="reveal">
+    <div class="kicker-row"><span class="eyebrow">01 — The mortgage</span><span class="num">the great modernization · O&amp;M tax</span></div>
+    <h2 class="head">The margin was spent before AI typed a line.</h2>
+    <p class="sub">Enterprises run on legacy. Keeping it alive — the <b>operations &amp; maintenance tax</b> — consumes the budget that modernization and margin were supposed to come from. AI didn't create the gap. It inherited it.</p>
+  </div>
+  <div class="meter-card reveal">
+    <div class="meter-top">
+      <div class="meter-big tnum"><span data-count="1.5" data-dec="1" data-prefix="$" data-suffix="T">$0</span><small>spent every year just to keep legacy systems running</small></div>
+      <div class="meter-cap">In federal IT alone, ~80% of a $100B budget goes to operations &amp; maintenance, not new value.</div>
+    </div>
+    <div class="budget">
+      <div class="bl"><span>Where the IT budget actually goes</span><span>keep-the-lights-on vs. new value</span></div>
+      <div class="track">
+        <div class="seg keep" data-w="80">80% · keep the lights on</div>
+        <div class="seg new" data-w="20">20% · new value</div>
+      </div>
+    </div>
+    <div class="mort-grid">
+      <div class="mort-stat bad"><div class="v tnum"><span data-count="2.41" data-dec="2" data-prefix="$" data-suffix="T">$0</span></div><div class="l">annual U.S. cost of poor software quality</div></div>
+      <div class="mort-stat bad"><div class="v tnum"><span data-count="520" data-prefix="$" data-suffix="B">$0</span></div><div class="l">documentation debt, every year</div></div>
+      <div class="mort-stat bad"><div class="v tnum">+<span data-count="180" data-suffix="%">0</span></div><div class="l">higher breach risk on legacy stacks</div></div>
+      <div class="mort-stat"><div class="v tnum"><span data-count="70" data-suffix="%">0</span></div><div class="l">of enterprises still depend on legacy</div></div>
+    </div>
+    <div class="mort-foot">The prize for fixing it is real — a <b class="tnum">$700B+</b> modernization market growing <b class="tnum">17.6%</b> a year. But a 3–7 year transformation only pays off if the work converts to <b>value</b>, not just motion.</div>
+  </div>
+</section>
+
+<!-- ===== 02 — FOUR WAYS OUT ===== -->
+<section class="wrap" id="ways">
+  <div class="reveal">
+    <div class="kicker-row"><span class="eyebrow">02 — Four ways out</span><span class="num">the modernization moves</span></div>
+    <h2 class="head">There are only four exits from legacy. AI changes the cost of each.</h2>
+    <p class="sub">Every modernization decision is one of the four R's. They trade <b style="color:var(--accent)">speed</b> against <b class="val">value reclaimed</b> against <b class="vol">risk</b>. AI makes the cheap ones cheaper — and tempts you to skip the gate on the risky ones.</p>
+  </div>
+  <div class="rrrr reveal">
+    <div class="rcard">
+      <div class="rk">R1</div><h3>Rehost</h3>
+      <p>Lift-and-shift to cloud. Fast and low-risk, but you carry the old design — and most of the tax — with you.</p>
+      <div class="rmeters">
+        <div class="rm"><span>Speed</span><div class="t"><i class="spd" data-w="92"></i></div></div>
+        <div class="rm"><span>Value</span><div class="t"><i class="val" data-w="28"></i></div></div>
+        <div class="rm"><span>Risk</span><div class="t"><i class="rsk" data-w="22"></i></div></div>
+      </div>
+    </div>
+    <div class="rcard">
+      <div class="rk">R2</div><h3>Refactor</h3>
+      <p>Restructure the code in place. Where AI assist pays off most — and where the review gate matters most.</p>
+      <div class="rmeters">
+        <div class="rm"><span>Speed</span><div class="t"><i class="spd" data-w="58"></i></div></div>
+        <div class="rm"><span>Value</span><div class="t"><i class="val" data-w="62"></i></div></div>
+        <div class="rm"><span>Risk</span><div class="t"><i class="rsk" data-w="48"></i></div></div>
+      </div>
+    </div>
+    <div class="rcard">
+      <div class="rk">R3</div><h3>Rebuild</h3>
+      <p>Greenfield microservices. Highest value reclaimed, highest risk — the place teams over-trust AI autopilot.</p>
+      <div class="rmeters">
+        <div class="rm"><span>Speed</span><div class="t"><i class="spd" data-w="30"></i></div></div>
+        <div class="rm"><span>Value</span><div class="t"><i class="val" data-w="90"></i></div></div>
+        <div class="rm"><span>Risk</span><div class="t"><i class="rsk" data-w="84"></i></div></div>
+      </div>
+    </div>
+    <div class="rcard">
+      <div class="rk">R4</div><h3>Replace</h3>
+      <p>Swap for SaaS / COTS. Fast value, but you trade control — and the margin moves to the vendor.</p>
+      <div class="rmeters">
+        <div class="rm"><span>Speed</span><div class="t"><i class="spd" data-w="76"></i></div></div>
+        <div class="rm"><span>Value</span><div class="t"><i class="val" data-w="52"></i></div></div>
+        <div class="rm"><span>Risk</span><div class="t"><i class="rsk" data-w="40"></i></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="strangler reveal">
+    <span>🌿</span><span><b>The pattern that survives contact with production:</b> the <b>Strangler Fig</b> — wrap the legacy system, route slices of traffic to the new one, and let the old core wither gradually. Phased strangulation beats a big-bang cutover every time.</span>
+  </div>
+</section>
+
+<!-- ===== 03 — THE PERCEPTION GAP ===== -->
+<section class="wrap" id="perception">
+  <div class="reveal">
+    <div class="kicker-row"><span class="eyebrow">03 — The perception gap</span><span class="num">why the volume feels like value</span></div>
+    <h2 class="head">Developers feel faster. The stopwatch disagrees.</h2>
+    <p class="sub">In METR's 2025 controlled trial, experienced engineers using AI tools <b class="gd">believed they were ~20% faster</b> — and were measured <b class="vol">~19% slower</b>. (METR's own early-2026 continuation narrowed that to ~−4% — not statistically significant — so treat the magnitude as 2025-specific; the durable signal is the felt-vs-measured gap, not its size.) Self-report is not measurement: instrument the behaviour, never the feeling.</p>
+  </div>
+  <div class="pgap reveal">
+    <div class="pgap-chart">
+      <div class="pgap-row">
+        <span class="pl">felt</span>
+        <div class="pgap-track"><span class="pgap-mid"></span><div class="pgap-fill felt" data-w="44"></div></div>
+        <span class="pgap-v gd">+20%</span>
+      </div>
+      <div class="pgap-row">
+        <span class="pl">measured</span>
+        <div class="pgap-track"><span class="pgap-mid"></span><div class="pgap-fill meas" data-w="42"></div></div>
+        <span class="pgap-v vol">−19%</span>
+      </div>
+      <div class="pgap-illusion">≈ 39 points between feeling and fact · <a class="gloss-link" href="#glossary">METR</a> randomised trial, 2025<sup class="fn"><a href="#fn2">2</a></sup></div>
+    </div>
+    <div class="pgap-aside">
+      <div class="big tnum">~<span data-count="39" data-suffix="pt">0</span></div>
+      <p>between perceived and actual speedup — the most expensive number in AI delivery, because it's the one nobody books.</p>
+      <div class="trustline">trust in AI accuracy <b class="tnum">40% → 29%</b> <span>even as adoption climbed</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 04 — THE GOVERNED LINE ===== -->
+<section class="wrap" id="line">
+  <div class="line-head reveal">
+    <div>
+      <div class="kicker-row"><span class="eyebrow">04 — The governed line</span><span class="num">8 stages · 1 gate</span></div>
+      <h2 class="head">Where the volume comes from — and where the value leaks out.</h2>
+    </div>
+  </div>
+  <p class="sub reveal">Bar height = throughput AI pushes into each stage. The line runs hot everywhere it touches code, then <b class="vol">clamps at governance</b> — the deliberate bottleneck. Pull the lever from Copilot to Autopilot and watch what removing the gate actually buys you.</p>
+
+  <div class="flowstage reveal">
+    <div class="flowcap"><span>Specify → Generate → <span class="hot">Review gate ▸ where it dams</span> → Integrate → Ship</span><span>live flow</span></div>
+    <svg class="flowsvg" viewBox="0 0 1160 290" role="img" aria-label="Work flows fast through generation and dams at the human review gate before reaching production">
+      <defs>
+        <linearGradient id="riverM" x1="0" x2="1">
+          <stop offset="0" class="gs-a"/><stop offset=".45" class="gs-g"/><stop offset=".58" class="gs-y"/><stop offset=".7" class="gs-r"/><stop offset="1" class="gs-a"/>
+        </linearGradient>
+        <filter id="glowM"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        <path id="chanM" d="M40,150 C220,150 250,150 360,150 C470,150 500,150 560,150 L600,150 C660,150 690,150 800,150 C940,150 1000,150 1120,150" fill="none"/>
+      </defs>
+      <path class="bank" d="M40,108 C300,108 420,118 545,150 C420,182 300,192 40,192" stroke-width="1"/>
+      <path class="bank" d="M1120,108 C880,108 740,118 615,150 C740,182 880,192 1120,192" stroke-width="1"/>
+      <g filter="url(#glowM)">
+        <line class="gline" x1="580" y1="92" x2="580" y2="208" stroke-width="2" stroke-dasharray="6 6">
+          <animate attributeName="stroke-dashoffset" from="0" to="24" dur="1.2s" repeatCount="indefinite"/>
+        </line>
+      </g>
+      <circle class="gring" cx="580" cy="150" r="20" fill="none" stroke-width="1.5">
+        <animate attributeName="r" values="18;24;18" dur="2.4s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values=".9;.3;.9" dur="2.4s" repeatCount="indefinite"/>
+      </circle>
+      <text x="580" y="74" text-anchor="middle" class="ssub gate">human review gate</text>
+      <use href="#chanM" stroke="url(#riverM)" stroke-width="2" opacity=".35"/>
+      <g id="partsM"></g>
+      <g>
+        <circle class="dot-a" cx="40" cy="150" r="5"/><text x="40" y="234" text-anchor="middle" class="slbl">Specify</text><text x="40" y="251" text-anchor="middle" class="ssub">intent</text>
+        <circle class="dot-g" cx="300" cy="150" r="5"/><text x="300" y="234" text-anchor="middle" class="slbl">Generate</text><text x="300" y="251" text-anchor="middle" class="ssub">cheap · fast · solved</text>
+        <text x="580" y="234" text-anchor="middle" class="slbl hot">Review</text><text x="580" y="251" text-anchor="middle" class="ssub hot">the new bottleneck</text>
+        <circle class="dot-a" cx="860" cy="150" r="5"/><text x="860" y="234" text-anchor="middle" class="slbl">Integrate</text><text x="860" y="251" text-anchor="middle" class="ssub">+ govern</text>
+        <circle class="dot-a" cx="1120" cy="150" r="5"/><text x="1120" y="234" text-anchor="middle" class="slbl">Ship</text><text x="1120" y="251" text-anchor="middle" class="ssub">value?</text>
+      </g>
+    </svg>
+  </div>
+
+  <div class="lever reveal" id="lever">
+    <div class="lever-top">
+      <span class="lt-lbl">The AI dilemma — who holds the keyboard</span>
+      <div class="seg" role="group" aria-label="Copilot to Autopilot">
+        <button type="button" data-mode="copilot" aria-pressed="true">Copilot</button>
+        <button type="button" data-mode="hybrid" aria-pressed="false">Hybrid</button>
+        <button type="button" data-mode="autopilot" aria-pressed="false">Autopilot</button>
+      </div>
+    </div>
+    <div class="lever-grid">
+      <div class="lv up"><div class="lvl">Raw throughput</div><div class="lvv" id="lvThru">1.0×</div></div>
+      <div class="lv up"><div class="lvl">Rework rate</div><div class="lvv" id="lvRework">29%</div></div>
+      <div class="lv down"><div class="lvl">Value to margin</div><div class="lvv" id="lvValue">Highest</div></div>
+      <div class="lv"><div class="lvl">Who is accountable</div><div class="lvv" id="lvAcct">Human</div></div>
+    </div>
+    <div class="lever-note" id="lvNote"><b>Copilot:</b> AI accelerates, a human still owns the diff. ~70–80% of LLM-generated code is right — the gate catches the rest before it reaches production.</div>
+  </div>
+
+  <div class="persona-rail reveal" id="personaRail" role="group" aria-label="Filter the line by role"></div>
+
+  <div class="factory reveal">
+    <div class="belt-card">
+      <div class="belt-title">
+        <span class="t">Throughput across the SDLC</span>
+        <span class="legend"><span><i style="background:var(--accent)"></i>AI-driven</span><span><i style="background:var(--violet)"></i>Human gate</span><span><i style="background:var(--volume)"></i>Bottleneck</span></span>
+      </div>
+      <div class="belt" id="belt" role="tablist" aria-label="SDLC stages"></div>
+      <div class="flow-note"><span class="pipe">▰▰▰▱</span><span><b>Read the heights:</b> generation runs hot, review runs cold. Faster authoring just delivers work to the gate sooner — so the queue, not the keyboard, sets the pace.</span></div>
+    </div>
+    <div class="deck" id="deck" aria-live="polite"></div>
+  </div>
+  <div class="govfac reveal">
+    <div class="factory-head">
+      <span class="fk">The governed delivery factory</span>
+      <span class="fs">Fragmented inputs enter on the left, pass through 13 governed stages — each with an owner and a gate — and leave as measurable outcomes. Enterprise controls stay deliberately outside.</span>
+      <button type="button" class="fwalk" id="fwalk" aria-pressed="false" aria-label="Animate the flow through all 13 stages"><span class="fw-ico">▸</span> Walk the line</button>
+    </div>
+    <div class="factory-grid">
+      <div class="frail ins">
+        <h6>Inputs · delivery pressure</h6>
+        <div class="fr">Demand &amp; KPI pressure</div>
+        <div class="fr">Fragmented requirement sources</div>
+        <div class="fr">Legacy &amp; hidden logic</div>
+        <div class="fr">Risk &amp; NFR pressure</div>
+        <div class="fr">Release &amp; runtime dependencies</div>
+      </div>
+      <div class="fcore">
+        <div class="fcaps">
+          <span>Living context</span><span>AI workbench</span><span>Custom agents &amp; skills</span><span>Deterministic modernization &amp; checks</span><span>Workflow control plane</span>
+        </div>
+        <div class="fflow" aria-hidden="true"><span class="fdot"></span></div>
+        <div class="fmoves">
+          <div class="fmove" style="--mc:var(--accent)">
+            <div class="mk">Movement 01</div><h5>Frame</h5>
+            <div class="fnode"><div class="nt"><b>Intake</b><span class="g">gate</span></div><div class="own">Business owner</div><div class="gv">Scope &amp; KPI framing</div></div>
+            <div class="fnode"><div class="nt"><b>Discovery</b><span class="g">gate</span></div><div class="own">SME &amp; BA</div><div class="gv">Discovery pack</div></div>
+            <div class="fnode"><div class="nt"><b>Planning</b><span class="g">gate</span></div><div class="own">Modernization lead</div><div class="gv">Sequenced backlog</div></div>
+          </div>
+          <div class="fmove" style="--mc:var(--violet)">
+            <div class="mk">Movement 02</div><h5>Shape</h5>
+            <div class="fnode"><div class="nt"><b>Design</b><span class="g">gate</span></div><div class="own">Architect</div><div class="gv">Approved target design</div></div>
+            <div class="fnode"><div class="nt"><b>Build</b><span class="g">gate</span></div><div class="own">Migration engineer</div><div class="gv">Code + mappings</div></div>
+          </div>
+          <div class="fmove" style="--mc:var(--gold-bright)">
+            <div class="mk">Movement 03</div><h5>Prove</h5>
+            <div class="fnode"><div class="nt"><b>Testing &amp; parity</b><span class="g">gate</span></div><div class="own">QA lead</div><div class="gv">Parity evidence</div></div>
+            <div class="fnode"><div class="nt"><b>NFR validation</b><span class="g">gate</span></div><div class="own">NFR &amp; security</div><div class="gv">NFR evidence</div></div>
+            <div class="fnode bn"><div class="nt"><b>Governance review</b><span class="g bn">bottleneck</span></div><div class="own">Governance lead</div><div class="gv">Review &amp; audit pack</div></div>
+          </div>
+          <div class="fmove" style="--mc:var(--good)">
+            <div class="mk">Movement 04</div><h5>Release &amp; learn</h5>
+            <div class="fnode"><div class="nt"><b>Release readiness</b><span class="g">gate</span></div><div class="own">Release manager</div><div class="gv">Release evidence pack</div></div>
+            <div class="fnode"><div class="nt"><b>Environment promotion</b><span class="g">gate</span></div><div class="own">Release &amp; platform</div><div class="gv">Promotion approval trail</div></div>
+            <div class="fnode"><div class="nt"><b>Production go-live</b><span class="g">gate</span></div><div class="own">Release &amp; CAB</div><div class="gv">Go-live approval + rollback</div></div>
+            <div class="fnode"><div class="nt"><b>Hypercare</b><span class="g">gate</span></div><div class="own">Platform &amp; support</div><div class="gv">Incident notes</div></div>
+            <div class="fnode"><div class="nt"><b>Scale-out &amp; reuse</b><span class="g">gate</span></div><div class="own">Modernization lead</div><div class="gv">Reusable playbook</div></div>
+          </div>
+        </div>
+        <div class="fext">
+          <div class="ek">Enterprise controls outside the delivery platform</div>
+          <div class="ev"><b><a class="gloss-link" href="#glossary">CAB</a> &amp; change approval · secrets &amp; platform state · runtime operations · observability · support operations.</b> Agents never reach these directly — the platform packages evidence up to the boundary, humans hold authority across it.</div>
+        </div>
+      </div>
+      <div class="frail out">
+        <h6>Outcomes · scale signals</h6>
+        <div class="fr">Cycle-time uplift</div>
+        <div class="fr">Migration consistency</div>
+        <div class="fr">Evidence-backed promotion</div>
+        <div class="fr">Approval clarity</div>
+        <div class="fr">Lower SME bottleneck</div>
+        <div class="fr">Wave-scale economics</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 05 — THE TRANSLATION STORY ===== -->
+<section class="wrap" id="story">
+  <div class="reveal">
+    <div class="kicker-row"><span class="eyebrow">05 — The translation story</span><span class="num">watch the margin leak, then hold</span></div>
+    <h2 class="head">AI translated 12,000 lines in an afternoon. The margin lived in the one line it dropped.</h2>
+    <p class="sub">Volume is the easy part — the model converts a legacy tax engine in minutes and every test goes green. The value hides in a rule that lived only in tribal knowledge. Step through the three moments where the <b class="vol">output</b> looks finished and the <b style="color:var(--value)">margin</b> quietly leaks past the gate.</p>
+  </div>
+  <div class="story reveal" id="storyCard">
+    <div class="story-head">
+      <div class="story-tabs" role="tablist" aria-label="Translation walkthrough steps">
+        <button type="button" class="story-tab on" role="tab" id="storyTab0" aria-controls="storyPanel0" data-step="0" aria-selected="true"><span class="sn">1</span><span class="stt">Generate</span></button>
+        <button type="button" class="story-tab" role="tab" id="storyTab1" aria-controls="storyPanel1" data-step="1" aria-selected="false"><span class="sn">2</span><span class="stt">The silent gap</span></button>
+        <button type="button" class="story-tab" role="tab" id="storyTab2" aria-controls="storyPanel2" data-step="2" aria-selected="false"><span class="sn">3</span><span class="stt">The gate holds</span></button>
+      </div>
+      <div class="story-where">LEGACY // tax-engine.cob → .ts</div>
+    </div>
+
+    <div class="story-step on" data-step="0" id="storyPanel0" role="tabpanel" aria-labelledby="storyTab0" tabindex="0" style="--ac:var(--accent)">
+      <h4>The model converts the whole module in one pass.</h4>
+      <p class="ssc">COBOL in, TypeScript out. The diff is clean, the unit tests it generated all pass, and the velocity dashboard lights up. Every signal an output metric can see says <b>done</b>.</p>
+      <div class="story-code"><span class="kw">function</span> <span class="vn">calculateTax</span>(amt, region) {
+  <span class="kw">const</span> rate = 0.05;
+  <span class="kw">if</span> (region === <span class="vn">'X8'</span>) {
+    <span class="kw">return</span> amt * (rate + 0.005);  <span class="cm">// local surcharge</span>
+  }
+  <span class="kw">return</span> amt * rate;
+}
+<span class="cm">// ✓ 41/41 generated tests pass · merged on green</span></div>
+    </div>
+
+    <div class="story-step" data-step="1" id="storyPanel1" role="tabpanel" aria-labelledby="storyTab1" tabindex="0" style="--ac:var(--volume)">
+      <h4>One rule never made the crossing — and no test knew to miss it.</h4>
+      <p class="ssc">A 1999 exemption lived in a single COBOL paragraph that no requirement, ticket, or test ever described. The model couldn't translate context it was never given. The code runs, the tests pass, and <b>47 accounts are silently overcharged</b> — value leaking exactly where no output metric is looking.</p>
+      <div class="story-code"><span class="cm">* COBOL (legacy):  IF SPECIAL-CODE = 'Y2'  MOVE 0 TO TAX.</span>
+<span class="rm">  ↑ dropped in translation — lived in no test, no ticket, no spec</span>
+
+  <span class="kw">const</span> rate = 0.05;
+  <span class="kw">return</span> amt * rate;  <span class="rm">// Y2-exempt accounts now taxed at full rate</span>
+}
+<span class="cm">// ✓ tests still green — the gap is invisible to the dashboard</span></div>
+    </div>
+
+    <div class="story-step" data-step="2" id="storyPanel2" role="tabpanel" aria-labelledby="storyTab2" tabindex="0" style="--ac:var(--good)">
+      <h4>A human who remembers 1999 restores the line.</h4>
+      <p class="ssc">The gate isn't ceremony — it's the one place the <i>why</i> behind a legacy line still exists. A senior engineer reads the output against intent, recognizes the missing exemption, and injects the context the model never had. This is the work that converts volume into margin — and the reason the governed line is the 5% path.</p>
+      <div class="story-code"><span class="kw">function</span> <span class="vn">calculateTax</span>(amt, region, code) {
+  <span class="ad">  // Human override: restored the 1999 Y2 exemption</span>
+  <span class="ad">  if (code === 'Y2') return 0;</span>
+  <span class="kw">const</span> rate = 0.05;
+  <span class="kw">if</span> (region === <span class="vn">'X8'</span>) {
+    <span class="kw">return</span> amt * (rate + 0.005);
+  }
+  <span class="kw">return</span> amt * rate;
+}
+<span class="cm">// ✓ verified against intent, not just against tests</span></div>
+    </div>
+
+    <div class="story-take">
+      <span class="ti">★</span>
+      <div>AI is a <b>Copilot, not an Autopilot</b> for legacy work. The model multiplies output; it cannot supply the context it was never told. That context — the reason a line exists — is the margin, and it's exactly the work the human gate exists to protect.</div>
+    </div>
+    <div class="story-nav">
+      <button type="button" class="story-btn" id="storyPrev" disabled>← Back</button>
+      <button type="button" class="story-btn" id="storyNext">Next: the silent gap →</button>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 06 — SIX ALTITUDES ===== -->
+<section class="wrap" id="altitudes">
+  <div class="reveal">
+    <div class="kicker-row"><span class="eyebrow">06 — Six altitudes</span><span class="num">measure where difficulty now lives</span></div>
+    <h2 class="head">Speed is one altitude. Value hides three floors up.</h2>
+    <p class="sub">Every fast win at the top carries a lagging shadow below it. Pair each throughput metric with the outcome it can quietly damage — and read all six floors <b>per cohort</b>, because the benefit and the bill land on different metrics.</p>
+  </div>
+  <div class="alt-stack reveal">
+    <div class="alt" style="--ac:var(--accent)"><span class="alt-c">L1</span><div class="alt-b"><h4>Delivery</h4><span class="alt-q">Is the pipeline healthy under AI?</span></div><div class="alt-pair">DORA throughput <b>↔ change-failure · recovery time</b></div></div>
+    <div class="alt" style="--ac:var(--accent)"><span class="alt-c">L2</span><div class="alt-b"><h4>Flow &amp; quality</h4><span class="alt-q">Where did the cost move?</span></div><div class="alt-pair">velocity · PRs merged <b>↔ rework · complexity · review burden</b></div></div>
+    <div class="alt" style="--ac:var(--good)"><span class="alt-c">L3</span><div class="alt-b"><h4>Experience</h4><span class="alt-q">Are the humans okay?</span></div><div class="alt-pair">activity <b>↔ <a class="gloss-link" href="#glossary">DXI</a> · trust · cognitive load · junior pipeline</b></div></div>
+    <div class="alt" style="--ac:var(--value)"><span class="alt-c">L4</span><div class="alt-b"><h4>Business</h4><span class="alt-q">Did it matter to the P&amp;L?</span></div><div class="alt-pair">features · TTM <b>↔ cost-per-feature · AI cost-per-run</b></div></div>
+    <div class="alt" style="--ac:var(--volume)"><span class="alt-c">L5</span><div class="alt-b"><h4>Security <span class="promo">· gate → instrument</span></h4><span class="alt-q">Is posture worsening as AI writes more?</span></div><div class="alt-pair">AI volume <b>↔ vuln-introduction · secret-leak · time-to-remediate</b></div></div>
+    <div class="alt" style="--ac:var(--violet)"><span class="alt-c">L6</span><div class="alt-b"><h4>Customer / field <span class="promo">· the actual point</span></h4><span class="alt-q">Did value reach the user — or just the repo?</span></div><div class="alt-pair">features shipped <b>↔ field defects · incidents · CSAT</b></div></div>
+  </div>
+  <div class="alt-cross reveal">⌖ cross-cut — <b>AI-segmentation.</b> Tag every unit AI-authored · AI-assisted · human, then read L1–L6 per cohort. Distributions, not averages — so a help and a harm never average into a lie.</div>
+  <div class="alt-blind reveal">
+    <h5>Open blind spots — tracked honestly, not hidden</h5>
+    <div class="alt-bg">
+      <span><b>Lead vs lag.</b> Every fast win carries a 6–12-month shadow — the gain shown with its pending bill.</span>
+      <span><b>Maintainability / TCO.</b> No multi-year data yet — complexity &amp; churn are the leading proxy for a debt not yet due.</span>
+      <span><b>Comprehension &amp; bus factor.</b> Proxied via incident-resolution time on AI code and "explain this module" drills.</span>
+      <span><b>Opportunity cost.</b> Benchmark AI ROI against the next-best investment, not against zero.</span>
+      <span><b>No stable "before."</b> Prefer rolling staggered-adoption — scope as "vs current practice," not "vs no-AI."</span>
+      <span><b>Energy &amp; lock-in.</b> Track compute per outcome and model portability as a switching-cost risk.</span>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 07 — THE SCORECARD ===== -->
+<section class="wrap" id="scorecard">
+  <div class="reveal">
+    <div class="kicker-row"><span class="eyebrow">07 — The scorecard</span><span class="num">is AI accelerating every phase?</span></div>
+    <h2 class="head">A speed number alone always lies. Read each phase to a verdict.</h2>
+    <p class="sub">Every "is it faster?" lead is bolted to a counter-metric, sliced by who wrote the code, against a captured baseline. A phase reads <b class="gd">Accelerating</b> only when the gain reaches business value without the bill moving downstream.</p>
+  </div>
+  <div class="vkey reveal">
+    <span class="vchip acc">Accelerating</span><span class="vchip neu">Neutral</span><span class="vchip shi">Shifting-cost</span><span class="vchip dec">Decelerating</span><span class="vchip unp">Unproven</span>
+  </div>
+  <div class="score reveal">
+    <div class="score-h"><span>Phase</span><span>Lead — is it faster?</span><span>Counter — anti-gaming</span><span>Verdict</span></div>
+    <div class="scrow" style="--vc:var(--good)"><div class="ph">Plan<i>discovery</i></div><div class="lead">idea → ready-for-dev cycle time</div><div class="ctr">spec rework · stories reopened</div><div class="verdict"><span class="vchip acc">Accelerating</span></div></div>
+    <div class="scrow" style="--vc:var(--good)"><div class="ph">Design<i>architecture</i></div><div class="lead">time to approved design</div><div class="ctr">defects later traced to design</div><div class="verdict"><span class="vchip acc">Accelerating</span></div></div>
+    <div class="scrow" style="--vc:var(--good)"><div class="ph">Code<i>build</i></div><div class="lead">PR throughput · % AI-authored</div><div class="ctr">complexity delta · churn &lt;3wks · CFR</div><div class="verdict"><span class="vchip acc">Accelerating</span></div></div>
+    <div class="scrow" style="--vc:var(--volume)"><div class="ph">Review<i>the bottleneck</i></div><div class="lead">review turnaround · PRs / reviewer / day</div><div class="ctr">defect-escape past review · reviewer load</div><div class="verdict"><span class="vchip dec">Decelerating</span></div></div>
+    <div class="scrow" style="--vc:var(--good)"><div class="ph">Test / QA<i>verify</i></div><div class="lead">test-authoring time · coverage delta</div><div class="ctr">escaped prod defects · assert-less coverage</div><div class="verdict"><span class="vchip acc">Accelerating</span></div></div>
+    <div class="scrow" style="--vc:var(--good)"><div class="ph">Release<i>deploy</i></div><div class="lead">deploy frequency · lead time to deploy</div><div class="ctr">change-failure rate · rollback · MTTR</div><div class="verdict"><span class="vchip acc">Accelerating</span></div></div>
+    <div class="scrow" style="--vc:var(--muted-soft)"><div class="ph">Operate<i>run</i></div><div class="lead">MTTR · toil hours removed</div><div class="ctr">incidents traced to AI code · on-call load</div><div class="verdict"><span class="vchip unp">Unproven</span></div></div>
+    <div class="scrow" style="--vc:var(--good)"><div class="ph">Docs<i>knowledge</i></div><div class="lead">doc coverage · time-to-publish</div><div class="ctr">doc staleness · tickets from gaps</div><div class="verdict"><span class="vchip acc">Accelerating</span></div></div>
+  </div>
+  <p class="vrule reveal">AI is accelerating your SDLC only when <b>most phases read Accelerating and none read Decelerating at the business and customer altitude.</b> In the read above, Review still decelerates as the bottleneck and Operate is unproven — so the honest headline is "broadly accelerating, gated by review capacity, not yet proven at the P&amp;L," not an unqualified win.</p>
+  <div class="recipe-cols reveal">
+    <div class="steps">
+      <h5>How to collect — eight steps</h5>
+      <ol>
+        <li><b>Freeze a baseline</b> of at least one pre-AI quarter per phase. No before, no attribution.</li>
+        <li><b>Tag authorship at source</b> — commit trailer or PR label — so every downstream metric slices by cohort.</li>
+        <li><b>Auto-pipe the four DORA keys</b> from CI/CD and the incident tool. No manual, gameable spreadsheet.</li>
+        <li><b>Add the counter-metric</b> for every lead you switch on. Never ship a speed number alone.</li>
+        <li><b>Run a controlled comparison</b> — staggered-adoption or diff-in-diff, never naive before/after.</li>
+        <li><b>Layer experience and cost</b> — a quarterly DXI/<a class="gloss-link" href="#glossary">SPACE</a> survey, plus token, run and review spend.</li>
+        <li><b>Report distributions, refresh weekly, re-baseline quarterly.</b> Magnitudes perish, methods endure.</li>
+        <li><b>Wire a governance feed</b> — identity, provenance and audit of agent output. A measurement input now, a legal one soon.</li>
+      </ol>
+    </div>
+    <div class="spine-card">
+      <h5>Instrument the stack you already run</h5>
+      <p class="sub" style="margin:0 0 14px; font-size:.84rem;">A thin telemetry layer reads the systems you already pay for and resolves them into one evidence spine and one scorecard — not another tool to buy, learn and ignore.</p>
+      <div class="spine-flow">
+        <div class="sbox"><div class="st">sources you already have</div><div class="schips"><span>Git/PRs</span><span>CI/CD</span><span>Jira</span><span>SonarQube</span><span>Incidents</span><span>DXI</span></div></div>
+        <span class="ar">→</span>
+        <div class="sbox hub"><h4>One evidence spine</h4><p>Authorship tag, baseline, provenance and segmentation, applied once.</p></div>
+        <span class="ar">→</span>
+        <div class="sbox out"><h4>One scorecard</h4><p>The L1–L6 verdict the board reads — same numbers, every altitude.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 08 — THE INSTRUMENTS (DORA) ===== -->
+<section class="wrap" id="dora">
+  <div class="reveal">
+    <div class="kicker-row"><span class="eyebrow">08 — The honest instruments</span><span class="num"><a class="gloss-link" href="#glossary">DORA</a><sup class="fn"><a href="#fn3">3</a></sup> · the ELITE band</span></div>
+    <h2 class="head">Velocity charts are vanity. These four are the truth.</h2>
+    <p class="sub">PR counts go up no matter what. The DORA metrics only move when work actually ships, stays up, and recovers fast. The <b class="gd">ELITE</b> band is the bar — and note that ungated AI volume pushes <b class="vol">change-failure rate</b> the wrong way.</p>
+  </div>
+  <div class="dora-grid reveal" id="doraGrid"></div>
+  <div class="dora-note reveal">Pair these with one business-outcome metric and you have an honest read. Report deploy frequency alone, and you've just dressed <b>volume</b> up as <b>value</b> again.</div>
+</section>
+
+<!-- ===== 09 — THE 5% VERDICT ===== -->
+<section class="wrap verdict-sec" id="verdict">
+  <div class="reveal">
+    <div class="kicker-row" style="justify-content:center"><span class="eyebrow">09 — The 5% verdict</span></div>
+    <h2 class="head">100 pilots launch. <span style="color:var(--value)">Five</span> move the margin.</h2>
+    <p class="sub">Every coin is an enterprise AI initiative. The lit ones returned measurable P&amp;L. The rest produced output, demos, and velocity charts — but never reached the bottom line.</p>
+  </div>
+  <div class="coingrid reveal" id="coinGrid" aria-label="Grid of 100 coins; 5 lit gold for pilots with measurable P&L return"></div>
+  <div class="coin-legend reveal"><span><i class="e"></i> <b>95</b> no measurable return</span><span><i class="w"></i> <b>5</b> reached the margin</span></div>
+</section>
+
+<!-- ===== 10 — EMPIRICAL OUTCOMES ===== -->
+<section class="wrap" id="empirical">
+  <div class="reveal">
+    <div class="kicker-row"><span class="eyebrow">10 — Empirical outcomes</span><span class="num">two paths · same tools · opposite P&amp;L</span></div>
+    <h2 class="head">The same AI on the same legacy. One pilot paid the J-curve. One pulled the gate.</h2>
+    <p class="sub">Evidence from the front lines of modernization. The governed line eats a first-quarter dip — the "tuition cost of transformation" — then crosses into real ROI. The ungoverned pilot looks faster for two quarters, then the rework arrives all at once.</p>
+  </div>
+  <div class="emp reveal">
+    <div class="emp-cases">
+      <div class="emp-case fail">
+        <div class="ec-k"><span class="ec-tag">Failure post-mortem</span><span class="ec-id">the ungoverned pilot</span></div>
+        <h4>The gate was only ever "temporary."</h4>
+        <p>To keep pace with AI volume, human review was thinned to a rubber stamp. Output tripled and the dashboards looked elite — until escaped defects and "almost-right" rework arrived together in month eight, and the rollback erased the year's modelled return. <b>More volume, negative value — this pilot joined the 95%.</b></p>
+      </div>
+      <div class="emp-case win">
+        <div class="ec-k"><span class="ec-tag">Field result</span><span class="ec-id">the governed line</span></div>
+        <h4>The J-curve got paid back.</h4>
+        <p>Risk-tiered human review stayed a deliberate constraint, not a bottleneck to remove. The team ate the early dip, kept a pre-AI baseline, and tied every shipped change to a business outcome. By month eight the line crossed into positive ROI and held — <b>~39% modelled first-year return, earned rather than assumed.</b><sup class="fn"><a href="#fn3">3</a></sup></p>
+      </div>
+    </div>
+    <div class="emp-chart">
+      <div class="ech-h">📈 ROI payback curve</div>
+      <div class="emp-legend">
+        <span><i style="background:var(--volume)"></i>Legacy O&amp;M cost</span>
+        <span><i style="background:var(--value)"></i>Governed AI ROI</span>
+      </div>
+      <svg class="emp-svg" id="empSvg" viewBox="0 0 720 320" role="img" aria-label="An ROI payback curve: legacy operations-and-maintenance cost declines slowly while governed AI ROI dips below zero in a J-curve, then crosses above the cost line at roughly month eight.">
+        <!-- grid + zero baseline -->
+        <line class="grid" x1="64" y1="44" x2="680" y2="44"></line>
+        <line class="grid" x1="64" y1="138" x2="680" y2="138"></line>
+        <line class="zero" x1="64" y1="232" x2="680" y2="232"></line>
+        <text class="axt" x="56" y="48" text-anchor="end">100</text>
+        <text class="axt" x="56" y="142" text-anchor="end">50</text>
+        <text class="axt" x="56" y="236" text-anchor="end">0</text>
+        <!-- J-curve tuition zone -->
+        <path class="jzone" d="M64 232 L187.2 265.84 L310.4 247.04 L310.4 232 Z"></path>
+        <!-- legacy cost line -->
+        <polyline class="ln cost" id="lnCost" points="64,44 187.2,53.4 310.4,62.8 433.6,72.2 556.8,81.6 680,100.4"></polyline>
+        <!-- governed ROI J-curve -->
+        <polyline class="ln roi" id="lnRoi" points="64,232 187.2,265.84 310.4,247.04 433.6,203.8 556.8,138 680,53.4"></polyline>
+        <!-- points -->
+        <circle class="pt cost" cx="64" cy="44" r="3.5"></circle>
+        <circle class="pt cost" cx="680" cy="100.4" r="3.5"></circle>
+        <circle class="pt roi" cx="187.2" cy="265.84" r="3.5"></circle>
+        <circle class="pt roi" cx="680" cy="53.4" r="3.5"></circle>
+        <!-- crossover -->
+        <circle class="xover" cx="624" cy="92" r="5"></circle>
+        <text class="xlbl" x="624" y="80" text-anchor="middle">payback ≈ month 8</text>
+        <!-- x axis -->
+        <text class="axt" x="64" y="300" text-anchor="middle">Start</text>
+        <text class="axt" x="187.2" y="300" text-anchor="middle">Q1</text>
+        <text class="axt" x="310.4" y="300" text-anchor="middle">Q2</text>
+        <text class="axt" x="433.6" y="300" text-anchor="middle">Q3</text>
+        <text class="axt" x="556.8" y="300" text-anchor="middle">Q4</text>
+        <text class="axt" x="680" y="300" text-anchor="middle">Yr 2</text>
+      </svg>
+      <p class="emp-note">Curve is illustrative — shaped to the DORA 2026 mature-platform model (~39% Y1 ROI, ~8-month payback, J-curve dip first).<sup class="fn"><a href="#fn3">3</a></sup> Read it as the difference governance makes, not a benchmark.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 11 — FIVE QUESTIONS ===== -->
+<section class="wrap" id="readiness">
+  <div class="reveal">
+    <div class="kicker-row"><span class="eyebrow">11 — Pilot to scale</span><span class="num">why 95 of 100 stall</span></div>
+    <h2 class="head">Five questions before you scale an agent pilot.</h2>
+    <p class="sub">A pilot proves the tool works. These prove the organisation can absorb it safely and profitably — the filter into the lit 5% that reach the margin.</p>
+  </div>
+  <div class="gateq reveal">
+    <div class="gq"><div class="gnum">1</div><div><h4>Integrated, or a standalone demo?</h4><p>Winners wire the agent into the real SDLC — issue → branch → CI → PR → deploy — carrying org context and replacing a step.</p><div class="good"><b>Good looks like:</b> in the workflow, not beside it.</div></div></div>
+    <div class="gq"><div class="gnum">2</div><div><h4>ROI proven — and cost modelled at 1,000 users?</h4><p>Agentic load is per-run and unbounded; per-seat budgeting breaks. Model token + orchestration + review cost before you sign.</p><div class="good"><b>Good looks like:</b> P&amp;L-grade ROI + budget guardrails up front.</div></div></div>
+    <div class="gq"><div class="gnum">3</div><div><h4>Safe across hundreds — identity, provenance, audit?</h4><p>Most agents are over-permissioned with no machine-identity strategy. Frameworks now ship their own CVEs, and EU AI Act high-risk duties are landing.</p><div class="good"><b>Good looks like:</b> governed non-human identities, least privilege, full audit trail.</div></div></div>
+    <div class="gq"><div class="gnum">4</div><div><h4>Genuinely used and trusted — junior rung safe?</h4><p>Adoption ≠ value — trust fell 40% → 29% as usage rose.<sup class="fn"><a href="#fn4">4</a></sup> Measure active use, not seats, and guard the entry path.</p><div class="good"><b>Good looks like:</b> daily-use + trust metrics, champions, a junior plan.</div></div></div>
+    <div class="gq"><div class="gnum">5</div><div><h4>Platform &amp; review capacity to absorb the output?</h4><p>AI amplifies what's already there. Weak platforms get worse — reviewer capacity is the rate-limiter of fleet throughput.</p><div class="good"><b>Good looks like:</b> mature CI/CD, quality gates, review planned as the constraint.</div></div></div>
+  </div>
+  <div class="cfo reveal" id="cfo">
+    <div class="cfo-h"><span class="ck">Question 2, made tangible</span><h4>Model the margin before you sign</h4></div>
+    <p class="cfo-sub">Agentic load is per-run and unbounded, so the bill is <b>runs × cost</b> — and every run still has to be reviewed by a human. Drag the inputs and watch where the money actually lands.</p>
+    <div class="cfo-grid">
+      <div class="cfo-controls">
+        <div class="cfo-ctrl"><label for="cfoSeats">Developer seats <b id="cfoSeatsV">250</b></label><input type="range" id="cfoSeats" min="25" max="2000" step="25" value="250"></div>
+        <div class="cfo-ctrl"><label for="cfoRuns">Agent runs / dev / day <b id="cfoRunsV">12</b></label><input type="range" id="cfoRuns" min="2" max="40" step="1" value="12"></div>
+        <div class="cfo-ctrl"><label for="cfoCost">$ per agent run <b id="cfoCostV">$0.35</b></label><input type="range" id="cfoCost" min="5" max="150" step="5" value="35"></div>
+        <div class="cfo-ctrl"><label for="cfoRev">Review minutes / PR <b id="cfoRevV">25</b></label><input type="range" id="cfoRev" min="5" max="60" step="1" value="25"></div>
+      </div>
+      <div class="cfo-out">
+        <div class="cfo-reads">
+          <div class="cfo-read"><div class="rv" id="cfoAI">—</div><div class="rl">AI run spend / mo</div></div>
+          <div class="cfo-read"><div class="rv" id="cfoReview">—</div><div class="rl">human review spend / mo</div></div>
+          <div class="cfo-read"><div class="rv" id="cfoPer">—</div><div class="rl">true cost / shipped PR</div></div>
+        </div>
+        <div class="cfo-bar"><i class="seg-ai" id="cfoBarAI"></i><i class="seg-rev" id="cfoBarRev"></i></div>
+        <div class="cfo-legend"><span><i style="background:color-mix(in srgb,var(--accent) 72%,transparent)"></i>AI run cost</span><span><i style="background:color-mix(in srgb,var(--volume) 72%,transparent)"></i>Review cost</span></div>
+        <div class="cfo-verdict" id="cfoVerdict">—</div>
+      </div>
+    </div>
+    <div class="cfo-note">Illustrative model · ~21 working days/mo · loaded reviewer $90/hr · ~40% of runs reach a PR. Tune to your own numbers — the <b>shape</b>, not the digits, is the point.</div>
+  </div>
+</section>
+
+<!-- ===== 12 — RISK MATRIX ===== -->
+<section class="wrap" id="risk">
+  <div class="reveal">
+    <div class="kicker-row"><span class="eyebrow">12 — The decision</span><span class="num">cost of doing nothing vs. risk of failure</span></div>
+    <h2 class="head">Doing nothing is a decision too — and usually the expensive one.</h2>
+    <p class="sub">Most legacy core systems sit in the top-right: <b>standing still is costly</b> and <b>change is risky</b>. That's not a reason to freeze — it's the case for phased, gated modernization.</p>
+  </div>
+  <div class="matrix-wrap reveal">
+    <div class="yaxis"><span class="ahi">high&nbsp;↑</span><span>cost of doing nothing</span><span class="alo">low</span></div>
+    <div>
+      <div class="matrix" id="matrix">
+        <div class="mgrid" role="img" aria-label="Risk matrix: cost of doing nothing rises upward, risk of failure rises rightward. Most legacy core sits top-right — high cost and high risk — calling for phased, gated modernization.">
+          <div class="heat" aria-hidden="true"></div>
+          <div class="frontier" aria-hidden="true"></div>
+          <div class="quad go"><div class="qt">high cost · low risk</div><h4>Modernize now</h4><p>Rehost or Refactor without delay — the cost of waiting outruns the risk.</p></div>
+          <div class="quad hot"><span class="you">most legacy core lives here</span><div class="qt">high cost · high risk</div><h4>Strangle gradually</h4><p>Phased Strangler Fig, every slice gated — the only safe way through a high-stakes core.</p></div>
+          <div class="quad cool"><div class="qt">low cost · low risk</div><h4>Defer &amp; watch</h4><p>Monitor. Spend the attention where the tax actually bites.</p></div>
+          <div class="quad care"><div class="qt">low cost · high risk</div><h4>Pilot carefully</h4><p>Contain the blast radius. Prove value on a slice before you commit.</p></div>
+        </div>
+        <div class="xaxis"><span class="alo">low</span><span>risk of failure</span><span class="ahi">high&nbsp;→</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 13 — PROOF + SPRINT ===== -->
+<section class="wrap" id="proof">
+  <div class="reveal">
+    <div class="kicker-row"><span class="eyebrow">13 — From the front lines</span><span class="num">when the gate holds</span></div>
+    <h2 class="head">When the work converts, the numbers are not subtle.</h2>
+    <p class="sub">The 5% that reach the margin look like this — and they get there on a cadence, not a moonshot.</p>
+  </div>
+  <div class="proof-grid">
+    <div class="proof-card win-note reveal">
+      <div class="pc-lbl">Empirical outcome · gated FinTech modernization</div>
+      <div class="proof-stats">
+        <div class="ps"><div class="v tnum">−<span data-count="40" data-suffix="%">0</span></div><div class="l">operating cost</div></div>
+        <div class="ps"><div class="v tnum">−<span data-count="75" data-suffix="%">0</span></div><div class="l">mean time to recovery</div></div>
+        <div class="ps"><div class="v tnum"><span data-count="25" data-suffix="–40%">0</span></div><div class="l">TCO savings potential</div></div>
+      </div>
+      <p>Same AI tooling as the pilots that failed. The difference was a <b>human-in-the-loop gate</b> and a metric tied to the P&amp;L — not the PR count.</p>
+    </div>
+    <div class="proof-card reveal">
+      <div class="sprint">
+        <div class="sl">The 16-day remediation sprint — gated, not heroic</div>
+        <div class="sbar">
+          <div class="sphase p1" data-w="25"><b>Discover</b><span>Days 1–4 · map hidden stacks</span></div>
+          <div class="sphase p2" data-w="37"><b>Remediate</b><span>Days 5–10 · AI-accelerated</span></div>
+          <div class="sphase p3" data-w="25"><b>Verify</b><span>Days 11–14 · DORA + tests</span></div>
+          <div class="sphase p4" data-w="13"><b>Govern</b><span>15–16</span></div>
+        </div>
+      </div>
+      <p style="margin-top:18px">Every phase ends at a checkpoint. AI compresses the middle; the gate guards the ends. <b>Speed comes from compression, not from skipping review.</b></p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 14 — THE SHIFT ===== -->
+<section class="wrap" id="shift">
+  <div class="reveal">
+    <div class="kicker-row"><span class="eyebrow">14 — The shift</span><span class="num">where the work goes next</span></div>
+    <h2 class="head">The job stops being writing code. It becomes orchestrating it.</h2>
+    <p class="sub">If raw output is no longer scarce, the margin moves to whoever can <b class="val">direct, verify, and govern</b> the output. The mix of where senior time pays off inverts.</p>
+  </div>
+  <div class="shift-grid">
+    <div class="shift-card reveal">
+      <span class="era">Before · the keyboard era</span><h3>Value followed who could produce.</h3>
+      <div class="bars">
+        <div class="brow"><span class="bn">Writing code</span><div class="track"><div class="v code" data-w="78"></div></div></div>
+        <div class="brow"><span class="bn">Reviewing</span><div class="track"><div class="v code" data-w="34"></div></div></div>
+        <div class="brow"><span class="bn">Orchestrating</span><div class="track"><div class="v code" data-w="16"></div></div></div>
+      </div>
+    </div>
+    <div class="shift-card now reveal">
+      <span class="era">Now · the orchestration era</span><h3>Value follows who can govern.</h3>
+      <div class="bars">
+        <div class="brow"><span class="bn">Writing code</span><div class="track"><div class="v orch" data-w="28"></div></div></div>
+        <div class="brow"><span class="bn">Reviewing</span><div class="track"><div class="v orch" data-w="72"></div></div></div>
+        <div class="brow"><span class="bn">Orchestrating</span><div class="track"><div class="v orch" data-w="88"></div></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="lanes-head reveal"><span>Who owns what — <b>platform-centered, not platform-only</b></span><span class="spine">inputs → governed factory → evidence → outcomes</span></div>
+  <div class="lanes reveal">
+    <div class="lane" style="--lnc:var(--accent)"><div class="ln-k">AI does</div><h4>Accelerate inside the boundary</h4><p>Bounded agents take the repetitive, contextual, reviewable work — only where ambiguity is low enough to trust.</p><div class="own">scope · generation · drafting</div></div>
+    <div class="lane" style="--lnc:var(--good)"><div class="ln-k">Platform does</div><h4>Workbench &amp; evidence spine</h4><p>The delivery platform carries the AI workbench, the workflow controls, and the provenance trail every claim is checked against.</p><div class="own">workflow · controls · evidence</div></div>
+    <div class="lane" style="--lnc:var(--value)"><div class="ln-k">Humans gate</div><h4>The approvals that matter</h4><p>Named humans own the risk-tiered review gate. The bottleneck is deliberate — judgment is the product, not a delay to engineer away.</p><div class="own">review · sign-off · accountability</div></div>
+    <div class="lane" style="--lnc:var(--violet)"><div class="ln-k">Stays enterprise</div><h4>Outside the platform</h4><p>CAB, secrets, runtime ops and production authority stay explicit enterprise controls — agents never reach them directly.</p><div class="own">CAB · secrets · prod authority</div></div>
+  </div>
+</section>
+
+<!-- ===== 15 — THE MANDATE ===== -->
+<section class="wrap" id="mandate">
+  <div class="reveal">
+    <div class="kicker-row"><span class="eyebrow">15 — The mandate</span><span class="num">what a good instrument must do</span></div>
+    <h2 class="head">Eight functions. Miss one and the instrument lies in a way that feels like insight.</h2>
+    <p class="sub">Before any dashboard, these are the non-negotiables. The green lights mean the function is live, not optional.</p>
+  </div>
+  <div class="specgrid reveal">
+    <div class="spec"><span class="led"></span><div class="fc">F1 · baseline</div><h4>Capture the before</h4><p>No baseline, no attribution. Most teams adopt AI and declare victory with no picture of what came before.</p></div>
+    <div class="spec"><span class="led"></span><div class="fc">F2 · whole lifecycle</div><h4>Measure every phase</h4><p>Plan through operate, not only coding. AI shifts cost between phases, so a coding-only lens miscounts both ways.</p></div>
+    <div class="spec"><span class="led"></span><div class="fc">F3 · balance</div><h4>Pair throughput with quality</h4><p>Never report speed alone. Throughput stands beside stability, quality and developer wellbeing, always.</p></div>
+    <div class="spec"><span class="led"></span><div class="fc">F4 · attribute</div><h4>Compare, don't assume</h4><p>Controlled comparison against a cohort, never a naive before-and-after that blames everything on the tool.</p></div>
+    <div class="spec"><span class="led"></span><div class="fc">F5 · segment</div><h4>Tag the authorship</h4><p>AI-authored, AI-assisted or human. Read every quality number per cohort, because benefit and bill land apart.</p></div>
+    <div class="spec"><span class="led"></span><div class="fc">F6 · resist gaming</div><h4>Counter every proxy</h4><p>Each output metric is paired with an outcome metric, so neither side can be gamed in isolation.</p></div>
+    <div class="spec"><span class="led"></span><div class="fc">F7 · roll up to value</div><h4>Reach the P&amp;L</h4><p>Climb from activity to business outcome and ROI — the only altitude that survives the question "did it matter?"</p></div>
+    <div class="spec"><span class="led"></span><div class="fc">F8 · govern</div><h4>Prove provenance</h4><p>Identity, provenance and audit of agent output. A measurement input now and, under the EU AI Act, a legal one.</p></div>
+  </div>
+  <div class="nfrband reveal">
+    <div class="nfr"><b>Trust over surveillance</b> · never tied to comp</div>
+    <div class="nfr"><b>Lead and lag</b> · every gain shows its bill</div>
+    <div class="nfr"><b>Behaviour over self-report</b> · the perception gap is real</div>
+    <div class="nfr"><b>Cost-aware</b> · track the AI spend</div>
+    <div class="nfr"><b>Distributions</b> · not averages</div>
+  </div>
+</section>
+
+<!-- ===== 16 — THE AI DILEMMA (interactive walkthrough) ===== -->
+<section class="wrap" id="dilemma">
+  <div class="reveal">
+    <div class="kicker-row"><span class="eyebrow">16 — Your move</span><span class="num">walk the decision yourself</span></div>
+    <h2 class="head">You're the VP of Engineering. Three calls decide which side of the balance you land on.</h2>
+    <p class="sub">No more charts — make the choices. Each pick moves three meters: the <b class="vol">output</b> AI pumps in, the <b style="color:var(--value)">margin</b> that actually reaches the P&amp;L, and the <b style="color:var(--violet)">unreviewed risk</b> you carry out the door. Land the margin without blowing the risk open.</p>
+  </div>
+  <div class="dilemma reveal">
+    <div class="dil-steps" id="dilSteps">
+
+      <div class="dil-step active" data-step="0">
+        <div class="dil-q"><span class="qn">Call 01 · posture</span><h4>AI just landed across every team. What do you optimize for?</h4></div>
+        <p class="dil-scene">The dashboards are already lighting up green and the board is excited. You set the posture for the next two quarters.</p>
+        <div class="dil-opts" role="group" aria-label="Call 01 — posture">
+          <button type="button" class="dil-opt" data-o='{"out":34,"mar":4,"risk":30}' style="--ac:var(--volume)"><span class="ok">A</span><span class="ob"><b>Ship faster — pull the gate.</b><span>Let AI autopilot. Merge on green, review later. Speed is the headline.</span></span></button>
+          <button type="button" class="dil-opt" data-o='{"out":12,"mar":20,"risk":-8}' style="--ac:var(--value)"><span class="ok">B</span><span class="ob"><b>Govern the gate.</b><span>Keep risk-tiered human review as the deliberate constraint. Slower, accountable.</span></span></button>
+          <button type="button" class="dil-opt" data-o='{"out":6,"mar":14,"risk":-4}' style="--ac:var(--accent)"><span class="ok">C</span><span class="ob"><b>Measure first.</b><span>Freeze a pre-AI baseline before you scale. You can't attribute what you never measured.</span></span></button>
+        </div>
+      </div>
+
+      <div class="dil-step locked" data-step="1" hidden>
+        <div class="dil-q"><span class="qn">Call 02 · the number</span><h4>The board wants one number next week. What do you report?</h4></div>
+        <p class="dil-scene">Whatever you put on the slide becomes the thing every team optimizes for. Choose what "good" means.</p>
+        <div class="dil-opts" role="group" aria-label="Call 02 — the metric">
+          <button type="button" class="dil-opt" data-o='{"out":12,"mar":-6,"risk":12}' style="--ac:var(--volume)"><span class="ok">A</span><span class="ob"><b>Output — PRs, velocity, % AI-authored.</b><span>The numbers only go up. They also quietly reward volume over value.</span></span></button>
+          <button type="button" class="dil-opt" data-o='{"out":2,"mar":18,"risk":-10}' style="--ac:var(--value)"><span class="ok">B</span><span class="ob"><b>Counter-metrics — every speed stat with its bill.</b><span>Throughput beside rework. Coverage beside escaped defects. Neither side can be gamed alone.</span></span></button>
+          <button type="button" class="dil-opt" data-o='{"out":0,"mar":22,"risk":-6}' style="--ac:var(--good)"><span class="ok">C</span><span class="ob"><b>P&amp;L roll-up — activity climbed to business outcome.</b><span>The only altitude that survives the question "did it actually matter?"</span></span></button>
+        </div>
+      </div>
+
+      <div class="dil-step locked" data-step="2" hidden>
+        <div class="dil-q"><span class="qn">Call 03 · the constraint</span><h4>Volume is up and the review queue is backing up. Where does the next dollar go?</h4></div>
+        <p class="dil-scene">AI made writing code cheap. The bottleneck moved. Your budget decision says whether you believe that.</p>
+        <div class="dil-opts" role="group" aria-label="Call 03 — capacity">
+          <button type="button" class="dil-opt" data-o='{"out":20,"mar":-4,"risk":16}' style="--ac:var(--volume)"><span class="ok">A</span><span class="ob"><b>More AI seats — amplify generation.</b><span>Pour fuel on the part that's already fast. The queue in front of review only grows.</span></span></button>
+          <button type="button" class="dil-opt" data-o='{"out":6,"mar":18,"risk":-16}' style="--ac:var(--value)"><span class="ok">B</span><span class="ob"><b>Reviewer capacity — fund the bottleneck.</b><span>Staff and tool the gate that everything now waits behind. Treat judgment as the product.</span></span></button>
+          <button type="button" class="dil-opt" data-o='{"out":2,"mar":12,"risk":-20}' style="--ac:var(--violet)"><span class="ok">C</span><span class="ob"><b>Provenance &amp; gates — identity, audit, risk-tiering.</b><span>Make every AI output traceable and gated. A measurement input now, a legal one under the EU AI Act.</span></span></button>
+        </div>
+      </div>
+
+    </div>
+
+    <aside class="dil-panel" aria-label="Live decision outcome">
+      <div class="pt">Live outcome</div>
+      <div class="dil-meters">
+        <div class="dil-m" style="--mc:var(--volume)"><div class="mh"><b>Output volume</b><span class="mv" id="mvOut">20</span></div><div class="dil-track"><i class="dil-fill" id="fOut" style="width:20%"></i></div></div>
+        <div class="dil-m" style="--mc:var(--value)"><div class="mh"><b>Margin to P&amp;L</b><span class="mv" id="mvMar">8</span></div><div class="dil-track"><i class="dil-fill" id="fMar" style="width:8%"></i></div></div>
+        <div class="dil-m" style="--mc:var(--violet)"><div class="mh"><b>Unreviewed risk</b><span class="mv" id="mvRisk">24</span></div><div class="dil-track"><i class="dil-fill" id="fRisk" style="width:24%"></i></div></div>
+      </div>
+      <div class="dil-verdict empty" id="dilVerdict" aria-live="polite"><div class="vh">Make your first call →</div></div>
+      <button type="button" class="dil-replay" id="dilReplay" hidden>↺ Replay the decision</button>
+    </aside>
+  </div>
+</section>
+
+<!-- ===== 17 — THE REALITY CHECK ===== -->
+<section class="wrap" id="reality">
+  <div class="reveal">
+    <div class="kicker-row"><span class="eyebrow">17 — The reality check</span><span class="num">what AI moves · what it never touches</span></div>
+    <h2 class="head">AI genuinely accelerates three things. None of them is the margin.</h2>
+    <p class="sub">The opportunity is real — conversion, discovery and data-unlocking all compound. But the dashboard shows the green and hides the gate. Run the simulation: the output reaches 100%, and you watch how much of it is still unverified risk rather than booked value.</p>
+  </div>
+  <div class="rcheck reveal">
+    <div class="rc-card opp">
+      <div class="rc-h"><span class="ico">⚡</span> What AI genuinely unlocks</div>
+      <p class="rc-sub">Real, compounding volume gains — the part that shows up green on every dashboard.</p>
+      <div class="rc-bar">
+        <div class="rc-bl"><b>Code translation</b><span class="pct" id="rcP1">0%</span></div>
+        <div class="rc-bd">Legacy COBOL / MUMPS → modern services, in an afternoon.</div>
+        <div class="rc-track"><i class="rc-fill" id="rcF1" data-target="88"></i></div>
+      </div>
+      <div class="rc-bar">
+        <div class="rc-bl"><b>System discovery</b><span class="pct" id="rcP2">0%</span></div>
+        <div class="rc-bd">Maps orphaned dependencies and dead modules humans lost track of.</div>
+        <div class="rc-track"><i class="rc-fill" id="rcF2" data-target="81"></i></div>
+      </div>
+      <div class="rc-bar">
+        <div class="rc-bl"><b>Data unlocking</b><span class="pct" id="rcP3">0%</span></div>
+        <div class="rc-bd">Structures messy legacy data for modern analytics and LLMs.</div>
+        <div class="rc-track"><i class="rc-fill" id="rcF3" data-target="76"></i></div>
+      </div>
+      <div class="rc-runwrap">
+        <button type="button" class="rc-run" id="rcRun">▶ Run the reckoning</button>
+      </div>
+    </div>
+    <div class="rc-card gov">
+      <div class="rc-h"><span class="ico">⚠</span> What it never touches</div>
+      <p class="rc-sub">The governance layer the volume rushes straight past — where value is won or lost.</p>
+      <div class="rc-matrix">
+        <div class="rc-risk"><div class="rt">Trust &amp; hallucination</div><p>66% of devs spend more time fixing "almost-right" AI code.<sup class="fn"><a href="#fn4">4</a></sup></p></div>
+        <div class="rc-risk"><div class="rt">Data quality</div><p>Legacy data is messy and incomplete — and quietly poisons attribution.</p></div>
+        <div class="rc-risk"><div class="rt">Governance gap</div><p>Missing provenance, audit and MLOps — duties the EU AI Act now names.</p></div>
+        <div class="rc-risk"><div class="rt">Shadow AI</div><p>Core logic pasted into public models — PII and IP leak past every control.</p></div>
+      </div>
+      <div class="rc-sim">
+        <div class="rc-donut">
+          <svg viewBox="0 0 118 118" aria-hidden="true">
+            <circle class="ring-bg" cx="59" cy="59" r="46"></circle>
+            <circle class="ring-vol" id="rcRing" cx="59" cy="59" r="46" stroke-dasharray="289" stroke-dashoffset="289"></circle>
+          </svg>
+          <div class="dcen"><div><b id="rcDonutPct">0%</b><span>ships with no review</span></div></div>
+        </div>
+        <div class="rc-simbody">
+          <p class="rc-simout" id="rcSimOut">Press <b>Run the reckoning</b> to simulate a quarter of AI-led delivery and weigh the output against what actually reaches the margin.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== GLOSSARY ===== -->
+<section class="wrap" id="glossary">
+  <div class="reveal">
+    <div class="kicker-row"><span class="eyebrow">The instrument panel</span><span class="num">terms, defined</span></div>
+    <h2 class="head">Every acronym on this page, in plain language.</h2>
+  </div>
+  <dl class="gloss reveal">
+    <div class="gterm"><dt>DORA — four keys</dt><dd><b>DevOps Research &amp; Assessment.</b> Deploy frequency, lead time, change-failure rate and time-to-restore — two speed, two stability, so neither games alone.</dd></div>
+    <div class="gterm"><dt>DXI</dt><dd><b>Developer Experience Index.</b> A survey score for how productive and unblocked engineers actually feel — the human side a throughput number misses.</dd></div>
+    <div class="gterm"><dt>SPACE</dt><dd>A productivity framework spanning Satisfaction, Performance, Activity, Communication and Efficiency — so productivity is never read off one number.</dd></div>
+    <div class="gterm"><dt>Baseline</dt><dd>The pre-AI snapshot you measure every later change against. <b>No before, no attribution.</b></dd></div>
+    <div class="gterm"><dt>DiD — difference-in-differences</dt><dd>A causal method comparing an adopting team against one that didn't, before and after — isolating the tool's effect from everything else moving at once.</dd></div>
+    <div class="gterm"><dt>Cohort · staggered adoption</dt><dd>Groups that switch on AI at different times, so each acts as the other's control without a formal trial.</dd></div>
+    <div class="gterm"><dt>Counter-metric</dt><dd>A guardrail bolted to every speed metric, so "faster" can never quietly mean "worse" without showing up.</dd></div>
+    <div class="gterm"><dt>Lead vs lag</dt><dd>A fast-moving leading signal always shown with its slow-moving lagging outcome — the gain next to its pending bill.</dd></div>
+    <div class="gterm"><dt>AI-segmentation</dt><dd>Tagging each unit AI-authored, AI-assisted or human, then reading every quality number per group — benefit and bill land on different cohorts.</dd></div>
+    <div class="gterm"><dt>Provenance</dt><dd>A verifiable record of who or what produced an output, and how — a measurement input now, a legal one under the EU AI Act.</dd></div>
+    <div class="gterm"><dt>P&amp;L</dt><dd><b>Profit and loss.</b> The business bottom line every result must eventually reach to count as real.</dd></div>
+    <div class="gterm"><dt>CAB</dt><dd><b>Change Advisory Board.</b> The human gate that authorises production changes — an enterprise control agents never touch directly.</dd></div>
+    <div class="gterm"><dt>EU AI Act</dt><dd>The EU regulation whose high-risk-system duties — identity, provenance, audit — apply to AI used in the SDLC as the timeline phases in.</dd></div>
+    <div class="gterm"><dt>METR</dt><dd>The research group behind the 2025 randomised trial where developers felt ~20% faster but measured ~19% slower. Its early-2026 continuation narrowed the measured effect to ~−4% (not statistically significant) and concluded AI "likely provides productivity benefits" — the 2025 magnitude is historical; the durable point is the felt-vs-measured gap.</dd></div>
+  </dl>
+</section>
+
+<!-- ===== CLOSING ===== -->
+<section class="wrap close" id="close">
+  <div class="reveal">
+    <h2>Stop weighing <span style="color:var(--volume)">output</span>.<br>Start weighing the <span class="gold">margin</span>.</h2>
+    <p>The legacy tax was always going to be paid by someone. AI made output cheap — but the governed work, the review, the verification, the judgment at the gate, is where the value was hiding all along.</p>
+    <div class="srcbox reveal" id="sources">
+      <h3>Sources &amp; method</h3>
+      <ol>
+        <li id="fn1"><b>NVIDIA — <i>State of AI 2026</i> · Deloitte — <i>State of AI in the Enterprise 2026</i>.</b> 88% of enterprises say AI lifted revenue and 87% report lower costs — yet measurable, P&amp;L-level impact stays concentrated in a small minority of adopters. The brief's headline ~95% is the widely-cited MIT 2025 finding that ~95% of enterprise GenAI pilots show no measurable P&amp;L return — named here as context, not added to the 2026 source list; the NVIDIA and Deloitte 2026 perception-vs-return gap is its corroboration. The gap between reported optimism and booked return is this brief's subject. <a href="https://blogs.nvidia.com/blog/state-of-ai-report-2026/" target="_blank" rel="noopener">NVIDIA ↗</a> · <a href="https://www.deloitte.com/us/en/what-we-do/capabilities/applied-artificial-intelligence/content/state-of-ai-in-the-enterprise.html" target="_blank" rel="noopener">Deloitte ↗</a></li>
+        <li id="fn2"><b>METR — <i>Early-2025 AI &amp; Experienced Open-Source Developer Productivity</i> (2025).</b> The one pre-2026 source kept by design — still the only randomised controlled trial on this question. Developers expected AI to speed them up and were measured ~19% slower: the perception gap this brief is built on. <b>Update (early 2026):</b> METR's own continuation narrowed the measured effect to ~−4% (CI −15% to +9%, not statistically significant) and concluded AI "likely provides productivity benefits" — so the ~19% magnitude is 2025-specific and the durable claim is the felt-vs-measured gap, not its size. <a href="https://metr.org/blog/2025-07-10-early-2025-ai-experienced-os-dev-study/" target="_blank" rel="noopener">2025 study ↗</a> · <a href="https://metr.org/blog/2026-05-11-ai-usage-survey/" target="_blank" rel="noopener">2026 continuation ↗</a></li>
+        <li id="fn3"><b>DORA — <i>ROI of AI-Assisted Software Development</i> (2026.01), Google Cloud.</b> AI amplifies the system it lands in: on a mature 500-engineer platform the team models a ~39% first-year ROI with an eight-month payback — but warns of a J-curve dip first, "the tuition cost of transformation." Without strong foundations, the gains are "lost in downstream chaos." <a href="https://www.infoq.com/news/2026/05/dora-roi-ai-assisted-dev-report/" target="_blank" rel="noopener">report ↗</a></li>
+        <li id="fn4"><b>Stack Overflow — <i>Closing the AI trust gap</i> (Feb 2026).</b> On the record 84%-adoption Developer Survey: trust in AI accuracy fell from ~40% to ~29%, 46% of developers now actively distrust accuracy, and 66% say they spend more time fixing "almost-right" AI code. Adoption is not endorsement. <a href="https://stackoverflow.blog/2026/02/18/closing-the-developer-ai-trust-gap/" target="_blank" rel="noopener">analysis ↗</a></li>
+        <li id="fn5"><b>Faros AI — <i>The AI Engineering Report 2026: The Acceleration Whiplash</i>.</b> Telemetry from 22,000 developers: output per dev rose (epics +66%, throughput +34%) while code churn climbed +861%, time in code review ~+200%, and 31% more code now ships with no review at all — volume up, value gated at the human. <a href="https://www.faros.ai/blog/ai-acceleration-whiplash-takeaways" target="_blank" rel="noopener">report ↗</a></li>
+      </ol>
+      <p class="method"><b>On the figures:</b> every source above is 2026 except METR (2025), kept deliberately as the only published randomised trial on this question. The studies are cited as published. The throughput, rework and cost magnitudes inside the interactive panels are <b>illustrative</b> — aggregated and rounded from engagement instrumentation (~Dec 2025–Apr 2026) and the source analyses (SDLC AI-Impact instrument · AI-Led SDLC Operating Map · The Great Modernization · Modernization Nexus 2026). Read them as a real team's instrumentation, not benchmark evidence. · Models to Margins · 2026</p>
+    </div>
+  </div>
+</section>
+
+<script>
+const reduce = matchMedia('(prefers-reduced-motion:reduce)').matches;
+
+/* ===================== DATA ===================== */
+const STAGES = [
+  { id:'plan',    ph:'Frame',   label:'Plan & Scope',   kind:'flow',       h:46,
+    ai:'Drafts epics, splits stories, estimates from history.', hu:'Product owner sets intent and priority.', pf:'Backlog + roadmap system of record.', out:'Strategy & funding decisions.',
+    lead:'Cycle-time to groomed backlog', counter:'Stories generated that never ship' },
+  { id:'design',  ph:'Frame',   label:'Architect',      kind:'flow',       h:52,
+    ai:'Proposes designs, surfaces patterns, flags risk.', hu:'Staff engineer owns the boundary decisions.', pf:'ADRs + design-system constraints.', out:'Compliance & security baselines.',
+    lead:'Designs with a recorded decision', counter:'Rework from skipped trade-off review' },
+  { id:'build',   ph:'Shape',   label:'Generate',       kind:'flow',       h:96,
+    ai:'Writes the bulk of the code, tests, and scaffolding.', hu:'Engineer steers, accepts, redirects.', pf:'Repo, CI, code-gen guardrails.', out:'—',
+    lead:'PRs opened per engineer', counter:'AI PRs needing material rework (~29%)' },
+  { id:'test',    ph:'Prove',   label:'Verify',         kind:'flow',       h:74,
+    ai:'Generates tests, reproduces, suggests fixes.', hu:'Engineer judges coverage that matters.', pf:'Test infra + coverage gates.', out:'—',
+    lead:'Defects caught pre-merge', counter:'Coverage inflated by low-value tests' },
+  { id:'review',  ph:'Prove',   label:'Govern Review',  kind:'bottleneck', h:26,
+    ai:'Pre-screens diffs, summarizes, flags risk.', hu:'Human reviewer holds final accountability — the gate.', pf:'Review SLAs + required approvals.', out:'Audit & liability.',
+    lead:'Risk caught at the gate', counter:'Queue time waiting for human review' },
+  { id:'release', ph:'Release', label:'Ship',           kind:'gate',       h:58,
+    ai:'Assembles release notes, predicts blast radius.', hu:'Release manager authorizes the gate.', pf:'CD pipeline + progressive rollout.', out:'Change-advisory & SOX controls.',
+    lead:'Deploy frequency', counter:'Changes shipped, value unconfirmed' },
+  { id:'operate', ph:'Release', label:'Operate',        kind:'flow',       h:62,
+    ai:'Triages alerts, drafts incident timelines.', hu:'On-call owns the call under pressure.', pf:'Observability + runbooks.', out:'SLAs & customer trust.',
+    lead:'MTTR', counter:'Alert volume without signal' },
+  { id:'measure', ph:'Release', label:'Measure Margin', kind:'gate',       h:38,
+    ai:'Stitches telemetry to outcomes, drafts the readout.', hu:'Leader decides what counts as value.', pf:'FinOps + outcome metrics.', out:'P&L & board narrative.',
+    lead:'Output tied to a business outcome', counter:'Velocity reported as if it were value' },
+];
+const VERDICT = {
+  flow:{cls:'flow',txt:'▲ Accelerating — AI compounds here'},
+  gate:{cls:'gate',txt:'◆ Controlled — a deliberate checkpoint'},
+  bottleneck:{cls:'bottleneck',txt:'■ Decelerating · by design — the bottleneck moved here'},
+};
+const PERSONAS = [
+  { id:'all',   label:'Everyone',          stages:null },
+  { id:'cio',   label:'CIO',               stages:['plan','measure','release'] },
+  { id:'eng',   label:'Engineer',          stages:['build','test','review'] },
+  { id:'staff', label:'Staff / Architect', stages:['design','review','operate'] },
+  { id:'po',    label:'Product Owner',     stages:['plan','design','measure'] },
+  { id:'rev',   label:'Reviewer',          stages:['review','release'] },
+  { id:'ciso',  label:'CISO',              stages:['design','review','operate'] },
+  { id:'sre',   label:'On-call / SRE',     stages:['operate','release'] },
+];
+const LEVER = {
+  copilot:   { thru:'1.0×', rework:'29%', value:'Highest', acct:'Human', gate:26,
+    note:'<b>Copilot:</b> AI accelerates, a human still owns the diff. ~70–80% of LLM-generated code is right — the gate catches the rest before it reaches production.',
+    cls:{value:'down',acct:'good'} },
+  hybrid:    { thru:'1.8×', rework:'41%', value:'Mixed', acct:'Shared', gate:15,
+    note:'<b>Hybrid:</b> the gate thins to keep up with volume. Throughput climbs, but more unreviewed code slips through and rework starts to bite.',
+    cls:{value:'',acct:''} },
+  autopilot: { thru:'3.2×', rework:'63%', value:'Lowest', acct:'No one', gate:5,
+    note:'<b>Autopilot:</b> remove the gate and output triples — but rework, unreviewed risk, and "who signed off?" all blow open. More volume, less value. This is how pilots join the 95%.',
+    cls:{value:'',acct:'up'} },
+};
+const DORA = [
+  { v:'On-demand', l:'Deploy frequency', t:'ELITE: multiple / day', pct:0.95, good:true },
+  { v:'< 1 day',   l:'Lead time for change', t:'ELITE: < one day', pct:0.9, good:true },
+  { v:'0–15%',     l:'Change failure rate', t:'AI volume pushes this UP', pct:0.55, good:false },
+  { v:'< 1 hour',  l:'Time to restore', t:'ELITE: < one hour', pct:0.92, good:true },
+];
+
+/* ===================== BUILD: belt ===================== */
+const belt = document.getElementById('belt');
+STAGES.forEach((s,i)=>{
+  const b=document.createElement('button');
+  b.className='stage'; b.dataset.kind=s.kind; b.dataset.id=s.id;
+  b.setAttribute('role','tab'); b.setAttribute('aria-selected', i===4?'true':'false');
+  const flag=(s.kind==='bottleneck')?'<span class="gateflag">◆ the gate</span>':'';
+  b.innerHTML=`${flag}<div class="bar"><div class="fill" data-h="${s.h}" style="height:0%"></div></div><span class="lbl">${s.label}</span><span class="ph">${s.ph}</span>`;
+  b.addEventListener('click',()=>selectStage(s.id));
+  belt.appendChild(b);
+});
+
+/* ===================== personas ===================== */
+const rail=document.getElementById('personaRail');
+PERSONAS.forEach(p=>{
+  const c=document.createElement('button');
+  c.className='chip'; c.textContent=p.label; c.dataset.id=p.id;
+  c.setAttribute('aria-pressed', p.id==='all'?'true':'false');
+  c.addEventListener('click',()=>applyPersona(p.id));
+  rail.appendChild(c);
+});
+function applyPersona(id){
+  const p=PERSONAS.find(x=>x.id===id);
+  rail.querySelectorAll('.chip').forEach(c=>c.setAttribute('aria-pressed', c.dataset.id===id?'true':'false'));
+  document.querySelectorAll('.stage').forEach(st=>{
+    const on=!p.stages||p.stages.includes(st.dataset.id);
+    st.classList.toggle('dim',!on);
+  });
+  if(p.stages && !p.stages.includes(currentStage)) selectStage(p.stages[0]);
+}
+
+/* ===================== deck ===================== */
+const deck=document.getElementById('deck');
+let currentStage='review';
+function selectStage(id){
+  currentStage=id;
+  const s=STAGES.find(x=>x.id===id);
+  document.querySelectorAll('.stage').forEach(st=>st.setAttribute('aria-selected', st.dataset.id===id?'true':'false'));
+  const v=VERDICT[s.kind];
+  const rows=[['ai','AI does',s.ai],['hu','Human gate',s.hu],['pf','Platform',s.pf],
+    ...(s.out&&s.out!=='—'?[['out','Still outside',s.out]]:[])]
+    .map(([c,t,x])=>`<div class="row"><span class="tag ${c}">${t}</span><span>${x}</span></div>`).join('');
+  deck.innerHTML=`<div class="dk-ph">${s.ph} · stage</div><div class="dk-title">${s.label}</div>
+    <div class="dk-verdict ${v.cls}">${v.txt}</div><div class="rows">${rows}</div>
+    <div class="metrics"><div class="metric"><div class="ml">Lead metric (worth pursuing)</div><div class="mv">${s.lead}</div></div>
+    <div class="metric counter"><div class="ml">Counter-metric (don't be gamed)</div><div class="mv">${s.counter}</div></div></div>`;
+}
+selectStage('review');
+
+/* ===================== lever ===================== */
+const lvThru=document.getElementById('lvThru'), lvRework=document.getElementById('lvRework'),
+      lvValue=document.getElementById('lvValue'), lvAcct=document.getElementById('lvAcct'), lvNote=document.getElementById('lvNote');
+document.querySelectorAll('#lever .seg button').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('#lever .seg button').forEach(b=>b.setAttribute('aria-pressed', b===btn?'true':'false'));
+    setLever(btn.dataset.mode);
+  });
+});
+function setLever(mode){
+  const m=LEVER[mode];
+  lvThru.textContent=m.thru; lvRework.textContent=m.rework; lvValue.textContent=m.value; lvAcct.textContent=m.acct; lvNote.innerHTML=m.note;
+  // recolor value/acct tiles
+  lvValue.parentElement.className='lv '+(m.cls.value||''); lvAcct.parentElement.className='lv '+(m.cls.acct||'');
+  // shrink/restore the governance gate bar
+  const gateFill=document.querySelector('.stage[data-id="review"] .fill');
+  if(gateFill) gateFill.style.height=m.gate+'%';
+}
+
+/* ===================== DORA gauges ===================== */
+const doraGrid=document.getElementById('doraGrid');
+const R=34, C=Math.PI*R; // half-arc circumference approx
+DORA.forEach(d=>{
+  const col=d.good?'var(--good)':'var(--volume)';
+  const off=C*(1-d.pct);
+  const g=document.createElement('div');
+  g.className='gauge';
+  g.innerHTML=`<svg viewBox="0 0 100 60" aria-hidden="true">
+      <path class="arc-bg" d="M8 54 A42 42 0 0 1 92 54"/>
+      <path class="arc-fg" d="M8 54 A42 42 0 0 1 92 54" style="stroke:${col}; stroke-dasharray:${(Math.PI*42).toFixed(1)}; stroke-dashoffset:${(Math.PI*42).toFixed(1)};" data-off="${(Math.PI*42*(1-d.pct)).toFixed(1)}"/>
+    </svg>
+    <div class="gv">${d.v}</div><div class="gl">${d.l}</div>
+    <div class="gt" style="color:${col}">${d.t}</div>`;
+  doraGrid.appendChild(g);
+});
+
+/* ===================== coins ===================== */
+const coinGrid=document.getElementById('coinGrid');
+const WIN=new Set([13,27,44,61,88]);
+for(let i=0;i<100;i++){ const d=document.createElement('div'); d.className='coin'+(WIN.has(i)?' win':''); coinGrid.appendChild(d); }
+
+/* ===================== animation helpers ===================== */
+function runCount(el){
+  const target=parseFloat(el.dataset.count), dec=parseInt(el.dataset.dec||'0',10);
+  const pre=el.dataset.prefix||'', suf=el.dataset.suffix||'', final=pre+target.toFixed(dec)+suf;
+  if(reduce){ el.textContent=final; return; }
+  const dur=1500; let start=null, settled=false;
+  const settle=()=>{ settled=true; el.textContent=final; };
+  function step(ts){ if(settled) return; if(!start) start=ts;
+    const p=Math.min((ts-start)/dur,1), e=1-Math.pow(1-p,3);
+    el.textContent=pre+(target*e).toFixed(dec)+suf;
+    if(p<1) requestAnimationFrame(step); else settle(); }
+  requestAnimationFrame(step);
+  setTimeout(()=>{ if(!settled) settle(); }, dur+400);
+}
+function animateCounts(scope){ scope.querySelectorAll('[data-count]').forEach(c=>{ if(!c.dataset.done){ c.dataset.done='1'; runCount(c);} }); }
+function animateWidths(scope){ scope.querySelectorAll('[data-w]').forEach((el,i)=>{ if(el.dataset.wdone) return; el.dataset.wdone='1'; setTimeout(()=>{ el.style.width=el.dataset.w+'%'; }, reduce?0:60+i*40); }); }
+function animateDora(scope){ scope.querySelectorAll('.arc-fg').forEach((a,i)=>{ if(a.dataset.adone) return; a.dataset.adone='1'; setTimeout(()=>{ a.style.strokeDashoffset=a.dataset.off; }, reduce?0:120+i*120); }); }
+
+let coinsDone=false;
+function revealCoins(){ if(coinsDone) return; coinsDone=true;
+  [...coinGrid.children].forEach((c,i)=> setTimeout(()=>c.classList.add('show'), reduce?0:i*14)); }
+
+let beltDone=false;
+function fillBelt(){ if(beltDone) return; beltDone=true;
+  document.querySelectorAll('#belt .fill').forEach((f,i)=> setTimeout(()=>{ f.style.height=f.dataset.h+'%'; }, reduce?0:i*70)); }
+
+let tilted=false;
+function tiltBeam(){ if(tilted) return; tilted=true;
+  const beam=document.getElementById('beam'), pv=document.getElementById('panVol'), pa=document.getElementById('panVal');
+  const ang=reduce?9:11;
+  beam.style.transform=`rotate(${ang}deg)`;
+  pv.style.transform=`rotate(${-ang}deg)`; pv.style.transformBox='fill-box'; pv.style.transformOrigin='140px 90px';
+  pa.style.transform=`rotate(${-ang}deg)`; pa.style.transformBox='fill-box'; pa.style.transformOrigin='620px 90px';
+}
+
+/* ===================== reveal observer ===================== */
+const io=new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{
+    if(!e.isIntersecting) return;
+    const t=e.target;
+    t.classList.add('in');
+    animateCounts(t); animateWidths(t);
+    if(t.id==='top'||t.classList.contains('scale-stage')){ document.getElementById('scaleWrap').classList.add('lit'); tiltBeam(); }
+    if(t.querySelector && t.querySelector('#belt')) fillBelt();
+    if(t.querySelector && t.querySelector('#doraGrid') || t.id==='doraGrid') animateDora(document);
+    if(t.id==='coinGrid' || (t.querySelector && t.querySelector('#coinGrid'))) revealCoins();
+    if(t.id==='matrix' || (t.querySelector && t.querySelector('#matrix'))){ const m=document.getElementById('matrix'); if(m) m.classList.add('in-view'); }
+    if(t.classList.contains('govfac')) stageFactory(t);
+    io.unobserve(t);
+  });
+},{ threshold:0.2 });
+document.querySelectorAll('.reveal, #top, #coinGrid').forEach(el=>io.observe(el));
+
+/* ===================== governed factory — staggered assembly + walk ===================== */
+let facStaged=false;
+function stageFactory(el){
+  if(facStaged) return; facStaged=true;
+  if(reduce) return;                 // reduced motion: children already visible, no cascade
+  el.classList.add('staged');
+  const seq=[];
+  el.querySelectorAll('.frail.ins .fr').forEach(n=>seq.push(n));
+  el.querySelectorAll('.fcaps span').forEach(n=>seq.push(n));
+  el.querySelectorAll('.fmove').forEach(mv=>{ seq.push(mv); mv.querySelectorAll('.fnode').forEach(n=>seq.push(n)); });
+  el.querySelectorAll('.frail.out .fr').forEach(n=>seq.push(n));
+  el.querySelectorAll('.fext').forEach(n=>seq.push(n));
+  seq.forEach((n,i)=> setTimeout(()=> n.classList.add('lit'), 70+i*50));
+}
+(function walkTheLine(){
+  const btn=document.getElementById('fwalk'); if(!btn) return;
+  const gov=document.querySelector('.govfac'); if(!gov) return;
+  const nodes=[...gov.querySelectorAll('.fnode')];
+  let timers=[], running=false;
+  function clearWalk(){ timers.forEach(clearTimeout); timers=[]; nodes.forEach(n=>n.classList.remove('step')); gov.classList.remove('walking'); running=false; btn.setAttribute('aria-pressed','false'); }
+  btn.addEventListener('click',()=>{
+    if(running){ clearWalk(); return; }
+    running=true; btn.setAttribute('aria-pressed','true'); gov.classList.add('walking');
+    let t=0;
+    nodes.forEach(n=>{
+      const dwell = n.classList.contains('bn') ? (reduce?500:1100) : (reduce?160:460);
+      timers.push(setTimeout(()=>{ nodes.forEach(x=>x.classList.remove('step')); n.classList.add('step'); }, t));
+      t += dwell;
+    });
+    timers.push(setTimeout(clearWalk, t+300));
+  });
+})();
+
+/* ===================== perf — pause ambient motion off-screen ===================== */
+(function pauseOffscreen(){
+  const flowSvg=document.querySelector('.flowsvg');
+  const govfacEl=document.querySelector('.govfac');
+  if(!('IntersectionObserver' in window)) return;
+  const po=new IntersectionObserver((es)=>{
+    es.forEach(e=>{
+      const on=e.isIntersecting;
+      if(e.target===flowSvg && flowSvg.pauseAnimations){ try{ on?flowSvg.unpauseAnimations():flowSvg.pauseAnimations(); }catch{} }
+      if(e.target===govfacEl){ govfacEl.classList.toggle('anim-paused', !on); }
+    });
+  },{ rootMargin:'120px' });
+  if(flowSvg) po.observe(flowSvg);
+  if(govfacEl) po.observe(govfacEl);
+})();
+
+/* ===================== progress rail ===================== */
+const prog=document.getElementById('prog');
+addEventListener('scroll',()=>{ const h=document.documentElement; const p=h.scrollTop/(h.scrollHeight-h.clientHeight||1); prog.style.width=(p*100)+'%'; },{passive:true});
+
+/* ===================== exec layer — dot-nav · share · print ===================== */
+(function execLayer(){
+  const NAV=[
+    ['top','Top'],['mortgage','01 · Mortgage'],['ways','02 · Four ways out'],['perception','03 · Perception gap'],
+    ['line','04 · Governed line'],['story','05 · Translation story'],['altitudes','06 · Six altitudes'],
+    ['scorecard','07 · Scorecard'],['dora','08 · Instruments'],['verdict','09 · 5% verdict'],
+    ['empirical','10 · Empirical outcomes'],['readiness','11 · Pilot to scale'],['risk','12 · The decision'],
+    ['proof','13 · Front lines'],['shift','14 · The shift'],['mandate','15 · The mandate'],
+    ['dilemma','16 · The AI Dilemma'],['reality','17 · Reality check'],['glossary','Glossary'],['sources','Sources']
+  ];
+  const nav=document.getElementById('dotnav'); const map=new Map();
+  if(nav){
+    NAV.forEach(([id,label])=>{
+      const sec=document.getElementById(id); if(!sec) return;
+      const a=document.createElement('a'); a.href='#'+id; a.setAttribute('aria-label',label);
+      a.innerHTML='<span class="dn-t">'+label+'</span>';
+      nav.appendChild(a); map.set(sec,a);
+    });
+    const spy=new IntersectionObserver((es)=>{
+      es.forEach(e=>{ const a=map.get(e.target); if(!a||!e.isIntersecting) return;
+        nav.querySelectorAll('a').forEach(x=>x.classList.remove('on')); a.classList.add('on'); });
+    },{ rootMargin:'-45% 0px -45% 0px', threshold:0 });
+    map.forEach((a,sec)=>spy.observe(sec));
+  }
+  let toT; function toast(msg){ const t=document.getElementById('toast'); if(!t) return; t.textContent=msg; t.classList.add('show'); clearTimeout(toT); toT=setTimeout(()=>t.classList.remove('show'),2200); }
+  document.getElementById('shareBtn')?.addEventListener('click', async ()=>{
+    const url=location.href;
+    try{
+      if(navigator.share && matchMedia('(max-width:760px)').matches){ await navigator.share({title:document.title, url}); return; }
+      await navigator.clipboard.writeText(url); toast('Link copied to clipboard');
+    }catch(err){ toast(url); }
+  });
+  document.getElementById('printBtn')?.addEventListener('click',()=>window.print());
+})();
+
+/* ===================== CFO margin model ===================== */
+(function cfoModel(){
+  const els={}; ['cfoSeats','cfoRuns','cfoCost','cfoRev','cfoSeatsV','cfoRunsV','cfoCostV','cfoRevV','cfoAI','cfoReview','cfoPer','cfoBarAI','cfoBarRev','cfoVerdict'].forEach(id=>els[id]=document.getElementById(id));
+  if(!els.cfoSeats) return;
+  const money=(n)=>{ if(n>=1e6) return '$'+(n/1e6).toFixed(n<1e7?2:1)+'M'; if(n>=1e3) return '$'+Math.round(n/1e3)+'k'; return '$'+Math.round(n); };
+  function calc(){
+    const seats=+els.cfoSeats.value, runs=+els.cfoRuns.value, costRun=(+els.cfoCost.value)/100, revMin=+els.cfoRev.value;
+    const DAYS=21, PR_RATIO=0.12, RATE=90;
+    const prs=seats*runs*PR_RATIO*DAYS;
+    const aiSpend=seats*runs*costRun*DAYS;
+    const revSpend=(prs*revMin/60)*RATE;
+    const total=aiSpend+revSpend;
+    const per=prs? total/prs : 0;
+    const revShare=total? revSpend/total : 0;
+    els.cfoSeatsV.textContent=seats.toLocaleString();
+    els.cfoRunsV.textContent=runs;
+    els.cfoCostV.textContent='$'+costRun.toFixed(2);
+    els.cfoRevV.textContent=revMin;
+    els.cfoAI.textContent=money(aiSpend);
+    els.cfoReview.textContent=money(revSpend);
+    els.cfoPer.textContent='$'+per.toFixed(2);
+    const aiPct=Math.round((1-revShare)*100), revPct=100-aiPct;
+    els.cfoBarAI.style.width=aiPct+'%'; els.cfoBarRev.style.width=revPct+'%';
+    els.cfoBarAI.textContent=aiPct>11?aiPct+'%':''; els.cfoBarRev.textContent=revPct>11?revPct+'%':'';
+    let c,v;
+    if(revShare>=0.78){ c='var(--volume)'; v='<b>The tokens are rounding error.</b> ~'+revPct+'% of tracked AI spend is human review — the gate, not the model, is your real cost and real constraint. Adding seats scales this line, not the AI bill.'; }
+    else if(revShare>=0.5){ c='var(--gold-bright)'; v='<b>Cheap output, expensive judgment.</b> Review is ~'+revPct+'% of spend and climbs with every seat or review-minute you add. Plan reviewer capacity as the bottleneck.'; }
+    else { c='var(--good)'; v='<b>Run-cost-heavy regime.</b> AI runs are ~'+aiPct+'% of spend here — but review still rivals them, and overtakes the moment volume or minutes rise.'; }
+    els.cfoVerdict.style.setProperty('--cvc',c); els.cfoVerdict.innerHTML=v;
+  }
+  ['cfoSeats','cfoRuns','cfoCost','cfoRev'].forEach(id=>els[id].addEventListener('input',calc));
+  calc();
+})();
+
+/* ===================== AI dilemma walkthrough ===================== */
+(function dilemma(){
+  var root=document.getElementById('dilSteps'); if(!root) return;
+  var steps=[].slice.call(root.querySelectorAll('.dil-step'));
+  var base={out:20,mar:8,risk:24};
+  var state, picks;
+  var fills={out:document.getElementById('fOut'),mar:document.getElementById('fMar'),risk:document.getElementById('fRisk')};
+  var vals={out:document.getElementById('mvOut'),mar:document.getElementById('mvMar'),risk:document.getElementById('mvRisk')};
+  var vbox=document.getElementById('dilVerdict');
+  var replay=document.getElementById('dilReplay');
+  if(!fills.out||!vbox||!replay) return;
+  function clamp(n){ return Math.max(0,Math.min(100,Math.round(n))); }
+  function render(){ ['out','mar','risk'].forEach(function(k){ var v=clamp(state[k]); fills[k].style.width=v+'%'; vals[k].textContent=v; }); }
+  function setVerdict(empty,vh,p){ vbox.classList.toggle('empty',!!empty); vbox.innerHTML='<div class="vh">'+vh+'</div>'+(p?'<p>'+p+'</p>':''); }
+  function finalVerdict(){
+    var O=clamp(state.out),M=clamp(state.mar),R=clamp(state.risk);
+    if(M>=52&&R<=30) return ['You found the 5% path.','You optimized for margin and kept risk on a leash — govern the gate, measure the bill, fund the bottleneck. This is what the teams that actually convert AI into P&L do. Output was never the headline; verified value is.'];
+    if(O>=68&&M<=30) return ['This is how pilots join the 95%.','Output exploded and the dashboards looked great — but almost none of it reached the margin, and you’re carrying a stack of unreviewed risk. More volume, less value. The gate you pulled was the one keeping you honest.'];
+    if(R>=55) return ['You shipped the bottleneck downstream.','You moved fast, but the risk you skipped didn’t disappear — it moved past the gate to whoever’s accountable when it breaks. Speed without a counter-metric is a loan, not a gain.'];
+    return ['Better than most — but the margin’s still leaking.','Some governed calls, some volume calls. The output is real; the value reaching the P&L is only partial. Pair every speed metric with its counter-metric and the leak closes.'];
+  }
+  function choose(step, btn){
+    if(step.classList.contains('locked')) return;
+    var d; try{ d=JSON.parse(btn.getAttribute('data-o')); }catch(e){ return; }
+    state.out+=d.out; state.mar+=d.mar; state.risk+=d.risk;
+    btn.classList.add('sel');
+    [].forEach.call(step.querySelectorAll('.dil-opt'),function(b){ b.disabled=true; });
+    step.classList.add('locked'); step.classList.remove('active');
+    picks++; render();
+    if(picks<steps.length){
+      var nx=steps[picks];
+      nx.hidden=false; nx.classList.remove('locked'); nx.classList.add('active');
+      requestAnimationFrame(function(){ try{ nx.scrollIntoView({behavior:reduce?'auto':'smooth',block:'center'}); }catch(e){} });
+      setVerdict(true, picks===1?'One call down. The board is watching.':'Two calls down — one to go.','');
+    } else {
+      var fv=finalVerdict(); setVerdict(false,fv[0],fv[1]); replay.hidden=false;
+    }
+  }
+  function reset(){
+    state=Object.assign({},base); picks=0;
+    steps.forEach(function(s,j){
+      s.classList.remove('locked','active');
+      if(j===0){ s.hidden=false; s.classList.add('active'); } else { s.hidden=true; }
+      [].forEach.call(s.querySelectorAll('.dil-opt'),function(b){ b.classList.remove('sel'); b.disabled=false; });
+    });
+    render(); setVerdict(true,'Make your first call →',''); replay.hidden=true;
+  }
+  steps.forEach(function(step){ [].forEach.call(step.querySelectorAll('.dil-opt'),function(btn){ btn.addEventListener('click',function(){ choose(step,btn); }); }); });
+  replay.addEventListener('click',reset);
+  reset();
+})();
+
+/* ===================== 15 — translation story ===================== */
+(function story(){
+  var card=document.getElementById('storyCard'); if(!card) return;
+  var tabs=[].slice.call(card.querySelectorAll('.story-tab'));
+  var steps=[].slice.call(card.querySelectorAll('.story-step'));
+  var prev=document.getElementById('storyPrev'), next=document.getElementById('storyNext');
+  if(!tabs.length||!prev||!next) return;
+  var labels=['Generate','the silent gap','the gate holds'];
+  var cur=0;
+  function show(i){
+    cur=Math.max(0,Math.min(steps.length-1,i));
+    tabs.forEach(function(t,j){ t.classList.toggle('on',j===cur); t.setAttribute('aria-selected', j===cur?'true':'false'); });
+    steps.forEach(function(s,j){ s.classList.toggle('on',j===cur); });
+    prev.disabled = cur===0;
+    next.disabled = cur===steps.length-1;
+    prev.textContent = cur>0 ? ('← Back: '+labels[cur-1]) : '← Back';
+    next.textContent = cur<steps.length-1 ? ('Next: '+labels[cur+1]+' →') : 'Resolved ✓';
+  }
+  tabs.forEach(function(t,j){ t.addEventListener('click',function(){ show(j); }); });
+  prev.addEventListener('click',function(){ show(cur-1); });
+  next.addEventListener('click',function(){ show(cur+1); });
+  show(0);
+})();
+
+/* ===================== 16 — reality check simulation ===================== */
+(function realityCheck(){
+  var sec=document.getElementById('reality'); if(!sec) return;
+  var fills=[1,2,3].map(function(n){ return document.getElementById('rcF'+n); });
+  var pcts=[1,2,3].map(function(n){ return document.getElementById('rcP'+n); });
+  var ring=document.getElementById('rcRing'), donutPct=document.getElementById('rcDonutPct');
+  var out=document.getElementById('rcSimOut'), run=document.getElementById('rcRun');
+  if(fills.indexOf(null)>-1||!ring||!run) return;
+  var CIRC=289, LEAK=31; // Faros: 31% of code ships with no review
+  function setFill(el,pctEl,target,delay){
+    el.style.width='0%'; pctEl.textContent='0%';
+    setTimeout(function(){
+      el.style.width=target+'%';
+      if(reduce){ pctEl.textContent=target+'%'; return; }
+      var t0=null, dur=1100, done=false;
+      function settle(){ done=true; pctEl.textContent=target+'%'; }
+      (function tick(ts){ if(done) return; if(!t0)t0=ts; var p=Math.min((ts-t0)/dur,1), e=1-Math.pow(1-p,3);
+        pctEl.textContent=Math.round(target*e)+'%'; if(p<1) requestAnimationFrame(tick); else settle(); })(performance.now());
+      setTimeout(function(){ if(!done) settle(); }, dur+300);   // fallback if rAF is throttled
+    }, delay);
+  }
+  var ran=false;
+  function run_(){
+    fills.forEach(function(f,i){ setFill(f,pcts[i],+f.dataset.target, reduce?0:120+i*180); });
+    ring.style.strokeDashoffset=CIRC; donutPct.textContent='0%';
+    setTimeout(function(){
+      ring.style.strokeDashoffset = CIRC*(1-LEAK/100);
+      if(reduce){ donutPct.textContent=LEAK+'%'; }
+      else { var t0=null,dur=1200,done=false; function settle(){ done=true; donutPct.textContent=LEAK+'%'; }
+        (function tick(ts){ if(done) return; if(!t0)t0=ts; var p=Math.min((ts-t0)/dur,1);
+          donutPct.textContent=Math.round(LEAK*(1-Math.pow(1-p,3)))+'%'; if(p<1) requestAnimationFrame(tick); else settle(); })(performance.now());
+        setTimeout(function(){ if(!done) settle(); }, dur+300); }   // fallback if rAF is throttled
+    }, reduce?0:700);
+    out.innerHTML='Output simulated at <b>100%</b>. Of it, <span class="leak">'+LEAK+'%</span> shipped with <b>no human review</b> — that lands as unverified risk, not booked value. Volume is the easy 100%. The <span class="keep">69%</span> you can actually defend at the P&amp;L is the margin.';
+  }
+  run.addEventListener('click',run_);
+  var io2=new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting&&!ran){ ran=true; run_(); io2.unobserve(e.target); } }); },{ threshold:0.35 });
+  io2.observe(sec);
+})();
+
+/* ===================== 17 — empirical ROI chart draw ===================== */
+(function empChart(){
+  var svg=document.getElementById('empSvg'); if(!svg) return;
+  var lines=[document.getElementById('lnCost'),document.getElementById('lnRoi')];
+  if(lines.indexOf(null)>-1) return;
+  lines.forEach(function(ln){ var len=ln.getTotalLength(); ln.style.strokeDasharray=len; ln.style.strokeDashoffset=reduce?0:len; });
+  var drawn=false;
+  function draw(){ if(drawn) return; drawn=true;
+    lines.forEach(function(ln,i){ setTimeout(function(){ ln.style.strokeDashoffset='0'; }, reduce?0:i*260); });
+    setTimeout(function(){ svg.classList.add('drawn'); }, reduce?0:300);
+  }
+  var io3=new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting){ draw(); io3.unobserve(e.target); } }); },{ threshold:0.3 });
+  io3.observe(svg);
+})();
+
+/* ===================== theme ===================== */
+function setTheme(next){ if(next!=='dark'&&next!=='light') return; const r=document.documentElement; r.dataset.theme=next; r.style.colorScheme=next; try{localStorage.setItem('m2m-theme',next);}catch{} }
+document.getElementById('themeBtn')?.addEventListener('click',()=>setTheme(document.documentElement.dataset.theme==='dark'?'light':'dark'));
+addEventListener('message',(e)=>{ const d=e.data; if(d&&d.type==='m2m:set-theme') setTheme(d.theme); });
+
+/* ===================== river flow — particles that dam at the gate ===================== */
+(function buildFlow(){
+  var g=document.getElementById('partsM'); if(!g) return;
+  var ns='http://www.w3.org/2000/svg';
+  var N = reduce ? 0 : 16;
+  var cls=['pa','pg','pg','pa','pg'];
+  for(var i=0;i<N;i++){
+    var c=document.createElementNS(ns,'circle');
+    c.setAttribute('class', cls[i%cls.length]);
+    c.setAttribute('r', (2.4+(i%3)*0.7).toFixed(1));
+    c.setAttribute('filter','url(#glowM)');
+    var am=document.createElementNS(ns,'animateMotion');
+    var dur=(5.5+(i%5)*0.9).toFixed(2);
+    am.setAttribute('dur', dur+'s'); am.setAttribute('repeatCount','indefinite');
+    am.setAttribute('begin', (-(i*0.55)).toFixed(2)+'s'); am.setAttribute('rotate','auto');
+    am.setAttribute('keyPoints','0;0.46;0.50;0.54;1');   // dwell near the gate (~0.50)
+    am.setAttribute('keyTimes','0;0.30;0.55;0.78;1');
+    am.setAttribute('calcMode','linear');
+    var mp=document.createElementNS(ns,'mpath');
+    mp.setAttributeNS('http://www.w3.org/1999/xlink','href','#chanM');
+    mp.setAttribute('href','#chanM');
+    am.appendChild(mp); c.appendChild(am);
+    var op=document.createElementNS(ns,'animate');
+    op.setAttribute('attributeName','opacity');
+    op.setAttribute('values','0;1;1;.5;1;1;0');           // flicker as it waits at the gate
+    op.setAttribute('keyTimes','0;0.06;0.45;0.55;0.65;0.95;1');
+    op.setAttribute('dur', dur+'s'); op.setAttribute('repeatCount','indefinite');
+    op.setAttribute('begin', (-(i*0.55)).toFixed(2)+'s');
+    c.appendChild(op);
+    g.appendChild(c);
+  }
+})();
+
+/* ===================== hero kick (above the fold) ===================== */
+addEventListener('load',()=>{
+  document.getElementById('scaleWrap').classList.add('lit');
+  setTimeout(tiltBeam, reduce?0:300);
+  animateCounts(document.getElementById('top'));
+});
+</script>
+</body>
+</html>

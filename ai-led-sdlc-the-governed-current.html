@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>The Governed Current — AI-Led SDLC, Measured Honestly</title>
+<meta name="description" content="A cinematic, interactive map of the governed AI-led SDLC: work flows from legacy pressure, accelerates through the AI factory, dams at the human review gate, and resolves into honestly-measured outcomes." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,900&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --ink:#05070d; --ink-1:#080b13; --ink-2:#0c1019; --ink-3:#121826; --line:#1f2738;
+    --fg:#e9edf5; --mut:#94a0b6; --mut-2:#5e6a80;
+    --cyan:#5ad6e8;       /* AI · the current */
+    --teal:#3ad8b3;
+    --amber:#f5a623;      /* human gate · accountability */
+    --amber-soft:#ffce85;
+    --green:#7bd88f;      /* outcomes · value */
+    --red:#ff6b6b;        /* the dam · bottleneck · risk */
+    --violet:#9b8eff;     /* governance */
+    --gold:#ffd270;
+    --maxw:1240px;
+    --serif:"Newsreader",Georgia,serif;
+    --disp:"Fraunces",Georgia,serif;
+    --mono:"JetBrains Mono",ui-monospace,monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--ink); color:var(--fg);
+    font-family:var(--serif); font-size:18px; line-height:1.65;
+    -webkit-font-smoothing:antialiased; overflow-x:hidden;
+  }
+  ::selection{background:rgba(90,214,232,.28); color:#fff}
+
+  /* ---------- atmosphere ---------- */
+  .bg{position:fixed; inset:0; z-index:-3; pointer-events:none;
+    background:
+      radial-gradient(1000px 680px at 8% -8%, rgba(90,214,232,.12), transparent 60%),
+      radial-gradient(1100px 760px at 96% 4%, rgba(155,142,255,.11), transparent 60%),
+      radial-gradient(1200px 900px at 70% 112%, rgba(245,166,35,.08), transparent 60%),
+      radial-gradient(900px 700px at 30% 60%, rgba(123,216,143,.05), transparent 60%),
+      var(--ink);
+  }
+  .bg::after{ content:""; position:absolute; inset:0; opacity:.05; mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  .grid-lines{position:fixed; inset:0; z-index:-2; pointer-events:none;
+    background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+    background-size:72px 72px; mask-image:radial-gradient(ellipse 90% 80% at 50% 24%, #000 28%, transparent 82%); opacity:.1;}
+  .wrap{max-width:var(--maxw); margin:0 auto; padding:0 34px}
+
+  /* ---------- chrome ---------- */
+  .progress{position:fixed; top:0; left:0; height:2px; width:0; z-index:60;
+    background:linear-gradient(90deg,var(--cyan),var(--violet),var(--amber)); box-shadow:0 0 14px var(--cyan)}
+  .topbar{position:fixed; top:0; left:0; right:0; z-index:50;
+    display:flex; align-items:center; justify-content:space-between; padding:15px 34px;
+    backdrop-filter:blur(12px); background:linear-gradient(180deg, rgba(5,7,13,.86), rgba(5,7,13,0));
+    border-bottom:1px solid transparent; transition:border-color .4s}
+  .topbar.scrolled{border-bottom-color:var(--line)}
+  .brand{font-family:var(--mono); font-size:12px; letter-spacing:.22em; text-transform:uppercase; color:var(--mut); display:flex; align-items:center; gap:11px}
+  .brand .dot{width:9px; height:9px; border-radius:50%; background:var(--cyan); box-shadow:0 0 0 0 rgba(90,214,232,.6); animation:beat 2.6s infinite}
+  @keyframes beat{0%{box-shadow:0 0 0 0 rgba(90,214,232,.55)}70%{box-shadow:0 0 0 9px rgba(90,214,232,0)}100%{box-shadow:0 0 0 0 rgba(90,214,232,0)}}
+  .brand b{color:var(--fg); font-weight:700}
+  .navlinks{display:flex; gap:24px}
+  .navlinks a{font-family:var(--mono); font-size:11px; letter-spacing:.15em; text-transform:uppercase; color:var(--mut-2); text-decoration:none; transition:color .25s}
+  .navlinks a:hover{color:var(--cyan)}
+  @media(max-width:840px){.navlinks{display:none}}
+
+  /* ---------- hero / the current ---------- */
+  .hero{position:relative; min-height:100svh; display:flex; flex-direction:column; justify-content:center; padding:140px 0 60px; overflow:hidden}
+  .riverwrap{position:absolute; inset:0; z-index:0; pointer-events:none}
+  .riversvg{position:absolute; inset:0; width:100%; height:100%}
+  .hero .wrap{position:relative; z-index:2}
+  .kicker{font-family:var(--mono); font-size:12px; letter-spacing:.3em; text-transform:uppercase; color:var(--cyan);
+    display:flex; align-items:center; gap:14px; margin-bottom:28px}
+  .kicker::before{content:""; width:46px; height:1px; background:linear-gradient(90deg,var(--cyan),transparent)}
+  .hero h1{font-family:var(--disp); font-weight:300; font-size:clamp(2.7rem,7.4vw,6rem); line-height:.99; letter-spacing:-.025em; margin:0 0 30px; max-width:17ch}
+  .hero h1 em{font-style:italic; font-weight:500; color:var(--amber)}
+  .hero h1 .cur{font-style:italic; font-weight:500;
+    background:linear-gradient(92deg,var(--cyan),var(--teal),var(--green)); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent}
+  .hero .lede{font-size:clamp(1.05rem,2vw,1.42rem); color:var(--mut); max-width:62ch; font-weight:300; line-height:1.62}
+  .hero .lede strong{color:var(--fg); font-weight:500}
+  .hero .lede .gate{color:var(--amber); font-weight:500}
+  .meta-row{display:flex; flex-wrap:wrap; gap:14px 26px; margin-top:46px; font-family:var(--mono); font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--mut-2)}
+  .meta-row span b{font-weight:500}
+  .meta-row .c1 b{color:var(--cyan)} .meta-row .c2 b{color:var(--amber)} .meta-row .c3 b{color:var(--green)} .meta-row .c4 b{color:var(--violet)}
+  .scrollcue{margin-top:54px; font-family:var(--mono); font-size:10.5px; letter-spacing:.2em; text-transform:uppercase; color:var(--mut-2); display:flex; align-items:center; gap:12px}
+  .scrollcue .ln{width:1px; height:34px; background:linear-gradient(180deg,var(--cyan),transparent); position:relative; overflow:hidden}
+  .scrollcue .ln::after{content:""; position:absolute; top:-10px; left:0; width:1px; height:10px; background:var(--cyan); animation:drip 1.9s ease-in infinite}
+  @keyframes drip{to{top:34px}}
+
+  .reveal-up{opacity:0; transform:translateY(28px); animation:up 1s cubic-bezier(.2,.7,.2,1) forwards}
+  @keyframes up{to{opacity:1; transform:none}}
+  .d1{animation-delay:.12s}.d2{animation-delay:.26s}.d3{animation-delay:.4s}.d4{animation-delay:.56s}.d5{animation-delay:.72s}.d6{animation-delay:.9s}
+
+  /* river stage labels */
+  .stagelbl{font-family:var(--mono); font-size:12px; letter-spacing:.04em}
+  .stagesub{font-family:var(--mono); font-size:9px; letter-spacing:.08em; text-transform:uppercase}
+
+  /* ---------- sections ---------- */
+  section{padding:108px 0; position:relative}
+  .sec-num{font-family:var(--mono); font-size:12px; letter-spacing:.22em; color:var(--cyan); margin-bottom:14px}
+  .sec-h{font-family:var(--disp); font-weight:400; font-size:clamp(2rem,4.6vw,3.5rem); line-height:1.04; letter-spacing:-.018em; margin:0 0 18px; max-width:20ch}
+  .sec-h em{font-style:italic; color:var(--amber)}
+  .sec-h .cy{font-style:italic; color:var(--cyan)}
+  .sec-intro{color:var(--mut); max-width:64ch; font-size:1.12rem; font-weight:300}
+  .sec-intro strong{color:var(--fg); font-weight:500}
+  .divider{height:1px; background:linear-gradient(90deg,transparent,var(--line),transparent)}
+
+  /* in-view */
+  .io{opacity:0; transform:translateY(34px); transition:opacity .9s cubic-bezier(.2,.7,.2,1), transform .9s cubic-bezier(.2,.7,.2,1)}
+  .io.in{opacity:1; transform:none}
+  .io.s1{transition-delay:.07s}.io.s2{transition-delay:.15s}.io.s3{transition-delay:.23s}.io.s4{transition-delay:.31s}
+
+  /* ============ INTERACTIVE FACTORY MAP ============ */
+  .mapframe{margin-top:54px; border:1px solid var(--line); border-radius:24px; overflow:hidden;
+    background:linear-gradient(180deg,rgba(255,255,255,.022),transparent 24%), var(--ink-1); box-shadow:0 30px 90px rgba(0,0,0,.45)}
+  .maptop{display:flex; flex-wrap:wrap; gap:14px; align-items:center; justify-content:space-between;
+    padding:18px 22px; border-bottom:1px solid var(--line);
+    background:linear-gradient(135deg, rgba(90,214,232,.06), rgba(155,142,255,.03) 70%, transparent)}
+  .maptop .mt-l{display:flex; flex-direction:column; gap:4px}
+  .maptop .mt-k{font-family:var(--mono); font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var(--cyan)}
+  .maptop .mt-t{font-family:var(--disp); font-weight:500; font-size:1.16rem; letter-spacing:-.02em}
+  .legendrow{display:flex; flex-wrap:wrap; gap:8px}
+  .lchip{font-family:var(--mono); font-size:10px; letter-spacing:.06em; text-transform:uppercase; color:var(--mut);
+    border:1px solid var(--line); border-radius:999px; padding:7px 12px; display:inline-flex; align-items:center; gap:7px; white-space:nowrap}
+  .lchip i{width:8px; height:8px; border-radius:50%; display:inline-block}
+
+  .stage{display:grid; grid-template-columns:248px minmax(0,1fr) 232px; gap:0}
+  @media(max-width:1080px){.stage{grid-template-columns:1fr}}
+  .rail{padding:22px 20px; display:flex; flex-direction:column; gap:12px}
+  .rail.left{border-right:1px solid var(--line); background:linear-gradient(180deg,rgba(255,107,107,.05),transparent 26%)}
+  .rail.right{border-left:1px solid var(--line); background:linear-gradient(180deg,rgba(123,216,143,.05),transparent 26%)}
+  .rail-k{font-family:var(--mono); font-size:9.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--mut-2)}
+  .rail.left .rail-k{color:var(--red)} .rail.right .rail-k{color:var(--green)}
+  .rail-t{font-family:var(--disp); font-weight:500; font-size:1.08rem; line-height:1.1; letter-spacing:-.01em; margin-bottom:4px}
+  .pcard{border:1px solid var(--line); border-radius:13px; padding:12px 13px; background:var(--ink-2); transition:border-color .35s, transform .35s, opacity .35s; position:relative; overflow:hidden}
+  .pcard::before{content:""; position:absolute; left:0; top:0; bottom:0; width:2px; background:var(--pc,var(--line)); opacity:.8}
+  .pcard.dim{opacity:.34}
+  .pcard.hot{border-color:var(--pc); transform:translateX(3px); box-shadow:0 8px 28px rgba(0,0,0,.28)}
+  .rail.right .pcard.hot{transform:translateX(-3px)}
+  .pcard .pl{font-family:var(--mono); font-size:11px; letter-spacing:.02em; color:var(--fg); font-weight:500}
+  .pcard .pp{color:var(--mut); font-size:.82rem; line-height:1.4; margin-top:5px}
+
+  .factory{padding:24px 22px; display:flex; flex-direction:column; gap:18px; position:relative}
+  .chapters{display:grid; grid-template-columns:repeat(4,1fr); gap:12px}
+  @media(max-width:720px){.chapters{grid-template-columns:1fr 1fr}}
+  .chap{border:1px solid var(--line); border-radius:16px; padding:13px 13px 12px; background:var(--ink-2); position:relative; overflow:hidden}
+  .chap::after{content:""; position:absolute; left:0; right:0; top:0; height:3px; background:var(--ch)}
+  .chap .ck{font-family:var(--mono); font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:var(--ch); margin-bottom:3px}
+  .chap .ct{font-family:var(--disp); font-weight:500; font-size:1.14rem; letter-spacing:-.02em}
+  .chap .cc{color:var(--mut); font-size:.8rem; line-height:1.4; margin-top:4px}
+  .stages-row{display:flex; flex-direction:column; gap:7px; margin-top:11px}
+  .snode{appearance:none; text-align:left; width:100%; cursor:pointer; border:1px solid var(--line);
+    border-radius:10px; padding:9px 11px; background:linear-gradient(180deg,rgba(255,255,255,.03),transparent), rgba(10,14,22,.7);
+    color:var(--fg); transition:border-color .25s, transform .25s, box-shadow .25s, opacity .25s; position:relative}
+  .snode:hover,.snode:focus-visible{outline:none; border-color:var(--ch); transform:translateY(-1px); box-shadow:0 8px 22px rgba(0,0,0,.28)}
+  .snode.active{border-color:var(--ch); box-shadow:0 0 0 1px var(--ch), 0 10px 26px rgba(0,0,0,.34)}
+  .snode.dim{opacity:.4}
+  .snode .sn-t{font-family:var(--mono); font-size:11.5px; letter-spacing:.01em; font-weight:500; display:flex; align-items:center; justify-content:space-between; gap:8px}
+  .snode .sn-s{color:var(--mut-2); font-size:.74rem; margin-top:2px; font-family:var(--mono); letter-spacing:.02em}
+  .gatemark{font-family:var(--mono); font-size:8px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink); background:var(--amber); padding:2px 6px; border-radius:20px; flex-shrink:0}
+  .gatemark.bottleneck{background:var(--red); color:#fff; animation:bpulse 2.2s ease-out infinite}
+  @keyframes bpulse{0%{box-shadow:0 0 0 0 rgba(255,107,107,.5)}70%{box-shadow:0 0 0 7px rgba(255,107,107,0)}100%{box-shadow:0 0 0 0 rgba(255,107,107,0)}}
+
+  .corebar{display:flex; align-items:center; gap:14px; border:1px dashed var(--cyan); border-radius:14px; padding:13px 16px;
+    background:linear-gradient(120deg,rgba(90,214,232,.07),transparent); position:relative; overflow:hidden}
+  .corebar .ci{font-family:var(--mono); font-size:9.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--cyan); flex-shrink:0}
+  .corebar .cd{color:var(--mut); font-size:.86rem; line-height:1.45}
+  .corebar .cd b{color:var(--fg); font-weight:500}
+  .corebar .sweep{position:absolute; top:0; bottom:0; width:120px; left:-140px;
+    background:linear-gradient(90deg,transparent,rgba(90,214,232,.16),transparent); animation:sweep 4.6s linear infinite}
+  @keyframes sweep{to{left:120%}}
+
+  /* enterprise boundary */
+  .boundary{margin:24px 22px 0; border:1px solid rgba(245,166,35,.28); border-radius:16px; padding:16px 18px;
+    background:linear-gradient(180deg,rgba(245,166,35,.06),transparent 60%)}
+  .boundary .bk{font-family:var(--mono); font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--amber); margin-bottom:8px}
+  .boundary .bt{font-family:var(--disp); font-weight:500; font-size:1.06rem; margin-bottom:10px}
+  .boundary-pills{display:flex; flex-wrap:wrap; gap:8px}
+  .bpill{font-family:var(--mono); font-size:10.5px; letter-spacing:.04em; color:var(--fg);
+    border:1px solid rgba(245,166,35,.25); background:rgba(245,166,35,.07); border-radius:999px; padding:7px 12px; transition:opacity .3s, border-color .3s}
+  .bpill.dim{opacity:.4}
+
+  /* detail deck */
+  .deck{margin:22px; border:1px solid var(--line); border-radius:18px; overflow:hidden; background:var(--ink-2)}
+  .deck-head{display:flex; flex-wrap:wrap; gap:12px; align-items:center; justify-content:space-between; padding:16px 18px; border-bottom:1px solid var(--line);
+    background:linear-gradient(135deg,rgba(90,214,232,.05),transparent 70%)}
+  .deck-head .dh-l{display:flex; flex-direction:column; gap:3px}
+  .deck-head .dh-k{font-family:var(--mono); font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:var(--cyan)}
+  .deck-head .dh-t{font-family:var(--disp); font-weight:500; font-size:1.3rem; letter-spacing:-.02em}
+  .deck-head .dh-own{font-family:var(--mono); font-size:10.5px; letter-spacing:.05em; color:var(--mut)}
+  .deck-head .dh-own b{color:var(--amber); font-weight:500}
+  .deck-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--line)}
+  @media(max-width:960px){.deck-grid{grid-template-columns:1fr 1fr}}
+  @media(max-width:560px){.deck-grid{grid-template-columns:1fr}}
+  .dpanel{background:var(--ink-2); padding:16px 17px; min-height:150px}
+  .dpanel h5{margin:0 0 9px; font-family:var(--mono); font-size:10px; letter-spacing:.13em; text-transform:uppercase; display:flex; align-items:center; gap:8px}
+  .dpanel h5 i{width:8px; height:8px; border-radius:50%; display:inline-block}
+  .dpanel.ai h5{color:var(--cyan)} .dpanel.ai h5 i{background:var(--cyan)}
+  .dpanel.human h5{color:var(--amber)} .dpanel.human h5 i{background:var(--amber)}
+  .dpanel.git h5{color:var(--violet)} .dpanel.git h5 i{background:var(--violet)}
+  .dpanel.out h5{color:var(--red)} .dpanel.out h5 i{background:var(--red)}
+  .dpanel p{margin:0 0 9px; color:var(--fg); font-size:.92rem; line-height:1.5}
+  .dpanel ul{margin:0; padding-left:16px; color:var(--mut); font-size:.86rem; line-height:1.5}
+  .dpanel ul li{margin-bottom:4px}
+  .deck-metrics{display:flex; flex-wrap:wrap; gap:10px; padding:16px 18px; border-top:1px solid var(--line)}
+  .mbadge{border:1px solid var(--line); border-radius:12px; padding:10px 14px; min-width:150px; background:var(--ink-3)}
+  .mbadge .mk{font-family:var(--mono); font-size:9px; letter-spacing:.12em; text-transform:uppercase; color:var(--mut-2); display:block; margin-bottom:5px}
+  .mbadge .mv{font-family:var(--mono); font-size:.92rem; color:var(--fg); font-weight:500}
+  .mbadge .mv .lead{color:var(--green)} .mbadge .mv .ctr{color:var(--red)}
+
+  /* persona ribbon */
+  .personas{display:flex; flex-wrap:wrap; gap:8px; padding:0 22px 22px}
+  .pbtn{appearance:none; cursor:pointer; font-family:var(--mono); font-size:10.5px; letter-spacing:.04em; text-transform:uppercase;
+    border:1px solid var(--line); background:var(--ink-2); color:var(--mut); border-radius:999px; padding:8px 13px; transition:all .22s}
+  .pbtn:hover,.pbtn:focus-visible{outline:none; color:var(--fg); border-color:var(--violet)}
+  .pbtn.active{color:var(--ink); background:var(--violet); border-color:var(--violet); font-weight:700}
+  .ptag{font-family:var(--mono); font-size:9.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--mut-2); align-self:center; margin-right:4px}
+
+  /* ============ HONEST INSTRUMENTS ============ */
+  .paradox-grid{display:grid; grid-template-columns:1.1fr .9fr; gap:52px; align-items:center; margin-top:52px}
+  @media(max-width:880px){.paradox-grid{grid-template-columns:1fr; gap:32px}}
+  .chartbox{background:linear-gradient(180deg,var(--ink-2),var(--ink-1)); border:1px solid var(--line); border-radius:16px; padding:26px 24px 18px; position:relative; overflow:hidden}
+  .chartbox .axislbl{font-family:var(--mono); font-size:10px; fill:var(--mut-2); letter-spacing:.06em}
+  .legend{display:flex; gap:20px; margin-top:14px; font-family:var(--mono); font-size:11px; letter-spacing:.03em; flex-wrap:wrap}
+  .legend i{display:inline-block; width:20px; height:3px; vertical-align:middle; margin-right:8px; border-radius:2px}
+  .stat-stack{display:flex; flex-direction:column; gap:22px}
+  .stat{border-left:2px solid var(--line); padding-left:18px}
+  .stat .big{font-family:var(--disp); font-size:2.7rem; font-weight:300; line-height:1; letter-spacing:-.02em}
+  .stat .big.up{color:var(--green)} .stat .big.dn{color:var(--red)} .stat .big.warn{color:var(--amber)}
+  .stat .lab{color:var(--mut); font-size:.96rem; margin-top:6px}
+  .stat .lab em{color:var(--fg); font-style:normal; font-weight:500}
+  .stat .src{font-family:var(--mono); font-size:9px; color:var(--mut-2); letter-spacing:.08em; text-transform:uppercase; margin-top:6px}
+
+  /* 95/5 waffle */
+  .waffle{margin:48px auto 0; display:flex; gap:40px; align-items:center; justify-content:center; flex-wrap:wrap}
+  .waffle .dots{display:grid; grid-template-columns:repeat(20,1fr); gap:6px; width:min(440px,74vw)}
+  .waffle .d{aspect-ratio:1; border-radius:3px; background:var(--ink-3); border:1px solid var(--line); opacity:.45}
+  .waffle .d.lit{background:var(--amber); border-color:var(--amber-soft); opacity:1}
+  .waffle.in .d.lit{animation:litpulse 2.8s ease-out infinite}
+  @keyframes litpulse{0%{box-shadow:0 0 0 0 rgba(245,166,35,.5)}70%{box-shadow:0 0 0 9px rgba(245,166,35,0)}100%{box-shadow:0 0 0 0 rgba(245,166,35,0)}}
+  .waffle .wtext{max-width:300px}
+  .waffle .wbig{font-family:var(--disp); font-size:3.4rem; font-weight:300; line-height:1; color:var(--amber); letter-spacing:-.02em}
+  .waffle .wsub{color:var(--mut); font-size:1rem; margin-top:8px; line-height:1.5}
+  .waffle .wsub b{color:var(--fg); font-weight:500}
+  .waffle .wsrc{font-family:var(--mono); font-size:9px; color:var(--mut-2); letter-spacing:.08em; text-transform:uppercase; margin-top:10px}
+
+  /* orchestration before/after */
+  .ba{display:grid; grid-template-columns:1fr 60px 1fr; gap:18px; align-items:stretch; margin-top:50px}
+  @media(max-width:760px){.ba{grid-template-columns:1fr; gap:14px}}
+  .bacard{border:1px solid var(--line); border-radius:16px; padding:26px; background:var(--ink-2)}
+  .bacard.then{opacity:.78}
+  .bacard h5{font-family:var(--mono); font-size:11px; letter-spacing:.16em; text-transform:uppercase; margin:0 0 16px}
+  .bacard.then h5{color:var(--mut)} .bacard.now h5{color:var(--cyan)}
+  .bacard ul{margin:0; padding:0; list-style:none}
+  .bacard li{padding:9px 0; border-bottom:1px solid var(--line); color:var(--mut); font-size:1rem}
+  .bacard.now li{color:var(--fg)} .bacard li:last-child{border:0}
+  .bacard li em{font-style:normal; color:var(--cyan); font-weight:500}
+  .baarrow{display:flex; align-items:center; justify-content:center; color:var(--cyan); font-size:1.6rem}
+  @media(max-width:760px){.baarrow{transform:rotate(90deg)}}
+
+  /* closing */
+  .closing{text-align:center; padding:130px 0 100px; position:relative}
+  .closing .big-q{font-family:var(--disp); font-weight:300; font-style:italic; font-size:clamp(1.7rem,4vw,3rem); line-height:1.24; max-width:24ch; margin:0 auto 30px; letter-spacing:-.01em}
+  .closing .big-q b{font-style:normal; font-weight:500; color:var(--amber)}
+  .closing .big-q .cur{font-style:normal; font-weight:500;
+    background:linear-gradient(92deg,var(--cyan),var(--green)); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent}
+  .footnote{font-family:var(--mono); font-size:11px; letter-spacing:.1em; color:var(--mut-2); text-transform:uppercase; margin-top:38px}
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:.001s!important; animation-delay:0s!important; transition-duration:.001s!important}
+    .io{opacity:1; transform:none}
+  }
+</style>
+</head>
+<body>
+<div class="bg"></div>
+<div class="grid-lines"></div>
+<div class="progress" id="progress"></div>
+
+<header class="topbar" id="topbar">
+  <div class="brand"><span class="dot"></span> THE GOVERNED <b>CURRENT</b></div>
+  <nav class="navlinks">
+    <a href="#current">The Current</a>
+    <a href="#map">Factory Map</a>
+    <a href="#gate">The Gate</a>
+    <a href="#honesty">Measured Honestly</a>
+    <a href="#shift">The Shift</a>
+  </nav>
+</header>
+
+<main>
+  <!-- ============ HERO — THE CURRENT ============ -->
+  <section class="hero" id="top">
+    <div class="riverwrap">
+      <svg class="riversvg" id="riversvg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+        <defs>
+          <linearGradient id="river" x1="0" x2="1">
+            <stop offset="0" stop-color="#ff6b6b"/>
+            <stop offset=".22" stop-color="#5ad6e8"/>
+            <stop offset=".46" stop-color="#7bd88f"/>
+            <stop offset=".55" stop-color="#ffd23f"/>
+            <stop offset=".62" stop-color="#ff6b6b"/>
+            <stop offset=".8" stop-color="#9b8eff"/>
+            <stop offset="1" stop-color="#7bd88f"/>
+          </linearGradient>
+          <filter id="glow"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          <filter id="softGlow"><feGaussianBlur stdDeviation="22"/></filter>
+          <!-- the channel: through the gate at ~x=900 -->
+          <path id="chan" d="M-40,470 C260,470 360,468 520,468 C700,468 800,470 900,470 C1010,470 1120,470 1320,470 C1480,470 1560,470 1680,470" fill="none"/>
+        </defs>
+
+        <!-- ambient channel banks, pinched at the gate -->
+        <path d="M-40,360 C420,360 640,392 900,470 C640,548 420,580 -40,580 Z" fill="rgba(90,214,232,.05)" stroke="rgba(90,214,232,.16)" stroke-width="1"/>
+        <path d="M1680,360 C1240,360 1080,392 900,470 C1080,548 1240,580 1680,580 Z" fill="rgba(123,216,143,.05)" stroke="rgba(123,216,143,.16)" stroke-width="1"/>
+
+        <!-- base current -->
+        <use href="#chan" stroke="url(#river)" stroke-width="2.4" opacity=".4"/>
+
+        <!-- the dam / human review gate -->
+        <g filter="url(#glow)">
+          <line x1="900" y1="300" x2="900" y2="640" stroke="#ffd23f" stroke-width="2.4" stroke-dasharray="7 7">
+            <animate attributeName="stroke-dashoffset" from="0" to="28" dur="1.4s" repeatCount="indefinite"/>
+          </line>
+        </g>
+        <circle cx="900" cy="470" r="26" fill="none" stroke="#ff6b6b" stroke-width="1.6">
+          <animate attributeName="r" values="24;34;24" dur="2.6s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values=".9;.25;.9" dur="2.6s" repeatCount="indefinite"/>
+        </circle>
+        <text x="900" y="282" text-anchor="middle" class="stagesub" fill="#ffd23f">human review gate · where it dams</text>
+
+        <!-- flowing particles injected by JS -->
+        <g id="parts"></g>
+
+        <!-- stage markers -->
+        <g opacity=".9">
+          <circle cx="120" cy="470" r="5" fill="#ff6b6b"/><text x="120" y="560" text-anchor="middle" class="stagelbl" fill="#94a0b6">Legacy pressure</text><text x="120" y="578" text-anchor="middle" class="stagesub" fill="#5e6a80">fragmented · risky</text>
+          <circle cx="460" cy="470" r="5" fill="#5ad6e8"/><text x="460" y="560" text-anchor="middle" class="stagelbl" fill="#94a0b6">Generate</text><text x="460" y="578" text-anchor="middle" class="stagesub" fill="#5e6a80">cheap · fast · solved</text>
+          <text x="900" y="560" text-anchor="middle" class="stagelbl" fill="#ff8f8f">Review</text><text x="900" y="578" text-anchor="middle" class="stagesub" fill="#ff8f8f">the new bottleneck</text>
+          <circle cx="1240" cy="470" r="5" fill="#9b8eff"/><text x="1240" y="560" text-anchor="middle" class="stagelbl" fill="#94a0b6">Govern + ship</text><text x="1240" y="578" text-anchor="middle" class="stagesub" fill="#5e6a80">provenance · audit</text>
+          <circle cx="1500" cy="470" r="5" fill="#7bd88f"/><text x="1500" y="560" text-anchor="middle" class="stagelbl" fill="#94a0b6">Outcome</text><text x="1500" y="578" text-anchor="middle" class="stagesub" fill="#5e6a80">value reached?</text>
+        </g>
+      </svg>
+    </div>
+
+    <div class="wrap">
+      <div class="kicker reveal-up">AI-Led SDLC · Operating Map &amp; Instrument · 2026</div>
+      <h1 class="reveal-up d1">Work has become a <span class="cur">current</span>. The job is to <em>govern</em> it.</h1>
+      <p class="lede reveal-up d2">Generating code is the solved, cheap part — the flow races through it. <strong>The bottleneck and the risk moved downstream</strong>, and the current piles up at the <span class="gate">human review gate</span>. This is the map of that governed flow — from legacy pressure, through an AI factory, to outcomes measured honestly, not by counting code.</p>
+
+      <div class="meta-row reveal-up d4">
+        <span class="c1">Flow · <b>legacy → factory → outcome</b></span>
+        <span class="c2">Gate · <b>named human accountability</b></span>
+        <span class="c3">Proof · <b>lead + lag, never vibes</b></span>
+        <span class="c4">Govern · <b>identity · provenance · audit</b></span>
+      </div>
+
+      <div class="scrollcue reveal-up d6"><span class="ln"></span> Follow the current</div>
+    </div>
+  </section>
+
+  <div class="wrap"><div class="divider"></div></div>
+
+  <!-- ============ THE CURRENT / FACTORY MAP ============ -->
+  <section id="current">
+    <div class="wrap">
+      <div class="sec-num io">01 — THE FLOW, MADE GOVERNABLE</div>
+      <h2 class="sec-h io s1">From fragmented pressure to <span class="cy">a governed factory</span> to measurable outcomes.</h2>
+      <p class="sec-intro io s2">The unit of work moved from a file to a migration; the human moved from author to <strong>supervisor of a fleet</strong>. The factory absorbs legacy pressure on the left, accelerates every stage in the center under explicit controls, and emits outcomes on the right — while enterprise authority stays deliberately outside. <strong>Click any stage</strong> to trace what AI does, where the human gate sits, and what stays out of reach.</p>
+
+      <div class="mapframe io s2" id="map">
+        <div class="maptop">
+          <div class="mt-l">
+            <span class="mt-k">Interactive · AI-Led SDLC Operating Map</span>
+            <span class="mt-t" id="focusTitle">The governed AI-led SDLC factory</span>
+          </div>
+          <div class="legendrow">
+            <span class="lchip"><i style="background:var(--cyan)"></i>AI accelerates</span>
+            <span class="lchip"><i style="background:var(--amber)"></i>Human gate</span>
+            <span class="lchip"><i style="background:var(--red)"></i>Bottleneck / outside</span>
+            <span class="lchip"><i style="background:var(--green)"></i>Outcome</span>
+          </div>
+        </div>
+
+        <div class="stage">
+          <!-- LEFT: pressure -->
+          <aside class="rail left">
+            <div><div class="rail-k">Left zone · inputs</div><div class="rail-t">Fragmented pressure</div></div>
+            <div id="pressureCards"></div>
+          </aside>
+
+          <!-- CENTER: factory -->
+          <div class="factory">
+            <div class="corebar">
+              <span class="sweep"></span>
+              <span class="ci">Center · cockpit</span>
+              <span class="cd"><b>Living context, Copilot surfaces, governed agents &amp; deterministic modernization</b> move work left→right while approval boundaries stay visible.</span>
+            </div>
+            <div class="chapters" id="chapters"></div>
+          </div>
+
+          <!-- RIGHT: outcomes -->
+          <aside class="rail right">
+            <div><div class="rail-k">Right zone · value</div><div class="rail-t">Measurable outcomes</div></div>
+            <div id="outcomeCards"></div>
+          </aside>
+        </div>
+
+        <!-- enterprise boundary -->
+        <div class="boundary" id="boundary">
+          <div class="bk">⚑ Outside the factory · enterprise still holds production authority</div>
+          <div class="bt">Acceleration inside the boundary; accountability never leaves the building.</div>
+          <div class="boundary-pills" id="boundaryPills"></div>
+        </div>
+
+        <!-- personas -->
+        <div class="personas" id="personas">
+          <span class="ptag">Trace a persona:</span>
+        </div>
+
+        <!-- detail deck -->
+        <div class="deck">
+          <div class="deck-head">
+            <div class="dh-l">
+              <span class="dh-k" id="deckKicker">Stage detail</span>
+              <span class="dh-t" id="deckTitle">Select a stage to begin</span>
+            </div>
+            <span class="dh-own" id="deckOwner">Owner · <b>the whole factory</b></span>
+          </div>
+          <div class="deck-grid">
+            <article class="dpanel ai"><h5><i></i>AI does</h5><p id="aiLead"></p><ul id="aiList"></ul></article>
+            <article class="dpanel human"><h5><i></i>Human gate &amp; evidence</h5><p id="humanLead"></p><ul id="humanList"></ul></article>
+            <article class="dpanel git"><h5><i></i>Platform &amp; controls</h5><p id="gitLead"></p><ul id="gitList"></ul></article>
+            <article class="dpanel out"><h5><i></i>Still outside</h5><p id="outLead"></p><ul id="outList"></ul></article>
+          </div>
+          <div class="deck-metrics" id="deckMetrics"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="wrap"><div class="divider"></div></div>
+
+  <!-- ============ THE GATE / HONEST INSTRUMENTS ============ -->
+  <section id="gate">
+    <div class="wrap">
+      <div class="sec-num io">02 — THE EMPIRICAL CORE</div>
+      <h2 class="sec-h io s1">AI raises the <em>volume</em> of code. It does not, by itself, raise the <span class="cy">value</span>.</h2>
+      <p class="sec-intro io s2">The pattern under the honest data: output and speed rise while quality, stability and trust drift the other way — and developers <strong>systematically misjudge their own speedup</strong>. Note the <strong style="color:var(--amber)">amber dashed line</strong>: gains are immediate, but the bill — maintainability, complexity debt, security — is <strong>lagged and invisible at rollout</strong>. Measure lead <em>and</em> lag, with controls, not vibes.</p>
+
+      <div class="paradox-grid">
+        <div class="chartbox io s2">
+          <svg viewBox="0 0 520 300" id="paradoxChart" aria-label="Diverging lines: output rising while quality, stability and trust decline, with a lagged hidden cost">
+            <g stroke="#1f2738" stroke-width="1">
+              <line x1="48" y1="40" x2="48" y2="250"/><line x1="48" y1="250" x2="495" y2="250"/>
+              <line x1="48" y1="145" x2="495" y2="145" stroke-dasharray="3 5" opacity=".5"/>
+            </g>
+            <text x="20" y="48" class="axislbl" transform="rotate(-90 20,150)" text-anchor="middle">signal ↑</text>
+            <text x="60" y="268" class="axislbl">rollout</text>
+            <text x="270" y="268" class="axislbl" text-anchor="middle">→ time →</text>
+            <text x="488" y="268" class="axislbl" text-anchor="end">12 mo</text>
+            <path id="lineUp" d="M48,200 C140,150 210,120 300,95 C380,74 440,66 495,60" fill="none" stroke="#7bd88f" stroke-width="3" stroke-linecap="round"/>
+            <path id="lineDn" d="M48,110 C150,128 210,150 300,178 C380,202 440,216 495,232" fill="none" stroke="#ff6b6b" stroke-width="3" stroke-linecap="round"/>
+            <path id="lineLag" d="M48,150 C200,150 300,150 360,158 C430,168 470,200 495,238" fill="none" stroke="#f5a623" stroke-width="2.4" stroke-dasharray="2 6" stroke-linecap="round" opacity=".9"/>
+            <circle id="crossDot" cx="0" cy="0" r="4.5" fill="#fff" opacity="0"/>
+          </svg>
+          <div class="legend">
+            <span style="color:var(--green)"><i style="background:#7bd88f"></i>Output / PRs / LOC</span>
+            <span style="color:var(--red)"><i style="background:#ff6b6b"></i>Quality · stability · trust</span>
+            <span style="color:var(--amber)"><i style="background:#f5a623"></i>Lagged cost (the bill)</span>
+          </div>
+        </div>
+
+        <div class="stat-stack">
+          <div class="stat io s1"><div class="big up" data-count="281" data-suffix="%">0%</div><div class="lab">lines added, month&nbsp;1 — <em>gone by month&nbsp;3</em></div><div class="src">CMU · Cursor diff-in-diff</div></div>
+          <div class="stat io s2"><div class="big warn" data-count="40.7" data-suffix="%" data-dec="1">0%</div><div class="lab">code-complexity increase — <em>persistent</em></div><div class="src">CMU · independent</div></div>
+          <div class="stat io s3"><div class="big dn" data-count="29" data-suffix="%">0%</div><div class="lab">trust in AI accuracy — <em>down from 40%</em></div><div class="src">Stack Overflow 2025</div></div>
+          <div class="stat io s4"><div class="big dn" data-count="39" data-prefix="~" data-suffix="pt">0</div><div class="lab">gap between <em>perceived</em> and <em>actual</em> speedup</div><div class="src">METR RCT 2025</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="wrap"><div class="divider"></div></div>
+
+  <!-- ============ MEASURED HONESTLY — 95/5 ============ -->
+  <section id="honesty">
+    <div class="wrap">
+      <div class="sec-num io">03 — FROM PILOT TO THE WINNING 5%</div>
+      <h2 class="sec-h io s1">A pilot proves the tool works. <span class="cy">The gate proves the org is ready.</span></h2>
+      <p class="sec-intro io s2">~95% of GenAI pilots show <strong>no measurable P&amp;L return</strong> — not because the tech fails, but because the organisation can't absorb it safely or profitably. Integration, cost-at-scale, governance, adoption, and review capacity are the filter into the lit cohort.</p>
+
+      <div class="waffle io s2">
+        <div class="dots" id="waffle" aria-label="Of one hundred GenAI pilots, about five reach a measurable profit-and-loss return"></div>
+        <div class="wtext">
+          <div class="wbig">5 in 100</div>
+          <div class="wsub">pilots reach a <b>measurable P&amp;L return</b>. The other 95 stall — integration, cost, governance, adoption, or review capacity. The governed factory is built to land in the <b>lit cohort</b>.</div>
+          <div class="wsrc">MIT NANDA · State of AI in Business 2025</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="wrap"><div class="divider"></div></div>
+
+  <!-- ============ THE SHIFT ============ -->
+  <section id="shift">
+    <div class="wrap">
+      <div class="sec-num io">04 — THE TEAM TRANSFORMATION</div>
+      <h2 class="sec-h io s1">From coding to <span class="cy">orchestration</span>.</h2>
+      <p class="sec-intro io s2">Measure the new job, not the old one. Output is no longer what you type — it is <strong>what you can safely merge</strong>, and review is the deliberate constraint, not a delay to engineer away.</p>
+
+      <div class="ba">
+        <div class="bacard then io s1">
+          <h5>↤ the old shape</h5>
+          <ul>
+            <li>Engineer writes the code</li>
+            <li>Output ≈ lines you personally type</li>
+            <li>Review is a courtesy step</li>
+            <li>Skills: syntax, speed, recall</li>
+            <li>Manage by individual activity</li>
+          </ul>
+        </div>
+        <div class="baarrow io s2">⟶</div>
+        <div class="bacard now io s3">
+          <h5>↦ the orchestration shape</h5>
+          <ul>
+            <li>Engineer <em>specifies, steers, verifies</em> fleets</li>
+            <li>Output ≈ what you safely <em>merge</em></li>
+            <li>Review &amp; integration is <em>the</em> bottleneck</li>
+            <li>Skills: judgment, architecture, taste</li>
+            <li>Manage by <em>system outcomes</em>, not LOC</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CLOSING ============ -->
+  <section class="closing">
+    <div class="wrap">
+      <p class="big-q io s1">The technology is commoditising fast. The <span class="cur">governed current</span> — measuring honestly, holding the <b>human gate</b>, rebuilding teams — is where delivered value is actually won.</p>
+      <div class="io s2 footnote">Methods endure · magnitudes perish · re-baseline quarterly</div>
+      <div class="io s3 footnote" style="margin-top:14px; color:var(--mut-2)">The Governed Current · every AI claim carries its confidence by design</div>
+    </div>
+  </section>
+</main>
+
+<script>
+(function(){
+  "use strict";
+  var rm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var $ = function(id){ return document.getElementById(id); };
+
+  /* ---------- progress + topbar ---------- */
+  var prog = $('progress'), bar = $('topbar');
+  function onScroll(){
+    var h = document.documentElement, st = h.scrollTop || document.body.scrollTop;
+    var sh = (h.scrollHeight - h.clientHeight);
+    prog.style.width = (sh>0 ? (st/sh*100):0) + '%';
+    bar.classList.toggle('scrolled', st > 40);
+  }
+  document.addEventListener('scroll', onScroll, {passive:true}); onScroll();
+
+  /* ---------- smooth nav ---------- */
+  document.querySelectorAll('.navlinks a').forEach(function(a){
+    a.addEventListener('click', function(e){
+      var href=a.getAttribute('href'); if(!href||href[0]!=='#')return;
+      e.preventDefault(); var t=document.querySelector(href);
+      if(t) t.scrollIntoView({behavior:rm?'auto':'smooth'});
+    });
+  });
+
+  /* ============ DATA MODEL ============ */
+  var PRESSURES = [
+    { id:"p-demand",  pc:"var(--gold)",  label:"Demand & KPI pressure",        copy:"Business value, timing and parity expectations enter here." },
+    { id:"p-context", pc:"var(--violet)",label:"Fragmented requirements",       copy:"Issues, Jira, Confluence and workshops are rarely in one place." },
+    { id:"p-legacy",  pc:"var(--red)",   label:"Legacy & hidden logic",         copy:"Hidden rules and framework coupling create discovery drag." },
+    { id:"p-risk",    pc:"var(--amber)", label:"Risk & NFR pressure",           copy:"Security, performance, resilience and traceability shape the path." },
+    { id:"p-runtime", pc:"var(--cyan)",  label:"Release & runtime deps",        copy:"CAB, platform state, observability and rollback stay in view." }
+  ];
+  var OUTCOMES = [
+    { id:"o-cycle",   label:"Cycle-time uplift",       copy:"Faster discovery → governed implementation." },
+    { id:"o-consist", label:"Migration consistency",   copy:"Shared patterns reduce variation." },
+    { id:"o-evidence",label:"Evidence-backed promotion",copy:"Traceability, tests and proof travel with the change." },
+    { id:"o-clarity", label:"Approval clarity",        copy:"Accountability stays visible at the gates." },
+    { id:"o-sme",     label:"Lower SME bottleneck",    copy:"Living context reduces tribal dependency." },
+    { id:"o-scale",   label:"Wave-scale economics",    copy:"Reusable playbooks improve portfolio economics." }
+  ];
+  var EXTERNALS = ["CAB & change approval","Secrets & platform state","Runtime operations","Observability","Support operations"];
+
+  var CHAPTERS = [
+    { id:"frame",   ch:"var(--cyan)",   k:"Movement 01", title:"Frame",   copy:"Fragmented demand → governed work." },
+    { id:"shape",   ch:"var(--violet)", k:"Movement 02", title:"Shape",   copy:"Understanding → target implementation." },
+    { id:"prove",   ch:"var(--amber)",  k:"Movement 03", title:"Prove",   copy:"Generated work → trusted delivery proof." },
+    { id:"release", ch:"var(--green)",  k:"Movement 04", title:"Release", copy:"Approved work → production value & reuse." }
+  ];
+
+  // gate: 'none' | 'gate' | 'bottleneck'
+  var STAGES = [
+    { id:"intake", chap:"frame", label:"Intake", short:"Goals & scope", gate:"gate", owner:"Business owner",
+      lead:"idea → ready-for-dev cycle time", ctr:"spec rework rate · stories reopened",
+      aiLead:"AI turns raw demand into structured work without becoming the business approver.",
+      ai:["Draft intake summaries and structured work items.","Surface missing source-of-truth links before execution starts."],
+      humanLead:"The business owner still owns scope, KPI and parity intent.",
+      human:["Approve the success criteria.","Confirm the requirement system of record."],
+      gitLead:"Planning gives demand a versioned, repo-side starting point.",
+      git:["Issues, Projects and repo context structure the queue.","Copilot summarizes demand — it does not approve it."],
+      outLead:"Requirement truth may still live outside the factory here.",
+      out:["Jira, Confluence and workshop notes remain dependency tracks.","AI cannot finalize business acceptance criteria."] },
+
+    { id:"discovery", chap:"frame", label:"Discovery", short:"Legacy understanding", gate:"none", owner:"SME & BA",
+      lead:"legacy comprehension time", ctr:"contradictions found post-build",
+      aiLead:"AI compresses reverse engineering and hotspot analysis of legacy components.",
+      ai:["Summarize code paths, dependencies, hotspots and hidden coupling.","Produce discovery packs, open questions and readiness signals."],
+      humanLead:"SMEs and analysts still confirm what the code actually means.",
+      human:["Validate findings before migration starts.","Resolve contradictions with named owners."],
+      gitLead:"Repository grounding matters most here — discovery quality depends on current context.",
+      git:["Indexing, IDE chat and discovery skills accelerate understanding.","Traceability artifacts capture what the next step needs."],
+      outLead:"Tribal knowledge still sits partly outside the repo.",
+      out:["SME clarification remains essential for hidden rules.","AI cannot settle contradictory guidance alone."] },
+
+    { id:"design", chap:"shape", label:"Design", short:"Target shape", gate:"gate", owner:"Architect",
+      lead:"time to approved design", ctr:"defects later traced to design",
+      aiLead:"AI drafts service boundaries, package layouts and option comparisons.",
+      ai:["Propose target structure, adapter seams and config patterns.","Compare migration options against repo-native rules."],
+      humanLead:"The architect still owns target design and exception decisions.",
+      human:["Approve boundaries and modernization tradeoffs.","Stop AI from quietly inventing architecture policy."],
+      gitLead:"Repo docs, migration guidance and Copilot keep design grounded.",
+      git:["IDE chat, repo docs and custom agents frame the discussion.","Living context keeps target patterns reusable."],
+      outLead:"Architecture review and design exceptions remain formal approvals.",
+      out:["Architecture boards remain outside the control plane.","The factory cannot grant design exceptions."] },
+
+    { id:"build", chap:"shape", label:"Build", short:"Code & migration", gate:"none", owner:"Migration engineer",
+      lead:"PR throughput · % AI-authored", ctr:"complexity delta · churn <3wks · change-failure rate",
+      aiLead:"Copilot accelerates build while deterministic modernization handles mechanical change.",
+      ai:["Draft service code, mappings, adapters and test scaffolding.","Use OpenRewrite for repeatable Java/Spring transforms."],
+      humanLead:"Engineers still review generated change and own implementation quality.",
+      human:["Approve what changes mechanically vs needs manual handling.","Never treat generated code as self-validating."],
+      gitLead:"The repo is the cockpit; deterministic tooling carries the trust burden.",
+      git:["Inline completions, IDE chat, PRs, Actions, rulesets keep it reviewable.","Instructions & evidence hooks anchor generated change."],
+      outLead:"Platform truth and runtime posture remain external to the build lane.",
+      out:["Build success ≠ production readiness.","AI should not replace deterministic rewrite where repeatability matters."] },
+
+    { id:"test", chap:"prove", label:"Test & parity", short:"Trust the behavior", gate:"gate", owner:"QA lead",
+      lead:"test-authoring time · time-to-green", ctr:"escaped prod defects · assert-less coverage",
+      aiLead:"AI drafts tests and parity scenarios — but not the truth of expected outcomes.",
+      ai:["Generate coverage, parity case drafts and fixture gaps.","Highlight missing evidence and edge-case blind spots."],
+      humanLead:"QA and business approvers still determine whether parity is met.",
+      human:["Approve expected outputs and known deltas.","Reject unsupported claims of functional equivalence."],
+      gitLead:"The platform keeps test evidence tied to the change.",
+      git:["Parity skills, Actions and PR evidence capture intent and result.","Repo-linked artifacts improve auditability."],
+      outLead:"Golden data and authoritative validation may need external confirmation.",
+      out:["SME-approved fixtures stay critical where behavior is ambiguous.","Correctness needs trusted expectations."] },
+
+    { id:"review", chap:"prove", label:"Governance review", short:"THE bottleneck", gate:"bottleneck", owner:"Governance lead",
+      lead:"review turnaround · PRs / reviewer / day", ctr:"defect-escape past review · reviewer load",
+      aiLead:"AI assembles traceability so human governance moves faster with more confidence — it never replaces the approver.",
+      ai:["Draft review narratives, evidence summaries and gap lists.","Connect requirement, code, test and release intent in one pack."],
+      humanLead:"This is the deliberate constraint. Reviewers decide whether the evidence is sufficient.",
+      human:["Approve/reject on proof, not on AI confidence.","Hold teams accountable for unresolved traceability gaps."],
+      gitLead:"The platform provides the reviewable evidence chain — not the approver.",
+      git:["PR history, manifests, linked issues and artifacts shape the pack.","Repo-native evidence makes audits repeatable."],
+      outLead:"Formal release governance and CAB may sit beyond the factory.",
+      out:["Program governance may require external approvals.","AI cannot waive policy or risk ownership."] },
+
+    { id:"release", chap:"release", label:"Release readiness", short:"Promotion pack", gate:"gate", owner:"Release manager",
+      lead:"deployment frequency · lead time to deploy", ctr:"change-failure rate · rollback rate · MTTR",
+      aiLead:"AI packages evidence and checklists so release prep becomes less manual.",
+      ai:["Draft release notes, evidence summaries and promotion checklists.","Expose missing approvals before promotion."],
+      humanLead:"Release management still decides whether the change is ready to move.",
+      human:["Confirm every gate, dependency and rollback precondition.","Escalate open risks before the release is booked."],
+      gitLead:"The platform bundles the repo-side story into a promotion-ready pack.",
+      git:["Artifacts, PR metadata and workflow state support packaging.","Environment rules keep the release pack bounded."],
+      outLead:"CAB scheduling and enterprise release governance remain external.",
+      out:["External calendars and change windows still matter.","The factory cannot claim release authority on its own."] },
+
+    { id:"golive", chap:"release", label:"Go-live & hypercare", short:"Cutover + learn", gate:"gate", owner:"Release & CAB",
+      lead:"MTTR · toil hours removed", ctr:"incidents traced to AI code · on-call load",
+      aiLead:"AI improves go-live clarity and learning capture — not the cutover authority.",
+      ai:["Summarize cutover steps, rollback notes and watch items.","Draft post-go-live learnings and recurring patterns."],
+      humanLead:"CAB and release leadership still own the go-live decision.",
+      human:["Approve the production cutover.","Confirm rollback, support and comms are ready."],
+      gitLead:"The platform keeps the deployment story coherent to the handoff point.",
+      git:["PRs, evidence packs and runbooks stay linked.","Repo history becomes reusable institutional memory."],
+      outLead:"Runtime operations, CAB and live controls remain outside.",
+      out:["Production authority does not move into the repo.","Operational command stays with platform & release teams."] }
+  ];
+
+  var PERSONAS = [
+    { id:"biz",      label:"Business owner", stages:["intake","test","release","golive"] },
+    { id:"sme",      label:"SME / BA",       stages:["discovery","test"] },
+    { id:"arch",     label:"Architect",      stages:["design","review"] },
+    { id:"eng",      label:"Engineer",       stages:["build","design","golive"] },
+    { id:"qa",       label:"QA",             stages:["test","review"] },
+    { id:"gov",      label:"Governance",     stages:["review","release"] },
+    { id:"rel",      label:"Release / CAB",  stages:["release","golive"] }
+  ];
+
+  var stageById = {}; STAGES.forEach(function(s){ stageById[s.id]=s; });
+
+  /* ============ RENDER STATIC RAILS ============ */
+  var pc = $('pressureCards');
+  PRESSURES.forEach(function(p){
+    var d=document.createElement('div'); d.className='pcard'; d.dataset.id=p.id; d.style.setProperty('--pc',p.pc);
+    d.innerHTML='<div class="pl">'+p.label+'</div><div class="pp">'+p.copy+'</div>';
+    pc.appendChild(d);
+  });
+  var oc=$('outcomeCards');
+  OUTCOMES.forEach(function(o){
+    var d=document.createElement('div'); d.className='pcard'; d.dataset.id=o.id; d.style.setProperty('--pc','var(--green)');
+    d.innerHTML='<div class="pl">'+o.label+'</div><div class="pp">'+o.copy+'</div>';
+    oc.appendChild(d);
+  });
+  var bp=$('boundaryPills');
+  EXTERNALS.forEach(function(x){ var s=document.createElement('span'); s.className='bpill'; s.textContent=x; bp.appendChild(s); });
+
+  /* ============ RENDER FACTORY CHAPTERS + STAGES ============ */
+  var chWrap=$('chapters');
+  CHAPTERS.forEach(function(c){
+    var col=document.createElement('div'); col.className='chap'; col.style.setProperty('--ch',c.ch);
+    col.innerHTML='<div class="ck">'+c.k+'</div><div class="ct">'+c.title+'</div><div class="cc">'+c.copy+'</div>';
+    var row=document.createElement('div'); row.className='stages-row';
+    STAGES.filter(function(s){return s.chap===c.id;}).forEach(function(s){
+      var b=document.createElement('button'); b.type='button'; b.className='snode'; b.dataset.id=s.id; b.style.setProperty('--ch',c.ch);
+      var mark='';
+      if(s.gate==='bottleneck') mark='<span class="gatemark bottleneck">bottleneck</span>';
+      else if(s.gate==='gate') mark='<span class="gatemark">gate</span>';
+      b.innerHTML='<div class="sn-t"><span>'+s.label+'</span>'+mark+'</div><div class="sn-s">'+s.short+'</div>';
+      b.addEventListener('click', function(){ selectStage(s.id, true); });
+      row.appendChild(b);
+    });
+    col.appendChild(row); chWrap.appendChild(col);
+  });
+
+  /* ============ PERSONAS ============ */
+  var personaWrap=$('personas');
+  var activePersona=null;
+  PERSONAS.forEach(function(p){
+    var b=document.createElement('button'); b.type='button'; b.className='pbtn'; b.textContent=p.label; b.dataset.id=p.id;
+    b.addEventListener('click', function(){
+      if(activePersona===p.id){ activePersona=null; clearPersona(); b.classList.remove('active'); return; }
+      activePersona=p.id;
+      personaWrap.querySelectorAll('.pbtn').forEach(function(x){ x.classList.remove('active'); });
+      b.classList.add('active');
+      applyPersona(p);
+    });
+    personaWrap.appendChild(b);
+  });
+  function applyPersona(p){
+    var set={}; p.stages.forEach(function(id){ set[id]=1; });
+    document.querySelectorAll('.snode').forEach(function(n){ n.classList.toggle('dim', !set[n.dataset.id]); });
+    // focus first persona stage
+    selectStage(p.stages[0], false);
+    $('focusTitle').textContent = p.label + ' · journey through the factory';
+  }
+  function clearPersona(){
+    document.querySelectorAll('.snode').forEach(function(n){ n.classList.remove('dim'); });
+    $('focusTitle').textContent='The governed AI-led SDLC factory';
+  }
+
+  /* ============ SELECT STAGE ============ */
+  var currentStage=null;
+  function fillList(ul, arr){ ul.innerHTML=''; arr.forEach(function(t){ var li=document.createElement('li'); li.textContent=t; ul.appendChild(li); }); }
+  function selectStage(id, scroll){
+    var s=stageById[id]; if(!s) return; currentStage=id;
+    document.querySelectorAll('.snode').forEach(function(n){ n.classList.toggle('active', n.dataset.id===id); });
+
+    var ch=CHAPTERS.filter(function(c){return c.id===s.chap;})[0];
+    $('deckKicker').textContent = ch.title + ' · ' + (s.gate==='bottleneck' ? 'the deliberate bottleneck' : s.gate==='gate' ? 'human gate' : 'AI-accelerated');
+    $('deckTitle').textContent = s.label;
+    $('deckOwner').innerHTML = 'Gate owner · <b>'+s.owner+'</b>';
+
+    $('aiLead').textContent=s.aiLead; fillList($('aiList'), s.ai);
+    $('humanLead').textContent=s.humanLead; fillList($('humanList'), s.human);
+    $('gitLead').textContent=s.gitLead; fillList($('gitList'), s.git);
+    $('outLead').textContent=s.outLead; fillList($('outList'), s.out);
+
+    var verdict = s.gate==='bottleneck' ? 'Decelerating · by design' : 'Accelerating';
+    var vcls = s.gate==='bottleneck' ? 'ctr' : 'lead';
+    $('deckMetrics').innerHTML =
+      '<div class="mbadge"><span class="mk">Lead — is it faster?</span><span class="mv"><span class="lead">'+s.lead+'</span></span></div>'+
+      '<div class="mbadge"><span class="mk">Counter — anti-gaming</span><span class="mv"><span class="ctr">'+s.ctr+'</span></span></div>'+
+      '<div class="mbadge"><span class="mk">Illustrative verdict</span><span class="mv"><span class="'+vcls+'">'+verdict+'</span></span></div>';
+
+    if(scroll){
+      var deck=document.querySelector('.deck');
+      var r=deck.getBoundingClientRect();
+      if(r.top<70 || r.bottom>window.innerHeight){ deck.scrollIntoView({behavior:rm?'auto':'smooth', block:'nearest'}); }
+    }
+  }
+  // default selection
+  selectStage('build', false);
+
+  /* ============ HERO RIVER PARTICLES ============ */
+  (function buildFlow(){
+    var g=$('parts'); if(!g) return;
+    var svgNS='http://www.w3.org/2000/svg';
+    var N = rm ? 0 : 22;
+    var cols=['#5ad6e8','#7bd88f','#5ad6e8','#9be7a8','#3ad8b3','#9b8eff'];
+    for(var i=0;i<N;i++){
+      var c=document.createElementNS(svgNS,'circle');
+      c.setAttribute('r',(2.6+(i%3)*0.9).toFixed(1));
+      c.setAttribute('fill',cols[i%cols.length]);
+      c.setAttribute('filter','url(#glow)');
+      var am=document.createElementNS(svgNS,'animateMotion');
+      var dur=(6.5+(i%5)*1.0).toFixed(2);
+      am.setAttribute('dur',dur+'s'); am.setAttribute('repeatCount','indefinite');
+      am.setAttribute('begin',(-(i*0.42)).toFixed(2)+'s'); am.setAttribute('rotate','auto');
+      // dwell at the gate (~0.50)
+      am.setAttribute('keyPoints','0;0.46;0.50;0.54;1');
+      am.setAttribute('keyTimes','0;0.30;0.56;0.80;1');
+      am.setAttribute('calcMode','linear');
+      var mp=document.createElementNS(svgNS,'mpath');
+      mp.setAttributeNS('http://www.w3.org/1999/xlink','href','#chan'); mp.setAttribute('href','#chan');
+      am.appendChild(mp); c.appendChild(am);
+      var op=document.createElementNS(svgNS,'animate');
+      op.setAttribute('attributeName','opacity');
+      op.setAttribute('values','0;1;1;.4;1;1;0');
+      op.setAttribute('keyTimes','0;0.06;0.45;0.55;0.66;0.95;1');
+      op.setAttribute('dur',dur+'s'); op.setAttribute('repeatCount','indefinite');
+      op.setAttribute('begin',(-(i*0.42)).toFixed(2)+'s');
+      c.appendChild(op);
+      g.appendChild(c);
+    }
+  })();
+
+  /* ============ IN-VIEW + CHARTS ============ */
+  var io=new IntersectionObserver(function(es){
+    es.forEach(function(e){
+      if(!e.isIntersecting) return;
+      e.target.classList.add('in');
+      if(e.target.id==='gate' || (e.target.querySelector && e.target.querySelector('#paradoxChart'))) drawParadox();
+      if(e.target.querySelectorAll){ e.target.querySelectorAll('[data-count]').forEach(runCount); }
+    });
+  }, {threshold:.18});
+  document.querySelectorAll('.io').forEach(function(el){ io.observe(el); });
+
+  function runCount(el){
+    if(el._done) return; el._done=true;
+    var target=parseFloat(el.getAttribute('data-count'));
+    var dec=parseInt(el.getAttribute('data-dec')||'0',10);
+    var pre=el.getAttribute('data-prefix')||'', suf=el.getAttribute('data-suffix')||'';
+    if(rm){ el.textContent=pre+target.toFixed(dec)+suf; return; }
+    var dur=1400, t0=null;
+    function step(ts){ if(!t0)t0=ts; var p=Math.min((ts-t0)/dur,1); var e=1-Math.pow(1-p,3);
+      el.textContent=pre+(target*e).toFixed(dec)+suf; if(p<1) requestAnimationFrame(step); }
+    requestAnimationFrame(step);
+  }
+
+  function drawParadox(){
+    ['lineUp','lineDn','lineLag'].forEach(function(id,i){
+      var p=$(id); if(!p||p._drawn) return; p._drawn=true;
+      var L=p.getTotalLength();
+      p.style.strokeDasharray=L; p.style.strokeDashoffset=rm?0:L;
+      if(rm) return;
+      p.style.transition='stroke-dashoffset 1.8s cubic-bezier(.4,.1,.2,1) '+(i*0.25)+'s';
+      requestAnimationFrame(function(){ requestAnimationFrame(function(){ p.style.strokeDashoffset=0; }); });
+    });
+    var dot=$('crossDot');
+    if(dot && !rm){ dot.setAttribute('cx','255'); dot.setAttribute('cy','150');
+      setTimeout(function(){ dot.style.transition='opacity .6s'; dot.style.opacity='1';
+        if(dot.animate) dot.animate([{r:3},{r:7},{r:3}],{duration:1800,iterations:Infinity}); }, 1400); }
+  }
+
+  /* ============ 95/5 WAFFLE ============ */
+  (function buildWaffle(){
+    var w=$('waffle'); if(!w) return;
+    var lit={7:1,33:1,52:1,74:1,91:1};
+    for(var i=0;i<100;i++){ var d=document.createElement('div'); d.className='d'+(lit[i]?' lit':''); w.appendChild(d); }
+  })();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,189 @@
+---
+import { getEntry } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import EntryMeta from '../../components/EntryMeta.astro';
+import BackLink from '../../components/BackLink.astro';
+
+const entry = await getEntry('briefs', 'ai-led-sdlc');
+
+if (!entry) {
+  throw new Error('Expected the ai-led-sdlc brief to exist in the briefs collection.');
+}
+
+const visualPath = entry.data.supportingVisualPath ?? '/visuals/ai-led-sdlc/the-margin-reckoning.html';
+---
+
+<BaseLayout
+  title={`${entry.data.title} | Models to Margins`}
+  description={entry.data.summary}
+  currentPath="/briefs"
+>
+  <article class="sdlc-brief-host">
+    <header class="sdlc-brief-host__hero">
+      <span class="sdlc-brief-host__eyebrow">Interactive Brief</span>
+      <h1 class="sdlc-brief-host__title">{entry.data.title}</h1>
+      <p class="sdlc-brief-host__summary">{entry.data.summary}</p>
+      <BackLink href="/briefs" label="Back to Brief" />
+      <EntryMeta
+        date={entry.data.pubDate}
+        primary={entry.data.industry}
+        readTime={entry.data.readTime}
+      />
+      {entry.data.lens?.length ? (
+        <div class="sdlc-brief-host__pills" aria-label="Brief lenses">
+          {entry.data.lens.map((lens) => (
+            <span class="sdlc-brief-host__pill">{lens}</span>
+          ))}
+        </div>
+      ) : null}
+    </header>
+
+    <div class="sdlc-brief-host__stage">
+      <iframe
+        id="sdlc-margin-reckoning-frame"
+        src={`${visualPath}?embed=1`}
+        title="The Margin Reckoning — AI-Led SDLC"
+        loading="eager"
+      ></iframe>
+    </div>
+  </article>
+
+  <script>
+    (() => {
+      const frame = document.getElementById('sdlc-margin-reckoning-frame');
+
+      const syncTheme = () => {
+        if (!frame?.contentWindow) return;
+        frame.contentWindow.postMessage(
+          { type: 'm2m:set-theme', theme: window.__m2mGetTheme?.() ?? 'light' },
+          window.location.origin
+        );
+      };
+
+      frame?.addEventListener('load', syncTheme);
+      window.addEventListener('m2m:themechange', syncTheme);
+      syncTheme();
+
+      // Let the BROWSER own the scroll: grow the iframe to its content height so the
+      // whole page scrolls as one document (no inner iframe scrollbar). Same-origin embed.
+      const sizeToContent = () => {
+        try {
+          const doc = frame?.contentDocument;
+          if (!doc) return;
+          const h = Math.max(
+            doc.documentElement.scrollHeight,
+            doc.body ? doc.body.scrollHeight : 0
+          );
+          if (h) frame.style.height = h + 'px';
+        } catch (_) {
+          /* cross-origin fallback: keep the CSS height */
+        }
+      };
+
+      frame?.addEventListener('load', () => {
+        sizeToContent();
+        // re-measure after fonts, count-ups, and any late layout settle
+        setTimeout(sizeToContent, 300);
+        setTimeout(sizeToContent, 1200);
+        try {
+          const doc = frame.contentDocument;
+          if (doc && window.ResizeObserver) {
+            new ResizeObserver(sizeToContent).observe(doc.documentElement);
+          }
+        } catch (_) {
+          /* cross-origin: ResizeObserver unavailable on the frame doc */
+        }
+      });
+      window.addEventListener('resize', sizeToContent);
+    })();
+  </script>
+
+  <style>
+    .sdlc-brief-host {
+      margin-top: 4px;
+      display: grid;
+      gap: clamp(18px, 2.2vw, 26px);
+    }
+
+    .sdlc-brief-host__hero {
+      display: grid;
+      gap: 14px;
+      justify-items: start;
+    }
+
+    .sdlc-brief-host__eyebrow {
+      display: inline-flex;
+      align-items: center;
+      min-height: 1.9rem;
+      padding: 0.28rem 0.72rem;
+      border-radius: 999px;
+      border: 1px solid color-mix(in srgb, var(--line) 80%, transparent);
+      background: color-mix(in srgb, var(--accent-cyan, var(--accent)) 12%, transparent);
+      color: var(--accent-cyan, var(--accent));
+      font-size: 0.78rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .sdlc-brief-host__title {
+      margin: 0;
+      max-width: none;
+      text-wrap: balance;
+    }
+
+    .sdlc-brief-host__summary {
+      margin: 0;
+      /* fill the full container width (override the hero's justify-items:start)
+         so lines run all the way to the right and wrap into the fewest rows */
+      justify-self: stretch;
+      max-width: 100%;
+      color: var(--muted);
+      line-height: 1.62;
+      text-wrap: pretty;
+    }
+
+    .sdlc-brief-host__pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 2px;
+    }
+
+    .sdlc-brief-host__pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 2.3rem;
+      padding: 0.45rem 0.85rem;
+      border-radius: 999px;
+      border: 1px solid color-mix(in srgb, var(--line) 82%, transparent);
+      background: color-mix(in srgb, var(--surface-soft) 76%, transparent);
+      color: var(--text);
+      font-size: 0.92rem;
+      line-height: 1.35;
+    }
+
+    .sdlc-brief-host__stage {
+      overflow: hidden;
+      border-radius: 28px;
+      border: 1px solid color-mix(in srgb, var(--line) 82%, transparent);
+      background: rgba(3, 9, 17, 0.8);
+      box-shadow: var(--shadow);
+    }
+
+    .sdlc-brief-host__stage iframe {
+      display: block;
+      width: 100%;
+      /* fallback before JS sizes the frame to its content height; the BROWSER owns the scroll */
+      height: 100vh;
+      min-height: 760px;
+      border: 0;
+      background: rgba(3, 9, 17, 0.82);
+    }
+
+    @media (max-width: 720px) {
+      .sdlc-brief-host__stage {
+        border-radius: 22px;
+      }
+    }
+  </style>
+</BaseLayout>
