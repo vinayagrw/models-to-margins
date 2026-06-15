@@ -17,7 +17,9 @@ export async function onRequestPost({ request, env }) {
   const origin = request.headers.get('origin');
   try {
     const raw = await request.text();
-    if (raw.length > 32_000) return new Response('payload too large', { status: 413 });
+    if (raw.length > 32 * 1024) {
+      return new Response('payload too large', { status: 413, headers: corsHeaders(origin) });
+    }
     const client = sanitizeClient(JSON.parse(raw || '{}'));
     const ua = request.headers.get('user-agent') || '';
     const geo = extractGeo(request);
