@@ -30,8 +30,8 @@ export function parseUserAgent(ua = '') {
 }
 
 export function extractGeo(request) {
-  const cf = request.cf || {};
-  const h = request.headers;
+  const cf = (request && request.cf) || {};
+  const h = request && request.headers;
   const ip = (h && h.get && (h.get('cf-connecting-ip') || h.get('x-forwarded-for'))) || '';
   return {
     ip,
