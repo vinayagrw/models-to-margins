@@ -1,0 +1,12 @@
+name = "models-to-margins"
+pages_build_output_dir = "dist"
+compatibility_date = "2024-11-01"
+
+# KV namespace for analytics events.
+# For production, create a namespace in the Cloudflare dashboard
+# (Workers & Pages > KV) and bind it as ANALYTICS on the Pages project.
+# The id below is a local-dev placeholder; `wrangler pages dev` creates a
+# local KV store automatically.
+[[kv_namespaces]]
+binding = "ANALYTICS"
+id = "analytics_local_placeholder"
