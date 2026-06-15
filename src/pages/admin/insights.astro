@@ -1,0 +1,52 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+---
+<BaseLayout
+  title="Insights | Models to Margins"
+  description="Hidden visitor analytics."
+  currentPath="/admin/insights"
+>
+  <section class="article-shell admin-shell" id="insights-root">
+    <header>
+      <span class="eyebrow warm">Hidden Analytics</span>
+      <h1>Visitor intelligence dashboard.</h1>
+      <p class="lead">Geographic, device, referral, and behavior data for public-page visitors.</p>
+    </header>
+
+    <div class="note-panel section-block" id="gate-note" hidden>
+      <p>Provide the access key: <code>/admin/insights?key=YOUR_TOKEN</code></p>
+    </div>
+
+    <div id="dash" hidden>
+      <div class="kpi-row section-block" id="kpis"></div>
+      <div class="section-block" id="viz"></div>
+
+      <div class="filter-bar section-block">
+        <input id="f-search" type="search" placeholder="Search (path, city, referrer…)" />
+        <input id="f-from" type="date" />
+        <input id="f-to" type="date" />
+        <select id="f-country"><option value="">All countries</option></select>
+        <select id="f-browser"><option value="">All browsers</option></select>
+        <select id="f-device"><option value="">All devices</option></select>
+        <select id="f-page"><option value="">All pages</option></select>
+        <button id="f-clear" type="button" class="button secondary">Clear</button>
+        <button id="f-csv" type="button" class="button secondary">Export CSV</button>
+        <span id="f-count"></span>
+      </div>
+
+      <div class="table-wrap section-block">
+        <table class="event-table">
+          <thead><tr>
+            <th data-sort="ts">Time</th><th data-sort="geo.country">Country</th>
+            <th data-sort="geo.city">City</th><th data-sort="page.path">Page</th>
+            <th data-sort="device.browser">Browser</th><th data-sort="device.deviceType">Device</th>
+            <th data-sort="page.referrer">Referrer</th><th data-sort="geo.ip">IP</th>
+          </tr></thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <script src="/scripts/insights.js" is:inline></script>
+</BaseLayout>
