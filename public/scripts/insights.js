@@ -3,7 +3,20 @@
   if (KEY) document.cookie = 'm2m_insights=' + encodeURIComponent(KEY) + ';path=/;max-age=86400;samesite=strict';
 
   var ALL = [];
+  var sortKey = 'ts', sortDir = -1; // default: newest first
   var get = function (o, path) { return path.split('.').reduce(function (a, k) { return a && a[k]; }, o); };
+
+  function sorted(rows) {
+    var copy = rows.slice();
+    copy.sort(function (a, b) {
+      var av = get(a, sortKey), bv = get(b, sortKey);
+      if (av == null) av = ''; if (bv == null) bv = '';
+      if (av < bv) return -1 * sortDir;
+      if (av > bv) return 1 * sortDir;
+      return 0;
+    });
+    return copy;
+  }
 
   function load() {
     var url = '/api/events?limit=5000' + (KEY ? '&key=' + encodeURIComponent(KEY) : '');
@@ -87,7 +100,7 @@
 
   function apply() {
     var rows = filtered();
-    renderTable(rows);
+    renderTable(sorted(rows));
     if (window.__m2mRenderViz) window.__m2mRenderViz(rows);
   }
 
@@ -106,7 +119,15 @@
       });
       apply();
     });
-    document.getElementById('f-csv').addEventListener('click', function () { csv(filtered()); });
+    document.getElementById('f-csv').addEventListener('click', function () { csv(sorted(filtered())); });
+    Array.prototype.forEach.call(document.querySelectorAll('.event-table th[data-sort]'), function (th) {
+      th.style.cursor = 'pointer';
+      th.addEventListener('click', function () {
+        var key = th.getAttribute('data-sort');
+        if (sortKey === key) { sortDir = -sortDir; } else { sortKey = key; sortDir = 1; }
+        apply();
+      });
+    });
     apply();
   }
 

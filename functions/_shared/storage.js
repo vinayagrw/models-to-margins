@@ -42,7 +42,9 @@ export class KvStore {
       const values = await Promise.all(keys.map((k) => this.kv.get(k.name)));
       const fromKv = values.filter(Boolean).map((v) => JSON.parse(v));
       const fromMem = await this.fallback.list({ limit });
-      return [...fromMem, ...fromKv].slice(0, limit);
+      // Re-sort: memory-buffered events (from a prior KV outage) may not be
+      // newest-first relative to KV's reverse-key ordering.
+      return [...fromMem, ...fromKv].sort((a, b) => (b.ts || 0) - (a.ts || 0)).slice(0, limit);
     } catch (err) {
       this.warn(`[analytics] KV list failed, serving memory only: ${err.message}`);
       return this.fallback.list({ limit });
