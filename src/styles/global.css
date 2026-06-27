@@ -824,11 +824,11 @@ p {
   box-shadow: var(--shadow-soft);
 }
 
-.article-body .signal-card strong,
-.article-body .thesis-card strong,
-.article-body .decision-card strong,
-.article-body .action-card strong,
-.article-body .callout strong {
+.article-body .signal-card > strong,
+.article-body .thesis-card > strong,
+.article-body .decision-card > strong,
+.article-body .action-card > strong,
+.article-body .callout > strong {
   display: block;
   margin-bottom: 0.38rem;
   color: var(--text);
@@ -861,7 +861,7 @@ p {
   margin: 0;
 }
 
-.article-body .thesis-card em {
+.article-body .thesis-card > em {
   display: block;
   margin-bottom: 0.4rem;
   font-style: normal;
@@ -1014,7 +1014,7 @@ p {
   box-shadow: var(--shadow-soft);
 }
 
-.article-body .convergence-card strong {
+.article-body .convergence-card > strong {
   display: block;
   margin-bottom: 0.35rem;
   color: var(--text);
@@ -1056,7 +1056,7 @@ p {
   background: color-mix(in srgb, var(--surface-muted) 86%, transparent);
 }
 
-.article-body .stack-item strong {
+.article-body .stack-item > strong {
   display: block;
   margin-bottom: 0.32rem;
   color: var(--text);
@@ -1246,7 +1246,7 @@ p {
   box-shadow: var(--shadow-soft);
 }
 
-.article-body .scenario-card strong {
+.article-body .scenario-card > strong {
   display: block;
   font-size: 0.78rem;
   color: var(--muted);
@@ -1255,7 +1255,7 @@ p {
   margin-top: 0.6rem;
 }
 
-.article-body .scenario-card strong:first-of-type { margin-top: 0.4rem; }
+.article-body .scenario-card > strong:first-of-type { margin-top: 0.4rem; }
 
 .article-body .scenario-card p {
   font-size: 0.88rem;

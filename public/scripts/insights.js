@@ -98,9 +98,19 @@
     a.download = 'insights.csv'; a.click();
   }
 
+  function markSort() {
+    Array.prototype.forEach.call(document.querySelectorAll('.event-table th[data-sort]'), function (th) {
+      var active = th.getAttribute('data-sort') === sortKey;
+      th.classList.toggle('is-sorted', active);
+      th.setAttribute('data-dir', active ? (sortDir === 1 ? 'asc' : 'desc') : '');
+      th.setAttribute('aria-sort', active ? (sortDir === 1 ? 'ascending' : 'descending') : 'none');
+    });
+  }
+
   function apply() {
     var rows = filtered();
     renderTable(sorted(rows));
+    markSort();
     if (window.__m2mRenderViz) window.__m2mRenderViz(rows);
   }
 

@@ -33,6 +33,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <link rel="canonical" href={canonical.href} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <ThemeBootstrap />
+    <slot name="head" />
   </head>
   <body>
     <SiteHeader currentPath={currentPath} />

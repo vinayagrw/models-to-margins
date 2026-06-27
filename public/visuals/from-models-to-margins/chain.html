@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Metric Chain — a playable model of leakage</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+.shell { display: flex; flex-direction: column; gap: clamp(7px,1.3vh,14px); justify-content: space-between; }
+.head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; }
+.head h1 { font-size: clamp(1.05rem,2vw,1.5rem); font-weight: 700; letter-spacing: -0.02em; color: var(--text-strong); }
+.head p { color: var(--muted); font-size: 0.8rem; }
+.presets { display: flex; flex-wrap: wrap; gap: 6px; }
+.preset { font: inherit; cursor: pointer; border-radius: 999px; padding: 5px 12px; font-size: 0.74rem; font-weight: 600;
+  border: 1px solid var(--border-strong); background: var(--surface); color: var(--muted); transition: all .18s ease; }
+.preset:hover { border-color: var(--accent); color: var(--text); }
+.preset[aria-pressed="true"] { background: linear-gradient(135deg, var(--accent), var(--accent-3)); color: #fff; border-color: transparent; box-shadow: var(--shadow-soft); }
+.preset.cuts[aria-pressed="true"] { background: linear-gradient(135deg, var(--warn), #b91c1c); }
+
+/* live chain of vertical magnitude bars */
+.chain { display: grid; grid-template-columns: repeat(9, auto); align-items: end; justify-content: space-between; gap: 0; position: relative; padding: 2px 0; }
+.node { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 0; }
+.barwrap { width: clamp(40px,7vw,72px); height: clamp(78px,15vh,128px); border-radius: 9px 9px 7px 7px; position: relative;
+  background: color-mix(in srgb, var(--c) 9%, var(--surface)); border: 1px solid var(--border); overflow: hidden; display: flex; align-items: flex-end; }
+.fill { width: 100%; border-radius: 0 0 6px 6px; transition: height .45s cubic-bezier(.4,.05,.2,1), background .3s ease;
+  background: linear-gradient(180deg, var(--c), color-mix(in srgb, var(--c) 62%, #000 16%)); box-shadow: var(--shadow-soft); }
+.barwrap.neg .fill { background: linear-gradient(180deg, var(--warn), #7f1d1d); }
+.barwrap .zero { position: absolute; left: 0; right: 0; bottom: 50%; height: 1px; background: var(--border-strong); opacity: .55; }
+.delta { font-size: clamp(0.84rem,1.7vh,1.18rem); font-weight: 800; font-variant-numeric: tabular-nums; color: var(--text-strong); line-height: 1; }
+.delta.neg { color: var(--warn); }
+.nm { font-size: clamp(0.6rem,1.2vh,0.74rem); font-weight: 700; color: var(--text); text-align: center; letter-spacing: .01em; }
+.unit { font-size: 0.56rem; opacity: 0.7; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; text-align:center; }
+
+/* the link cell: an arrow track with a flowing spark + the slider underneath */
+.link { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 0 clamp(2px,0.7vw,10px); align-self: stretch; justify-content: center; min-width: clamp(46px,8vw,88px); }
+.track { position: relative; width: 100%; height: 3px; border-radius: 3px; background: color-mix(in srgb, var(--accent-3) 28%, transparent); overflow: visible; }
+.track .spark { position: absolute; top: -3px; left: 0; width: 9px; height: 9px; border-radius: 50%; background: #fff;
+  box-shadow: 0 0 8px 2px color-mix(in srgb, var(--accent) 70%, #fff); animation: travel var(--spd,2.4s) linear infinite; opacity: var(--op,1); }
+.track.neg { background: repeating-linear-gradient(90deg, var(--warn) 0 5px, transparent 5px 10px); }
+.track.neg .spark { display: none; }
+@keyframes travel { 0%{ left:-6%; opacity:0;} 14%{opacity:var(--op,1);} 86%{opacity:var(--op,1);} 100%{ left:100%; opacity:0;} }
+.slider { width: 100%; accent-color: var(--accent); cursor: pointer; height: 16px; }
+.lpct { font-size: 0.66rem; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--text-strong); }
+.lpct.neg { color: var(--warn); }
+.llbl { font-size: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted-soft); white-space: nowrap; }
+
+.readout { border-radius: 12px; border: 1px solid var(--border); background: var(--surface); padding: 9px 14px; box-shadow: var(--shadow-soft);
+  display: flex; gap: 12px; align-items: center; }
+.readout .tag { font-size: 0.64rem; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; padding: 4px 10px; border-radius: 999px; white-space: nowrap; color: #fff; background: var(--accent-3); }
+.readout.warn .tag { background: var(--warn); }
+.readout.win .tag { background: var(--good); }
+.readout .txt { font-size: 0.82rem; line-height: 1.4; color: var(--text); }
+.readout .txt b { color: var(--text-strong); }
+@media (max-width: 600px){ .llbl { display:none; } .unit { display:none; } }
+@media (prefers-reduced-motion: reduce){ .fill { transition: none; } }
+</style>
+</head>
+<body>
+<main class="shell">
+  <div class="head">
+    <h1>Tune the chain. Watch the win leak.</h1>
+    <p>A 100% win enters at System. Drag each link to set how much survives — then read what reaches Business.</p>
+  </div>
+  <div class="presets" id="presets"></div>
+  <div class="chain" id="chain"></div>
+  <div class="readout" id="readout" aria-live="polite"><span class="tag" id="rtag"></span><span class="txt" id="rtxt"></span></div>
+</main>
+
+<script>
+const NODES = [
+  { nm:'System',  v:'--sys', unit:'−200ms P95' },
+  { nm:'Model',   v:'--mod', unit:'headroom' },
+  { nm:'Output',  v:'--out', unit:'acceptance' },
+  { nm:'UX',      v:'--ux',  unit:'completion' },
+  { nm:'Business',v:'--biz', unit:'retention' },
+];
+const LINKLBL = ['Sys→Model','Model→Out','Out→UX','UX→Biz'];
+const PRESETS = {
+  healthy:   { label:'Healthy chain',          c:[100,100,100,100] },
+  cuts:      { label:'Death by 1000 cuts',     c:[90,90,90,90] },
+  attenuate: { label:'Attenuation',            c:[100,100,18,100] },
+  saturate:  { label:'Saturation',             c:[10,100,100,100] },
+  reverse:   { label:'Reversal (paradox)',     c:[100,100,100,-60] },
+};
+let coef = [100,100,100,100];   // percent per link
+let activePreset = 'healthy';
+
+const presetsEl = document.getElementById('presets');
+Object.entries(PRESETS).forEach(([k,p])=>{
+  const b=document.createElement('button'); b.className='preset'+(k==='cuts'?' cuts':''); b.dataset.k=k; b.textContent=p.label;
+  b.setAttribute('aria-pressed', k===activePreset?'true':'false');
+  b.addEventListener('click', ()=>{ coef=[...p.c]; activePreset=k; syncSliders(); render(); });
+  presetsEl.appendChild(b);
+});
+
+const chain = document.getElementById('chain');
+function build(){
+  chain.innerHTML='';
+  NODES.forEach((n,i)=>{
+    const node=document.createElement('div'); node.className='node';
+    node.innerHTML=`<div class="delta" id="d${i}"></div>
+      <div class="barwrap" id="bw${i}" style="--c:var(${n.v})"><div class="zero"></div><div class="fill" id="f${i}"></div></div>
+      <div class="nm">${n.nm}</div><div class="unit">${n.unit}</div>`;
+    chain.appendChild(node);
+    if(i<4){
+      const link=document.createElement('div'); link.className='link';
+      link.innerHTML=`<span class="lpct" id="p${i}"></span>
+        <div class="track" id="t${i}"><span class="spark"></span></div>
+        <input class="slider" id="s${i}" type="range" min="-80" max="120" step="5" value="${coef[i]}" aria-label="${LINKLBL[i]} transfer">
+        <span class="llbl">${LINKLBL[i]}</span>`;
+      chain.appendChild(link);
+    }
+  });
+  for(let i=0;i<4;i++){
+    document.getElementById('s'+i).addEventListener('input', e=>{
+      coef[i]=+e.target.value; activePreset=detectPreset(); syncPresetButtons(); render();
+    });
+  }
+}
+function detectPreset(){
+  for(const [k,p] of Object.entries(PRESETS)){ if(p.c.every((x,i)=>x===coef[i])) return k; }
+  return null;
+}
+function syncPresetButtons(){
+  [...presetsEl.children].forEach(b=> b.setAttribute('aria-pressed', b.dataset.k===activePreset?'true':'false'));
+}
+function syncSliders(){ for(let i=0;i<4;i++){ const s=document.getElementById('s'+i); if(s) s.value=coef[i]; } syncPresetButtons(); }
+
+function render(){
+  // propagate
+  let v=100; const vals=[100];
+  for(let i=0;i<4;i++){ v=v*(coef[i]/100); vals.push(v); }
+  const MAXH=100; // bar height %
+  NODES.forEach((n,i)=>{
+    const val=vals[i]; const pct=Math.round(val);
+    const d=document.getElementById('d'+i);
+    d.textContent=(i===0?'100%':(val<0?'▼ ':(pct>0?'+':''))+pct+'%'); d.classList.toggle('neg', val<0);
+    const f=document.getElementById('f'+i); const bw=document.getElementById('bw'+i);
+    const mag=Math.min(Math.abs(val),120)/120*MAXH;
+    f.style.height=mag+'%'; bw.classList.toggle('neg', val<0);
+  });
+  for(let i=0;i<4;i++){
+    const c=coef[i]; const p=document.getElementById('p'+i); const t=document.getElementById('t'+i);
+    p.textContent=c+'%'; p.classList.toggle('neg', c<0);
+    t.classList.toggle('neg', c<0);
+    const sp=t.querySelector('.spark');
+    if(sp){ const frac=Math.max(0,Math.min(c/100,1.2)); sp.style.setProperty('--op', c<=0?'0':String(0.25+frac*0.75)); sp.style.setProperty('--spd', (1.4+(1.2-frac)*1.4).toFixed(2)+'s'); }
+  }
+  // verdict
+  const fin=vals[4]; const prod=coef.reduce((a,b)=>a*(b/100),1); // == fin/100
+  const r=document.getElementById('readout'); const tag=document.getElementById('rtag'); const txt=document.getElementById('rtxt');
+  let cls='readout', t='', x='';
+  const allHealthyLooking = coef.every(c=>c>=85 && c<=100);
+  if(fin<0){ cls+=' warn'; t='Sign flipped'; x='<b>Surrogate paradox.</b> The proxy rose, historically tracked retention — yet retention <i>fell</i>. A validated-looking metric that reverses the real decision. The most dangerous link of all.'; }
+  else if(allHealthyLooking && fin<80){ cls+=' warn'; t=`Leaked to ${Math.round(fin)}%`; x=`<b>Death by a thousand cuts.</b> Every link looks "healthy" — yet multiplying them erased <b>${Math.round(100-fin)}%</b> of the win. The chain is <i>multiplicative</i>: small, individually-acceptable losses compound into a missing third.`; }
+  else if(fin>=85){ cls+=' win'; t='Chain intact'; x='A real win <b>propagates</b> through every layer and lands as a measurable business lift. The case everyone assumes — and the rarest.'; }
+  else if(fin>=40){ cls+=' warn'; t=`Leaked to ${Math.round(fin)}%`; x='The win is <b>attenuating</b>. Find the weakest link — that arrow is where the value drains out before it reaches the business.'; }
+  else { cls+=' warn'; t=`Mostly lost (${Math.round(fin)}%)`; x='Almost nothing survives to Business. Either a link <b>saturated</b> (a win nobody could feel) or one arrow is near zero. You optimized a number, not an outcome.'; }
+  r.className=cls; tag.textContent=t; txt.innerHTML=x;
+}
+build(); render();
+</script>
+</body>
+</html>

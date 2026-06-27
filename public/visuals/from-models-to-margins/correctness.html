@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Three things the platform enforces by construction</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+.shell { display: flex; flex-direction: column; gap: clamp(8px,1.4vh,13px); justify-content: center; }
+.head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; }
+.head h1 { font-size: clamp(1.05rem,2vw,1.5rem); font-weight: 700; letter-spacing: -0.02em; color: var(--text-strong); }
+.head p { color: var(--muted); font-size: 0.8rem; }
+
+.stack { display: flex; flex-direction: column; gap: 8px; }
+.rule { border-radius: 13px; border: 1px solid var(--border); background: var(--surface); box-shadow: var(--shadow-soft); overflow: hidden; }
+.rbtn { width: 100%; font: inherit; cursor: pointer; background: none; border: none; text-align: left; padding: 11px 14px; display: flex; align-items: center; gap: 11px; color: var(--text); }
+.rnum { flex: none; width: 24px; height: 24px; border-radius: 7px; display: grid; place-items: center; font-size: 0.74rem; font-weight: 800; color: #fff;
+  background: linear-gradient(135deg, var(--accent), var(--accent-3)); }
+.rname { font-size: 0.92rem; font-weight: 700; color: var(--text-strong); flex: 1; }
+.chev { flex: none; color: var(--muted); transition: transform .22s ease; }
+.rule[aria-expanded="true"] .chev { transform: rotate(180deg); }
+.rule[aria-expanded="true"] .rbtn { border-bottom: 1px solid var(--border); }
+.detail { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .26s ease; }
+.detail > div { overflow: hidden; }
+.rule[aria-expanded="true"] .detail { grid-template-rows: 1fr; }
+.dpad { padding: 11px 14px 13px; display: grid; gap: 9px; }
+.line { display: flex; gap: 9px; font-size: 0.82rem; line-height: 1.42; align-items: flex-start; }
+.line .ic { flex: none; font-weight: 800; margin-top: 1px; }
+.line.bad .ic { color: var(--warn); } .line.good .ic { color: var(--good); }
+.line .k { font-size: 0.58rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.07em; display: block; margin-bottom: 1px; }
+.line.bad .k { color: var(--warn); } .line.good .k { color: var(--good); }
+.line .body { color: var(--text); } .line .body b { color: var(--text-strong); }
+.line.good { padding-top: 9px; border-top: 1px dashed var(--border-strong); }
+@media (prefers-reduced-motion: reduce){ .detail, .chev { transition: none !important; } }
+</style>
+</head>
+<body>
+<main class="shell">
+  <div class="head">
+    <h1>Three rules, enforced by construction.</h1>
+    <p>So a dashboard physically <em>cannot</em> get them wrong. Open a card to see the trap it kills.</p>
+  </div>
+  <div class="stack" id="stack"></div>
+</main>
+
+<script>
+const RULES = [
+  { n:1, name:'Store the right statistical object',
+    bad:'A <b>mean of percentiles</b> — <code>avg(p99)</code> across shards. It is not a percentile of anything; it just looks like a number.',
+    good:'Rates → pool raw counts, report <b>Wilson intervals</b>. Percentiles → keep a <b>mergeable sketch</b>, merge then read. Ratios like cost-per-task → <b>delta-method</b> variance (it clusters by user).' },
+  { n:2, name:'Cost is per *successful* task',
+    bad:'<b>Cost per request.</b> A cheaper model that fails more burns tokens for no value — and looks cheaper on this metric.',
+    good:'Price input &amp; output <b>apart</b> (output runs ~5–6× input), credit <b>cache-read discounts</b> (~90% on current frontier providers), and roll <b>cost-per-successful-task</b> up to contribution margin — the literal models-to-margins link.' },
+  { n:3, name:'Attribute to the harness, not the model',
+    bad:'“<b>The model scores 62%</b>” — as if the number belonged to the model alone.',
+    good:'A fixed model swings <b>~10–20 points</b> across agent harnesses; report every metric as <b>(model × harness × tools × retry)</b> and keep agent metrics <b>trajectory-aware</b>.' },
+];
+const stack = document.getElementById('stack');
+RULES.forEach((r,i)=>{
+  const el=document.createElement('div'); el.className='rule'; el.setAttribute('aria-expanded', i===0?'true':'false');
+  el.innerHTML = `
+    <button class="rbtn" aria-expanded="${i===0?'true':'false'}" aria-controls="d${i}">
+      <span class="rnum">${r.n}</span><span class="rname">${r.name.replace(/\*(.+?)\*/g,'<em>$1</em>')}</span>
+      <svg class="chev" width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <div class="detail" id="d${i}"><div><div class="dpad">
+      <div class="line bad"><span class="ic">✕</span><span class="body"><span class="k">The trap</span>${r.bad}</span></div>
+      <div class="line good"><span class="ic">✓</span><span class="body"><span class="k">Enforced instead</span>${r.good}</span></div>
+    </div></div></div>`;
+  const btn = el.querySelector('.rbtn');
+  btn.addEventListener('click', ()=>{
+    const open = el.getAttribute('aria-expanded')==='true';
+    // single-open accordion: collapse every card, then open this one if it was closed.
+    // Keeps the visual inside its fixed (no-scroll) embed frame.
+    stack.querySelectorAll('.rule').forEach(r=>{
+      r.setAttribute('aria-expanded','false');
+      r.querySelector('.rbtn').setAttribute('aria-expanded','false');
+    });
+    if (!open){ el.setAttribute('aria-expanded','true'); btn.setAttribute('aria-expanded','true'); }
+  });
+  stack.appendChild(el);
+});
+</script>
+</body>
+</html>

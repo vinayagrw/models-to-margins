@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Chain Validator — watch a proxy decouple</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+.shell { display: flex; flex-direction: column; gap: clamp(8px,1.4vh,13px); justify-content: center; }
+.head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; }
+.head h1 { font-size: clamp(1.05rem,2vw,1.5rem); font-weight: 700; letter-spacing: -0.02em; color: var(--text-strong); }
+.head p { color: var(--muted); font-size: 0.8rem; }
+.links { display: flex; flex-wrap: wrap; gap: 6px; }
+.lk { font: inherit; cursor: pointer; border-radius: 999px; padding: 5px 12px; font-size: 0.73rem; font-weight: 600;
+  border: 1px solid var(--border-strong); background: var(--surface); color: var(--muted); transition: all .18s ease; }
+.lk:hover { color: var(--text); border-color: var(--accent); }
+.lk[aria-pressed="true"] { background: linear-gradient(135deg, var(--accent), var(--accent-3)); color: #fff; border-color: transparent; box-shadow: var(--shadow-soft); }
+.chartwrap { border-radius: 14px; border: 1px solid var(--border); background: var(--surface); box-shadow: var(--shadow-soft); padding: 12px 14px 8px; }
+svg { width: 100%; height: auto; max-height: clamp(118px,19vh,158px); overflow: visible; display: block; }
+.thresh { stroke: var(--warn); stroke-width: 0.22; stroke-dasharray: 0.9 0.9; }
+.zero { stroke: var(--muted-soft); stroke-width: 0.22; }
+.axis { stroke: var(--border-strong); stroke-width: 0.22; }
+.curve { fill: none; stroke: var(--accent); stroke-width: 0.7; stroke-linejoin: round; }
+.marker { fill: var(--text-strong); }
+.danger { fill: var(--warn); opacity: 0.07; }
+.flip { fill: var(--warn); opacity: 0.13; }
+.lbl { fill: var(--muted); font-size: 1.5px; font-family: "DM Sans", sans-serif; }
+.lblw { fill: var(--warn); font-size: 1.5px; font-family: "DM Sans", sans-serif; font-weight: 700; }
+.bottom { display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center; }
+.rho { display: flex; flex-direction: column; }
+.rho .val { font-size: clamp(1.3rem,3.4vh,1.9rem); font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1; color: var(--text-strong); }
+.rho .cap { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); }
+.scrub { display: flex; flex-direction: column; gap: 3px; }
+.scrub .wk { font-size: 0.7rem; color: var(--muted); }
+.scrub input { width: 100%; accent-color: var(--accent); cursor: pointer; }
+.play { font: inherit; cursor: pointer; border-radius: 999px; padding: 6px 13px; font-size: 0.74rem; font-weight: 700; border: 1px solid var(--accent); background: transparent; color: var(--accent); white-space: nowrap; }
+.play:hover { background: var(--accent); color: #fff; }
+.alert { border-radius: 10px; padding: 8px 13px; font-size: 0.82rem; line-height: 1.4; border-left: 3px solid var(--c,var(--good)); background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow-soft); }
+.alert b { font-weight: 800; }
+.alert .state { font-size: 0.62rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--c); }
+@media (max-width: 560px){ .bottom { grid-template-columns: 1fr; gap: 8px; } }
+</style>
+</head>
+<body>
+<main class="shell">
+  <div class="head">
+    <h1>Plane 4 in action: the chain validator.</h1>
+    <p>It watches each arrow's proxy-to-outcome correlation and alerts when it decays — or flips sign. Pick a link, scrub the weeks.</p>
+  </div>
+  <div class="links" id="links"></div>
+  <div class="chartwrap">
+    <svg viewBox="0 0 100 22" id="svg" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Proxy-to-outcome correlation over time">
+      <rect class="danger" x="8" y="7.35" width="88" height="4.86"/>
+      <rect class="flip" x="8" y="12.21" width="88" height="6.79"/>
+      <line class="axis" x1="8" y1="2.5" x2="8" y2="19"/>
+      <line class="axis" x1="8" y1="19" x2="96" y2="19"/>
+      <line class="thresh" x1="8" y1="7.35" x2="96" y2="7.35"/>
+      <line class="zero" x1="8" y1="12.21" x2="96" y2="12.21"/>
+      <text class="lblw" x="9.2" y="6.85">alert threshold ρ = 0.5</text>
+      <text class="lbl" x="9.2" y="11.75">ρ = 0 (decoupled)</text>
+      <text class="lbl" x="52" y="21.4" text-anchor="middle">weeks since ship →</text>
+      <path class="curve" id="curve"/>
+      <circle class="marker" id="marker" r="1.0"/>
+    </svg>
+  </div>
+  <div class="bottom">
+    <div class="rho" aria-live="polite"><span class="val" id="rhoVal">—</span><span class="cap">ρ proxy→outcome · wk <span id="wkLbl">0</span></span></div>
+    <div class="scrub">
+      <div class="wk">Scrub time, or press play</div>
+      <input id="week" type="range" min="0" max="12" step="1" value="0" aria-label="Week">
+    </div>
+    <button class="play" id="play" aria-pressed="false">▶ Play</button>
+  </div>
+  <div class="alert" id="alert" aria-live="polite" style="--c:var(--good)"></div>
+</main>
+
+<script>
+// correlation profiles ρ(week), weeks 0..12 ; y maps ρ[1..-0.7] to svg [4..48]
+const WK=12;
+const PROFILES = {
+  mobile:  { label:'Output→UX · mobile', f:w=>0.82-0.030*w },                 // decays through 0.5 → break
+  desktop: { label:'Output→UX · desktop', f:w=>0.78-0.004*w-0.02*Math.sin(w/2) }, // holds
+  judge:   { label:'Judge→Human truth', f:w=>0.70-0.115*w },                 // crosses 0 → sign flip
+};
+let cur='mobile', week=0, playing=null;
+const X = w => 8 + (w/WK)*88;
+const Y = r => 2.5 + ((1-r)/1.7)*16.5;   // ρ=1→2.5, ρ=0.5→7.35, ρ=0→12.21, ρ=-0.7→19
+const rhoAt = w => Math.max(-0.7, Math.min(1, PROFILES[cur].f(w)));
+
+const linksEl=document.getElementById('links');
+Object.entries(PROFILES).forEach(([k,p])=>{
+  const b=document.createElement('button'); b.className='lk'; b.dataset.k=k; b.textContent=p.label; b.setAttribute('aria-pressed',k===cur?'true':'false');
+  b.addEventListener('click',()=>{ cur=k; drawCurve(); update(); });
+  linksEl.appendChild(b);
+});
+const weekEl=document.getElementById('week');
+weekEl.addEventListener('input',()=>{ week=+weekEl.value; stop(); update(); });
+document.getElementById('play').addEventListener('click',play);
+
+function drawCurve(){
+  [...linksEl.children].forEach(b=>b.setAttribute('aria-pressed', b.dataset.k===cur?'true':'false'));
+  let d='';
+  for(let w=0;w<=WK;w++){ d += (w?'L':'M')+X(w).toFixed(1)+' '+Y(rhoAt(w)).toFixed(1)+' '; }
+  document.getElementById('curve').setAttribute('d',d);
+}
+function update(){
+  const r=rhoAt(week);
+  document.getElementById('marker').setAttribute('cx',X(week).toFixed(1));
+  document.getElementById('marker').setAttribute('cy',Y(r).toFixed(1));
+  document.getElementById('rhoVal').textContent=(r>=0?'+':'')+r.toFixed(2);
+  document.getElementById('wkLbl').textContent=week;
+  weekEl.value=week;
+  const a=document.getElementById('alert');
+  let c,state,msg;
+  if(r<0){ c='var(--warn)'; state='⛔ Sign flip · surrogate paradox'; msg='The proxy now moves <b>opposite</b> the outcome. Optimizing it actively <b>harms</b> the business. The most dangerous failure — and invisible without this validator.'; }
+  else if(r<0.5){ c='var(--warn)'; state='✕ Chain break'; msg='Correlation fell below the alert threshold. The dashboard built on this arrow is <b>asserting a link that no longer holds</b>. Stop trusting the proxy; re-validate against ground truth.'; }
+  else if(r<0.62){ c='var(--accent-2)'; state='⚠ Decaying'; msg='The link is weakening. Goodhart pressure or distribution shift is eroding the proxy. Watch closely — it is trending toward a break.'; }
+  else { c='var(--good)'; state='✓ Chain holds'; msg='The proxy still tracks the outcome. The arrow on the dashboard is, for now, a <b>measured</b> claim rather than an asserted one.'; }
+  a.style.setProperty('--c',c);
+  a.innerHTML=`<span class="state">${state}</span><div>${msg}</div>`;
+  document.getElementById('svg').setAttribute('aria-label',
+    `${PROFILES[cur].label}. Week ${week}: proxy-to-outcome correlation ρ ${(r>=0?'+':'')+r.toFixed(2)}. State: ${state.replace(/^[^A-Za-z]+/,'')}.`);
+}
+function play(){
+  if(playing){ stop(); return; }
+  if(week>=WK) week=0;
+  const b=document.getElementById('play'); b.textContent='❚❚ Pause'; b.setAttribute('aria-pressed','true');
+  playing=setInterval(()=>{ week++; update(); if(week>=WK) stop(); }, 360);
+}
+function stop(){ if(playing){ clearInterval(playing); playing=null; } const b=document.getElementById('play'); b.textContent='▶ Play'; b.setAttribute('aria-pressed','false'); }
+// pause auto-advance when the iframe/tab is hidden (avoids motion running offscreen)
+document.addEventListener('visibilitychange', ()=>{ if(document.hidden) stop(); });
+drawCurve(); update();
+</script>
+</body>
+</html>

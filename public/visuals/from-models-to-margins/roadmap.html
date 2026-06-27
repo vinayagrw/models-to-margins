@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The build roadmap — watch the pyramid light up, phase by phase</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+.shell { display: flex; flex-direction: column; gap: clamp(9px,1.6vh,15px); justify-content: center; }
+.head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; }
+.head h1 { font-size: clamp(1.05rem,2vw,1.5rem); font-weight: 700; letter-spacing: -0.02em; color: var(--text-strong); }
+.head p { color: var(--muted); font-size: 0.8rem; }
+
+/* stepper rail */
+.rail { position: relative; display: grid; grid-template-columns: repeat(4,1fr); gap: 6px; }
+.rail::before { content: ""; position: absolute; left: 7%; right: 7%; top: 13px; height: 3px; border-radius: 2px;
+  background: var(--border-strong); z-index: 0; }
+.railfill { position: absolute; left: 7%; top: 13px; height: 3px; border-radius: 2px; z-index: 0;
+  background: linear-gradient(90deg, var(--accent), var(--accent-3)); transition: width .35s cubic-bezier(.4,.1,.2,1); }
+.step { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 5px;
+  background: none; border: none; font: inherit; cursor: pointer; padding: 0; text-align: center; }
+.dot { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-size: 0.78rem; font-weight: 800;
+  background: var(--surface); border: 2px solid var(--border-strong); color: var(--muted); transition: all .2s ease; }
+.step .lab { font-size: 0.67rem; font-weight: 600; color: var(--muted); line-height: 1.25; max-width: 13ch; }
+.step:hover .dot { border-color: var(--accent); color: var(--text); }
+.step.done .dot { background: linear-gradient(135deg, var(--accent), var(--accent-3)); border-color: transparent; color: #04121d; }
+.step[aria-selected="true"] .dot { box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 30%, transparent); border-color: var(--accent); transform: scale(1.08); }
+.step[aria-selected="true"] .lab { color: var(--text-strong); }
+
+.body { display: grid; grid-template-columns: minmax(150px,0.62fr) minmax(0,1fr); gap: clamp(12px,2vw,22px); align-items: center; }
+
+/* mini pyramid */
+.pyr { display: flex; flex-direction: column; gap: 5px; }
+.layer { position: relative; height: 30px; border-radius: 7px; display: flex; align-items: center; padding: 0 10px; margin: 0 auto;
+  font-size: 0.66rem; font-weight: 700; letter-spacing: 0.02em; transition: all .35s ease; overflow: hidden; white-space: nowrap; }
+.layer .tag { position: relative; z-index: 1; }
+.layer .st { position: relative; z-index: 1; margin-left: auto; font-size: 0.56rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; opacity: 0.85; }
+.l0 { width: 56%; } .l1 { width: 67%; } .l2 { width: 78%; } .l3 { width: 89%; } .l4 { width: 100%; }
+/* states */
+.layer.off { background: color-mix(in srgb, var(--border) 60%, transparent); color: var(--muted-soft); border: 1px dashed var(--border-strong); }
+.layer.asserted { background: color-mix(in srgb, var(--c) 14%, transparent); color: var(--text); border: 1px dashed color-mix(in srgb, var(--c) 70%, transparent); }
+.layer.solid { background: linear-gradient(135deg, color-mix(in srgb, var(--c) 80%, transparent), color-mix(in srgb, var(--c) 55%, transparent));
+  color: #fff; border: 1px solid transparent; box-shadow: var(--shadow-soft); }
+
+/* detail panel */
+.panel { border-radius: 14px; border: 1px solid var(--border); background: var(--surface); box-shadow: var(--shadow-soft); padding: 13px 15px; }
+.ptitle { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 9px; }
+.ptitle .pn { font-size: 0.78rem; font-weight: 800; color: var(--accent); }
+.ptitle .pname { font-size: 1rem; font-weight: 700; color: var(--text-strong); }
+.gets { margin-top: 9px; display: grid; gap: 5px; }
+.gets .g { display: flex; gap: 7px; font-size: 0.82rem; color: var(--text); line-height: 1.4; }
+.gets .g .ic { color: var(--good); font-weight: 800; flex: none; }
+.gets .g b { color: var(--text-strong); }
+.miss { margin-top: 10px; padding-top: 9px; border-top: 1px dashed var(--border-strong); font-size: 0.81rem; color: var(--muted); line-height: 1.42; display: flex; gap: 7px; }
+.miss .ic { color: var(--warn); font-weight: 800; flex: none; }
+.miss b { color: var(--text); }
+@media (max-width: 600px){ .body { grid-template-columns: 1fr; } .pyr { max-width: 280px; margin: 0 auto; } }
+@media (prefers-reduced-motion: reduce){ .railfill, .dot, .layer, .step[aria-selected="true"] .dot { transition: none !important; } }
+</style>
+</head>
+<body>
+<main class="shell">
+  <div class="head">
+    <h1>The build, phase by phase.</h1>
+    <p>Each phase buys something — and pointedly does <em>not</em> buy the next. Pick a phase; watch the pyramid light up.</p>
+  </div>
+
+  <div class="rail" id="rail" role="tablist" aria-label="Build phases">
+    <div class="railfill" id="railfill" style="width:0"></div>
+  </div>
+
+  <div class="body">
+    <div class="pyr" id="pyr" aria-hidden="true"></div>
+    <div class="panel" id="panel" role="tabpanel" tabindex="0" aria-live="polite"></div>
+  </div>
+</main>
+
+<script>
+const LAYERS = [
+  { key:'biz', tag:'Business',      cls:'l0', cv:'var(--biz)' },
+  { key:'ux',  tag:'User Experience', cls:'l1', cv:'var(--ux)' },
+  { key:'out', tag:'Model Output',  cls:'l2', cv:'var(--out)' },
+  { key:'mod', tag:'Model',         cls:'l3', cv:'var(--mod)' },
+  { key:'sys', tag:'System',        cls:'l4', cv:'var(--sys)' },
+];
+// per-phase layer reach: solid = measured, asserted = on the dashboard but only asserted, off = not yet
+const PHASES = [
+  { n:1, name:'Substrate + cost truth',
+    reach:{ sys:'solid', mod:'solid', out:'off', ux:'off', biz:'off' },
+    gets:['Trustworthy <b>System / Model</b> metrics — correct percentiles, <b>cost-per-successful-task</b>, drift detection'],
+    miss:'Any link to the business; any eval.' },
+  { n:2, name:'Eval gate + judge calibration',
+    reach:{ sys:'solid', mod:'solid', out:'solid', ux:'off', biz:'off' },
+    gets:['Pre-ship <b>regression protection</b>','<b>Validated judges</b> instead of vanity scores'],
+    miss:'Causal business attribution.' },
+  { n:3, name:'Metric tree + chain validator',
+    reach:{ sys:'solid', mod:'solid', out:'solid', ux:'asserted', biz:'asserted' },
+    gets:['“Dashboards as <b>hypotheses</b>”','<b>Chain-break</b> and <b>surrogate-paradox</b> alerts'],
+    miss:'Powered causal proof (still needs traffic) — the top two layers are on the board, but only <b>asserted</b>.' },
+  { n:4, name:'Experiment + confidence-gated HITL',
+    reach:{ sys:'solid', mod:'solid', out:'solid', ux:'solid', biz:'solid' },
+    gets:['Causal <b>ship / no-ship</b> decisions','Safe automation + a <b>label flywheel</b>'],
+    miss:'Nothing — this is the full vision. The whole chain is now <b>measured</b>, not asserted.' },
+];
+
+const rail = document.getElementById('rail');
+const railfill = document.getElementById('railfill');
+const pyr = document.getElementById('pyr');
+const panel = document.getElementById('panel');
+let active = 0;
+
+// build pyramid layers once
+LAYERS.forEach(l=>{
+  const d=document.createElement('div'); d.className='layer '+l.cls; d.id='ly-'+l.key; d.style.setProperty('--c', l.cv);
+  d.innerHTML=`<span class="tag">${l.tag}</span><span class="st"></span>`;
+  pyr.appendChild(d);
+});
+// build stepper
+PHASES.forEach((p,i)=>{
+  const b=document.createElement('button'); b.className='step'; b.id='step'+i; b.dataset.i=i;
+  b.setAttribute('role','tab'); b.setAttribute('aria-controls','panel'); b.tabIndex = i===active?0:-1;
+  b.innerHTML=`<span class="dot">${p.n}</span><span class="lab">${p.name}</span>`;
+  b.addEventListener('click',()=>{ active=i; render(); });
+  rail.appendChild(b);
+});
+rail.addEventListener('keydown', e=>{
+  if(e.key!=='ArrowRight' && e.key!=='ArrowLeft') return;
+  e.preventDefault();
+  active = (active + (e.key==='ArrowRight'?1:-1) + PHASES.length) % PHASES.length;
+  render(); rail.querySelectorAll('.step')[active].focus();
+});
+
+function render(){
+  const p = PHASES[active];
+  // stepper states
+  rail.querySelectorAll('.step').forEach((b,i)=>{
+    b.setAttribute('aria-selected', i===active?'true':'false');
+    b.tabIndex = i===active?0:-1;
+    b.classList.toggle('done', i<active);
+  });
+  railfill.style.width = (active/(PHASES.length-1))*86 + '%';
+  // pyramid states
+  const stLabel = { solid:'measured', asserted:'asserted', off:'' };
+  LAYERS.forEach(l=>{
+    const el=document.getElementById('ly-'+l.key);
+    const s=p.reach[l.key];
+    el.classList.remove('solid','asserted','off'); el.classList.add(s);
+    el.querySelector('.st').textContent = stLabel[s];
+  });
+  // detail
+  panel.setAttribute('aria-labelledby','step'+active);
+  panel.innerHTML = `
+    <div class="ptitle"><span class="pn">Phase ${p.n}</span><span class="pname">${p.name}</span></div>
+    <div class="gets">${p.gets.map(g=>`<div class="g"><span class="ic">✓</span><span>${g}</span></div>`).join('')}</div>
+    <div class="miss"><span class="ic">✕</span><span><b>Still don’t have:</b> ${p.miss}</span></div>`;
+}
+render();
+</script>
+</body>
+</html>

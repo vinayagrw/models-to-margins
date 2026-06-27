@@ -32,7 +32,8 @@ const deepDives = defineCollection({
   schema: z.object({
     ...sharedSchema,
     geography: z.string(),
-    horizon: z.string().optional()
+    horizon: z.string().optional(),
+    template: z.string().optional()
   })
 });
 

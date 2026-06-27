@@ -61,7 +61,7 @@ Contrast: `--bp-ink` on paper ≈ 13:1; `--bp-ink-2` ≈ 7:1; accent reserved fo
 
 ## 5. Components
 
-**Header.** Eyebrow `DEEP DIVE / DRAWING NO. MCH-01` with an orange underline; `FROM MODELS → MARGINS` in Syne uppercase (the `→` in accent); IBM Plex lead; a mono coordinate strip `SCALE 1:1 · LAYERS 5 · SCENES 9 · REV 2026.06`; back-link rendered as a blueprint tab. Replaces the generic `.eyebrow/.lead/EntryMeta` block for this template.
+**Header.** Eyebrow `DEEP DIVE / Metric Chain` with an orange underline; `FROM MODELS → MARGINS` in Syne uppercase (the `→` in accent); IBM Plex lead; a mono coordinate strip `SCALE 1:1 · LAYERS 5 · SCENES 9 · REV 2026.06`; back-link rendered as a blueprint tab. Replaces the generic `.eyebrow/.lead/EntryMeta` block for this template.
 
 **Chain-spine + scroll-spy.** A 2px indigo rail down the left of `.article-body`. Each scene `h2` gets a node (`::before` ring) plus a mono scene-id. A sticky left-edge **scene index** lists the 9 scenes; `spine.js` uses `IntersectionObserver` to fill the active node/index entry in accent as the reader scrolls. Keyboard: the index entries are anchor links to scene ids (real navigation, not JS-only).
 

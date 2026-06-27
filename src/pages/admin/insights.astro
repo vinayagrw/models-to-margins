@@ -7,43 +7,59 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
   currentPath="/admin/insights"
 >
   <section class="article-shell admin-shell" id="insights-root">
-    <header>
+    <header class="admin-head">
       <span class="eyebrow warm">Hidden Analytics</span>
-      <h1>Visitor intelligence dashboard.</h1>
-      <p class="lead">Geographic, device, referral, and behavior data for public-page visitors.</p>
+      <h1>Visitor intelligence.</h1>
+      <p class="lead">Geographic, device, referral, and behavior signals for everyone who lands on a public page.</p>
     </header>
 
     <div class="note-panel section-block" id="gate-note" hidden>
-      <p>Provide the access key: <code>/admin/insights?key=YOUR_TOKEN</code></p>
+      <p>Provide the access key in the URL: <code>/admin/insights?key=YOUR_TOKEN</code></p>
     </div>
 
     <div id="dash" hidden>
       <div class="kpi-row section-block" id="kpis"></div>
-      <div class="section-block" id="viz"></div>
 
-      <div class="filter-bar section-block">
-        <input id="f-search" type="search" placeholder="Search (path, city, referrer…)" />
-        <input id="f-from" type="date" />
-        <input id="f-to" type="date" />
-        <select id="f-country"><option value="">All countries</option></select>
-        <select id="f-browser"><option value="">All browsers</option></select>
-        <select id="f-device"><option value="">All devices</option></select>
-        <select id="f-page"><option value="">All pages</option></select>
-        <button id="f-clear" type="button" class="button secondary">Clear</button>
-        <button id="f-csv" type="button" class="button secondary">Export CSV</button>
-        <span id="f-count"></span>
+      <div class="section-block dash-section">
+        <div class="dash-section__head">
+          <h2>Signals</h2>
+          <p>Where visitors are, what they browse with, and how they arrive.</p>
+        </div>
+        <div id="viz"></div>
       </div>
 
-      <div class="table-wrap section-block">
-        <table class="event-table">
-          <thead><tr>
-            <th data-sort="ts">Time</th><th data-sort="geo.country">Country</th>
-            <th data-sort="geo.city">City</th><th data-sort="page.path">Page</th>
-            <th data-sort="device.browser">Browser</th><th data-sort="device.deviceType">Device</th>
-            <th data-sort="page.referrer">Referrer</th><th data-sort="geo.ip">IP</th>
-          </tr></thead>
-          <tbody id="rows"></tbody>
-        </table>
+      <div class="section-block dash-section">
+        <div class="dash-section__head dash-section__head--row">
+          <div>
+            <h2>Event log</h2>
+            <p>Filter, sort, and export the raw event stream.</p>
+          </div>
+          <span id="f-count" class="count-chip"></span>
+        </div>
+
+        <div class="filter-bar">
+          <input id="f-search" type="search" aria-label="Search events" placeholder="Search path, city, referrer, IP…" />
+          <label class="field"><span>From</span><input id="f-from" type="date" aria-label="From date" /></label>
+          <label class="field"><span>To</span><input id="f-to" type="date" aria-label="To date" /></label>
+          <select id="f-country" aria-label="Filter by country"><option value="">All countries</option></select>
+          <select id="f-browser" aria-label="Filter by browser"><option value="">All browsers</option></select>
+          <select id="f-device" aria-label="Filter by device"><option value="">All devices</option></select>
+          <select id="f-page" aria-label="Filter by page"><option value="">All pages</option></select>
+          <button id="f-clear" type="button" class="button secondary">Clear</button>
+          <button id="f-csv" type="button" class="button primary">Export CSV</button>
+        </div>
+
+        <div class="table-wrap">
+          <table class="event-table">
+            <thead><tr>
+              <th data-sort="ts">Time</th><th data-sort="geo.country">Country</th>
+              <th data-sort="geo.city">City</th><th data-sort="page.path">Page</th>
+              <th data-sort="device.browser">Browser</th><th data-sort="device.deviceType">Device</th>
+              <th data-sort="page.referrer">Referrer</th><th data-sort="geo.ip">IP</th>
+            </tr></thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </div>
       </div>
     </div>
   </section>
@@ -51,3 +67,201 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
   <script src="/scripts/insights-viz.js" is:inline></script>
   <script src="/scripts/insights.js" is:inline></script>
 </BaseLayout>
+
+<style is:global>
+  /* Visitor intelligence dashboard — styled with the site's existing tokens so
+     light/dark both work. Selectors are scoped under #insights-root / .admin-shell.
+     Uses is:global because the charts and rows are injected at runtime by external
+     scripts, so Astro's build-time scope hashes never reach them. */
+
+  .admin-shell { max-width: 1280px; }
+  .admin-head h1 { font-size: clamp(2.2rem, 5vw, 3.6rem); }
+
+  .admin-shell .dash-section__head { margin-bottom: 16px; }
+  .admin-shell .dash-section__head h2 { font-size: clamp(1.3rem, 2.4vw, 1.8rem); }
+  .admin-shell .dash-section__head p { margin: 6px 0 0; }
+  .admin-shell .dash-section__head--row {
+    display: flex; align-items: flex-end; justify-content: space-between;
+    gap: 16px; flex-wrap: wrap;
+  }
+
+  /* ---- KPI band ---- */
+  .admin-shell .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 14px;
+  }
+  .admin-shell .kpi {
+    display: flex; flex-direction: column; gap: 8px;
+    padding: 18px 20px;
+    background: var(--surface-muted);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    box-shadow: var(--shadow-soft);
+  }
+  .admin-shell .kpi-label {
+    font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--muted);
+  }
+  .admin-shell .kpi-value {
+    font-size: clamp(1.6rem, 3vw, 2.1rem); font-weight: 700; line-height: 1;
+    color: var(--text);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .admin-shell .kpi:first-child .kpi-value,
+  .admin-shell .kpi:nth-child(2) .kpi-value {
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+
+  /* ---- Viz layout ---- */
+  .admin-shell #viz { display: grid; gap: 16px; }
+  .admin-shell .map-card,
+  .admin-shell .bar-card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    box-shadow: var(--shadow-soft);
+    padding: 18px;
+  }
+  .admin-shell .bar-card h3 {
+    font-size: 0.95rem; letter-spacing: 0.01em; margin-bottom: 14px;
+    color: var(--text);
+  }
+  .admin-shell .bar-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+    gap: 16px;
+  }
+
+  /* ---- World map ---- */
+  .admin-shell .map-card { padding: 0; overflow: hidden; }
+  .admin-shell .world-map {
+    display: block; width: 100%; height: auto;
+    filter: drop-shadow(0 0 6px color-mix(in srgb, var(--accent) 45%, transparent));
+  }
+  .admin-shell .world-bg { fill: var(--surface-muted); }
+  .admin-shell .geo-pt {
+    fill: var(--accent-2);
+    stroke: color-mix(in srgb, var(--accent-2) 60%, transparent);
+    stroke-width: 1.4; paint-order: stroke; opacity: 0.92;
+  }
+
+  /* ---- Bars ---- */
+  .admin-shell .bar-row {
+    display: grid; grid-template-columns: minmax(0, 9rem) 1fr auto;
+    align-items: center; gap: 10px;
+    padding: 5px 0;
+  }
+  .admin-shell .bar-label {
+    font-size: 0.85rem; color: var(--muted);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .admin-shell .bar {
+    position: relative; height: 9px; border-radius: 999px;
+    background: var(--surface-muted); overflow: hidden;
+  }
+  .admin-shell .bar-fill {
+    display: block; height: 100%; border-radius: 999px;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    transition: width 320ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .admin-shell .bar-val {
+    font-size: 0.82rem; color: var(--text); font-variant-numeric: tabular-nums;
+    min-width: 2ch; text-align: right;
+  }
+  .admin-shell .muted { color: var(--muted); font-size: 0.88rem; }
+
+  /* ---- Time series ---- */
+  .admin-shell .ts-chart { display: block; width: 100%; height: 90px; }
+  .admin-shell .ts-area { fill: var(--accent); opacity: 0.14; }
+  .admin-shell .ts-line {
+    fill: none; stroke: var(--accent); stroke-width: 2;
+    stroke-linejoin: round; stroke-linecap: round;
+    vector-effect: non-scaling-stroke;
+  }
+  .admin-shell .ts-dot { fill: var(--accent-2); }
+
+  /* ---- Filter bar ---- */
+  .admin-shell .filter-bar {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
+    padding: 14px;
+    background: var(--surface-muted);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    margin-bottom: 16px;
+  }
+  .admin-shell .filter-bar input,
+  .admin-shell .filter-bar select {
+    height: 40px; padding: 0 12px;
+    background: var(--panel-strong);
+    color: var(--text);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    font-size: 0.9rem;
+  }
+  .admin-shell .filter-bar input:focus,
+  .admin-shell .filter-bar select:focus {
+    outline: none; border-color: var(--accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent);
+  }
+  .admin-shell .filter-bar #f-search { flex: 1 1 220px; min-width: 180px; }
+  .admin-shell .filter-bar .field {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 0.78rem; color: var(--muted); text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .admin-shell .filter-bar .button { padding: 0 16px; height: 40px; }
+  .admin-shell .filter-bar .button.primary { color: #05111f; }
+  .admin-shell .count-chip {
+    display: inline-flex; align-items: center;
+    padding: 6px 12px; border-radius: 999px;
+    background: var(--tag-bg); border: 1px solid var(--line);
+    color: var(--muted); font-size: 0.82rem; white-space: nowrap;
+  }
+
+  /* ---- Event table ---- */
+  .admin-shell .table-wrap {
+    max-height: 560px; overflow: auto;
+    border: 1px solid var(--line); border-radius: 16px;
+    background: var(--panel);
+  }
+  .admin-shell .event-table { width: 100%; border-collapse: collapse; font-size: 0.86rem; }
+  .admin-shell .event-table th {
+    position: sticky; top: 0; z-index: 1;
+    text-align: left; padding: 12px 14px; white-space: nowrap;
+    background: var(--table-head);
+    color: var(--text); font-weight: 600;
+    font-size: 0.74rem; letter-spacing: 0.06em; text-transform: uppercase;
+    border-bottom: 1px solid var(--line-strong);
+    cursor: pointer; user-select: none;
+    backdrop-filter: blur(8px);
+  }
+  .admin-shell .event-table th::after {
+    content: ''; display: inline-block; width: 0; margin-left: 6px;
+    opacity: 0.4; font-size: 0.7rem;
+  }
+  .admin-shell .event-table th.is-sorted { color: var(--accent); }
+  .admin-shell .event-table th.is-sorted[data-dir="asc"]::after { content: '▲'; opacity: 1; }
+  .admin-shell .event-table th.is-sorted[data-dir="desc"]::after { content: '▼'; opacity: 1; }
+  .admin-shell .event-table td {
+    padding: 10px 14px; white-space: nowrap;
+    color: var(--muted);
+    border-bottom: 1px solid var(--line);
+  }
+  .admin-shell .event-table td:first-child,
+  .admin-shell .event-table td:last-child {
+    font-variant-numeric: tabular-nums;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.8rem; color: var(--text);
+  }
+  .admin-shell .event-table tbody tr { transition: background 140ms ease; }
+  .admin-shell .event-table tbody tr:hover { background: var(--nav-hover); }
+  .admin-shell .event-table tbody tr:last-child td { border-bottom: none; }
+
+  @media (max-width: 720px) {
+    .admin-shell .filter-bar { padding: 12px; }
+    .admin-shell .filter-bar #f-search { flex-basis: 100%; }
+    .admin-shell .bar-row { grid-template-columns: minmax(0, 7rem) 1fr auto; }
+  }
+</style>

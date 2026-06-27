@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The metric lifecycle — a checklist you can tick</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+.shell { display: flex; flex-direction: column; gap: clamp(9px,1.6vh,15px); justify-content: center; }
+.head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; }
+.head h1 { font-size: clamp(1.05rem,2vw,1.5rem); font-weight: 700; letter-spacing: -0.02em; color: var(--text-strong); }
+.head p { color: var(--muted); font-size: 0.8rem; }
+
+.cols { display: grid; grid-template-columns: repeat(3,1fr); gap: clamp(8px,1.4vw,14px); }
+.stage { border-radius: 14px; border: 1px solid var(--border); background: var(--surface); box-shadow: var(--shadow-soft); padding: 12px 13px; display: flex; flex-direction: column; gap: 9px; }
+.stage .when { display: flex; align-items: center; gap: 7px; }
+.stage .when .mk { width: 9px; height: 9px; border-radius: 50%; flex: none; background: var(--c); box-shadow: 0 0 0 3px color-mix(in srgb, var(--c) 22%, transparent); }
+.stage .when h2 { font-size: 0.82rem; font-weight: 700; color: var(--text-strong); letter-spacing: -0.01em; }
+.stage .when .ph { font-size: 0.58rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--c); }
+.items { display: flex; flex-direction: column; gap: 7px; }
+.item { display: flex; gap: 9px; align-items: flex-start; font: inherit; text-align: left; cursor: pointer; background: none; border: none; padding: 2px 0; color: var(--text); }
+.box { flex: none; width: 17px; height: 17px; border-radius: 5px; border: 2px solid var(--border-strong); display: grid; place-items: center; margin-top: 1px; transition: all .16s ease; }
+.box svg { width: 10px; height: 10px; opacity: 0; transform: scale(.5); transition: all .18s cubic-bezier(.3,1.4,.5,1); }
+.item[aria-checked="true"] .box { background: var(--c); border-color: var(--c); }
+.item[aria-checked="true"] .box svg { opacity: 1; transform: scale(1); }
+.item .txt { font-size: 0.79rem; line-height: 1.36; transition: color .16s ease, opacity .16s ease; }
+.item[aria-checked="true"] .txt { color: var(--muted); }
+.item .txt b { color: var(--text-strong); font-weight: 600; }
+.item[aria-checked="true"] .txt b { color: var(--muted); }
+.item:hover .box { border-color: var(--c); }
+.item:focus-visible { outline: none; }
+.item:focus-visible .box { box-shadow: 0 0 0 3px color-mix(in srgb, var(--c) 35%, transparent); }
+
+.foot { display: flex; align-items: center; gap: 12px; }
+.bar { flex: 1; height: 8px; border-radius: 5px; background: color-mix(in srgb, var(--border) 70%, transparent); overflow: hidden; }
+.fill { height: 100%; border-radius: 5px; width: 0; background: linear-gradient(90deg, var(--accent), var(--accent-3)); transition: width .3s cubic-bezier(.4,.1,.2,1); }
+.count { font-size: 0.76rem; font-weight: 700; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.count.done { color: var(--good); }
+@media (max-width: 600px){ .cols { grid-template-columns: 1fr; } }
+@media (prefers-reduced-motion: reduce){ .box, .box svg, .fill { transition: none !important; } }
+</style>
+</head>
+<body>
+<main class="shell">
+  <div class="head">
+    <h1>The metric lifecycle — a checklist you can tick.</h1>
+    <p>Three moments in a metric's life. Tick each as you clear it; the bar fills.</p>
+  </div>
+
+  <div class="cols" id="cols"></div>
+
+  <div class="foot">
+    <div class="bar"><div class="fill" id="fill"></div></div>
+    <div class="count" id="count" aria-live="polite">0 / 6 cleared</div>
+  </div>
+</main>
+
+<script>
+const STAGES = [
+  { ph:'Before tracking', cv:'var(--sys)', items:[
+    'Map the metric to the <b>layer above</b> it.',
+    'Validate it against <b>real user behavior</b> — not its own definition.' ]},
+  { ph:'Before shipping', cv:'var(--out)', items:[
+    'Name the trade — <b>which goes up, which goes down</b>.',
+    'Set the <b>threshold</b> before you see the result.',
+    'List the <b>second-order effects</b>.' ]},
+  { ph:'After shipping', cv:'var(--biz)', items:[
+    'Business metric flat? <b>Trace the broken link</b> in the chain — don’t guess.' ]},
+];
+const TOTAL = STAGES.reduce((n,s)=>n+s.items.length,0);
+const cols = document.getElementById('cols');
+const fill = document.getElementById('fill');
+const count = document.getElementById('count');
+let checked = 0;
+
+STAGES.forEach((s,si)=>{
+  const st=document.createElement('div'); st.className='stage'; st.style.setProperty('--c', s.cv);
+  const items = s.items.map((t,ii)=>`
+    <button class="item" role="checkbox" aria-checked="false" id="it-${si}-${ii}">
+      <span class="box"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 6.3 L5 9 L10 3" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      <span class="txt">${t}</span>
+    </button>`).join('');
+  st.innerHTML = `<div class="when"><span class="mk"></span><span class="ph">${s.ph}</span></div><div class="items">${items}</div>`;
+  cols.appendChild(st);
+});
+
+cols.querySelectorAll('.item').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const on = btn.getAttribute('aria-checked')==='true';
+    btn.setAttribute('aria-checked', on?'false':'true');
+    checked += on? -1 : 1;
+    update();
+  });
+});
+function update(){
+  fill.style.width = (checked/TOTAL*100)+'%';
+  if (checked===TOTAL){ count.textContent='✓ Chain defended — all 6 cleared'; count.classList.add('done'); }
+  else { count.textContent = `${checked} / ${TOTAL} cleared`; count.classList.remove('done'); }
+}
+update();
+</script>
+</body>
+</html>

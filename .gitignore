@@ -156,3 +156,6 @@ m2m-app/
 
 # Analytics dev mirror
 .analytics/
+
+# Personal local notes (never committed)
+*.local.md

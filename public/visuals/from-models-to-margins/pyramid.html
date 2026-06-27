@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Five-Layer Metric Pyramid</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+.shell { display: grid; grid-template-columns: minmax(0,1.15fr) minmax(300px,0.95fr); gap: clamp(18px,2.6vw,40px); align-items: center; }
+:root[data-embedded="true"] .shell { align-items: stretch; }
+.intro { display: flex; flex-direction: column; gap: 10px; justify-content: center; }
+.headline { font-weight: 700; font-size: clamp(1.3rem,2.4vw,2rem); line-height: 1.1; letter-spacing: -0.02em; color: var(--text-strong); }
+.sub { color: var(--muted); font-size: clamp(0.85rem,1.5vh,0.98rem); line-height: 1.5; max-width: 46ch; }
+.inject { font: inherit; cursor: pointer; align-self: flex-start; border-radius: 999px; padding: 7px 15px; font-size: 0.78rem; font-weight: 700;
+  border: none; color: #fff; background: linear-gradient(135deg, var(--sys), color-mix(in srgb, var(--sys) 60%, #000 20%)); box-shadow: var(--shadow-soft); transition: filter .18s ease, transform .18s ease; }
+.inject:hover { filter: brightness(1.08); transform: translateY(-1px); }
+.inject:disabled { opacity: 0.6; cursor: default; transform: none; }
+.clock { font-size: 0.74rem; color: var(--muted); min-height: 1.1em; letter-spacing: 0.01em; }
+.clock b { color: var(--text-strong); }
+.hint { font-size: 0.72rem; color: var(--muted-soft); letter-spacing: 0.02em; }
+.detail { margin-top: 2px; border-radius: 14px; border: 1px solid var(--border); background: var(--surface); padding: 14px 16px; box-shadow: var(--shadow-soft); min-height: 118px; }
+.detail .dlabel { display: flex; align-items: center; gap: 8px; font-weight: 700; color: var(--text-strong); font-size: 1.02rem; }
+.detail .dswatch { width: 12px; height: 12px; border-radius: 4px; background: var(--c); }
+.detail .dq { margin-top: 6px; color: var(--text); font-style: italic; font-size: 0.92rem; }
+.detail .dmetrics { margin-top: 9px; display: flex; flex-wrap: wrap; gap: 6px; }
+.detail .dlatency { margin-top: 9px; font-size: 0.74rem; color: var(--muted); letter-spacing: 0.02em; }
+.pyramid { display: flex; flex-direction: column; gap: 7px; justify-content: center; }
+.row { position: relative; cursor: pointer; border: none; background: none; font: inherit; text-align: left; }
+.bar { margin: 0 auto; padding: 11px 16px; border-radius: 10px; color: #fff; position: relative; overflow: hidden;
+  background: linear-gradient(135deg, var(--c), color-mix(in srgb, var(--c) 70%, #000 18%));
+  box-shadow: var(--shadow-soft); transition: transform .25s ease, box-shadow .25s ease, filter .25s ease;
+  display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.row[aria-selected="true"] .bar { transform: translateY(-1px) scale(1.015); box-shadow: var(--shadow); filter: brightness(1.08); outline: 2px solid color-mix(in srgb, var(--c) 60%, #fff); outline-offset: 2px; }
+.row:not([aria-selected="true"]):hover .bar { filter: brightness(1.06); transform: translateY(-1px); }
+.bar .bname { font-weight: 700; font-size: clamp(0.82rem,1.5vh,0.98rem); letter-spacing: 0.01em; position: relative; z-index: 1; }
+.bar .btag { font-size: 0.66rem; opacity: 0.86; text-transform: uppercase; letter-spacing: 0.1em; white-space: nowrap; position: relative; z-index: 1; }
+/* ripple state */
+.row.dim .bar { filter: grayscale(0.5) brightness(0.7); opacity: 0.7; }
+.row.lit .bar { filter: brightness(1.12); opacity: 1; }
+.row.pulse .bar::after { content:''; position: absolute; inset: 0; background: radial-gradient(circle at 12% 50%, rgba(255,255,255,.85), transparent 60%); animation: sweep .7s ease-out forwards; }
+@keyframes sweep { 0%{ transform: translateX(-30%); opacity: .9;} 100%{ transform: translateX(120%); opacity: 0;} }
+.bar .land { position: absolute; right: 14px; z-index: 2; font-size: 0.62rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+  background: rgba(0,0,0,0.32); padding: 2px 7px; border-radius: 999px; opacity: 0; transition: opacity .3s ease; }
+.row.lit .bar .land { opacity: 1; }
+/* the landed-badge replaces the resting latency tag once a layer lights — avoid overlap */
+.row.lit .bar .btag { opacity: 0; }
+/* widths form the pyramid */
+.r0 .bar { width: 56%; } .r1 .bar { width: 66%; } .r2 .bar { width: 78%; } .r3 .bar { width: 89%; } .r4 .bar { width: 100%; }
+.flow { text-align: center; font-size: 0.68rem; color: var(--muted-soft); letter-spacing: 0.14em; text-transform: uppercase; margin: 1px 0; transition: color .3s ease; }
+.flow.active { color: var(--accent); }
+@media (max-width: 820px) { .shell { grid-template-columns: 1fr; } .detail { min-height: 0; } }
+@media (prefers-reduced-motion: reduce) { .row.pulse .bar::after { animation: none; display: none; } }
+</style>
+</head>
+<body>
+<main class="shell">
+  <div class="intro">
+    <span class="eyebrow">The metric pyramid</span>
+    <h1 class="headline">Five altitudes, two speeds.</h1>
+    <p class="sub">The top is what the business feels; the bottom is what the system does. The art is reading them as <strong>one chain</strong> — and the catch is they land at wildly different speeds.</p>
+    <button class="inject" id="inject">▶ Inject a win at System — watch it climb</button>
+    <p class="clock" id="clock">A System metric lands in real time. A Business outcome lands days later. You always act on a fast proxy for a slow truth.</p>
+    <p class="hint">↑ Or click any layer to inspect it.</p>
+    <div class="detail" id="detail" style="--c: var(--biz)">
+      <div class="dlabel"><span class="dswatch"></span><span id="dname">Business</span></div>
+      <div class="dq" id="dq">"Did the margin move?"</div>
+      <div class="dmetrics" id="dmetrics"></div>
+      <div class="dlatency" id="dlatency"></div>
+    </div>
+  </div>
+
+  <div class="pyramid" id="pyramid" role="listbox" aria-label="Metric layers, top to bottom"></div>
+</main>
+
+<script>
+const LAYERS = [
+  { key:'biz', cls:'r0', name:'Business',        tag:'days–weeks', land:'days–weeks', q:'"Did the margin move?"',            v:'--biz', metrics:['retention','conversion','revenue','DAU'], lat:'Lands in days to weeks — the slow truth.' },
+  { key:'ux',  cls:'r1', name:'User Experience', tag:'hours',      land:'hours',      q:'"Did they get the job done?"',       v:'--ux',  metrics:['task completion','session length','correction frequency'], lat:'Lands in hours.' },
+  { key:'out', cls:'r2', name:'Model Output',    tag:'seconds',    land:'seconds',    q:'"Was this answer useful?"',          v:'--out', metrics:['acceptance rate','edit rate','LLM-as-judge score'], lat:'Lands in seconds — the fast proxy.' },
+  { key:'mod', cls:'r3', name:'Model',           tag:'seconds',    land:'seconds',    q:'"Is the model correct?"',            v:'--mod', metrics:['accuracy','precision / recall','F1','hallucination rate'], lat:'Lands in seconds.' },
+  { key:'sys', cls:'r4', name:'System',          tag:'real-time',  land:'real-time',  q:'"Is it fast, cheap, and up?"',       v:'--sys', metrics:['P95 latency','cost / request','KV-cache hit','throughput'], lat:'Real-time — the plumbing.' },
+];
+const py = document.getElementById('pyramid');
+LAYERS.forEach((L, i) => {
+  if (i>0) { const f=document.createElement('div'); f.className='flow'; f.dataset.f=i; f.textContent='▲ propagates up'; py.appendChild(f); }
+  const b = document.createElement('button');
+  b.className = `row ${L.cls}`; b.setAttribute('role','option'); b.dataset.i = i; b.dataset.key = L.key; b.style.setProperty('--c', `var(${L.v})`);
+  b.innerHTML = `<div class="bar"><span class="bname">${L.name}</span><span class="land">⏱ ${L.land}</span><span class="btag">${L.tag}</span></div>`;
+  b.addEventListener('click', () => select(i));
+  py.appendChild(b);
+});
+const rows = [...document.querySelectorAll('.row')];
+const detail = document.getElementById('detail');
+function select(i){
+  const L = LAYERS[i];
+  rows.forEach(r => r.setAttribute('aria-selected', r.dataset.i==i ? 'true':'false'));
+  detail.style.setProperty('--c', `var(${L.v})`);
+  document.getElementById('dname').textContent = L.name;
+  document.getElementById('dq').textContent = L.q;
+  document.getElementById('dlatency').textContent = '⏱ ' + L.lat;
+  document.getElementById('dmetrics').innerHTML = L.metrics.map(m=>`<span class="pill">${m}</span>`).join('');
+}
+select(0);
+
+// --- the two-speed ripple ---
+// bottom (System, i=4) → top (Business, i=0); delays are compressed but log-spaced to convey the gap
+const SEQ = [
+  { i:4, t:0,    msg:'<b>System win injected.</b> Real-time — you see it instantly.' },
+  { i:3, t:450,  msg:'Model metrics land in <b>seconds</b>.' },
+  { i:2, t:900,  msg:'Output quality lands in <b>seconds</b>.' },
+  { i:1, t:1900, msg:'User-experience signals take <b>hours</b> to read.' },
+  { i:0, t:3300, msg:'…and Business lands <b>days to weeks</b> later. That lag <i>is</i> the central design fact.' },
+];
+const clock = document.getElementById('clock');
+const injectBtn = document.getElementById('inject');
+let timers = [];
+function ripple(){
+  timers.forEach(clearTimeout); timers = [];
+  injectBtn.disabled = true;
+  rows.forEach(r=>{ r.classList.remove('lit','pulse'); r.classList.add('dim'); });
+  document.querySelectorAll('.flow').forEach(f=>f.classList.remove('active'));
+  SEQ.forEach((s,idx)=>{
+    timers.push(setTimeout(()=>{
+      const row = rows.find(r=>+r.dataset.i===s.i);
+      row.classList.remove('dim'); row.classList.add('lit','pulse');
+      const fl = document.querySelector(`.flow[data-f="${s.i}"]`); if (fl) fl.classList.add('active');
+      clock.innerHTML = s.msg;
+      select(s.i);
+      if (idx===SEQ.length-1){
+        timers.push(setTimeout(()=>{ rows.forEach(r=>r.classList.remove('dim')); injectBtn.disabled=false; }, 1400));
+      }
+    }, s.t));
+  });
+}
+injectBtn.addEventListener('click', ripple);
+</script>
+</body>
+</html>

@@ -6,13 +6,22 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev"],
       "port": 4321,
-      "autoPort": true
+      "autoPort": true,
+      "env": {
+        "INSIGHTS_TOKEN": "123456"
+      }
     },
     {
       "name": "static-preview",
       "runtimeExecutable": "python",
       "runtimeArgs": ["-m", "http.server", "8777"],
       "port": 8777
+    },
+    {
+      "name": "astro-preview",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "preview", "--", "--port", "4322"],
+      "port": 4322
     }
   ]
 }

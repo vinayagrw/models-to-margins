@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Four Families, One Pyramid</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+.shell { display: flex; flex-direction: column; gap: clamp(10px,1.6vh,16px); justify-content: center; }
+.head h1 { font-size: clamp(1.15rem,2.2vw,1.7rem); font-weight: 700; letter-spacing: -0.02em; color: var(--text-strong); }
+.head p { color: var(--muted); font-size: 0.86rem; margin-top: 3px; }
+.grid { display: grid; grid-template-columns: 130px repeat(4, 1fr); gap: 6px; }
+.ch { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.02em; color: var(--text-strong); text-align: center; padding: 4px; align-self: end; cursor: pointer; border-radius: 8px; border: 1px solid transparent; }
+.ch.colhdr:hover { border-color: var(--border-strong); }
+.ch.active { background: var(--surface-strong); border-color: var(--accent); color: var(--accent); }
+.rh { font-size: 0.74rem; font-weight: 700; color: #fff; display: flex; align-items: center; padding: 0 10px; border-radius: 8px;
+  background: linear-gradient(135deg, var(--c), color-mix(in srgb, var(--c) 70%, #000 16%)); }
+.cell { height: 42px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); position: relative; transition: all .18s ease; }
+.cell.cov { background: color-mix(in srgb, var(--fc) 26%, var(--surface)); border-color: color-mix(in srgb, var(--fc) 55%, transparent); }
+.cell.prim { background: color-mix(in srgb, var(--fc) 60%, var(--surface)); border-color: var(--fc); box-shadow: var(--shadow-soft); }
+.cell .mk { position: absolute; inset: 0; display: grid; place-items: center; font-size: 0.86rem; font-weight: 800; color: color-mix(in srgb, var(--fc) 88%, #000 10%); }
+.cell.dim { opacity: 0.28; }
+.legend { display: flex; flex-wrap: wrap; gap: 12px; font-size: 0.74rem; color: var(--muted); align-items: center; }
+.legend b { color: var(--text-strong); }
+.swatch { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 4px; }
+.note { border-radius: 12px; border: 1px solid var(--border); background: var(--surface); padding: 10px 14px; box-shadow: var(--shadow-soft); font-size: 0.86rem; line-height: 1.45; color: var(--text); }
+.note b { color: var(--text-strong); }
+@media (max-width: 680px){ .grid { grid-template-columns: 92px repeat(4,1fr); } .ch { font-size: 0.6rem; } .rh { font-size: 0.62rem; } }
+</style>
+</head>
+<body>
+<main class="shell">
+  <div class="head">
+    <h1>No single family covers the pyramid.</h1>
+    <p>Four distinct tool families, each owning a slice. Click a family to trace its reach — then watch the gaps.</p>
+  </div>
+  <div class="grid" id="grid"></div>
+  <div class="legend">
+    <span><span class="swatch" style="background:var(--accent)"></span><b>Primary</b> owner</span>
+    <span><span class="swatch" style="background:color-mix(in srgb,var(--accent) 30%,transparent)"></span>Partial coverage</span>
+    <span>Empty = blind spot</span>
+  </div>
+  <div class="note" id="note"></div>
+</main>
+
+<script>
+const LAYERS = [ {k:'Business',v:'--biz'},{k:'User Experience',v:'--ux'},{k:'Model Output',v:'--out'},{k:'Model',v:'--mod'},{k:'System',v:'--sys'} ];
+const FAMS = [
+  { name:'Observability\n& tracing', fc:'--sys', cov:{System:'p', Model:'c'},
+    note:'<b>Observability &amp; tracing</b> owns System and watches Model — per-request spans for tokens, latency, cost. But it is pure <i>online</i> signal: it never tells you whether the business moved.' },
+  { name:'Eval-driven\ndev', fc:'--out', cov:{'Model Output':'p', Model:'c'},
+    note:'<b>Eval-driven development</b> owns Model Output and Model — golden sets and graders gate quality before ship. Offline only: it says nothing about the production distribution or downstream value.' },
+  { name:'Metric tree\n+ semantic layer', fc:'--accent', cov:{Business:'c','User Experience':'c','Model Output':'c',Model:'c',System:'c'},
+    note:'<b>Metric trees</b> span the whole chain — that is the point — but the lineage is <i>asserted</i>, not measured, and the layer is not AI-aware. It is glue, not proof.' },
+  { name:'Online\nexperimentation', fc:'--biz', cov:{Business:'p','User Experience':'p'},
+    note:'<b>Online experimentation</b> owns Business and UX with <i>causal</i> attribution (OEC + guardrails). The catch: it needs traffic and time, and LLM stochasticity inflates the variance.' },
+];
+const grid = document.getElementById('grid');
+let active = -1;
+function build(){
+  grid.innerHTML = '';
+  grid.appendChild(corner(''));
+  FAMS.forEach((f,ci)=>{
+    const c = document.createElement('div'); c.className='ch colhdr'+(active===ci?' active':''); c.innerHTML = f.name.replace(/\n/g,'<br>');
+    c.addEventListener('click', ()=>{ active = active===ci?-1:ci; build(); });
+    grid.appendChild(c);
+  });
+  LAYERS.forEach(L=>{
+    const rh = document.createElement('div'); rh.className='rh'; rh.style.setProperty('--c',`var(${L.v})`); rh.textContent = L.k;
+    grid.appendChild(rh);
+    FAMS.forEach((f,ci)=>{
+      const cov = f.cov[L.k];
+      const cell = document.createElement('div');
+      cell.className = 'cell' + (cov==='p'?' prim':cov==='c'?' cov':'') + (active!==-1 && active!==ci?' dim':'');
+      cell.style.setProperty('--fc', `var(${f.fc})`);
+      if (cov) cell.innerHTML = `<span class="mk">${cov==='p'?'●':'◗'}</span>`;
+      grid.appendChild(cell);
+    });
+  });
+  document.getElementById('note').innerHTML = active===-1
+    ? 'The synthesis: tracing is the <b>substrate</b>, evals the <b>pre-ship gate</b>, experimentation the <b>causal arbiter</b>, the metric tree the <b>glue</b>. A real stack is the composition of all four.'
+    : FAMS[active].note;
+}
+function corner(t){ const c=document.createElement('div'); c.className='ch'; c.textContent=t; return c; }
+build();
+</script>
+</body>
+</html>

@@ -1,0 +1,645 @@
+/* ============================================================================
+   Blueprint Spine — bespoke template for the metric-chain deep-dive.
+   Every rule is scoped under .dd-blueprint so nothing leaks to other pages.
+   It deliberately OVERRIDES the global .article-body "terminal" reset within
+   this scope and re-establishes a drafting-paper / technical-drawing identity.
+   ========================================================================== */
+
+.dd-blueprint.article-shell {
+  /* paper + ink */
+  --bp-paper-1: #eef2f7;
+  --bp-paper-2: #e4eaf2;
+  --bp-paper-edge: #d6deea;
+  --bp-ink: #16233b;
+  --bp-ink-2: #3c4a63;
+  --bp-ink-3: #64718a;
+  --bp-line: #1b3a6b;
+  --bp-line-soft: rgba(27, 58, 107, 0.16);
+  --bp-line-faint: rgba(27, 58, 107, 0.07);
+  --bp-accent: #e0832a;
+  --bp-accent-ink: #a8530c; /* darkened for AA on paper (~4.6:1) */
+  --bp-good: #1f7a52;
+  --bp-warn: #c0461f;
+
+  /* surfaces (tokenized so dark mode can re-skin them) */
+  --bp-card: #ffffff;
+  --bp-card-2: #f3f6fb;
+  --bp-code-bg: #f7f9fc;
+  --bp-node-fill: var(--bp-paper-1);
+  --bp-shadow: rgba(27, 58, 107, 0.1);
+  --bp-active-tint: rgba(224, 131, 42, 0.1);
+
+  --bp-display: "Syne", "Segoe UI", sans-serif;
+  --bp-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --bp-mono: "IBM Plex Mono", "Cascadia Code", ui-monospace, monospace;
+
+  position: relative;
+  color: var(--bp-ink);
+  font-family: var(--bp-body);
+  background:
+    linear-gradient(0deg, var(--bp-line-faint) 1px, transparent 1px) 0 0 / 100% 28px,
+    linear-gradient(90deg, var(--bp-line-faint) 1px, transparent 1px) 0 0 / 28px 100%,
+    linear-gradient(135deg, var(--bp-paper-1), var(--bp-paper-2));
+  border: 1.5px solid var(--bp-line);
+  border-radius: 2px;
+  box-shadow: 10px 10px 0 -2px var(--bp-shadow), 0 26px 60px -30px rgba(11, 24, 48, 0.55);
+  padding: clamp(22px, 4vw, 52px);
+  margin-top: 8px;
+  /* `clip` clips the grid/corner-ticks like `hidden` would, but does NOT
+     create a scroll container — so the sticky scene index still pins to the
+     viewport instead of scrolling away with the article. */
+  overflow: clip;
+}
+
+/* ============================================================
+   Dark mode — deep observability console (ported from the
+   telemetry-console palette: near-black navy surfaces, cool
+   slate ink). Only the palette tokens change; every rule below
+   inherits, so the whole page + nav + visuals follow the site's
+   light/dark toggle. The orange accent is kept across both modes
+   so the blueprint identity stays continuous.
+   ============================================================ */
+[data-theme="dark"] .dd-blueprint.article-shell {
+  --bp-paper-1: #0b1019;
+  --bp-paper-2: #070b11;
+  --bp-paper-edge: #1f2e44;
+  --bp-ink: #eaf1fb;
+  --bp-ink-2: #c5d4ea;
+  --bp-ink-3: #8093ad;
+  --bp-line: #2a3d57;
+  --bp-line-soft: rgba(94, 132, 188, 0.18);
+  --bp-line-faint: rgba(94, 132, 188, 0.06);
+  --bp-accent: #f0993f;
+  --bp-accent-ink: #ffb454;
+  --bp-good: #46e6a0;
+  --bp-warn: #ff6b5e;
+
+  --bp-card: #111826;
+  --bp-card-2: #0e1521;
+  --bp-code-bg: #060a10;
+  --bp-node-fill: #0b1019;
+  --bp-shadow: rgba(0, 0, 0, 0.6);
+  --bp-active-tint: rgba(240, 153, 63, 0.14);
+
+  box-shadow: 0 0 0 1px rgba(94, 132, 188, 0.06),
+    0 30px 80px -40px rgba(0, 0, 0, 0.9);
+}
+
+/* corner registration ticks — pure decoration */
+.dd-blueprint::before,
+.dd-blueprint::after {
+  content: "";
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid var(--bp-accent);
+  pointer-events: none;
+  opacity: 0.85;
+}
+.dd-blueprint::before { top: 12px; left: 12px; border-right: 0; border-bottom: 0; }
+.dd-blueprint::after { bottom: 12px; right: 12px; border-left: 0; border-top: 0; }
+
+/* ----------------------------------------------------------------- Header -- */
+.dd-blueprint .bp-header {
+  border-bottom: 1.5px solid var(--bp-line);
+  padding-bottom: clamp(20px, 3vw, 30px);
+  margin-bottom: clamp(10px, 2vw, 22px);
+}
+
+.dd-blueprint .bp-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-family: var(--bp-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--bp-ink-2);
+  padding-bottom: 4px;
+  border-bottom: 2px solid var(--bp-accent);
+}
+.dd-blueprint .bp-eyebrow-sep { color: var(--bp-accent); }
+.dd-blueprint .bp-eyebrow-no { color: var(--bp-accent-ink); font-weight: 600; }
+
+.dd-blueprint .bp-title {
+  font-family: var(--bp-display);
+  font-weight: 800;
+  font-size: clamp(2.4rem, 6vw, 4.4rem);
+  line-height: 0.96;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  color: var(--bp-ink);
+  margin: 0.5em 0 0;
+}
+.dd-blueprint .bp-arrow { color: var(--bp-accent); font-weight: 700; }
+
+.dd-blueprint .bp-subtitle {
+  font-family: var(--bp-mono);
+  font-size: clamp(0.82rem, 1.6vw, 0.96rem);
+  color: var(--bp-ink-2);
+  margin: 0.85rem 0 0;
+  max-width: 60ch;
+}
+
+.dd-blueprint .bp-lead {
+  font-size: clamp(1.02rem, 1.7vw, 1.22rem);
+  line-height: 1.55;
+  color: var(--bp-ink-2);
+  margin: 1.1rem 0 0;
+  /* run each line to the right edge of the sheet — no early measure cap */
+  max-width: none;
+}
+
+.dd-blueprint .bp-coords {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  margin: 1.4rem 0 0;
+  border: 1px solid var(--bp-line-soft);
+  width: max-content;
+  max-width: 100%;
+}
+.dd-blueprint .bp-coords span {
+  font-family: var(--bp-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--bp-ink-2);
+  padding: 7px 14px;
+  border-right: 1px solid var(--bp-line-soft);
+}
+.dd-blueprint .bp-coords span:last-child { border-right: 0; }
+
+.dd-blueprint .bp-header-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px 22px;
+  margin-top: 1.5rem;
+}
+
+/* back link + meta + tags re-tinted for paper */
+.dd-blueprint .back-link,
+.dd-blueprint .meta-row,
+.dd-blueprint .meta-pill,
+.dd-blueprint .entry-meta { color: var(--bp-ink-2); }
+.dd-blueprint .tag-row { margin-top: 1.2rem; }
+.dd-blueprint .tag {
+  background: transparent;
+  border: 1px solid var(--bp-line-soft);
+  border-radius: 2px;
+  color: var(--bp-ink-2);
+  font-family: var(--bp-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 5px 10px;
+}
+
+/* ------------------------------------------------------- Layout + spine --- */
+.dd-blueprint .bp-layout {
+  display: grid;
+  grid-template-columns: 210px minmax(0, 1fr);
+  gap: clamp(20px, 3vw, 40px);
+  margin-top: clamp(18px, 2.5vw, 30px);
+}
+
+.dd-blueprint .bp-spine-index {
+  position: sticky;
+  top: 92px;
+  align-self: start;
+  height: max-content;
+  border-left: 2px solid var(--bp-line-soft);
+  padding: 2px 0;
+  display: flex;
+  flex-direction: column;
+}
+.dd-blueprint .bp-index-link {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  align-items: baseline;
+  gap: 9px;
+  padding: 7px 12px;
+  margin-left: -2px;
+  border-left: 2px solid transparent;
+  text-decoration: none;
+  color: var(--bp-ink-3);
+  transition: color 0.18s ease, border-color 0.18s ease;
+}
+/* leading status dot — dim until its scene is active, then lit */
+.dd-blueprint .bp-index-link::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  align-self: center;
+  background: var(--bp-line-soft);
+  transition: background 0.18s ease, box-shadow 0.18s ease;
+}
+.dd-blueprint .bp-index-no {
+  font-family: var(--bp-mono);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+.dd-blueprint .bp-index-label {
+  font-size: 0.78rem;
+  line-height: 1.25;
+  letter-spacing: -0.005em;
+}
+.dd-blueprint .bp-index-link:hover { color: var(--bp-ink); }
+.dd-blueprint .bp-index-link.is-active {
+  color: var(--bp-ink);
+  border-left-color: var(--bp-accent);
+  background: var(--bp-active-tint);
+  font-weight: 500;
+}
+.dd-blueprint .bp-index-link.is-active .bp-index-no { color: var(--bp-accent-ink); }
+.dd-blueprint .bp-index-link.is-active::before {
+  background: var(--bp-accent);
+  box-shadow: 0 0 0 3px var(--bp-active-tint), 0 0 8px var(--bp-accent);
+}
+.dd-blueprint .bp-index-link:focus-visible {
+  outline: 2px solid var(--bp-accent);
+  outline-offset: 2px;
+}
+
+/* the spine rail down the article body */
+.dd-blueprint .bp-body {
+  position: relative;
+  padding-left: 42px;
+}
+.dd-blueprint .bp-body::before {
+  content: "";
+  position: absolute;
+  left: 9px;
+  top: 4px;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(var(--bp-line) 0 70%, var(--bp-line-soft));
+  transform-origin: top center;
+}
+
+/* ============================================================
+   Typography reset — neutralize the global terminal aesthetic.
+   Global rule .article-body :not(pre > code) has specificity (0,2,2);
+   adding .dd-blueprint raises this to (0,3,2) so it wins cleanly.
+   ============================================================ */
+.dd-blueprint .article-body :not(pre > code) {
+  display: revert;
+  padding: revert;
+  border: revert;
+  border-radius: 0;
+  background: none;
+  font-family: var(--bp-body);
+  font-size: revert;
+  color: revert;
+}
+
+.dd-blueprint .article-body {
+  margin-top: 0;
+  color: var(--bp-ink-2);
+  font-size: 1.04rem;
+  line-height: 1.68;
+}
+.dd-blueprint .article-body p,
+.dd-blueprint .article-body li,
+.dd-blueprint .article-body blockquote { color: var(--bp-ink-2); }
+.dd-blueprint .article-body strong { color: var(--bp-ink); font-weight: 600; }
+.dd-blueprint .article-body em { color: var(--bp-accent-ink); font-style: italic; }
+.dd-blueprint .article-body a {
+  color: var(--bp-accent-ink);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-thickness: 1px;
+}
+
+/* scene headings + spine nodes */
+.dd-blueprint .bp-body h2 {
+  position: relative;
+  font-family: var(--bp-display);
+  font-weight: 700;
+  font-size: clamp(1.5rem, 3vw, 2.1rem);
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  color: var(--bp-ink);
+  margin: 2.6rem 0 0.9rem;
+  scroll-margin-top: 90px;
+}
+.dd-blueprint .bp-body h2:first-of-type { margin-top: 0.6rem; }
+.dd-blueprint .bp-body h2::before {
+  content: "";
+  position: absolute;
+  left: -39px;
+  top: 0.28em;
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--bp-line);
+  border-radius: 50%;
+  background: var(--bp-node-fill);
+  transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.dd-blueprint .bp-body h2.is-current::before {
+  background: var(--bp-accent);
+  border-color: var(--bp-accent-ink);
+  box-shadow: 0 0 0 4px rgba(224, 131, 42, 0.18);
+}
+
+.dd-blueprint .bp-body h3,
+.dd-blueprint .bp-body h4 {
+  font-family: var(--bp-display);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--bp-ink);
+  margin: 1.8rem 0 0.6rem;
+}
+
+/* inline code → mono chip (re-applied above the reset, equal specificity, later) */
+.dd-blueprint .article-body :not(pre) > code {
+  font-family: var(--bp-mono);
+  font-size: 0.86em;
+  color: var(--bp-accent-ink);
+  background: rgba(27, 58, 107, 0.07);
+  border: 1px solid var(--bp-line-soft);
+  border-radius: 2px;
+  padding: 0.08em 0.36em;
+}
+
+/* code blocks → drafting note */
+.dd-blueprint .article-body pre,
+.dd-blueprint .code-block-shell {
+  border-radius: 2px;
+  border: 1.5px solid var(--bp-line);
+  background: var(--bp-code-bg);
+  box-shadow: 6px 6px 0 -2px var(--bp-shadow);
+}
+.dd-blueprint .article-body pre code {
+  font-family: var(--bp-mono);
+  color: var(--bp-ink);
+}
+.dd-blueprint .code-block-toolbar {
+  background: var(--bp-paper-2);
+  border-bottom: 1px solid var(--bp-line-soft);
+}
+.dd-blueprint .code-block-label { color: var(--bp-ink-2); font-family: var(--bp-mono); }
+.dd-blueprint .code-copy-button {
+  background: var(--bp-card);
+  border: 1px solid var(--bp-line-soft);
+  color: var(--bp-ink);
+  border-radius: 2px;
+}
+
+/* ----------------------------------------------- Cards → annotation plates -- */
+/* (0,3,x) specificity beats the (0,3,2) reset for these container properties) */
+.dd-blueprint .article-body .note-panel,
+.dd-blueprint .article-body .signal-card,
+.dd-blueprint .article-body .thesis-card,
+.dd-blueprint .article-body .decision-card,
+.dd-blueprint .article-body .action-card,
+.dd-blueprint .article-body .convergence-card,
+.dd-blueprint .article-body .scenario-card,
+.dd-blueprint .article-body .stack-item,
+.dd-blueprint .article-body .summary-item,
+.dd-blueprint .article-body .callout {
+  display: block;
+  padding: 1.05rem 1.15rem;
+  border: 1.5px solid var(--bp-line);
+  border-radius: 2px;
+  background: var(--bp-card);
+  box-shadow: 7px 7px 0 -2px var(--bp-shadow);
+  color: var(--bp-ink-2);
+}
+
+.dd-blueprint .article-body .note-panel {
+  display: grid;
+  gap: 0.6rem;
+  background: linear-gradient(135deg, var(--bp-card), var(--bp-card-2));
+}
+
+/* grids keep their column layout */
+.dd-blueprint .article-body .signal-grid,
+.dd-blueprint .article-body .thesis-grid,
+.dd-blueprint .article-body .decision-grid,
+.dd-blueprint .article-body .action-grid {
+  display: grid;
+  gap: 16px;
+  margin: 1.5rem 0 1.7rem;
+}
+.dd-blueprint .article-body .signal-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.dd-blueprint .article-body .thesis-grid,
+.dd-blueprint .article-body .decision-grid,
+.dd-blueprint .article-body .action-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.dd-blueprint .article-body .reading-map-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+/* card labels → mono uppercase */
+.dd-blueprint .article-body .signal-label,
+.dd-blueprint .article-body .reading-map-label {
+  display: inline-block;
+  font-family: var(--bp-mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--bp-accent-ink);
+}
+.dd-blueprint .article-body .signal-card > strong,
+.dd-blueprint .article-body .thesis-card > strong,
+.dd-blueprint .article-body .decision-card > strong,
+.dd-blueprint .article-body .action-card > strong,
+.dd-blueprint .article-body .callout > strong {
+  display: block;
+  font-family: var(--bp-display);
+  font-weight: 600;
+  font-size: 1.04rem;
+  color: var(--bp-ink);
+  margin: 0.15rem 0 0.4rem;
+}
+
+/* callout edge-tabs */
+.dd-blueprint .article-body .callout.warm { border-left: 5px solid var(--bp-warn); }
+.dd-blueprint .article-body .callout.green { border-left: 5px solid var(--bp-good); }
+
+/* reading map */
+.dd-blueprint .article-body .reading-map {
+  border: 1.5px dashed var(--bp-line-soft);
+  border-radius: 2px;
+  padding: 1rem 1.1rem 1.15rem;
+  background: var(--bp-card-2);
+  margin: 1.6rem 0;
+}
+.dd-blueprint .article-body .reading-link {
+  display: block;
+  padding: 9px 11px;
+  border: 1px solid var(--bp-line-soft);
+  border-radius: 2px;
+  background: var(--bp-card);
+  text-decoration: none;
+  color: var(--bp-ink-2);
+  transition: border-color 0.16s ease, transform 0.16s ease;
+}
+.dd-blueprint .article-body .reading-link:hover {
+  border-color: var(--bp-accent);
+  transform: translateY(-1px);
+}
+.dd-blueprint .article-body .reading-link > strong {
+  display: block;
+  font-family: var(--bp-display);
+  color: var(--bp-ink);
+  margin-bottom: 2px;
+}
+.dd-blueprint .article-body .reading-link > span { font-size: 0.82rem; color: var(--bp-ink-3); }
+
+/* ------------------------------------------------------------- Tables ----- */
+.dd-blueprint .article-body table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.6rem 0;
+  border: 1.5px solid var(--bp-line);
+  font-size: 0.94rem;
+}
+.dd-blueprint .article-body th,
+.dd-blueprint .article-body td {
+  display: table-cell;
+  padding: 11px 13px;
+  border: 1px solid var(--bp-line-soft);
+  text-align: left;
+  vertical-align: top;
+  color: var(--bp-ink-2);
+}
+.dd-blueprint .article-body th {
+  font-family: var(--bp-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--bp-ink);
+  background: var(--bp-paper-2);
+}
+.dd-blueprint .article-body td strong { color: var(--bp-ink); }
+
+.dd-blueprint .article-body hr {
+  border: 0;
+  border-top: 1.5px dashed var(--bp-line-soft);
+  margin: 2.4rem 0;
+}
+
+/* -------------------------------------------------- Visual plates --------- */
+.dd-blueprint .article-body .visual-frame {
+  position: relative;
+  border: 1.5px solid var(--bp-line);
+  border-radius: 2px;
+  background: var(--bp-card);
+  box-shadow: 8px 8px 0 -2px var(--bp-shadow);
+  margin: 1.7rem 0 2.2rem;
+  padding-top: 26px;
+  overflow: hidden;
+}
+.dd-blueprint .article-body .visual-frame::before {
+  content: "FIG · LIVE INSTRUMENT";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  font-family: var(--bp-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--bp-ink-2);
+  background: var(--bp-paper-2);
+  border-bottom: 1px solid var(--bp-line-soft);
+  z-index: 1;
+}
+.dd-blueprint .article-body .visual-frame::after {
+  content: "";
+  position: absolute;
+  top: 9px;
+  right: 12px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--bp-good);
+  box-shadow: 0 0 0 3px rgba(31, 122, 82, 0.18);
+  z-index: 2;
+}
+.dd-blueprint .article-body .visual-frame iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: var(--bp-card);
+}
+
+/* ------------------------------------------------------------- Motion ------ */
+@media (prefers-reduced-motion: no-preference) {
+  .dd-blueprint .bp-title,
+  .dd-blueprint .bp-subtitle,
+  .dd-blueprint .bp-lead,
+  .dd-blueprint .bp-coords {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  .dd-blueprint.bp-loaded .bp-title,
+  .dd-blueprint.bp-loaded .bp-subtitle,
+  .dd-blueprint.bp-loaded .bp-lead,
+  .dd-blueprint.bp-loaded .bp-coords {
+    animation: bp-rise 0.6s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+  }
+  .dd-blueprint.bp-loaded .bp-subtitle { animation-delay: 0.08s; }
+  .dd-blueprint.bp-loaded .bp-lead { animation-delay: 0.16s; }
+  .dd-blueprint.bp-loaded .bp-coords { animation-delay: 0.24s; }
+
+  .dd-blueprint .bp-body::before { transform: scaleY(0); }
+  .dd-blueprint.bp-loaded .bp-body::before {
+    animation: bp-grow 0.7s ease 0.2s forwards;
+  }
+}
+@keyframes bp-rise { to { opacity: 1; transform: translateY(0); } }
+@keyframes bp-grow { to { transform: scaleY(1); } }
+
+/* ----------------------------------------------------------- Responsive --- */
+@media (max-width: 960px) {
+  .dd-blueprint .bp-layout { grid-template-columns: 1fr; }
+  /* index becomes a sticky horizontal scene strip so wayfinding survives */
+  .dd-blueprint .bp-spine-index {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    flex-direction: row;
+    align-self: stretch;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: thin;
+    border-left: 0;
+    border-bottom: 2px solid var(--bp-line-soft);
+    margin-bottom: 16px;
+    padding: 4px 0;
+    background: linear-gradient(135deg, var(--bp-paper-1), var(--bp-paper-2));
+  }
+  .dd-blueprint .bp-index-link {
+    flex: 0 0 auto;
+    white-space: nowrap;
+    margin-left: 0;
+    border-left: 0;
+    border-bottom: 2px solid transparent;
+  }
+  .dd-blueprint .bp-index-link.is-active {
+    border-left-color: transparent;
+    border-bottom-color: var(--bp-accent);
+  }
+  .dd-blueprint .article-body .signal-grid,
+  .dd-blueprint .article-body .thesis-grid,
+  .dd-blueprint .article-body .decision-grid,
+  .dd-blueprint .article-body .action-grid,
+  .dd-blueprint .article-body .reading-map-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 560px) {
+  .dd-blueprint .bp-body { padding-left: 26px; }
+  .dd-blueprint .bp-body::before { left: 5px; }
+  .dd-blueprint .bp-body h2::before { left: -25px; width: 14px; height: 14px; }
+}

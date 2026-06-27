@@ -43,6 +43,9 @@
     "horizon": {
       "type": "string"
     },
+    "template": {
+      "type": "string"
+    },
     "$schema": {
       "type": "string"
     }

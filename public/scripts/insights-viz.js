@@ -59,10 +59,17 @@
     var days = Object.keys(byDay).sort();
     var max = Math.max.apply(null, days.map(function (d) { return byDay[d]; }));
     var w = 360, h = 80, step = days.length > 1 ? w / (days.length - 1) : 0;
-    var pts = days.map(function (d, i) { return (i * step).toFixed(1) + ',' + (h - byDay[d] / max * h).toFixed(1); }).join(' ');
+    var coords = days.map(function (d, i) { return [i * step, h - byDay[d] / max * h]; });
+    var pts = coords.map(function (c) { return c[0].toFixed(1) + ',' + c[1].toFixed(1); }).join(' ');
+    var lastX = coords[coords.length - 1][0];
+    var area = '0,' + h + ' ' + pts + ' ' + lastX.toFixed(1) + ',' + h;
+    var last = coords[coords.length - 1];
     return '<div class="bar-card"><h3>Visits over time</h3>' +
       '<svg viewBox="0 0 ' + w + ' ' + h + '" class="ts-chart" preserveAspectRatio="none">' +
-      '<polyline points="' + pts + '" class="ts-line"/></svg></div>';
+      '<polygon points="' + area + '" class="ts-area"/>' +
+      '<polyline points="' + pts + '" class="ts-line"/>' +
+      '<circle cx="' + last[0].toFixed(1) + '" cy="' + last[1].toFixed(1) + '" r="3" class="ts-dot"/>' +
+      '</svg></div>';
   }
 
   window.__m2mRenderViz = function (rows) {

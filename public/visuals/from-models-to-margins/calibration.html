@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calibration — bend the overconfident curve onto the diagonal</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+.shell { display: flex; flex-direction: column; gap: clamp(8px,1.4vh,14px); justify-content: center; }
+.head h1 { font-size: clamp(1.05rem,2vw,1.5rem); font-weight: 700; letter-spacing: -0.02em; color: var(--text-strong); }
+.head p { color: var(--muted); font-size: 0.8rem; margin-top: 2px; }
+.body { display: grid; grid-template-columns: minmax(0,1fr) minmax(220px,0.82fr); gap: clamp(12px,2vw,26px); align-items: center; }
+.plot { width: 100%; aspect-ratio: 1 / 1; max-height: clamp(180px,30vh,260px); margin: 0 auto; }
+svg { width: 100%; height: 100%; overflow: visible; }
+.axis { stroke: var(--border-strong); stroke-width: 0.5; }
+.gridline { stroke: var(--border); stroke-width: 0.35; }
+.diag { stroke: var(--muted-soft); stroke-width: 0.7; stroke-dasharray: 2 2; }
+.gap { stroke-width: 1.4; stroke-linecap: round; }
+.gap.over { stroke: var(--warn); }
+.gap.under { stroke: var(--biz); }
+.pt { r: 2.1; }
+.pt.over { fill: var(--warn); } .pt.under { fill: var(--biz); }
+.curve { fill: none; stroke: var(--accent); stroke-width: 1.1; }
+.alabel { fill: var(--muted); font-size: 3.4px; font-family: "DM Sans", sans-serif; }
+.corner { fill: var(--muted-soft); font-size: 3px; font-family: "DM Sans", sans-serif; }
+.controls { display: flex; flex-direction: column; gap: 10px; }
+.eceline { display: flex; align-items: baseline; gap: 8px; }
+.ece { font-size: clamp(1.6rem,4vh,2.4rem); font-weight: 800; font-variant-numeric: tabular-nums; color: var(--text-strong); line-height: 1; }
+.ece.good { color: var(--good); } .ece.bad { color: var(--warn); }
+.ecelbl { font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+.slab { display: flex; justify-content: space-between; align-items: baseline; font-size: 0.74rem; color: var(--muted); }
+.slab b { color: var(--text-strong); font-variant-numeric: tabular-nums; font-size: 0.92rem; }
+.tslider { width: 100%; accent-color: var(--accent); cursor: pointer; }
+.verdict { border-radius: 11px; border: 1px solid var(--border); background: var(--surface); padding: 9px 12px; box-shadow: var(--shadow-soft);
+  font-size: 0.8rem; line-height: 1.42; color: var(--text); border-left: 3px solid var(--c, var(--accent)); }
+.verdict b { color: var(--text-strong); }
+.snap { font: inherit; cursor: pointer; align-self: flex-start; border-radius: 999px; padding: 5px 12px; font-size: 0.72rem; font-weight: 600;
+  border: 1px solid var(--accent); background: transparent; color: var(--accent); transition: all .18s ease; }
+.snap:hover { background: var(--accent); color: #fff; }
+.legend { display: flex; gap: 12px; font-size: 0.66rem; color: var(--muted); flex-wrap: wrap; }
+.sw { display: inline-block; width: 9px; height: 9px; border-radius: 2px; vertical-align: 0; margin-right: 4px; }
+@media (max-width: 640px){ .body { grid-template-columns: 1fr; } .plot { max-height: 200px; } }
+</style>
+</head>
+<body>
+<main class="shell">
+  <div class="head">
+    <h1>A confidence score is worthless until it's calibrated.</h1>
+    <p>An RLHF'd model is systematically <em>over</em>confident. Drag the temperature to scale the logits and pull the curve onto the diagonal.</p>
+  </div>
+  <div class="body">
+    <div class="plot">
+      <svg viewBox="0 0 60 60" id="svg" role="img" aria-label="Reliability diagram: predicted confidence vs actual accuracy">
+        <!-- grid -->
+        <line class="gridline" x1="10" y1="10" x2="55" y2="10"/>
+        <line class="gridline" x1="10" y1="25" x2="55" y2="25"/>
+        <line class="gridline" x1="10" y1="40" x2="55" y2="40"/>
+        <line class="axis" x1="10" y1="55" x2="55" y2="55"/>
+        <line class="axis" x1="10" y1="10" x2="10" y2="55"/>
+        <line class="diag" x1="10" y1="55" x2="55" y2="10"/>
+        <g id="gaps"></g>
+        <path class="curve" id="curve"/>
+        <g id="pts"></g>
+        <text class="alabel" x="32" y="59.6" text-anchor="middle">predicted confidence →</text>
+        <text class="alabel" x="4.6" y="33" text-anchor="middle" transform="rotate(-90 4.6 33)">actual accuracy →</text>
+        <text class="corner" x="52" y="13.5" text-anchor="end">perfect = diagonal</text>
+      </svg>
+    </div>
+    <div class="controls">
+      <div class="eceline" aria-live="polite"><span class="ece" id="ece">—</span><span class="ecelbl">ECE<br>mean gap</span></div>
+      <div class="slab"><span>Temperature <span style="font-size:0.66rem">T</span></span><b id="tval">1.0</b></div>
+      <input class="tslider" id="t" type="range" min="1.0" max="3.0" step="0.1" value="1.0" aria-label="Temperature scaling factor">
+      <button class="snap" id="snap">▸ Snap to best-fit temperature</button>
+      <div class="verdict" id="verdict" aria-live="polite"></div>
+      <div class="legend">
+        <span><span class="sw" style="background:var(--warn)"></span>▲ overconfident (below line)</span>
+        <span><span class="sw" style="background:var(--biz)"></span>▼ underconfident (above line)</span>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+const T_TRUE = 1.8;              // the temperature that perfectly calibrates this model
+const CONF = [0.55,0.62,0.70,0.78,0.85,0.91,0.96]; // raw model confidence bins
+const logit = c => Math.log(c/(1-c));
+const sig   = z => 1/(1+Math.exp(-z));
+// plot maps confidence/accuracy in [0.5,1] to svg [10..55] (x) and [55..10] (y)
+const PX = v => 10 + (v-0.5)/0.5*45;
+const PY = v => 55 - (v-0.5)/0.5*45;
+
+const t = document.getElementById('t');
+function render(){
+  const T = +t.value;
+  document.getElementById('tval').textContent = T.toFixed(1);
+  const pts=[], gaps=[]; let eceSum=0;
+  CONF.forEach(c=>{
+    const z = logit(c);
+    const pred = sig(z/T);          // predicted confidence after temperature scaling
+    const act  = sig(z/T_TRUE);     // the model's true accuracy for those samples
+    eceSum += Math.abs(pred-act);
+    const over = pred > act + 0.005;
+    const under = act > pred + 0.005;
+    const cls = over?'over':under?'under':'';
+    gaps.push(`<line class="gap ${cls}" x1="${PX(pred)}" y1="${PY(pred)}" x2="${PX(pred)}" y2="${PY(act)}"/>`);
+    // shape encodes over/under so it survives grayscale (WCAG 1.4.1): ▲ overconfident, ▼ underconfident
+    const cx=PX(pred), cy=PY(act);
+    pts.push(over
+      ? `<path class="pt ${cls}" d="M${cx.toFixed(1)} ${(cy-2).toFixed(1)} l1.8 3.1 h-3.6 z"/>`
+      : under
+      ? `<path class="pt ${cls}" d="M${cx.toFixed(1)} ${(cy+2).toFixed(1)} l1.8 -3.1 h-3.6 z"/>`
+      : `<circle class="pt" cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="1.6"/>`);
+  });
+  document.getElementById('gaps').innerHTML = gaps.join('');
+  document.getElementById('pts').innerHTML = pts.join('');
+  // smooth curve through (pred,act)
+  const path = CONF.map(c=>{ const z=logit(c); return [PX(sig(z/T)), PY(sig(z/T_TRUE))]; })
+                   .map((p,i)=> (i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ');
+  document.getElementById('curve').setAttribute('d', path);
+
+  const ece = eceSum/CONF.length;
+  const eceEl = document.getElementById('ece');
+  eceEl.textContent = (ece*100).toFixed(1)+'%';
+  eceEl.className = 'ece ' + (ece<0.02?'good':ece>0.06?'bad':'');
+  const v = document.getElementById('verdict');
+  if (T < T_TRUE-0.15){
+    v.style.setProperty('--c','var(--warn)');
+    v.innerHTML = '<b>Overconfident.</b> Points sit <i>below</i> the diagonal — at 90% confidence the model is right far less than 90% of the time. Raw scores cannot gate a human-review threshold safely.';
+  } else if (T > T_TRUE+0.15){
+    v.style.setProperty('--c','var(--biz)');
+    v.innerHTML = '<b>Now underconfident.</b> You overcorrected — points rose <i>above</i> the diagonal. Temperature scaling is accuracy-preserving, but past the best fit it just trades one bias for the other.';
+  } else {
+    v.style.setProperty('--c','var(--good)');
+    v.innerHTML = '<b>Calibrated.</b> Points lie on the diagonal: among predictions at 80% confidence, ~80% are correct. <i>Now</i> the score can gate automation vs. human review.';
+  }
+  document.getElementById('svg').setAttribute('aria-label',
+    `Reliability diagram. Temperature ${T.toFixed(1)}. Expected calibration error ${(ece*100).toFixed(1)} percent. ${ece<0.02?'Calibrated — points on the diagonal.':T<T_TRUE?'Overconfident — points below the diagonal.':'Underconfident — points above the diagonal.'}`);
+}
+t.addEventListener('input', render);
+document.getElementById('snap').addEventListener('click', ()=>{
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches){ t.value=T_TRUE; render(); return; }
+  // animate toward T_TRUE
+  let cur=+t.value; const step=()=>{ cur += (T_TRUE-cur)*0.25; if(Math.abs(T_TRUE-cur)<0.02) cur=T_TRUE; t.value=cur.toFixed(2); render(); if(cur!==T_TRUE) requestAnimationFrame(step); }; step();
+});
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Last 30 Days — Metrics & Eval SOTA</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+.shell { display: flex; flex-direction: column; gap: clamp(8px,1.5vh,16px); justify-content: center; }
+.head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px; }
+.head h1 { font-size: clamp(1.12rem,2.1vw,1.6rem); font-weight: 700; letter-spacing: -0.02em; color: var(--text-strong); }
+.head p { color: var(--muted); font-size: 0.82rem; }
+.track { position: relative; display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 6px; padding-top: 16px; }
+.track::before { content:''; position: absolute; top: 22px; left: 2%; right: 2%; height: 2px; background: linear-gradient(90deg, var(--accent), var(--accent-2)); border-radius: 2px; }
+.tnode { background: none; border: none; font: inherit; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; position: relative; padding: 0 2px; }
+.tdot { width: 14px; height: 14px; border-radius: 50%; background: var(--surface-strong); border: 3px solid var(--c); z-index: 1; transition: transform .18s ease; box-shadow: 0 0 0 4px color-mix(in srgb, var(--c) 16%, transparent); }
+.tnode[aria-selected="true"] .tdot { transform: scale(1.35); }
+.tdate { font-size: 0.64rem; font-weight: 700; color: var(--text-strong); letter-spacing: 0.01em; }
+.ttitle { font-size: 0.66rem; color: var(--muted); text-align: center; line-height: 1.18; max-width: 14ch; }
+.tnode[aria-selected="true"] .ttitle { color: var(--text); }
+.panel { border-radius: 14px; border: 1px solid var(--border); background: var(--surface); padding: 14px 16px; box-shadow: var(--shadow-soft); display: grid; gap: 6px; min-height: 132px; }
+.panel .pmeta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.panel .pdate { font-size: 0.66rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #fff; background: var(--c); padding: 3px 9px; border-radius: 999px; }
+.panel .psrc { font-size: 0.68rem; color: var(--muted); font-family: "DM Sans", sans-serif; }
+.panel .pconf { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--good); border: 1px solid color-mix(in srgb, var(--good) 45%, transparent); padding: 2px 7px; border-radius: 999px; }
+.panel h2 { font-size: 1rem; color: var(--text-strong); font-weight: 700; }
+.panel .pbody { font-size: 0.86rem; line-height: 1.46; color: var(--text); }
+.panel .pbody b { color: var(--text-strong); }
+.panel .pwhy { font-size: 0.78rem; color: var(--muted); border-left: 2px solid var(--c); padding-left: 9px; }
+@media (max-width: 720px){ .ttitle { display: none; } }
+</style>
+</head>
+<body>
+<main class="shell">
+  <div class="head">
+    <h1>What changed in the last 30 days.</h1>
+    <p>Every link still points one way: evals belong on the production-trace substrate. Click a node.</p>
+  </div>
+  <div class="track" id="track"></div>
+  <div class="panel" id="panel" style="--c: var(--out)"></div>
+</main>
+<script>
+const ITEMS = [
+  { date:'May 25–29', full:'May 25–29, 2026', c:'--out', conf:'High', title:'Langfuse Launch Week', src:'langfuse.com',
+    h:'Eval primitives, shipped',
+    body:'Deterministic <b>code evaluators</b> beside the LLM judge, an <b>LLM-judge calibration skill</b> (auto precision/recall/F1), and <b>CI/CD experiments</b> that fail a PR when scores drop.',
+    why:'The exact primitives this playbook calls for — now off-the-shelf, not a build.' },
+  { date:'May 31', full:'May 31, 2026', c:'--sys', conf:'High', title:'Wasted-Computation diagnosis', src:'arXiv:2606.01365',
+    h:'Failure-aware agent observability',
+    body:'Maps tool retries, loops, and budget pressure to <b>online trace signals</b> across 165 GAIA agent traces — diagnosing wasted computation <i>before</i> the bill lands.',
+    why:'Operationalizes "cost per <i>successful</i> task" and trajectory-aware metrics on the trace spine.' },
+  { date:'Jun 15', full:'Jun 15, 2026', c:'--biz', conf:'High', title:'Metered agent billing', src:'Anthropic',
+    h:'Per-session cost becomes observable',
+    body:'Agent SDK / Claude Code usage moves onto <b>metered API billing</b> — managed agents priced at ~<b>$0.08 / session-hour</b> + tokens.',
+    why:'A live market move toward attributable per-task cost — the System-to-Business margin bridge made real.' },
+  { date:'Jun 16', full:'Jun 16, 2026', c:'--mod', conf:'High', title:'OpenAI Deployment Simulation', src:'openai.com',
+    h:'Production replay as an eval',
+    body:'Replay ~1.3M de-identified conversations through a <b>candidate</b> model, regrade, estimate deployment-time behavior change. <b>92% directional accuracy</b> — but only directional: median multiplicative error <b>~1.5×</b>, tails to ~10×.',
+    why:'Validates "production replay" as a pattern — and reinforces decision-agreement over point estimates.' },
+  { date:'Jun 17', full:'Jun 17, 2026', c:'--out', conf:'High', title:'Reliability without Validity', src:'arXiv:2606.19544',
+    h:'The largest LLM-judge audit yet',
+    body:'21 judges: test-retest reliability >0.95 <i>coexists</i> with severe position bias. Raw agreement <b>overstates chance-corrected κ by 33–41 points</b>; rankings shift up to 14 positions across benchmarks.',
+    why:'Kills "~85–90% raw agreement" as a target. Report chance-corrected <b>κ ≥ 0.6</b> + bias audits instead.' },
+];
+const track = document.getElementById('track');
+ITEMS.forEach((it,i)=>{
+  const b = document.createElement('button'); b.className='tnode'; b.dataset.i=i; b.setAttribute('role','option'); b.style.setProperty('--c',`var(${it.c})`);
+  b.innerHTML = `<span class="tdate">${it.date}</span><span class="tdot"></span><span class="ttitle">${it.title}</span>`;
+  b.addEventListener('click', ()=>sel(i));
+  track.appendChild(b);
+});
+const panel = document.getElementById('panel');
+function sel(i){
+  const it = ITEMS[i];
+  document.querySelectorAll('.tnode').forEach(n=>n.setAttribute('aria-selected', n.dataset.i==i?'true':'false'));
+  panel.style.setProperty('--c', `var(${it.c})`);
+  panel.innerHTML = `<div class="pmeta"><span class="pdate">${it.full}</span><span class="pconf">${it.conf} confidence</span><span class="psrc">${it.src}</span></div>
+    <h2>${it.h}</h2><div class="pbody">${it.body}</div><div class="pwhy">Why it matters — ${it.why}</div>`;
+}
+sel(ITEMS.length-1);
+</script>
+</body>
+</html>

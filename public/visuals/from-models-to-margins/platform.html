@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Platform — Four Planes on One Trace Spine</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+.shell { display: flex; flex-direction: column; gap: clamp(8px,1.4vh,14px); justify-content: center; }
+.head h1 { font-size: clamp(1.12rem,2.1vw,1.6rem); font-weight: 700; letter-spacing: -0.02em; color: var(--text-strong); }
+.head p { color: var(--muted); font-size: 0.82rem; margin-top: 2px; }
+.diagram { display: grid; grid-template-columns: 0.8fr 1.7fr 0.9fr; gap: 10px; align-items: stretch; }
+.col { display: flex; flex-direction: column; gap: 8px; }
+.colcap { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted-soft); text-align: center; }
+.box { border-radius: 11px; border: 1px solid var(--border); background: var(--surface); padding: 9px 11px; box-shadow: var(--shadow-soft); }
+.box .t { font-weight: 700; font-size: 0.8rem; color: var(--text-strong); }
+.box .d { font-size: 0.7rem; color: var(--muted); margin-top: 2px; line-height: 1.32; }
+.planes { display: flex; flex-direction: column; gap: 7px; }
+.plane { cursor: pointer; border-radius: 11px; padding: 9px 11px; color: #fff; position: relative;
+  background: linear-gradient(135deg, var(--c), color-mix(in srgb, var(--c) 68%, #000 18%)); box-shadow: var(--shadow-soft);
+  transition: transform .18s ease, filter .18s ease; }
+.plane:hover { filter: brightness(1.06); transform: translateX(2px); }
+.plane[aria-selected="true"] { outline: 2px solid #fff; outline-offset: 2px; filter: brightness(1.1); }
+.plane .pt { font-weight: 700; font-size: 0.82rem; }
+.plane .pl { font-size: 0.64rem; opacity: 0.86; text-transform: uppercase; letter-spacing: 0.06em; }
+.spine { border: 1px dashed color-mix(in srgb, var(--accent) 60%, transparent); border-radius: 11px; padding: 7px; background: color-mix(in srgb, var(--accent) 8%, var(--surface)); }
+.spine .scap { font-size: 0.6rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color: var(--accent); text-align:center; margin-bottom: 6px; }
+.anchor { border-radius: 11px; padding: 11px; text-align: center; color: #fff; position: relative; overflow: hidden;
+  background: linear-gradient(140deg, var(--accent-2), #b45309); box-shadow: var(--shadow); }
+.anchor::after { content:''; position:absolute; inset:-40%; background: radial-gradient(circle, rgba(255,255,255,.35), transparent 60%); animation: pulse 3.4s ease-in-out infinite; }
+@keyframes pulse { 0%,100%{ opacity:.25; transform:scale(.9);} 50%{ opacity:.6; transform:scale(1.05);} }
+.anchor .at { font-weight: 800; font-size: 0.86rem; position: relative; }
+.anchor .ad { font-size: 0.68rem; opacity: 0.92; margin-top: 3px; position: relative; line-height: 1.35; }
+.anchor .star { font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase; position: relative; display:block; margin-bottom:3px; }
+.readout { border-radius: 12px; border: 1px solid var(--border); background: var(--surface); padding: 10px 14px; box-shadow: var(--shadow-soft); font-size: 0.85rem; line-height: 1.45; color: var(--text); min-height: 56px; }
+.readout b { color: var(--text-strong); }
+@media (max-width: 760px){ .diagram { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<main class="shell">
+  <div class="head">
+    <h1>Four planes. One trace spine. One anchor.</h1>
+    <p>Everything hangs off the same per-interaction trace. Click a plane to see its job — and what it owns in the pyramid.</p>
+  </div>
+  <div class="diagram">
+    <div class="col">
+      <div class="colcap">Runtime</div>
+      <div class="box"><div class="t">Instrumentation SDK</div><div class="d">OTel GenAI auto-instrument</div></div>
+      <div class="box"><div class="t">Confidence gate</div><div class="d">autonomous vs human review</div></div>
+      <div class="box"><div class="t">Ingest + redaction</div><div class="d">PII stripped before storage</div></div>
+    </div>
+    <div class="col">
+      <div class="colcap">Four planes on the spine</div>
+      <div class="spine">
+        <div class="scap">◇ Trace spine · one substrate</div>
+        <div class="planes" id="planes"></div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="colcap">The load-bearing asset</div>
+      <div class="anchor">
+        <span class="star">★ build this well</span>
+        <div class="at">Ground-Truth Anchor</div>
+        <div class="ad">A refreshed human-labeled holdout. Every proxy — judge, surrogate, drift detector — is scored against it.</div>
+      </div>
+      <div class="box"><div class="t">Consumption</div><div class="d">dashboards-as-hypotheses · chain-break alerts · review queue</div></div>
+    </div>
+  </div>
+  <div class="readout" id="readout"></div>
+</main>
+<script>
+const PLANES = [
+  { t:'1 · Trace spine', l:'System + Model', c:'--sys', d:'<b>Captures every interaction</b> — prompt, model/version, tokens (in/out/cached), latency, tool steps, cost. Stores <b>mergeable histograms</b> so percentiles are merged, never averaged.' },
+  { t:'2 · Eval harness', l:'Model Output + Model', c:'--out', d:'<b>Scores traces</b> — code assertions + a validated judge — in CI and on sampled production traffic. L1 code gate → L2 offline judge → canary → L3 online.' },
+  { t:'3 · Experiment / OEC', l:'Business + UX (causal)', c:'--biz', d:'<b>Causal ship / no-ship</b> with a pre-registered OEC + non-inferiority guardrails. SRM check <b>blocks</b> before any metric is read; CUPED tames variance.' },
+  { t:'4 · Metric-tree overlay', l:'The whole chain', c:'--accent', d:'<b>Certified metric definitions</b> + a chain validator that watches each arrow’s proxy-to-outcome correlation and alerts when it decays or flips sign.' },
+];
+const wrap = document.getElementById('planes');
+PLANES.forEach((p,i)=>{
+  const el = document.createElement('div'); el.className='plane'; el.style.setProperty('--c',`var(${p.c})`); el.dataset.i=i; el.setAttribute('role','option');
+  el.innerHTML = `<div class="pt">${p.t}</div><div class="pl">owns ${p.l}</div>`;
+  el.addEventListener('click', ()=>sel(i));
+  wrap.appendChild(el);
+});
+function sel(i){
+  document.querySelectorAll('.plane').forEach(p=>p.setAttribute('aria-selected', p.dataset.i==i?'true':'false'));
+  document.getElementById('readout').innerHTML = PLANES[i].d;
+}
+sel(0);
+</script>
+</body>
+</html>
