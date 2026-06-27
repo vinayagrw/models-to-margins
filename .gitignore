@@ -157,5 +157,8 @@ m2m-app/
 # Analytics dev mirror
 .analytics/
 
+# Wrangler local state / cache (from `wrangler dev`)
+.wrangler/
+
 # Personal local notes (never committed)
 *.local.md
