@@ -5,6 +5,12 @@
     <strong>Business-first AI research and operating maps.</strong>
   </p>
   <p>
+    <a href="./LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-2c7a4b?style=for-the-badge"></a>
+    <img alt="Built with Astro 6" src="https://img.shields.io/badge/Built%20with-Astro%206-ff5d01?style=for-the-badge&logo=astro&logoColor=white">
+    <img alt="Deploys on Cloudflare" src="https://img.shields.io/badge/Deploys%20on-Cloudflare-f38020?style=for-the-badge&logo=cloudflare&logoColor=white">
+    <a href="https://models-to-margins.vinayagrw.workers.dev/"><img alt="Live site status" src="https://img.shields.io/website?url=https%3A%2F%2Fmodels-to-margins.vinayagrw.workers.dev%2F&style=for-the-badge&up_message=online&down_message=offline&label=site"></a>
+  </p>
+  <p>
     Models to Margins is a publication-style Astro site for turning AI, workflow complexity, and industry noise into
     flagship briefs, premium deep dives, and custom live briefs backed by raw HTML assets that still ship as a clean
     static deployment.
@@ -65,6 +71,7 @@
 | AI Playbook for a 10-Year-Old | `/deep-dives/ai-playbook-for-explaining-a-problem-to-a-10-year-old` | premium deep dive | Research-backed playbook for using AI to translate hard ideas into child-sized explanations without becoming a shortcut machine |
 | Future of Work Deep Dive | `/deep-dives/future-of-work-2026` | premium deep dive | Modern Markdown, semantic HTML, structured editorial design |
 | Harness Engineering Deep Dive | `/deep-dives/harness-engineering` | premium deep dive + slide-deck sub-route | Article-shell page with 10 inline interactive visuals; optional `/present` sub-route renders the same content as a single-viewport keyboard-navigable slide deck |
+| From Models to Margins — The Metric Chain | `/deep-dives/from-models-to-margins-metric-chain` | premium deep dive (bespoke Blueprint template) | Field-tested playbook on the five metric layers, four practices, and vanity traps for AI products, rendered in the bespoke `blueprint` template with 11 themed interactive visuals on a sticky scene spine |
 
 ## How It Works
 
@@ -105,6 +112,8 @@ flowchart LR
 | Premium deep dive | `/deep-dives/future-of-work-2026` | `src/content/deep-dives/future-of-work-2026.md` |
 | Premium deep dive | `/deep-dives/harness-engineering` | `src/content/deep-dives/harness-engineering.md` (article-shell, canonical) |
 | Slide-deck sub-route | `/deep-dives/harness-engineering/present` | `src/pages/deep-dives/harness-engineering/present.astro` (full-viewport slide deck of the same content) |
+| Premium deep dive | `/deep-dives/from-models-to-margins-metric-chain` | `src/content/deep-dives/from-models-to-margins-metric-chain.md` (bespoke `template: blueprint`) |
+| Hidden visitor analytics | `/admin/insights?key=…` | `src/pages/admin/insights.astro` + `public/scripts/insights*.js` (secret-gated, not linked from any public surface) |
 
 ### Content model
 
@@ -123,14 +132,20 @@ models-to-margins/
   src/
     components/        Shared UI primitives
     content/           Typed editorial collections
+    integrations/      Astro dev middleware (analytics dev mirror)
     layouts/           Shared page shell
-    pages/             Public routes and collection renderers
+    pages/             Public routes, collection renderers, /admin
     styles/            Shared design system
   public/
     visuals/           Standalone HTML/SVG interactive experiences
+    scripts/           Client beacon, dashboard, blueprint spine
+    styles/            Bespoke deep-dive (blueprint) stylesheet
+  functions/           Cloudflare Pages Functions (analytics collect/read)
+  test/                Node test suite for enrichment + storage
   docs/
     cloudflare-pages-setup.md
     readme-assets/
+  wrangler.toml        Cloudflare KV binding for analytics
   AGENTS.md            Repo-specific editing guardrails
 ```
 
@@ -179,6 +194,11 @@ Preferred design vocabulary:
 Current references:
 - `src/content/deep-dives/future-of-work-2026.md` — pure Markdown + small inline data-vis iframes
 - `src/content/deep-dives/harness-engineering.md` — same article-shell, embedding a family of 10 large interactive visuals from `public/visuals/harness-engineering/`
+- `src/content/deep-dives/from-models-to-margins-metric-chain.md` — bespoke `template: blueprint` shell with a sticky scene spine and 11 theme-synced visuals from `public/visuals/from-models-to-margins/`
+
+#### Optional bespoke template
+
+For a deep dive that needs its own visual identity, opt in with frontmatter `template: blueprint`. `src/pages/deep-dives/[slug].astro` then renders a `.dd-blueprint` shell and injects `public/styles/deep-dive-blueprint.css` + `public/scripts/spine-blueprint.js` instead of the default article shell. New bespoke looks add a `template:` value, a branch in `[slug].astro`, and scoped CSS/JS under a fresh `.dd-<name>` namespace. House-style note: prose in this template uses no semicolons or em-dashes (scene headings keep their em-dash because the reading-map anchors depend on the slug).
 
 #### Optional slide-deck sub-route
 
@@ -201,6 +221,21 @@ Use `public/visuals/...` when the artifact should remain:
 > [!TIP]
 > Before inventing a new pattern, check [`AGENTS.md`](./AGENTS.md). It captures the repo's current rules for page structure, metadata order, theme behavior, live-brief routing, raw visual chrome, and deep-dive presentation.
 
+## Visitor Analytics (hidden)
+
+A first-party, privacy-conscious analytics layer rides alongside the static site as Cloudflare Pages Functions. It is opt-out-friendly and never linked from any public surface.
+
+| Piece | Path | Job |
+|---|---|---|
+| Client beacon | `public/scripts/beacon.js` | Collects pageview, device, geo-hint, and behavior signals; injected only on public pages |
+| Collect endpoint | `functions/api/collect.js` | Enriches with Cloudflare geo/UA and writes events to KV (in-memory fallback) |
+| Read endpoint | `functions/api/events.js` | Secret-gated event read; returns `404` when the token is absent or wrong |
+| Dashboard | `src/pages/admin/insights.astro` | Hidden `/admin/insights` view: KPIs, world map, time series, breakdowns, filterable event table, CSV export |
+| Storage | `functions/_shared/storage.js` | `KvStore` (primary) + `MemoryStore` (warn-and-degrade fallback) |
+
+> [!IMPORTANT]
+> The dashboard is gated by `env.INSIGHTS_TOKEN` and the KV binding is `env.ANALYTICS` (see `wrangler.toml`). Never hardcode the token or the binding values in source. Access the dashboard with `/admin/insights?key=YOUR_TOKEN`; the key is cached in a same-site cookie after first load.
+
 ## Run Locally
 
 ```bash
@@ -214,6 +249,7 @@ Useful commands:
 npm run build
 npm run preview
 npm run check
+npm test          # node --test: analytics enrichment + storage suites
 ```
 
 Visibility and discovery docs:
