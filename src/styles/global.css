@@ -1074,10 +1074,14 @@ p {
   height: var(--vf-h, auto);
   border-radius: 22px;
   overflow: hidden;
-  border: 1px solid rgba(147, 198, 255, 0.14);
-  background: rgba(3, 9, 17, 0.8);
+  border: 1px solid var(--line);
+  background: var(--surface-muted);
 }
 .visual-frame[style*="--vf-h"] { aspect-ratio: auto; }
+
+@media (max-width: 860px) {
+  .visual-frame { height: var(--vf-h-m, var(--vf-h, auto)); }
+}
 
 .visual-frame iframe {
   width: 100%;

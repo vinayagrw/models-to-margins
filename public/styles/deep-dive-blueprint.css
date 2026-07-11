@@ -124,10 +124,12 @@
 .dd-blueprint .bp-title {
   font-family: var(--bp-display);
   font-weight: 800;
-  font-size: clamp(2.4rem, 6vw, 4.4rem);
+  /* 2rem floor: "MICROSERVICES" in Syne 800 must fit a 326px column at 390px viewport */
+  font-size: clamp(2rem, 6vw, 4.4rem);
   line-height: 0.96;
   letter-spacing: -0.02em;
   text-transform: uppercase;
+  overflow-wrap: break-word;
   color: var(--bp-ink);
   margin: 0.5em 0 0;
 }
@@ -282,10 +284,13 @@
 
 /* ============================================================
    Typography reset — neutralize the global terminal aesthetic.
-   Global rule .article-body :not(pre > code) has specificity (0,2,2);
-   adding .dd-blueprint raises this to (0,3,2) so it wins cleanly.
+   :where() zeroes the :not() so this stays (0,2,0): above the global
+   .article-body :not(pre > code) reset at (0,1,2), but below this
+   sheet's own element rules like `.dd-blueprint .article-body th`
+   at (0,2,1) — otherwise the reset reverts our own table/heading/link
+   styling (it did: th padding 0, h2 in body font).
    ============================================================ */
-.dd-blueprint .article-body :not(pre > code) {
+.dd-blueprint .article-body :where(:not(pre > code)) {
   display: revert;
   padding: revert;
   border: revert;
@@ -519,6 +524,53 @@
 }
 .dd-blueprint .article-body td strong { color: var(--bp-ink); }
 
+/* Data annexes — collapsed <details> tables behind the visual plates.
+   .article-body.bp-body outranks the global details/summary styling. */
+.dd-blueprint .article-body.bp-body details {
+  margin: 1.4rem 0 2rem;
+  border: 1.5px solid var(--bp-line);
+  border-radius: 2px;
+  background: var(--bp-card);
+  overflow: hidden;
+}
+.dd-blueprint .article-body.bp-body summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  font-family: var(--bp-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--bp-ink);
+  background: var(--bp-paper-2);
+}
+.dd-blueprint .article-body.bp-body summary::-webkit-details-marker { display: none; }
+.dd-blueprint .article-body.bp-body summary::after {
+  content: "+";
+  flex: 0 0 auto;
+  font-size: 0.9rem;
+  color: var(--bp-accent-ink);
+}
+.dd-blueprint .article-body.bp-body details[open] summary::after { content: "\2212"; }
+.dd-blueprint .article-body.bp-body details[open] summary {
+  border-bottom: 1px solid var(--bp-line-soft);
+}
+.dd-blueprint .article-body.bp-body summary:focus-visible {
+  outline: 2px solid var(--bp-accent);
+  outline-offset: -2px;
+}
+.dd-blueprint .article-body.bp-body details table {
+  margin: 0;
+  border: 0;
+}
+.dd-blueprint .article-body.bp-body details table + table {
+  border-top: 1.5px solid var(--bp-line);
+}
+
 .dd-blueprint .article-body hr {
   border: 0;
   border-top: 1.5px dashed var(--bp-line-soft);
@@ -604,7 +656,7 @@
 
 /* ----------------------------------------------------------- Responsive --- */
 @media (max-width: 960px) {
-  .dd-blueprint .bp-layout { grid-template-columns: 1fr; }
+  .dd-blueprint .bp-layout { grid-template-columns: minmax(0, 1fr); }
   /* index becomes a sticky horizontal scene strip so wayfinding survives */
   .dd-blueprint .bp-spine-index {
     position: sticky;

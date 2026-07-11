@@ -33,7 +33,11 @@ const deepDives = defineCollection({
     ...sharedSchema,
     geography: z.string(),
     horizon: z.string().optional(),
-    template: z.string().optional()
+    template: z.string().optional(),
+    bpEyebrow: z.string().optional(),
+    bpTitle: z.string().optional(),
+    bpSubtitle: z.string().optional(),
+    bpCoords: z.array(z.string()).optional()
   })
 });
 

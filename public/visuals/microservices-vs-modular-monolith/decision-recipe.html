@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Extraction Recipe — Five Forces, One Shape</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+/* Scene-specific: the extraction recipe. Five yes/no force questions drive a
+   live verdict panel; a static sequencing strip carries the migration waves. */
+
+.shell { display: flex; flex-direction: column; gap: 12px; }
+:root[data-embedded="true"] .shell {
+  display: flex; flex-direction: column; gap: clamp(6px, 1vh, 12px);
+  padding: clamp(10px, 1.5vh, 16px) clamp(14px, 2vw, 22px);
+}
+
+.head h1 {
+  font-family: "Space Grotesk", sans-serif; font-weight: 700;
+  font-size: clamp(1.05rem, 2.3vw, 1.45rem); letter-spacing: -0.02em; color: var(--text-strong);
+}
+:root[data-embedded="true"] .head h1 { font-size: clamp(0.92rem, 2.1vh, 1.2rem); }
+.head p { font: 500 0.78rem/1.4 "DM Sans", sans-serif; color: var(--muted); margin-top: 3px; }
+:root[data-embedded="true"] .head p { font-size: clamp(0.69rem, 1.3vh, 0.78rem); }
+
+.main { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(260px, 0.85fr); gap: 12px; flex: 1 1 auto; min-height: 0; }
+:root[data-embedded="true"] .main { gap: clamp(8px, 1.2vw, 12px); }
+
+/* Force rows */
+.forces { display: flex; flex-direction: column; gap: 8px; justify-content: space-between; }
+:root[data-embedded="true"] .forces { gap: clamp(5px, 0.8vh, 8px); }
+.force {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: center;
+  padding: 9px 12px; border-radius: 12px;
+  border: 1px solid var(--border); background: var(--surface);
+}
+:root[data-embedded="true"] .force { padding: clamp(6px, 1vh, 9px) clamp(9px, 1.3vw, 12px); }
+.f-num {
+  font: 700 0.69rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--accent);
+}
+.f-q { font: 600 0.8rem/1.35 "DM Sans", sans-serif; color: var(--text-strong); margin-top: 3px; }
+.f-why { font: 400 0.72rem/1.3 "DM Sans", sans-serif; color: var(--muted); margin-top: 2px; }
+:root[data-embedded="true"] .f-q { font-size: clamp(0.72rem, 1.4vh, 0.8rem); }
+:root[data-embedded="true"] .f-why { font-size: clamp(0.69rem, 1.2vh, 0.72rem); }
+
+.f-toggle { display: flex; border: 1px solid var(--border-strong); border-radius: 99px; overflow: hidden; }
+.f-toggle button {
+  appearance: none; border: 0; background: transparent; cursor: pointer;
+  min-height: 40px; min-width: 52px; padding: 0 14px;
+  font: 700 0.72rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--muted);
+}
+.f-toggle button + button { border-left: 1px solid var(--border-strong); }
+.f-toggle button[aria-pressed="true"] { background: var(--accent); color: var(--bg-mid); }
+.f-toggle button:focus-visible { outline: 2px solid var(--accent-2); outline-offset: -3px; }
+:root[data-embedded="true"] .f-toggle button { font-size: clamp(0.69rem, 1.1vh, 0.72rem); }
+
+/* Verdict panel */
+.verdict {
+  display: flex; flex-direction: column; gap: 8px;
+  padding: 13px 15px; border-radius: 14px;
+  border: 1.5px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  background: color-mix(in srgb, var(--accent) 7%, transparent);
+}
+:root[data-embedded="true"] .verdict { padding: clamp(9px, 1.4vh, 13px) clamp(11px, 1.6vw, 15px); gap: clamp(5px, 0.8vh, 8px); }
+.v-label { font: 700 0.69rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent); }
+.v-shape { font: 700 1.02rem/1.25 "Space Grotesk", sans-serif; letter-spacing: -0.01em; color: var(--text-strong); }
+:root[data-embedded="true"] .v-shape { font-size: clamp(0.86rem, 1.9vh, 1.02rem); }
+.v-desc { font: 400 0.78rem/1.45 "DM Sans", sans-serif; color: var(--text); }
+:root[data-embedded="true"] .v-desc { font-size: clamp(0.7rem, 1.35vh, 0.78rem); }
+.v-extract { display: flex; flex-wrap: wrap; gap: 6px; }
+.v-chip {
+  font: 700 0.69rem/1.25 "Space Grotesk", sans-serif; letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--good); padding: 4px 9px; border-radius: 99px;
+  border: 1px solid color-mix(in srgb, var(--good) 45%, transparent);
+  background: color-mix(in srgb, var(--good) 8%, transparent);
+}
+.v-chip.none { color: var(--muted); border-color: var(--border); background: transparent; }
+.v-tell {
+  font: 500 0.72rem/1.4 "DM Sans", sans-serif; color: var(--muted); font-style: italic;
+  border-top: 1px dashed var(--border-strong); padding-top: 7px; margin-top: auto;
+}
+:root[data-embedded="true"] .v-tell { font-size: clamp(0.69rem, 1.25vh, 0.72rem); }
+
+/* Sequencing waves */
+.waves { display: grid; grid-template-columns: auto repeat(3, minmax(0, 1fr)); gap: 8px; align-items: stretch; }
+:root[data-embedded="true"] .waves { gap: clamp(5px, 0.8vw, 8px); }
+.waves-label {
+  writing-mode: vertical-rl; transform: rotate(180deg); text-align: center;
+  font: 700 0.69rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--muted); padding: 4px 0;
+}
+.wave {
+  padding: 8px 11px; border-radius: 12px;
+  border: 1px dashed var(--border-strong); background: var(--surface);
+}
+:root[data-embedded="true"] .wave { padding: clamp(6px, 0.9vh, 8px) clamp(8px, 1.2vw, 11px); }
+.w-num { font: 700 0.69rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent-2); }
+.w-title { font: 700 0.76rem/1.3 "DM Sans", sans-serif; color: var(--text-strong); margin-top: 3px; }
+.w-desc { font: 400 0.72rem/1.35 "DM Sans", sans-serif; color: var(--muted); margin-top: 2px; }
+:root[data-embedded="true"] .w-title { font-size: clamp(0.7rem, 1.3vh, 0.76rem); }
+:root[data-embedded="true"] .w-desc { font-size: clamp(0.69rem, 1.2vh, 0.72rem); }
+
+@media (max-width: 760px) {
+  .main { grid-template-columns: 1fr; }
+  .force { grid-template-columns: 1fr; }
+  .f-toggle { justify-self: start; }
+  .f-toggle button { min-height: 44px; }
+  .waves { grid-template-columns: 1fr; }
+  .waves-label { writing-mode: horizontal-tb; transform: none; text-align: left; padding: 0; }
+}
+@media (max-width: 560px) {
+  .f-why { display: none; }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <header class="head">
+    <div class="eyebrow">Five forces in, one shape out</div>
+    <h1>The extraction recipe: answer for your system</h1>
+    <p>The gates above place one capability. This places your whole system. Answers are preset to a payments-grade platform; flip them to yours.</p>
+  </header>
+
+  <div class="main">
+
+    <div class="forces" role="group" aria-label="Five force questions">
+
+      <div class="force">
+        <div>
+          <div class="f-num">Force 1 · Consistency</div>
+          <div class="f-q" id="q1">Do capabilities share one transaction boundary — a ledger that can never be a saga?</div>
+          <div class="f-why">Sagas cannot give atomicity. Splitting the ledger is where migrations actually fail.</div>
+        </div>
+        <div class="f-toggle" role="group" aria-labelledby="q1">
+          <button type="button" data-q="f1" data-val="yes" aria-pressed="true">Yes</button>
+          <button type="button" data-q="f1" data-val="no" aria-pressed="false">No</button>
+        </div>
+      </div>
+
+      <div class="force">
+        <div>
+          <div class="f-num">Force 2 · Latency</div>
+          <div class="f-q" id="q2">Is your synchronous hot path on a tail-latency budget where every hop costs p99?</div>
+          <div class="f-why">Five sequential 99.99% hops compound to 99.95%. The hop tax is a tail, not a mean.</div>
+        </div>
+        <div class="f-toggle" role="group" aria-labelledby="q2">
+          <button type="button" data-q="f2" data-val="yes" aria-pressed="true">Yes</button>
+          <button type="button" data-q="f2" data-val="no" aria-pressed="false">No</button>
+        </div>
+      </div>
+
+      <div class="force">
+        <div>
+          <div class="f-num">Force 3 · Compliance</div>
+          <div class="f-q" id="q3">Do you hold regulated data whose audit scope follows access — card data, PHI?</div>
+          <div class="f-why">A mesh inside the compliance boundary multiplies audit evidence. One enclave, tokens elsewhere.</div>
+        </div>
+        <div class="f-toggle" role="group" aria-labelledby="q3">
+          <button type="button" data-q="f3" data-val="yes" aria-pressed="true">Yes</button>
+          <button type="button" data-q="f3" data-val="no" aria-pressed="false">No</button>
+        </div>
+      </div>
+
+      <div class="force">
+        <div>
+          <div class="f-num">Force 4 · Cadence</div>
+          <div class="f-q" id="q4">Does one capability have a divergent cadence, stack, or scaling profile — and a durable owning team?</div>
+          <div class="f-why">Both halves required. A seam without an owner is an outage looking for a pager.</div>
+        </div>
+        <div class="f-toggle" role="group" aria-labelledby="q4">
+          <button type="button" data-q="f4" data-val="yes" aria-pressed="true">Yes</button>
+          <button type="button" data-q="f4" data-val="no" aria-pressed="false">No</button>
+        </div>
+      </div>
+
+      <div class="force">
+        <div>
+          <div class="f-num">Force 5 · Coordination</div>
+          <div class="f-q" id="q5">Are hundreds of engineers queuing on one release train — the release-coordination-manager tell?</div>
+          <div class="f-why">The day that job is posted, coordination cost has become the dominant force.</div>
+        </div>
+        <div class="f-toggle" role="group" aria-labelledby="q5">
+          <button type="button" data-q="f5" data-val="yes" aria-pressed="false">Yes</button>
+          <button type="button" data-q="f5" data-val="no" aria-pressed="true">No</button>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="verdict" aria-live="polite">
+      <div class="v-label">Recommended shape</div>
+      <div class="v-shape" id="vShape"></div>
+      <div class="v-desc" id="vDesc"></div>
+      <div class="v-extract" id="vExtract"></div>
+      <div class="v-tell" id="vTell"></div>
+    </div>
+
+  </div>
+
+  <div class="waves" aria-label="Migration sequencing">
+    <div class="waves-label">If migrating</div>
+    <div class="wave">
+      <div class="w-num">Wave 1</div>
+      <div class="w-title">Tokenize at the edge, stand up the vault</div>
+      <div class="w-desc">Shrinks the compliance scope before anything else moves.</div>
+    </div>
+    <div class="wave">
+      <div class="w-num">Wave 2</div>
+      <div class="w-title">Core to modular parity, behind outbox seams</div>
+      <div class="w-desc">Like-for-like output is dual-run checkable. Decomposed-async is not.</div>
+    </div>
+    <div class="wave">
+      <div class="w-num">Wave 3</div>
+      <div class="w-title">Exercise the seams on a schedule</div>
+      <div class="w-desc">Review extraction candidates per wave, or "later" quietly becomes "never" — the parity trap.</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(() => {
+  const state = { f1: true, f2: true, f3: true, f4: true, f5: false };
+  const el = (id) => document.getElementById(id);
+
+  const verdict = () => {
+    const { f1, f2, f3, f4, f5 } = state;
+    const coreNeeded = f1 || f2;
+    const chips = [];
+    if (f3) chips.push('Vault enclave');
+    if (f4) chips.push('Divergent-cadence seam');
+
+    let shape, desc, tell = '';
+    if (coreNeeded && chips.length) {
+      shape = 'Composite: modular core + default extractions';
+      desc = 'Keep the consistent, latency-critical capabilities in one deployable behind a dumb edge. Extract only where a force points, through an outbox seam, with an event backbone for everything after the transaction.';
+      tell = f5
+        ? 'Coordination is also biting: the post-transaction services absorb the headcount — and they need a funded platform team.'
+        : 'No coordination force yet. Revisit the seams when the release train slows.';
+    } else if (coreNeeded) {
+      shape = 'Modular monolith, one deployable';
+      desc = 'Consistency or the tail budget binds the hot path together, and no extraction force is present. Scale by replicating the whole core, not by splitting it.';
+      tell = f5
+        ? 'Coordination pain without an extraction force means invest in module boundaries and world-class CI, not the network.'
+        : 'Enforce the module boundaries anyway — they are free to keep and cheap to exercise.';
+    } else if (chips.length) {
+      shape = 'Coarse services, few hops, replicated';
+      desc = 'Nothing binds the capabilities into one transaction, so draw a few coarse seams exactly where the forces point, and let active-active replication do the availability work.';
+      tell = f5 ? 'With coordination biting too, keep splitting along team lines — but count the platform cost first.' : '';
+    } else if (f5) {
+      shape = 'Fine-grained microservices + a funded platform org';
+      desc = 'Coordination is the dominant force and nothing else binds the capabilities. The maximal pole works — at the price of a real platform organization, and a radically simple stand-in path for the day it breaks.';
+    } else {
+      shape = 'Modular monolith — no force present';
+      desc = 'In-process boundaries are free to keep and cheap to exercise. Choose the simple shape and revisit the moment a force appears.';
+      tell = 'Not a maturity verdict. A force list with five empty rows is a reason, not a rite of passage.';
+    }
+
+    el('vShape').textContent = shape;
+    el('vDesc').textContent = desc;
+    el('vExtract').innerHTML = chips.length
+      ? chips.map((c) => '<span class="v-chip">' + c + '</span>').join('')
+      : '<span class="v-chip none">Nothing to extract</span>';
+    el('vTell').textContent = tell;
+    el('vTell').style.display = tell ? '' : 'none';
+  };
+
+  document.querySelectorAll('.f-toggle button').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const q = btn.dataset.q;
+      state[q] = btn.dataset.val === 'yes';
+      document.querySelectorAll('.f-toggle button[data-q="' + q + '"]').forEach((b) => {
+        b.setAttribute('aria-pressed', String(b === btn));
+      });
+      verdict();
+    });
+  });
+
+  verdict();
+})();
+</script>
+</body>
+</html>

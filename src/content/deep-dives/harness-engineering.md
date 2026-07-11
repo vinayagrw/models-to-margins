@@ -51,16 +51,16 @@ readTime: 14 min read
 <nav class="reading-map" aria-label="Reading map">
   <p class="reading-map-label">Reading map · 10 scenes</p>
   <div class="reading-map-grid">
-    <a class="reading-link" href="#scene-1-the-equation"><strong>1 · The equation</strong><span>Agent = Model + Harness, in one image.</span></a>
-    <a class="reading-link" href="#scene-2-without-vs-with"><strong>2 · Without vs With</strong><span>Same brain, two outcomes.</span></a>
-    <a class="reading-link" href="#scene-3-why-now"><strong>3 · Why now</strong><span>Four hard numbers from 2026.</span></a>
-    <a class="reading-link" href="#scene-4-the-5-layers"><strong>4 · The 5 layers</strong><span>The framework spine, interactive.</span></a>
-    <a class="reading-link" href="#scene-5-one-governed-run"><strong>5 · One governed run</strong><span>9 steps in 3 acts.</span></a>
-    <a class="reading-link" href="#scene-6-failure-modes"><strong>6 · Failure modes</strong><span>9 failures mapped to layers.</span></a>
-    <a class="reading-link" href="#scene-7-where-to-invest"><strong>7 · Where to invest</strong><span>Decision tree + coverage heatmap.</span></a>
-    <a class="reading-link" href="#scene-8-three-decision-lanes"><strong>8 · Decision lanes</strong><span>Agentic vs deterministic vs human.</span></a>
-    <a class="reading-link" href="#scene-9-implementation-playbook"><strong>9 · Playbook</strong><span>One min-viable move per layer.</span></a>
-    <a class="reading-link" href="#scene-10-vocabulary-and-sources"><strong>10 · Vocab + sources</strong><span> 13 terms + sources.</span></a>
+    <a class="reading-link" href="#scene-1--the-equation"><strong>1 · The equation</strong><span>Agent = Model + Harness, in one image.</span></a>
+    <a class="reading-link" href="#scene-2--without-vs-with"><strong>2 · Without vs With</strong><span>Same brain, two outcomes.</span></a>
+    <a class="reading-link" href="#scene-3--why-now"><strong>3 · Why now</strong><span>Four hard numbers from 2026.</span></a>
+    <a class="reading-link" href="#scene-4--the-5-layers"><strong>4 · The 5 layers</strong><span>The framework spine, interactive.</span></a>
+    <a class="reading-link" href="#scene-5--one-governed-run"><strong>5 · One governed run</strong><span>9 steps in 3 acts.</span></a>
+    <a class="reading-link" href="#scene-6--failure-modes"><strong>6 · Failure modes</strong><span>9 failures mapped to layers.</span></a>
+    <a class="reading-link" href="#scene-7--where-to-invest"><strong>7 · Where to invest</strong><span>Decision tree + coverage heatmap.</span></a>
+    <a class="reading-link" href="#scene-8--three-decision-lanes"><strong>8 · Decision lanes</strong><span>Agentic vs deterministic vs human.</span></a>
+    <a class="reading-link" href="#scene-9--implementation-playbook"><strong>9 · Playbook</strong><span>One min-viable move per layer.</span></a>
+    <a class="reading-link" href="#scene-10--vocabulary-and-sources"><strong>10 · Vocab + sources</strong><span> 13 terms + sources.</span></a>
   </div>
 </nav>
 

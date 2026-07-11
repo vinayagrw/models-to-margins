@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Twelve Years in One Arc — 2014 to 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+/* Scene-specific: dialectic pendulum. The discourse swings from the
+   microservices pole to the monolith pole, then settles at equilibrium. */
+:root {
+  --mono: var(--accent-3);
+  --micro: #a56cff;
+  --reframe: var(--accent-2);
+}
+
+.shell { display: flex; flex-direction: column; gap: 12px; }
+:root[data-embedded="true"] .shell {
+  display: flex; flex-direction: column; gap: clamp(6px, 1vh, 12px);
+  padding: clamp(10px, 1.6vh, 16px) clamp(14px, 2vw, 22px);
+}
+
+.head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.head h1 {
+  font-family: "Space Grotesk", sans-serif; font-weight: 700;
+  font-size: clamp(1.1rem, 2.4vw, 1.5rem); letter-spacing: -0.02em; color: var(--text-strong);
+}
+.head .legend { display: flex; gap: 14px; font-family: "DM Sans", sans-serif; font-size: 0.74rem; color: var(--muted); }
+.head .legend span { display: flex; align-items: center; gap: 6px; }
+.head .legend i { width: 10px; height: 10px; border-radius: 3px; }
+:root[data-embedded="true"] .head h1 { font-size: clamp(0.95rem, 2.2vh, 1.25rem); }
+:root[data-embedded="true"] .head .legend { font-size: clamp(0.69rem, 1.3vh, 0.74rem); }
+
+/* Stage */
+.stage {
+  position: relative; flex: 1 1 auto; min-height: 0;
+  border: 1px solid var(--border); border-radius: 20px; overflow: hidden;
+  background: var(--surface); box-shadow: var(--shadow-soft);
+  aspect-ratio: 1600 / 660;
+}
+:root[data-embedded="true"] .stage { aspect-ratio: auto; }
+
+/* Pole bands */
+.pole { position: absolute; left: 0; right: 0; pointer-events: none; }
+.pole.micro { top: 0; height: 45%; background: linear-gradient(180deg, color-mix(in srgb, var(--micro) 7%, transparent), transparent 80%); }
+.pole.mono { top: 45%; bottom: 0; background: linear-gradient(0deg, color-mix(in srgb, var(--mono) 7%, transparent), transparent 80%); }
+.pole-label {
+  position: absolute; font: 700 0.7rem/1 "Space Grotesk", sans-serif;
+  letter-spacing: 0.16em; text-transform: uppercase; pointer-events: none;
+}
+.pole-label.micro { top: 4.5%; right: 1.6%; color: color-mix(in srgb, var(--micro) 80%, var(--text)); }
+.pole-label.mono { bottom: 4.5%; right: 1.6%; color: color-mix(in srgb, var(--mono) 80%, var(--text)); }
+:root[data-embedded="true"] .pole-label { font-size: clamp(0.69rem, 1.15vh, 0.7rem); }
+
+/* Equilibrium line */
+.equilibrium {
+  position: absolute; left: 0; right: 0; top: 45%; height: 0;
+  border-top: 1.5px dashed color-mix(in srgb, var(--reframe) 55%, transparent);
+  pointer-events: none;
+}
+.equilibrium-label {
+  position: absolute; top: 41%; left: 1.6%;
+  font: 700 0.7rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--reframe); pointer-events: none;
+}
+:root[data-embedded="true"] .equilibrium-label { font-size: clamp(0.69rem, 1.1vh, 0.7rem); }
+
+/* Swing path */
+.swing { position: absolute; inset: 0; width: 100%; height: 100%; }
+.swing-path {
+  fill: none; stroke: color-mix(in srgb, var(--text) 45%, transparent);
+  stroke-width: 2.5; stroke-linecap: round; stroke-dasharray: 2400;
+  stroke-dashoffset: 2400; animation: draw 2.4s ease-out forwards .2s;
+  vector-effect: non-scaling-stroke;
+}
+
+/* Beat dots */
+.dot {
+  position: absolute; width: 15px; height: 15px; border-radius: 50%;
+  transform: translate(-50%, -50%); border: 2.5px solid var(--surface-strong);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--c) 35%, transparent);
+  background: var(--c); opacity: 0; animation: pop .4s ease-out forwards;
+}
+
+/* Beat cards */
+.beat {
+  position: absolute; width: 13.8%; min-width: 128px;
+  padding: 9px 11px; border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--c) 40%, var(--border));
+  background: var(--surface-strong); box-shadow: var(--shadow-soft);
+  opacity: 0; transform: translateY(8px); animation: rise .5s ease-out forwards;
+}
+.beat-date {
+  font: 700 0.7rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--c);
+}
+.beat-title {
+  font: 700 0.82rem/1.15 "Space Grotesk", sans-serif; letter-spacing: -0.01em;
+  color: var(--text-strong); margin-top: 4px;
+}
+.beat-desc { font: 400 0.72rem/1.35 "DM Sans", sans-serif; color: var(--muted); margin-top: 4px; }
+:root[data-embedded="true"] .beat { padding: clamp(5px, 1vh, 9px) clamp(7px, 1.1vw, 11px); min-width: 0; }
+:root[data-embedded="true"] .beat-date { font-size: clamp(0.69rem, 1.05vh, 0.7rem); }
+:root[data-embedded="true"] .beat-title { font-size: clamp(0.72rem, 1.4vh, 0.82rem); }
+:root[data-embedded="true"] .beat-desc { font-size: clamp(0.7rem, 1.15vh, 0.72rem); }
+.beat.reframe { border-width: 1.5px; background: color-mix(in srgb, var(--reframe) 8%, var(--surface-strong)); }
+
+/* Takeaway strip */
+.takeaway {
+  display: flex; align-items: center; gap: 10px; justify-content: center;
+  font-family: "DM Sans", sans-serif; font-size: 0.8rem; color: var(--muted); text-align: center;
+}
+.takeaway strong { color: var(--text-strong); font-family: "Space Grotesk", sans-serif; }
+:root[data-embedded="true"] .takeaway { font-size: clamp(0.72rem, 1.4vh, 0.8rem); }
+
+@keyframes draw { to { stroke-dashoffset: 0; } }
+@keyframes pop { to { opacity: 1; } }
+@keyframes rise { to { opacity: 1; transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) {
+  .swing-path { animation: none; stroke-dashoffset: 0; }
+  .dot, .beat { animation: none; opacity: 1; transform: translateY(0); }
+}
+@media (max-width: 720px) {
+  .beat { min-width: 108px; }
+  .beat-desc { display: none; }
+}
+
+/* Small screens: absolutely-positioned beat cards pile up, so the stage
+   becomes a plain vertical timeline list. */
+@media (max-width: 760px) {
+  .stage, :root[data-embedded="true"] .stage {
+    aspect-ratio: auto; display: flex; flex-direction: column; gap: 7px;
+    padding: 12px; flex: 1 1 auto; min-height: 0;
+  }
+  .pole, .pole-label, .equilibrium, .equilibrium-label, .swing, .dot { display: none; }
+  .beat {
+    position: static; width: auto; min-width: 0;
+    opacity: 1; transform: none; animation: none;
+    border-left: 3px solid var(--c);
+  }
+  .beat-desc { display: block; }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <header class="head">
+    <div>
+      <div class="eyebrow">2014 → 2026 · One damped swing</div>
+      <h1>Twelve years of discourse, settling at equilibrium</h1>
+    </div>
+    <div class="legend">
+      <span><i style="background:var(--micro)"></i>Microservices pole</span>
+      <span><i style="background:var(--mono)"></i>Monolith pole</span>
+      <span><i style="background:var(--reframe)"></i>The reframe</span>
+    </div>
+  </header>
+
+  <div class="stage" role="img" aria-label="A damped pendulum timeline from 2014 to 2026. The discourse starts at the microservices pole in 2014, swings hard to the monolith pole through 2015 to 2025, and settles at equilibrium in 2026: forces, not stages.">
+    <div class="pole micro"></div>
+    <div class="pole mono"></div>
+    <div class="pole-label micro">The microservices pole</div>
+    <div class="pole-label mono">The monolith pole</div>
+    <div class="equilibrium"></div>
+    <div class="equilibrium-label">Equilibrium · forces decide</div>
+
+    <svg class="swing" viewBox="0 0 1000 500" preserveAspectRatio="none" aria-hidden="true">
+      <path class="swing-path" d="M 70 55 C 120 55, 170 320, 220 320 S 330 375, 380 375 S 510 355, 560 355 S 690 310, 740 310 S 870 225, 920 225"/>
+    </svg>
+
+    <div class="dot" style="--c:var(--micro); left:7%;  top:11%; animation-delay:.35s"></div>
+    <div class="dot" style="--c:var(--mono);  left:22%; top:64%; animation-delay:.7s"></div>
+    <div class="dot" style="--c:var(--mono);  left:38%; top:75%; animation-delay:1.05s"></div>
+    <div class="dot" style="--c:var(--mono);  left:56%; top:71%; animation-delay:1.4s"></div>
+    <div class="dot" style="--c:var(--mono);  left:74%; top:62%; animation-delay:1.75s"></div>
+    <div class="dot" style="--c:var(--reframe); left:92%; top:45%; animation-delay:2.1s"></div>
+
+    <div class="beat" style="--c:var(--micro); left:8.5%; top:5%; animation-delay:.45s">
+      <div class="beat-date">2014 · Definition</div>
+      <div class="beat-title">Lewis &amp; Fowler define microservices</div>
+      <div class="beat-desc">Business-capability alignment, independent deployability, decentralized data.</div>
+    </div>
+    <div class="beat" style="--c:var(--mono); left:15.5%; top:70%; animation-delay:.8s">
+      <div class="beat-date">2015 · First correction</div>
+      <div class="beat-title">Fowler: MonolithFirst</div>
+      <div class="beat-desc">"Don't even consider microservices unless the system is too complex as a monolith."</div>
+    </div>
+    <div class="beat" style="--c:var(--mono); left:32.5%; top:79%; animation-delay:1.15s">
+      <div class="beat-date">2019–2020 · Backlash</div>
+      <div class="beat-title">The reversals begin</div>
+      <div class="beat-desc">Hightower: "monoliths are the future." Segment folds 100+ services into one. Istio consolidates istiod.</div>
+    </div>
+    <div class="beat" style="--c:var(--mono); left:50.5%; top:76%; animation-delay:1.5s">
+      <div class="beat-date">2023 · Flashpoint</div>
+      <div class="beat-title">Prime Video goes viral, misread</div>
+      <div class="beat-desc">Spring Modulith hits 1.0 GA. Thoughtworks names fading "microservice envy."</div>
+    </div>
+    <div class="beat" style="--c:var(--mono); left:66.5%; top:67%; animation-delay:1.85s">
+      <div class="beat-date">2024–2025 · New consensus</div>
+      <div class="beat-title">"Not the default"</div>
+      <div class="beat-desc">InfoQ: modular monolith at early majority. Threads ships on Instagram's monolith. Newman at QCon: not the default.</div>
+    </div>
+    <div class="beat reframe" style="--c:var(--reframe); left:83.5%; top:53%; animation-delay:2.2s">
+      <div class="beat-date">2026 · The reframe</div>
+      <div class="beat-title">The question was wrong</div>
+      <div class="beat-desc">Neither shape is a stage. There is no "first." Only forces, present or absent.</div>
+    </div>
+  </div>
+
+  <p class="takeaway">Read it as a dialectic: <strong>2014 said microservices</strong>, <strong>2015–2025 said monolith first</strong>, <strong>2026 says there is no "first"</strong>.</p>
+
+</div>
+</body>
+</html>

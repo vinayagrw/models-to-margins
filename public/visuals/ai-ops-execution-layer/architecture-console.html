@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Ops Execution Layer — Architecture Console</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+/* Merged console: reference architecture + pattern decision tree behind a tab bar. */
+
+/* ---------- Tab bar ---------- */
+.console { display: flex; flex-direction: column; gap: 10px; min-height: 100%; }
+:root[data-embedded="true"] .console { gap: clamp(6px, 1vh, 10px); padding: clamp(8px, 1.2vh, 12px) clamp(14px, 2vw, 22px) 0; }
+.tabbar {
+  display: flex; gap: 6px; align-items: center; flex: 0 0 auto;
+  border-bottom: 1px solid var(--border);
+  padding: 0 0 0 2px; min-height: 40px;
+}
+.tabbar [role="tab"] {
+  appearance: none; cursor: pointer; border: 0; background: transparent;
+  padding: 10px 14px 9px; border-bottom: 2px solid transparent; margin-bottom: -1px;
+  font-family: "Space Grotesk", sans-serif; font-weight: 700; font-size: 0.78rem;
+  letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted);
+  transition: color .2s, border-color .2s;
+}
+.tabbar [role="tab"]:hover { color: var(--text-strong); }
+.tabbar [role="tab"]:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; border-radius: 6px; }
+.tabbar [role="tab"][aria-selected="true"] { color: var(--text-strong); border-bottom-color: var(--accent); }
+:root[data-embedded="true"] .tabbar [role="tab"] { font-size: clamp(0.7rem, 1.3vh, 0.78rem); padding: 8px 12px 7px; }
+
+section[role="tabpanel"] { flex: 1 1 auto; min-height: 0; }
+section[role="tabpanel"][hidden] { display: none; }
+
+/* =========================================================
+   TAB 1 · Reference architecture (scoped to #tab-arch)
+   ========================================================= */
+:root {
+  --c-control: var(--accent);   /* control / orchestration */
+  --c-human: var(--good);       /* human oversight */
+  --c-reason: var(--warn);      /* LLM reasoning, risk */
+  --c-gate: var(--accent-2);    /* decision gates */
+  --c-data: var(--L5);          /* data and state */
+}
+
+#tab-arch .shell { display: flex; flex-direction: column; gap: 10px; height: 100%; }
+:root[data-embedded="true"] #tab-arch .shell {
+  display: flex; flex-direction: column; gap: clamp(6px, 1vh, 10px);
+  padding: 0 0 clamp(10px, 1.5vh, 16px);
+}
+
+#tab-arch .head h1 {
+  font-family: "Space Grotesk", sans-serif; font-weight: 700;
+  font-size: clamp(1.05rem, 2.3vw, 1.45rem); letter-spacing: -0.02em; color: var(--text-strong);
+}
+#tab-arch .head p { color: var(--muted); font-size: 0.9rem; max-width: 70ch; margin-top: 4px; line-height: 1.5; }
+/* The page prose introduces this scene, so the header is redundant inside the iframe */
+:root[data-embedded="true"] #tab-arch .head { display: none; }
+
+/* Top bar: play button + legend */
+#tab-arch .bar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+#tab-arch .play {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 9px 16px; border-radius: 999px; cursor: pointer;
+  border: 1px solid color-mix(in srgb, var(--c-control) 55%, transparent);
+  background: color-mix(in srgb, var(--c-control) 10%, var(--surface));
+  color: var(--text-strong); font: 700 0.78rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.04em;
+  transition: background .25s, transform .2s;
+}
+#tab-arch .play:hover { transform: translateY(-1px); background: color-mix(in srgb, var(--c-control) 16%, var(--surface)); }
+#tab-arch .play:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+#tab-arch .play[disabled] { opacity: .55; cursor: default; transform: none; }
+#tab-arch .play .tri { width: 0; height: 0; border-style: solid; border-width: 5px 0 5px 8px; border-color: transparent transparent transparent var(--c-control); }
+:root[data-embedded="true"] #tab-arch .play { padding: clamp(6px, 1vh, 9px) clamp(11px, 1.4vw, 16px); font-size: clamp(0.72rem, 1.3vh, 0.78rem); }
+
+#tab-arch .trace-note {
+  font: 500 0.74rem/1.35 "DM Sans", sans-serif; color: var(--muted); min-width: 0;
+}
+#tab-arch .trace-note strong { color: var(--text-strong); font-family: "Space Grotesk", sans-serif; }
+
+#tab-arch .legend { display: flex; gap: 10px; flex-wrap: wrap; margin-left: auto; }
+#tab-arch .leg { display: inline-flex; align-items: center; gap: 6px; font: 500 0.7rem/1 "DM Sans", sans-serif; color: var(--muted); }
+#tab-arch .leg i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+:root[data-embedded="true"] #tab-arch .leg { font-size: clamp(0.69rem, 1.1vh, 0.7rem); }
+
+/* Main layout: diagram + explainer */
+#tab-arch .main { display: grid; grid-template-columns: minmax(0, 1fr) minmax(240px, 320px); gap: 10px; flex: 1 1 auto; min-height: 0; }
+
+#tab-arch .stage {
+  position: relative; border: 1px solid var(--border); border-radius: 18px;
+  background: var(--surface); box-shadow: var(--shadow-soft);
+  padding: 12px; overflow: hidden; min-height: 0;
+  display: flex; flex-direction: column; gap: 8px;
+}
+:root[data-embedded="true"] #tab-arch .stage { padding: clamp(8px, 1.2vh, 12px); gap: clamp(5px, 0.9vh, 8px); }
+#tab-arch .stage::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--text) 4%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--text) 4%, transparent) 1px, transparent 1px);
+  background-size: 40px 40px;
+  mask-image: radial-gradient(ellipse 80% 70% at center, black, transparent);
+}
+
+/* Planes */
+#tab-arch .plane {
+  position: relative; z-index: 1; border-radius: 14px; padding: 8px 10px 10px;
+  border: 1.5px dashed color-mix(in srgb, var(--pc, var(--accent)) 50%, transparent);
+  background: color-mix(in srgb, var(--pc, var(--accent)) 4%, transparent);
+  display: flex; flex-direction: column; gap: 7px; cursor: pointer;
+  transition: border-color .25s, background .25s, box-shadow .25s;
+  flex: 1 1 auto; min-height: 0;
+}
+:root[data-embedded="true"] #tab-arch .plane { padding: clamp(5px, 0.8vh, 8px) clamp(7px, 1vw, 10px) clamp(6px, 0.9vh, 10px); gap: clamp(4px, 0.7vh, 7px); }
+#tab-arch .plane:hover { border-color: var(--pc); }
+#tab-arch .plane.selected {
+  border-style: solid; border-color: var(--pc);
+  background: color-mix(in srgb, var(--pc) 8%, transparent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--pc) 20%, transparent);
+}
+#tab-arch .plane[data-plane="edge"] { --pc: var(--c-data); }
+#tab-arch .plane[data-plane="state"] { --pc: var(--c-data); }
+#tab-arch .plane[data-plane="decide"] { --pc: var(--c-control); }
+#tab-arch .plane[data-plane="act"] { --pc: var(--c-gate); }
+#tab-arch .plane[data-plane="oversee"] { --pc: var(--c-human); }
+
+#tab-arch .plane-label {
+  font: 700 11px/1 "Space Grotesk", sans-serif; letter-spacing: 0.12em; text-transform: uppercase;
+  color: color-mix(in srgb, var(--pc) 70%, var(--text-strong));
+  display: flex; align-items: center; gap: 8px;
+}
+#tab-arch .plane-label::after { content: ""; flex: 1; height: 1px; background: color-mix(in srgb, var(--pc) 35%, transparent); }
+
+#tab-arch .nodes { display: flex; gap: 6px; flex-wrap: wrap; }
+#tab-arch .node {
+  flex: 1 1 0; min-width: 0; text-align: left; cursor: pointer;
+  padding: 7px 9px; border-radius: 10px;
+  border: 1.4px solid color-mix(in srgb, var(--nc, var(--pc)) 60%, transparent);
+  background: color-mix(in srgb, var(--nc, var(--pc)) 7%, var(--surface-strong));
+  font-family: "DM Sans", sans-serif;
+  transition: border-color .25s, box-shadow .25s, transform .2s, background .25s;
+}
+:root[data-embedded="true"] #tab-arch .node { padding: clamp(4px, 0.7vh, 7px) clamp(6px, 0.9vw, 9px); }
+#tab-arch .node:hover { transform: translateY(-1px); border-color: var(--nc, var(--pc)); }
+#tab-arch .node:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+#tab-arch .node.selected {
+  border-color: var(--nc, var(--pc));
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--nc, var(--pc)) 28%, transparent);
+}
+#tab-arch .node.lit {
+  border-color: var(--nc, var(--pc));
+  background: color-mix(in srgb, var(--nc, var(--pc)) 20%, var(--surface-strong));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--nc, var(--pc)) 30%, transparent);
+  animation: litpulse 0.9s ease;
+}
+@keyframes litpulse { 0% { transform: scale(1); } 30% { transform: scale(1.04); } 100% { transform: scale(1); } }
+#tab-arch .node .n-name { display: block; font: 700 0.76rem/1.25 "Space Grotesk", sans-serif; color: var(--text-strong); letter-spacing: -0.01em; }
+#tab-arch .node .n-sub { display: block; font-size: 0.69rem; line-height: 1.3; color: var(--muted); margin-top: 2px; }
+:root[data-embedded="true"] #tab-arch .node .n-name { font-size: clamp(0.7rem, 1.25vh, 0.76rem); }
+:root[data-embedded="true"] #tab-arch .node .n-sub { font-size: clamp(0.69rem, 1.1vh, 0.7rem); }
+
+/* Node color overrides inside mixed planes */
+#tab-arch .node[data-c="reason"] { --nc: var(--c-reason); }
+#tab-arch .node[data-c="gate"] { --nc: var(--c-gate); }
+#tab-arch .node[data-c="control"] { --nc: var(--c-control); }
+#tab-arch .node[data-c="human"] { --nc: var(--c-human); }
+#tab-arch .node[data-c="data"] { --nc: var(--c-data); }
+
+/* Connectors between planes */
+#tab-arch .link { position: relative; z-index: 1; display: flex; justify-content: center; align-items: center; gap: 14px; height: 12px; flex: 0 0 auto; }
+#tab-arch .link .arrow {
+  width: 2px; height: 100%; border-radius: 2px;
+  background: color-mix(in srgb, var(--text) 25%, transparent); position: relative;
+}
+#tab-arch .link .arrow::after {
+  content: ""; position: absolute; bottom: -1px; left: 50%; transform: translateX(-50%);
+  border: 4px solid transparent; border-top-color: color-mix(in srgb, var(--text) 35%, transparent); border-bottom: none;
+}
+#tab-arch .link .arrow.feedback { background: color-mix(in srgb, var(--c-human) 55%, transparent); }
+#tab-arch .link .arrow.feedback::after { border-top-color: color-mix(in srgb, var(--c-human) 70%, transparent); }
+#tab-arch .link .lk-tag { font: 700 10px/1 "Space Grotesk", sans-serif; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted-soft); }
+
+/* Feedback loop badge */
+#tab-arch .loop {
+  position: relative; z-index: 1; text-align: center;
+  font: 700 0.69rem/1.3 "Space Grotesk", sans-serif; letter-spacing: 0.08em; text-transform: uppercase;
+  color: color-mix(in srgb, var(--c-human) 70%, var(--text-strong));
+}
+#tab-arch .loop span { opacity: .8; }
+
+/* Explainer panel */
+#tab-arch .panel {
+  border: 1px solid var(--border); border-radius: 18px;
+  background: var(--surface); box-shadow: var(--shadow-soft);
+  padding: 14px; display: flex; flex-direction: column; gap: 8px;
+  min-height: 0; overflow-y: auto;
+}
+:root[data-embedded="true"] #tab-arch .panel { padding: clamp(9px, 1.3vh, 14px); }
+#tab-arch .panel-tag {
+  align-self: flex-start;
+  font: 700 0.69rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.1em; text-transform: uppercase;
+  color: color-mix(in srgb, var(--panel-c, var(--accent)) 70%, var(--text-strong));
+  border: 1px solid color-mix(in srgb, var(--panel-c, var(--accent)) 50%, transparent);
+  background: color-mix(in srgb, var(--panel-c, var(--accent)) 9%, transparent);
+  border-radius: 99px; padding: 4px 9px;
+}
+#tab-arch .panel h2 { font: 700 0.95rem/1.25 "Space Grotesk", sans-serif; color: var(--text-strong); letter-spacing: -0.01em; }
+#tab-arch .panel p { font: 400 0.78rem/1.5 "DM Sans", sans-serif; color: var(--text); }
+#tab-arch .panel p + p { margin-top: 2px; }
+#tab-arch .panel .hint { font: 400 0.7rem/1.45 "DM Sans", sans-serif; color: var(--muted); margin-top: auto; padding-top: 8px; border-top: 1px dashed var(--border); }
+:root[data-embedded="true"] #tab-arch .panel h2 { font-size: clamp(0.82rem, 1.6vh, 0.95rem); }
+:root[data-embedded="true"] #tab-arch .panel p { font-size: clamp(0.71rem, 1.3vh, 0.78rem); }
+:root[data-embedded="true"] #tab-arch .panel .hint { font-size: clamp(0.69rem, 1.15vh, 0.7rem); }
+
+@media (prefers-reduced-motion: reduce) {
+  #tab-arch .node, #tab-arch .plane, #tab-arch .play { transition-duration: 0.01s !important; }
+  #tab-arch .node.lit { animation: none; }
+}
+
+@media (max-width: 860px) {
+  #tab-arch .main { grid-template-columns: 1fr; }
+  #tab-arch .panel { order: -1; overflow: visible; }
+  #tab-arch .panel .hint { display: none; }
+  #tab-arch .legend { margin-left: 0; }
+  :root[data-embedded="true"] #tab-arch .main { overflow-y: auto; }
+  :root[data-embedded="true"] #tab-arch .stage, :root[data-embedded="true"] #tab-arch .panel { flex: 0 0 auto; overflow: visible; }
+}
+@media (max-width: 560px) {
+  #tab-arch .nodes { flex-direction: column; }
+  #tab-arch .node .n-sub { margin-top: 1px; }
+}
+
+/* =========================================================
+   TAB 2 · Pattern decision tree (scoped to #tab-patterns)
+   ========================================================= */
+#tab-patterns .shell { display: flex; flex-direction: column; gap: 12px; height: 100%; }
+:root[data-embedded="true"] #tab-patterns .shell {
+  display: flex; flex-direction: column; gap: clamp(5px, 0.9vh, 12px);
+  padding: 0 0 clamp(10px, 1.5vh, 16px);
+}
+
+#tab-patterns .head h1 {
+  font-family: "Space Grotesk", sans-serif; font-weight: 700;
+  font-size: clamp(1.05rem, 2.3vw, 1.45rem); letter-spacing: -0.02em; color: var(--text-strong);
+}
+:root[data-embedded="true"] #tab-patterns .head h1 { font-size: clamp(0.92rem, 2.1vh, 1.2rem); }
+#tab-patterns .head p { font: 500 0.78rem/1.4 "DM Sans", sans-serif; color: var(--muted); margin-top: 3px; }
+:root[data-embedded="true"] #tab-patterns .head p { font-size: clamp(0.69rem, 1.3vh, 0.78rem); }
+
+#tab-patterns .main { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(260px, 0.85fr); gap: 12px; flex: 1 1 auto; min-height: 0; }
+:root[data-embedded="true"] #tab-patterns .main { gap: clamp(8px, 1.2vw, 12px); }
+
+/* Gate rows */
+#tab-patterns .forces { display: flex; flex-direction: column; gap: 8px; justify-content: space-between; min-height: 0; }
+:root[data-embedded="true"] #tab-patterns .forces { gap: clamp(4px, 0.7vh, 8px); }
+#tab-patterns .force {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: center;
+  padding: 9px 12px; border-radius: 12px;
+  border: 1px solid var(--border); background: var(--surface);
+  transition: opacity .25s ease;
+}
+:root[data-embedded="true"] #tab-patterns .force { padding: clamp(5px, 0.9vh, 9px) clamp(9px, 1.3vw, 12px); }
+#tab-patterns .force.moot { opacity: 0.38; pointer-events: none; }
+#tab-patterns .f-num {
+  font: 700 0.69rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--accent);
+}
+#tab-patterns .f-q { font: 600 0.8rem/1.35 "DM Sans", sans-serif; color: var(--text-strong); margin-top: 3px; }
+#tab-patterns .f-why { font: 400 0.72rem/1.3 "DM Sans", sans-serif; color: var(--muted); margin-top: 2px; }
+:root[data-embedded="true"] #tab-patterns .f-q { font-size: clamp(0.72rem, 1.4vh, 0.8rem); }
+:root[data-embedded="true"] #tab-patterns .f-why { font-size: clamp(0.69rem, 1.2vh, 0.72rem); }
+
+#tab-patterns .f-toggle { display: flex; border: 1px solid var(--border-strong); border-radius: 99px; overflow: hidden; }
+#tab-patterns .f-toggle button {
+  appearance: none; border: 0; background: transparent; cursor: pointer;
+  min-height: 40px; min-width: 52px; padding: 0 14px;
+  font: 700 0.72rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--muted);
+}
+#tab-patterns .f-toggle button + button { border-left: 1px solid var(--border-strong); }
+#tab-patterns .f-toggle button[aria-pressed="true"] { background: var(--accent); color: var(--bg-mid); }
+#tab-patterns .f-toggle button:focus-visible { outline: 2px solid var(--accent-2); outline-offset: -3px; }
+:root[data-embedded="true"] #tab-patterns .f-toggle button { font-size: clamp(0.69rem, 1.1vh, 0.72rem); min-height: 34px; }
+
+/* Verdict panel */
+#tab-patterns .verdict {
+  display: flex; flex-direction: column; gap: 8px;
+  padding: 13px 15px; border-radius: 14px;
+  border: 1.5px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  background: color-mix(in srgb, var(--accent) 7%, transparent);
+  min-height: 0;
+}
+:root[data-embedded="true"] #tab-patterns .verdict { padding: clamp(8px, 1.3vh, 13px) clamp(11px, 1.6vw, 15px); gap: clamp(4px, 0.7vh, 8px); }
+#tab-patterns .v-label { font: 700 0.69rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent); }
+#tab-patterns .v-shape { font: 700 1.02rem/1.25 "Space Grotesk", sans-serif; letter-spacing: -0.01em; color: var(--text-strong); }
+:root[data-embedded="true"] #tab-patterns .v-shape { font-size: clamp(0.86rem, 1.9vh, 1.02rem); }
+#tab-patterns .v-desc { font: 400 0.78rem/1.45 "DM Sans", sans-serif; color: var(--text); }
+:root[data-embedded="true"] #tab-patterns .v-desc { font-size: clamp(0.7rem, 1.3vh, 0.78rem); }
+#tab-patterns .v-stack { display: flex; flex-direction: column; gap: 5px; }
+#tab-patterns .v-step {
+  display: flex; align-items: baseline; gap: 8px;
+  padding: 5px 9px; border-radius: 9px;
+  border: 1px solid color-mix(in srgb, var(--sc) 40%, transparent);
+  background: color-mix(in srgb, var(--sc) 7%, transparent);
+}
+#tab-patterns .v-step b {
+  font: 700 0.69rem/1.2 "Space Grotesk", sans-serif; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--sc); white-space: nowrap;
+}
+#tab-patterns .v-step span { font: 400 0.72rem/1.35 "DM Sans", sans-serif; color: var(--text); }
+:root[data-embedded="true"] #tab-patterns .v-step { padding: clamp(3px, 0.5vh, 5px) 9px; }
+:root[data-embedded="true"] #tab-patterns .v-step span { font-size: clamp(0.69rem, 1.2vh, 0.72rem); }
+#tab-patterns .v-tell {
+  font: 500 0.72rem/1.4 "DM Sans", sans-serif; color: var(--muted); font-style: italic;
+  border-top: 1px dashed var(--border-strong); padding-top: 7px; margin-top: auto;
+}
+:root[data-embedded="true"] #tab-patterns .v-tell { font-size: clamp(0.69rem, 1.25vh, 0.72rem); padding-top: 5px; }
+
+/* Comparison matrix collapsible */
+#tab-patterns .matrix { border: 1px solid var(--border); border-radius: 14px; background: var(--surface); box-shadow: var(--shadow-soft); overflow: hidden; }
+#tab-patterns .matrix summary {
+  cursor: pointer; list-style: none; display: flex; align-items: center; gap: 8px;
+  padding: 10px 15px;
+  font: 700 0.72rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.13em; text-transform: uppercase; color: var(--text-strong);
+}
+#tab-patterns .matrix summary::-webkit-details-marker { display: none; }
+#tab-patterns .matrix summary::before { content: "▸"; color: var(--accent); transition: transform .2s ease; }
+#tab-patterns .matrix[open] summary::before { transform: rotate(90deg); }
+#tab-patterns .matrix summary em { font: 400 0.7rem/1 "DM Sans", sans-serif; text-transform: none; letter-spacing: 0; color: var(--muted); font-style: normal; }
+:root[data-embedded="true"] #tab-patterns .matrix summary { padding: clamp(6px, 1vh, 10px) clamp(11px, 1.5vw, 15px); font-size: clamp(0.69rem, 1.2vh, 0.72rem); }
+#tab-patterns .matrix-scroll { overflow-x: auto; padding: 0 15px 12px; }
+:root[data-embedded="true"] #tab-patterns .matrix-scroll { padding: 0 clamp(11px, 1.5vw, 15px) clamp(8px, 1.2vh, 12px); }
+#tab-patterns .matrix table { border-collapse: collapse; width: 100%; min-width: 520px; }
+#tab-patterns .matrix th, #tab-patterns .matrix td {
+  padding: 5px 8px; text-align: center;
+  font: 500 0.7rem/1.25 "DM Sans", sans-serif; color: var(--text);
+  border-top: 1px solid var(--border);
+}
+#tab-patterns .matrix th { font: 700 0.69rem/1.2 "Space Grotesk", sans-serif; letter-spacing: 0.05em; color: var(--text-strong); border-top: 0; }
+#tab-patterns .matrix td:first-child, #tab-patterns .matrix th:first-child { text-align: left; color: var(--muted); white-space: nowrap; }
+#tab-patterns .matrix td:first-child { font-weight: 700; color: var(--text); }
+#tab-patterns .dot { display: inline-block; width: 11px; height: 11px; border-radius: 50%; vertical-align: middle; }
+#tab-patterns .dot.g { background: var(--good); }
+#tab-patterns .dot.m { background: var(--accent-2); }
+#tab-patterns .dot.r { background: var(--warn); }
+#tab-patterns .d-note { display: block; font: 400 0.69rem/1.2 "DM Sans", sans-serif; color: var(--muted); margin-top: 1px; }
+#tab-patterns .role-row td { font: 600 0.69rem/1.25 "DM Sans", sans-serif; color: var(--accent); }
+#tab-patterns .m-key { display: flex; gap: 14px; padding: 8px 15px 0; flex-wrap: wrap; }
+#tab-patterns .m-key span { display: inline-flex; align-items: center; gap: 5px; font: 500 0.69rem/1 "DM Sans", sans-serif; color: var(--muted); }
+
+/* Composite close */
+#tab-patterns .composite {
+  display: flex; gap: 10px; align-items: baseline;
+  padding: 10px 15px; border-radius: 14px;
+  border: 1px dashed var(--border-strong); background: var(--surface);
+}
+:root[data-embedded="true"] #tab-patterns .composite { padding: clamp(6px, 1vh, 10px) clamp(11px, 1.5vw, 15px); }
+#tab-patterns .composite b { font: 700 0.69rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-2); white-space: nowrap; }
+#tab-patterns .composite p { font: 500 0.75rem/1.45 "DM Sans", sans-serif; color: var(--text); }
+:root[data-embedded="true"] #tab-patterns .composite p { font-size: clamp(0.69rem, 1.3vh, 0.75rem); }
+
+@media (max-width: 760px) {
+  #tab-patterns .main { grid-template-columns: 1fr; }
+  #tab-patterns .force { grid-template-columns: 1fr; }
+  #tab-patterns .f-toggle { justify-self: start; }
+  #tab-patterns .f-toggle button { min-height: 44px; }
+  #tab-patterns .composite { flex-direction: column; gap: 4px; }
+}
+@media (max-width: 560px) {
+  #tab-patterns .f-why { display: none; }
+}
+</style>
+</head>
+<body>
+<div class="console">
+
+  <div class="tabbar" role="tablist" aria-label="Architecture console views">
+    <button type="button" role="tab" id="tabbtn-arch" aria-controls="tab-arch" aria-selected="true">Reference architecture</button>
+    <button type="button" role="tab" id="tabbtn-patterns" aria-controls="tab-patterns" aria-selected="false" tabindex="-1">Pattern decision tree</button>
+  </div>
+
+  <!-- ============ TAB 1 · Reference architecture ============ -->
+  <section id="tab-arch" role="tabpanel" aria-labelledby="tabbtn-arch">
+  <div class="shell">
+
+    <header class="head">
+      <div class="eyebrow">Reference architecture · Four planes plus oversight</div>
+      <h1>The execution layer, from signal to safe write</h1>
+      <p>Click any plane or node for the short version of what it does. Press play to trace a routine signal and an ambiguous one through the system.</p>
+    </header>
+
+    <div class="bar">
+      <button class="play" id="playBtn"><span class="tri"></span>Trace a signal</button>
+      <div class="trace-note" id="traceNote" aria-live="polite">Two journeys: routine → fast path → auto. Ambiguous → slow path → review queue.</div>
+      <div class="legend" aria-hidden="true">
+        <span class="leg"><i style="background:var(--c-control)"></i>control</span>
+        <span class="leg"><i style="background:var(--c-human)"></i>human</span>
+        <span class="leg"><i style="background:var(--c-reason)"></i>reasoning / risk</span>
+        <span class="leg"><i style="background:var(--c-gate)"></i>gate</span>
+        <span class="leg"><i style="background:var(--c-data)"></i>data</span>
+      </div>
+    </div>
+
+    <div class="main">
+      <div class="stage" id="stage">
+
+        <div class="plane" data-plane="edge" tabindex="0" role="button">
+          <div class="plane-label">Edge &amp; signals</div>
+          <div class="nodes">
+            <button class="node" data-c="data" data-node="pos"><span class="n-name">POS / ERP / WMS / TMS</span><span class="n-sub">systems of record</span></button>
+            <button class="node" data-c="data" data-node="sensors"><span class="n-name">Sensors, photos, voice</span><span class="n-sub">frontline evidence</span></button>
+            <button class="node" data-c="data" data-node="tasks"><span class="n-name">Tasks &amp; checklists</span><span class="n-sub">claimed completions</span></button>
+          </div>
+        </div>
+
+        <div class="link"><span class="arrow"></span></div>
+
+        <div class="plane" data-plane="state" tabindex="0" role="button">
+          <div class="plane-label">State plane</div>
+          <div class="nodes">
+            <button class="node" data-c="data" data-node="graph"><span class="n-name">Operational graph</span><span class="n-sub">conformed store, item, vendor IDs</span></button>
+            <button class="node" data-c="data" data-node="trust"><span class="n-name">Evidence trust scores</span><span class="n-sub">claims weighted, not believed</span></button>
+          </div>
+        </div>
+
+        <div class="link"><span class="arrow"></span></div>
+
+        <div class="plane" data-plane="decide" tabindex="0" role="button">
+          <div class="plane-label">Decision plane</div>
+          <div class="nodes">
+            <button class="node" data-c="control" data-node="fast"><span class="n-name">Fast path</span><span class="n-sub">forecasts, rules, thresholds</span></button>
+            <button class="node" data-c="gate" data-node="triage"><span class="n-name">Ambiguity gate</span><span class="n-sub">routine or residue?</span></button>
+            <button class="node" data-c="reason" data-node="slow"><span class="n-name">Slow path</span><span class="n-sub">LLM reasoning, governed context</span></button>
+          </div>
+        </div>
+
+        <div class="link"><span class="arrow"></span></div>
+
+        <div class="plane" data-plane="act" tabindex="0" role="button">
+          <div class="plane-label">Actuation gateway</div>
+          <div class="nodes">
+            <button class="node" data-c="gate" data-node="risk"><span class="n-name">Risk tier + autonomy status</span><span class="n-sub">shadow / suggest / auto, per category</span></button>
+            <button class="node" data-c="control" data-node="writer"><span class="n-name">Idempotent write adapters</span><span class="n-sub">OBO identity, staged posting</span></button>
+          </div>
+        </div>
+
+        <div class="link"><span class="arrow"></span></div>
+
+        <div class="plane" data-plane="oversee" tabindex="0" role="button">
+          <div class="plane-label">Oversight plane</div>
+          <div class="nodes">
+            <button class="node" data-c="human" data-node="queue"><span class="n-name">Budgeted review queue</span><span class="n-sub">capped per reviewer per day</span></button>
+            <button class="node" data-c="data" data-node="audit"><span class="n-name">Dual-identity audit</span><span class="n-sub">user → agent → resource</span></button>
+            <button class="node" data-c="control" data-node="evals"><span class="n-name">Eval harness</span><span class="n-sub">traces become regression tests</span></button>
+          </div>
+        </div>
+
+        <div class="loop"><span>⟲ evals promote or demote categories, feeding the gateway</span></div>
+
+      </div>
+
+      <aside class="panel" id="panel" aria-live="polite">
+        <span class="panel-tag" id="panelTag">Start here</span>
+        <h2 id="panelTitle">One write path, earned autonomy</h2>
+        <p id="panelBody">Signals land in the state plane, decisions run cheap-first in the decision plane, and every proposed action passes one actuation gateway that knows its risk tier and its earned autonomy status. The oversight plane closes the loop.</p>
+        <p class="hint">Click a plane or a node to read what it does. Press play to watch two signals travel.</p>
+      </aside>
+    </div>
+
+  </div>
+  </section>
+
+  <!-- ============ TAB 2 · Pattern decision tree ============ -->
+  <section id="tab-patterns" role="tabpanel" aria-labelledby="tabbtn-patterns" hidden>
+  <div class="shell">
+
+    <header class="head">
+      <div class="eyebrow">Five gates in, one pattern stack out</div>
+      <h1>Which pattern when: walk your signal through</h1>
+      <p>The §8 decision tree, live. Answer for the signal in front of you and watch the stack assemble. Preset to a cross-system exception on a live write path.</p>
+    </header>
+
+    <div class="main">
+
+      <div class="forces" role="group" aria-label="Five gate questions">
+
+        <div class="force" id="rowQ1">
+          <div>
+            <div class="f-num">Gate 1 · Routine</div>
+            <div class="f-q" id="q1">Is the signal routine and rule-decidable, no judgment needed?</div>
+            <div class="f-why">If a rule can decide it, a rule should. LLM tokens on the easy majority is the first anti-pattern.</div>
+          </div>
+          <div class="f-toggle" role="group" aria-labelledby="q1">
+            <button type="button" data-q="f1" data-val="yes" aria-pressed="false">Yes</button>
+            <button type="button" data-q="f1" data-val="no" aria-pressed="true">No</button>
+          </div>
+        </div>
+
+        <div class="force" id="rowQ2">
+          <div>
+            <div class="f-num">Gate 2 · Variety</div>
+            <div class="f-q" id="q2">Do multiple distinct signal classes arrive at the same front door?</div>
+            <div class="f-why">Routing is cheap, observable, and essential at ops event volumes. One handler per class beats one prompt for all.</div>
+          </div>
+          <div class="f-toggle" role="group" aria-labelledby="q2">
+            <button type="button" data-q="f2" data-val="yes" aria-pressed="true">Yes</button>
+            <button type="button" data-q="f2" data-val="no" aria-pressed="false">No</button>
+          </div>
+        </div>
+
+        <div class="force" id="rowQ3">
+          <div>
+            <div class="f-num">Gate 3 · Diagnosis</div>
+            <div class="f-q" id="q3">Does resolving it require cross-system diagnosis, inventory plus carrier plus labor?</div>
+            <div class="f-why">Yes means an orchestrator decomposing checks to parallel workers. No means a linear document-style chain.</div>
+          </div>
+          <div class="f-toggle" role="group" aria-labelledby="q3">
+            <button type="button" data-q="f3" data-val="yes" aria-pressed="true">Yes</button>
+            <button type="button" data-q="f3" data-val="no" aria-pressed="false">No</button>
+          </div>
+        </div>
+
+        <div class="force" id="rowQ4">
+          <div>
+            <div class="f-num">Gate 4 · Stakes</div>
+            <div class="f-q" id="q4">Is this contested or high-value residue, a claim someone will dispute?</div>
+            <div class="f-why">A generate → verify loop earns its cost only here. Everywhere else it is expensive theater.</div>
+          </div>
+          <div class="f-toggle" role="group" aria-labelledby="q4">
+            <button type="button" data-q="f4" data-val="yes" aria-pressed="false">Yes</button>
+            <button type="button" data-q="f4" data-val="no" aria-pressed="true">No</button>
+          </div>
+        </div>
+
+        <div class="force" id="rowQ5">
+          <div>
+            <div class="f-num">Gate 5 · Action risk</div>
+            <div class="f-q" id="q5">Is the resulting action high-risk or unproven for this category?</div>
+            <div class="f-why">Autonomy is earned per category with shadow evidence, never assumed. Money and physical ops start gated.</div>
+          </div>
+          <div class="f-toggle" role="group" aria-labelledby="q5">
+            <button type="button" data-q="f5" data-val="yes" aria-pressed="true">Yes</button>
+            <button type="button" data-q="f5" data-val="no" aria-pressed="false">No</button>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="verdict" aria-live="polite">
+        <div class="v-label">Your pattern stack</div>
+        <div class="v-shape" id="vShape"></div>
+        <div class="v-desc" id="vDesc"></div>
+        <div class="v-stack" id="vStack"></div>
+        <div class="v-tell" id="vTell"></div>
+      </div>
+
+    </div>
+
+    <details class="matrix">
+      <summary>Comparison matrix · patterns B–G across seven dimensions <em>(tap to expand)</em></summary>
+      <div class="m-key">
+        <span><i class="dot g"></i> favorable</span>
+        <span><i class="dot m"></i> middling</span>
+        <span><i class="dot r"></i> costly</span>
+      </div>
+      <div class="matrix-scroll">
+        <table>
+          <thead>
+            <tr><th>Dimension</th><th>B chain</th><th>C route</th><th>D orch-workers</th><th>E eval-opt</th><th>F ReAct</th><th>G HITL</th></tr>
+          </thead>
+          <tbody id="mBody"></tbody>
+        </table>
+      </div>
+    </details>
+
+    <div class="composite">
+      <b>The composite</b>
+      <p>Cheap deterministic patterns own the easy majority. Reasoning patterns earn their cost only on the hard minority. And where actions touch money and physical operations, the HITL gateway is not a pattern choice, it is the substrate everything else stands on.</p>
+    </div>
+
+  </div>
+  </section>
+
+</div>
+
+<script>
+/* Tab bar: two panels, keyboard accessible, ?tab=patterns opens the second tab. */
+(() => {
+  const tabs = [
+    { btn: document.getElementById('tabbtn-arch'), panel: document.getElementById('tab-arch') },
+    { btn: document.getElementById('tabbtn-patterns'), panel: document.getElementById('tab-patterns') },
+  ];
+
+  const select = (idx, focus) => {
+    tabs.forEach((t, i) => {
+      const on = i === idx;
+      t.btn.setAttribute('aria-selected', String(on));
+      t.btn.tabIndex = on ? 0 : -1;
+      t.panel.hidden = !on;
+    });
+    if (focus) tabs[idx].btn.focus();
+  };
+
+  tabs.forEach((t, i) => {
+    t.btn.addEventListener('click', () => select(i, false));
+    t.btn.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowLeft' || e.key === 'Home' || e.key === 'End') {
+        e.preventDefault();
+        const next = e.key === 'Home' ? 0
+          : e.key === 'End' ? tabs.length - 1
+          : (i + (e.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length;
+        select(next, true);
+      }
+    });
+  });
+
+  const params = new URLSearchParams(location.search);
+  if (params.get('tab') === 'patterns') select(1, false);
+})();
+</script>
+
+<script>
+/* Tab 1: reference architecture walkthrough. */
+(() => {
+  const INFO = {
+    // planes
+    'plane:edge': { tag: 'Plane · data', c: 'var(--c-data)', title: 'Edge and signals', body: 'Everything the operation emits: transactions, sensor readings, photos, voice, task completions. All of it is untrusted input data, never instructions. Documents and transcripts get parsed in a sandbox before anything reasons over them.' },
+    'plane:state': { tag: 'Plane · data', c: 'var(--c-data)', title: 'State plane', body: 'One queryable representation of the operation. Identity resolution builds golden records for stores, items, and vendors. Conformed dimensions come before clever models, because NL-analyst and forecasting projects stall on identity fragmentation, not model quality.' },
+    'plane:decide': { tag: 'Plane · control', c: 'var(--c-control)', title: 'Decision plane', body: 'Cheap deterministic work first. The fast path handles the boring majority, and only the ambiguous residue reaches LLM reasoning. That ordering keeps cost, latency, and audit burden proportional to actual difficulty.' },
+    'plane:act': { tag: 'Plane · gate', c: 'var(--c-gate)', title: 'Actuation gateway', body: 'The product. One write path for all actors, human or model. It enforces identity, risk tiering, idempotency, and autonomy status. Nothing writes to a system of record around it.' },
+    'plane:oversee': { tag: 'Plane · human', c: 'var(--c-human)', title: 'Oversight plane', body: 'Budgeted approvals, dual-identity audit, sampled QA of auto-acted items, and an eval harness that turns traces into regression tests. Its promotion and demotion evidence feeds straight back into the gateway.' },
+    // nodes
+    'pos': { tag: 'Data', c: 'var(--c-data)', title: 'Systems of record', body: 'POS, ERP, WMS, TMS, CMMS. The transactional backbone the layer reads from and, through the gateway only, writes back to. Most of these support no true rollback, reversal is a compensating document, so writes stage as propose → approve → post.' },
+    'sensors': { tag: 'Data', c: 'var(--c-data)', title: 'Sensors, photos, voice', body: 'Frontline evidence. Voice works as closed-vocabulary command-and-confirm, not open conversation. Vision follows asymmetric-cost design: detection uses tolerate lower precision, enforcement uses bias hard to precision and keep a human between detection and accusation.' },
+    'tasks': { tag: 'Data', c: 'var(--c-data)', title: 'Tasks and checklists', body: 'Completion records are claims, not facts. A checklist completion arrives with its verification signals, duration, photo, sensor cross-check, so downstream logic can weight it instead of trusting it.' },
+    'graph': { tag: 'Data', c: 'var(--c-data)', title: 'Operational graph', body: 'Golden records and conformed IDs for stores, items, and vendors, modeling franchise reality: two-level tenancy, store-local assortments, promo calendars as first-class inputs. The load-bearing choice of the whole layer.' },
+    'trust': { tag: 'Data', c: 'var(--c-data)', title: 'Evidence trust scores', body: 'Pencil-whipping signatures, like 2-minute completions of 15-minute checklists or temperature logs that never vary, become features that downweight suspect completions before anything acts on them.' },
+    'fast': { tag: 'Control', c: 'var(--c-control)', title: 'Fast path', body: 'Forecasting, replenishment suggestions, threshold exceptions, dedup and suppression. Deterministic, so fully regression-testable. Alert stewardship lives here: override rates monitored per alert type, low-value alerts retired on a schedule.' },
+    'triage': { tag: 'Gate', c: 'var(--c-gate)', title: 'Ambiguity gate', body: 'The router between cheap and expensive. Routine signals go straight to the actuation gateway. Only the ambiguous residue, cross-system exceptions, messy documents, odd transcripts, earns a trip through LLM reasoning.' },
+    'slow': { tag: 'Reasoning', c: 'var(--c-reason)', title: 'Slow path', body: 'LLM work bounded inside deterministic workflow steps, never a top-level autonomous controller. Quarantined context, tool allowlists per workflow, read-only by default, and no path where private data, untrusted content, and an exfiltration channel coexist.' },
+    'risk': { tag: 'Gate', c: 'var(--c-gate)', title: 'Risk tier and autonomy status', body: 'Every action class is rated on reversibility, financial impact, and blast radius. Bulk operations are always top tier. Autonomy is earned per category: shadow, then suggest, then auto, and any metric drop demotes instantly.' },
+    'writer': { tag: 'Control', c: 'var(--c-control)', title: 'Idempotent write adapters', body: 'On-behalf-of token exchange means an agent architecturally cannot exceed the delegating human’s rights. Idempotency keys per action, and staged posting where the target system cannot truly undo.' },
+    'queue': { tag: 'Human', c: 'var(--c-human)', title: 'Budgeted review queue', body: 'Suggest-tier actions arrive as a reviewable package: intent, reasoning summary, blast radius, rollback plan. The queue is capped per reviewer per day. Excess demand does not pile up, it demotes the noisiest category back to shadow.' },
+    'audit': { tag: 'Data', c: 'var(--c-data)', title: 'Dual-identity audit', body: 'Every write records initiating user, acting agent, resource, and outcome. Auto-acted items get randomly sampled for human QA, the check on the worst failure mode: confidently wrong.' },
+    'evals': { tag: 'Control', c: 'var(--c-control)', title: 'Eval harness', body: 'Deterministic action-level checks online, LLM-as-judge offline and sampled only. Every production failure becomes an eval case. Trajectory evals matter: most perfect-outcome traces still contain procedural violations.' },
+  };
+
+  const panel = document.getElementById('panel');
+  const tagEl = document.getElementById('panelTag');
+  const titleEl = document.getElementById('panelTitle');
+  const bodyEl = document.getElementById('panelBody');
+  const stage = document.getElementById('stage');
+  const note = document.getElementById('traceNote');
+  const playBtn = document.getElementById('playBtn');
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const clearSel = () => stage.querySelectorAll('.selected').forEach((el) => el.classList.remove('selected'));
+
+  const show = (key, el) => {
+    const info = INFO[key];
+    if (!info) return;
+    clearSel();
+    el.classList.add('selected');
+    panel.style.setProperty('--panel-c', info.c);
+    tagEl.textContent = info.tag;
+    titleEl.textContent = info.title;
+    bodyEl.textContent = info.body;
+  };
+
+  stage.querySelectorAll('.plane').forEach((plane) => {
+    const key = 'plane:' + plane.dataset.plane;
+    plane.addEventListener('click', (e) => { if (!e.target.closest('.node')) show(key, plane); });
+    plane.addEventListener('keydown', (e) => {
+      if ((e.key === 'Enter' || e.key === ' ') && !e.target.closest('.node')) { e.preventDefault(); show(key, plane); }
+    });
+  });
+  stage.querySelectorAll('.node').forEach((node) => {
+    node.addEventListener('click', () => show(node.dataset.node, node));
+  });
+
+  // Trace animation
+  const node = (id) => stage.querySelector('.node[data-node="' + id + '"]');
+  const ROUTINE = ['pos', 'graph', 'fast', 'triage', 'risk', 'writer', 'audit'];
+  const AMBIG = ['sensors', 'graph', 'fast', 'triage', 'slow', 'risk', 'queue', 'writer', 'audit'];
+  const STEP = reduced ? 60 : 620;
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+  const runPath = async (ids) => {
+    for (const id of ids) {
+      const el = node(id);
+      el.classList.add('lit');
+      await sleep(STEP);
+      el.classList.remove('lit');
+    }
+  };
+
+  let playing = false;
+  playBtn.addEventListener('click', async () => {
+    if (playing) return;
+    playing = true;
+    playBtn.disabled = true;
+    note.innerHTML = '<strong>Routine signal:</strong> sales feed → graph → fast path → not ambiguous → gateway → auto write → audit.';
+    await runPath(ROUTINE);
+    await sleep(reduced ? 60 : 400);
+    note.innerHTML = '<strong>Ambiguous signal:</strong> odd photo evidence → graph → fast path flags it → slow path reasons → gateway routes to the suggest queue → approved → write → audit.';
+    await runPath(AMBIG);
+    note.innerHTML = 'Same gateway, different exits. Autonomy is a property of the action category, not the model.';
+    playBtn.disabled = false;
+    playing = false;
+  });
+})();
+</script>
+
+<script>
+/* Tab 2: pattern decision tree. */
+(() => {
+  const state = { f1: false, f2: true, f3: true, f4: false, f5: true };
+  const el = (id) => document.getElementById(id);
+  const patternsRoot = document.getElementById('tab-patterns');
+
+  const STEP_COLORS = {
+    fast: 'var(--good)', C: 'var(--accent)', B: 'var(--accent-3)',
+    D: 'var(--accent-3)', E: 'var(--accent-2)', G: 'var(--good)', auto: 'var(--accent)'
+  };
+  const step = (key, code, text) =>
+    '<div class="v-step" style="--sc:' + STEP_COLORS[key] + '"><b>' + code + '</b><span>' + text + '</span></div>';
+
+  const verdict = () => {
+    const { f1, f2, f3, f4, f5 } = state;
+    ['rowQ2', 'rowQ3', 'rowQ4', 'rowQ5'].forEach((id) => el(id).classList.toggle('moot', f1));
+
+    let shape, desc, steps = [], tell = '';
+
+    if (f1) {
+      shape = 'Fast path only, no LLM';
+      desc = 'A rule can decide it, so a rule does. Deterministic detection, thresholding, and staging handle the routine majority at pennies per thousand signals.';
+      steps.push(step('fast', 'Fast', 'Deterministic rules and thresholds, fully observable'));
+      tell = 'The other gates go quiet. Spending reasoning tokens here is the first anti-pattern in the wild.';
+    } else {
+      const parts = [];
+      if (f2) { steps.push(step('C', 'C', 'Routing front door, signal class → specialist handler')); parts.push('routing at the door'); }
+      if (f3) { steps.push(step('D', 'D', 'Orchestrator-workers, parallel cross-system checks')); parts.push('orchestrator-workers for diagnosis'); }
+      else { steps.push(step('B', 'B', 'Prompt chain, parse → extract → validate → stage')); parts.push('a linear chain'); }
+      if (f4) { steps.push(step('E', 'E', 'Evaluator-optimizer loop on the contested residue')); parts.push('an evaluator loop'); }
+      if (f5) { steps.push(step('G', 'G', 'HITL gate, the actuation gateway suggest tier')); }
+      else { steps.push(step('auto', 'Auto', 'Auto-act with sampled QA on the write path')); }
+
+      shape = f5 ? 'Gated slow path: ' + (f3 ? 'D' : 'B') + (f4 ? ' + E' : '') + ' behind ' + (f2 ? 'C' : 'the door') + ', into G'
+                 : 'Earned autonomy: ' + (f3 ? 'D' : 'B') + (f4 ? ' + E' : '') + ' with sampled QA';
+      desc = 'This signal takes the slow path, ' + parts.join(', ') + ', ' +
+        (f5 ? 'and every resulting write stops at the human gate until shadow evidence promotes the category.'
+            : 'and the category has earned auto-act, so writes flow with sampled QA watching the tail.');
+      tell = f5
+        ? 'F, the autonomous ReAct engine, never appears at the top level. It lives inside a step, on a budget, if at all.'
+        : 'Promotion was earned per category with shadow evidence. Demotion stays one bad sample away.';
+    }
+
+    el('vShape').textContent = shape;
+    el('vDesc').textContent = desc;
+    el('vStack').innerHTML = steps.join('');
+    el('vTell').textContent = tell;
+  };
+
+  patternsRoot.querySelectorAll('.f-toggle button').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const q = btn.dataset.q;
+      state[q] = btn.dataset.val === 'yes';
+      patternsRoot.querySelectorAll('.f-toggle button[data-q="' + q + '"]').forEach((b) => {
+        b.setAttribute('aria-pressed', String(b === btn));
+      });
+      verdict();
+    });
+  });
+
+  // Matrix data: g = favorable, m = middling, r = costly.
+  const MATRIX = [
+    ['Build complexity', 'g', 'g', 'm', 'm', 'r', 'm'],
+    ['Latency', 'g', 'g', 'm', 'r', 'r', 'r'],
+    ['Cost per item', 'g', 'g', 'm', 'r', 'r', 'm'],
+    ['Easy ~80% of signals', 'g', 'g', 'm', 'r', 'r', 'm'],
+    ['Hard ~20%', 'm', 'r', 'g', 'g', 'm', 'g'],
+    ['Observability', 'g', 'g', 'g', 'm', 'r', 'g'],
+    ['Predictability', 'g', 'g', 'g', 'm', 'r', 'g']
+  ];
+  const NOTES = {
+    '1-6': 'human-paced', '2-6': 'review labor',
+    '3-3': 'overkill', '3-4': 'overkill', '3-5': 'overkill', '3-6': 'overkill',
+    '4-2': 'alone'
+  };
+  const ROLES = ['Best role', 'doc flows', 'front door', 'exception diagnosis', 'contested long tail', 'bounded exploration', 'risk gate'];
+
+  const cell = (v, note) =>
+    '<td><i class="dot ' + v + '"></i>' + (note ? '<span class="d-note">' + note + '</span>' : '') + '</td>';
+  el('mBody').innerHTML =
+    MATRIX.map((row, ri) =>
+      '<tr><td>' + row[0] + '</td>' +
+      row.slice(1).map((v, ci) => cell(v, NOTES[ri + '-' + (ci + 1)])).join('') + '</tr>'
+    ).join('') +
+    '<tr class="role-row">' + ROLES.map((r) => '<td>' + r + '</td>').join('') + '</tr>';
+
+  verdict();
+})();
+</script>
+</body>
+</html>

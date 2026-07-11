@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Microservices vs Modular Monolith — Architecture Morph</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+/* Scene-specific: architecture morph.
+   Same four capabilities, two runtime shapes. Toggle morphs between them. */
+:root {
+  --mono: var(--accent-3);
+  --micro: #a56cff;
+  --data: var(--L5);
+  --ease-morph: cubic-bezier(.65,.05,.28,1);
+}
+
+.shell { display: flex; flex-direction: column; gap: 14px; }
+:root[data-embedded="true"] .shell {
+  display: flex; flex-direction: column;
+  gap: clamp(8px, 1.2vh, 14px);
+  padding: clamp(10px, 1.6vh, 16px) clamp(14px, 2vw, 22px);
+}
+
+.head { text-align: center; }
+.head h1 {
+  font-family: "Space Grotesk", sans-serif; font-weight: 700;
+  font-size: clamp(1.2rem, 2.6vw, 1.7rem); letter-spacing: -0.02em;
+  color: var(--text-strong); margin-top: 6px;
+}
+.head p { color: var(--muted); font-size: 0.92rem; max-width: 62ch; margin: 6px auto 0; line-height: 1.5; }
+/* The page prose introduces this scene, so the header is redundant inside the iframe */
+:root[data-embedded="true"] .head { display: none; }
+
+/* Toggle */
+.toggle-bar { display: flex; justify-content: center; }
+.toggle {
+  position: relative; display: flex; padding: 5px; border-radius: 999px;
+  border: 1px solid var(--border-strong); background: var(--surface);
+  box-shadow: var(--shadow-soft);
+}
+.toggle-btn {
+  position: relative; z-index: 2; padding: 10px 22px; border: none; background: transparent;
+  color: var(--muted); font: 700 0.82rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.03em;
+  cursor: pointer; border-radius: 999px; transition: color .35s ease;
+  display: flex; align-items: center; gap: 9px; min-height: 44px;
+}
+.toggle-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+:root[data-embedded="true"] .toggle-btn { padding: clamp(6px, 1.2vh, 10px) clamp(14px, 2vw, 22px); font-size: clamp(0.72rem, 1.4vh, 0.82rem); }
+.toggle-btn .dot { width: 9px; height: 9px; border-radius: 50%; background: currentColor; opacity: .45; transition: opacity .3s; }
+.toggle-btn.active .dot { opacity: 1; }
+.toggle-btn[data-state="mono"].active { color: var(--mono); }
+.toggle-btn[data-state="micro"].active { color: var(--micro); }
+.toggle-slider {
+  position: absolute; top: 5px; left: 5px; height: calc(100% - 10px); width: calc(50% - 5px);
+  border-radius: 999px; z-index: 1;
+  background: color-mix(in srgb, var(--mono) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--mono) 45%, transparent);
+  transition: transform .8s var(--ease-morph), background .8s var(--ease-morph), border-color .8s var(--ease-morph);
+}
+.wrap[data-state="micro"] .toggle-slider {
+  transform: translateX(100%);
+  background: color-mix(in srgb, var(--micro) 14%, transparent);
+  border-color: color-mix(in srgb, var(--micro) 45%, transparent);
+}
+
+/* Stage */
+.stage {
+  position: relative; border: 1px solid var(--border); border-radius: 20px;
+  background: var(--surface); box-shadow: var(--shadow-soft); padding: 8px; overflow: hidden;
+}
+:root[data-embedded="true"] .stage { flex: 1 1 auto; min-height: 0; display: flex; }
+.stage::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--text) 4%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--text) 4%, transparent) 1px, transparent 1px);
+  background-size: 40px 40px;
+  mask-image: radial-gradient(ellipse 80% 70% at center, black, transparent);
+}
+.morph-svg { width: 100%; height: auto; display: block; position: relative; z-index: 1; }
+:root[data-embedded="true"] .morph-svg { height: 100%; width: 100%; }
+
+/* SVG text */
+.band-rect { fill: color-mix(in srgb, var(--text) 2.5%, transparent); stroke: var(--border); }
+.band-label {
+  fill: var(--accent); font: 700 13px/1 "Space Grotesk", sans-serif;
+  letter-spacing: 0.14em; text-transform: uppercase;
+}
+.static-node .frame { fill: var(--surface-strong); stroke: var(--border-strong); stroke-width: 1.2; rx: 10; }
+.static-node .label { fill: var(--text-strong); font: 700 16px/1 "Space Grotesk", sans-serif; }
+.static-node .sub { fill: var(--muted); font: 12.5px/1 "DM Sans", sans-serif; }
+
+/* Morphing groups */
+.morph { transition: transform .9s var(--ease-morph), opacity .55s ease; }
+
+.runtime-box {
+  fill: color-mix(in srgb, var(--mono) 5%, transparent);
+  stroke: color-mix(in srgb, var(--mono) 55%, transparent);
+  stroke-width: 2; stroke-dasharray: 8 6;
+}
+.runtime-label {
+  fill: color-mix(in srgb, var(--mono) 75%, var(--text)); font: 700 12.5px/1 "Space Grotesk", sans-serif;
+  letter-spacing: 0.14em; text-transform: uppercase;
+}
+.wrap[data-state="mono"] .runtime-container { opacity: 1; transform: translate(0,0); }
+.wrap[data-state="micro"] .runtime-container { opacity: 0; transform: translate(0,-20px); }
+
+.node .node-rect {
+  fill: var(--surface-strong); stroke-width: 1.8; rx: 14;
+  transition: stroke .9s var(--ease-morph), fill .9s var(--ease-morph);
+}
+.wrap[data-state="mono"] .node .node-rect { stroke: var(--mono); fill: color-mix(in srgb, var(--mono) 7%, var(--surface-strong)); }
+.wrap[data-state="micro"] .node .node-rect { stroke: var(--micro); fill: color-mix(in srgb, var(--micro) 7%, var(--surface-strong)); }
+.node .node-tag {
+  font: 700 11.5px/1 "Space Grotesk", sans-serif; letter-spacing: 0.12em; text-transform: uppercase;
+  transition: fill .9s var(--ease-morph);
+}
+.wrap[data-state="mono"] .node .node-tag { fill: var(--mono); }
+.wrap[data-state="micro"] .node .node-tag { fill: var(--micro); }
+.node .node-label { fill: var(--text-strong); font: 700 20px/1 "Space Grotesk", sans-serif; letter-spacing: -0.02em; }
+.node .node-desc { fill: var(--muted); font: 13px/1.35 "DM Sans", sans-serif; }
+.node .pulse { fill: var(--micro); opacity: 0; transition: opacity .55s ease; }
+.wrap[data-state="micro"] .node .pulse { opacity: 1; animation: pulse 2s ease-in-out infinite; }
+
+/* Node positions — monolith 2x2 grid vs microservices 1x4 row */
+.wrap[data-state="mono"] .node[data-id="orders"]   { transform: translate(410px,290px); }
+.wrap[data-state="mono"] .node[data-id="billing"]  { transform: translate(700px,290px); }
+.wrap[data-state="mono"] .node[data-id="risk"]     { transform: translate(410px,420px); }
+.wrap[data-state="mono"] .node[data-id="accounts"] { transform: translate(700px,420px); }
+.wrap[data-state="micro"] .node[data-id="orders"]   { transform: translate(100px,260px); }
+.wrap[data-state="micro"] .node[data-id="billing"]  { transform: translate(470px,260px); }
+.wrap[data-state="micro"] .node[data-id="risk"]     { transform: translate(840px,260px); }
+.wrap[data-state="micro"] .node[data-id="accounts"] { transform: translate(1210px,260px); }
+
+/* Shared database (monolith only) */
+.shared-db .db-rect { fill: color-mix(in srgb, var(--data) 6%, var(--surface-strong)); stroke: var(--data); stroke-width: 1.6; rx: 14; }
+.shared-db .db-label { fill: var(--text-strong); font: 700 15px/1 "Space Grotesk", sans-serif; letter-spacing: -0.02em; }
+.shared-db .db-tag { fill: var(--data); font: 700 11.5px/1 "Space Grotesk", sans-serif; letter-spacing: 0.12em; text-transform: uppercase; }
+.shared-db .db-desc { fill: var(--muted); font: 12.5px/1.35 "DM Sans", sans-serif; }
+.db-ellipse { fill: none; stroke: color-mix(in srgb, var(--data) 65%, transparent); }
+.db-body { fill: color-mix(in srgb, var(--data) 14%, transparent); stroke: color-mix(in srgb, var(--data) 65%, transparent); stroke-width: 1.3; }
+.wrap[data-state="mono"] .shared-db { opacity: 1; transform: translate(450px,560px); }
+.wrap[data-state="micro"] .shared-db { opacity: 0; transform: translate(450px,600px); }
+
+/* Per-service databases (microservices only) */
+.micro-db .db-rect { fill: color-mix(in srgb, var(--data) 4%, var(--surface-strong)); stroke: color-mix(in srgb, var(--data) 55%, transparent); stroke-width: 1.2; rx: 10; }
+.micro-db .db-tag { fill: var(--text-strong); font: 700 12px/1 "Space Grotesk", sans-serif; }
+.micro-db .db-label { fill: var(--muted); font: 11.5px/1 "DM Sans", sans-serif; }
+.wrap[data-state="mono"] .micro-db { opacity: 0; }
+.wrap[data-state="micro"] .micro-db { opacity: 1; }
+.wrap[data-state="mono"] .micro-db[data-id="db-orders"]   { transform: translate(110px,380px); }
+.wrap[data-state="mono"] .micro-db[data-id="db-billing"]  { transform: translate(480px,380px); }
+.wrap[data-state="mono"] .micro-db[data-id="db-risk"]     { transform: translate(850px,380px); }
+.wrap[data-state="mono"] .micro-db[data-id="db-accounts"] { transform: translate(1220px,380px); }
+.wrap[data-state="micro"] .micro-db[data-id="db-orders"]   { transform: translate(110px,400px); }
+.wrap[data-state="micro"] .micro-db[data-id="db-billing"]  { transform: translate(480px,400px); }
+.wrap[data-state="micro"] .micro-db[data-id="db-risk"]     { transform: translate(850px,400px); }
+.wrap[data-state="micro"] .micro-db[data-id="db-accounts"] { transform: translate(1220px,400px); }
+
+/* Event broker (microservices only) */
+.event-broker .broker-rect {
+  fill: color-mix(in srgb, var(--micro) 5%, transparent);
+  stroke: var(--micro); stroke-width: 1.6; stroke-dasharray: 10 6; rx: 14;
+}
+.event-broker .broker-label { fill: var(--text-strong); font: 700 15px/1 "Space Grotesk", sans-serif; letter-spacing: -0.02em; }
+.event-broker .broker-tag { fill: var(--micro); font: 700 11.5px/1 "Space Grotesk", sans-serif; letter-spacing: 0.14em; text-transform: uppercase; }
+.event-broker .broker-desc { fill: var(--muted); font: 12.5px/1.35 "DM Sans", sans-serif; }
+.wrap[data-state="mono"] .event-broker { opacity: 0; transform: translate(100px,540px); }
+.wrap[data-state="micro"] .event-broker { opacity: 1; transform: translate(100px,520px); }
+
+/* Connection lines */
+.mono-line, .micro-line { fill: none; stroke-width: 2; stroke-linecap: round; transition: opacity .55s ease; }
+.mono-line { stroke: color-mix(in srgb, var(--mono) 55%, transparent); stroke-dasharray: 5 4; }
+.micro-line { stroke: color-mix(in srgb, var(--micro) 55%, transparent); stroke-dasharray: 5 4; }
+.wrap[data-state="mono"] .mono-line { opacity: 1; animation: dash 3s linear infinite; }
+.wrap[data-state="mono"] .micro-line { opacity: 0; }
+.wrap[data-state="micro"] .mono-line { opacity: 0; }
+.wrap[data-state="micro"] .micro-line { opacity: 1; animation: dash 3s linear infinite; }
+
+/* Count readout under the stage */
+.readout {
+  display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;
+}
+.readout-item {
+  display: flex; align-items: baseline; gap: 7px;
+  padding: 8px 14px; border-radius: 12px; border: 1px solid var(--border);
+  background: var(--surface); font-family: "Space Grotesk", sans-serif;
+}
+:root[data-embedded="true"] .readout-item { padding: clamp(4px, 0.9vh, 8px) clamp(9px, 1.4vw, 14px); }
+.readout-value {
+  font-weight: 700; font-size: 1.05rem; letter-spacing: -0.01em;
+  transition: color .55s ease;
+}
+:root[data-embedded="true"] .readout-value { font-size: clamp(0.85rem, 1.7vh, 1.05rem); }
+.readout-label { color: var(--muted); font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; }
+:root[data-embedded="true"] .readout-label { font-size: clamp(0.69rem, 1.2vh, 0.72rem); }
+.wrap[data-state="mono"] .readout-value { color: var(--mono); }
+.wrap[data-state="micro"] .readout-value { color: var(--micro); }
+
+/* Forces strip — the actual decision inputs */
+.forces {
+  display: grid; grid-template-columns: auto repeat(4, minmax(0,1fr)); gap: 10px; align-items: stretch;
+}
+:root[data-embedded="true"] .forces { gap: clamp(6px, 1vw, 10px); }
+.forces-intro {
+  display: flex; flex-direction: column; justify-content: center;
+  padding: 10px 14px; border-radius: 12px;
+  background: color-mix(in srgb, var(--accent-2) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent-2) 40%, transparent);
+  max-width: 190px;
+}
+.forces-intro strong { font-family: "Space Grotesk", sans-serif; font-size: 0.78rem; color: var(--text-strong); letter-spacing: 0.02em; }
+.forces-intro span { color: var(--muted); font-family: "DM Sans", sans-serif; font-size: 0.7rem; line-height: 1.35; margin-top: 3px; }
+.force {
+  padding: 10px 12px; border-radius: 12px; border: 1px solid var(--border);
+  background: var(--surface);
+}
+:root[data-embedded="true"] .force, :root[data-embedded="true"] .forces-intro { padding: clamp(6px, 1vh, 10px) clamp(8px, 1.2vw, 12px); }
+.force strong {
+  display: block; font-family: "Space Grotesk", sans-serif; font-size: 0.76rem;
+  color: var(--text-strong); letter-spacing: 0.02em;
+}
+.force span { display: block; color: var(--muted); font-family: "DM Sans", sans-serif; font-size: 0.7rem; line-height: 1.35; margin-top: 3px; }
+:root[data-embedded="true"] .force strong, :root[data-embedded="true"] .forces-intro strong { font-size: clamp(0.7rem, 1.3vh, 0.76rem); }
+:root[data-embedded="true"] .force span, :root[data-embedded="true"] .forces-intro span { font-size: clamp(0.69rem, 1.15vh, 0.72rem); }
+
+@keyframes pulse { 0%,100% { r: 4; opacity: .7; } 50% { r: 6; opacity: 1; } }
+@keyframes dash { from { stroke-dashoffset: 0; } to { stroke-dashoffset: -36; } }
+@media (prefers-reduced-motion: reduce) {
+  .morph, .toggle-slider, .node .node-rect, .node .node-tag { transition-duration: 0.01s !important; }
+  .mono-line, .micro-line, .node .pulse { animation: none !important; }
+}
+
+@media (max-width: 760px) {
+  .forces { grid-template-columns: 1fr 1fr; }
+  .forces-intro { max-width: none; grid-column: 1 / -1; }
+}
+
+/* Small screens: the 1600-wide SVG scales its text below legibility (~3px),
+   so swap it for a stacked HTML rendering of the same two shapes. */
+/* both selectors needed: the embedded .stage flex rule outranks a bare class */
+.stage-mobile, :root[data-embedded="true"] .stage-mobile { display: none; }
+@media (max-width: 760px) {
+  .stage-desktop, :root[data-embedded="true"] .stage-desktop { display: none; }
+  .stage-mobile, :root[data-embedded="true"] .stage-mobile {
+    display: flex; flex-direction: column; gap: 8px; padding: 12px;
+    flex: 0 0 auto; overflow: visible;
+  }
+  .m-band {
+    font: 700 0.7rem/1.3 "Space Grotesk", sans-serif; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--accent); text-align: center;
+    border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px;
+    background: color-mix(in srgb, var(--text) 2.5%, transparent);
+  }
+  .m-view { display: none; flex-direction: column; gap: 8px; }
+  .wrap[data-state="mono"] .m-view.m-mono { display: flex; }
+  .wrap[data-state="micro"] .m-view.m-micro { display: flex; }
+  .m-runtime {
+    display: flex; flex-direction: column; gap: 8px; padding: 10px;
+    border: 2px dashed color-mix(in srgb, var(--mono) 55%, transparent);
+    border-radius: 14px; background: color-mix(in srgb, var(--mono) 5%, transparent);
+  }
+  .m-runtime-label {
+    font: 700 0.7rem/1.3 "Space Grotesk", sans-serif; letter-spacing: 0.08em;
+    text-transform: uppercase; color: color-mix(in srgb, var(--mono) 75%, var(--text)); text-align: center;
+  }
+  .m-caps { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .m-cap {
+    font: 700 0.85rem/1.2 "Space Grotesk", sans-serif; color: var(--text-strong);
+    text-align: center; padding: 11px 8px; border-radius: 10px;
+    border: 1.5px solid var(--mono); background: color-mix(in srgb, var(--mono) 7%, var(--surface-strong));
+  }
+  .m-db {
+    font: 700 0.74rem/1.35 "Space Grotesk", sans-serif; color: var(--text-strong); text-align: center;
+    padding: 9px 10px; border-radius: 10px;
+    border: 1.5px solid var(--data); background: color-mix(in srgb, var(--data) 6%, var(--surface-strong));
+  }
+  .m-db span { display: block; font: 400 0.7rem/1.35 "DM Sans", sans-serif; color: var(--muted); margin-top: 2px; }
+  .m-services { display: flex; flex-direction: column; gap: 6px; }
+  .m-svc {
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    padding: 9px 12px; border-radius: 10px;
+    border: 1.5px solid var(--micro); background: color-mix(in srgb, var(--micro) 7%, var(--surface-strong));
+    font: 700 0.85rem/1.2 "Space Grotesk", sans-serif; color: var(--text-strong);
+  }
+  .m-svc small {
+    font: 700 0.7rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--data); border: 1px solid color-mix(in srgb, var(--data) 55%, transparent);
+    border-radius: 99px; padding: 4px 8px; white-space: nowrap;
+  }
+  .m-broker {
+    padding: 9px 10px; border-radius: 10px; text-align: center;
+    border: 1.5px dashed var(--micro); background: color-mix(in srgb, var(--micro) 5%, transparent);
+  }
+  .m-broker-label {
+    font: 700 0.7rem/1.3 "Space Grotesk", sans-serif; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--micro);
+  }
+  .m-broker span { display: block; font: 400 0.7rem/1.35 "DM Sans", sans-serif; color: var(--muted); margin-top: 2px; }
+}
+</style>
+</head>
+<body>
+<div class="shell wrap" id="wrap" data-state="mono">
+
+  <header class="head">
+    <div class="eyebrow">Same capabilities · Two shapes · No ladder</div>
+    <h1>Watch the same system answer one question two ways</h1>
+    <p>Orders, billing, risk, and accounts do not change. Only the boundary placement does: in-process or on the network.</p>
+  </header>
+
+  <div class="toggle-bar">
+    <div class="toggle" role="tablist" aria-label="Architecture shape">
+      <div class="toggle-slider"></div>
+      <button class="toggle-btn active" data-state="mono" role="tab" aria-selected="true">
+        <span class="dot"></span>Modular Monolith
+      </button>
+      <button class="toggle-btn" data-state="micro" role="tab" aria-selected="false">
+        <span class="dot"></span>Microservices
+      </button>
+    </div>
+  </div>
+
+  <div class="stage stage-desktop">
+    <svg class="morph-svg" viewBox="0 0 1600 790" preserveAspectRatio="xMidYMid meet" role="img"
+         aria-label="Animated architecture morph between a modular monolith and microservices. The same four capabilities rearrange from one process with a shared database into four services with their own databases and an event broker.">
+
+      <!-- STATIC: shared edge and control plane -->
+      <g class="static-layer">
+        <rect x="60" y="20" width="1480" height="80" rx="14" class="band-rect"/>
+        <text x="80" y="44" class="band-label">Shared edge &amp; control plane · identical in both shapes</text>
+        <g class="static-node" transform="translate(100,54)">
+          <rect class="frame" width="320" height="40" rx="10"/>
+          <text class="label" x="16" y="18">API Gateway / WAF</text>
+          <text class="sub" x="16" y="32">Traffic entry &amp; routing</text>
+        </g>
+        <g class="static-node" transform="translate(460,54)">
+          <rect class="frame" width="320" height="40" rx="10"/>
+          <text class="label" x="16" y="18">Identity &amp; access</text>
+          <text class="sub" x="16" y="32">AuthN / AuthZ / tokens</text>
+        </g>
+        <g class="static-node" transform="translate(820,54)">
+          <rect class="frame" width="320" height="40" rx="10"/>
+          <text class="label" x="16" y="18">Policy &amp; governance</text>
+          <text class="sub" x="16" y="32">Guardrails &amp; audit</text>
+        </g>
+        <g class="static-node" transform="translate(1180,54)">
+          <rect class="frame" width="320" height="40" rx="10"/>
+          <text class="label" x="16" y="18">CI/CD &amp; observability</text>
+          <text class="sub" x="16" y="32">Platform engineering</text>
+        </g>
+      </g>
+
+      <!-- MORPH: single-process boundary (monolith only) -->
+      <g class="morph runtime-container">
+        <rect class="runtime-box" x="370" y="240" width="620" height="300" rx="22"/>
+        <text class="runtime-label" x="390" y="264">Single process boundary · one deployable</text>
+      </g>
+
+      <!-- MORPH: connection lines -->
+      <g>
+        <path class="mono-line" d="M 800 120 L 800 240"/>
+        <path class="mono-line" d="M 530 520 L 530 560"/>
+        <path class="mono-line" d="M 820 520 L 820 560"/>
+        <path class="micro-line" d="M 220 120 L 220 260"/>
+        <path class="micro-line" d="M 590 120 L 590 260"/>
+        <path class="micro-line" d="M 960 120 L 960 260"/>
+        <path class="micro-line" d="M 1330 120 L 1330 260"/>
+        <path class="micro-line" d="M 220 360 L 220 400"/>
+        <path class="micro-line" d="M 590 360 L 590 400"/>
+        <path class="micro-line" d="M 960 360 L 960 400"/>
+        <path class="micro-line" d="M 1330 360 L 1330 400"/>
+        <path class="micro-line" d="M 220 470 L 220 520"/>
+        <path class="micro-line" d="M 590 470 L 590 520"/>
+        <path class="micro-line" d="M 960 470 L 960 520"/>
+        <path class="micro-line" d="M 1330 470 L 1330 520"/>
+      </g>
+
+      <!-- MORPH: the four capabilities -->
+      <g class="morph node" data-id="orders">
+        <rect class="node-rect" width="240" height="100"/>
+        <text class="node-tag" x="20" y="26">Capability</text>
+        <text class="node-label" x="20" y="52">Orders</text>
+        <text class="node-desc" x="20" y="72">Order flow, pricing,</text>
+        <text class="node-desc" x="20" y="86">cart, checkout.</text>
+        <circle class="pulse" cx="222" cy="18" r="4"/>
+      </g>
+      <g class="morph node" data-id="billing">
+        <rect class="node-rect" width="240" height="100"/>
+        <text class="node-tag" x="20" y="26">Capability</text>
+        <text class="node-label" x="20" y="52">Billing</text>
+        <text class="node-desc" x="20" y="72">Invoicing, payments,</text>
+        <text class="node-desc" x="20" y="86">revenue capture.</text>
+        <circle class="pulse" cx="222" cy="18" r="4"/>
+      </g>
+      <g class="morph node" data-id="risk">
+        <rect class="node-rect" width="240" height="100"/>
+        <text class="node-tag" x="20" y="26">Capability</text>
+        <text class="node-label" x="20" y="52">Risk</text>
+        <text class="node-desc" x="20" y="72">Fraud scoring,</text>
+        <text class="node-desc" x="20" y="86">compliance checks.</text>
+        <circle class="pulse" cx="222" cy="18" r="4"/>
+      </g>
+      <g class="morph node" data-id="accounts">
+        <rect class="node-rect" width="240" height="100"/>
+        <text class="node-tag" x="20" y="26">Capability</text>
+        <text class="node-label" x="20" y="52">Accounts</text>
+        <text class="node-desc" x="20" y="72">Customer profiles,</text>
+        <text class="node-desc" x="20" y="86">KYC state.</text>
+        <circle class="pulse" cx="222" cy="18" r="4"/>
+      </g>
+
+      <!-- MORPH: shared database (monolith only) -->
+      <g class="morph shared-db">
+        <rect class="db-rect" width="700" height="90"/>
+        <g transform="translate(20,20)">
+          <ellipse class="db-body" cx="24" cy="8" rx="20" ry="6"/>
+          <path class="db-body" d="M 4 8 L 4 44 Q 4 50 24 50 Q 44 50 44 44 L 44 8"/>
+          <ellipse class="db-ellipse" cx="24" cy="22" rx="20" ry="6" stroke-width="1"/>
+          <ellipse class="db-ellipse" cx="24" cy="36" rx="20" ry="6" stroke-width="1"/>
+        </g>
+        <text class="db-tag" x="90" y="28">Data layer</text>
+        <text class="db-label" x="90" y="50">Shared database · module-owned schemas</text>
+        <text class="db-desc" x="90" y="72">One platform, one transaction boundary. Discipline enforced in the codebase.</text>
+      </g>
+
+      <!-- MORPH: per-service databases (microservices only) -->
+      <g class="morph micro-db" data-id="db-orders">
+        <rect class="db-rect" width="220" height="70"/>
+        <g transform="translate(14,14)">
+          <ellipse class="db-body" cx="18" cy="6" rx="15" ry="4.5"/>
+          <path class="db-body" d="M 3 6 L 3 36 Q 3 42 18 42 Q 33 42 33 36 L 33 6"/>
+          <ellipse class="db-ellipse" cx="18" cy="18" rx="15" ry="4.5" stroke-width=".9"/>
+        </g>
+        <text class="db-tag" x="60" y="30">Orders DB</text>
+        <text class="db-label" x="60" y="48">Service-owned</text>
+      </g>
+      <g class="morph micro-db" data-id="db-billing">
+        <rect class="db-rect" width="220" height="70"/>
+        <g transform="translate(14,14)">
+          <ellipse class="db-body" cx="18" cy="6" rx="15" ry="4.5"/>
+          <path class="db-body" d="M 3 6 L 3 36 Q 3 42 18 42 Q 33 42 33 36 L 33 6"/>
+          <ellipse class="db-ellipse" cx="18" cy="18" rx="15" ry="4.5" stroke-width=".9"/>
+        </g>
+        <text class="db-tag" x="60" y="30">Billing DB</text>
+        <text class="db-label" x="60" y="48">Service-owned</text>
+      </g>
+      <g class="morph micro-db" data-id="db-risk">
+        <rect class="db-rect" width="220" height="70"/>
+        <g transform="translate(14,14)">
+          <ellipse class="db-body" cx="18" cy="6" rx="15" ry="4.5"/>
+          <path class="db-body" d="M 3 6 L 3 36 Q 3 42 18 42 Q 33 42 33 36 L 33 6"/>
+          <ellipse class="db-ellipse" cx="18" cy="18" rx="15" ry="4.5" stroke-width=".9"/>
+        </g>
+        <text class="db-tag" x="60" y="30">Risk DB</text>
+        <text class="db-label" x="60" y="48">Service-owned</text>
+      </g>
+      <g class="morph micro-db" data-id="db-accounts">
+        <rect class="db-rect" width="220" height="70"/>
+        <g transform="translate(14,14)">
+          <ellipse class="db-body" cx="18" cy="6" rx="15" ry="4.5"/>
+          <path class="db-body" d="M 3 6 L 3 36 Q 3 42 18 42 Q 33 42 33 36 L 33 6"/>
+          <ellipse class="db-ellipse" cx="18" cy="18" rx="15" ry="4.5" stroke-width=".9"/>
+        </g>
+        <text class="db-tag" x="60" y="30">Accounts DB</text>
+        <text class="db-label" x="60" y="48">Service-owned</text>
+      </g>
+
+      <!-- MORPH: event broker (microservices only) -->
+      <g class="morph event-broker">
+        <rect class="broker-rect" width="1400" height="70"/>
+        <text class="broker-tag" x="24" y="28">Integration layer</text>
+        <text class="broker-label" x="24" y="50">Event broker / message bus</text>
+        <text class="broker-desc" x="420" y="44">Primary cross-service coordination · events carry integration, replay, and consistency obligations</text>
+      </g>
+
+      <!-- STATIC: downstream -->
+      <g class="static-layer">
+        <rect x="60" y="640" width="1480" height="80" rx="14" class="band-rect"/>
+        <text x="80" y="664" class="band-label">Downstream enterprise systems · identical in both shapes</text>
+        <g class="static-node" transform="translate(100,674)">
+          <rect class="frame" width="320" height="40" rx="10"/>
+          <text class="label" x="16" y="18">ERP</text>
+          <text class="sub" x="16" y="32">Back-office ledgers</text>
+        </g>
+        <g class="static-node" transform="translate(460,674)">
+          <rect class="frame" width="320" height="40" rx="10"/>
+          <text class="label" x="16" y="18">CRM</text>
+          <text class="sub" x="16" y="32">Customer lifecycle</text>
+        </g>
+        <g class="static-node" transform="translate(820,674)">
+          <rect class="frame" width="320" height="40" rx="10"/>
+          <text class="label" x="16" y="18">Payment network</text>
+          <text class="sub" x="16" y="32">Settlement rails</text>
+        </g>
+        <g class="static-node" transform="translate(1180,674)">
+          <rect class="frame" width="320" height="40" rx="10"/>
+          <text class="label" x="16" y="18">Reporting &amp; BI</text>
+          <text class="sub" x="16" y="32">Analytics &amp; compliance</text>
+        </g>
+      </g>
+    </svg>
+  </div>
+
+  <div class="stage stage-mobile">
+    <div class="m-band">Shared edge &amp; control plane · identical in both shapes</div>
+    <div class="m-view m-mono">
+      <div class="m-runtime">
+        <div class="m-runtime-label">Single process boundary · one deployable</div>
+        <div class="m-caps">
+          <div class="m-cap">Orders</div>
+          <div class="m-cap">Billing</div>
+          <div class="m-cap">Risk</div>
+          <div class="m-cap">Accounts</div>
+        </div>
+        <div class="m-db">Shared database · module-owned schemas<span>one transaction boundary, discipline in the codebase</span></div>
+      </div>
+    </div>
+    <div class="m-view m-micro">
+      <div class="m-services">
+        <div class="m-svc">Orders <small>own DB</small></div>
+        <div class="m-svc">Billing <small>own DB</small></div>
+        <div class="m-svc">Risk <small>own DB</small></div>
+        <div class="m-svc">Accounts <small>own DB</small></div>
+      </div>
+      <div class="m-broker">
+        <div class="m-broker-label">Event broker / message bus</div>
+        <span>primary cross-service coordination</span>
+      </div>
+    </div>
+    <div class="m-band">Downstream enterprise systems · identical in both shapes</div>
+  </div>
+
+  <div class="readout" aria-live="polite">
+    <div class="readout-item"><span class="readout-value" id="deployables">1</span><span class="readout-label">deployable(s)</span></div>
+    <div class="readout-item"><span class="readout-value" id="databases">1 shared</span><span class="readout-label">database(s)</span></div>
+    <div class="readout-item"><span class="readout-value" id="coordination">In-process calls</span><span class="readout-label">coordination</span></div>
+  </div>
+
+  <div class="forces">
+    <div class="forces-intro">
+      <strong>Forces choose the shape</strong>
+      <span>Not a maturity stage. Not a graduation.</span>
+    </div>
+    <div class="force"><strong>Consistency</strong><span>Does it share a transaction boundary?</span></div>
+    <div class="force"><strong>Latency budget</strong><span>Can the hot path afford network hops?</span></div>
+    <div class="force"><strong>Compliance boundary</strong><span>Where does audit scope actually end?</span></div>
+    <div class="force"><strong>Team topology</strong><span>Is there a durable owning team per piece?</span></div>
+  </div>
+
+</div>
+
+<script>
+(() => {
+  const wrap = document.getElementById('wrap');
+  const buttons = document.querySelectorAll('.toggle-btn');
+  const readouts = {
+    deployables: document.getElementById('deployables'),
+    databases: document.getElementById('databases'),
+    coordination: document.getElementById('coordination'),
+  };
+  const copy = {
+    mono: { deployables: '1', databases: '1 shared', coordination: 'In-process calls' },
+    micro: { deployables: '4+', databases: '4 owned', coordination: 'APIs + events' },
+  };
+
+  const setState = (state) => {
+    wrap.dataset.state = state;
+    buttons.forEach((b) => {
+      const active = b.dataset.state === state;
+      b.classList.toggle('active', active);
+      b.setAttribute('aria-selected', String(active));
+    });
+    Object.entries(copy[state]).forEach(([key, value]) => { readouts[key].textContent = value; });
+  };
+
+  buttons.forEach((btn) => btn.addEventListener('click', () => setState(btn.dataset.state)));
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+      e.preventDefault();
+      setState(wrap.dataset.state === 'mono' ? 'micro' : 'mono');
+    }
+  });
+})();
+</script>
+</body>
+</html>

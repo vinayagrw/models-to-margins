@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Ops Execution Layer — Reference Architecture</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+/* Scene-specific: the four-plane execution-layer reference architecture.
+   Click a plane or node for an explainer. Play button traces two signals. */
+:root {
+  --c-control: var(--accent);   /* control / orchestration */
+  --c-human: var(--good);       /* human oversight */
+  --c-reason: var(--warn);      /* LLM reasoning, risk */
+  --c-gate: var(--accent-2);    /* decision gates */
+  --c-data: var(--L5);          /* data and state */
+}
+
+.shell { display: flex; flex-direction: column; gap: 10px; }
+:root[data-embedded="true"] .shell {
+  display: flex; flex-direction: column; gap: clamp(6px, 1vh, 10px);
+  padding: clamp(10px, 1.5vh, 16px) clamp(14px, 2vw, 22px);
+}
+
+.head h1 {
+  font-family: "Space Grotesk", sans-serif; font-weight: 700;
+  font-size: clamp(1.05rem, 2.3vw, 1.45rem); letter-spacing: -0.02em; color: var(--text-strong);
+}
+.head p { color: var(--muted); font-size: 0.9rem; max-width: 70ch; margin-top: 4px; line-height: 1.5; }
+/* The page prose introduces this scene, so the header is redundant inside the iframe */
+:root[data-embedded="true"] .head { display: none; }
+
+/* Top bar: play button + legend */
+.bar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.play {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 9px 16px; border-radius: 999px; cursor: pointer;
+  border: 1px solid color-mix(in srgb, var(--c-control) 55%, transparent);
+  background: color-mix(in srgb, var(--c-control) 10%, var(--surface));
+  color: var(--text-strong); font: 700 0.78rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.04em;
+  transition: background .25s, transform .2s;
+}
+.play:hover { transform: translateY(-1px); background: color-mix(in srgb, var(--c-control) 16%, var(--surface)); }
+.play:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.play[disabled] { opacity: .55; cursor: default; transform: none; }
+.play .tri { width: 0; height: 0; border-style: solid; border-width: 5px 0 5px 8px; border-color: transparent transparent transparent var(--c-control); }
+:root[data-embedded="true"] .play { padding: clamp(6px, 1vh, 9px) clamp(11px, 1.4vw, 16px); font-size: clamp(0.72rem, 1.3vh, 0.78rem); }
+
+.trace-note {
+  font: 500 0.74rem/1.35 "DM Sans", sans-serif; color: var(--muted); min-width: 0;
+}
+.trace-note strong { color: var(--text-strong); font-family: "Space Grotesk", sans-serif; }
+
+.legend { display: flex; gap: 10px; flex-wrap: wrap; margin-left: auto; }
+.leg { display: inline-flex; align-items: center; gap: 6px; font: 500 0.7rem/1 "DM Sans", sans-serif; color: var(--muted); }
+.leg i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+:root[data-embedded="true"] .leg { font-size: clamp(0.69rem, 1.1vh, 0.7rem); }
+
+/* Main layout: diagram + explainer */
+.main { display: grid; grid-template-columns: minmax(0, 1fr) minmax(240px, 320px); gap: 10px; flex: 1 1 auto; min-height: 0; }
+
+.stage {
+  position: relative; border: 1px solid var(--border); border-radius: 18px;
+  background: var(--surface); box-shadow: var(--shadow-soft);
+  padding: 12px; overflow: hidden; min-height: 0;
+  display: flex; flex-direction: column; gap: 8px;
+}
+:root[data-embedded="true"] .stage { padding: clamp(8px, 1.2vh, 12px); gap: clamp(5px, 0.9vh, 8px); }
+.stage::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--text) 4%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--text) 4%, transparent) 1px, transparent 1px);
+  background-size: 40px 40px;
+  mask-image: radial-gradient(ellipse 80% 70% at center, black, transparent);
+}
+
+/* Planes */
+.plane {
+  position: relative; z-index: 1; border-radius: 14px; padding: 8px 10px 10px;
+  border: 1.5px dashed color-mix(in srgb, var(--pc, var(--accent)) 50%, transparent);
+  background: color-mix(in srgb, var(--pc, var(--accent)) 4%, transparent);
+  display: flex; flex-direction: column; gap: 7px; cursor: pointer;
+  transition: border-color .25s, background .25s, box-shadow .25s;
+  flex: 1 1 auto; min-height: 0;
+}
+:root[data-embedded="true"] .plane { padding: clamp(5px, 0.8vh, 8px) clamp(7px, 1vw, 10px) clamp(6px, 0.9vh, 10px); gap: clamp(4px, 0.7vh, 7px); }
+.plane:hover { border-color: var(--pc); }
+.plane.selected {
+  border-style: solid; border-color: var(--pc);
+  background: color-mix(in srgb, var(--pc) 8%, transparent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--pc) 20%, transparent);
+}
+.plane[data-plane="edge"] { --pc: var(--c-data); }
+.plane[data-plane="state"] { --pc: var(--c-data); }
+.plane[data-plane="decide"] { --pc: var(--c-control); }
+.plane[data-plane="act"] { --pc: var(--c-gate); }
+.plane[data-plane="oversee"] { --pc: var(--c-human); }
+
+.plane-label {
+  font: 700 11px/1 "Space Grotesk", sans-serif; letter-spacing: 0.12em; text-transform: uppercase;
+  color: color-mix(in srgb, var(--pc) 70%, var(--text-strong));
+  display: flex; align-items: center; gap: 8px;
+}
+.plane-label::after { content: ""; flex: 1; height: 1px; background: color-mix(in srgb, var(--pc) 35%, transparent); }
+
+.nodes { display: flex; gap: 6px; flex-wrap: wrap; }
+.node {
+  flex: 1 1 0; min-width: 0; text-align: left; cursor: pointer;
+  padding: 7px 9px; border-radius: 10px;
+  border: 1.4px solid color-mix(in srgb, var(--nc, var(--pc)) 60%, transparent);
+  background: color-mix(in srgb, var(--nc, var(--pc)) 7%, var(--surface-strong));
+  font-family: "DM Sans", sans-serif;
+  transition: border-color .25s, box-shadow .25s, transform .2s, background .25s;
+}
+:root[data-embedded="true"] .node { padding: clamp(4px, 0.7vh, 7px) clamp(6px, 0.9vw, 9px); }
+.node:hover { transform: translateY(-1px); border-color: var(--nc, var(--pc)); }
+.node:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.node.selected {
+  border-color: var(--nc, var(--pc));
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--nc, var(--pc)) 28%, transparent);
+}
+.node.lit {
+  border-color: var(--nc, var(--pc));
+  background: color-mix(in srgb, var(--nc, var(--pc)) 20%, var(--surface-strong));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--nc, var(--pc)) 30%, transparent);
+  animation: litpulse 0.9s ease;
+}
+@keyframes litpulse { 0% { transform: scale(1); } 30% { transform: scale(1.04); } 100% { transform: scale(1); } }
+.node .n-name { display: block; font: 700 0.76rem/1.25 "Space Grotesk", sans-serif; color: var(--text-strong); letter-spacing: -0.01em; }
+.node .n-sub { display: block; font-size: 0.69rem; line-height: 1.3; color: var(--muted); margin-top: 2px; }
+:root[data-embedded="true"] .node .n-name { font-size: clamp(0.7rem, 1.25vh, 0.76rem); }
+:root[data-embedded="true"] .node .n-sub { font-size: clamp(0.69rem, 1.1vh, 0.7rem); }
+
+/* Node color overrides inside mixed planes */
+.node[data-c="reason"] { --nc: var(--c-reason); }
+.node[data-c="gate"] { --nc: var(--c-gate); }
+.node[data-c="control"] { --nc: var(--c-control); }
+.node[data-c="human"] { --nc: var(--c-human); }
+.node[data-c="data"] { --nc: var(--c-data); }
+
+/* Connectors between planes */
+.link { position: relative; z-index: 1; display: flex; justify-content: center; align-items: center; gap: 14px; height: 12px; flex: 0 0 auto; }
+.link .arrow {
+  width: 2px; height: 100%; border-radius: 2px;
+  background: color-mix(in srgb, var(--text) 25%, transparent); position: relative;
+}
+.link .arrow::after {
+  content: ""; position: absolute; bottom: -1px; left: 50%; transform: translateX(-50%);
+  border: 4px solid transparent; border-top-color: color-mix(in srgb, var(--text) 35%, transparent); border-bottom: none;
+}
+.link .arrow.feedback { background: color-mix(in srgb, var(--c-human) 55%, transparent); }
+.link .arrow.feedback::after { border-top-color: color-mix(in srgb, var(--c-human) 70%, transparent); }
+.link .lk-tag { font: 700 10px/1 "Space Grotesk", sans-serif; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted-soft); }
+
+/* Feedback loop badge */
+.loop {
+  position: relative; z-index: 1; text-align: center;
+  font: 700 0.69rem/1.3 "Space Grotesk", sans-serif; letter-spacing: 0.08em; text-transform: uppercase;
+  color: color-mix(in srgb, var(--c-human) 70%, var(--text-strong));
+}
+.loop span { opacity: .8; }
+
+/* Explainer panel */
+.panel {
+  border: 1px solid var(--border); border-radius: 18px;
+  background: var(--surface); box-shadow: var(--shadow-soft);
+  padding: 14px; display: flex; flex-direction: column; gap: 8px;
+  min-height: 0; overflow-y: auto;
+}
+:root[data-embedded="true"] .panel { padding: clamp(9px, 1.3vh, 14px); }
+.panel-tag {
+  align-self: flex-start;
+  font: 700 0.69rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.1em; text-transform: uppercase;
+  color: color-mix(in srgb, var(--panel-c, var(--accent)) 70%, var(--text-strong));
+  border: 1px solid color-mix(in srgb, var(--panel-c, var(--accent)) 50%, transparent);
+  background: color-mix(in srgb, var(--panel-c, var(--accent)) 9%, transparent);
+  border-radius: 99px; padding: 4px 9px;
+}
+.panel h2 { font: 700 0.95rem/1.25 "Space Grotesk", sans-serif; color: var(--text-strong); letter-spacing: -0.01em; }
+.panel p { font: 400 0.78rem/1.5 "DM Sans", sans-serif; color: var(--text); }
+.panel p + p { margin-top: 2px; }
+.panel .hint { font: 400 0.7rem/1.45 "DM Sans", sans-serif; color: var(--muted); margin-top: auto; padding-top: 8px; border-top: 1px dashed var(--border); }
+:root[data-embedded="true"] .panel h2 { font-size: clamp(0.82rem, 1.6vh, 0.95rem); }
+:root[data-embedded="true"] .panel p { font-size: clamp(0.71rem, 1.3vh, 0.78rem); }
+:root[data-embedded="true"] .panel .hint { font-size: clamp(0.69rem, 1.15vh, 0.7rem); }
+
+@media (prefers-reduced-motion: reduce) {
+  .node, .plane, .play { transition-duration: 0.01s !important; }
+  .node.lit { animation: none; }
+}
+
+@media (max-width: 860px) {
+  .main { grid-template-columns: 1fr; }
+  .panel { order: -1; overflow: visible; }
+  .panel .hint { display: none; }
+  .legend { margin-left: 0; }
+  :root[data-embedded="true"] .main { overflow-y: auto; }
+  :root[data-embedded="true"] .stage, :root[data-embedded="true"] .panel { flex: 0 0 auto; overflow: visible; }
+}
+@media (max-width: 560px) {
+  .nodes { flex-direction: column; }
+  .node .n-sub { margin-top: 1px; }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <header class="head">
+    <div class="eyebrow">Reference architecture · Four planes plus oversight</div>
+    <h1>The execution layer, from signal to safe write</h1>
+    <p>Click any plane or node for the short version of what it does. Press play to trace a routine signal and an ambiguous one through the system.</p>
+  </header>
+
+  <div class="bar">
+    <button class="play" id="playBtn"><span class="tri"></span>Trace a signal</button>
+    <div class="trace-note" id="traceNote" aria-live="polite">Two journeys: routine → fast path → auto. Ambiguous → slow path → review queue.</div>
+    <div class="legend" aria-hidden="true">
+      <span class="leg"><i style="background:var(--c-control)"></i>control</span>
+      <span class="leg"><i style="background:var(--c-human)"></i>human</span>
+      <span class="leg"><i style="background:var(--c-reason)"></i>reasoning / risk</span>
+      <span class="leg"><i style="background:var(--c-gate)"></i>gate</span>
+      <span class="leg"><i style="background:var(--c-data)"></i>data</span>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="stage" id="stage">
+
+      <div class="plane" data-plane="edge" tabindex="0" role="button">
+        <div class="plane-label">Edge &amp; signals</div>
+        <div class="nodes">
+          <button class="node" data-c="data" data-node="pos"><span class="n-name">POS / ERP / WMS / TMS</span><span class="n-sub">systems of record</span></button>
+          <button class="node" data-c="data" data-node="sensors"><span class="n-name">Sensors, photos, voice</span><span class="n-sub">frontline evidence</span></button>
+          <button class="node" data-c="data" data-node="tasks"><span class="n-name">Tasks &amp; checklists</span><span class="n-sub">claimed completions</span></button>
+        </div>
+      </div>
+
+      <div class="link"><span class="arrow"></span></div>
+
+      <div class="plane" data-plane="state" tabindex="0" role="button">
+        <div class="plane-label">State plane</div>
+        <div class="nodes">
+          <button class="node" data-c="data" data-node="graph"><span class="n-name">Operational graph</span><span class="n-sub">conformed store, item, vendor IDs</span></button>
+          <button class="node" data-c="data" data-node="trust"><span class="n-name">Evidence trust scores</span><span class="n-sub">claims weighted, not believed</span></button>
+        </div>
+      </div>
+
+      <div class="link"><span class="arrow"></span></div>
+
+      <div class="plane" data-plane="decide" tabindex="0" role="button">
+        <div class="plane-label">Decision plane</div>
+        <div class="nodes">
+          <button class="node" data-c="control" data-node="fast"><span class="n-name">Fast path</span><span class="n-sub">forecasts, rules, thresholds</span></button>
+          <button class="node" data-c="gate" data-node="triage"><span class="n-name">Ambiguity gate</span><span class="n-sub">routine or residue?</span></button>
+          <button class="node" data-c="reason" data-node="slow"><span class="n-name">Slow path</span><span class="n-sub">LLM reasoning, governed context</span></button>
+        </div>
+      </div>
+
+      <div class="link"><span class="arrow"></span></div>
+
+      <div class="plane" data-plane="act" tabindex="0" role="button">
+        <div class="plane-label">Actuation gateway</div>
+        <div class="nodes">
+          <button class="node" data-c="gate" data-node="risk"><span class="n-name">Risk tier + autonomy status</span><span class="n-sub">shadow / suggest / auto, per category</span></button>
+          <button class="node" data-c="control" data-node="writer"><span class="n-name">Idempotent write adapters</span><span class="n-sub">OBO identity, staged posting</span></button>
+        </div>
+      </div>
+
+      <div class="link"><span class="arrow"></span></div>
+
+      <div class="plane" data-plane="oversee" tabindex="0" role="button">
+        <div class="plane-label">Oversight plane</div>
+        <div class="nodes">
+          <button class="node" data-c="human" data-node="queue"><span class="n-name">Budgeted review queue</span><span class="n-sub">capped per reviewer per day</span></button>
+          <button class="node" data-c="data" data-node="audit"><span class="n-name">Dual-identity audit</span><span class="n-sub">user → agent → resource</span></button>
+          <button class="node" data-c="control" data-node="evals"><span class="n-name">Eval harness</span><span class="n-sub">traces become regression tests</span></button>
+        </div>
+      </div>
+
+      <div class="loop"><span>⟲ evals promote or demote categories, feeding the gateway</span></div>
+
+    </div>
+
+    <aside class="panel" id="panel" aria-live="polite">
+      <span class="panel-tag" id="panelTag">Start here</span>
+      <h2 id="panelTitle">One write path, earned autonomy</h2>
+      <p id="panelBody">Signals land in the state plane, decisions run cheap-first in the decision plane, and every proposed action passes one actuation gateway that knows its risk tier and its earned autonomy status. The oversight plane closes the loop.</p>
+      <p class="hint">Click a plane or a node to read what it does. Press play to watch two signals travel.</p>
+    </aside>
+  </div>
+
+</div>
+
+<script>
+(() => {
+  const INFO = {
+    // planes
+    'plane:edge': { tag: 'Plane · data', c: 'var(--c-data)', title: 'Edge and signals', body: 'Everything the operation emits: transactions, sensor readings, photos, voice, task completions. All of it is untrusted input data, never instructions. Documents and transcripts get parsed in a sandbox before anything reasons over them.' },
+    'plane:state': { tag: 'Plane · data', c: 'var(--c-data)', title: 'State plane', body: 'One queryable representation of the operation. Identity resolution builds golden records for stores, items, and vendors. Conformed dimensions come before clever models, because NL-analyst and forecasting projects stall on identity fragmentation, not model quality.' },
+    'plane:decide': { tag: 'Plane · control', c: 'var(--c-control)', title: 'Decision plane', body: 'Cheap deterministic work first. The fast path handles the boring majority, and only the ambiguous residue reaches LLM reasoning. That ordering keeps cost, latency, and audit burden proportional to actual difficulty.' },
+    'plane:act': { tag: 'Plane · gate', c: 'var(--c-gate)', title: 'Actuation gateway', body: 'The product. One write path for all actors, human or model. It enforces identity, risk tiering, idempotency, and autonomy status. Nothing writes to a system of record around it.' },
+    'plane:oversee': { tag: 'Plane · human', c: 'var(--c-human)', title: 'Oversight plane', body: 'Budgeted approvals, dual-identity audit, sampled QA of auto-acted items, and an eval harness that turns traces into regression tests. Its promotion and demotion evidence feeds straight back into the gateway.' },
+    // nodes
+    'pos': { tag: 'Data', c: 'var(--c-data)', title: 'Systems of record', body: 'POS, ERP, WMS, TMS, CMMS. The transactional backbone the layer reads from and, through the gateway only, writes back to. Most of these support no true rollback, reversal is a compensating document, so writes stage as propose → approve → post.' },
+    'sensors': { tag: 'Data', c: 'var(--c-data)', title: 'Sensors, photos, voice', body: 'Frontline evidence. Voice works as closed-vocabulary command-and-confirm, not open conversation. Vision follows asymmetric-cost design: detection uses tolerate lower precision, enforcement uses bias hard to precision and keep a human between detection and accusation.' },
+    'tasks': { tag: 'Data', c: 'var(--c-data)', title: 'Tasks and checklists', body: 'Completion records are claims, not facts. A checklist completion arrives with its verification signals, duration, photo, sensor cross-check, so downstream logic can weight it instead of trusting it.' },
+    'graph': { tag: 'Data', c: 'var(--c-data)', title: 'Operational graph', body: 'Golden records and conformed IDs for stores, items, and vendors, modeling franchise reality: two-level tenancy, store-local assortments, promo calendars as first-class inputs. The load-bearing choice of the whole layer.' },
+    'trust': { tag: 'Data', c: 'var(--c-data)', title: 'Evidence trust scores', body: 'Pencil-whipping signatures, like 2-minute completions of 15-minute checklists or temperature logs that never vary, become features that downweight suspect completions before anything acts on them.' },
+    'fast': { tag: 'Control', c: 'var(--c-control)', title: 'Fast path', body: 'Forecasting, replenishment suggestions, threshold exceptions, dedup and suppression. Deterministic, so fully regression-testable. Alert stewardship lives here: override rates monitored per alert type, low-value alerts retired on a schedule.' },
+    'triage': { tag: 'Gate', c: 'var(--c-gate)', title: 'Ambiguity gate', body: 'The router between cheap and expensive. Routine signals go straight to the actuation gateway. Only the ambiguous residue, cross-system exceptions, messy documents, odd transcripts, earns a trip through LLM reasoning.' },
+    'slow': { tag: 'Reasoning', c: 'var(--c-reason)', title: 'Slow path', body: 'LLM work bounded inside deterministic workflow steps, never a top-level autonomous controller. Quarantined context, tool allowlists per workflow, read-only by default, and no path where private data, untrusted content, and an exfiltration channel coexist.' },
+    'risk': { tag: 'Gate', c: 'var(--c-gate)', title: 'Risk tier and autonomy status', body: 'Every action class is rated on reversibility, financial impact, and blast radius. Bulk operations are always top tier. Autonomy is earned per category: shadow, then suggest, then auto, and any metric drop demotes instantly.' },
+    'writer': { tag: 'Control', c: 'var(--c-control)', title: 'Idempotent write adapters', body: 'On-behalf-of token exchange means an agent architecturally cannot exceed the delegating human’s rights. Idempotency keys per action, and staged posting where the target system cannot truly undo.' },
+    'queue': { tag: 'Human', c: 'var(--c-human)', title: 'Budgeted review queue', body: 'Suggest-tier actions arrive as a reviewable package: intent, reasoning summary, blast radius, rollback plan. The queue is capped per reviewer per day. Excess demand does not pile up, it demotes the noisiest category back to shadow.' },
+    'audit': { tag: 'Data', c: 'var(--c-data)', title: 'Dual-identity audit', body: 'Every write records initiating user, acting agent, resource, and outcome. Auto-acted items get randomly sampled for human QA, the check on the worst failure mode: confidently wrong.' },
+    'evals': { tag: 'Control', c: 'var(--c-control)', title: 'Eval harness', body: 'Deterministic action-level checks online, LLM-as-judge offline and sampled only. Every production failure becomes an eval case. Trajectory evals matter: most perfect-outcome traces still contain procedural violations.' },
+  };
+
+  const panel = document.getElementById('panel');
+  const tagEl = document.getElementById('panelTag');
+  const titleEl = document.getElementById('panelTitle');
+  const bodyEl = document.getElementById('panelBody');
+  const stage = document.getElementById('stage');
+  const note = document.getElementById('traceNote');
+  const playBtn = document.getElementById('playBtn');
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const clearSel = () => stage.querySelectorAll('.selected').forEach((el) => el.classList.remove('selected'));
+
+  const show = (key, el) => {
+    const info = INFO[key];
+    if (!info) return;
+    clearSel();
+    el.classList.add('selected');
+    panel.style.setProperty('--panel-c', info.c);
+    tagEl.textContent = info.tag;
+    titleEl.textContent = info.title;
+    bodyEl.textContent = info.body;
+  };
+
+  stage.querySelectorAll('.plane').forEach((plane) => {
+    const key = 'plane:' + plane.dataset.plane;
+    plane.addEventListener('click', (e) => { if (!e.target.closest('.node')) show(key, plane); });
+    plane.addEventListener('keydown', (e) => {
+      if ((e.key === 'Enter' || e.key === ' ') && !e.target.closest('.node')) { e.preventDefault(); show(key, plane); }
+    });
+  });
+  stage.querySelectorAll('.node').forEach((node) => {
+    node.addEventListener('click', () => show(node.dataset.node, node));
+  });
+
+  // Trace animation
+  const node = (id) => stage.querySelector('.node[data-node="' + id + '"]');
+  const ROUTINE = ['pos', 'graph', 'fast', 'triage', 'risk', 'writer', 'audit'];
+  const AMBIG = ['sensors', 'graph', 'fast', 'triage', 'slow', 'risk', 'queue', 'writer', 'audit'];
+  const STEP = reduced ? 60 : 620;
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+  const runPath = async (ids) => {
+    for (const id of ids) {
+      const el = node(id);
+      el.classList.add('lit');
+      await sleep(STEP);
+      el.classList.remove('lit');
+    }
+  };
+
+  let playing = false;
+  playBtn.addEventListener('click', async () => {
+    if (playing) return;
+    playing = true;
+    playBtn.disabled = true;
+    note.innerHTML = '<strong>Routine signal:</strong> sales feed → graph → fast path → not ambiguous → gateway → auto write → audit.';
+    await runPath(ROUTINE);
+    await sleep(reduced ? 60 : 400);
+    note.innerHTML = '<strong>Ambiguous signal:</strong> odd photo evidence → graph → fast path flags it → slow path reasons → gateway routes to the suggest queue → approved → write → audit.';
+    await runPath(AMBIG);
+    note.innerHTML = 'Same gateway, different exits. Autonomy is a property of the action category, not the model.';
+    playBtn.disabled = false;
+    playing = false;
+  });
+})();
+</script>
+</body>
+</html>

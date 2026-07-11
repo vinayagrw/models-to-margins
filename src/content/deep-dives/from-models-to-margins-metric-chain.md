@@ -6,6 +6,13 @@ updatedDate: 2026-06-25
 featured: true
 listed: true
 template: blueprint
+bpEyebrow: Metric Chain
+bpTitle: The Metric Chain for AI Products
+bpSubtitle: From Models to Margins
+bpCoords:
+  - Scale 1:1
+  - Layers 5
+  - Scenes 9
 geography: generic AI product
 horizon: Now to 18 months
 tags:

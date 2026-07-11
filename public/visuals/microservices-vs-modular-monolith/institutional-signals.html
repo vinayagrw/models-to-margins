@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Institutional Signals — Release Trains and Conference Arcs</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+/* Scene-specific: institutional signals. Framework investment and
+   conference programming are harder to fake than surveys. */
+:root {
+  --train: var(--accent-3);
+  --conf: var(--accent);
+  --ms: #a56cff;
+  --radar: var(--L5);
+}
+
+.shell { display: flex; flex-direction: column; gap: 10px; }
+:root[data-embedded="true"] .shell {
+  display: flex; flex-direction: column; gap: clamp(6px, 1vh, 10px);
+  padding: clamp(10px, 1.5vh, 16px) clamp(14px, 2vw, 22px);
+}
+
+.head h1 {
+  font-family: "Space Grotesk", sans-serif; font-weight: 700;
+  font-size: clamp(1.05rem, 2.3vw, 1.45rem); letter-spacing: -0.02em; color: var(--text-strong);
+}
+:root[data-embedded="true"] .head h1 { font-size: clamp(0.92rem, 2.1vh, 1.2rem); }
+
+.panel {
+  border: 1px solid var(--border); border-radius: 16px;
+  background: var(--surface); box-shadow: var(--shadow-soft);
+  padding: 12px 16px;
+}
+:root[data-embedded="true"] .panel { padding: clamp(7px, 1.1vh, 12px) clamp(10px, 1.5vw, 16px); }
+.panel-label {
+  display: flex; align-items: center; gap: 8px;
+  font: 700 0.7rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.13em;
+  text-transform: uppercase; color: var(--pc);
+}
+.panel-label i { width: 9px; height: 9px; border-radius: 50%; background: var(--pc); }
+:root[data-embedded="true"] .panel-label { font-size: clamp(0.69rem, 1.15vh, 0.72rem); }
+
+/* Release train */
+.train-panel { flex: 1.2 1 0; min-height: 0; display: flex; flex-direction: column; }
+.track-zone { position: relative; flex: 1 1 auto; min-height: 118px; margin-top: 8px; }
+.track {
+  position: absolute; left: 2%; right: 2%; top: 34px; height: 4px; border-radius: 99px;
+  background: color-mix(in srgb, var(--train) 25%, transparent);
+  overflow: hidden;
+}
+.track::after {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(90deg, transparent, var(--train) 45%, var(--train) 55%, transparent);
+  width: 30%; animation: travel 4.5s linear infinite;
+}
+.station { position: absolute; top: 0; transform: translateX(-50%); text-align: center; width: 22%; }
+.station-dot {
+  width: 15px; height: 15px; border-radius: 50%; margin: 27px auto 0;
+  background: var(--train); border: 3px solid var(--surface-strong);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--train) 30%, transparent);
+}
+.station-version { font: 700 0.82rem/1 "Space Grotesk", sans-serif; color: var(--text-strong); }
+.station-date { font: 700 0.69rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.1em; text-transform: uppercase; color: var(--train); margin-top: 3px; }
+.station-note { font: 400 0.7rem/1.3 "DM Sans", sans-serif; color: var(--muted); margin-top: 8px; }
+:root[data-embedded="true"] .station-version { font-size: clamp(0.72rem, 1.45vh, 0.82rem); }
+:root[data-embedded="true"] .station-note { font-size: clamp(0.69rem, 1.15vh, 0.7rem); }
+.train-verdict { font: 500 0.72rem/1.35 "DM Sans", sans-serif; color: var(--text); margin-top: 4px; }
+.train-verdict strong { font-family: "Space Grotesk", sans-serif; color: var(--text-strong); }
+:root[data-embedded="true"] .train-verdict { font-size: clamp(0.69rem, 1.3vh, 0.72rem); }
+
+/* Conference arc */
+.conf-panel { flex: 1 1 0; min-height: 0; }
+.conf-row { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 10px; margin-top: 8px; align-items: stretch; }
+:root[data-embedded="true"] .conf-row { gap: clamp(6px, 0.9vw, 10px); }
+.conf-card {
+  position: relative; padding: 9px 11px; border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--conf) 30%, var(--border));
+  background: color-mix(in srgb, var(--conf) 4%, transparent);
+  opacity: 0; transform: translateY(6px); animation: rise .5s ease-out forwards;
+}
+:root[data-embedded="true"] .conf-card { padding: clamp(5px, 0.9vh, 9px) clamp(7px, 1.1vw, 11px); }
+.conf-year { font: 700 0.69rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.12em; text-transform: uppercase; color: var(--conf); }
+.conf-title { font: 700 0.78rem/1.2 "Space Grotesk", sans-serif; color: var(--text-strong); margin-top: 4px; }
+.conf-note { font: 400 0.7rem/1.35 "DM Sans", sans-serif; color: var(--muted); margin-top: 4px; }
+:root[data-embedded="true"] .conf-title { font-size: clamp(0.7rem, 1.35vh, 0.78rem); }
+:root[data-embedded="true"] .conf-note { font-size: clamp(0.69rem, 1.15vh, 0.7rem); }
+.conf-card:not(:first-child)::before {
+  content: "→"; position: absolute; left: -11px; top: 50%; transform: translateY(-50%);
+  color: var(--muted-soft); font-size: 0.85rem;
+}
+
+/* Bottom chips */
+.chips { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+:root[data-embedded="true"] .chips { gap: clamp(6px, 0.9vw, 10px); }
+.chip {
+  display: flex; flex-direction: column; gap: 4px; padding: 10px 13px; border-radius: 14px;
+  border: 1px solid color-mix(in srgb, var(--cc) 35%, var(--border));
+  background: color-mix(in srgb, var(--cc) 5%, var(--surface));
+}
+:root[data-embedded="true"] .chip { padding: clamp(6px, 1vh, 10px) clamp(9px, 1.3vw, 13px); }
+.chip-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.chip-name { font: 700 0.8rem/1.2 "Space Grotesk", sans-serif; color: var(--text-strong); }
+.chip-badge {
+  font: 700 0.69rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--cc); border: 1px solid color-mix(in srgb, var(--cc) 50%, transparent);
+  border-radius: 99px; padding: 3px 8px;
+  background: color-mix(in srgb, var(--cc) 9%, transparent);
+}
+.chip-note { font: 400 0.72rem/1.35 "DM Sans", sans-serif; color: var(--muted); }
+:root[data-embedded="true"] .chip-name { font-size: clamp(0.72rem, 1.4vh, 0.8rem); }
+:root[data-embedded="true"] .chip-note { font-size: clamp(0.69rem, 1.2vh, 0.72rem); }
+
+@keyframes travel { from { transform: translateX(-100%); } to { transform: translateX(430%); } }
+@keyframes rise { to { opacity: 1; transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) {
+  .track::after { animation: none; opacity: 0; }
+  .conf-card { animation: none; opacity: 1; transform: none; }
+}
+@media (max-width: 760px) {
+  .conf-row { grid-template-columns: 1fr; }
+  .conf-card:not(:first-child)::before { content: "↓"; left: 50%; top: -13px; transform: translateX(-50%); }
+  .chips { grid-template-columns: 1fr; }
+  .station-note { display: none; }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <header class="head">
+    <div class="eyebrow">Harder to fake than surveys</div>
+    <h1>Institutional signals all point the same direction</h1>
+  </header>
+
+  <div class="panel train-panel">
+    <div class="panel-label" style="--pc:var(--train)"><i></i>Spring Modulith release train · a three-year unbroken cadence</div>
+    <div class="track-zone" role="img" aria-label="Spring Modulith release train: experimental October 2022, 1.0 GA August 2023, 2.0 GA November 2025, 2.1 GA June 2026.">
+      <div class="track"></div>
+      <div class="station" style="left:11%">
+        <div class="station-version">Experimental</div>
+        <div class="station-dot"></div>
+        <div class="station-date">Oct 2022</div>
+        <div class="station-note">The bet is placed</div>
+      </div>
+      <div class="station" style="left:37%">
+        <div class="station-version">1.0 GA</div>
+        <div class="station-dot"></div>
+        <div class="station-date">Aug 2023</div>
+        <div class="station-note">Production-ready module boundaries</div>
+      </div>
+      <div class="station" style="left:63%">
+        <div class="station-version">2.0 GA</div>
+        <div class="station-dot"></div>
+        <div class="station-date">Nov 2025</div>
+        <div class="station-note">Major-version commitment</div>
+      </div>
+      <div class="station" style="left:89%">
+        <div class="station-version">2.1 GA</div>
+        <div class="station-dot"></div>
+        <div class="station-date">Jun 2026</div>
+        <div class="station-note">Module-scoped slice testing, transactional-outbox integrations</div>
+      </div>
+    </div>
+    <div class="train-verdict"><strong>Read:</strong> institutional commitment, not a hobby.</div>
+  </div>
+
+  <div class="panel conf-panel">
+    <div class="panel-label" style="--pc:var(--conf)"><i></i>The conference arc · what QCon put on stage</div>
+    <div class="conf-row">
+      <div class="conf-card" style="animation-delay:.15s">
+        <div class="conf-year">QCon 2020</div>
+        <div class="conf-title">"To Microservices and Back Again"</div>
+        <div class="conf-note">The reversals get a stage.</div>
+      </div>
+      <div class="conf-card" style="animation-delay:.35s">
+        <div class="conf-year">QCon 2024</div>
+        <div class="conf-title">Meta ships Threads in 5 months</div>
+        <div class="conf-note">On Instagram's monolithic substrate.</div>
+      </div>
+      <div class="conf-card" style="animation-delay:.55s">
+        <div class="conf-year">QCon 2025</div>
+        <div class="conf-title">Newman: "not the default"</div>
+        <div class="conf-note">The author of <em>Building Microservices</em>, on his own subject.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="chips">
+    <div class="chip" style="--cc:var(--ms)">
+      <div class="chip-head"><span class="chip-name">Microsoft · .NET Aspire</span><span class="chip-badge">GA May 2024</span></div>
+      <div class="chip-note">Makes single-process vs distributed a deployment-time detail. Microsoft's own Copilot team started as a modular monolith and split only when needed.</div>
+    </div>
+    <div class="chip" style="--cc:var(--radar)">
+      <div class="chip-head"><span class="chip-name">Thoughtworks Radar</span><span class="chip-badge">Assess only · never promoted</span></div>
+      <div class="chip-note">Named "a resurgence of interest in the well-factored monolith" (Sep 2023). Honest caveat: Assess is the second-lowest ring. Enthusiasm, not endorsement.</div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

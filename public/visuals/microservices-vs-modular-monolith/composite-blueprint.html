@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Composite — Blueprint and Decision Gates</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+/* Scene-specific: the composite architecture the evidence converges on,
+   plus the five decision gates that replace the maturity ladder. */
+:root {
+  --core: var(--accent-3);
+  --vault: var(--L5);
+  --fraud: #a56cff;
+  --backbone: #a56cff;
+  --standin: var(--accent);
+  --gate: var(--accent-2);
+  /* accent-2 alone is ~2.6:1 on paper-light; mixed toward text it clears AA for the small labels */
+  --gate-text: color-mix(in srgb, var(--accent-2) 72%, var(--text-strong));
+}
+
+.shell { display: flex; flex-direction: column; gap: 10px; }
+:root[data-embedded="true"] .shell {
+  display: flex; flex-direction: column; gap: clamp(6px, 1vh, 10px);
+  padding: clamp(10px, 1.5vh, 16px) clamp(14px, 2vw, 22px);
+}
+
+.head h1 {
+  font-family: "Space Grotesk", sans-serif; font-weight: 700;
+  font-size: clamp(1.05rem, 2.3vw, 1.45rem); letter-spacing: -0.02em; color: var(--text-strong);
+}
+:root[data-embedded="true"] .head h1 { font-size: clamp(0.92rem, 2.1vh, 1.2rem); }
+
+/* Blueprint stage */
+.stage {
+  position: relative; border: 1px solid var(--border); border-radius: 18px;
+  background: var(--surface); box-shadow: var(--shadow-soft);
+  padding: 6px; overflow: hidden; flex: 1.5 1 0; min-height: 0; display: flex;
+}
+.stage::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--text) 4%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--text) 4%, transparent) 1px, transparent 1px);
+  background-size: 40px 40px;
+  mask-image: radial-gradient(ellipse 80% 70% at center, black, transparent);
+}
+.bp { width: 100%; height: 100%; display: block; position: relative; z-index: 1; }
+
+.band-rect { fill: color-mix(in srgb, var(--text) 2.5%, transparent); stroke: var(--border); }
+.bp-label { font: 700 13px/1 "Space Grotesk", sans-serif; letter-spacing: 0.13em; text-transform: uppercase; }
+.bp-title { font: 700 18px/1 "Space Grotesk", sans-serif; letter-spacing: -0.02em; fill: var(--text-strong); }
+.bp-sub { font: 13px/1.3 "DM Sans", sans-serif; fill: var(--muted); }
+
+.core-box {
+  fill: color-mix(in srgb, var(--core) 5%, transparent);
+  stroke: var(--core); stroke-width: 2; stroke-dasharray: 9 6;
+}
+.module-box { fill: color-mix(in srgb, var(--core) 8%, var(--surface-strong)); stroke: var(--core); stroke-width: 1.5; }
+.vault-box { fill: color-mix(in srgb, var(--vault) 7%, var(--surface-strong)); stroke: var(--vault); stroke-width: 1.6; }
+.fraud-box { fill: color-mix(in srgb, var(--fraud) 7%, var(--surface-strong)); stroke: var(--fraud); stroke-width: 1.6; }
+.outbox-box { fill: var(--surface-strong); stroke: color-mix(in srgb, var(--backbone) 70%, transparent); stroke-width: 1.4; }
+.backbone-box {
+  fill: color-mix(in srgb, var(--backbone) 5%, transparent);
+  stroke: var(--backbone); stroke-width: 1.6; stroke-dasharray: 10 6;
+}
+.pod-box { fill: color-mix(in srgb, var(--backbone) 5%, var(--surface-strong)); stroke: color-mix(in srgb, var(--backbone) 55%, var(--border)); stroke-width: 1.3; }
+.standin-box { fill: color-mix(in srgb, var(--standin) 6%, var(--surface-strong)); stroke: var(--standin); stroke-width: 1.5; stroke-dasharray: 5 4; }
+
+.flow { fill: none; stroke-width: 2; stroke-linecap: round; stroke-dasharray: 6 5; animation: dash 3s linear infinite; }
+.flow.core-flow { stroke: color-mix(in srgb, var(--core) 60%, transparent); }
+.flow.vault-flow { stroke: color-mix(in srgb, var(--vault) 65%, transparent); }
+.flow.fraud-flow { stroke: color-mix(in srgb, var(--fraud) 60%, transparent); }
+.flow.backbone-flow { stroke: color-mix(in srgb, var(--backbone) 60%, transparent); }
+.flow.standin-flow { stroke: color-mix(in srgb, var(--standin) 55%, transparent); animation-duration: 5s; }
+.flow-tag { font: 700 11.5px/1 "Space Grotesk", sans-serif; letter-spacing: 0.1em; text-transform: uppercase; fill: var(--muted); }
+
+/* Gates */
+.gates-label {
+  font: 700 0.7rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.13em;
+  text-transform: uppercase; color: var(--gate-text);
+  display: flex; align-items: center; gap: 10px;
+}
+.gates-label::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, color-mix(in srgb, var(--gate) 40%, transparent), transparent); }
+:root[data-embedded="true"] .gates-label { font-size: clamp(0.69rem, 1.15vh, 0.72rem); }
+
+.gates { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap: 8px; }
+:root[data-embedded="true"] .gates { gap: clamp(5px, 0.8vw, 8px); }
+.gate {
+  position: relative; text-align: left; padding: 9px 11px; border-radius: 12px;
+  border: 1px solid var(--border); background: var(--surface); cursor: pointer;
+  font-family: "DM Sans", sans-serif; transition: border-color .25s, background .25s, transform .25s;
+}
+:root[data-embedded="true"] .gate { padding: clamp(5px, 0.9vh, 9px) clamp(7px, 1vw, 11px); }
+.gate:hover { transform: translateY(-2px); }
+.gate:focus-visible { outline: 2px solid var(--gate); outline-offset: 2px; }
+.gate.active { border-color: var(--gate); background: color-mix(in srgb, var(--gate) 7%, var(--surface)); }
+.gate-num { font: 700 0.7rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.1em; color: var(--gate-text); }
+.gate-q { font: 500 0.74rem/1.3 "DM Sans", sans-serif; color: var(--text-strong); margin-top: 4px; }
+:root[data-embedded="true"] .gate-num { font-size: clamp(0.69rem, 1vh, 0.72rem); }
+:root[data-embedded="true"] .gate-q { font-size: clamp(0.7rem, 1.2vh, 0.74rem); }
+.gate:not(:first-child)::before {
+  content: "▸"; position: absolute; left: -8.5px; top: 50%; transform: translateY(-50%);
+  color: var(--muted-soft); font-size: 0.7rem;
+}
+
+.outcome {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 14px; border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--gate) 45%, transparent);
+  background: color-mix(in srgb, var(--gate) 6%, transparent);
+  font-family: "DM Sans", sans-serif; font-size: 0.78rem; color: var(--text); min-height: 40px;
+}
+.outcome strong { font-family: "Space Grotesk", sans-serif; color: var(--text-strong); white-space: nowrap; }
+:root[data-embedded="true"] .outcome { font-size: clamp(0.7rem, 1.35vh, 0.78rem); padding: clamp(5px, 0.9vh, 9px) 14px; min-height: 0; }
+.outcome-tag {
+  font: 700 0.69rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--gate-text); border: 1px solid color-mix(in srgb, var(--gate) 50%, transparent);
+  border-radius: 99px; padding: 4px 9px; white-space: nowrap;
+  background: color-mix(in srgb, var(--gate) 9%, transparent);
+}
+
+@keyframes dash { from { stroke-dashoffset: 0; } to { stroke-dashoffset: -33; } }
+@media (prefers-reduced-motion: reduce) { .flow { animation: none; } .gate:hover { transform: none; } }
+@media (max-width: 860px) {
+  .gates { grid-template-columns: 1fr 1fr; }
+  .gate:not(:first-child)::before { display: none; }
+}
+
+/* Small screens: the 1600-wide SVG scales its text below legibility (~3px),
+   so swap it for a stacked HTML rendering of the same architecture. */
+.stage-mobile, :root[data-embedded="true"] .stage-mobile { display: none; }
+@media (max-width: 760px) {
+  .stage-desktop, :root[data-embedded="true"] .stage-desktop { display: none; }
+  .stage-mobile, :root[data-embedded="true"] .stage-mobile { display: flex; flex-direction: column; gap: 7px; padding: 10px; flex: 0 0 auto; overflow: visible; }
+  .mb-band {
+    font: 700 0.72rem/1.3 "Space Grotesk", sans-serif; text-align: center; color: var(--text-strong);
+    padding: 8px 10px; border-radius: 10px; border: 1px solid var(--border);
+    background: color-mix(in srgb, var(--text) 2.5%, transparent);
+  }
+  .mb-band small { display: block; font: 400 0.7rem/1.3 "DM Sans", sans-serif; color: var(--muted); margin-top: 1px; }
+  .mb-core {
+    display: flex; flex-direction: column; gap: 6px; padding: 9px;
+    border: 2px dashed var(--core); border-radius: 12px;
+    background: color-mix(in srgb, var(--core) 5%, transparent);
+  }
+  .mb-core-label {
+    font: 700 0.7rem/1.3 "Space Grotesk", sans-serif; letter-spacing: 0.06em;
+    text-transform: uppercase; color: var(--core); text-align: center;
+  }
+  .mb-modules { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .mb-module {
+    border: 1.5px solid var(--core); background: color-mix(in srgb, var(--core) 8%, var(--surface-strong));
+    border-radius: 10px; padding: 9px 6px; text-align: center;
+    font: 700 0.8rem/1.2 "Space Grotesk", sans-serif; color: var(--text-strong);
+  }
+  .mb-module small { display: block; font: 400 0.7rem/1.3 "DM Sans", sans-serif; color: var(--muted); margin-top: 2px; }
+  .mb-outbox {
+    text-align: center; border: 1.4px solid color-mix(in srgb, var(--backbone) 70%, transparent);
+    border-radius: 9px; padding: 7px; background: var(--surface-strong);
+    font: 700 0.7rem/1.3 "Space Grotesk", sans-serif; color: var(--backbone);
+  }
+  .mb-row { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+  .mb-ext {
+    padding: 9px 8px; border-radius: 10px; text-align: center;
+    font: 700 0.78rem/1.2 "Space Grotesk", sans-serif; color: var(--text-strong);
+  }
+  .mb-ext small { display: block; font: 400 0.7rem/1.3 "DM Sans", sans-serif; color: var(--muted); margin-top: 2px; }
+  .mb-ext.vault { border: 1.5px solid var(--vault); background: color-mix(in srgb, var(--vault) 7%, var(--surface-strong)); }
+  .mb-ext.fraud { border: 1.5px solid var(--fraud); background: color-mix(in srgb, var(--fraud) 7%, var(--surface-strong)); }
+  .mb-backbone {
+    border: 1.5px dashed var(--backbone); background: color-mix(in srgb, var(--backbone) 5%, transparent);
+    border-radius: 10px; padding: 8px; text-align: center;
+    font: 700 0.72rem/1.3 "Space Grotesk", sans-serif; color: var(--text-strong);
+  }
+  .mb-pods { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
+  .mb-pod {
+    border: 1.3px solid color-mix(in srgb, var(--backbone) 55%, var(--border));
+    background: color-mix(in srgb, var(--backbone) 5%, var(--surface-strong));
+    border-radius: 9px; padding: 8px 6px; text-align: center;
+    font: 700 0.76rem/1.2 "Space Grotesk", sans-serif; color: var(--text-strong);
+  }
+  .mb-standin {
+    border: 1.5px dashed var(--standin); background: color-mix(in srgb, var(--standin) 6%, var(--surface-strong));
+    border-radius: 10px; padding: 8px 10px; text-align: center;
+    font: 400 0.7rem/1.4 "DM Sans", sans-serif; color: var(--text);
+  }
+  .mb-standin strong {
+    font: 700 0.72rem/1.3 "Space Grotesk", sans-serif; letter-spacing: 0.04em;
+    text-transform: uppercase; color: var(--standin);
+  }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <header class="head">
+    <div class="eyebrow">Neither pole · The shape the evidence converges on</div>
+    <h1>A modular core, exactly two extractions, an event backbone</h1>
+  </header>
+
+  <div class="stage stage-desktop">
+    <svg class="bp" viewBox="0 0 1600 640" preserveAspectRatio="xMidYMid meet" role="img"
+         aria-label="Composite architecture blueprint. A dumb edge feeds a strongly consistent modular core holding authorization and the ledger in one transaction boundary. Two extractions sit beside it: a PCI vault enclave and a fraud ML scorer. A transactional outbox feeds an event backbone carrying clearing, settlement, disputes, and analytics. A stand-in path bypasses the core for the day it is down.">
+
+      <!-- Edge band -->
+      <rect x="220" y="16" width="1160" height="62" rx="14" class="band-rect"/>
+      <text x="800" y="42" text-anchor="middle" class="bp-title" style="font-size:16px">Dumb edge · stateless, replicated, active-active</text>
+      <text x="800" y="62" text-anchor="middle" class="bp-sub">terminate, authenticate, route. No business logic lives here.</text>
+
+      <!-- Stand-in path -->
+      <g>
+        <rect class="standin-box" x="40" y="120" width="150" height="130" rx="14"/>
+        <text x="115" y="163" text-anchor="middle" class="bp-label" fill="var(--standin)">Stand-in</text>
+        <text x="115" y="184" text-anchor="middle" class="bp-title" style="font-size:15px">Authorizer</text>
+        <text x="115" y="206" text-anchor="middle" class="bp-sub">radically simple,</text>
+        <text x="115" y="221" text-anchor="middle" class="bp-sub">independent path</text>
+        <path class="flow standin-flow" d="M 222 47 Q 115 47 115 118"/>
+        <text x="52" y="96" class="flow-tag" fill="var(--standin)">if core is down</text>
+      </g>
+
+      <!-- PCI vault -->
+      <g>
+        <rect class="vault-box" x="230" y="130" width="230" height="120" rx="14"/>
+        <text x="345" y="160" text-anchor="middle" class="bp-label" fill="var(--vault)">Extraction 1 · Compliance force</text>
+        <text x="345" y="184" text-anchor="middle" class="bp-title" style="font-size:16px">PCI vault enclave</text>
+        <text x="345" y="206" text-anchor="middle" class="bp-sub">card data lives here, nothing else joins it.</text>
+        <text x="345" y="222" text-anchor="middle" class="bp-sub">Tokens everywhere else.</text>
+        <path class="flow vault-flow" d="M 462 190 L 538 190"/>
+        <text x="466" y="180" class="flow-tag">tokenize</text>
+      </g>
+
+      <!-- Modular core -->
+      <g>
+        <rect class="core-box" x="540" y="108" width="520" height="230" rx="20"/>
+        <text x="560" y="134" class="bp-label" fill="var(--core)">Modular core · one deployable · one transaction boundary</text>
+        <rect class="module-box" x="565" y="152" width="225" height="100" rx="12"/>
+        <text x="677" y="192" text-anchor="middle" class="bp-title" style="font-size:16px">Authorization</text>
+        <text x="677" y="214" text-anchor="middle" class="bp-sub">the synchronous hot path</text>
+        <rect class="module-box" x="810" y="152" width="225" height="100" rx="12"/>
+        <text x="922" y="192" text-anchor="middle" class="bp-title" style="font-size:16px">Ledger</text>
+        <text x="922" y="214" text-anchor="middle" class="bp-sub">strongly consistent, never a saga</text>
+        <path class="flow core-flow" d="M 790 202 L 810 202"/>
+        <rect class="outbox-box" x="710" y="284" width="180" height="40" rx="10"/>
+        <text x="800" y="302" text-anchor="middle" class="bp-label" style="font-size:12px" fill="var(--backbone)">Transactional outbox</text>
+        <text x="800" y="316" text-anchor="middle" class="bp-sub" style="font-size:12px">events commit with the ledger</text>
+        <path class="flow core-flow" d="M 800 80 L 800 106"/>
+        <text x="812" y="98" class="flow-tag">authorize</text>
+      </g>
+
+      <!-- Fraud ML -->
+      <g>
+        <rect class="fraud-box" x="1140" y="130" width="230" height="120" rx="14"/>
+        <text x="1255" y="160" text-anchor="middle" class="bp-label" fill="var(--fraud)">Extraction 2 · Cadence force</text>
+        <text x="1255" y="184" text-anchor="middle" class="bp-title" style="font-size:16px">Fraud ML scorer</text>
+        <text x="1255" y="206" text-anchor="middle" class="bp-sub">advisory, fail-open, own release</text>
+        <text x="1255" y="222" text-anchor="middle" class="bp-sub">cadence and stack.</text>
+        <path class="flow fraud-flow" d="M 1062 190 L 1138 190"/>
+        <text x="1070" y="180" class="flow-tag">score</text>
+      </g>
+
+      <!-- Backbone -->
+      <rect class="backbone-box" x="220" y="392" width="1160" height="64" rx="14"/>
+      <text x="800" y="418" text-anchor="middle" class="bp-title" style="font-size:16px">Event backbone · everything after authorization</text>
+      <text x="800" y="440" text-anchor="middle" class="bp-sub">eventual consistency is the domain's native semantics here</text>
+      <path class="flow backbone-flow" d="M 800 326 L 800 390"/>
+
+      <!-- Downstream pods -->
+      <g>
+        <rect class="pod-box" x="280" y="500" width="230" height="90" rx="12"/>
+        <text x="395" y="538" text-anchor="middle" class="bp-title" style="font-size:15px">Clearing</text>
+        <text x="395" y="560" text-anchor="middle" class="bp-sub">independently deployable</text>
+        <rect class="pod-box" x="550" y="500" width="230" height="90" rx="12"/>
+        <text x="665" y="538" text-anchor="middle" class="bp-title" style="font-size:15px">Settlement</text>
+        <text x="665" y="560" text-anchor="middle" class="bp-sub">independently deployable</text>
+        <rect class="pod-box" x="820" y="500" width="230" height="90" rx="12"/>
+        <text x="935" y="538" text-anchor="middle" class="bp-title" style="font-size:15px">Disputes</text>
+        <text x="935" y="560" text-anchor="middle" class="bp-sub">independently deployable</text>
+        <rect class="pod-box" x="1090" y="500" width="230" height="90" rx="12"/>
+        <text x="1205" y="538" text-anchor="middle" class="bp-title" style="font-size:15px">Analytics</text>
+        <text x="1205" y="560" text-anchor="middle" class="bp-sub">independently deployable</text>
+        <path class="flow backbone-flow" d="M 395 458 L 395 498"/>
+        <path class="flow backbone-flow" d="M 665 458 L 665 498"/>
+        <path class="flow backbone-flow" d="M 935 458 L 935 498"/>
+        <path class="flow backbone-flow" d="M 1205 458 L 1205 498"/>
+      </g>
+    </svg>
+  </div>
+
+  <div class="stage stage-mobile">
+    <div class="mb-band">Dumb edge<small>stateless · active-active · no business logic</small></div>
+    <div class="mb-core">
+      <div class="mb-core-label">Modular core · one deployable · one transaction boundary</div>
+      <div class="mb-modules">
+        <div class="mb-module">Authorization<small>the synchronous hot path</small></div>
+        <div class="mb-module">Ledger<small>strongly consistent, never a saga</small></div>
+      </div>
+      <div class="mb-outbox">Transactional outbox · events commit with the ledger</div>
+    </div>
+    <div class="mb-row">
+      <div class="mb-ext vault">PCI vault enclave<small>Extraction 1 · compliance force</small></div>
+      <div class="mb-ext fraud">Fraud ML scorer<small>Extraction 2 · cadence force</small></div>
+    </div>
+    <div class="mb-backbone">Event backbone · everything after authorization</div>
+    <div class="mb-pods">
+      <div class="mb-pod">Clearing</div>
+      <div class="mb-pod">Settlement</div>
+      <div class="mb-pod">Disputes</div>
+      <div class="mb-pod">Analytics</div>
+    </div>
+    <div class="mb-standin"><strong>Stand-in authorizer</strong> · radically simple independent path, used if the core is down</div>
+  </div>
+
+  <div class="gates-label">The five gates that replace the ladder · asked in order, for any new capability</div>
+
+  <div class="gates" role="tablist" aria-label="Decision gates">
+    <button class="gate active" data-outcome="Core module, in process. It shares a transaction boundary with the ledger or the authorization decision." data-tag="Stay in core" role="tab" aria-selected="true">
+      <div class="gate-num">Gate 1</div>
+      <div class="gate-q">Shares a transaction boundary with the ledger?</div>
+    </button>
+    <button class="gate" data-outcome="Core module. Scale by replicating the whole core, not by splitting it." data-tag="Stay in core" role="tab" aria-selected="false">
+      <div class="gate-num">Gate 2</div>
+      <div class="gate-q">On the synchronous hot path, inside the tail-latency budget?</div>
+    </button>
+    <button class="gate" data-outcome="The one vault enclave. Nothing else joins it, tokens everywhere else." data-tag="Vault only" role="tab" aria-selected="false">
+      <div class="gate-num">Gate 3</div>
+      <div class="gate-q">Holds or accesses card data?</div>
+    </button>
+    <button class="gate" data-outcome="Extract as a service through an outbox seam. This is the only gate that creates a new service, and it needs a durable owning team." data-tag="Extract" role="tab" aria-selected="false">
+      <div class="gate-num">Gate 4</div>
+      <div class="gate-q">Divergent cadence, stack, or scaling, with a durable owning team?</div>
+    </button>
+    <button class="gate" data-outcome="Stay a module. Revisit when a force appears. Notice what is absent: there is no 'are we mature enough yet' gate." data-tag="Stay a module" role="tab" aria-selected="false">
+      <div class="gate-num">Gate 5</div>
+      <div class="gate-q">None of the above?</div>
+    </button>
+  </div>
+
+  <div class="outcome" aria-live="polite">
+    <span class="outcome-tag" id="outcomeTag">Stay in core</span>
+    <span id="outcomeText"><strong>If yes:</strong>&nbsp;Core module, in process. It shares a transaction boundary with the ledger or the authorization decision.</span>
+  </div>
+
+</div>
+
+<script>
+(() => {
+  const gates = document.querySelectorAll('.gate');
+  const tag = document.getElementById('outcomeTag');
+  const text = document.getElementById('outcomeText');
+  gates.forEach((gate) => {
+    const activate = () => {
+      gates.forEach((g) => { g.classList.toggle('active', g === gate); g.setAttribute('aria-selected', String(g === gate)); });
+      tag.textContent = gate.dataset.tag;
+      text.innerHTML = '<strong>If yes:</strong>&nbsp;' + gate.dataset.outcome;
+    };
+    gate.addEventListener('click', activate);
+    gate.addEventListener('mouseenter', activate);
+    gate.addEventListener('focus', activate);
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Open Questions — What the Red-Team Could Not Close</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+/* Scene-specific: the honest tail. A genuinely balanced scale for the
+   AI-agent question, plus the gaps stated plainly. */
+:root {
+  --mono: var(--accent-3);
+  --micro: #a56cff;
+  --open: var(--L5);
+}
+
+.shell { display: flex; flex-direction: column; gap: 10px; }
+:root[data-embedded="true"] .shell {
+  display: flex; flex-direction: column; gap: clamp(6px, 1vh, 10px);
+  padding: clamp(10px, 1.5vh, 16px) clamp(14px, 2vw, 22px);
+}
+
+.head h1 {
+  font-family: "Space Grotesk", sans-serif; font-weight: 700;
+  font-size: clamp(1.05rem, 2.3vw, 1.45rem); letter-spacing: -0.02em; color: var(--text-strong);
+}
+:root[data-embedded="true"] .head h1 { font-size: clamp(0.92rem, 2.1vh, 1.2rem); }
+
+.grid { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 10px; flex: 1 1 auto; min-height: 0; }
+:root[data-embedded="true"] .grid { gap: clamp(6px, 0.9vw, 10px); }
+
+/* Scale panel */
+.scale-panel {
+  display: flex; flex-direction: column; border: 1px solid var(--border); border-radius: 16px;
+  background: var(--surface); box-shadow: var(--shadow-soft); padding: 12px 14px; min-height: 0;
+}
+:root[data-embedded="true"] .scale-panel { padding: clamp(7px, 1.1vh, 12px) clamp(9px, 1.3vw, 14px); }
+.scale-title {
+  font: 700 0.7rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.13em;
+  text-transform: uppercase; color: var(--open);
+}
+:root[data-embedded="true"] .scale-title { font-size: clamp(0.69rem, 1.15vh, 0.72rem); }
+.scale-svg { flex: 1 1 auto; min-height: 0; width: 100%; margin-top: 4px; }
+
+.beam-group { transform-origin: 300px 74px; animation: rock 7s ease-in-out infinite; }
+.beam { stroke: var(--text-strong); stroke-width: 4; stroke-linecap: round; }
+.chain { stroke: color-mix(in srgb, var(--text) 40%, transparent); stroke-width: 1.5; stroke-dasharray: 3 3; }
+.pan { rx: 12; stroke-width: 1.6; }
+.pan.mono { fill: color-mix(in srgb, var(--mono) 7%, var(--surface-strong)); stroke: var(--mono); }
+.pan.micro { fill: color-mix(in srgb, var(--micro) 7%, var(--surface-strong)); stroke: var(--micro); }
+.pan-label { font: 700 14px/1 "Space Grotesk", sans-serif; fill: var(--text-strong); }
+.pan-sub { font: 11.5px/1.3 "DM Sans", sans-serif; fill: var(--muted); }
+.pillar { stroke: var(--text-strong); stroke-width: 4; stroke-linecap: round; }
+.fulcrum-tag {
+  font: 700 12px/1 "Space Grotesk", sans-serif; letter-spacing: 0.1em;
+  text-transform: uppercase; fill: var(--open);
+}
+.base-box { fill: color-mix(in srgb, var(--good) 6%, var(--surface-strong)); stroke: var(--good); stroke-width: 1.5; rx: 10; }
+.base-title { font: 700 13.5px/1 "Space Grotesk", sans-serif; fill: var(--text-strong); }
+.base-sub { font: 11.5px/1.3 "DM Sans", sans-serif; fill: var(--muted); }
+
+/* Open item cards */
+.items { display: flex; flex-direction: column; gap: 8px; min-height: 0; justify-content: space-between; }
+:root[data-embedded="true"] .items { gap: clamp(4px, 0.7vh, 8px); }
+.item {
+  flex: 1 1 0; display: flex; flex-direction: column; justify-content: center; gap: 4px;
+  padding: 10px 13px; border-radius: 14px;
+  border: 1px dashed color-mix(in srgb, var(--open) 50%, var(--border));
+  background: color-mix(in srgb, var(--open) 4%, transparent);
+  opacity: 0; transform: translateY(6px); animation: rise .5s ease-out forwards;
+}
+:root[data-embedded="true"] .item { padding: clamp(6px, 1vh, 10px) clamp(9px, 1.3vw, 13px); }
+.item-tag { font: 700 0.69rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.11em; text-transform: uppercase; color: var(--open); }
+.item-title { font: 700 0.8rem/1.2 "Space Grotesk", sans-serif; color: var(--text-strong); }
+.item-desc { font: 400 0.72rem/1.4 "DM Sans", sans-serif; color: var(--muted); }
+:root[data-embedded="true"] .item-tag { font-size: clamp(0.69rem, 1vh, 0.7rem); }
+:root[data-embedded="true"] .item-title { font-size: clamp(0.72rem, 1.4vh, 0.8rem); }
+:root[data-embedded="true"] .item-desc { font-size: clamp(0.7rem, 1.2vh, 0.72rem); }
+
+@keyframes rock { 0%, 100% { transform: rotate(-1.6deg); } 50% { transform: rotate(1.6deg); } }
+@keyframes rise { to { opacity: 1; transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) {
+  .beam-group { animation: none; }
+  .item { animation: none; opacity: 1; transform: none; }
+}
+@media (max-width: 760px) { .grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <header class="head">
+    <div class="eyebrow">The honest tail</div>
+    <h1>What the red-team could not close</h1>
+  </header>
+
+  <div class="grid">
+
+    <div class="scale-panel">
+      <div class="scale-title">The AI-agent question · genuinely two-sided, empirically open</div>
+      <svg class="scale-svg" viewBox="0 0 600 330" preserveAspectRatio="xMidYMid meet" role="img"
+           aria-label="A balanced scale. One pan, led by Michael Nygard, argues agents reason better in a single well-modularized repo. The other, led by Chris Richardson, argues service boundaries are the guardrails agents need. The fulcrum is labeled zero direct studies, adjacent evidence only. Beneath the scale, both camps agree that enforced module boundaries help agents in either topology.">
+        <g class="beam-group">
+          <line class="beam" x1="90" y1="74" x2="510" y2="74"/>
+          <line class="chain" x1="115" y1="74" x2="115" y2="112"/>
+          <line class="chain" x1="485" y1="74" x2="485" y2="112"/>
+          <g>
+            <rect class="pan mono" x="20" y="112" width="190" height="86"/>
+            <text class="pan-label" x="115" y="140" text-anchor="middle">Whole-codebase camp</text>
+            <text class="pan-sub" x="115" y="160" text-anchor="middle">agents reason better in one</text>
+            <text class="pan-sub" x="115" y="174" text-anchor="middle">well-modularized repo</text>
+            <text class="pan-sub" x="115" y="188" text-anchor="middle">— Nygard, May 2026</text>
+          </g>
+          <g>
+            <rect class="pan micro" x="390" y="112" width="190" height="86"/>
+            <text class="pan-label" x="485" y="140" text-anchor="middle">Bounded-services camp</text>
+            <text class="pan-sub" x="485" y="160" text-anchor="middle">service boundaries are the</text>
+            <text class="pan-sub" x="485" y="174" text-anchor="middle">guardrails agents need</text>
+            <text class="pan-sub" x="485" y="188" text-anchor="middle">— Richardson, Feb–May 2026</text>
+          </g>
+        </g>
+        <line class="pillar" x1="300" y1="74" x2="300" y2="240"/>
+        <circle cx="300" cy="74" r="7" fill="var(--text-strong)"/>
+        <text class="fulcrum-tag" x="300" y="226" text-anchor="middle">Fulcrum: zero direct studies — adjacent only (mid-2026)</text>
+        <g>
+          <rect class="base-box" x="100" y="248" width="400" height="70"/>
+          <text class="base-title" x="300" y="270" text-anchor="middle">The one point both camps agree on</text>
+          <text class="base-sub" x="300" y="290" text-anchor="middle">enforced module boundaries (Modulith verification, Packwerk, ArchUnit)</text>
+          <text class="base-sub" x="300" y="306" text-anchor="middle">help agents in either topology</text>
+        </g>
+      </svg>
+    </div>
+
+    <div class="items">
+      <div class="item" style="animation-delay:.15s">
+        <div class="item-tag">Gap 01</div>
+        <div class="item-title">Green-field preference is under-evidenced</div>
+        <div class="item-desc">Adyen, Stripe, and Shopify kept monoliths they already had. Meta's Threads is the nearest consequential green-field-ish case. For true green-field builds, the gates, not the proof cases, are the load-bearing guidance.</div>
+      </div>
+      <div class="item" style="animation-delay:.3s">
+        <div class="item-tag">Gap 02</div>
+        <div class="item-title">Production adoption is unmeasured</div>
+        <div class="item-desc">Every modality that once tracked it dropped the question or never asked it. Treat every future statistic in this space with Scene 4 suspicion.</div>
+      </div>
+      <div class="item" style="animation-delay:.45s">
+        <div class="item-tag">Re-sweep triggers</div>
+        <div class="item-title">When to re-run this research</div>
+        <div class="item-desc">ModulithBench publishing actual data, the InfoQ 2026 architecture trends report landing, DDD Europe 2026 talk publications, and any direct study of agent productivity versus architecture.</div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+</body>
+</html>

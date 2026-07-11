@@ -1,0 +1,996 @@
+/* ============================================================================
+   Control Room — bespoke "console" template for operations deep-dives.
+   Every rule is scoped under .dd-console so nothing leaks to other pages.
+   Identity: an industrial ops console. Dark is the native mode (control room
+   at night); light is the "daylight shift" of the same instrument panel.
+   Token base below is the daylight shift; [data-theme="dark"] re-skins it.
+   ========================================================================== */
+
+.dd-console.article-shell {
+  /* daylight shift (light) */
+  --cr-bg-0: #e9edef;
+  --cr-bg-1: #dfe5e8;
+  --cr-panel: #f6f8f9;
+  --cr-panel-2: #eceff1;
+  --cr-edge: #b7c2c9;
+  --cr-edge-hot: #8fa0aa;
+  --cr-ink: #16232c;
+  --cr-ink-2: #3b4d5a;
+  --cr-ink-3: #64747f;
+  --cr-amber: #9a5b00;
+  --cr-green: #0d6e48;
+  --cr-red: #b03030;
+  --cr-amber-dim: rgba(154, 91, 0, 0.12);
+  --cr-green-dim: rgba(13, 110, 72, 0.12);
+  --cr-red-dim: rgba(176, 48, 48, 0.12);
+  --cr-glow: none;
+  --cr-scan: none;
+  --cr-shadow: rgba(22, 35, 44, 0.12);
+
+  --cr-display: "Archivo", "Segoe UI", sans-serif;
+  --cr-body: "Barlow", "Segoe UI", system-ui, sans-serif;
+  --cr-mono: "Chivo Mono", "Cascadia Code", ui-monospace, monospace;
+
+  position: relative;
+  color: var(--cr-ink);
+  font-family: var(--cr-body);
+  background:
+    var(--cr-scan),
+    linear-gradient(180deg, var(--cr-bg-0), var(--cr-bg-1));
+  border: 1px solid var(--cr-edge);
+  border-radius: 4px;
+  box-shadow: 0 18px 50px -28px var(--cr-shadow);
+  padding: clamp(20px, 4vw, 48px);
+  margin-top: 8px;
+  /* clip, not hidden: clips decoration without creating a scroll container,
+     so the sticky scene index keeps pinning. */
+  overflow: clip;
+}
+
+/* ============================================================
+   Control room (dark) — the native mode.
+   ============================================================ */
+[data-theme="dark"] .dd-console.article-shell {
+  --cr-bg-0: #0a0d10;
+  --cr-bg-1: #0d1319;
+  --cr-panel: #131a21;
+  --cr-panel-2: #0e141a;
+  --cr-edge: #26313c;
+  --cr-edge-hot: #3b4a58;
+  --cr-ink: #e8eef2;
+  --cr-ink-2: #b6c2cc;
+  --cr-ink-3: #7d8b97;
+  --cr-amber: #ffb347;
+  --cr-green: #3ddc97;
+  --cr-red: #ff5d5d;
+  --cr-amber-dim: rgba(255, 179, 71, 0.16);
+  --cr-green-dim: rgba(61, 220, 151, 0.16);
+  --cr-red-dim: rgba(255, 93, 93, 0.16);
+  --cr-glow: 0 0 10px;
+  --cr-scan: repeating-linear-gradient(
+    0deg,
+    rgba(255, 255, 255, 0.014) 0 1px,
+    transparent 1px 3px
+  );
+  --cr-shadow: rgba(0, 0, 0, 0.8);
+
+  box-shadow: 0 0 0 1px rgba(59, 74, 88, 0.35), 0 30px 80px -40px rgba(0, 0, 0, 0.9);
+}
+
+/* corner rivets — pure decoration */
+.dd-console::before,
+.dd-console::after {
+  content: "";
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border: 1.5px solid var(--cr-amber);
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0.55;
+}
+.dd-console::before { top: 10px; left: 10px; }
+.dd-console::after { bottom: 10px; right: 10px; }
+
+/* ----------------------------------------------------------------- Header -- */
+.dd-console .cr-header {
+  border-bottom: 1px solid var(--cr-edge);
+  padding-bottom: clamp(18px, 3vw, 28px);
+  margin-bottom: clamp(10px, 2vw, 20px);
+}
+
+.dd-console .cr-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--cr-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--cr-ink-2);
+  padding: 5px 10px;
+  border: 1px solid var(--cr-edge);
+  background: var(--cr-panel-2);
+}
+.dd-console .cr-eyebrow-sep { color: var(--cr-amber); }
+.dd-console .cr-eyebrow-no { color: var(--cr-amber); font-weight: 600; }
+.dd-console .cr-eyebrow-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--cr-green);
+  font-weight: 600;
+}
+.dd-console .cr-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--cr-green);
+  box-shadow: var(--cr-glow) var(--cr-green);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .dd-console .cr-dot { animation: cr-pulse 2.2s ease-in-out infinite; }
+}
+@keyframes cr-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+.dd-console .cr-title {
+  font-family: var(--cr-display);
+  font-weight: 800;
+  font-size: clamp(2rem, 5.6vw, 4rem);
+  line-height: 0.98;
+  letter-spacing: -0.015em;
+  text-transform: uppercase;
+  overflow-wrap: break-word;
+  color: var(--cr-ink);
+  margin: 0.5em 0 0;
+}
+.dd-console .cr-arrow { color: var(--cr-amber); font-weight: 700; }
+
+.dd-console .cr-subtitle {
+  font-family: var(--cr-mono);
+  font-size: clamp(0.82rem, 1.6vw, 0.94rem);
+  color: var(--cr-ink-2);
+  margin: 0.85rem 0 0;
+  max-width: 62ch;
+}
+
+.dd-console .cr-lead {
+  font-size: clamp(1.02rem, 1.7vw, 1.2rem);
+  line-height: 1.55;
+  color: var(--cr-ink-2);
+  margin: 1.1rem 0 0;
+  max-width: none;
+}
+
+.dd-console .cr-coords {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  margin: 1.4rem 0 0;
+  border: 1px solid var(--cr-edge);
+  background: var(--cr-panel-2);
+  width: max-content;
+  max-width: 100%;
+}
+.dd-console .cr-coords span {
+  font-family: var(--cr-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--cr-ink-2);
+  padding: 7px 14px;
+  border-right: 1px solid var(--cr-edge);
+}
+.dd-console .cr-coords span:last-child { border-right: 0; }
+
+.dd-console .cr-header-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px 22px;
+  margin-top: 1.5rem;
+}
+.dd-console .back-link,
+.dd-console .meta-row,
+.dd-console .meta-pill,
+.dd-console .entry-meta { color: var(--cr-ink-2); }
+.dd-console .tag-row { margin-top: 1.2rem; }
+.dd-console .tag {
+  background: transparent;
+  border: 1px solid var(--cr-edge);
+  border-radius: 2px;
+  color: var(--cr-ink-2);
+  font-family: var(--cr-mono);
+  font-size: 0.69rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 5px 10px;
+}
+
+/* ------------------------------------------------------- Layout + spine --- */
+.dd-console .cr-layout {
+  display: grid;
+  grid-template-columns: 210px minmax(0, 1fr);
+  gap: clamp(20px, 3vw, 40px);
+  margin-top: clamp(18px, 2.5vw, 30px);
+}
+
+.dd-console .cr-spine-index {
+  position: sticky;
+  top: 92px;
+  align-self: start;
+  height: max-content;
+  border-left: 2px solid var(--cr-edge);
+  padding: 2px 0;
+  display: flex;
+  flex-direction: column;
+}
+.dd-console .cr-index-link {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  align-items: baseline;
+  gap: 9px;
+  padding: 7px 12px;
+  margin-left: -2px;
+  border-left: 2px solid transparent;
+  text-decoration: none;
+  color: var(--cr-ink-3);
+  transition: color 0.18s ease, border-color 0.18s ease;
+}
+.dd-console .cr-index-link::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  align-self: center;
+  background: var(--cr-edge);
+  transition: background 0.18s ease, box-shadow 0.18s ease;
+}
+.dd-console .cr-index-no {
+  font-family: var(--cr-mono);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+.dd-console .cr-index-label {
+  font-size: 0.78rem;
+  line-height: 1.25;
+}
+.dd-console .cr-index-link:hover { color: var(--cr-ink); }
+.dd-console .cr-index-link.is-active {
+  color: var(--cr-ink);
+  border-left-color: var(--cr-amber);
+  background: var(--cr-amber-dim);
+  font-weight: 500;
+}
+.dd-console .cr-index-link.is-active .cr-index-no { color: var(--cr-amber); }
+.dd-console .cr-index-link.is-active::before {
+  background: var(--cr-amber);
+  box-shadow: var(--cr-glow) var(--cr-amber);
+}
+.dd-console .cr-index-link:focus-visible {
+  outline: 2px solid var(--cr-amber);
+  outline-offset: 2px;
+}
+
+/* ============================================================
+   Typography reset — neutralize the global terminal aesthetic.
+   :where() keeps this at (0,2,0): above the global reset at (0,1,2),
+   below this sheet's own element rules at (0,2,1).
+   ============================================================ */
+.dd-console .article-body :where(:not(pre > code)) {
+  display: revert;
+  padding: revert;
+  border: revert;
+  border-radius: 0;
+  background: none;
+  font-family: var(--cr-body);
+  font-size: revert;
+  color: revert;
+}
+
+.dd-console .article-body {
+  margin-top: 0;
+  color: var(--cr-ink-2);
+  font-size: 1.03rem;
+  line-height: 1.66;
+}
+.dd-console .article-body p,
+.dd-console .article-body li,
+.dd-console .article-body blockquote { color: var(--cr-ink-2); }
+.dd-console .article-body strong { color: var(--cr-ink); font-weight: 600; }
+.dd-console .article-body em { color: var(--cr-amber); font-style: italic; }
+.dd-console .article-body a {
+  color: var(--cr-amber);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-thickness: 1px;
+}
+
+/* scene headings styled as panel headers */
+.dd-console .cr-body h2 {
+  position: relative;
+  font-family: var(--cr-display);
+  font-weight: 700;
+  font-size: clamp(1.4rem, 2.8vw, 1.9rem);
+  line-height: 1.1;
+  letter-spacing: 0.005em;
+  text-transform: uppercase;
+  color: var(--cr-ink);
+  margin: 3rem 0 1rem;
+  padding: 10px 0 10px 14px;
+  border-left: 3px solid var(--cr-edge-hot);
+  border-bottom: 1px solid var(--cr-edge);
+  scroll-margin-top: 90px;
+  transition: border-color 0.2s ease;
+}
+.dd-console .cr-body h2:first-of-type { margin-top: 0.6rem; }
+.dd-console .cr-body h2.is-current {
+  border-left-color: var(--cr-amber);
+}
+.dd-console .cr-body h2::after {
+  content: "";
+  position: absolute;
+  right: 2px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--cr-edge);
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+.dd-console .cr-body h2.is-current::after {
+  background: var(--cr-green);
+  box-shadow: var(--cr-glow) var(--cr-green);
+}
+
+.dd-console .cr-body h3,
+.dd-console .cr-body h4 {
+  font-family: var(--cr-display);
+  font-weight: 600;
+  color: var(--cr-ink);
+  margin: 1.8rem 0 0.6rem;
+}
+
+/* inline code chip */
+.dd-console .article-body :not(pre) > code {
+  font-family: var(--cr-mono);
+  font-size: 0.86em;
+  color: var(--cr-amber);
+  background: var(--cr-amber-dim);
+  border: 1px solid var(--cr-edge);
+  border-radius: 2px;
+  padding: 0.08em 0.36em;
+}
+.dd-console .article-body pre {
+  border-radius: 2px;
+  border: 1px solid var(--cr-edge);
+  background: var(--cr-panel-2);
+}
+.dd-console .article-body pre code {
+  font-family: var(--cr-mono);
+  color: var(--cr-ink);
+}
+
+/* ------------------------------------------------- Master console (hero) -- */
+.dd-console .article-body .cr-master {
+  display: block;
+  border: 1px solid var(--cr-edge);
+  border-radius: 3px;
+  background: var(--cr-panel);
+  margin: 0 0 1.6rem;
+  overflow: hidden;
+}
+.dd-console .article-body .cr-master-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 8px 14px;
+  font-family: var(--cr-mono);
+  font-size: 0.69rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--cr-ink-2);
+  background: var(--cr-panel-2);
+  border-bottom: 1px solid var(--cr-edge);
+}
+.dd-console .article-body .cr-master-head strong {
+  color: var(--cr-amber);
+  font-family: var(--cr-mono);
+  font-weight: 600;
+}
+
+/* thesis lamps */
+.dd-console .article-body .cr-lamp-row {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0;
+  border-bottom: 1px solid var(--cr-edge);
+}
+.dd-console .article-body .cr-lamp {
+  display: block;
+  padding: 12px 12px 11px;
+  border-right: 1px solid var(--cr-edge);
+  text-decoration: none;
+  background: var(--cr-panel);
+  transition: background 0.16s ease;
+}
+.dd-console .article-body .cr-lamp:last-child { border-right: 0; }
+.dd-console .article-body .cr-lamp:hover { background: var(--cr-panel-2); }
+.dd-console .article-body .cr-lamp i {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  margin-right: 7px;
+  vertical-align: baseline;
+}
+.dd-console .article-body .cr-lamp[data-s="ok"] i { background: var(--cr-green); box-shadow: var(--cr-glow) var(--cr-green); }
+.dd-console .article-body .cr-lamp[data-s="warn"] i { background: var(--cr-amber); box-shadow: var(--cr-glow) var(--cr-amber); }
+.dd-console .article-body .cr-lamp[data-s="bad"] i { background: var(--cr-red); box-shadow: var(--cr-glow) var(--cr-red); }
+.dd-console .article-body .cr-lamp b {
+  font-family: var(--cr-mono);
+  font-size: 0.69rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--cr-ink);
+}
+.dd-console .article-body .cr-lamp span {
+  display: block;
+  margin-top: 3px;
+  font-family: var(--cr-mono);
+  font-size: 0.69rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--cr-ink-3);
+}
+
+/* readout tiles */
+.dd-console .article-body .cr-tile-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0;
+}
+.dd-console .article-body .cr-tile {
+  padding: 16px 16px 14px;
+  border-right: 1px solid var(--cr-edge);
+}
+.dd-console .article-body .cr-tile:last-child { border-right: 0; }
+.dd-console .article-body .cr-tile b {
+  display: block;
+  font-family: var(--cr-mono);
+  font-size: clamp(1.3rem, 2.6vw, 1.9rem);
+  font-weight: 700;
+  color: var(--cr-ink);
+  line-height: 1.05;
+}
+.dd-console .article-body .cr-tile b em {
+  font-style: normal;
+  color: var(--cr-amber);
+}
+.dd-console .article-body .cr-tile span {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  color: var(--cr-ink-3);
+}
+
+/* mission brief */
+.dd-console .article-body .cr-brief { margin-top: 0; }
+
+/* --------------------------------------------------------- Reading map ---- */
+.dd-console .article-body .reading-map {
+  border: 1px dashed var(--cr-edge-hot);
+  border-radius: 3px;
+  padding: 1rem 1.1rem 1.15rem;
+  background: var(--cr-panel-2);
+  margin: 1.6rem 0;
+}
+.dd-console .article-body .reading-map-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.dd-console .article-body .reading-map-label,
+.dd-console .article-body .signal-label {
+  display: inline-block;
+  font-family: var(--cr-mono);
+  font-size: 0.69rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--cr-amber);
+}
+.dd-console .article-body .reading-link {
+  display: block;
+  padding: 9px 11px;
+  border: 1px solid var(--cr-edge);
+  border-radius: 2px;
+  background: var(--cr-panel);
+  text-decoration: none;
+  color: var(--cr-ink-2);
+  transition: border-color 0.16s ease, transform 0.16s ease;
+}
+.dd-console .article-body .reading-link:hover {
+  border-color: var(--cr-amber);
+  transform: translateY(-1px);
+}
+.dd-console .article-body .reading-link > strong {
+  display: block;
+  font-family: var(--cr-display);
+  color: var(--cr-ink);
+  margin-bottom: 2px;
+}
+.dd-console .article-body .reading-link > span { font-size: 0.82rem; color: var(--cr-ink-3); }
+
+/* -------------------------------------------------------------- Callouts -- */
+.dd-console .article-body .callout {
+  display: block;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--cr-edge);
+  border-left: 4px solid var(--cr-edge-hot);
+  border-radius: 2px;
+  background: var(--cr-panel);
+  color: var(--cr-ink-2);
+  margin: 1.4rem 0;
+}
+.dd-console .article-body .callout > strong {
+  display: block;
+  font-family: var(--cr-mono);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--cr-ink);
+  margin: 0 0 0.4rem;
+}
+.dd-console .article-body .callout.warm { border-left-color: var(--cr-amber); }
+.dd-console .article-body .callout.warm > strong { color: var(--cr-amber); }
+.dd-console .article-body .callout.alert { border-left-color: var(--cr-red); }
+.dd-console .article-body .callout.alert > strong { color: var(--cr-red); }
+.dd-console .article-body .callout.green,
+.dd-console .article-body .callout.neutral { border-left-color: var(--cr-green); }
+.dd-console .article-body .callout.green > strong,
+.dd-console .article-body .callout.neutral > strong { color: var(--cr-green); }
+
+/* ----------------------------------------------- Scene 7: thesis board ---- */
+.dd-console .article-body .cr-instrument-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 1.5rem 0;
+}
+.dd-console .article-body .cr-instrument {
+  border: 1px solid var(--cr-edge);
+  border-radius: 3px;
+  background: var(--cr-panel);
+  padding: 0;
+  overflow: hidden;
+}
+.dd-console .article-body .cr-instrument-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--cr-panel-2);
+  border-bottom: 1px solid var(--cr-edge);
+  font-family: var(--cr-mono);
+  font-size: 0.69rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--cr-ink);
+}
+.dd-console .article-body .cr-verdict {
+  font-family: var(--cr-mono);
+  font-size: 0.69rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 2px 8px;
+  border-radius: 2px;
+  white-space: nowrap;
+}
+.dd-console .article-body .cr-verdict[data-s="ok"] { color: var(--cr-green); background: var(--cr-green-dim); }
+.dd-console .article-body .cr-verdict[data-s="warn"] { color: var(--cr-amber); background: var(--cr-amber-dim); }
+.dd-console .article-body .cr-verdict[data-s="bad"] { color: var(--cr-red); background: var(--cr-red-dim); }
+.dd-console .article-body .cr-instrument > p {
+  margin: 0;
+  padding: 10px 12px 12px;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--cr-ink-2);
+}
+.dd-console .article-body .cr-instrument .cr-log {
+  margin: 0;
+  border: 0;
+  border-top: 1px solid var(--cr-edge);
+  border-radius: 0;
+  background: var(--cr-panel-2);
+}
+
+/* event log lines */
+.dd-console .article-body .cr-log-line {
+  display: block;
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--cr-edge);
+  font-family: var(--cr-mono);
+  font-size: 0.72rem;
+  line-height: 1.45;
+  color: var(--cr-ink-2);
+}
+.dd-console .article-body .cr-log-line:last-child { border-bottom: 0; }
+.dd-console .article-body .cr-log-line b {
+  color: var(--cr-amber);
+  font-weight: 600;
+  font-family: var(--cr-mono);
+}
+
+/* vendor-reported badge */
+.dd-console .article-body .cr-v {
+  display: inline-block;
+  font-family: var(--cr-mono);
+  font-size: 0.69rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--cr-amber);
+  background: var(--cr-amber-dim);
+  border: 1px solid var(--cr-amber);
+  border-radius: 2px;
+  padding: 1px 4px;
+  vertical-align: 0.08em;
+}
+
+/* ----------------------------------------------- Scene 7: vendor cards ---- */
+.dd-console .article-body .cr-vendor-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 1.5rem 0;
+}
+.dd-console .article-body .cr-vendor-card {
+  border: 1px solid var(--cr-edge);
+  border-radius: 3px;
+  background: var(--cr-panel);
+  padding: 0 0 12px;
+  overflow: hidden;
+}
+.dd-console .article-body .cr-vendor-card > header {
+  padding: 9px 12px;
+  background: var(--cr-panel-2);
+  border-bottom: 1px solid var(--cr-edge);
+}
+.dd-console .article-body .cr-vendor-card > header b {
+  display: block;
+  font-family: var(--cr-display);
+  font-weight: 700;
+  font-size: 0.98rem;
+  color: var(--cr-ink);
+}
+.dd-console .article-body .cr-vendor-card > header span {
+  display: block;
+  margin-top: 1px;
+  font-family: var(--cr-mono);
+  font-size: 0.69rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--cr-ink-3);
+}
+.dd-console .article-body .cr-score-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 10px 12px 0;
+}
+.dd-console .article-body .cr-chip {
+  font-family: var(--cr-mono);
+  font-size: 0.69rem;
+  line-height: 1;
+  color: var(--cr-ink-2);
+  border: 1px solid var(--cr-edge);
+  border-radius: 2px;
+  padding: 4px 7px;
+  background: var(--cr-panel-2);
+}
+.dd-console .article-body .cr-chip b {
+  color: var(--cr-amber);
+  font-weight: 700;
+  font-family: var(--cr-mono);
+}
+.dd-console .article-body .cr-vendor-card > p {
+  margin: 0;
+  padding: 9px 12px 0;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--cr-ink-2);
+}
+.dd-console .article-body .cr-vendor-card .cr-update {
+  font-family: var(--cr-mono);
+  font-size: 0.74rem;
+  color: var(--cr-ink-3);
+}
+.dd-console .article-body .cr-vendor-card .cr-update b {
+  font-family: var(--cr-mono);
+  font-weight: 600;
+  color: var(--cr-ink-2);
+}
+
+/* ------------------------------------------- Scene 8: opportunity cards --- */
+.dd-console .article-body .cr-opp-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 1.5rem 0;
+}
+.dd-console .article-body .cr-opp-card {
+  border: 1px solid var(--cr-edge);
+  border-radius: 3px;
+  background: var(--cr-panel);
+  overflow: hidden;
+}
+.dd-console .article-body .cr-opp-card > header {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 9px 12px;
+  background: var(--cr-panel-2);
+  border-bottom: 1px solid var(--cr-edge);
+}
+.dd-console .article-body .cr-opp-rank {
+  font-family: var(--cr-mono);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--cr-amber);
+}
+.dd-console .article-body .cr-opp-card > header b {
+  font-family: var(--cr-display);
+  font-weight: 700;
+  font-size: 0.98rem;
+  color: var(--cr-ink);
+}
+.dd-console .article-body .cr-plane {
+  margin-left: auto;
+  font-family: var(--cr-mono);
+  font-size: 0.69rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--cr-green);
+  background: var(--cr-green-dim);
+  border-radius: 2px;
+  padding: 3px 7px;
+  white-space: nowrap;
+}
+.dd-console .article-body .cr-opp-card > p {
+  margin: 0;
+  padding: 10px 12px;
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+.dd-console .article-body .cr-opp-card details {
+  margin: 0;
+  border: 0;
+  border-top: 1px solid var(--cr-edge);
+  border-radius: 0;
+  background: var(--cr-panel-2);
+}
+.dd-console .article-body .cr-opp-card dl {
+  margin: 0;
+  padding: 8px 12px 12px;
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr);
+  gap: 5px 10px;
+}
+.dd-console .article-body .cr-opp-card dt {
+  font-family: var(--cr-mono);
+  font-size: 0.69rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--cr-ink-3);
+  padding-top: 2px;
+}
+.dd-console .article-body .cr-opp-card dd {
+  margin: 0;
+  font-size: 0.83rem;
+  line-height: 1.45;
+  color: var(--cr-ink-2);
+}
+
+/* ------------------------------------------------------------- Tables ----- */
+.dd-console .article-body table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.6rem 0;
+  border: 1px solid var(--cr-edge);
+  font-size: 0.92rem;
+}
+.dd-console .article-body th,
+.dd-console .article-body td {
+  display: table-cell;
+  padding: 10px 13px;
+  border: 1px solid var(--cr-edge);
+  text-align: left;
+  vertical-align: top;
+  color: var(--cr-ink-2);
+}
+.dd-console .article-body th {
+  font-family: var(--cr-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--cr-ink);
+  background: var(--cr-panel-2);
+}
+.dd-console .article-body td strong { color: var(--cr-ink); }
+
+/* ----------------------------------------------------- Details / summary -- */
+.dd-console .article-body details {
+  margin: 1.4rem 0 2rem;
+  border: 1px solid var(--cr-edge);
+  border-radius: 3px;
+  background: var(--cr-panel);
+  overflow: hidden;
+}
+.dd-console .article-body summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  font-family: var(--cr-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--cr-ink);
+  background: var(--cr-panel-2);
+}
+.dd-console .article-body summary::-webkit-details-marker { display: none; }
+.dd-console .article-body summary::after {
+  content: "+";
+  flex: 0 0 auto;
+  font-size: 0.9rem;
+  color: var(--cr-amber);
+}
+.dd-console .article-body details[open] summary::after { content: "\2212"; }
+.dd-console .article-body details[open] summary {
+  border-bottom: 1px solid var(--cr-edge);
+}
+.dd-console .article-body summary:focus-visible {
+  outline: 2px solid var(--cr-amber);
+  outline-offset: -2px;
+}
+.dd-console .article-body details table { margin: 0; border: 0; }
+
+.dd-console .article-body hr {
+  border: 0;
+  border-top: 1px dashed var(--cr-edge);
+  margin: 2.4rem 0;
+}
+
+/* -------------------------------------------------- Visual instruments ---- */
+.dd-console .article-body .visual-frame {
+  position: relative;
+  border: 1px solid var(--cr-edge);
+  border-radius: 3px;
+  background: var(--cr-panel);
+  margin: 1.7rem 0 2.2rem;
+  padding-top: 26px;
+  overflow: hidden;
+}
+.dd-console .article-body .visual-frame::before {
+  content: "INSTRUMENT FEED · INTERACTIVE";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  font-family: var(--cr-mono);
+  font-size: 0.69rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--cr-ink-2);
+  background: var(--cr-panel-2);
+  border-bottom: 1px solid var(--cr-edge);
+  z-index: 1;
+}
+.dd-console .article-body .visual-frame::after {
+  content: "";
+  position: absolute;
+  top: 9px;
+  right: 12px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--cr-green);
+  box-shadow: var(--cr-glow) var(--cr-green);
+  z-index: 2;
+}
+.dd-console .article-body .visual-frame iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: var(--cr-panel);
+}
+
+/* ------------------------------------------------------------- Motion ----- */
+@media (prefers-reduced-motion: no-preference) {
+  .dd-console .cr-title,
+  .dd-console .cr-subtitle,
+  .dd-console .cr-lead,
+  .dd-console .cr-coords {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  .dd-console.cr-loaded .cr-title,
+  .dd-console.cr-loaded .cr-subtitle,
+  .dd-console.cr-loaded .cr-lead,
+  .dd-console.cr-loaded .cr-coords {
+    animation: cr-rise 0.6s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+  }
+  .dd-console.cr-loaded .cr-subtitle { animation-delay: 0.08s; }
+  .dd-console.cr-loaded .cr-lead { animation-delay: 0.16s; }
+  .dd-console.cr-loaded .cr-coords { animation-delay: 0.24s; }
+}
+@keyframes cr-rise { to { opacity: 1; transform: translateY(0); } }
+
+/* ----------------------------------------------------------- Responsive --- */
+@media (max-width: 960px) {
+  .dd-console .cr-layout { grid-template-columns: minmax(0, 1fr); }
+  .dd-console .cr-spine-index {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    flex-direction: row;
+    align-self: stretch;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: thin;
+    border-left: 0;
+    border-bottom: 2px solid var(--cr-edge);
+    margin-bottom: 16px;
+    padding: 4px 0;
+    background: linear-gradient(180deg, var(--cr-bg-0), var(--cr-bg-1));
+  }
+  .dd-console .cr-index-link {
+    flex: 0 0 auto;
+    white-space: nowrap;
+    margin-left: 0;
+    border-left: 0;
+    border-bottom: 2px solid transparent;
+  }
+  .dd-console .cr-index-link.is-active {
+    border-left-color: transparent;
+    border-bottom-color: var(--cr-amber);
+  }
+  .dd-console .article-body .cr-lamp-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .dd-console .article-body .cr-lamp { border-bottom: 1px solid var(--cr-edge); }
+  .dd-console .article-body .cr-lamp:nth-child(2n) { border-right: 0; }
+  .dd-console .article-body .cr-lamp:last-child { grid-column: span 2; border-bottom: 0; }
+  .dd-console .article-body .cr-lamp:nth-child(4) { border-bottom: 0; }
+  .dd-console .article-body .cr-tile-grid { grid-template-columns: minmax(0, 1fr); }
+  .dd-console .article-body .cr-tile {
+    border-right: 0;
+    border-bottom: 1px solid var(--cr-edge);
+  }
+  .dd-console .article-body .cr-tile:last-child { border-bottom: 0; }
+}
+@media (max-width: 760px) {
+  .dd-console .article-body .cr-instrument-grid,
+  .dd-console .article-body .cr-vendor-grid,
+  .dd-console .article-body .cr-opp-grid,
+  .dd-console .article-body .reading-map-grid { grid-template-columns: minmax(0, 1fr); }
+}

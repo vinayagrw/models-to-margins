@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Adoption Data — Signal Console</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+/* Scene-specific: signal console. Every adoption signal gets a lane,
+   a status LED, a mini visualization, and an honest weight tag. */
+:root {
+  --live: var(--good);
+  --editorial: var(--L5);
+  --dark: var(--muted); /* muted-soft fails contrast for the tag text on these lanes */
+  --decline: var(--warn);
+}
+
+.shell { display: flex; flex-direction: column; gap: 10px; }
+:root[data-embedded="true"] .shell {
+  display: flex; flex-direction: column; gap: clamp(5px, 0.9vh, 10px);
+  padding: clamp(10px, 1.5vh, 16px) clamp(14px, 2vw, 22px);
+}
+
+.head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.head h1 {
+  font-family: "Space Grotesk", sans-serif; font-weight: 700;
+  font-size: clamp(1.05rem, 2.3vw, 1.45rem); letter-spacing: -0.02em; color: var(--text-strong);
+}
+:root[data-embedded="true"] .head h1 { font-size: clamp(0.92rem, 2.1vh, 1.2rem); }
+.legend { display: flex; gap: 13px; font-family: "DM Sans", sans-serif; font-size: 0.72rem; color: var(--muted); flex-wrap: wrap; }
+.legend span { display: flex; align-items: center; gap: 6px; }
+.legend i { width: 9px; height: 9px; border-radius: 50%; }
+:root[data-embedded="true"] .legend { font-size: clamp(0.69rem, 1.25vh, 0.72rem); }
+
+.board { display: flex; flex-direction: column; gap: 7px; flex: 1 1 auto; min-height: 0; justify-content: space-between; }
+:root[data-embedded="true"] .board { gap: clamp(4px, 0.7vh, 7px); }
+
+.lane {
+  display: grid; grid-template-columns: 14px minmax(150px, 0.9fr) minmax(0, 1.15fr) minmax(0, 0.9fr) auto;
+  gap: 12px; align-items: center;
+  padding: 9px 13px; border-radius: 12px;
+  border: 1px solid var(--border); background: var(--surface);
+  opacity: 0; transform: translateX(-8px); animation: slide .45s ease-out forwards;
+}
+:root[data-embedded="true"] .lane { padding: clamp(5px, 0.9vh, 9px) clamp(9px, 1.3vw, 13px); gap: clamp(7px, 1vw, 12px); }
+.lane.is-dark { border-style: dashed; background: transparent; }
+.lane.is-dark .src-name, .lane.is-dark .finding { color: var(--muted); }
+
+.led { width: 10px; height: 10px; border-radius: 50%; background: var(--c); box-shadow: 0 0 0 3px color-mix(in srgb, var(--c) 22%, transparent); }
+.led.blink { animation: blink 2.4s ease-in-out infinite; }
+
+.src-name { font: 700 0.8rem/1.2 "Space Grotesk", sans-serif; color: var(--text-strong); letter-spacing: -0.01em; }
+.src-date { font: 700 0.69rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-top: 3px; }
+:root[data-embedded="true"] .src-name { font-size: clamp(0.72rem, 1.4vh, 0.8rem); }
+:root[data-embedded="true"] .src-date { font-size: clamp(0.69rem, 1.05vh, 0.7rem); }
+
+/* Mini visualizations */
+.viz { display: flex; align-items: center; gap: 8px; min-height: 30px; }
+.viz-bar { display: flex; flex-direction: column; gap: 4px; width: 100%; }
+.bar-row { display: flex; align-items: center; gap: 7px; }
+.bar-track { flex: 1 1 auto; height: 8px; border-radius: 99px; background: color-mix(in srgb, var(--text) 8%, transparent); overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 99px; background: var(--bc); width: 0; animation: grow 1s ease-out forwards .5s; }
+.bar-num { font: 700 0.7rem/1 "Space Grotesk", sans-serif; color: var(--text-strong); min-width: 56px; text-align: right; }
+:root[data-embedded="true"] .bar-num { font-size: clamp(0.69rem, 1.2vh, 0.7rem); min-width: 48px; }
+
+.viz-flat { width: 100%; height: 30px; }
+.viz-flat polyline { fill: none; stroke: var(--live); stroke-width: 2; stroke-linecap: round; }
+.viz-flat .cut { stroke: var(--decline); stroke-dasharray: 3 4; }
+.viz-flat text { font: 700 11px "Space Grotesk", sans-serif; fill: var(--muted); letter-spacing: .08em; }
+
+.viz-drop { display: flex; gap: 14px; align-items: center; }
+.drop-stat { display: flex; align-items: center; gap: 5px; font: 700 0.92rem/1 "Space Grotesk", sans-serif; color: var(--decline); }
+.drop-stat small { font: 700 0.69rem/1.2 "Space Grotesk", sans-serif; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.drop-stat .arrow { display: inline-block; animation: sink 2.2s ease-in-out infinite; }
+:root[data-embedded="true"] .drop-stat { font-size: clamp(0.74rem, 1.6vh, 0.92rem); }
+:root[data-embedded="true"] .drop-stat small { font-size: clamp(0.69rem, 1vh, 0.7rem); }
+
+.viz-note { font: 500 0.72rem/1.3 "DM Sans", sans-serif; color: var(--muted); font-style: italic; }
+:root[data-embedded="true"] .viz-note { font-size: clamp(0.69rem, 1.25vh, 0.72rem); }
+
+.finding { font: 400 0.72rem/1.35 "DM Sans", sans-serif; color: var(--text); }
+:root[data-embedded="true"] .finding { font-size: clamp(0.69rem, 1.25vh, 0.72rem); }
+
+.weight {
+  font: 700 0.69rem/1.25 "Space Grotesk", sans-serif; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--c); padding: 5px 9px; border-radius: 99px;
+  border: 1px solid color-mix(in srgb, var(--c) 45%, transparent);
+  background: color-mix(in srgb, var(--c) 8%, transparent);
+  max-width: 150px; text-align: center;
+}
+:root[data-embedded="true"] .weight { font-size: clamp(0.69rem, 1vh, 0.7rem); padding: clamp(3px, 0.6vh, 5px) clamp(6px, 0.9vw, 9px); }
+
+.verdict {
+  display: flex; align-items: center; justify-content: center; gap: 8px; text-align: center;
+  padding: 8px 14px; border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+  background: color-mix(in srgb, var(--accent) 7%, transparent);
+  font-family: "DM Sans", sans-serif; font-size: 0.8rem; color: var(--text);
+}
+.verdict strong { font-family: "Space Grotesk", sans-serif; color: var(--text-strong); }
+:root[data-embedded="true"] .verdict { font-size: clamp(0.7rem, 1.4vh, 0.8rem); padding: clamp(5px, 0.9vh, 8px) 14px; }
+
+@keyframes slide { to { opacity: 1; transform: translateX(0); } }
+@keyframes grow { to { width: var(--w); } }
+@keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: .35; } }
+@keyframes sink { 0%,100% { transform: translateY(-1px); } 50% { transform: translateY(2px); } }
+@media (prefers-reduced-motion: reduce) {
+  .lane { animation: none; opacity: 1; transform: none; }
+  .bar-fill { animation: none; width: var(--w); }
+  .led.blink, .drop-stat .arrow { animation: none; }
+}
+@media (max-width: 860px) {
+  .lane { grid-template-columns: 12px minmax(0,1fr) auto; }
+  .viz, .finding { display: none; }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <header class="head">
+    <div>
+      <div class="eyebrow">Every signal, honestly weighted</div>
+      <h1>The adoption data: plateau, fading curiosity, dark lanes</h1>
+    </div>
+    <div class="legend">
+      <span><i style="background:var(--live)"></i>Measured</span>
+      <span><i style="background:var(--decline)"></i>Declining</span>
+      <span><i style="background:var(--editorial)"></i>Editorial judgment</span>
+      <span><i style="background:var(--dark)"></i>Measurement went dark</span>
+    </div>
+  </header>
+
+  <div class="board">
+
+    <div class="lane" style="--c:var(--live); animation-delay:.05s">
+      <div class="led blink" style="--c:var(--live)"></div>
+      <div><div class="src-name">O'Reilly adoption survey</div><div class="src-date">Jul 2020 · n=1,502</div></div>
+      <div class="viz"><div class="viz-bar">
+        <div class="bar-row"><div class="bar-track"><div class="bar-fill" style="--bc:var(--live); --w:77%"></div></div><div class="bar-num">77% adopted</div></div>
+        <div class="bar-row"><div class="bar-track"><div class="bar-fill" style="--bc:color-mix(in srgb, var(--live) 55%, transparent); --w:29%"></div></div><div class="bar-num">29% majority</div></div>
+      </div></div>
+      <div class="finding">Most had some microservices. Few ran mostly microservices.</div>
+      <div class="weight" style="--c:var(--live)">Hype-era high-water mark</div>
+    </div>
+
+    <div class="lane" style="--c:var(--live); animation-delay:.15s">
+      <div class="led" style="--c:var(--live)"></div>
+      <div><div class="src-name">JetBrains developer survey</div><div class="src-date">2021 → 2022</div></div>
+      <div class="viz">
+        <svg class="viz-flat" viewBox="0 0 220 30" preserveAspectRatio="none" aria-hidden="true">
+          <polyline points="4,18 70,17 140,16"/>
+          <line class="cut" x1="140" y1="4" x2="140" y2="27" stroke-width="1.5"/>
+          <text x="148" y="12">QUESTION</text>
+          <text x="148" y="23">DROPPED</text>
+        </svg>
+      </div>
+      <div class="finding">35% then ~37% working on microservices. Flat, then the question vanished.</div>
+      <div class="weight" style="--c:var(--live)">Flat, then unmeasured</div>
+    </div>
+
+    <div class="lane" style="--c:var(--decline); animation-delay:.25s">
+      <div class="led blink" style="--c:var(--decline)"></div>
+      <div><div class="src-name">O'Reilly platform usage</div><div class="src-date">Jan 2025</div></div>
+      <div class="viz"><div class="viz-drop">
+        <div class="drop-stat"><span class="arrow">▼</span>24% <small>microservices content</small></div>
+        <div class="drop-stat"><span class="arrow">▼</span>22% <small>DDD content</small></div>
+      </div></div>
+      <div class="finding">Learning interest is measurably falling, year over year.</div>
+      <div class="weight" style="--c:var(--decline)">Curiosity, not production</div>
+    </div>
+
+    <div class="lane" style="--c:var(--editorial); animation-delay:.35s">
+      <div class="led" style="--c:var(--editorial)"></div>
+      <div><div class="src-name">InfoQ architecture trends</div><div class="src-date">Apr 2024</div></div>
+      <div class="viz">
+        <svg class="viz-flat" viewBox="0 0 220 30" preserveAspectRatio="none" aria-hidden="true">
+          <polyline points="4,26 60,24 110,18 150,10 214,6" style="stroke:var(--editorial)"/>
+          <circle cx="110" cy="18" r="4" fill="var(--editorial)"/>
+          <text x="102" y="29">EARLY MAJORITY</text>
+        </svg>
+      </div>
+      <div class="finding">"Designing modular monoliths" crosses to early majority.</div>
+      <div class="weight" style="--c:var(--editorial)">Editorial judgment</div>
+    </div>
+
+    <div class="lane is-dark" style="--c:var(--dark); animation-delay:.45s">
+      <div class="led" style="--c:var(--dark)"></div>
+      <div><div class="src-name">InfoQ architecture trends</div><div class="src-date">Apr 2025</div></div>
+      <div class="viz"><div class="viz-note">Topic absent entirely. Report dominated by agentic AI.</div></div>
+      <div class="finding">The debate left the trend stage.</div>
+      <div class="weight" style="--c:var(--dark)">Signal ended</div>
+    </div>
+
+    <div class="lane is-dark" style="--c:var(--dark); animation-delay:.55s">
+      <div class="led" style="--c:var(--dark)"></div>
+      <div><div class="src-name">DORA / State of DevOps</div><div class="src-date">2023–2024</div></div>
+      <div class="viz"><div class="viz-note">Architecture-agnostic by design. A well-structured monolith counts as "loosely coupled."</div></div>
+      <div class="finding">Neutral on purpose.</div>
+      <div class="weight" style="--c:var(--dark)">Neutral by design</div>
+    </div>
+
+    <div class="lane is-dark" style="--c:var(--dark); animation-delay:.65s">
+      <div class="led" style="--c:var(--dark)"></div>
+      <div><div class="src-name">Stack Overflow survey</div><div class="src-date">2024–2025</div></div>
+      <div class="viz"><div class="viz-note">No architecture-style question exists.</div></div>
+      <div class="finding">Any derived claim is blog inference.</div>
+      <div class="weight" style="--c:var(--dark)">Never measured</div>
+    </div>
+
+  </div>
+
+  <div class="verdict">
+    <strong>Honest headline:</strong>&nbsp;nobody credibly measures production architecture adoption anymore. What is measured shows a plateau plus declining curiosity, not an exodus.
+  </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The 2026 AI Evidence Board — Claims, Measurements, Institutions</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+/* Scene-specific: three-lane evidence board for the AI question.
+   Lane 1 stamps the essay discourse, lane 2 shows what 2026 actually
+   measured, lane 3 shows the institutional vocabulary migration. */
+:root {
+  --mono: var(--accent-3);
+  --micro: #a56cff;
+  --reject: var(--warn);
+  --adjacent: var(--accent);
+  --inst: var(--accent-2);
+}
+
+.shell { display: flex; flex-direction: column; gap: 10px; }
+:root[data-embedded="true"] .shell {
+  gap: clamp(6px, 1vh, 10px);
+  padding: clamp(10px, 1.5vh, 16px) clamp(14px, 2vw, 22px);
+}
+
+.head h1 {
+  font-family: "Space Grotesk", sans-serif; font-weight: 700;
+  font-size: clamp(1.05rem, 2.3vw, 1.45rem); letter-spacing: -0.02em; color: var(--text-strong);
+}
+.head p { color: var(--muted); font-family: "DM Sans", sans-serif; font-size: 0.82rem; margin-top: 3px; }
+:root[data-embedded="true"] .head h1 { font-size: clamp(0.92rem, 2.1vh, 1.2rem); }
+:root[data-embedded="true"] .head p { font-size: clamp(0.72rem, 1.4vh, 0.82rem); }
+
+.lane { display: flex; flex-direction: column; gap: 7px; }
+.lane-title {
+  font: 700 0.7rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.13em;
+  text-transform: uppercase; color: var(--lc, var(--muted));
+}
+:root[data-embedded="true"] .lane-title { font-size: clamp(0.69rem, 1.15vh, 0.72rem); }
+
+/* ---- Lane 1: the claims ---- */
+.poles { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 8px; }
+.pole { display: flex; flex-direction: column; gap: 6px; border-radius: 14px; padding: 9px 10px;
+  border: 1px solid color-mix(in srgb, var(--pc) 35%, var(--border));
+  background: color-mix(in srgb, var(--pc) 4%, var(--surface)); }
+.pole-name { font: 700 0.74rem/1.15 "Space Grotesk", sans-serif; color: var(--pc); text-transform: uppercase; letter-spacing: 0.1em; }
+.essay {
+  display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 8px; align-items: center;
+  padding: 7px 10px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface);
+}
+.essay-name { font: 700 0.76rem/1.25 "Space Grotesk", sans-serif; color: var(--text-strong); }
+.essay-name small { font: 500 0.69rem/1 "DM Sans", sans-serif; color: var(--muted); letter-spacing: 0.02em; }
+.essay-desc { font: 400 0.7rem/1.35 "DM Sans", sans-serif; color: var(--muted); margin-top: 2px; }
+:root[data-embedded="true"] .essay-name { font-size: clamp(0.7rem, 1.35vh, 0.76rem); }
+:root[data-embedded="true"] .essay-desc { font-size: clamp(0.69rem, 1.15vh, 0.7rem); }
+
+.stamp {
+  font: 700 0.69rem/1.15 "Space Grotesk", sans-serif; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--sc); border: 2px solid var(--sc); border-radius: 6px;
+  padding: 5px 8px; transform: rotate(-8deg) scale(2.2); opacity: 0;
+  animation: thump .35s cubic-bezier(.2,1.6,.4,1) forwards;
+  white-space: nowrap; text-align: center;
+}
+:root[data-embedded="true"] .stamp { font-size: clamp(0.69rem, 1.1vh, 0.7rem); padding: clamp(4px, 0.7vh, 5px) clamp(6px, 0.9vw, 8px); }
+
+.errata { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 8px; }
+.erratum {
+  display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 8px; align-items: center;
+  padding: 8px 11px; border-radius: 12px;
+  border: 1px dashed color-mix(in srgb, var(--reject) 50%, var(--border));
+  background: color-mix(in srgb, var(--reject) 4%, transparent);
+}
+.erratum .essay-name { color: var(--text-strong); }
+
+/* ---- Lane 2: the measurements ---- */
+.metrics { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 8px; }
+.metric {
+  position: relative; display: flex; flex-direction: column; gap: 3px;
+  padding: 9px 11px 8px; border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--adjacent) 30%, var(--border)); background: var(--surface);
+}
+.metric-num { font: 700 clamp(0.95rem, 2vw, 1.25rem)/1.05 "Space Grotesk", sans-serif; color: var(--text-strong); letter-spacing: -0.02em; }
+.metric-num em { font-style: normal; color: var(--adjacent); }
+.metric-label { font: 700 0.72rem/1.25 "Space Grotesk", sans-serif; color: var(--text-strong); }
+.metric-src { font: 400 0.69rem/1.3 "DM Sans", sans-serif; color: var(--muted); }
+.metric-tag {
+  align-self: flex-start; margin-top: auto;
+  font: 700 0.69rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--adjacent); border: 1.5px solid var(--adjacent); border-radius: 5px; padding: 3px 6px;
+}
+:root[data-embedded="true"] .metric-label { font-size: clamp(0.69rem, 1.3vh, 0.72rem); }
+:root[data-embedded="true"] .metric-src { font-size: clamp(0.69rem, 1.1vh, 0.69rem); }
+
+.counterweight {
+  display: grid; grid-template-columns: auto minmax(0,1fr); gap: 10px; align-items: center;
+  padding: 8px 11px; border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--good) 45%, var(--border));
+  background: color-mix(in srgb, var(--good) 5%, var(--surface));
+}
+.cw-tag {
+  font: 700 0.69rem/1.15 "Space Grotesk", sans-serif; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--good); border: 2px solid var(--good); border-radius: 6px; padding: 5px 8px;
+  transform: rotate(-8deg); white-space: nowrap;
+}
+.cw-text { font: 400 0.72rem/1.4 "DM Sans", sans-serif; color: var(--muted); }
+.cw-text strong { color: var(--text-strong); font-family: "Space Grotesk", sans-serif; }
+:root[data-embedded="true"] .cw-text { font-size: clamp(0.69rem, 1.2vh, 0.72rem); }
+
+/* ---- Lane 3: the institutions ---- */
+.timeline { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap: 8px; }
+.tl-node {
+  position: relative; display: flex; flex-direction: column; gap: 3px;
+  padding: 8px 10px; border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--inst) 32%, var(--border)); background: var(--surface);
+}
+.tl-node.absent { border-style: dashed; background: transparent; }
+.tl-month { font: 700 0.69rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.12em; text-transform: uppercase; color: var(--inst); }
+.tl-name { font: 700 0.74rem/1.25 "Space Grotesk", sans-serif; color: var(--text-strong); }
+.tl-desc { font: 400 0.69rem/1.35 "DM Sans", sans-serif; color: var(--muted); }
+:root[data-embedded="true"] .tl-name { font-size: clamp(0.69rem, 1.3vh, 0.74rem); }
+:root[data-embedded="true"] .tl-desc { font-size: clamp(0.69rem, 1.1vh, 0.69rem); }
+
+/* ---- Verdict strip ---- */
+.verdict-strip {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  padding: 10px 14px; border-radius: 12px;
+  border: 1.5px solid color-mix(in srgb, var(--accent) 55%, var(--border));
+  background: color-mix(in srgb, var(--accent) 6%, var(--surface));
+}
+.verdict-strip .v-label {
+  font: 700 0.7rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.13em; text-transform: uppercase; color: var(--accent);
+}
+.verdict-strip .v-text { font: 500 0.8rem/1.35 "DM Sans", sans-serif; color: var(--text-strong); }
+:root[data-embedded="true"] .verdict-strip .v-text { font-size: clamp(0.72rem, 1.4vh, 0.8rem); }
+
+@keyframes thump { to { opacity: 1; transform: rotate(-8deg) scale(1); } }
+@media (prefers-reduced-motion: reduce) {
+  .stamp { animation: none; opacity: 1; transform: rotate(-8deg) scale(1); }
+}
+
+@media (max-width: 760px) {
+  .poles, .errata, .metrics, .timeline { grid-template-columns: 1fr; }
+  .metric-tag { margin-top: 2px; }
+}
+/* True phones: stamps and numbers carry the message; the fine print
+   lives in the page's data table. */
+@media (max-width: 560px) {
+  .essay-desc, .tl-desc, .head p { display: none; }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <header class="head">
+    <div class="eyebrow">The 2026 AI check</div>
+    <h1>Loud claims, adjacent evidence, migrated vocabulary</h1>
+    <p>Every entry below was published in 2026 and date-verified against its primary source. The lanes are ranked by how hard they are to fake.</p>
+  </header>
+
+  <section class="lane" style="--lc: var(--reject)" aria-label="Lane one: the claims, all argument and no data">
+    <div class="lane-title">Lane 1 · The claims — every one an argument, none a measurement</div>
+    <div class="poles">
+      <div class="pole" style="--pc: var(--mono)">
+        <div class="pole-name">Pulls monolith-ward</div>
+        <div class="essay">
+          <div><div class="essay-name">Nygard, "AI Versus Microservices" <small>· May 9</small></div>
+          <div class="essay-desc">The heavyweight: AI leverage concentrates where the whole system is in view.</div></div>
+          <div class="stamp" style="--sc: var(--reject); animation-delay:.4s">Argument<br>no data</div>
+        </div>
+        <div class="essay">
+          <div><div class="essay-name">Lacerda, "Death of Microservices" <small>· Feb 14</small></div>
+          <div class="essay-desc">Microservices managed human cognitive limits; large-context AI removes the rationale. Carries an unsourced "1000×" latency figure.</div></div>
+          <div class="stamp" style="--sc: var(--reject); animation-delay:.55s">Argument<br>no data</div>
+        </div>
+        <div class="essay">
+          <div><div class="essay-name">ModulithBench proposal (Mysore) <small>· May 14</small></div>
+          <div class="essay-desc">The only attempt at a head-to-head benchmark — self-described proposal, "measurements still in progress".</div></div>
+          <div class="stamp" style="--sc: var(--reject); animation-delay:.7s">Proposal<br>no data yet</div>
+        </div>
+      </div>
+      <div class="pole" style="--pc: var(--micro)">
+        <div class="pole-name">Pulls services-ward</div>
+        <div class="essay">
+          <div><div class="essay-name">Richardson, microservices.io series <small>· Feb–May</small></div>
+          <div class="essay-desc">The other heavyweight, across five posts: service boundaries are exactly the guardrails coding agents need.</div></div>
+          <div class="stamp" style="--sc: var(--reject); animation-delay:.4s">Argument<br>no data</div>
+        </div>
+        <div class="essay">
+          <div><div class="essay-name">Nordic APIs panel <small>· Mar 17</small></div>
+          <div class="essay-desc">Four named experts: small per-service codebases fit context windows and bound agent blast radius.</div></div>
+          <div class="stamp" style="--sc: var(--reject); animation-delay:.55s">Argument<br>no data</div>
+        </div>
+        <div class="essay">
+          <div><div class="essay-name">Spectro Cloud, monorepo case <small>· Jan 16</small></div>
+          <div class="essay-desc">Filed here with a caveat: argues single-repo context for AI — repository shape, not deployment shape.</div></div>
+          <div class="stamp" style="--sc: var(--reject); animation-delay:.7s">Argument<br>no data</div>
+        </div>
+      </div>
+    </div>
+    <div class="errata">
+      <div class="erratum">
+        <div><div class="essay-name">The category error, thrice <small>· Jan 20 / Feb 26 / Jun 17</small></div>
+        <div class="essay-desc">"AI agents are the new microservices" essays decompose <em>agents</em>, not your codebase. Different question, same vocabulary.</div></div>
+        <div class="stamp" style="--sc: var(--reject); animation-delay:.85s">Category<br>error</div>
+      </div>
+      <div class="erratum">
+        <div><div class="essay-name">The Scene 4 loop, still running</div>
+        <div class="essay-desc">Search snippets in this sweep asserted a "QCon 2026 monolith renaissance keynote" and a "CNCF 42% consolidation" stat. Neither exists in the fetched pages.</div></div>
+        <div class="stamp" style="--sc: var(--reject); animation-delay:1s">Hallucinated</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="lane" style="--lc: var(--adjacent)" aria-label="Lane two: what 2026 actually measured — adjacent evidence only">
+    <div class="lane-title">Lane 2 · The measurements — real numbers, none of them the direct comparison</div>
+    <div class="metrics">
+      <div class="metric">
+        <div class="metric-num">91.3% <em>→</em> 15.3%</div>
+        <div class="metric-label">Agent pass rate collapses with repo size</div>
+        <div class="metric-src">Under 10K LOC vs over 50K LOC · RepoMod-Bench, arXiv, Feb 26</div>
+        <div class="metric-tag">Adjacent</div>
+      </div>
+      <div class="metric">
+        <div class="metric-num">Integration <em>width</em></div>
+        <div class="metric-label">Cross-component coupling is the primary agent bottleneck</div>
+        <div class="metric-src">Repo-level reasoning benchmark · ACL 2026, arXiv, Jan 7</div>
+        <div class="metric-tag">Adjacent</div>
+      </div>
+      <div class="metric">
+        <div class="metric-num">≤ <em>23.7%</em></div>
+        <div class="metric-label">Best agent pass rate generating microservice repos; half the failures are cross-file consistency</div>
+        <div class="metric-src">RepoGenesis, arXiv, Jan 20</div>
+        <div class="metric-tag">Adjacent</div>
+      </div>
+      <div class="metric">
+        <div class="metric-num">33–44% <em>fewer</em></div>
+        <div class="metric-label">Navigation steps when agents get formal architecture descriptors</div>
+        <div class="metric-src">p = 0.009 · arXiv, Apr 11</div>
+        <div class="metric-tag">Adjacent</div>
+      </div>
+    </div>
+    <div class="counterweight">
+      <div class="cw-tag">Null result</div>
+      <div class="cw-text"><strong>The honest counterweight:</strong> the one controlled minimal-pair study (code cleanliness, May 19) found completion rates <strong>unchanged</strong> — only 7–8% fewer tokens and 34% fewer file revisits. Structure differences do not automatically move the outcome needle.</div>
+    </div>
+  </section>
+
+  <section class="lane" style="--lc: var(--inst)" aria-label="Lane three: institutional signals, January to June 2026">
+    <div class="lane-title">Lane 3 · The institutions — the topology debate went missing</div>
+    <div class="timeline">
+      <div class="tl-node">
+        <div class="tl-month">Feb · upd. Apr 22</div>
+        <div class="tl-name">DORA ROI report</div>
+        <div class="tl-desc">AI as amplifier of seven org capabilities. Cites Stanford research: uplift often 10% or less on complex legacy vs 35–40% greenfield. Topology unmentioned.</div>
+      </div>
+      <div class="tl-node">
+        <div class="tl-month">Mar</div>
+        <div class="tl-name">QCon London AI track</div>
+        <div class="tl-desc">"Architecture in the Age of AI" = MCP, context engineering, agent authz. Not service granularity.</div>
+      </div>
+      <div class="tl-node">
+        <div class="tl-month">Apr 15</div>
+        <div class="tl-name">Radar Vol. 34</div>
+        <div class="tl-desc">"Codebase cognitive debt" on Hold; "agent topologies alongside team topologies". The only monoliths warned against are monolithic <em>agents</em>.</div>
+      </div>
+      <div class="tl-node">
+        <div class="tl-month">May 27</div>
+        <div class="tl-name">AWS Transform ARA</div>
+        <div class="tl-desc">Agent-readiness scored across five pillars, "Agent-Ready" to "Not Agent-Integrable". Boundaries as a billable property.</div>
+      </div>
+      <div class="tl-node absent">
+        <div class="tl-month">Apr — missing</div>
+        <div class="tl-name">InfoQ A&amp;D trends 2026</div>
+        <div class="tl-desc">The annual April report had not appeared by July. Absence noted, re-checked on landing.</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="verdict-strip">
+    <span class="v-label">2026 verdict</span>
+    <span class="v-text">Boundaries, not topology. Every lane rewards small navigable contexts and enforced seams in either shape — and the direct head-to-head study still does not exist.</span>
+  </div>
+
+</div>
+</body>
+</html>
