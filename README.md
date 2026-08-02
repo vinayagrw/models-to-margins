@@ -55,6 +55,7 @@
 - **Business-first framing**: the site is built to explain operating consequences, not just announce AI news.
 - **Live brief architecture**: immersive experiences stay inside the Brief collection instead of becoming disconnected microsites.
 - **Raw assets stay portable**: custom HTML visuals remain framework-independent and embed-friendly.
+- **Dark-first theming**: dark is the site default with a light toggle, and every embedded visual syncs to the active theme over a postMessage relay.
 - **Structured long-form writing**: deep dives use signal cards, reading maps, callouts, decision grids, and collapsible sections rather than plain wall-of-text documents.
 - **Cloudflare-ready by default**: the entire output stays static, which keeps build and deployment mechanics easy to reason about.
 
@@ -72,6 +73,9 @@
 | Future of Work Deep Dive | `/deep-dives/future-of-work-2026` | premium deep dive | Modern Markdown, semantic HTML, structured editorial design |
 | Harness Engineering Deep Dive | `/deep-dives/harness-engineering` | premium deep dive + slide-deck sub-route | Article-shell page with 10 inline interactive visuals; optional `/present` sub-route renders the same content as a single-viewport keyboard-navigable slide deck |
 | From Models to Margins — The Metric Chain | `/deep-dives/from-models-to-margins-metric-chain` | premium deep dive (bespoke Blueprint template) | Field-tested playbook on the five metric layers, four practices, and vanity traps for AI products, rendered in the bespoke `blueprint` template with 11 themed interactive visuals on a sticky scene spine |
+| Microservices vs Modular Monolith | `/deep-dives/microservices-vs-modular-monolith` | premium deep dive (bespoke Blueprint template) | Nine scenes of date-stamped evidence plus a statistics audit that replaces the maturity-ladder story with a forces-based decision framework |
+| The AI Ops Execution Layer | `/deep-dives/ai-ops-execution-layer` | premium deep dive (bespoke Console template) | Eight-scene capability atlas on AI that acts instead of reports, with a governed write path, an autonomy ladder, and a graded evidence refresh |
+| Loop Engineering | `/deep-dives/loop-engineering` | premium deep dive (bespoke Console template) | Sequel to Harness Engineering: ten visual-led scenes with 12 interactive instruments — era timeline, evidence board with a dated four-week self-evolving-harness ledger, failure lamps, and an adoption playbook |
 
 ## How It Works
 
@@ -87,7 +91,7 @@ flowchart LR
   F --> I
   H --> I
   I --> J["Astro static build"]
-  J --> K["Cloudflare Pages / workers.dev"]
+  J --> K["Cloudflare Worker + Static Assets (workers.dev)"]
 ```
 
 > [!NOTE]
@@ -113,6 +117,9 @@ flowchart LR
 | Premium deep dive | `/deep-dives/harness-engineering` | `src/content/deep-dives/harness-engineering.md` (article-shell, canonical) |
 | Slide-deck sub-route | `/deep-dives/harness-engineering/present` | `src/pages/deep-dives/harness-engineering/present.astro` (full-viewport slide deck of the same content) |
 | Premium deep dive | `/deep-dives/from-models-to-margins-metric-chain` | `src/content/deep-dives/from-models-to-margins-metric-chain.md` (bespoke `template: blueprint`) |
+| Premium deep dive | `/deep-dives/microservices-vs-modular-monolith` | `src/content/deep-dives/microservices-vs-modular-monolith.md` (bespoke `template: blueprint`) |
+| Premium deep dive | `/deep-dives/ai-ops-execution-layer` | `src/content/deep-dives/ai-ops-execution-layer.md` (bespoke `template: console`) |
+| Premium deep dive | `/deep-dives/loop-engineering` | `src/content/deep-dives/loop-engineering.md` (bespoke `template: console`) |
 | Hidden visitor analytics | `/admin/insights?key=…` | `src/pages/admin/insights.astro` + `public/scripts/insights*.js` (secret-gated, not linked from any public surface) |
 
 ### Content model
@@ -138,14 +145,16 @@ models-to-margins/
     styles/            Shared design system
   public/
     visuals/           Standalone HTML/SVG interactive experiences
-    scripts/           Client beacon, dashboard, blueprint spine
-    styles/            Bespoke deep-dive (blueprint) stylesheet
-  functions/           Cloudflare Pages Functions (analytics collect/read)
+    scripts/           Client beacon, dashboard, spine scripts (blueprint, console)
+    styles/            Bespoke deep-dive stylesheets (blueprint, console)
+  functions/           Analytics API handlers (imported by worker.js)
   test/                Node test suite for enrichment + storage
   docs/
     cloudflare-pages-setup.md
+    site-audit-2026-07.md
     readme-assets/
-  wrangler.toml        Cloudflare KV binding for analytics
+  worker.js            Worker entry: /api/* analytics routes + static assets
+  wrangler.toml        Worker + Static Assets config, ANALYTICS KV binding
   AGENTS.md            Repo-specific editing guardrails
 ```
 
@@ -195,10 +204,20 @@ Current references:
 - `src/content/deep-dives/future-of-work-2026.md` — pure Markdown + small inline data-vis iframes
 - `src/content/deep-dives/harness-engineering.md` — same article-shell, embedding a family of 10 large interactive visuals from `public/visuals/harness-engineering/`
 - `src/content/deep-dives/from-models-to-margins-metric-chain.md` — bespoke `template: blueprint` shell with a sticky scene spine and 11 theme-synced visuals from `public/visuals/from-models-to-margins/`
+- `src/content/deep-dives/microservices-vs-modular-monolith.md` — second `template: blueprint` reference, nine evidence scenes
+- `src/content/deep-dives/ai-ops-execution-layer.md` — `template: console` shell, eight scenes with a governed write path and autonomy ladder
+- `src/content/deep-dives/loop-engineering.md` — `template: console`, ten visual-led scenes embedding 12 interactive instruments from `public/visuals/loop-engineering/` (every visual autosizes into its frame and theme-syncs over a postMessage relay)
 
-#### Optional bespoke template
+#### Optional bespoke templates
 
-For a deep dive that needs its own visual identity, opt in with frontmatter `template: blueprint`. `src/pages/deep-dives/[slug].astro` then renders a `.dd-blueprint` shell and injects `public/styles/deep-dive-blueprint.css` + `public/scripts/spine-blueprint.js` instead of the default article shell. New bespoke looks add a `template:` value, a branch in `[slug].astro`, and scoped CSS/JS under a fresh `.dd-<name>` namespace. House-style note: prose in this template uses no semicolons or em-dashes (scene headings keep their em-dash because the reading-map anchors depend on the slug).
+For a deep dive that needs its own visual identity, opt in with a frontmatter `template:` value. `src/pages/deep-dives/[slug].astro` branches on it and injects that template's scoped CSS/JS instead of the default article shell:
+
+| Template | Look | Shell + assets | Used by |
+|---|---|---|---|
+| `template: blueprint` | Paper-light drawing board with a sticky scene spine | `.dd-blueprint` + `public/styles/deep-dive-blueprint.css` + `public/scripts/spine-blueprint.js` | metric-chain, microservices-vs-modular-monolith |
+| `template: console` | Dark instrument panel with thesis lamps, master tiles, and a mission-brief block | `.dd-console` + `public/styles/deep-dive-console.css` + `public/scripts/spine-console.js` | loop-engineering, ai-ops-execution-layer |
+
+New bespoke looks add a `template:` value, a branch in `[slug].astro`, and scoped CSS/JS under a fresh `.dd-<name>` namespace. House-style note: prose in these templates uses no semicolons or em-dashes (scene headings keep their em-dash because the reading-map anchors depend on the slug).
 
 #### Optional slide-deck sub-route
 
@@ -223,11 +242,12 @@ Use `public/visuals/...` when the artifact should remain:
 
 ## Visitor Analytics (hidden)
 
-A first-party, privacy-conscious analytics layer rides alongside the static site as Cloudflare Pages Functions. It is opt-out-friendly and never linked from any public surface.
+A first-party, privacy-conscious analytics layer is served by the same Cloudflare Worker that fronts the static build: `worker.js` answers `/api/collect` and `/api/events` and reuses the handlers in `functions/api/` verbatim. It is opt-out-friendly and never linked from any public surface.
 
 | Piece | Path | Job |
 |---|---|---|
 | Client beacon | `public/scripts/beacon.js` | Collects pageview, device, geo-hint, and behavior signals; injected only on public pages |
+| Worker router | `worker.js` | Routes `/api/collect` + `/api/events` to the handlers below, serves everything else from `dist/` |
 | Collect endpoint | `functions/api/collect.js` | Enriches with Cloudflare geo/UA and writes events to KV (in-memory fallback) |
 | Read endpoint | `functions/api/events.js` | Secret-gated event read; returns `404` when the token is absent or wrong |
 | Dashboard | `src/pages/admin/insights.astro` | Hidden `/admin/insights` view: KPIs, world map, time series, breakdowns, filterable event table, CSV export |
@@ -259,14 +279,17 @@ Visibility and discovery docs:
 
 ## Deploy
 
-This repo is configured as a static Astro project.
+This repo deploys as a Cloudflare **Worker with Static Assets** (served on `*.workers.dev`), not Cloudflare Pages: `worker.js` answers `/api/*` for visitor analytics and falls through to the `ASSETS` binding for the static Astro build in `dist/`.
 
 | Setting | Value |
 |---|---|
-| Framework preset | `Astro` |
-| Build command | `npm run build` |
-| Output directory | `dist` |
-| Root directory | leave empty unless the repo is nested inside a larger workspace |
+| Entry point | `main = "worker.js"` in `wrangler.toml` |
+| Static assets | `[assets] directory = "./dist"`, binding `ASSETS` |
+| KV | `ANALYTICS` namespace binding (persistent visitor events) |
+| Build + deploy | `npm run build` then `npx wrangler deploy` |
+
+> [!WARNING]
+> Do not add `pages_build_output_dir` to `wrangler.toml` or deploy this repo through the Pages pipeline — the `/api/*` routes live in `worker.js`, and a Pages deploy would silently drop them.
 
 Deployment docs:
 - [docs/cloudflare-pages-setup.md](./docs/cloudflare-pages-setup.md)
