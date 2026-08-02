@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>From prompts to loops, the era timeline</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+/* Arc Timeline. Four era bands, a conveyor track beneath them with a
+   traveling dot, and eleven clickable milestone chips that slide onto
+   the track in date order under .play. Clicking a chip loads the
+   detail panel. Reduced motion: chips visible, dot parked. */
+
+.shell { display: flex; flex-direction: column; gap: 10px; }
+:root[data-embedded="true"] .shell { padding: 14px clamp(14px, 2vw, 22px); }
+/* Embed: size to content and report it, the parent autosizes the frame. */
+:root[data-embedded="true"], :root[data-embedded="true"] body { height: auto; }
+:root[data-embedded="true"] .shell { height: auto; }
+
+.head h1 {
+  font-family: "Space Grotesk", sans-serif; font-weight: 700;
+  font-size: clamp(1.02rem, 2.2vw, 1.3rem); letter-spacing: -0.02em; color: var(--text-strong);
+}
+:root[data-embedded="true"] .head h1 { font-size: 1.02rem; }
+.head p { font: 500 0.72rem/1.4 "DM Sans", sans-serif; color: var(--muted); margin-top: 2px; }
+
+/* ---------- era bands ---------- */
+.eras { display: grid; grid-template-columns: 0.8fr 0.8fr 1.2fr 1.2fr; gap: 8px; }
+.era {
+  border: 1px solid var(--border); border-left: 3px solid var(--ec);
+  border-radius: 10px; background: var(--surface); padding: 7px 10px; min-width: 0;
+}
+.era b { display: block; font: 700 0.62rem/1.2 "Space Grotesk", sans-serif; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ec); }
+.era span { display: block; font: 500 0.6rem/1.35 "DM Sans", sans-serif; color: var(--muted); margin-top: 2px; }
+
+/* ---------- conveyor track + chips ---------- */
+.belt { position: relative; padding: 16px 0 4px; }
+.track { position: relative; height: 4px; border-radius: 3px; background: color-mix(in srgb, var(--accent) 18%, transparent); overflow: hidden; }
+.track i {
+  position: absolute; top: 0; bottom: 0; width: 46px; border-radius: 3px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  left: -50px;
+}
+.play .track i { animation: dot-run 7s linear infinite; }
+@keyframes dot-run { from { left: -50px; } to { left: 100%; } }
+
+.chips { display: flex; gap: 6px; margin-top: 12px; }
+.chip {
+  flex: 1 1 0; min-width: 0; cursor: pointer;
+  border: 1px solid var(--border-strong); border-radius: 10px;
+  background: var(--surface-strong); box-shadow: var(--shadow-soft);
+  padding: 7px 4px 6px; text-align: center;
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.chip::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--ec); }
+.chip b { font: 700 0.66rem/1.1 "Space Grotesk", sans-serif; color: var(--text-strong); white-space: nowrap; }
+.chip span { font: 500 0.66rem/1.1 "DM Sans", sans-serif; color: var(--muted-soft); }
+.chip:hover { border-color: var(--ec); }
+.chip[aria-pressed="true"] {
+  border-color: var(--ec);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ec) 22%, transparent), var(--shadow-soft);
+}
+.play .chip { animation: chip-in 0.45s ease-out backwards; }
+.play .chip:nth-child(1) { animation-delay: 0.05s; } .play .chip:nth-child(2) { animation-delay: 0.15s; }
+.play .chip:nth-child(3) { animation-delay: 0.25s; } .play .chip:nth-child(4) { animation-delay: 0.35s; }
+.play .chip:nth-child(5) { animation-delay: 0.45s; } .play .chip:nth-child(6) { animation-delay: 0.55s; }
+.play .chip:nth-child(7) { animation-delay: 0.65s; } .play .chip:nth-child(8) { animation-delay: 0.75s; }
+.play .chip:nth-child(9) { animation-delay: 0.85s; } .play .chip:nth-child(10) { animation-delay: 0.95s; }
+.play .chip:nth-child(11) { animation-delay: 1.05s; }
+@keyframes chip-in { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: none; } }
+
+/* ---------- detail panel ---------- */
+.detail {
+  flex: 1; min-height: 0; overflow: auto;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+  box-shadow: var(--shadow-soft); padding: 12px 14px;
+  display: flex; flex-direction: column; gap: 7px;
+}
+.d-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.d-date {
+  font: 700 0.6rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--dc, var(--accent)); border: 1px solid color-mix(in srgb, var(--dc, var(--accent)) 45%, transparent);
+  border-radius: 999px; padding: 4px 10px;
+}
+.d-era {
+  font: 700 0.56rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--muted);
+}
+.d-actor { font: 700 0.9rem/1.25 "Space Grotesk", sans-serif; color: var(--text-strong); }
+.d-text { font: 500 0.76rem/1.55 "DM Sans", sans-serif; color: var(--text); }
+
+/* ---------- mobile ---------- */
+@media (max-width: 760px) {
+  .head h1 { font-size: 1rem; }
+  .eras { grid-template-columns: 1fr 1fr; }
+  .chips { flex-wrap: wrap; }
+  .chip { flex: 1 1 22%; }
+  .chip b { font-size: 0.66rem; }
+  .chip span { font-size: 0.66rem; }
+  .era b { font-size: 0.64rem; }
+  .era span { font-size: 0.64rem; }
+  .d-text { font-size: 0.78rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .play .track i, .play .chip { animation: none !important; }
+  .track i { left: 40%; }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="head">
+    <h1>From prompts to loops</h1>
+    <p>Four eras, eleven dated moments. Click a chip on the belt.</p>
+  </div>
+
+  <div class="eras">
+    <div class="era" style="--ec: var(--muted)"><b>Prompt eng.</b><span>2023 to 2024 · optimize what you say</span></div>
+    <div class="era" style="--ec: var(--accent)"><b>Context eng.</b><span>2025 · optimize what the model sees</span></div>
+    <div class="era" style="--ec: var(--good)"><b>Harness eng.</b><span>from Feb 2026 · engineer the environment around one run</span></div>
+    <div class="era" style="--ec: var(--accent-2)"><b>Loop eng.</b><span>from Jun 2026 · engineer the system between runs</span></div>
+  </div>
+
+  <div class="belt">
+    <div class="track" aria-hidden="true"><i></i></div>
+    <div class="chips" role="group" aria-label="Timeline milestones">
+      <button class="chip" style="--ec: var(--muted)" data-i="0" aria-pressed="false"><b>SEP 30</b><span>2025</span></button>
+      <button class="chip" style="--ec: var(--good)" data-i="1" aria-pressed="false"><b>FEB 5</b><span>2026</span></button>
+      <button class="chip" style="--ec: var(--good)" data-i="2" aria-pressed="false"><b>FEB 11</b><span>2026</span></button>
+      <button class="chip" style="--ec: var(--good)" data-i="3" aria-pressed="false"><b>FEB 17</b><span>2026</span></button>
+      <button class="chip" style="--ec: var(--good)" data-i="4" aria-pressed="false"><b>MAR 5</b><span>2026</span></button>
+      <button class="chip" style="--ec: var(--good)" data-i="5" aria-pressed="false"><b>APR 19</b><span>2026</span></button>
+      <button class="chip" style="--ec: var(--accent-2)" data-i="6" aria-pressed="false"><b>MAY 12</b><span>2026</span></button>
+      <button class="chip" style="--ec: var(--accent-2)" data-i="7" aria-pressed="false"><b>JUN 6</b><span>2026</span></button>
+      <button class="chip" style="--ec: var(--accent-2)" data-i="8" aria-pressed="false"><b>JUN 7</b><span>2026</span></button>
+      <button class="chip" style="--ec: var(--accent-2)" data-i="9" aria-pressed="false"><b>JUN 30</b><span>2026</span></button>
+      <button class="chip" style="--ec: var(--accent-2)" data-i="10" aria-pressed="false"><b>JUL 4</b><span>2026</span></button>
+    </div>
+  </div>
+
+  <div class="detail" aria-live="polite">
+    <div class="d-top"><span class="d-date" id="d-date"></span><span class="d-era" id="d-era"></span></div>
+    <div class="d-actor" id="d-actor"></div>
+    <p class="d-text" id="d-text"></p>
+  </div>
+</div>
+<script>
+(() => {
+  const DATA = [
+    { date: 'Sep 30 2025', era: 'Prehistory', color: 'var(--muted)', actor: 'Simon Willison',
+      text: 'Names designing agentic loops a critical new skill, eight months before the field agrees. The prehistory marker: the loop idea existed, the discipline did not.' },
+    { date: 'Feb 5 2026', era: 'Harness era opens', color: 'var(--good)', actor: 'Mitchell Hashimoto',
+      text: 'His adoption-journey post seeds harness engineering: every AGENTS.md line traces to a past agent failure, and each failure gets engineered away permanently.' },
+    { date: 'Feb 11 2026', era: 'Harness era', color: 'var(--good)', actor: 'OpenAI (Ryan Lopopolo)',
+      text: 'The flagship harness post: constrain, inform, verify, correct. A million-line internal product with zero hand-written code, built by a team of three growing to seven.' },
+    { date: 'Feb 17 2026', era: 'Harness era', color: 'var(--good)', actor: 'Birgitta Böckeler, martinfowler.com',
+      text: 'The enterprise memo: harnesses externalize what human developer experience brings, guides steer the agent and sensors detect drift.' },
+    { date: 'Mar 5 2026', era: 'Harness era', color: 'var(--good)', actor: 'swyx stages the debate',
+      text: 'Big Model vs Big Harness, argued in public with named advocates on each side. Verdict: harness engineering shows real value. A conference track follows.' },
+    { date: 'Apr 19 2026', era: 'Harness era', color: 'var(--good)', actor: 'Addy Osmani',
+      text: 'The harness essay: a decent model with a great harness beats a great model with a bad harness. If you are not the model, you are the harness.' },
+    { date: 'May 12 2026', era: 'Loop era opens', color: 'var(--accent-2)', actor: 'Claude Code v2.1.139',
+      text: 'Ships /goal. Set a completion condition and the agent iterates until it verifies. Goal loops become a product primitive rather than user scaffolding.' },
+    { date: 'Jun 6 2026', era: 'Loop era', color: 'var(--accent-2)', actor: 'Boris Cherny',
+      text: 'The Claude Code creator, on record: "my job is to write loops". The interface moved from source code, to agent, to loop.' },
+    { date: 'Jun 7 2026', era: 'Loop era', color: 'var(--accent-2)', actor: 'Osmani + Steinberger',
+      text: 'Osmani publishes Loop Engineering. Steinberger compresses it into the line that pulls five million views in a day: design loops that prompt your agents.' },
+    { date: 'Jun 30 2026', era: 'Loop era', color: 'var(--accent-2)', actor: 'Anthropic, official loops guide',
+      text: 'The vendor canon lands: turn-based, goal-based, time-based, and proactive loops, with an evaluator model checking each goal step. Loops are now documentation, not folklore.' },
+    { date: 'Jul 4 2026', era: 'Loop era', color: 'var(--accent-2)', actor: 'Lilian Weng',
+      text: 'Folds loop design into the agent formula and ties harness engineering to self-improvement: the model improves its harness before anyone rewrites weights.' }
+  ];
+  const chips = document.querySelectorAll('.chip');
+  const el = (id) => document.getElementById(id);
+  const render = (i) => {
+    const d = DATA[i];
+    el('d-date').textContent = d.date;
+    el('d-date').style.setProperty('--dc', d.color);
+    el('d-era').textContent = d.era;
+    el('d-actor').textContent = d.actor;
+    el('d-text').textContent = d.text;
+  };
+  const select = (i) => {
+    chips.forEach((b) => b.setAttribute('aria-pressed', String(Number(b.dataset.i) === i)));
+    render(i);
+  };
+  chips.forEach((btn) => {
+    btn.addEventListener('click', () => select(Number(btn.dataset.i)));
+  });
+  select(8);
+
+  const shell = document.querySelector('.shell');
+  const start = () => shell.classList.add('play');
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((en) => { if (en.isIntersecting) { start(); io.disconnect(); } });
+    }, { threshold: 0.2 });
+    io.observe(shell);
+  } else { start(); }
+  /* Report content height so the parent frame hugs the content. */
+  if (document.documentElement.dataset.embedded === 'true') {
+    const postSize = () => window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+    if ('ResizeObserver' in window) new ResizeObserver(postSize).observe(document.body);
+    window.addEventListener('load', postSize);
+  }
+})();
+</script>
+</body>
+</html>

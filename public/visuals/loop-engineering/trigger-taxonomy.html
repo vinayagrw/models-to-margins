@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The trigger taxonomy, four loop types</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+/* Trigger Taxonomy. A 2x2 quadrant: what starts the loop (clock vs
+   event) crossed with what stops it (fixed task vs success condition).
+   Heartbeat, cron, hook, and goal loops each own a quadrant. Click a
+   quadrant to load the detail card: fires when, best for, failure
+   smell, and a config sketch. The goal quadrant carries the dated
+   /goal release chip. */
+
+.shell { display: flex; flex-direction: column; gap: 10px; }
+:root[data-embedded="true"] .shell { padding: 14px clamp(14px, 2vw, 22px); }
+/* Embed: size to content and report it, the parent autosizes the frame. */
+:root[data-embedded="true"], :root[data-embedded="true"] body { height: auto; }
+:root[data-embedded="true"] .shell { height: auto; }
+
+.head h1 {
+  font-family: "Space Grotesk", sans-serif; font-weight: 700;
+  font-size: clamp(1.02rem, 2.2vw, 1.3rem); letter-spacing: -0.02em; color: var(--text-strong);
+}
+:root[data-embedded="true"] .head h1 { font-size: 1.02rem; }
+.head p { font: 500 0.72rem/1.4 "DM Sans", sans-serif; color: var(--muted); margin-top: 2px; }
+
+.board { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 12px; }
+
+/* ---------- quadrant ---------- */
+.quad-panel {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+  box-shadow: var(--shadow-soft); padding: 12px 14px 14px; min-width: 0; min-height: 0;
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr) 20px;
+  gap: 6px;
+}
+.axis-y {
+  writing-mode: vertical-rl; transform: rotate(180deg);
+  display: flex; align-items: center; justify-content: center;
+  font: 700 0.6rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--muted);
+}
+.axis-x {
+  grid-column: 2; display: flex; align-items: center; justify-content: center;
+  font: 700 0.6rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--muted);
+}
+.grid22 { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 8px; min-height: 0; }
+.q {
+  position: relative; border: 1px solid var(--border-strong); border-radius: 14px;
+  background: color-mix(in srgb, var(--qc) 6%, var(--surface-strong));
+  padding: 10px 12px; cursor: pointer; text-align: left; min-width: 0; min-height: 0;
+  display: flex; flex-direction: column; gap: 4px; overflow: hidden;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.q:hover { border-color: var(--qc); }
+.q[aria-pressed="true"] {
+  border-color: var(--qc);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--qc) 25%, transparent), var(--shadow-soft);
+}
+.q b {
+  display: inline-flex; align-items: center; gap: 7px;
+  font: 700 0.84rem/1.2 "Space Grotesk", sans-serif; color: var(--text-strong);
+}
+.q b::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: var(--qc); flex: none; }
+.q span { font: 500 0.66rem/1.4 "DM Sans", sans-serif; color: var(--muted); }
+.q .corner {
+  position: absolute; right: 9px; top: 9px;
+  font: 700 0.56rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.1em;
+  color: var(--qc); text-transform: uppercase;
+}
+.date-chip {
+  margin-top: auto; align-self: flex-start;
+  font: 700 0.56rem/1.5 "Space Grotesk", sans-serif; letter-spacing: 0.06em;
+  color: var(--qc); border: 1px solid color-mix(in srgb, var(--qc) 45%, transparent);
+  border-radius: 12px; padding: 1px 8px; white-space: normal; max-width: 100%;
+}
+.q-beat { --qc: var(--T-heartbeat); }
+.q-cron { --qc: var(--T-cron); }
+.q-hook { --qc: var(--T-hook); }
+.q-goal { --qc: var(--T-goal); }
+
+/* ---------- detail card ---------- */
+.detail {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+  box-shadow: var(--shadow-soft); padding: 14px 16px; min-width: 0; min-height: 0;
+  display: flex; flex-direction: column; gap: 9px; overflow: auto;
+}
+.d-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.d-head b { font: 700 0.95rem/1.2 "Space Grotesk", sans-serif; color: var(--text-strong); }
+.gate {
+  font: 700 0.6rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.1em; text-transform: uppercase;
+  border-radius: 999px; padding: 4px 9px; white-space: nowrap;
+}
+.gate[data-g="yes"] { color: var(--warn); border: 1px solid color-mix(in srgb, var(--warn) 45%, transparent); }
+.gate[data-g="soft"] { color: var(--accent-2); border: 1px solid color-mix(in srgb, var(--accent-2) 45%, transparent); }
+.d-block { border-top: 1px solid var(--border); padding-top: 7px; }
+.d-label {
+  font: 700 0.62rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--muted); margin-bottom: 4px;
+}
+.d-block p { font: 500 0.75rem/1.5 "DM Sans", sans-serif; color: var(--text); }
+.smell { border-left: 3px solid var(--warn); border-radius: 4px; padding: 6px 10px; background: color-mix(in srgb, var(--warn) 7%, transparent); }
+.cfg {
+  font-family: ui-monospace, "Cascadia Mono", Consolas, "Roboto Mono", monospace;
+  font-size: 0.68rem; line-height: 1.55; color: var(--text);
+  background: color-mix(in srgb, var(--text) 6%, transparent);
+  border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px;
+  white-space: pre; overflow-x: auto;
+}
+
+/* ---------- mobile ---------- */
+@media (max-width: 760px) {
+  .board { grid-template-columns: 1fr; grid-template-rows: auto auto; }
+  .grid22 { min-height: 300px; }
+  .q b { font-size: 0.76rem; }
+  .q span { font-size: 0.62rem; }
+  .head h1 { font-size: 1rem; }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="head">
+    <h1>The trigger taxonomy</h1>
+    <p>What starts the loop, crossed with what stops it. Click a quadrant.</p>
+  </div>
+  <div class="board">
+    <div class="quad-panel">
+      <div class="axis-y">Stops: condition met ↑ · task done ↓</div>
+      <div class="grid22">
+        <button class="q q-beat" data-t="beat" aria-pressed="false">
+          <span class="corner">clock</span>
+          <b>Heartbeat</b>
+          <span>Short interval, runs until the watched state is healthy. The monitor that never clocks out.</span>
+        </button>
+        <button class="q q-goal" data-t="goal" aria-pressed="true">
+          <span class="corner">event</span>
+          <b>Goal</b>
+          <span>Fired once, iterates until a success condition verifies. The loop with a finish line.</span>
+          <span class="date-chip">/goal · Claude Code v2.1.139 · May 12 2026</span>
+        </button>
+        <button class="q q-cron" data-t="cron" aria-pressed="false">
+          <span class="corner">clock</span>
+          <b>Cron</b>
+          <span>Scheduled, bounded sweep. Fires at 02:00, does the chore, stops.</span>
+        </button>
+        <button class="q q-hook" data-t="hook" aria-pressed="false">
+          <span class="corner">event</span>
+          <b>Hook</b>
+          <span>Event-triggered, bounded response. A PR opens, the loop answers, done.</span>
+        </button>
+      </div>
+      <div class="axis-x">Starts: clock ← · → event</div>
+    </div>
+    <div class="detail" aria-live="polite">
+      <div class="d-head"><b id="d-title"></b><span class="gate" id="d-gate"></span></div>
+      <div class="d-block"><div class="d-label">Fires when</div><p id="d-fires"></p></div>
+      <div class="d-block"><div class="d-label">Best for</div><p id="d-best"></p></div>
+      <div class="d-block smell"><div class="d-label">Failure smell</div><p id="d-smell"></p></div>
+      <div class="d-block"><div class="d-label">Config sketch</div><div class="cfg" id="d-cfg"></div></div>
+    </div>
+  </div>
+</div>
+<script>
+(() => {
+  const DATA = {
+    beat: {
+      title: 'Heartbeat loop', gate: 'Alerts a human', g: 'soft',
+      fires: 'Every short interval, 30 seconds to 10 minutes, regardless of whether anything changed.',
+      best: 'Watching external state that cannot push events to you: a deploy queue, a vendor status page, a data pipeline that fails silently.',
+      smell: 'Runs that find nothing, all day. The interval is mismatched to how fast the watched state actually changes: you are paying per heartbeat for silence.',
+      cfg: '/loop 5m "check deploy status,\n  page me if the canary regresses"'
+    },
+    cron: {
+      title: 'Cron loop', gate: 'Human reviews output', g: 'yes',
+      fires: 'On a schedule (nightly at 02:00, Monday at 09:00), then does its bounded chore and stops.',
+      best: 'Maintenance the team never prioritizes: CI-failure triage, dependency bumps, dead-code sweeps, garbage-collecting agent-written cruft.',
+      smell: 'The Monday-morning surprise: a week of unreviewed agent output waiting in a stack of PRs nobody budgeted time to read.',
+      cfg: 'schedule: "0 2 * * *"\ntask: triage today’s CI failures,\n  open one issue per root cause'
+    },
+    hook: {
+      title: 'Hook loop', gate: 'Human reviews output', g: 'yes',
+      fires: 'On an event: a PR opens, CI fails, a Slack message lands, an issue gets labeled.',
+      best: 'Feedback at the moment of change: review every PR on open, reproduce every CI failure while the diff is small and the author still has context.',
+      smell: 'Hook storms. One event triggers a loop whose output fires more events, which trigger more loops. Every hook loop needs a loop-breaker guard.',
+      cfg: 'on: pull_request.opened\nrun: reviewer agent, refute mode\nguard: skip if author == agent'
+    },
+    goal: {
+      title: 'Goal loop', gate: 'Budget cap + merge gate', g: 'yes',
+      fires: 'Once, by a human or another loop. Then it iterates on its own, checking the success condition after every attempt, until it verifies or the budget dies.',
+      best: 'Bounded outcomes with a machine-checkable finish line: all tests green, the benchmark under 200 ms, the migration compiling on every target.',
+      smell: 'The unfalsifiable goal. "Make the code better" never verifies, so the loop burns budget forever. If the finish line is not machine-checkable, it is not a goal loop.',
+      cfg: '/goal "all tests pass on 3.12"\n  --budget 2h\n  --stop-on: success | budget'
+    }
+  };
+  const quads = document.querySelectorAll('.q');
+  const el = (id) => document.getElementById(id);
+  const render = (key) => {
+    const d = DATA[key];
+    el('d-title').textContent = d.title;
+    el('d-gate').textContent = d.gate;
+    el('d-gate').dataset.g = d.g;
+    el('d-fires').textContent = d.fires;
+    el('d-best').textContent = d.best;
+    el('d-smell').textContent = d.smell;
+    el('d-cfg').textContent = d.cfg;
+  };
+  quads.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      quads.forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
+      render(btn.dataset.t);
+    });
+  });
+  render('goal');
+
+  /* Report content height so the parent frame hugs the content. */
+  if (document.documentElement.dataset.embedded === 'true') {
+    const postSize = () => window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+    if ('ResizeObserver' in window) new ResizeObserver(postSize).observe(document.body);
+    window.addEventListener('load', postSize);
+  }
+})();
+</script>
+</body>
+</html>

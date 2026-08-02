@@ -74,16 +74,16 @@ That architecture is what makes **private AI and public AI** coexist. Sensitive,
 
 This is **not** a ranking of all open models. It is a shortlist of the major production-relevant open or open-weight families discussed in the April 3, 2026 thread, evaluated for business deployment value rather than benchmark theater.
 
-Representative hosted prices below are snapshots cited in that thread and can move by provider and date. Open-model economics are not standardized.
+Representative hosted prices below are April 2026 snapshots cited in that thread and have already moved on several rows (DeepSeek in particular, where V4 has since shipped and typical hosted V3.1/R1 prices are now well below the listed figures). Open-model economics are not standardized.
 
 | Family | License | Business fit | Self-host difficulty | Typical cost | Best use case | When to prefer closed instead |
 |---|---|---|---|---|---|---|
 | Qwen3 | Apache 2.0 | Best all-around open business option | Medium-High on large variants | About `$0.20/M` input and `$0.60/M` output for `235B-A22B` via hosted providers | Enterprise copilots, multilingual support, coding, agents | When managed support, indemnity, or premium multimodal matter more than control |
 | Gemma 4 | Apache 2.0 | Efficient, license-friendly, productizable | Low-Medium for smaller variants | Provider-dependent; no single canonical price | Private assistants, regulated internal apps, edge/local AI | When you want frontier capability with the least operational work |
-| gpt-oss | Open-weight release | Strong reasoning with major ecosystem gravity | Medium | About `$0.15/M` input and `$0.60/M` output for `120B` via hosted providers | Reasoning agents, coding, private deployment | When a team prefers fully managed OpenAI APIs and does not want infra ownership |
+| gpt-oss | Apache 2.0 (open-weight) | Strong reasoning with major ecosystem gravity | Medium | About `$0.15/M` input and `$0.60/M` output for `120B` via hosted providers | Reasoning agents, coding, private deployment | When a team prefers fully managed OpenAI APIs and does not want infra ownership |
 | Mistral open models | Mostly Apache 2.0 on open families | Efficient enterprise production, especially EU-friendly | Low-Medium | About `$0.10/M` input and `$0.30/M` output for `Mistral Small 3` | Fast assistants, multilingual apps, lower-cost production | When frontier reasoning or turnkey multimodal is the priority |
 | IBM Granite 4 | Apache 2.0 | Governance-heavy enterprise use | Low-Medium | Provider-dependent; lower infra footprint is part of the pitch | RAG, documents, controlled workflows | When raw frontier quality matters more than auditability and efficiency |
-| DeepSeek V3 / R1 | Mixed model terms | Strongest price-performance for reasoning-heavy work | Medium-High | `V3.1` about `$0.60/$1.70`; `R1` about `$3/$7` | Coding, reasoning, research agents | When compliance, procurement comfort, or geopolitical scrutiny are blockers |
+| DeepSeek V3 / R1 | MIT (weights) | Strongest price-performance for reasoning-heavy work | Medium-High | `V3.1` about `$0.60/$1.70` at the April snapshot, typical hosted now nearer `$0.25/$0.95`; `R1` `$3/$7` on Together's list, typical hosted nearer `$0.70/$2.50` | Coding, reasoning, research agents | When compliance, procurement comfort, or geopolitical scrutiny are blockers |
 | Llama 4 | Llama 4 Community License | Ecosystem-first generalist | Medium-High | About `$0.27/M` input and `$0.85/M` output for `Maverick` | Broad compatibility and partner tooling | When legal wants cleaner permissive licensing or fewer usage conditions |
 
 Two things can both be true at once:
@@ -135,7 +135,7 @@ It is a **portfolio strategy**.
 - [Google Gemma 4 announcement](https://blog.google/innovation-and-ai/technology/developers-tools/gemma-4/)
 - [Qwen3](https://qwenlm.github.io/blog/qwen3/)
 - [Together AI pricing](https://www.together.ai/pricing)
-- [Introducing gpt-oss](https://openai.com/blog/introducing-gpt-oss/)
+- [Introducing gpt-oss](https://openai.com/index/introducing-gpt-oss/)
 - [Mistral models](https://docs.mistral.ai/getting-started/models/)
 - [IBM Granite 4.0](https://www.ibm.com/new/announcements/ibm-granite-4-0-hyper-efficient-high-performance-hybrid-models)
 - [Meta Llama models](https://huggingface.co/meta-llama)

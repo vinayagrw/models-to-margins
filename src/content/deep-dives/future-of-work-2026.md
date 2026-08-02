@@ -95,7 +95,7 @@ readTime: 18 min read
     src="/visuals/future-of-work/market-pulse.html?embed=1"
     title="March 2026 market pulse — payroll gains and key economic signals"
     loading="lazy"
-  ></iframe>
+   sandbox="allow-scripts allow-same-origin"></iframe>
 </div>
 
 <div class="thesis-grid">
@@ -193,7 +193,7 @@ Job creation potential is weighted highest (25%) because this is an employment-f
     src="/visuals/future-of-work/portfolio-heatmap.html?embed=1"
     title="Portfolio heatmap — sector rankings across three time horizons"
     loading="lazy"
-  ></iframe>
+   sandbox="allow-scripts allow-same-origin"></iframe>
 </div>
 
 <details>
@@ -378,7 +378,7 @@ Job creation potential is weighted highest (25%) because this is an employment-f
     src="/visuals/future-of-work/sector-trajectory.html?embed=1"
     title="Sector trajectory bump chart showing rank changes across three time horizons"
     loading="lazy"
-  ></iframe>
+   sandbox="allow-scripts allow-same-origin"></iframe>
 </div>
 
 ## Scenario Sensitivity
@@ -926,7 +926,7 @@ Job creation potential is weighted highest (25%) because this is an employment-f
     src="/visuals/future-of-work/convergence-network.html?embed=1"
     title="Sector convergence network — connections between five workforce sectors"
     loading="lazy"
-  ></iframe>
+   sandbox="allow-scripts allow-same-origin"></iframe>
 </div>
 
 <details>

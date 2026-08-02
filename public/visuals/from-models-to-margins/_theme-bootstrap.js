@@ -15,7 +15,7 @@
   };
   const getSystem = () => (media.matches ? 'dark' : 'light');
   const getPreferred = () =>
-    normalize(params.get('theme')) ?? getStored() ?? getSystem();
+    normalize(params.get('theme')) ?? getStored() ?? 'dark';
 
   const apply = (theme) => {
     const next = normalize(theme) ?? getPreferred();

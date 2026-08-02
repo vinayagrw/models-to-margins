@@ -2,7 +2,10 @@
   "permissions": {
     "allow": [
       "mcp__Claude_Preview__preview_start",
-      "WebSearch"
+      "WebSearch",
+      "Read(//c/Users/viagr/Documents/Vinay/Ciklum/Tech-explorer/**)",
+      "Bash(pandoc -t markdown \"Vinay's TheTechNewsLetter.docx\" -o /tmp/newsletter.md)",
+      "Read(//tmp/**)"
     ]
   }
 }

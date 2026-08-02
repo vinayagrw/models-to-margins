@@ -36,8 +36,9 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <slot name="head" />
   </head>
   <body>
+    <a class="skip-link" href="#main-content">Skip to content</a>
     <SiteHeader currentPath={currentPath} />
-    <main class="site-shell">
+    <main class="site-shell" id="main-content">
       <slot />
     </main>
     <footer class="site-shell site-footer">
@@ -47,8 +48,6 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     </footer>
     <script is:inline>
       (() => {
-        const media = window.matchMedia('(prefers-color-scheme: dark)');
-
         const getTheme = () => document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
         const promptPattern = /\bROLE\b[\s\S]*\bINPUTS\b[\s\S]*\bRULES\b[\s\S]*\bOUTPUT FORMAT\b/;
 
@@ -155,8 +154,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
         window.addEventListener('m2m:themechange', syncToggles);
         window.addEventListener('storage', (event) => {
           if (event.key !== window.__m2mThemeKey) return;
-          const fallbackTheme = media.matches ? 'dark' : 'light';
-          window.__m2mApplyTheme?.(event.newValue ?? fallbackTheme, false);
+          window.__m2mApplyTheme?.(event.newValue ?? 'dark', false);
         });
       })();
     </script>

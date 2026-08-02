@@ -265,6 +265,10 @@
 @media (max-width: 560px) {
   .layer-grid { grid-template-columns: 1fr; }
 }
+
+/* Embed: size to content and report it, the parent autosizes the frame. */
+:root[data-embedded="true"], :root[data-embedded="true"] body { height: auto; }
+:root[data-embedded="true"] .shell { height: auto; }
 </style>
 </head>
 <body>
@@ -302,7 +306,7 @@
         <span class="evidence-copy">Same model, harness-only tweaks, +13.7 points on Terminal Bench 2.0.</span>
       </div>
       <div class="evidence-card">
-        <span class="evidence-label">Vercel v0</span>
+        <span class="evidence-label">Vercel d0</span>
         <span class="evidence-stat">−80% tools = better</span>
         <span class="evidence-copy">Removing 80% of available tools measurably improved task completion.</span>
       </div>
@@ -437,6 +441,16 @@
       });
     });
   });
+})();
+</script>
+<script>
+(() => {
+  /* Report content height so the parent frame hugs the content. */
+  if (document.documentElement.dataset.embedded === 'true') {
+    const postSize = () => window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+    if ('ResizeObserver' in window) new ResizeObserver(postSize).observe(document.body);
+    window.addEventListener('load', postSize);
+  }
 })();
 </script>
 </body>

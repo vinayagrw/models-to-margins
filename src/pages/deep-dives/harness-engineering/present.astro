@@ -41,11 +41,10 @@ const slides = [
       (() => {
         const params = new URLSearchParams(window.location.search);
         const root = document.documentElement;
-        const media = window.matchMedia('(prefers-color-scheme: dark)');
         const storageKey = 'm2m-theme';
         const norm = (v) => (v === 'dark' || v === 'light' ? v : null);
         const stored = (() => { try { return norm(localStorage.getItem(storageKey)); } catch { return null; } })();
-        const theme = norm(params.get('theme')) ?? stored ?? (media.matches ? 'dark' : 'light');
+        const theme = norm(params.get('theme')) ?? stored ?? 'dark';
         root.dataset.theme = theme;
         root.style.colorScheme = theme;
       })();

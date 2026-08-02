@@ -13,7 +13,7 @@
       const r = document.documentElement;
       const media = matchMedia('(prefers-color-scheme: dark)');
       const norm = (v) => v === 'dark' || v === 'light' ? v : null;
-      const pref = () => norm(p.get('theme')) || norm(localStorage.getItem('m2m-theme')) || (media.matches ? 'dark' : 'light');
+      const pref = () => norm(p.get('theme')) || norm(localStorage.getItem('m2m-theme')) || 'dark';
       r.dataset.embedded = p.get('embed') === '1' ? 'true' : 'false';
       r.dataset.focusMode = 'thesis';
       window.__m2mApplyTheme = (theme, persist = false) => {

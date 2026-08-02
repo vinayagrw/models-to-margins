@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Instrumenting the loop, six gauges</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+/* Loop Metrics. Six gauge cards, one per fleet metric. Each shows an
+   illustrative reading against a healthy band; the "what it hides"
+   toggle flips the card to its counter-metric view — the gaming smell
+   and the paired check that keeps the headline honest.
+   All magnitudes are illustrative, and labelled so. */
+
+.shell { display: flex; flex-direction: column; gap: 10px; }
+:root[data-embedded="true"] .shell { padding: 14px clamp(14px, 2vw, 22px); }
+/* Embed: size to content and report it, the parent autosizes the frame. */
+:root[data-embedded="true"], :root[data-embedded="true"] body { height: auto; }
+:root[data-embedded="true"] .shell { height: auto; }
+
+.head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.head h1 {
+  font-family: "Space Grotesk", sans-serif; font-weight: 700;
+  font-size: clamp(1.02rem, 2.2vw, 1.3rem); letter-spacing: -0.02em; color: var(--text-strong);
+}
+:root[data-embedded="true"] .head h1 { font-size: 1.02rem; }
+.disclaimer {
+  font: 700 0.58rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--accent-2); border: 1px solid color-mix(in srgb, var(--accent-2) 45%, transparent);
+  border-radius: 999px; padding: 4px 10px; white-space: nowrap;
+}
+
+.grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-auto-rows: auto; gap: 10px; }
+
+.gauge {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+  box-shadow: var(--shadow-soft); padding: 10px 12px; min-width: 0; min-height: 0;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.g-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.g-head b { font: 700 0.76rem/1.25 "Space Grotesk", sans-serif; color: var(--text-strong); }
+.g-toggle {
+  border: 1px solid var(--border-strong); border-radius: 999px; background: none; cursor: pointer;
+  font: 700 0.6rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.09em; text-transform: uppercase;
+  color: var(--muted); padding: 7px 10px; min-height: 24px; white-space: nowrap; flex: none;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+.g-toggle[aria-pressed="true"] { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 55%, transparent); }
+
+/* headline face */
+.g-val { font: 700 1.25rem/1.1 "Space Grotesk", sans-serif; color: var(--text-strong); }
+.g-val em { font: 500 0.64rem/1.3 "DM Sans", sans-serif; font-style: normal; color: var(--muted); margin-left: 6px; }
+.g-bar { position: relative; height: 10px; border-radius: 6px; background: color-mix(in srgb, var(--text) 8%, transparent); overflow: hidden; }
+.g-band { position: absolute; top: 0; bottom: 0; background: color-mix(in srgb, var(--good) 26%, transparent); }
+.g-needle { position: absolute; top: -1px; bottom: -1px; width: 3px; border-radius: 2px; background: var(--accent); }
+.g-scale { display: flex; justify-content: space-between; font: 500 0.66rem/1.3 "DM Sans", sans-serif; color: var(--muted-soft); }
+.g-note { font: 500 0.66rem/1.45 "DM Sans", sans-serif; color: var(--muted); }
+
+/* counter face */
+.g-counter { display: none; flex-direction: column; gap: 5px; }
+.g-counter .smell {
+  border-left: 3px solid var(--warn); border-radius: 4px; padding: 5px 8px;
+  background: color-mix(in srgb, var(--warn) 7%, transparent);
+  font: 500 0.66rem/1.45 "DM Sans", sans-serif; color: var(--text);
+}
+.g-counter .pair { font: 500 0.66rem/1.45 "DM Sans", sans-serif; color: var(--text); }
+.g-counter .pair b { color: var(--good); font-weight: 700; }
+.gauge[data-face="counter"] .g-face { display: none; }
+.gauge[data-face="counter"] .g-counter { display: flex; }
+
+/* ---------- mobile ---------- */
+@media (max-width: 760px) {
+  .grid { grid-template-columns: 1fr; grid-auto-rows: auto; }
+  .head h1 { font-size: 1rem; }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="head">
+    <h1>Instrumenting the loop</h1>
+    <span class="disclaimer">Magnitudes illustrative</span>
+  </div>
+  <div class="grid">
+
+    <div class="gauge" data-face="head">
+      <div class="g-head"><b>$ per merged PR</b><button class="g-toggle" aria-pressed="false">What it hides</button></div>
+      <div class="g-face">
+        <div class="g-val">$14<em>per merged PR</em></div>
+        <div class="g-bar"><span class="g-band" style="left:12%; width:40%"></span><span class="g-needle" style="left:22%"></span></div>
+        <div class="g-scale"><span>$0</span><span>$80</span></div>
+        <p class="g-note">Total loop spend (tokens, compute, review time) over merges landed.</p>
+      </div>
+      <div class="g-counter">
+        <p class="smell">Gaming smell: PR inflation. Split one change into ten trivial PRs and the average falls while total cost rises.</p>
+        <p class="pair"><b>Pair with:</b> $ per change still alive at 30 days. Survivors, not merges.</p>
+      </div>
+    </div>
+
+    <div class="gauge" data-face="head">
+      <div class="g-head"><b>Time-to-merge</b><button class="g-toggle" aria-pressed="false">What it hides</button></div>
+      <div class="g-face">
+        <div class="g-val">4.2h<em>median, agent PRs</em></div>
+        <div class="g-bar"><span class="g-band" style="left:8%; width:34%"></span><span class="g-needle" style="left:18%"></span></div>
+        <div class="g-scale"><span>0h</span><span>48h</span></div>
+        <p class="g-note">Open to merge, agent-authored PRs only.</p>
+      </div>
+      <div class="g-counter">
+        <p class="smell">Gaming smell: rubber-stamping. Merges are fast because nobody is actually reading them, speed bought with review debt.</p>
+        <p class="pair"><b>Pair with:</b> substantive-review rate, the share of agent PRs with at least one human comment that changed the diff.</p>
+      </div>
+    </div>
+
+    <div class="gauge" data-face="head">
+      <div class="g-head"><b>First-pass success</b><button class="g-toggle" aria-pressed="false">What it hides</button></div>
+      <div class="g-face">
+        <div class="g-val">62%<em>no retry needed</em></div>
+        <div class="g-bar"><span class="g-band" style="left:45%; width:35%"></span><span class="g-needle" style="left:62%"></span></div>
+        <div class="g-scale"><span>0%</span><span>100%</span></div>
+        <p class="g-note">Runs whose first attempt cleared the grader gate.</p>
+      </div>
+      <div class="g-counter">
+        <p class="smell">Gaming smell: soft graders. When the loop grades itself, rubrics drift easy and first-pass "success" quietly inflates.</p>
+        <p class="pair"><b>Pair with:</b> grader-vs-human agreement on a random sample, re-checked monthly.</p>
+      </div>
+    </div>
+
+    <div class="gauge" data-face="head">
+      <div class="g-head"><b>Churn, agent code</b><button class="g-toggle" aria-pressed="false">What it hides</button></div>
+      <div class="g-face">
+        <div class="g-val">1.4&times;<em>vs human baseline</em></div>
+        <div class="g-bar"><span class="g-band" style="left:10%; width:35%"></span><span class="g-needle" style="left:47%"></span></div>
+        <div class="g-scale"><span>0.5&times;</span><span>3&times;</span></div>
+        <p class="g-note">How often agent-touched lines get rewritten within 8 weeks.</p>
+      </div>
+      <div class="g-counter">
+        <p class="smell">Gaming smell: none. Churn is itself the counter-metric. It catches rework masquerading as velocity on every other gauge.</p>
+        <p class="pair"><b>Pair with:</b> churn split by cause: spec changed (fine) vs defect fix (not fine).</p>
+      </div>
+    </div>
+
+    <div class="gauge" data-face="head">
+      <div class="g-head"><b>30-day PR survival</b><button class="g-toggle" aria-pressed="false">What it hides</button></div>
+      <div class="g-face">
+        <div class="g-val">91%<em>alive at day 30</em></div>
+        <div class="g-bar"><span class="g-band" style="left:70%; width:25%"></span><span class="g-needle" style="left:91%"></span></div>
+        <div class="g-scale"><span>50%</span><span>100%</span></div>
+        <p class="g-note">Merged agent PRs not reverted or rewritten within 30 days.</p>
+      </div>
+      <div class="g-counter">
+        <p class="smell">Gaming smell: silent replacement. Code undone by a later "refactor" PR never registers as a revert, so survival overstates.</p>
+        <p class="pair"><b>Pair with:</b> net line survival, how many of the PR's lines still exist at day 30.</p>
+      </div>
+    </div>
+
+    <div class="gauge" data-face="head">
+      <div class="g-head"><b>Defect escape rate</b><button class="g-toggle" aria-pressed="false">What it hides</button></div>
+      <div class="g-face">
+        <div class="g-val">2.1%<em>of agent merges</em></div>
+        <div class="g-bar"><span class="g-band" style="left:2%; width:18%"></span><span class="g-needle" style="left:14%"></span></div>
+        <div class="g-scale"><span>0%</span><span>15%</span></div>
+        <p class="g-note">Merges later linked to a production incident or bug report.</p>
+      </div>
+      <div class="g-counter">
+        <p class="smell">Gaming smell: detection lag. Escapes only count when found: a quiet quarter can mean healthy code or nobody looking.</p>
+        <p class="pair"><b>Pair with:</b> time-to-discovery distribution, and a sampled audit of "quiet" merges.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+<script>
+(() => {
+  document.querySelectorAll('.gauge').forEach((card) => {
+    const btn = card.querySelector('.g-toggle');
+    btn.addEventListener('click', () => {
+      const flipped = card.dataset.face === 'counter';
+      card.dataset.face = flipped ? 'head' : 'counter';
+      btn.setAttribute('aria-pressed', String(!flipped));
+      btn.textContent = flipped ? 'What it hides' : 'Headline view';
+    });
+  });
+
+  /* Report content height so the parent frame hugs the content. */
+  if (document.documentElement.dataset.embedded === 'true') {
+    const postSize = () => window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+    if ('ResizeObserver' in window) new ResizeObserver(postSize).observe(document.body);
+    window.addEventListener('load', postSize);
+  }
+})();
+</script>
+</body>
+</html>

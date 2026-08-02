@@ -191,6 +191,10 @@ body {
   .lanes { grid-template-columns: 1fr; }
   .foot { grid-template-columns: 1fr; }
 }
+
+/* Embed: size to content and report it, the parent autosizes the frame. */
+:root[data-embedded="true"], :root[data-embedded="true"] body { height: auto; }
+:root[data-embedded="true"] .shell { height: auto; }
 </style>
 </head>
 <body>
@@ -305,5 +309,15 @@ body {
     <div class="foot-text"><strong>Match the lane to the work, not the work to the lane you already invested in.</strong> A harness only earns its keep when the underlying work is genuinely agentic. Use deterministic pipelines for rule-heavy work and keep authority with named humans for risky or ambiguous decisions.</div>
   </div>
 </main>
+<script>
+(() => {
+  /* Report content height so the parent frame hugs the content. */
+  if (document.documentElement.dataset.embedded === 'true') {
+    const postSize = () => window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+    if ('ResizeObserver' in window) new ResizeObserver(postSize).observe(document.body);
+    window.addEventListener('load', postSize);
+  }
+})();
+</script>
 </body>
 </html>

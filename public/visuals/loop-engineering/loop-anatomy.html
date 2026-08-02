@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anatomy of a loop, six elements</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+/* Loop Anatomy. One running loop drawn as a circuit with the six
+   elements as stations. Click a station to load the detail panel:
+   role, minimum-viable version, harness-layer mapping, and what
+   breaks without it. Desktop: circuit left, panel right.
+   Mobile: circuit on top, panel below. */
+
+:root { --violet: #a56cff; }
+
+.shell { display: flex; flex-direction: column; gap: 10px; }
+:root[data-embedded="true"] .shell { padding: 14px clamp(14px, 2vw, 22px); }
+/* Embed: size to content and report it, the parent autosizes the frame. */
+:root[data-embedded="true"], :root[data-embedded="true"] body { height: auto; }
+:root[data-embedded="true"] .shell { height: auto; }
+
+.head h1 {
+  font-family: "Space Grotesk", sans-serif; font-weight: 700;
+  font-size: clamp(1.02rem, 2.2vw, 1.3rem); letter-spacing: -0.02em; color: var(--text-strong);
+}
+:root[data-embedded="true"] .head h1 { font-size: 1.02rem; }
+.head p { font: 500 0.72rem/1.4 "DM Sans", sans-serif; color: var(--muted); margin-top: 2px; }
+
+.board { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 12px; }
+
+/* ---------- circuit ---------- */
+.circuit-panel {
+  position: relative; background: var(--surface); border: 1px solid var(--border);
+  border-radius: 16px; box-shadow: var(--shadow-soft); min-width: 0; min-height: 0;
+  display: grid; place-items: center; padding: 10px;
+}
+.ringbox { position: relative; width: min(100%, 380px); aspect-ratio: 1 / 1; max-height: 100%; }
+.ringbox svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.ring { fill: none; stroke: color-mix(in srgb, var(--accent) 22%, transparent); stroke-width: 1.8; }
+.ring-dash { fill: none; stroke: color-mix(in srgb, var(--accent) 45%, transparent); stroke-width: 1.8; stroke-dasharray: 4 14; stroke-linecap: round; }
+@keyframes ring-spin { to { stroke-dashoffset: -180; } }
+.ring-dash { animation: ring-spin 14s linear infinite; }
+@media (prefers-reduced-motion: reduce) { .ring-dash { animation: none; } }
+
+.hub {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  text-align: center; pointer-events: none;
+}
+.hub b { display: block; font: 700 0.8rem/1.25 "Space Grotesk", sans-serif; letter-spacing: 0.1em; color: var(--text-strong); }
+.hub span { display: block; font: 500 0.62rem/1.35 "DM Sans", sans-serif; color: var(--muted); }
+
+.station {
+  position: absolute; transform: translate(-50%, -50%);
+  border: 1px solid var(--border-strong); border-radius: 999px;
+  background: var(--surface-strong); box-shadow: var(--shadow-soft);
+  padding: 6px 12px; cursor: pointer;
+  font: 700 0.7rem/1.2 "Space Grotesk", sans-serif; color: var(--text-strong);
+  display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.station::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--sc); flex: none; }
+.station:hover { border-color: var(--sc); }
+.station[aria-pressed="true"] {
+  border-color: var(--sc);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--sc) 25%, transparent), var(--shadow-soft);
+}
+/* six stations on the ring (percent coords of the square box) */
+.s1 { left: 50%; top: 7%; }
+.s2 { left: 88%; top: 28%; }
+.s3 { left: 88%; top: 72%; }
+.s4 { left: 50%; top: 93%; }
+.s5 { left: 12%; top: 72%; }
+.s6 { left: 12%; top: 28%; }
+
+/* ---------- detail panel ---------- */
+.detail {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+  box-shadow: var(--shadow-soft); padding: 14px 16px; min-width: 0; min-height: 0;
+  display: flex; flex-direction: column; gap: 10px; overflow: auto;
+}
+.d-head { display: flex; align-items: center; gap: 9px; }
+.d-head i { width: 11px; height: 11px; border-radius: 50%; background: var(--sc, var(--accent)); flex: none; }
+.d-head b { font: 700 0.95rem/1.2 "Space Grotesk", sans-serif; color: var(--text-strong); }
+.d-block { border-top: 1px solid var(--border); padding-top: 8px; }
+.d-label {
+  font: 700 0.62rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--muted); margin-bottom: 4px;
+}
+.d-block p { font: 500 0.76rem/1.5 "DM Sans", sans-serif; color: var(--text); }
+.d-block p code {
+  font-family: ui-monospace, "Cascadia Mono", Consolas, "Roboto Mono", monospace;
+  font-size: 0.7rem; background: color-mix(in srgb, var(--text) 7%, transparent);
+  border-radius: 5px; padding: 1px 5px;
+}
+.layer-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  font: 700 0.7rem/1 "Space Grotesk", sans-serif; color: var(--text-strong);
+  border: 1px solid var(--border-strong); border-radius: 999px; padding: 5px 10px;
+}
+.layer-chip::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--lc); }
+.d-break { border-left: 3px solid var(--warn); border-radius: 4px; padding: 6px 10px; background: color-mix(in srgb, var(--warn) 7%, transparent); }
+.d-break p { color: var(--text); }
+
+/* ---------- mobile ---------- */
+@media (max-width: 760px) {
+  .board { grid-template-columns: 1fr; grid-template-rows: auto auto; }
+  .ringbox { width: min(100%, 330px); }
+  .station { padding: 6px 10px; font-size: 0.66rem; }
+  .head h1 { font-size: 1rem; }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="head">
+    <h1>Anatomy of a loop</h1>
+    <p>Six elements every production loop is assembled from. Click a station.</p>
+  </div>
+  <div class="board">
+    <div class="circuit-panel">
+      <div class="ringbox">
+        <svg viewBox="0 0 100 100" aria-hidden="true">
+          <circle class="ring" cx="50" cy="50" r="41"/>
+          <circle class="ring-dash" cx="50" cy="50" r="41"/>
+        </svg>
+        <div class="hub"><b>THE LOOP</b><span>trigger → run → verify<br>→ record → again</span></div>
+        <button class="station s1" style="--sc: var(--LV4)" data-el="automations" aria-pressed="true">Automations</button>
+        <button class="station s2" style="--sc: var(--violet)" data-el="worktrees" aria-pressed="false">Worktrees</button>
+        <button class="station s3" style="--sc: var(--LV1)" data-el="skills" aria-pressed="false">Skills</button>
+        <button class="station s4" style="--sc: var(--LV3)" data-el="connectors" aria-pressed="false">Connectors</button>
+        <button class="station s5" style="--sc: var(--LV2)" data-el="subagents" aria-pressed="false">Sub-agents</button>
+        <button class="station s6" style="--sc: var(--accent)" data-el="state" aria-pressed="false">External state</button>
+      </div>
+    </div>
+    <div class="detail" id="detail" aria-live="polite">
+      <div class="d-head"><i id="d-dot"></i><b id="d-title">Automations</b></div>
+      <div class="d-block"><div class="d-label">Role in the loop</div><p id="d-role"></p></div>
+      <div class="d-block"><div class="d-label">Minimum viable version</div><p id="d-mv"></p></div>
+      <div class="d-block"><div class="d-label">Harness layer it lives in</div><p><span class="layer-chip" id="d-layer"></span></p></div>
+      <div class="d-block d-break"><div class="d-label">What breaks without it</div><p id="d-break"></p></div>
+    </div>
+  </div>
+</div>
+<script>
+(() => {
+  const DATA = {
+    automations: {
+      title: 'Automations', color: 'var(--LV4)',
+      role: 'The clock. Scheduled or event-driven jobs that fire the loop without a human pressing enter: the difference between an agent you use and a loop that runs.',
+      mv: 'One nightly cron job that triages the day’s CI failures and files its findings as issues.',
+      layer: 'Lifecycle', layerColor: 'var(--LV4)',
+      breaks: 'The loop only runs when someone remembers to prompt it. That is not a loop. It is a human with a very expensive button.'
+    },
+    worktrees: {
+      title: 'Worktrees', color: 'var(--violet)',
+      role: 'Isolation. Each run gets its own working copy of the repo, so five parallel agents produce five clean diffs instead of one corrupted tree.',
+      mv: 'A <code>git worktree</code> per agent session, deleted when the run’s PR merges or dies.',
+      layer: 'Execution', layerColor: 'var(--violet)',
+      breaks: 'Parallel runs trample each other’s files. One bad run poisons every branch that shared its checkout.'
+    },
+    skills: {
+      title: 'Skills', color: 'var(--LV1)',
+      role: 'Packaged knowledge. Documented procedures the agent loads on demand, so each run starts with the project’s conventions instead of rediscovering them.',
+      mv: 'One <code>SKILL.md</code> for the procedure you re-explain most often (usually the deploy or release steps).',
+      layer: 'Context', layerColor: 'var(--LV1)',
+      breaks: 'Every run re-derives tribal knowledge from scratch, burns the context window doing it, and repeats mistakes the last run already made.'
+    },
+    connectors: {
+      title: 'Connectors', color: 'var(--LV3)',
+      role: 'Hands. MCP servers and integrations that let the loop read the issue tracker, query the database, and post to the channel where the team actually works.',
+      mv: 'A read-only MCP connector to your issue tracker. Write access comes after the loop earns it.',
+      layer: 'Execution', layerColor: 'var(--violet)',
+      breaks: 'The agent can reason but not act. Every output stalls as a suggestion in a chat log that a human must copy-paste into the real system.'
+    },
+    subagents: {
+      title: 'Sub-agents', color: 'var(--LV2)',
+      role: 'Separation of powers. The agent that drafts the change is never the agent that judges it: a reviewer sub-agent with fresh context grades the work.',
+      mv: 'One reviewer sub-agent prompted to refute the change, not to approve it.',
+      layer: 'Verification', layerColor: 'var(--LV2)',
+      breaks: 'The author grades its own homework. Plausible-but-wrong output sails through, and you discover it in production.'
+    },
+    state: {
+      title: 'External state', color: 'var(--accent)',
+      role: 'Memory that outlives the context window. A file or board the loop reads first and writes last, recording what is done, what failed, and what is next.',
+      mv: 'A <code>STATE.md</code> in the repo: done / in-progress / next, updated at the end of every run.',
+      layer: 'Context + Lifecycle', layerColor: 'var(--accent)',
+      breaks: 'Every run starts amnesiac. The loop redoes yesterday’s work, contradicts its own past decisions, and never converges.'
+    }
+  };
+  const stations = document.querySelectorAll('.station');
+  const el = (id) => document.getElementById(id);
+  const render = (key) => {
+    const d = DATA[key];
+    el('d-title').textContent = d.title;
+    el('d-dot').style.background = d.color;
+    el('d-role').innerHTML = d.role;
+    el('d-mv').innerHTML = d.mv;
+    el('d-layer').textContent = d.layer;
+    el('d-layer').style.setProperty('--lc', d.layerColor);
+    el('d-break').innerHTML = d.breaks;
+  };
+  stations.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      stations.forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
+      render(btn.dataset.el);
+    });
+  });
+  render('automations');
+
+  /* Report content height so the parent frame hugs the content. */
+  if (document.documentElement.dataset.embedded === 'true') {
+    const postSize = () => window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+    if ('ResizeObserver' in window) new ResizeObserver(postSize).observe(document.body);
+    window.addEventListener('load', postSize);
+  }
+})();
+</script>
+</body>
+</html>

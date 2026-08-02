@@ -1,5 +1,5 @@
-/* Microservices vs Modular Monolith — shared theme + embed bootstrap.
-   Loaded synchronously in <head> across all 8 visuals to prevent FOUC.
+/* Loop Engineering — shared theme + embed bootstrap.
+   Loaded synchronously in <head> across all visuals to prevent FOUC.
    Reads ?theme= and ?embed= from URL, falls back to localStorage, then to dark
    (the site default). Sets data-theme and data-embedded on <html>. */
 (() => {

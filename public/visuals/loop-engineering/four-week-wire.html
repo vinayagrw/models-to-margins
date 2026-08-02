@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The last four weeks, a dated ledger</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+/* Four-week wire. A vertical ledger of seven dated entries from the
+   self-evolving-harness month (Jun 28 to Jul 26 2026), one antecedent
+   strip for the June paper the month kept citing, and a shared detail
+   panel. Clicking a row loads the detail. Reduced motion: rows visible,
+   no stagger. */
+
+.shell { display: flex; flex-direction: column; gap: 10px; }
+:root[data-embedded="true"] .shell { padding: 14px clamp(14px, 2vw, 22px); }
+/* Embed: size to content and report it, the parent autosizes the frame. */
+:root[data-embedded="true"], :root[data-embedded="true"] body { height: auto; }
+:root[data-embedded="true"] .shell { height: auto; }
+
+.head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.head h1 {
+  font-family: "Space Grotesk", sans-serif; font-weight: 700;
+  font-size: clamp(1.02rem, 2.2vw, 1.3rem); letter-spacing: -0.02em; color: var(--text-strong);
+}
+:root[data-embedded="true"] .head h1 { font-size: 1.02rem; }
+.head p { font: 500 0.74rem/1.4 "DM Sans", sans-serif; color: var(--muted); margin-top: 2px; }
+.win {
+  font: 700 0.66rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--accent); border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  border-radius: 999px; padding: 5px 11px; white-space: nowrap;
+}
+
+/* ---------- antecedent strip ---------- */
+.ante {
+  border: 1px dashed var(--border-strong); border-radius: 10px;
+  background: color-mix(in srgb, var(--surface) 60%, transparent);
+  padding: 8px 12px;
+}
+.ante b {
+  display: inline-block; font: 700 0.66rem/1 "Space Grotesk", sans-serif;
+  letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-right: 6px;
+}
+.ante span { font: 500 0.72rem/1.5 "DM Sans", sans-serif; color: var(--muted); }
+
+/* ---------- ledger rows ---------- */
+.wire { display: flex; flex-direction: column; gap: 6px; }
+.row {
+  display: flex; align-items: center; gap: 10px; width: 100%; text-align: left;
+  cursor: pointer; border: 1px solid var(--border-strong); border-radius: 10px;
+  background: var(--surface-strong); box-shadow: var(--shadow-soft);
+  padding: 9px 12px; min-height: 44px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.row:hover { border-color: var(--tc, var(--accent)); }
+.row[aria-pressed="true"] {
+  border-color: var(--tc, var(--accent));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--tc, var(--accent)) 22%, transparent), var(--shadow-soft);
+}
+.r-date {
+  flex: 0 0 52px; font: 700 0.7rem/1.1 "Space Grotesk", sans-serif;
+  letter-spacing: 0.06em; color: var(--text-strong);
+}
+.r-badge {
+  flex: 0 0 auto; font: 700 0.66rem/1 "Space Grotesk", sans-serif;
+  letter-spacing: 0.08em; text-transform: uppercase; color: var(--tc, var(--accent));
+  border: 1px solid color-mix(in srgb, var(--tc, var(--accent)) 45%, transparent);
+  background: color-mix(in srgb, var(--tc, var(--accent)) 10%, transparent);
+  border-radius: 999px; padding: 4px 9px; white-space: nowrap;
+}
+.r-main { min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.r-main b { font: 700 0.78rem/1.25 "Space Grotesk", sans-serif; color: var(--text-strong); }
+.r-main span { font: 500 0.74rem/1.35 "DM Sans", sans-serif; color: var(--muted); }
+
+.play .row { animation: row-in 0.4s ease-out backwards; }
+.play .row:nth-child(1) { animation-delay: 0.05s; } .play .row:nth-child(2) { animation-delay: 0.13s; }
+.play .row:nth-child(3) { animation-delay: 0.21s; } .play .row:nth-child(4) { animation-delay: 0.29s; }
+.play .row:nth-child(5) { animation-delay: 0.37s; } .play .row:nth-child(6) { animation-delay: 0.45s; }
+.play .row:nth-child(7) { animation-delay: 0.53s; }
+@keyframes row-in { from { opacity: 0; transform: translateX(-12px); } to { opacity: 1; transform: none; } }
+
+/* ---------- detail panel ---------- */
+.detail {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+  box-shadow: var(--shadow-soft); padding: 12px 14px;
+  display: flex; flex-direction: column; gap: 7px;
+}
+.d-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.d-date {
+  font: 700 0.66rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--tc, var(--accent)); border: 1px solid color-mix(in srgb, var(--tc, var(--accent)) 45%, transparent);
+  border-radius: 999px; padding: 4px 10px;
+}
+.d-type { font: 700 0.66rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+.d-actor { font: 700 0.92rem/1.25 "Space Grotesk", sans-serif; color: var(--text-strong); }
+.d-text { font: 500 0.8rem/1.55 "DM Sans", sans-serif; color: var(--text); }
+.d-why {
+  font: 500 0.76rem/1.5 "DM Sans", sans-serif; color: var(--muted);
+  border-left: 3px solid color-mix(in srgb, var(--tc, var(--accent)) 55%, transparent);
+  padding-left: 10px;
+}
+
+/* ---------- mobile ---------- */
+@media (max-width: 760px) {
+  .head h1 { font-size: 1rem; }
+  .row { flex-wrap: wrap; gap: 6px 10px; }
+  .r-main { flex: 1 1 100%; }
+  .r-main b { font-size: 0.76rem; }
+  .r-main span { font-size: 0.72rem; }
+  .d-text { font-size: 0.78rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .play .row { animation: none !important; }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="head">
+    <div>
+      <h1>The last four weeks</h1>
+      <p>Seven dated entries from the self-evolving harness month. Click a row.</p>
+    </div>
+    <span class="win">Jun 28 &rarr; Jul 26 2026</span>
+  </div>
+
+  <div class="ante">
+    <b>Before the window</b>
+    <span>Jun 8, Self-Harness (Shanghai AI Lab, arXiv 2606.09498): weakness mining, harness proposal, proposal validation. A frozen model lifts Terminal Bench 2.0 from 40.5 to 61.9 percent by editing its own harness. The month below kept citing it.</span>
+  </div>
+
+  <div class="wire" role="group" aria-label="Seven dated entries from June 28 to July 26 2026, click one to load its detail">
+    <button class="row" data-i="0" aria-pressed="false" style="--tc: var(--accent)">
+      <span class="r-date">JUL 1</span><span class="r-badge">Paper</span>
+      <span class="r-main"><b>Ant Group, HKUST, Tsinghua</b><span>Self-evolving agents get an enterprise systems blueprint</span></span>
+    </button>
+    <button class="row" data-i="1" aria-pressed="false" style="--tc: var(--accent)">
+      <span class="r-date">JUL 2</span><span class="r-badge">Paper</span>
+      <span class="r-main"><b>Maryland, UPenn, NVIDIA, Lehigh</b><span>COMFYCLAW ships its own skill edits, gated by held-out validation</span></span>
+    </button>
+    <button class="row" data-i="2" aria-pressed="false" style="--tc: var(--accent-2)">
+      <span class="r-date">JUL 4</span><span class="r-badge">Signal</span>
+      <span class="r-main"><b>Lilian Weng</b><span>The optimization ladder gets named, optimizer code on top</span></span>
+    </button>
+    <button class="row" data-i="3" aria-pressed="false" style="--tc: var(--accent)">
+      <span class="r-date">JUL 8</span><span class="r-badge">Paper</span>
+      <span class="r-main"><b>RSI survey</b><span>Roughly 1,250 papers, one map of self-improvement</span></span>
+    </button>
+    <button class="row" data-i="4" aria-pressed="false" style="--tc: var(--warn)">
+      <span class="r-date">JUL 13</span><span class="r-badge">Press</span>
+      <span class="r-main"><b>TechTalks</b><span>The press cycle arrives, led by the Self-Harness result</span></span>
+    </button>
+    <button class="row" data-i="5" aria-pressed="false" style="--tc: var(--good)">
+      <span class="r-date">JUL 21</span><span class="r-badge">Release</span>
+      <span class="r-main"><b>Harness Inc.</b><span>The DevOps vendor named Harness ships Agent DLC</span></span>
+    </button>
+    <button class="row" data-i="6" aria-pressed="false" style="--tc: var(--good)">
+      <span class="r-date">JUL 22</span><span class="r-badge">Release</span>
+      <span class="r-main"><b>Microsoft</b><span>Agent Framework Harness goes stable in Python and .NET</span></span>
+    </button>
+  </div>
+
+  <div class="detail" aria-live="polite">
+    <div class="d-top"><span class="d-date" id="d-date"></span><span class="d-type" id="d-type"></span></div>
+    <div class="d-actor" id="d-actor"></div>
+    <p class="d-text" id="d-text"></p>
+    <p class="d-why" id="d-why"></p>
+  </div>
+</div>
+
+<script>
+(() => {
+  const DATA = [
+    { date: 'Jul 1 2026', type: 'Paper · arXiv 2607.01120', tc: 'var(--accent)', actor: 'Ant Group, HKUST, Tsinghua',
+      text: 'A position paper argues that enterprise self-evolving agents are a systems problem before they are an algorithms problem: standardized data protocols, data governance, and a centralized control plane, so that agents improving themselves stay observable and governable at fleet scale.',
+      why: 'The L4 crank needs a runtime to live in, and this is the first serious sketch of one at enterprise scale.' },
+    { date: 'Jul 2 2026', type: 'Paper · arXiv 2607.01709', tc: 'var(--accent)', actor: 'Maryland, UPenn, NVIDIA, Lehigh',
+      text: 'COMFYCLAW keeps a library of SKILL.md procedures that the agent itself creates, revises, merges, and deletes. A mutation lands only if held-out validation does not degrade. Average gain: 8.44 points over a frozen-skill baseline.',
+      why: 'The acceptance rule in production form: no self-edit ships without a held-out guard.' },
+    { date: 'Jul 4 2026', type: 'Signal · lilianweng.github.io', tc: 'var(--accent-2)', actor: 'Lilian Weng',
+      text: 'Harness Engineering for Self-Improvement orders the practice into a ladder: instruction prompts, structured context, workflow, harness code, optimizer code. Self-improvement runs through the harness before the weights. 39 sourced references, and Latent Space led with it four days later.',
+      why: 'The clearest statement yet that the harness is the surface a model edits long before anyone touches a weight.' },
+    { date: 'Jul 8 2026', type: 'Paper · arXiv 2607.07663', tc: 'var(--accent)', actor: 'Recursive self-improvement survey',
+      text: 'A 42-page survey maps roughly 1,250 papers from 2024 to 2026, from bounded self-refinement to autonomous research loops, and centers evaluator design and loop closure as the load-bearing choices.',
+      why: 'The field is now big enough to need a map, and the map says the grader is the hard part.' },
+    { date: 'Jul 13 2026', type: 'Press · bdtechtalks.com', tc: 'var(--warn)', actor: 'TechTalks, Ben Dickson',
+      text: 'The trade press picks up the wave, retelling the Self-Harness result (Terminal Bench 2.0 lifted from 40.5 to 61.9 percent with the model frozen) for a practitioner audience and framing harness self-improvement as the new agent playbook.',
+      why: 'When trade press retells a June paper in July, the idea has left the lab.' },
+    { date: 'Jul 21 2026', type: 'Release · prnewswire.com', tc: 'var(--good)', actor: 'Harness Inc.',
+      text: 'Harness, the CI/CD company rather than the concept, launches Agent DLC, an agent development lifecycle: evals, canary deployments, approvals, trace observability, and a firewall against prompt injection. The naming convergence is itself the signal.',
+      why: 'Agents are getting the same delivery discipline as code, from a vendor whose name accidentally says so.' },
+    { date: 'Jul 22 2026', type: 'Release · devblogs.microsoft.com', tc: 'var(--good)', actor: 'Microsoft',
+      text: 'Microsoft ships what it calls a stable, batteries-included harness in Python and .NET: the loop, planning, memory, compaction, tool approval, and telemetry as product surface. Background agents and shell tooling stay opt-in preview.',
+      why: 'The harness is now a product noun a platform vendor ships, batteries included.' },
+  ];
+
+  const el = (id) => document.getElementById(id);
+  const rows = Array.from(document.querySelectorAll('.row'));
+  const render = (i) => {
+    const d = DATA[i];
+    el('d-date').textContent = d.date;
+    el('d-date').style.setProperty('--tc', d.tc);
+    el('d-type').textContent = d.type;
+    el('d-actor').textContent = d.actor;
+    el('d-text').textContent = d.text;
+    el('d-why').textContent = d.why;
+    document.querySelector('.d-why').style.setProperty('--tc', d.tc);
+  };
+  const select = (i) => {
+    rows.forEach((b) => b.setAttribute('aria-pressed', String(Number(b.dataset.i) === i)));
+    render(i);
+  };
+  rows.forEach((btn) => {
+    btn.addEventListener('click', () => select(Number(btn.dataset.i)));
+  });
+  select(2);
+
+  const shell = document.querySelector('.shell');
+  const start = () => shell.classList.add('play');
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((en) => { if (en.isIntersecting) { start(); io.disconnect(); } });
+    }, { threshold: 0.2 });
+    io.observe(shell);
+  } else { start(); }
+
+  /* Report content height so the parent frame hugs the content. */
+  if (document.documentElement.dataset.embedded === 'true') {
+    const postSize = () => window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+    if ('ResizeObserver' in window) new ResizeObserver(postSize).observe(document.body);
+    window.addEventListener('load', postSize);
+  }
+})();
+</script>
+</body>
+</html>

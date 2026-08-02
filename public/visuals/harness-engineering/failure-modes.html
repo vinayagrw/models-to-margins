@@ -156,6 +156,10 @@ body {
 @media (max-width: 520px) {
   .grid { grid-template-columns: 1fr; }
 }
+
+/* Embed: size to content and report it, the parent autosizes the frame. */
+:root[data-embedded="true"], :root[data-embedded="true"] body { height: auto; }
+:root[data-embedded="true"] .shell { height: auto; }
 </style>
 </head>
 <body>
@@ -205,7 +209,7 @@ body {
     { id: 'dumb-zone', name: 'The dumb zone', icon: '⚙', layer: 'L3', color: 'var(--L3)',
       tagline: 'More tokens on tools than work.',
       symptom: 'Trace shows the model spending 70% of its tokens reasoning about which tool to call, leaving little budget for the actual task.',
-      prevent: 'L3 Execution: dynamic tool scoping per task type. Vercel v0 saw measurable gains by removing 80% of available tools.' },
+      prevent: 'L3 Execution: dynamic tool scoping per task type. Vercel d0 went from 80 to 100 percent success by removing 80% of available tools.' },
     { id: 'silent-failure', name: 'Silent failure', icon: '!', layer: 'L4', color: 'var(--L4)',
       tagline: 'Output looks great, nothing was checked.',
       symptom: 'PR merges cleanly, the agent declares success, then a failing test surfaces in nightly CI two days later.',
@@ -269,6 +273,16 @@ body {
   });
 
   showFailure(failures[0]);
+})();
+</script>
+<script>
+(() => {
+  /* Report content height so the parent frame hugs the content. */
+  if (document.documentElement.dataset.embedded === 'true') {
+    const postSize = () => window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+    if ('ResizeObserver' in window) new ResizeObserver(postSize).observe(document.body);
+    window.addEventListener('load', postSize);
+  }
 })();
 </script>
 </body>

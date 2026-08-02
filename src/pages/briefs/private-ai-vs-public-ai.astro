@@ -819,7 +819,7 @@ const focusData = {
               src={`${entry.data.supportingVisualPath}?embed=1`}
               title="Private AI control plane"
               loading="eager"
-            ></iframe>
+             sandbox="allow-scripts allow-same-origin"></iframe>
           </div>
 
           <div class="legend">
@@ -874,7 +874,6 @@ const focusData = {
     </main>
 
     <script define:vars={{ focusData }}>
-      const media = window.matchMedia('(prefers-color-scheme: dark)');
       const summaryItems = Array.from(document.querySelectorAll(".summary-item"));
       const focusTitle = document.getElementById("focus-title");
       const focusCopy = document.getElementById("focus-copy");
@@ -978,8 +977,7 @@ const focusData = {
       });
       window.addEventListener("storage", (event) => {
         if (event.key !== window.__m2mThemeKey) return;
-        const fallbackTheme = media.matches ? "dark" : "light";
-        window.__m2mApplyTheme?.(event.newValue ?? fallbackTheme, false);
+        window.__m2mApplyTheme?.(event.newValue ?? "dark", false);
       });
       activateNode("router-layer");
       syncEmbeddedTheme();

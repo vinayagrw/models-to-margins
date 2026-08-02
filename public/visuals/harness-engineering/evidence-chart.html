@@ -141,6 +141,10 @@ body {
   .bar-frame { height: 50px; }
   .bar-stat { font-size: 1.15rem; }
 }
+
+/* Embed: size to content and report it, the parent autosizes the frame. */
+:root[data-embedded="true"], :root[data-embedded="true"] body { height: auto; }
+:root[data-embedded="true"] .shell { height: auto; }
 </style>
 </head>
 <body>
@@ -169,9 +173,9 @@ body {
 
       <div class="row" style="--src: var(--L1)">
         <div class="row-meta">
-          <span class="row-source">Vercel v0 · 2026</span>
-          <div class="row-claim">−80% available tools improved completion</div>
-          <div class="row-detail">Trim the toolbelt; escape the "dumb zone" where the model burns tokens reasoning about tools.</div>
+          <span class="row-source">Vercel d0 · 2025</span>
+          <div class="row-claim">−80% available tools, success 80% → 100%</div>
+          <div class="row-detail">Trim the toolbelt: the data agent got 3.5× faster with 37% fewer tokens once the model stopped reasoning about unused tools.</div>
         </div>
         <div class="bar-frame" aria-label="Bar showing 80% tool reduction">
           <div class="bar delay-2" style="--w: 0.94"></div>
@@ -217,5 +221,15 @@ body {
     </div>
   </section>
 </main>
+<script>
+(() => {
+  /* Report content height so the parent frame hugs the content. */
+  if (document.documentElement.dataset.embedded === 'true') {
+    const postSize = () => window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+    if ('ResizeObserver' in window) new ResizeObserver(postSize).observe(document.body);
+    window.addEventListener('load', postSize);
+  }
+})();
+</script>
 </body>
 </html>

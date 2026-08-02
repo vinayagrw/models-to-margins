@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The field, ten people and five repos</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+/* Field Map. Two lanes of chips, PEOPLE (10, cyan) and REPOS (5, amber),
+   staggered fade-in under .play, one shared detail card. The ralph repo
+   detail types its one-line bash loop into a code strip (typewriter,
+   static under reduced motion). */
+
+.shell { display: flex; flex-direction: column; gap: 9px; }
+:root[data-embedded="true"] .shell { padding: 14px clamp(14px, 2vw, 22px); }
+/* Embed: size to content and report it, the parent autosizes the frame. */
+:root[data-embedded="true"], :root[data-embedded="true"] body { height: auto; }
+:root[data-embedded="true"] .shell { height: auto; }
+
+.head h1 {
+  font-family: "Space Grotesk", sans-serif; font-weight: 700;
+  font-size: clamp(1.02rem, 2.2vw, 1.3rem); letter-spacing: -0.02em; color: var(--text-strong);
+}
+:root[data-embedded="true"] .head h1 { font-size: 1.02rem; }
+.head p { font: 500 0.72rem/1.4 "DM Sans", sans-serif; color: var(--muted); margin-top: 2px; }
+
+.lane-label { display: flex; align-items: center; gap: 10px; }
+.lane-label b {
+  font: 700 0.6rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--lc); white-space: nowrap;
+}
+.lane-label i { flex: 1; height: 1px; background: var(--border); }
+
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip {
+  cursor: pointer; border: 1px solid var(--border-strong); border-radius: 999px;
+  background: var(--surface-strong); box-shadow: var(--shadow-soft);
+  padding: 6px 11px; display: inline-flex; align-items: center; gap: 6px;
+  font: 700 0.66rem/1.2 "Space Grotesk", sans-serif; color: var(--text-strong); white-space: nowrap;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.chip::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--cc); flex: none; }
+.chip:hover { border-color: var(--cc); }
+.chip[aria-pressed="true"] {
+  border-color: var(--cc);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--cc) 22%, transparent), var(--shadow-soft);
+}
+.play .chip { animation: chip-in 0.4s ease-out backwards; }
+@keyframes chip-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+/* ---------- detail card ---------- */
+.detail {
+  flex: 1; min-height: 0; overflow: auto;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+  box-shadow: var(--shadow-soft); padding: 12px 14px;
+  display: flex; flex-direction: column; gap: 7px;
+}
+.d-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.d-name { font: 700 0.95rem/1.2 "Space Grotesk", sans-serif; color: var(--text-strong); }
+.d-date {
+  font: 700 0.58rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--dc, var(--accent)); border: 1px solid color-mix(in srgb, var(--dc, var(--accent)) 45%, transparent);
+  border-radius: 999px; padding: 4px 9px; white-space: nowrap;
+}
+.d-role { font: 500 0.68rem/1.4 "DM Sans", sans-serif; color: var(--muted); }
+.d-sig {
+  border-left: 3px solid var(--dc, var(--accent)); border-radius: 4px; padding: 6px 10px;
+  background: color-mix(in srgb, var(--dc, var(--accent)) 7%, transparent);
+  font: 600 0.76rem/1.5 "DM Sans", sans-serif; color: var(--text);
+}
+.d-text { font: 500 0.7rem/1.5 "DM Sans", sans-serif; color: var(--text); }
+.d-code {
+  display: none; font-family: ui-monospace, "Cascadia Mono", Consolas, "Roboto Mono", monospace;
+  font-size: 0.68rem; line-height: 1.5; color: var(--accent);
+  background: color-mix(in srgb, var(--text) 7%, transparent);
+  border: 1px solid var(--border); border-radius: 8px; padding: 8px 11px;
+  white-space: pre-wrap; word-break: break-all;
+}
+.d-code.on { display: block; }
+.d-code::after { content: "▌"; opacity: 0.7; }
+.d-code.done::after { content: ""; }
+
+/* ---------- mobile ---------- */
+@media (max-width: 760px) {
+  .head h1 { font-size: 1rem; }
+  .chip { font-size: 0.68rem; padding: 7px 11px; }
+  .d-sig { font-size: 0.76rem; }
+  .d-text { font-size: 0.73rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .play .chip { animation: none !important; }
+  .d-code::after { content: "" !important; }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="head">
+    <h1>The field</h1>
+    <p>The ten people and five repositories carrying the loop and harness conversation. Click a chip.</p>
+  </div>
+
+  <div class="lane-label" style="--lc: var(--accent)"><b>People · 10</b><i></i></div>
+  <div class="chips" id="people" role="group" aria-label="People"></div>
+
+  <div class="lane-label" style="--lc: var(--T-cron)"><b>Repos · 5</b><i></i></div>
+  <div class="chips" id="repos" role="group" aria-label="Repositories"></div>
+
+  <div class="detail" aria-live="polite">
+    <div class="d-top"><span class="d-name" id="d-name"></span><span class="d-date" id="d-date"></span></div>
+    <p class="d-role" id="d-role"></p>
+    <p class="d-sig" id="d-sig"></p>
+    <p class="d-text" id="d-text"></p>
+    <code class="d-code" id="d-code" aria-label="The ralph loop, one line of bash"></code>
+  </div>
+</div>
+<script>
+(() => {
+  const PEOPLE = [
+    { n: 'Mitchell Hashimoto', role: 'Ghostty author, seeded harness engineering', d: 'Feb 5',
+      sig: 'The mistake-to-permanent-fix ratchet.', text: 'Every AGENTS.md line traces to a specific past agent failure, engineered away so it cannot repeat.' },
+    { n: 'Peter Steinberger', role: 'OpenClaw creator', d: 'Jun 7',
+      sig: '"designing loops that prompt your agents"', text: 'The line pulled about five million views in a day and named the shift from prompting to loop design.' },
+    { n: 'Boris Cherny', role: 'Claude Code creator', d: 'Jun 6',
+      sig: '"my job is to write loops"', text: 'Runs standing loops that hunt architecture improvements and unify duplicate abstractions, filing PRs indefinitely.' },
+    { n: 'Addy Osmani', role: 'Google Chrome engineering lead', d: 'Apr 19 + Jun 7',
+      sig: 'A decent model with a great harness beats a great model with a bad harness.', text: 'Wrote both the harness essay and the loop essay that named the discipline.' },
+    { n: 'Geoffrey Huntley', role: 'Invented the ralph loop', d: 'Feb 27',
+      sig: '"Sit on the loop, not in it"', text: 'Priced agent labor at 10 dollars 42 cents an hour and dared the industry to check minimum wage.' },
+    { n: 'Lilian Weng', role: 'Thinking Machines co-founder', d: 'Jul 4',
+      sig: 'Self-improvement runs through the harness before the weights.', text: 'Upgraded her 2023 agent formula: harness engineering now includes loop design, evaluation, permissions.' },
+    { n: 'Simon Willison', role: 'Datasette author, Django co-creator', d: 'Sep 30 2025',
+      sig: '"tools in a loop"', text: 'Named designing agentic loops a critical new skill eight months before the June wave.' },
+    { n: 'swyx', role: 'Latent.Space, AI Engineer conferences', d: 'Mar 5',
+      sig: 'Staged the Big Model vs Big Harness debate.', text: 'Then institutionalized the winner: the first harness engineering conference track.' },
+    { n: 'Birgitta Böckeler', role: 'Thoughtworks, martinfowler.com', d: 'Feb 17',
+      sig: 'Harnesses externalize human developer experience.', text: 'Split the harness into guides that steer the agent and sensors that detect drift.' },
+    { n: 'Dex Horthy', role: 'HumanLayer, 12-factor agents', d: 'Jan 2026',
+      sig: 'Slow loops: a nightly trigger, four PRs waiting by morning.', text: 'Also the field’s historian, wrote the definitive chronicle of the ralph technique.' }
+  ];
+  const REPOS = [
+    { n: 'ghostty-org/ghostty', role: '58.7k stars', d: 'AGENTS.md',
+      sig: 'The under-50-line AGENTS.md.', text: 'Under fifty lines guard a 58.7k-star codebase, plus a tripwire: an agent asked to open a PR must write a confession file into the diff instead.' },
+    { n: 'langchain-ai/deepagents', role: '26.8k stars', d: 'harness pkg',
+      sig: 'The harness as a pip install.', text: 'Sub-agents, filesystem backends, summarization, human-in-the-loop approval, and skills wired behind one create call.' },
+    { n: 'snarktank/ralph', role: '21.3k stars', d: 'the loop', code: true,
+      sig: 'The canonical loop.', text: 'Fresh context every turn, prd.json grading, progress.txt memory, exits when every story passes.' },
+    { n: 'gastownhall/gastown', role: '17.2k stars', d: 'multi-agent',
+      sig: 'Yegge’s multi-agent town.', text: 'A Mayor coordinates polecat workers, git-backed hooks survive crashes, and stalled loops raise GUPP violations.' },
+    { n: 'ai-boost/awesome-harness-engineering', role: '3.3k stars', d: 'the index',
+      sig: 'The field’s index.', text: 'Twelve design primitives and a PLAN.md template where each milestone unlocks only when its verify command passes.' }
+  ];
+  const RALPH = 'while :; do cat PROMPT.md | claude ; done';
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const el = (id) => document.getElementById(id);
+  let typeTimer = null;
+
+  const makeChips = (list, holder, color, kind, offset) => {
+    list.forEach((item, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'chip';
+      btn.style.setProperty('--cc', color);
+      btn.style.animationDelay = ((offset + i) * 0.06) + 's';
+      btn.setAttribute('aria-pressed', 'false');
+      btn.textContent = item.n;
+      btn.addEventListener('click', () => select(kind, i, btn));
+      holder.appendChild(btn);
+    });
+  };
+  const select = (kind, i, btn) => {
+    document.querySelectorAll('.chip').forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
+    const d = (kind === 'p' ? PEOPLE : REPOS)[i];
+    const color = kind === 'p' ? 'var(--accent)' : 'var(--T-cron)';
+    el('d-name').textContent = d.n;
+    el('d-date').textContent = d.d;
+    el('d-date').style.setProperty('--dc', color);
+    el('d-sig').style.setProperty('--dc', color);
+    el('d-role').textContent = d.role;
+    el('d-sig').textContent = d.sig;
+    el('d-text').textContent = d.text;
+    const codeEl = el('d-code');
+    clearTimeout(typeTimer);
+    if (d.code) {
+      codeEl.classList.add('on');
+      codeEl.classList.remove('done');
+      if (reduced) { codeEl.textContent = RALPH; codeEl.classList.add('done'); }
+      else {
+        codeEl.textContent = '';
+        let k = 0;
+        const tick = () => {
+          codeEl.textContent = RALPH.slice(0, k += 1);
+          if (k < RALPH.length) typeTimer = setTimeout(tick, 34);
+          else codeEl.classList.add('done');
+        };
+        typeTimer = setTimeout(tick, 220);
+      }
+    } else {
+      codeEl.classList.remove('on');
+      codeEl.textContent = '';
+    }
+  };
+
+  makeChips(PEOPLE, el('people'), 'var(--accent)', 'p', 0);
+  makeChips(REPOS, el('repos'), 'var(--T-cron)', 'r', 10);
+  const first = document.querySelector('#people .chip');
+  select('p', 0, first);
+
+  const shell = document.querySelector('.shell');
+  const start = () => shell.classList.add('play');
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((en) => { if (en.isIntersecting) { start(); io.disconnect(); } });
+    }, { threshold: 0.2 });
+    io.observe(shell);
+  } else { start(); }
+  /* Report content height so the parent frame hugs the content. */
+  if (document.documentElement.dataset.embedded === 'true') {
+    const postSize = () => window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+    if ('ResizeObserver' in window) new ResizeObserver(postSize).observe(document.body);
+    window.addEventListener('load', postSize);
+  }
+})();
+</script>
+</body>
+</html>

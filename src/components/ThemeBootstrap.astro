@@ -8,7 +8,6 @@
     window.__m2mInitTheme = () => {
       const storageKey = 'm2m-theme';
       const root = document.documentElement;
-      const media = window.matchMedia('(prefers-color-scheme: dark)');
       const normalizeTheme = (value) => value === 'dark' || value === 'light' ? value : null;
       const getStoredTheme = () => {
         try {
@@ -17,8 +16,8 @@
           return null;
         }
       };
-      const getSystemTheme = () => media.matches ? 'dark' : 'light';
-      const getPreferredTheme = () => getStoredTheme() ?? getSystemTheme();
+      // Dark is the site default; only an explicit stored preference switches to light.
+      const getPreferredTheme = () => getStoredTheme() ?? 'dark';
 
       window.__m2mThemeKey = storageKey;
       window.__m2mGetTheme = () => root.dataset.theme || getPreferredTheme();

@@ -148,6 +148,10 @@ html, body { height: 100%; overflow: hidden; }
   .hashimoto-mark { font-size: 2rem; }
   .vocab-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
 }
+
+/* Embed: size to content and report it, the parent autosizes the frame. */
+:root[data-embedded="true"], :root[data-embedded="true"] body { height: auto; }
+:root[data-embedded="true"] .shell { height: auto; }
 </style>
 </head>
 <body>
@@ -157,7 +161,7 @@ html, body { height: 100%; overflow: hidden; }
     <div class="hashimoto-body">
       <span class="hashimoto-eyebrow">The single rule that compounds harness quality</span>
       <p class="hashimoto-quote">Anytime you find an agent makes a mistake, you take the time to engineer a solution such that the agent <em>never makes that mistake again</em>.</p>
-      <span class="hashimoto-attr">— </span>
+      <span class="hashimoto-attr">— Mitchell Hashimoto, February 5 2026, the post that seeded harness engineering</span>
     </div>
     <div style="font-family: 'DM Sans', sans-serif; font-size: 0.78rem; color: var(--muted); text-align: right; align-self: end;">
       Every other rule in this deck<br>is downstream of that one.
@@ -169,7 +173,7 @@ html, body { height: 100%; overflow: hidden; }
       <h2>Vocabulary cheat sheet</h2>
       <span class="vocab-hint">Tap a card to flip · 13 terms</span>
     </div>
-    <div class="vocab-grid" id="vocabGrid" role="list"></div>
+    <div class="vocab-grid" id="vocabGrid" role="group" aria-label="Vocabulary cards, tap a card to flip it"></div>
   </section>
 
   <section class="sources" aria-label="Sources">
@@ -181,6 +185,7 @@ html, body { height: 100%; overflow: hidden; }
       <a href="https://openai.com/index/harness-engineering/" target="_blank" rel="noreferrer">OpenAI: Harness engineering</a>
       <a href="https://www.anthropic.com/engineering/building-effective-agents" target="_blank" rel="noreferrer">Anthropic: Building effective agents</a>
       <a href="https://www.anthropic.com/engineering/building-c-compiler" target="_blank" rel="noreferrer">Anthropic: C compiler with parallel Claudes</a>
+      <a href="https://mitchellh.com/writing/my-ai-adoption-journey" target="_blank" rel="noreferrer">Hashimoto: My AI Adoption Journey</a>
     </div>
   </section>
 </main>
@@ -191,7 +196,7 @@ html, body { height: 100%; overflow: hidden; }
     { term: 'Agent = Model + Harness', tip: 'Equation', def: 'The foundational equation. The agent is not the model — it\'s the model plus everything around it.', source: 'Anthropic, OpenAI, LangChain', color: 'var(--accent)' },
     { term: 'Harness engineering', tip: 'The discipline', def: 'Designing the load-bearing system around the model. The 2026 inflection.', source: 'Anthropic', color: 'var(--accent-2)' },
     { term: 'Meta-harness', tip: 'Platform pattern', def: 'A platform that virtualizes parts of the harness so you don\'t build them. Anthropic Managed Agents is one.', source: 'Anthropic', color: 'var(--L3)' },
-    { term: 'The dumb zone', tip: 'Failure mode', def: 'When the model spends more tokens reasoning about tools than doing the work. Caused by exposing too many tools.', source: 'Vercel v0', color: 'var(--L3)' },
+    { term: 'The dumb zone', tip: 'Failure mode', def: 'When the model spends more tokens reasoning about tools than doing the work. Caused by exposing too many tools.', source: 'Shorthand, after Vercel d0', color: 'var(--L3)' },
     { term: 'Context rot', tip: 'Failure mode', def: 'Gradual goal-drift in long-running sessions as the original task gets buried under tool output.', source: 'LangChain', color: 'var(--L2)' },
     { term: 'Doom loop', tip: 'Failure mode', def: 'An infinite retry pattern that burns thousands of dollars overnight. Prevented by L5 loop detection.', source: 'LangChain', color: 'var(--L5)' },
     { term: 'Success silent, failure loud', tip: 'Design principle', def: 'Verification design rule: pre-stop hooks should exit 0 silently and exit non-zero with detail. Exit code, not narration.', source: 'HumanLayer', color: 'var(--L4)' },
@@ -208,7 +213,6 @@ html, body { height: 100%; overflow: hidden; }
     const card = document.createElement('button');
     card.type = 'button';
     card.className = 'vocab-card';
-    card.setAttribute('role', 'listitem');
     card.setAttribute('aria-pressed', 'false');
     card.setAttribute('aria-label', `${v.term}: ${v.def}`);
     card.style.setProperty('--c', v.color);
@@ -230,6 +234,16 @@ html, body { height: 100%; overflow: hidden; }
     });
     grid.appendChild(card);
   });
+})();
+</script>
+<script>
+(() => {
+  /* Report content height so the parent frame hugs the content. */
+  if (document.documentElement.dataset.embedded === 'true') {
+    const postSize = () => window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+    if ('ResizeObserver' in window) new ResizeObserver(postSize).observe(document.body);
+    window.addEventListener('load', postSize);
+  }
 })();
 </script>
 </body>

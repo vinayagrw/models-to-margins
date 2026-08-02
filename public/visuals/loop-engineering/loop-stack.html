@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The four-level loop stack</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+/* Loop Stack. The four-level ladder as a step-through instrument.
+   Tabs L1 to L4; each level visually adds machinery to the same base
+   loop: L1 bare model-tools loop, L2 the grader gate and retry
+   channel, L3 the event bus feeding triggers, L4 the trace pipeline
+   into an analysis agent that rewrites the harness. Proper tab
+   semantics: role=tablist/tab/tabpanel, aria-controls, arrow keys. */
+
+.shell { display: flex; flex-direction: column; gap: 10px; }
+:root[data-embedded="true"] .shell { padding: 14px clamp(14px, 2vw, 22px); }
+/* Embed: size to content and report it, the parent autosizes the frame. */
+:root[data-embedded="true"], :root[data-embedded="true"] body { height: auto; }
+:root[data-embedded="true"] .shell { height: auto; }
+
+.head h1 {
+  font-family: "Space Grotesk", sans-serif; font-weight: 700;
+  font-size: clamp(1.02rem, 2.2vw, 1.3rem); letter-spacing: -0.02em; color: var(--text-strong);
+}
+:root[data-embedded="true"] .head h1 { font-size: 1.02rem; }
+.head p { font: 500 0.72rem/1.4 "DM Sans", sans-serif; color: var(--muted); margin-top: 2px; }
+
+/* ---------- tabs ---------- */
+.tabs { display: flex; gap: 7px; flex-wrap: wrap; }
+.tab {
+  border: 1px solid var(--border-strong); border-radius: 999px;
+  background: var(--surface); color: var(--text); cursor: pointer;
+  font: 700 0.7rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.04em;
+  padding: 7px 13px; display: inline-flex; align-items: center; gap: 7px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.tab::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--tc); flex: none; }
+.tab[aria-selected="true"] {
+  border-color: var(--tc); color: var(--text-strong);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--tc) 22%, transparent);
+}
+.tab-1 { --tc: var(--LV1); }
+.tab-2 { --tc: var(--LV2); }
+.tab-3 { --tc: var(--LV3); }
+.tab-4 { --tc: var(--LV4); }
+
+.board { display: grid; grid-template-rows: auto auto; gap: 10px; }
+
+/* ---------- stage ---------- */
+/* The stage grows with the selected level so L1 is not sized for the
+   full L4 diagram: the parent frame autosizes along with it. */
+.stage-panel {
+  position: relative; background: var(--surface); border: 1px solid var(--border);
+  border-radius: 16px; box-shadow: var(--shadow-soft); height: 250px; overflow: hidden;
+  transition: height 0.3s ease;
+}
+[data-level="2"] .stage-panel { height: 300px; }
+[data-level="3"] .stage-panel { height: 320px; }
+[data-level="4"] .stage-panel { height: 420px; }
+@media (prefers-reduced-motion: reduce) { .stage-panel { transition: none; } }
+.stage { position: absolute; inset: 0; }
+.stage svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.wire { fill: none; stroke: color-mix(in srgb, var(--wc, var(--accent)) 45%, transparent); stroke-width: 1.6; }
+.wire-dash { stroke-dasharray: 4 8; stroke-linecap: round; }
+.arrowhead { fill: color-mix(in srgb, var(--wc, var(--accent)) 60%, transparent); }
+
+.snode {
+  position: absolute; transform: translate(-50%, -50%);
+  border: 1px solid color-mix(in srgb, var(--nc, var(--border-strong)) 60%, var(--border-strong));
+  border-radius: 11px; background: var(--surface-strong); box-shadow: var(--shadow-soft);
+  padding: 6px 11px; text-align: center; white-space: nowrap; z-index: 2;
+}
+.snode b { display: block; font: 700 0.7rem/1.25 "Space Grotesk", sans-serif; letter-spacing: 0.07em; color: var(--text-strong); }
+.snode span { display: block; font: 500 0.66rem/1.3 "DM Sans", sans-serif; color: var(--muted); }
+
+/* layer visibility: .m2/.m3/.m4 appear at that level and above */
+.m2, .m3, .m4 { opacity: 0; transition: opacity 0.3s ease; pointer-events: none; }
+[data-level="2"] .m2,
+[data-level="3"] .m2, [data-level="3"] .m3,
+[data-level="4"] .m2, [data-level="4"] .m3, [data-level="4"] .m4 { opacity: 1; }
+
+/* node positions (percent of stage) */
+.n-model { left: 44%; top: 26%; --nc: var(--LV1); }
+.n-tools { left: 44%; top: 62%; --nc: var(--LV1); }
+.n-grader { left: 71%; top: 44%; --nc: var(--LV2); }
+.n-bus { left: 13%; top: 44%; --nc: var(--LV3); }
+.n-traces { left: 71%; top: 82%; --nc: var(--LV4); }
+.n-analysis { left: 36%; top: 88%; --nc: var(--LV4); }
+.n-config { left: 15%; top: 76%; --nc: var(--LV4); }
+
+.snode span.busrow { display: flex; flex-direction: column; gap: 3px; margin-top: 3px; }
+.busrow i {
+  font: 700 0.54rem/1.4 "Space Grotesk", sans-serif; letter-spacing: 0.08em;
+  color: var(--LV3); font-style: normal; text-transform: uppercase;
+}
+
+/* ---------- description panel ---------- */
+.desc {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+  box-shadow: var(--shadow-soft); padding: 12px 16px;
+  display: flex; flex-direction: column; gap: 6px; overflow: auto;
+}
+.desc-head { display: flex; align-items: baseline; gap: 9px; flex-wrap: wrap; }
+.desc-head b { font: 700 0.9rem/1.2 "Space Grotesk", sans-serif; color: var(--text-strong); }
+.desc-head .q { font: 500 0.7rem/1.4 "DM Sans", sans-serif; color: var(--muted); font-style: italic; }
+.desc p { font: 500 0.75rem/1.5 "DM Sans", sans-serif; color: var(--text); }
+.desc .cite { font: 500 0.66rem/1.5 "DM Sans", sans-serif; color: var(--muted); }
+
+/* ---------- mobile ---------- */
+@media (max-width: 760px) {
+  .stage-panel { height: 280px; }
+  [data-level="2"] .stage-panel { height: 330px; }
+  [data-level="3"] .stage-panel { height: 350px; }
+  [data-level="4"] .stage-panel { height: 460px; }
+  .snode { padding: 5px 8px; }
+  .snode b { font-size: 0.66rem; }
+  .snode span { font-size: 0.62rem; }
+  .n-model { left: 46%; }
+  .n-tools { left: 46%; }
+  .n-grader { left: 76%; }
+  .head h1 { font-size: 1rem; }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="head">
+    <h1>The four-level loop stack</h1>
+    <p>Each level adds machinery around the same core. Step through the tabs.</p>
+  </div>
+  <div class="tabs" role="tablist" aria-label="Loop stack levels">
+    <button class="tab tab-1" role="tab" id="tab-1" aria-controls="stagewrap" aria-selected="true" data-lv="1">L1 · Agent core</button>
+    <button class="tab tab-2" role="tab" id="tab-2" aria-controls="stagewrap" aria-selected="false" data-lv="2">L2 · Verification</button>
+    <button class="tab tab-3" role="tab" id="tab-3" aria-controls="stagewrap" aria-selected="false" data-lv="3">L3 · Event-driven</button>
+    <button class="tab tab-4" role="tab" id="tab-4" aria-controls="stagewrap" aria-selected="false" data-lv="4">L4 · Hill-climbing</button>
+  </div>
+  <div class="board" id="stagewrap" role="tabpanel" aria-labelledby="tab-1" data-level="1">
+    <div class="stage-panel">
+      <div class="stage">
+        <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+          <!-- L1 core: model <-> tools -->
+          <path class="wire" style="--wc: var(--LV1)" d="M 41 32 C 36 40, 36 48, 41 56"/>
+          <path class="wire" style="--wc: var(--LV1)" d="M 47 56 C 52 48, 52 40, 47 32"/>
+          <!-- L2: to grader and retry back -->
+          <path class="wire m2" style="--wc: var(--LV2)" d="M 52 62 C 62 60, 66 54, 69 50"/>
+          <path class="wire wire-dash m2" style="--wc: var(--accent-2)" d="M 69 38 C 64 30, 56 27, 51 26"/>
+          <!-- L3: bus into the core -->
+          <path class="wire m3" style="--wc: var(--LV3)" d="M 20 40 C 27 34, 33 30, 38 28"/>
+          <!-- L4: grader/tools traces down, analysis, config back into core -->
+          <path class="wire m4" style="--wc: var(--LV4)" d="M 73 52 C 74 62, 74 70, 72 76"/>
+          <path class="wire m4" style="--wc: var(--LV4)" d="M 62 84 C 55 86, 49 87, 45 88"/>
+          <path class="wire wire-dash m4" style="--wc: var(--LV4)" d="M 27 86 C 20 84, 16 81, 15 79"/>
+          <path class="wire wire-dash m4" style="--wc: var(--LV4)" d="M 14 70 C 14 62, 15 54, 17 49"/>
+        </svg>
+        <div class="snode n-model"><b>MODEL</b><span>reason · decide</span></div>
+        <div class="snode n-tools"><b>TOOLS</b><span>act · observe</span></div>
+        <div class="snode n-grader m2"><b>GRADER</b><span>rubric · tests<br>fail → retry ↺</span></div>
+        <div class="snode n-bus m3"><b>EVENT BUS</b><span class="busrow"><i>webhook</i><i>cron</i><i>queue</i></span></div>
+        <div class="snode n-traces m4"><b>TRACES</b><span>every run logged</span></div>
+        <div class="snode n-analysis m4"><b>ANALYSIS AGENT</b><span>reads failures</span></div>
+        <div class="snode n-config m4"><b>HARNESS vNEXT</b><span>prompts · tools · graders</span></div>
+      </div>
+    </div>
+    <div class="desc" aria-live="polite">
+      <div class="desc-head"><b id="d-title"></b><span class="q" id="d-q"></span></div>
+      <p id="d-body"></p>
+      <p class="cite" id="d-cite"></p>
+    </div>
+  </div>
+</div>
+<script>
+(() => {
+  const DATA = {
+    1: {
+      title: 'L1 · Agent core',
+      q: 'Can the agent do the task at all?',
+      body: 'The bare loop every framework ships: the model calls tools, reads results, and repeats until it declares the task done. Powerful, and entirely self-graded: nothing at this level checks whether "done" is true.',
+      cite: 'This is where most 2025 agent projects stopped. Everything above this line is what 2026 added.'
+    },
+    2: {
+      title: 'L2 · Verification',
+      q: 'Is the output actually right?',
+      body: 'A grader gates the exit: rubric scoring, deterministic checks (tests, lint, link resolution), or a reviewer sub-agent prompted to refute. Failures loop back with feedback instead of shipping. The creator stops grading its own homework.',
+      cite: 'The single highest-leverage upgrade: it converts "the model said done" into "the check passed."'
+    },
+    3: {
+      title: 'L3 · Event-driven',
+      q: 'When does it run?',
+      body: 'The loop detaches from the human. Webhooks, cron schedules, and queue messages fire runs on their own. The trigger taxonomy in the previous scene is the control surface for exactly this level.',
+      cite: 'At L3 the unit of work changes: you stop running agents and start operating a system that runs them.'
+    },
+    4: {
+      title: 'L4 · Hill-climbing',
+      q: 'Does the system get better every week?',
+      body: 'Production traces feed an analysis agent that reads the failures and rewrites the harness (prompts, tools, graders), shipping harness vNEXT back into the core. The Agentic Principle, automated: mistakes become permanent fixes without a human doing the engineering.',
+      cite: 'Formalized as observability-driven harness evolution in "Agentic Harness Engineering" (arXiv 2604.25850, 2026). Still the emerging edge: most teams run L4 as a weekly human ritual, not an agent.'
+    }
+  };
+  const tabs = Array.from(document.querySelectorAll('.tab'));
+  const wrap = document.getElementById('stagewrap');
+  const el = (id) => document.getElementById(id);
+  const select = (tab) => {
+    tabs.forEach((t) => t.setAttribute('aria-selected', String(t === tab)));
+    const lv = tab.dataset.lv;
+    wrap.dataset.level = lv;
+    wrap.setAttribute('aria-labelledby', tab.id);
+    const d = DATA[lv];
+    el('d-title').textContent = d.title;
+    el('d-q').textContent = d.q;
+    el('d-body').textContent = d.body;
+    el('d-cite').textContent = d.cite;
+    tab.focus();
+  };
+  tabs.forEach((tab, i) => {
+    tab.addEventListener('click', () => select(tab));
+    tab.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') select(tabs[(i + 1) % tabs.length]);
+      if (e.key === 'ArrowLeft') select(tabs[(i - 1 + tabs.length) % tabs.length]);
+    });
+  });
+  const d = DATA[1];
+  el('d-title').textContent = d.title;
+  el('d-q').textContent = d.q;
+  el('d-body').textContent = d.body;
+  el('d-cite').textContent = d.cite;
+
+  /* Report content height so the parent frame hugs the content. */
+  if (document.documentElement.dataset.embedded === 'true') {
+    const postSize = () => window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+    if ('ResizeObserver' in window) new ResizeObserver(postSize).observe(document.body);
+    window.addEventListener('load', postSize);
+  }
+})();
+</script>
+</body>
+</html>

@@ -18,7 +18,7 @@
   const key = 'm2m-theme';
   const norm = (v) => (v === 'dark' || v === 'light' ? v : null);
   const stored = (() => { try { return norm(localStorage.getItem(key)); } catch { return null; } })();
-  const theme = norm(params.get('theme')) ?? stored ?? (media.matches ? 'dark' : 'light');
+  const theme = norm(params.get('theme')) ?? stored ?? 'dark';
   root.dataset.theme = theme;
   root.style.colorScheme = theme;
   root.dataset.embedded = params.get('embed') === '1' ? 'true' : 'false';
@@ -838,7 +838,7 @@ a.gloss-link:hover{ border-bottom-color:currentColor; color:var(--gold); }
       <div class="read val">
         <div class="cap"><i></i> What reached the margin</div>
         <div class="big tnum"><span data-count="0" data-suffix="%" data-prefix="+">+0%</span></div>
-        <div class="note"><b class="val tnum">95%</b> of enterprise AI pilots show no measurable P&amp;L return.<sup class="fn"><a href="#fn1">1</a></sup></div>
+        <div class="note"><b class="val tnum">95%</b> of organisations see no measurable P&amp;L return from their AI pilots.<sup class="fn"><a href="#fn1">1</a></sup></div>
       </div>
     </div>
     <div class="verdict-bar"><span class="vb-text">the bottleneck didn't disappear — <b>it moved to human review.</b></span></div>
@@ -851,7 +851,7 @@ a.gloss-link:hover{ border-bottom-color:currentColor; color:var(--gold); }
   <div class="tldr-card">
     <div class="tldr-k">The reckoning in 30 seconds <span class="mins">· for the time-pressed</span></div>
     <div class="tldr-stats">
-      <div class="tstat" style="--ts:var(--volume)"><div class="v">95%</div><div class="l">of enterprise AI pilots show no measurable P&amp;L return<sup class="fn"><a href="#fn1">1</a></sup></div></div>
+      <div class="tstat" style="--ts:var(--volume)"><div class="v">95%</div><div class="l">of organisations see no measurable P&amp;L return from their AI pilots<sup class="fn"><a href="#fn1">1</a></sup></div></div>
       <div class="tstat" style="--ts:var(--accent)"><div class="v">~19%</div><div class="l">slower in METR's 2025 trial — while devs felt faster<sup class="fn"><a href="#fn2">2</a></sup></div></div>
       <div class="tstat" style="--ts:var(--violet)"><div class="v">1 gate</div><div class="l">the bottleneck moved from writing code to reviewing it</div></div>
       <div class="tstat" style="--ts:var(--gold-bright)"><div class="v">~39%</div><div class="l">modelled Y1 ROI — but only on a mature platform<sup class="fn"><a href="#fn3">3</a></sup></div></div>
@@ -1277,10 +1277,10 @@ a.gloss-link:hover{ border-bottom-color:currentColor; color:var(--gold); }
 <section class="wrap verdict-sec" id="verdict">
   <div class="reveal">
     <div class="kicker-row" style="justify-content:center"><span class="eyebrow">09 — The 5% verdict</span></div>
-    <h2 class="head">100 pilots launch. <span style="color:var(--value)">Five</span> move the margin.</h2>
-    <p class="sub">Every coin is an enterprise AI initiative. The lit ones returned measurable P&amp;L. The rest produced output, demos, and velocity charts — but never reached the bottom line.</p>
+    <h2 class="head">100 organisations pilot AI. <span style="color:var(--value)">Five</span> move the margin.</h2>
+    <p class="sub">Every coin is an organisation running AI pilots. The lit ones translated pilots into measurable P&amp;L. The rest produced output, demos, and velocity charts — but never reached the bottom line.</p>
   </div>
-  <div class="coingrid reveal" id="coinGrid" aria-label="Grid of 100 coins; 5 lit gold for pilots with measurable P&L return"></div>
+  <div class="coingrid reveal" id="coinGrid" aria-label="Grid of 100 coins; 5 lit gold for organisations with measurable P&L return"></div>
   <div class="coin-legend reveal"><span><i class="e"></i> <b>95</b> no measurable return</span><span><i class="w"></i> <b>5</b> reached the margin</span></div>
 </section>
 
@@ -1296,7 +1296,7 @@ a.gloss-link:hover{ border-bottom-color:currentColor; color:var(--gold); }
       <div class="emp-case fail">
         <div class="ec-k"><span class="ec-tag">Failure post-mortem</span><span class="ec-id">the ungoverned pilot</span></div>
         <h4>The gate was only ever "temporary."</h4>
-        <p>To keep pace with AI volume, human review was thinned to a rubber stamp. Output tripled and the dashboards looked elite — until escaped defects and "almost-right" rework arrived together in month eight, and the rollback erased the year's modelled return. <b>More volume, negative value — this pilot joined the 95%.</b></p>
+        <p>To keep pace with AI volume, human review was thinned to a rubber stamp. Output tripled and the dashboards looked elite — until escaped defects and "almost-right" rework arrived together in month eight, and the rollback erased the year's modelled return. <b>More volume, negative value — this organisation joined the 95%.</b></p>
       </div>
       <div class="emp-case win">
         <div class="ec-k"><span class="ec-tag">Field result</span><span class="ec-id">the governed line</span></div>
@@ -1643,7 +1643,7 @@ a.gloss-link:hover{ border-bottom-color:currentColor; color:var(--gold); }
     <div class="srcbox reveal" id="sources">
       <h3>Sources &amp; method</h3>
       <ol>
-        <li id="fn1"><b>NVIDIA — <i>State of AI 2026</i> · Deloitte — <i>State of AI in the Enterprise 2026</i>.</b> 88% of enterprises say AI lifted revenue and 87% report lower costs — yet measurable, P&amp;L-level impact stays concentrated in a small minority of adopters. The brief's headline ~95% is the widely-cited MIT 2025 finding that ~95% of enterprise GenAI pilots show no measurable P&amp;L return — named here as context, not added to the 2026 source list; the NVIDIA and Deloitte 2026 perception-vs-return gap is its corroboration. The gap between reported optimism and booked return is this brief's subject. <a href="https://blogs.nvidia.com/blog/state-of-ai-report-2026/" target="_blank" rel="noopener">NVIDIA ↗</a> · <a href="https://www.deloitte.com/us/en/what-we-do/capabilities/applied-artificial-intelligence/content/state-of-ai-in-the-enterprise.html" target="_blank" rel="noopener">Deloitte ↗</a></li>
+        <li id="fn1"><b>NVIDIA — <i>State of AI 2026</i> · Deloitte — <i>State of AI in the Enterprise 2026</i>.</b> 88% of enterprises say AI lifted revenue and 87% report lower costs — yet measurable, P&amp;L-level impact stays concentrated in a small minority of adopters. The brief's headline ~95% is from <i>The GenAI Divide: State of AI in Business 2025</i> (MIT Media Lab Project NANDA, July 2025): only ~5% of <b>organisations</b> are translating GenAI pilots into real operational or financial impact. Handle it with care — the report is preliminary and not peer-reviewed, MIT later gated access behind a request form, and it carries a second, separate 5% finding (5% of custom GenAI tools reach production) that is often conflated with this one. Its companion figure — 67% of successful deployments vendor-built vs 33% internal — is from the same paper, so it is not independent corroboration. Named here as context, not added to the 2026 source list; the NVIDIA and Deloitte 2026 perception-vs-return gap is the independent corroboration. The gap between reported optimism and booked return is this brief's subject. <a href="https://blogs.nvidia.com/blog/state-of-ai-report-2026/" target="_blank" rel="noopener">NVIDIA ↗</a> · <a href="https://www.deloitte.com/us/en/what-we-do/capabilities/applied-artificial-intelligence/content/state-of-ai-in-the-enterprise.html" target="_blank" rel="noopener">Deloitte ↗</a></li>
         <li id="fn2"><b>METR — <i>Early-2025 AI &amp; Experienced Open-Source Developer Productivity</i> (2025).</b> The one pre-2026 source kept by design — still the only randomised controlled trial on this question. Developers expected AI to speed them up and were measured ~19% slower: the perception gap this brief is built on. <b>Update (early 2026):</b> METR's own continuation narrowed the measured effect to ~−4% (CI −15% to +9%, not statistically significant) and concluded AI "likely provides productivity benefits" — so the ~19% magnitude is 2025-specific and the durable claim is the felt-vs-measured gap, not its size. <a href="https://metr.org/blog/2025-07-10-early-2025-ai-experienced-os-dev-study/" target="_blank" rel="noopener">2025 study ↗</a> · <a href="https://metr.org/blog/2026-05-11-ai-usage-survey/" target="_blank" rel="noopener">2026 continuation ↗</a></li>
         <li id="fn3"><b>DORA — <i>ROI of AI-Assisted Software Development</i> (2026.01), Google Cloud.</b> AI amplifies the system it lands in: on a mature 500-engineer platform the team models a ~39% first-year ROI with an eight-month payback — but warns of a J-curve dip first, "the tuition cost of transformation." Without strong foundations, the gains are "lost in downstream chaos." <a href="https://www.infoq.com/news/2026/05/dora-roi-ai-assisted-dev-report/" target="_blank" rel="noopener">report ↗</a></li>
         <li id="fn4"><b>Stack Overflow — <i>Closing the AI trust gap</i> (Feb 2026).</b> On the record 84%-adoption Developer Survey: trust in AI accuracy fell from ~40% to ~29%, 46% of developers now actively distrust accuracy, and 66% say they spend more time fixing "almost-right" AI code. Adoption is not endorsement. <a href="https://stackoverflow.blog/2026/02/18/closing-the-developer-ai-trust-gap/" target="_blank" rel="noopener">analysis ↗</a></li>
@@ -1707,7 +1707,7 @@ const LEVER = {
     note:'<b>Hybrid:</b> the gate thins to keep up with volume. Throughput climbs, but more unreviewed code slips through and rework starts to bite.',
     cls:{value:'',acct:''} },
   autopilot: { thru:'3.2×', rework:'63%', value:'Lowest', acct:'No one', gate:5,
-    note:'<b>Autopilot:</b> remove the gate and output triples — but rework, unreviewed risk, and "who signed off?" all blow open. More volume, less value. This is how pilots join the 95%.',
+    note:'<b>Autopilot:</b> remove the gate and output triples — but rework, unreviewed risk, and "who signed off?" all blow open. More volume, less value. This is how organisations join the 95%.',
     cls:{value:'',acct:'up'} },
 };
 const DORA = [
@@ -1999,7 +1999,7 @@ addEventListener('scroll',()=>{ const h=document.documentElement; const p=h.scro
   function finalVerdict(){
     var O=clamp(state.out),M=clamp(state.mar),R=clamp(state.risk);
     if(M>=52&&R<=30) return ['You found the 5% path.','You optimized for margin and kept risk on a leash — govern the gate, measure the bill, fund the bottleneck. This is what the teams that actually convert AI into P&L do. Output was never the headline; verified value is.'];
-    if(O>=68&&M<=30) return ['This is how pilots join the 95%.','Output exploded and the dashboards looked great — but almost none of it reached the margin, and you’re carrying a stack of unreviewed risk. More volume, less value. The gate you pulled was the one keeping you honest.'];
+    if(O>=68&&M<=30) return ['This is how organisations join the 95%.','Output exploded and the dashboards looked great — but almost none of it reached the margin, and you’re carrying a stack of unreviewed risk. More volume, less value. The gate you pulled was the one keeping you honest.'];
     if(R>=55) return ['You shipped the bottleneck downstream.','You moved fast, but the risk you skipped didn’t disappear — it moved past the gate to whoever’s accountable when it breaks. Speed without a counter-metric is a loan, not a gain.'];
     return ['Better than most — but the margin’s still leaking.','Some governed calls, some volume calls. The output is real; the value reaching the P&L is only partial. Pair every speed metric with its counter-metric and the leak closes.'];
   }

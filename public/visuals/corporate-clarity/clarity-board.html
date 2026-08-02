@@ -15,7 +15,7 @@
         try { return normalizeTheme(window.localStorage.getItem(storageKey)); } catch { return null; }
       };
       const getSystemTheme = () => media.matches ? 'dark' : 'light';
-      const getPreferredTheme = () => normalizeTheme(params.get('theme')) ?? getStoredTheme() ?? getSystemTheme();
+      const getPreferredTheme = () => normalizeTheme(params.get('theme')) ?? getStoredTheme() ?? 'dark';
 
       root.dataset.embedded = params.get('embed') === '1' ? 'true' : 'false';
       root.dataset.focusMode = 'translation';
@@ -535,7 +535,7 @@
       window.addEventListener('m2m:focuschange', (event) => applyFocus(event.detail?.focus || 'translation'));
       window.addEventListener('storage', (event) => {
         if (event.key !== 'm2m-theme') return;
-        const fallbackTheme = media.matches ? 'dark' : 'light';
+        const fallbackTheme = 'dark';
         window.__m2mApplyTheme?.(event.newValue ?? fallbackTheme, false);
         syncToggle();
       });

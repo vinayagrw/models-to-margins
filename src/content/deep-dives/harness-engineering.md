@@ -2,7 +2,7 @@
 title: Harness Engineering — The Discipline Around the Model
 summary: Agent = Model + Harness. The model does the thinking; the harness decides what's true, what tools exist, what gets verified, and what survives a crash. Ten interactive scenes that take you from the equation to the implementation playbook.
 pubDate: 2026-04-30
-updatedDate: 2026-04-30
+updatedDate: 2026-07-26
 featured: true
 listed: true
 geography: Vendor-neutral, generic enterprise
@@ -21,30 +21,31 @@ readTime: 14 min read
 <div class="note-panel">
   <p><strong>One-line idea</strong>: <code>Agent = Model + Harness</code>. The model is the brain; the harness is the skeleton, memory, hands, immune system, and nervous system around it.</p>
   <p><strong>Who this is for</strong>: an exec who needs the analogy and the decision (sections 1-3); a tech lead who needs the framework (sections 4-5); an engineer who needs the patterns (sections 6 onward).</p>
-  <p><strong>Vendor stance</strong>: neutral. Examples reference OpenAI Codex, Anthropic Claude Code and Managed Agents, MCP, LangChain, Vercel v0, and HumanLayer where the public evidence comes from those teams.</p>
+  <p><strong>Vendor stance</strong>: neutral. Examples reference OpenAI Codex, Anthropic Claude Code and Managed Agents, MCP, LangChain, Vercel d0, and HumanLayer where the public evidence comes from those teams.</p>
   <p style="margin-top: 4px;"><strong>Prefer a slide deck?</strong> <a href="/deep-dives/harness-engineering/present">▶ Open in Present mode</a> — single-viewport, 10 slides, keyboard-navigable.</p>
+  <p style="margin-top: 4px;"><strong>Sequel (July 2026):</strong> <a href="/deep-dives/loop-engineering">Loop Engineering — Designing the Loops That Prompt the Agents</a> — what changed since this page, and how the harness gets run on a loop.</p>
 </div>
 
 <div class="signal-grid">
   <div class="signal-card">
     <span class="signal-label">The shift</span>
     <strong>Leverage moved from the model to the harness.</strong>
-    <p>In 2025 the conversation was prompts. In early 2026 it was context. By mid-2026 the leading teams stopped arguing about either and started shipping a different artifact — the harness.</p>
+    <p>In 2024 the conversation was prompts. Through 2025 it was context. By early 2026 the leading teams stopped arguing about either and started shipping a different artifact — the harness.</p>
   </div>
   <div class="signal-card">
     <span class="signal-label">Hard evidence</span>
     <strong>+13.7 points on Terminal Bench, harness-only.</strong>
-    <p>LangChain raised a coding agent from 52.8% to 66.5% by tweaking the harness alone — same model. None of the four 2026 case studies in this deep-dive beat the next model; they beat the previous version of themselves.</p>
+    <p>LangChain raised a coding agent from 52.8% to 66.5% by tweaking the harness alone — same model. None of the four case studies in this deep-dive (December 2025 to February 2026) beat the next model; they beat the previous version of themselves.</p>
   </div>
   <div class="signal-card">
     <span class="signal-label">The framework</span>
     <strong>Five layers, five owners, five rates of change.</strong>
-    <p>Constraint, Context, Execution, Verification, Lifecycle. Anthropic Managed Agents shipped 3 of the 5 in April 2026; the developer still owns L1 and L4 — and on a managed platform, that's exactly where your next dollar should go.</p>
+    <p>Constraint, Context, Execution, Verification, Lifecycle. Anthropic's Managed Agents platform (April 2026) covers what the synthesis essays map as 3 of the 5; the developer still owns L1 and L4 — and on a managed platform, that's exactly where your next dollar should go.</p>
   </div>
   <div class="signal-card">
     <span class="signal-label">The compounding rule</span>
     <strong>The Agentic Principle.</strong>
-    <p>"Anytime an agent makes a mistake, engineer it so the agent never makes that mistake again." A team that runs for six months ends up with a harness no one else can copy quickly.</p>
+    <p>"Anytime an agent makes a mistake, engineer it so the agent never makes that mistake again" (Mitchell Hashimoto, February 2026). A team that runs for six months ends up with a harness no one else can copy quickly.</p>
   </div>
 </div>
 
@@ -82,9 +83,9 @@ readTime: 14 min read
   ></iframe>
 </div>
 
-> "When everything is harness, nothing is. The word 'harness' today is where 'networking' was before the OSI model. Everyone agreed networks mattered, but nobody could have a precise conversation about which part was broken."
+> When everything is harness, nothing is. The word "harness" today is where "networking" was before the OSI model. Everyone agreed networks mattered, but nobody could have a precise conversation about which part was broken.
 
-This deep dive gives you a precise way to talk about it.
+The objection above writes itself, and this deep dive answers it with a precise way to talk about the parts.
 
 ## Scene 2 — Without vs With
 
@@ -103,7 +104,7 @@ The model isn't the bottleneck. The missing harness is.
 
 ## Scene 3 — Why now
 
-Four independent teams in 2026, four very different setups, same conclusion: **the harness moves the needle far more than the next model upgrade does.** None of them beat a frontier model — they beat the previous version of themselves by re-engineering the system around the same model.
+Four independent teams across the last eight months, four very different setups, same conclusion: **the harness moves the needle far more than the next model upgrade does.** None of them beat a frontier model — they beat the previous version of themselves by re-engineering the system around the same model.
 
 <div class="visual-frame" style="--vf-h:520px">
   <iframe
@@ -118,7 +119,7 @@ That's the shift. The discipline now has a name.
 
 ## Scene 4 — The 5 layers
 
-The cleanest formalization comes from Anthropic's Managed Agent post (April 2026): a harness has five layers, each with a different purpose, owner, and rate of change. **Click any layer** below to see its examples and minimum viable version. Switch the metaphor (Body / Kitchen / Car) to match your audience.
+The cleanest formalization comes from the synthesis essays written around Anthropic's Managed Agents launch (April 2026): a harness has five layers, each with a different purpose, owner, and rate of change. **Click any layer** below to see its examples and minimum viable version. Switch the metaphor (Body / Kitchen / Car) to match your audience.
 
 <div class="visual-frame" style="--vf-h:640px">
   <iframe
@@ -130,8 +131,8 @@ The cleanest formalization comes from Anthropic's Managed Agent post (April 2026
 </div>
 
 <div class="callout green">
-  <strong>Anthropic shipped 3 of the 5</strong>
-  <p>In April 2026, Anthropic Managed Agents shipped <strong>L2 (Context)</strong>, <strong>L3 (Execution)</strong>, and <strong>L5 (Lifecycle)</strong> as platform infrastructure — durable session logs, sandboxed execution, MCP routing, crash recovery. P50 time-to-first-token dropped ~60%, p95 over 90%. <strong>L1 (Constraint)</strong> and <strong>L4 (Verification)</strong> stay the developer's responsibility — and on a managed platform, that's exactly where your next dollar should go.</p>
+  <strong>The platform covers 3 of the 5</strong>
+  <p>Anthropic Managed Agents (April 2026) ships what the synthesis essays map as <strong>L2 (Context)</strong>, <strong>L3 (Execution)</strong>, and <strong>L5 (Lifecycle)</strong> — durable session logs, sandboxed execution, MCP routing, crash recovery. In Anthropic's June 2026 follow-up testing, P50 time-to-first-token dropped ~60%, p95 over 90%. <strong>L1 (Constraint)</strong> and <strong>L4 (Verification)</strong> stay the developer's responsibility — and on a managed platform, that's exactly where your next dollar should go.</p>
 </div>
 
 ## Scene 5 — One governed run
@@ -210,8 +211,8 @@ One minimum-viable move per layer. Click any layer tab to see the goal, two or t
 <div class="thesis-grid">
   <div class="thesis-card">
     <em>L4 first, on self-hosted</em>
-    <strong>One pre-stop hook moves the needle 2-3×.</strong>
-    <p>Boris Cherny on Claude Code: effective verification methods multiply final output quality. A single hook that runs your existing test command and exits non-zero on failure is the cheapest reliability win you can ship.</p>
+    <strong>A verification loop moves the needle 2-3×.</strong>
+    <p>Boris Cherny on Claude Code: give the agent a way to verify its work and the feedback loop will 2-3× the quality of the final result. A pre-stop hook that runs your existing test command and exits non-zero on failure is the cheapest implementation of that loop.</p>
   </div>
   <div class="thesis-card">
     <em>L1 first, on a managed platform</em>
@@ -220,8 +221,8 @@ One minimum-viable move per layer. Click any layer tab to see the goal, two or t
   </div>
   <div class="thesis-card">
     <em>L2 — never trust LLM-written agentfiles</em>
-    <strong>Hand-written under 100 lines.</strong>
-    <p>An ETH Zurich study of 138 agentfiles found that LLM-generated agentfiles <em>hurt</em> performance and cost 20%+ more in tokens. HumanLayer's working CLAUDE.md is under 60 lines. Curated and relevant beats comprehensive and stale.</p>
+    <strong>Hand-written and short.</strong>
+    <p>An ETH Zurich benchmark (138 tasks across 12 repositories) found that LLM-generated agentfiles slightly <em>hurt</em> performance while costing 20%+ more in tokens. HumanLayer's working CLAUDE.md is under 60 lines. Curated and relevant beats comprehensive and stale.</p>
   </div>
 </div>
 
@@ -240,12 +241,12 @@ The Principle in a sentence, 13 flippable vocabulary cards (tap to flip), and a 
 
 <div class="callout warm">
   <strong>Principle</strong>
-  <p>Principle: "Anytime you find an agent makes a mistake, you take the time to engineer a solution such that the agent never makes that mistake again." Every other rule in this deep dive is downstream of that one.</p>
+  <p>Principle: "Anytime you find an agent makes a mistake, you take the time to engineer a solution such that the agent never makes that mistake again." — Mitchell Hashimoto, whose February 5 2026 post seeded the discipline. Every other rule in this deep dive is downstream of that one.</p>
 </div>
 
 ## How this relates to the older 7-component view
 
-You may see an older OpenAI-derived framing that lists seven harness components: control loop, state management, memory, tools and sandboxing, context management, planning and self-verification, and error handling. That view isn't wrong — it's the same system at a different altitude. The 5-layer model is the architectural spine; the 7 components are how the work gets done inside it.
+You may see an older community framing that lists seven harness components: control loop, state management, memory, tools and sandboxing, context management, planning and self-verification, and error handling. That view isn't wrong — it's the same system at a different altitude. The 5-layer model is the architectural spine; the 7 components are how the work gets done inside it.
 
 | 5-layer view (this deep dive) | 7-component view (older framing) |
 |---|---|
@@ -290,11 +291,14 @@ A harness costs real engineering time. Five situations where it's the wrong move
 
 ## Sources
 
-Primary references those articles draw on:
+Primary references:
 
+- Mitchell Hashimoto, [*My AI Adoption Journey*](https://mitchellh.com/writing/my-ai-adoption-journey) (February 5, 2026) — the post that seeded harness engineering and the Principle.
 - OpenAI, [*Harness engineering: leveraging Codex in an agent-first world*](https://openai.com/index/harness-engineering/) (February 11, 2026).
-- Anthropic, [*Building effective agents*](https://www.anthropic.com/engineering/building-effective-agents) (December 2024) and [*Building a C compiler with a team of parallel Claudes*](https://www.anthropic.com/engineering/building-c-compiler) (February 2026).
-- Anthropic Managed Agents platform announcement (April 2026).
-- LangChain Terminal Bench 2.0 results, HumanLayer practical guides, Vercel v0 tool-scoping write-up, ETH Zurich agentfile study, Boris Cherny on Claude Code verification — find these via the three synthesis articles above.
+- Anthropic, [*Building effective agents*](https://www.anthropic.com/engineering/building-effective-agents) (December 2024), [*Building a C compiler with a team of parallel Claudes*](https://www.anthropic.com/engineering/building-c-compiler) (February 2026), and the [Managed Agents platform announcement](https://claude.com/blog/claude-managed-agents) (April 8, 2026).
+- LangChain, [*Improving deep agents with harness engineering*](https://www.langchain.com/blog/improving-deep-agents-with-harness-engineering) (February 2026) — the 52.8% to 66.5% Terminal Bench result.
+- Vercel, [*We removed 80 percent of our agent's tools*](https://vercel.com/blog/we-removed-80-percent-of-our-agents-tools) (December 22, 2025) — the d0 data-agent tool-scoping case.
+- HumanLayer, [*Skill Issue: Harness Engineering for Coding Agents*](https://www.humanlayer.dev/blog/skill-issue-harness-engineering-for-coding-agents) (March 2026), the ETH Zurich agentfile benchmark (arXiv 2602.11988), and Boris Cherny on Claude Code verification (January 2026).
+- The five-layer decomposition used throughout is a synthesis framing that emerged in essays around the Managed Agents launch, not an Anthropic artifact.
 
 This deep dive is vendor-neutral. The patterns work on any modern coding agent — Claude Code, Codex, Cursor, Copilot Workspace, or your own — provided you name the five layers, give each one an owner, and run the Principle for long enough to compound.

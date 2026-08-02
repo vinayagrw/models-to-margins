@@ -51,7 +51,7 @@ If one of those is missing, the product may still be useful. It is just less lik
 
 The brief keeps the operator-grade intelligence engine as a supporting method layer because the argument did not come from one impressive launch week.
 
-- Filter hype down to named operational evidence.
+- Filter hype down to operator-shaped evidence. The sector payoffs shown are illustrative archetypes, not attributed cases.
 - Remember what persisted across recurring runs instead of resetting every week.
 - Route patterns across sectors until the same control point shows up under different operating realities.
 - Hold or downgrade the claim when queue ownership or writeback stays unclear.

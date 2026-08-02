@@ -13,7 +13,7 @@
       const normalizeTheme = (v) => v === 'dark' || v === 'light' ? v : null;
       const getStoredTheme = () => { try { return normalizeTheme(localStorage.getItem(storageKey)); } catch { return null; } };
       const getSystemTheme = () => media.matches ? 'dark' : 'light';
-      const getPreferredTheme = () => normalizeTheme(params.get('theme')) ?? getStoredTheme() ?? getSystemTheme();
+      const getPreferredTheme = () => normalizeTheme(params.get('theme')) ?? getStoredTheme() ?? 'dark';
       root.dataset.embedded = params.get('embed') === '1' ? 'true' : 'false';
       window.__m2mApplyTheme = (theme, persist = false) => {
         const next = normalizeTheme(theme) ?? getPreferredTheme();

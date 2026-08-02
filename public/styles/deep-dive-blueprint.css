@@ -12,7 +12,7 @@
   --bp-paper-edge: #d6deea;
   --bp-ink: #16233b;
   --bp-ink-2: #3c4a63;
-  --bp-ink-3: #64718a;
+  --bp-ink-3: #57647b;
   --bp-line: #1b3a6b;
   --bp-line-soft: rgba(27, 58, 107, 0.16);
   --bp-line-faint: rgba(27, 58, 107, 0.07);
@@ -133,7 +133,7 @@
   color: var(--bp-ink);
   margin: 0.5em 0 0;
 }
-.dd-blueprint .bp-arrow { color: var(--bp-accent); font-weight: 700; }
+.dd-blueprint .bp-arrow { color: var(--bp-accent-ink); font-weight: 700; }
 
 .dd-blueprint .bp-subtitle {
   font-family: var(--bp-mono);

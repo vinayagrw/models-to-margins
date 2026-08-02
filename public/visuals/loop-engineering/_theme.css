@@ -1,6 +1,5 @@
-/* Harness Engineering — shared theme tokens and base styles
-   Used by hero-equation, without-vs-with, evidence-chart, harness-explorer,
-   run-trace, failure-modes, invest-first, decision-lanes. */
+/* Loop Engineering — shared theme tokens and base styles
+   Used by hero-loop-feed, loop-anatomy, trigger-taxonomy, loop-stack, loop-metrics. */
 
 :root,
 :root[data-theme="light"] {
@@ -11,7 +10,8 @@
   --bg-mid: #e8f5fa;
   --bg-end: #f4e7e2;
 
-  /* Text */
+  /* Text. Light values are tuned to hold WCAG AA (4.5:1) for small text
+     over --surface composited on --bg-mid. */
   --text: #0d2138;
   --text-strong: #051324;
   --muted: rgba(16, 42, 67, 0.72);
@@ -32,17 +32,18 @@
   --warn: #c93d17;
   --good: #16825d;
 
-  /* 5-layer canonical colors (used in hero, explorer, failure-modes, invest-first) */
-  --L1: #b8520d;  /* Constraint    — orange */
-  --L2: #077693;  /* Context       — cyan */
-  --L3: #7d3bde;  /* Execution     — violet */
-  --L4: #16825d;  /* Verification  — jade */
-  --L5: #8f680a;  /* Lifecycle     — amber */
+  /* Trigger palette (trigger-taxonomy, hero) */
+  --T-heartbeat: #077693; /* heartbeat — cyan */
+  --T-cron: #8f680a;      /* cron      — amber */
+  --T-hook: #b8520d;      /* hook      — orange */
+  --T-goal: #7d3bde;      /* goal      — violet */
 
-  /* Heatmap */
-  --heat-empty: rgba(16, 42, 67, 0.10);
-  --heat-partial: #f4cb73;
-  --heat-strong: #16825d;
+  /* Loop-stack levels (loop-stack, hero). Hues echo the harness layer palette
+     where the concepts map: L2 verify = jade, L4 climb = amber. */
+  --LV1: #077693; /* agent core   — cyan */
+  --LV2: #16825d; /* verification — jade */
+  --LV3: #b8520d; /* event-driven — orange */
+  --LV4: #8f680a; /* hill-climb   — amber */
 
   /* Shadow */
   --shadow: 0 18px 38px rgba(16, 42, 67, 0.12);
@@ -68,14 +69,14 @@
     --accent-3: #4edab5;
     --warn: #ff776c;
     --good: #4edab5;
-    --L1: #f97316;
-    --L2: #22d3ee;
-    --L3: #a56cff;
-    --L4: #4edab5;
-    --L5: #f4cb73;
-    --heat-empty: rgba(166, 212, 255, 0.08);
-    --heat-partial: #f4cb73;
-    --heat-strong: #4edab5;
+    --T-heartbeat: #22d3ee;
+    --T-cron: #f4cb73;
+    --T-hook: #f97316;
+    --T-goal: #a56cff;
+    --LV1: #22d3ee;
+    --LV2: #4edab5;
+    --LV3: #f97316;
+    --LV4: #f4cb73;
     --shadow: 0 22px 60px rgba(0, 0, 0, 0.42);
     --shadow-soft: 0 14px 32px rgba(0, 0, 0, 0.30);
   }
@@ -99,14 +100,14 @@
   --accent-3: #4edab5;
   --warn: #ff776c;
   --good: #4edab5;
-  --L1: #f97316;
-  --L2: #22d3ee;
-  --L3: #a56cff;
-  --L4: #4edab5;
-  --L5: #f4cb73;
-  --heat-empty: rgba(166, 212, 255, 0.08);
-  --heat-partial: #f4cb73;
-  --heat-strong: #4edab5;
+  --T-heartbeat: #22d3ee;
+  --T-cron: #f4cb73;
+  --T-hook: #f97316;
+  --T-goal: #a56cff;
+  --LV1: #22d3ee;
+  --LV2: #4edab5;
+  --LV3: #f97316;
+  --LV4: #f4cb73;
   --shadow: 0 22px 60px rgba(0, 0, 0, 0.42);
   --shadow-soft: 0 14px 32px rgba(0, 0, 0, 0.30);
 }
@@ -150,6 +151,14 @@ body {
   /* Each visual's own .shell rule sets display + grid/flex template. */
 }
 
+/* Keyboard focus: explicit high-visibility ring on every interactive element */
+button:focus-visible,
+a:focus-visible,
+summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 /* Shared typography utilities */
 .eyebrow {
   font-family: "Space Grotesk", sans-serif;
@@ -158,12 +167,4 @@ body {
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--accent);
-}
-
-/* Keyboard focus: explicit high-visibility ring on every interactive element */
-button:focus-visible,
-a:focus-visible,
-summary:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
 }

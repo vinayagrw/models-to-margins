@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Failure modes of the loop era</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+/* Failure Wall. One animated instrument (the comprehension-debt meter:
+   an unread-PR counter climbing while a team-comprehension bar decays),
+   six failure lamps, one shared detail panel, and the bar line pinned
+   at the bottom. Reduced motion: meter parked at its end state. */
+
+.shell { display: flex; flex-direction: column; gap: 10px; }
+:root[data-embedded="true"] .shell { padding: 14px clamp(14px, 2vw, 22px); }
+/* Embed: size to content and report it, the parent autosizes the frame. */
+:root[data-embedded="true"], :root[data-embedded="true"] body { height: auto; }
+:root[data-embedded="true"] .shell { height: auto; }
+
+.head h1 {
+  font-family: "Space Grotesk", sans-serif; font-weight: 700;
+  font-size: clamp(1.02rem, 2.2vw, 1.3rem); letter-spacing: -0.02em; color: var(--text-strong);
+}
+:root[data-embedded="true"] .head h1 { font-size: 1.02rem; }
+.head p { font: 500 0.72rem/1.4 "DM Sans", sans-serif; color: var(--muted); margin-top: 2px; }
+
+/* ---------- comprehension-debt meter ---------- */
+.meter {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+  box-shadow: var(--shadow-soft); padding: 9px 12px;
+  display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px 16px; align-items: center;
+}
+.m-label {
+  font: 700 0.56rem/1.2 "Space Grotesk", sans-serif; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--muted); white-space: nowrap;
+}
+.m-count { font: 700 1.15rem/1 "Space Grotesk", sans-serif; color: var(--warn); font-variant-numeric: tabular-nums; }
+.m-count em { font: 500 0.6rem/1.2 "DM Sans", sans-serif; font-style: normal; color: var(--muted); margin-left: 6px; }
+.m-barwrap { display: flex; align-items: center; gap: 9px; }
+.m-bar { position: relative; flex: 1; height: 10px; border-radius: 6px; background: color-mix(in srgb, var(--text) 8%, transparent); overflow: hidden; }
+.m-fill { position: absolute; top: 0; bottom: 0; left: 0; width: 34%; border-radius: 6px; background: linear-gradient(90deg, var(--good), color-mix(in srgb, var(--good) 60%, var(--warn))); }
+.play .m-fill { animation: decay 6s ease-out forwards; }
+@keyframes decay { from { width: 96%; } to { width: 34%; } }
+.m-pct { font: 700 0.78rem/1 "Space Grotesk", sans-serif; color: var(--good); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* ---------- lamps ---------- */
+.grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.lamp {
+  cursor: pointer; text-align: left; min-width: 0;
+  border: 1px solid var(--border-strong); border-radius: 12px;
+  background: var(--surface-strong); box-shadow: var(--shadow-soft);
+  padding: 8px 10px; display: flex; flex-direction: column; gap: 4px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.lamp:hover { border-color: var(--fc); }
+.lamp[aria-pressed="true"] {
+  border-color: var(--fc);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--fc) 22%, transparent), var(--shadow-soft);
+}
+.l-top { display: flex; align-items: center; gap: 7px; }
+.l-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--fc); flex: none; box-shadow: 0 0 8px color-mix(in srgb, var(--fc) 65%, transparent); }
+.play .l-dot { animation: lamp-glow 2.6s ease-in-out infinite; }
+@keyframes lamp-glow { 0%, 100% { box-shadow: 0 0 4px color-mix(in srgb, var(--fc) 40%, transparent); } 50% { box-shadow: 0 0 11px color-mix(in srgb, var(--fc) 85%, transparent); } }
+.l-top b { font: 700 0.7rem/1.2 "Space Grotesk", sans-serif; color: var(--text-strong); min-width: 0; }
+.l-tag {
+  align-self: flex-start;
+  font: 700 0.52rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--fc); border: 1px solid color-mix(in srgb, var(--fc) 50%, transparent);
+  border-radius: 5px; padding: 3px 6px;
+}
+
+/* ---------- detail ---------- */
+.detail {
+  flex: 1; min-height: 0; overflow: auto;
+  background: var(--surface); border: 1px solid var(--border);
+  border-left: 4px solid var(--dc, var(--warn)); border-radius: 12px;
+  box-shadow: var(--shadow-soft); padding: 10px 13px;
+  display: flex; flex-direction: column; gap: 5px;
+}
+.d-head { display: flex; align-items: center; gap: 8px; }
+.d-head b { font: 700 0.85rem/1.2 "Space Grotesk", sans-serif; color: var(--text-strong); }
+.d-head span { font: 700 0.54rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.12em; text-transform: uppercase; color: var(--dc, var(--warn)); }
+.detail p { font: 500 0.73rem/1.55 "DM Sans", sans-serif; color: var(--text); }
+
+.bar-line {
+  border: 1px dashed color-mix(in srgb, var(--warn) 55%, transparent); border-radius: 10px;
+  padding: 7px 12px; text-align: center;
+  font: 600 0.68rem/1.45 "DM Sans", sans-serif; color: var(--text);
+}
+.bar-line b { color: var(--warn); }
+
+/* ---------- mobile ---------- */
+@media (max-width: 760px) {
+  .head h1 { font-size: 1rem; }
+  .grid { grid-template-columns: 1fr 1fr; }
+  .l-top b { font-size: 0.68rem; }
+  .detail p { font-size: 0.74rem; }
+  .bar-line { font-size: 0.7rem; }
+  .meter { grid-template-columns: auto minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .play .m-fill, .play .l-dot { animation: none !important; }
+  .m-fill { width: 34%; }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="head">
+    <h1>Failure modes of the loop era</h1>
+    <p>Six lamps. The harness failure modes still apply underneath, these are what the loop adds on top.</p>
+  </div>
+
+  <div class="meter" role="img" aria-label="Comprehension debt meter. Unread merged PRs climb while team comprehension decays toward 34 percent.">
+    <span class="m-label">Unread merged PRs</span>
+    <span class="m-count"><span id="m-count">48</span><em>this sprint, illustrative</em></span>
+    <span class="m-label">Team comprehension</span>
+    <span class="m-barwrap"><span class="m-bar"><span class="m-fill"></span></span><span class="m-pct" id="m-pct">34%</span></span>
+  </div>
+
+  <div class="grid" role="group" aria-label="Failure modes">
+    <button class="lamp" style="--fc: var(--warn)" data-k="f1" aria-pressed="true">
+      <span class="l-top"><span class="l-dot"></span><b>F1 · Comprehension debt</b></span><span class="l-tag">Structural</span>
+    </button>
+    <button class="lamp" style="--fc: var(--warn)" data-k="f2" aria-pressed="false">
+      <span class="l-top"><span class="l-dot"></span><b>F2 · Cognitive surrender</b></span><span class="l-tag">Cultural</span>
+    </button>
+    <button class="lamp" style="--fc: var(--accent-2)" data-k="f3" aria-pressed="false">
+      <span class="l-top"><span class="l-dot"></span><b>F3 · Code entropy</b></span><span class="l-tag">Mitigable</span>
+    </button>
+    <button class="lamp" style="--fc: var(--accent-2)" data-k="f4" aria-pressed="false">
+      <span class="l-top"><span class="l-dot"></span><b>F4 · Verification gaps</b></span><span class="l-tag">The L2 tax</span>
+    </button>
+    <button class="lamp" style="--fc: var(--accent-2)" data-k="f5" aria-pressed="false">
+      <span class="l-top"><span class="l-dot"></span><b>F5 · Review ghosting</b></span><span class="l-tag">Measured</span>
+    </button>
+    <button class="lamp" style="--fc: var(--warn)" data-k="f6" aria-pressed="false">
+      <span class="l-top"><span class="l-dot"></span><b>F6 · Brownfield</b></span><span class="l-tag">Unsolved</span>
+    </button>
+  </div>
+
+  <div class="detail" id="detail" aria-live="polite">
+    <div class="d-head"><b id="d-name"></b><span id="d-tag"></span></div>
+    <p id="d-text"></p>
+  </div>
+
+  <div class="bar-line">The bar for agent-written code is <b>the bar for human-written code</b>. Every failure on this wall is a team quietly lowering it.</div>
+</div>
+<script>
+(() => {
+  const DATA = {
+    f1: { name: 'F1 · Comprehension debt', tag: 'Structural', color: 'var(--warn)',
+      text: 'The loop ships faster than you understand what it shipped. Every unread merged PR is borrowed comprehension and the interest compounds. No tooling fixes it, only pacing does. The meter above is this failure, drawn.' },
+    f2: { name: 'F2 · Cognitive surrender', tag: 'Cultural', color: 'var(--warn)',
+      text: 'Reviewers approve because the grader passed. The grader passes because nobody re-checks the rubric. The human gate rots into a formality, and the failure is letting it.' },
+    f3: { name: 'F3 · Code entropy', tag: 'Mitigable', color: 'var(--accent-2)',
+      text: 'Near-duplicate helpers, drifting conventions, dead branches. GitClear measured churn doubling from 3.3 to 7.1 percent. The mitigation is itself a loop, garbage-collection agents, which then need their own grader.' },
+    f4: { name: 'F4 · Verification gaps', tag: 'The L2 tax', color: 'var(--accent-2)',
+      text: 'Features marked complete that were never exercised end to end. The grader checked what it could see, what it could not see shipped. Deterministic checks wherever one exists, rubrics only where none does.' },
+    f5: { name: 'F5 · Review ghosting', tag: 'Measured', color: 'var(--accent-2)',
+      text: 'MSR 2026, 33,707 agent PRs: 28.3 percent merge almost instantly, but agents abandon their PRs when iterative human review pushes back. The loop opens PRs, it does not yet ride review.' },
+    f6: { name: 'F6 · Brownfield', tag: 'Unsolved', color: 'var(--warn)',
+      text: 'Every marquee result on the evidence wall is greenfield or near it. A decade-old codebase with implicit invariants and no test harness remains the field’s open problem.' }
+  };
+  const lamps = document.querySelectorAll('.lamp');
+  const el = (id) => document.getElementById(id);
+  const render = (k) => {
+    const d = DATA[k];
+    el('detail').style.setProperty('--dc', d.color);
+    el('d-name').textContent = d.name;
+    el('d-tag').textContent = d.tag;
+    el('d-text').textContent = d.text;
+  };
+  lamps.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      lamps.forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
+      render(btn.dataset.k);
+    });
+  });
+  render('f1');
+
+  /* meter animation: counter climbs 0 -> 48 while the bar decays (CSS). */
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const runMeter = () => {
+    if (reduced) return;
+    const count = el('m-count');
+    const pct = el('m-pct');
+    const dur = 6000;
+    /* t0 comes from the rAF clock itself: in a sandboxed iframe
+       performance.now() and the rAF timestamp can disagree by minutes. */
+    let t0 = null;
+    const step = (now) => {
+      if (t0 === null) t0 = now;
+      const t = Math.min(Math.max((now - t0) / dur, 0), 1);
+      const e = 1 - Math.pow(1 - t, 2);
+      count.textContent = String(Math.round(48 * e));
+      pct.textContent = String(Math.round(96 - 62 * e)) + '%';
+      if (t < 1) requestAnimationFrame(step);
+    };
+    count.textContent = '0';
+    pct.textContent = '96%';
+    requestAnimationFrame(step);
+  };
+
+  const shell = document.querySelector('.shell');
+  const start = () => {
+    if (shell.classList.contains('play')) return;
+    shell.classList.add('play');
+    runMeter();
+  };
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((en) => { if (en.isIntersecting) { start(); io.disconnect(); } });
+    }, { threshold: 0.2 });
+    io.observe(shell);
+  } else { start(); }
+  /* Report content height so the parent frame hugs the content. */
+  if (document.documentElement.dataset.embedded === 'true') {
+    const postSize = () => window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+    if ('ResizeObserver' in window) new ResizeObserver(postSize).observe(document.body);
+    window.addEventListener('load', postSize);
+  }
+})();
+</script>
+</body>
+</html>

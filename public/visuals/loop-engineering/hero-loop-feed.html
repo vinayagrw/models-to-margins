@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Loop, running itself</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+/* Hero Loop Feed. A self-playing simulation of one engineered loop:
+   triggers fire on the left (hook, cron, goal), each pulse runs the
+   agent in the center corridor, hits the grader gate, passes green to
+   the merge ticker or fails amber back around the retry arc, and every
+   completed run drips a trace into the hill-climb meter on the right.
+   When the meter fills, the harness version chip ticks up and the
+   meter flushes — the Agentic Principle on a timer.
+   All motion is one 24s CSS master timeline, seamless loop.
+   Base styles (no media query) form the calm reduced-motion snapshot:
+   one commit landed, one retry queued, meter two notches full. */
+
+.shell { display: flex; flex-direction: column; gap: 12px; }
+:root[data-embedded="true"] .shell { padding: 14px clamp(14px, 2vw, 22px); }
+/* Embed: size to content and report it, the parent autosizes the frame. */
+:root[data-embedded="true"], :root[data-embedded="true"] body { height: auto; }
+:root[data-embedded="true"] .shell { height: auto; }
+
+/* ---------- header ---------- */
+.head { display: flex; align-items: baseline; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
+.head h1 {
+  font-family: "Space Grotesk", sans-serif; font-weight: 700;
+  font-size: clamp(1.02rem, 2.2vw, 1.35rem); letter-spacing: -0.02em; color: var(--text-strong);
+}
+:root[data-embedded="true"] .head h1 { font-size: 1.02rem; }
+.legend { display: flex; gap: 12px; align-items: center; }
+.lg {
+  font: 500 0.7rem/1 "DM Sans", sans-serif; color: var(--muted);
+  display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
+}
+.lg::before { content: ""; width: 8px; height: 8px; border-radius: 50%; }
+.lg-pass::before { background: var(--good); box-shadow: 0 0 6px color-mix(in srgb, var(--good) 55%, transparent); }
+.lg-retry::before { background: var(--accent-2); box-shadow: 0 0 6px color-mix(in srgb, var(--accent-2) 55%, transparent); }
+
+/* ---------- board ---------- */
+.board {
+  display: grid; grid-template-columns: 230px minmax(0, 1.25fr) minmax(0, 1fr);
+  gap: 12px; align-items: stretch;
+}
+.panel {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 16px; padding: 12px 14px; box-shadow: var(--shadow-soft);
+  min-width: 0; display: flex; flex-direction: column;
+}
+.p-head {
+  font: 700 0.69rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.13em;
+  text-transform: uppercase; color: var(--muted);
+  display: flex; align-items: center; gap: 7px;
+}
+.p-dot { width: 7px; height: 7px; border-radius: 50%; flex: none; background: var(--accent); }
+
+/* ---------- triggers panel ---------- */
+.triggers { gap: 8px; }
+.trig-list { flex: 1; display: flex; flex-direction: column; justify-content: space-evenly; gap: 8px; margin-top: 8px; }
+.trig {
+  border: 1px solid var(--border); border-radius: 12px; padding: 8px 10px;
+  display: grid; grid-template-columns: 10px 1fr; gap: 4px 9px; align-items: center;
+  background: color-mix(in srgb, var(--text) 3%, transparent);
+}
+.trig i {
+  grid-row: span 2; width: 10px; height: 10px; border-radius: 50%;
+  background: color-mix(in srgb, var(--tc, var(--accent)) 35%, transparent);
+}
+.trig b { font: 700 0.76rem/1.2 "Space Grotesk", sans-serif; color: var(--text-strong); }
+.trig span { font: 500 0.66rem/1.3 "DM Sans", sans-serif; color: var(--muted); }
+.t-hook { --tc: var(--T-hook); }
+.t-cron { --tc: var(--T-cron); }
+.t-goal { --tc: var(--T-goal); }
+.t-beat { --tc: var(--T-heartbeat); }
+
+/* trigger firing pulses */
+@keyframes trig-fire {
+  0%, 2% { background: var(--tc); box-shadow: 0 0 10px color-mix(in srgb, var(--tc) 70%, transparent); }
+  7%, 100% { background: color-mix(in srgb, var(--tc) 35%, transparent); box-shadow: none; }
+}
+.play .t-hook i { animation: trig-fire 24s linear infinite; }
+.play .t-cron i { animation: trig-fire 24s linear infinite; animation-delay: 8s; }
+.play .t-goal i { animation: trig-fire 24s linear infinite; animation-delay: 17s; }
+@keyframes beat-fire {
+  0%, 1.5% { background: var(--tc); }
+  5%, 100% { background: color-mix(in srgb, var(--tc) 35%, transparent); }
+}
+.play .t-beat i { animation: beat-fire 6s linear infinite; }
+
+/* ---------- loop corridor ---------- */
+.corridor { position: relative; align-items: center; }
+.stage { position: relative; width: min(100%, 320px); height: 300px; margin: 0 auto; flex: 1; }
+.stage svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.rail { fill: none; stroke: color-mix(in srgb, var(--accent) 20%, transparent); stroke-width: 1.6; }
+.rail-retry { fill: none; stroke: color-mix(in srgb, var(--accent-2) 40%, transparent); stroke-width: 1.6; stroke-dasharray: 3 8; stroke-linecap: round; }
+
+.node {
+  position: absolute; left: 50%; transform: translateX(-50%);
+  border: 1px solid var(--border-strong); border-radius: 12px;
+  background: var(--surface-strong); box-shadow: var(--shadow-soft);
+  padding: 7px 12px; text-align: center; white-space: nowrap; z-index: 2;
+}
+.node b { display: block; font: 700 0.74rem/1.2 "Space Grotesk", sans-serif; letter-spacing: 0.08em; color: var(--text-strong); }
+.node span { display: block; font: 500 0.63rem/1.3 "DM Sans", sans-serif; color: var(--muted); }
+.n-run { top: 6%; }
+.n-gate { top: 42%; border-color: color-mix(in srgb, var(--LV2) 55%, var(--border-strong)); }
+.n-merge { bottom: 4%; border-color: color-mix(in srgb, var(--good) 45%, var(--border-strong)); }
+
+/* run activity dots inside the RUN node */
+.run-dots { display: inline-flex; gap: 4px; margin-top: 3px; }
+.run-dots i { width: 5px; height: 5px; border-radius: 50%; background: color-mix(in srgb, var(--accent) 40%, transparent); }
+@keyframes run-blink { 0%, 100% { opacity: 0.35; } 50% { opacity: 1; } }
+.play .run-dots i { animation: run-blink 0.9s ease-in-out infinite; }
+.play .run-dots i:nth-child(2) { animation-delay: 0.3s; }
+.play .run-dots i:nth-child(3) { animation-delay: 0.6s; }
+
+/* the travelling run token */
+.token {
+  position: absolute; left: 50%; top: 18%; z-index: 3;
+  width: 12px; height: 12px; border-radius: 50%; margin-left: -6px;
+  background: var(--accent); box-shadow: 0 0 10px color-mix(in srgb, var(--accent) 60%, transparent);
+  opacity: 0;
+}
+/* One 24s cycle, three runs:
+   run A (hook, 0-7s): down, gate, pass to merge.
+   run B (cron, 8-16s): down, gate, FAIL amber, retry arc back up, rerun, pass.
+   run C (goal, 17-23s): down, gate, pass. */
+@keyframes token-trip {
+  0% { opacity: 0; top: 16%; left: 50%; background: var(--T-hook); }
+  2% { opacity: 1; top: 16%; }
+  12% { top: 44%; }                                   /* at gate */
+  16% { top: 44%; }                                   /* grading */
+  24% { top: 84%; background: var(--good); opacity: 1; }
+  26%, 32% { opacity: 0; top: 16%; }
+  /* run B */
+  34% { opacity: 1; top: 16%; left: 50%; background: var(--T-cron); }
+  42% { top: 44%; left: 50%; }
+  46% { top: 44%; background: var(--accent-2); }      /* fail */
+  52% { top: 30%; left: 82%; }                        /* retry arc */
+  58% { top: 16%; left: 50%; background: var(--T-cron); }
+  64% { top: 44%; left: 50%; }
+  68% { top: 44%; }
+  74% { top: 84%; background: var(--good); }
+  76%, 80% { opacity: 0; top: 16%; }
+  /* run C */
+  82% { opacity: 1; top: 16%; left: 50%; background: var(--T-goal); }
+  88% { top: 44%; }
+  91% { top: 44%; }
+  97% { top: 84%; background: var(--good); }
+  100% { opacity: 0; top: 84%; }
+}
+.play .token { animation: token-trip 24s linear infinite; }
+
+/* gate verdict lamp */
+.gate-lamp { position: absolute; top: 42%; left: calc(50% + 74px); width: 10px; height: 10px; border-radius: 50%; margin-top: 10px; background: color-mix(in srgb, var(--muted) 30%, transparent); z-index: 2; }
+@keyframes gate-verdict {
+  0%, 11% { background: color-mix(in srgb, var(--muted) 30%, transparent); box-shadow: none; }
+  13%, 22% { background: var(--good); box-shadow: 0 0 8px color-mix(in srgb, var(--good) 60%, transparent); }
+  26%, 43% { background: color-mix(in srgb, var(--muted) 30%, transparent); box-shadow: none; }
+  45%, 52% { background: var(--accent-2); box-shadow: 0 0 8px color-mix(in srgb, var(--accent-2) 60%, transparent); }
+  56%, 65% { background: color-mix(in srgb, var(--muted) 30%, transparent); box-shadow: none; }
+  67%, 74% { background: var(--good); box-shadow: 0 0 8px color-mix(in srgb, var(--good) 60%, transparent); }
+  78%, 88% { background: color-mix(in srgb, var(--muted) 30%, transparent); box-shadow: none; }
+  90%, 97% { background: var(--good); box-shadow: 0 0 8px color-mix(in srgb, var(--good) 60%, transparent); }
+  100% { background: color-mix(in srgb, var(--muted) 30%, transparent); }
+}
+.play .gate-lamp { animation: gate-verdict 24s linear infinite; }
+
+.retry-tag {
+  position: absolute; top: 26%; left: calc(50% + 58px); z-index: 2;
+  font: 700 0.6rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.1em;
+  color: var(--accent-2); text-transform: uppercase; opacity: 0.45;
+}
+@keyframes retry-flash { 0%, 45% { opacity: 0.45; } 47%, 58% { opacity: 1; } 62%, 100% { opacity: 0.45; } }
+.play .retry-tag { animation: retry-flash 24s linear infinite; }
+
+/* ---------- harness panel ---------- */
+.harness { gap: 8px; }
+.h-version {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  border: 1px solid var(--border); border-radius: 12px; padding: 8px 12px; margin-top: 8px;
+  background: color-mix(in srgb, var(--text) 3%, transparent);
+}
+.h-version span { font: 500 0.68rem/1.3 "DM Sans", sans-serif; color: var(--muted); }
+.chip {
+  position: relative; display: inline-block; min-width: 74px; height: 1.35rem; overflow: hidden;
+  font: 700 0.82rem/1.35rem "Space Grotesk", sans-serif; color: var(--text-strong); text-align: right;
+}
+.chip b { position: absolute; right: 0; top: 0; }
+.chip .v2 { opacity: 0; color: var(--good); }
+@keyframes chip-v1 { 0%, 95% { opacity: 1; } 97%, 99% { opacity: 0; } 100% { opacity: 1; } }
+@keyframes chip-v2 { 0%, 95% { opacity: 0; } 97%, 99% { opacity: 1; } 100% { opacity: 0; } }
+.play .chip .v1 { animation: chip-v1 24s linear infinite; }
+.play .chip .v2 { animation: chip-v2 24s linear infinite; }
+
+.meter { margin-top: 4px; }
+.meter-label { display: flex; justify-content: space-between; font: 500 0.66rem/1.4 "DM Sans", sans-serif; color: var(--muted); }
+.meter-track { display: flex; gap: 5px; margin-top: 5px; }
+.meter-track i { flex: 1; height: 9px; border-radius: 5px; background: color-mix(in srgb, var(--text) 8%, transparent); overflow: hidden; position: relative; }
+.meter-track i::after { content: ""; position: absolute; inset: 0; background: var(--LV4); opacity: 0; }
+.meter-track i:nth-child(1)::after, .meter-track i:nth-child(2)::after { opacity: 1; } /* static snapshot */
+@keyframes notch1 { 0%, 24% { opacity: 0; } 26%, 96% { opacity: 1; } 98%, 100% { opacity: 0; } }
+@keyframes notch2 { 0%, 74% { opacity: 0; } 76%, 96% { opacity: 1; } 98%, 100% { opacity: 0; } }
+@keyframes notch3 { 0%, 95% { opacity: 0; } 96.5%, 96.9% { opacity: 1; } 98%, 100% { opacity: 0; } }
+.play .meter-track i:nth-child(1)::after { animation: notch1 24s linear infinite; }
+.play .meter-track i:nth-child(2)::after { animation: notch2 24s linear infinite; }
+.play .meter-track i:nth-child(3)::after { animation: notch3 24s linear infinite; }
+
+.h-log { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; gap: 6px; margin-top: 6px; min-height: 0; }
+.h-line {
+  font-family: ui-monospace, "Cascadia Mono", Consolas, "Roboto Mono", monospace;
+  font-size: 0.66rem; line-height: 1.4; color: var(--text);
+  padding: 4px 8px; border-radius: 8px;
+  background: color-mix(in srgb, var(--text) 3%, transparent);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.h-line b { color: var(--accent); font-weight: 700; }
+.h-line.dim { opacity: 0.5; }
+.h-upgrade { color: var(--good); opacity: 0.5; }
+.h-upgrade b { color: var(--good); }
+@keyframes upgrade-flash { 0%, 95% { opacity: 0.5; } 96.5%, 99.5% { opacity: 1; } 100% { opacity: 0.5; } }
+.play .h-upgrade { animation: upgrade-flash 24s linear infinite; }
+
+/* merge ticker */
+.tick-row { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+.tick-label { font: 500 0.66rem/1.4 "DM Sans", sans-serif; color: var(--muted); white-space: nowrap; }
+.ticks { display: flex; gap: 5px; }
+.ticks i { width: 12px; height: 12px; border-radius: 4px; background: color-mix(in srgb, var(--good) 22%, transparent); position: relative; }
+.ticks i::after {
+  content: "✓"; position: absolute; inset: 0; display: grid; place-items: center;
+  font: 700 0.58rem/1 "DM Sans", sans-serif; color: var(--good); opacity: 0;
+}
+.ticks i:nth-child(1)::after { opacity: 1; } /* static snapshot */
+@keyframes tick1 { 0%, 23% { opacity: 0; } 25%, 97% { opacity: 1; } 99%, 100% { opacity: 0; } }
+@keyframes tick2 { 0%, 73% { opacity: 0; } 75%, 97% { opacity: 1; } 99%, 100% { opacity: 0; } }
+@keyframes tick3 { 0%, 95% { opacity: 0; } 97%, 98% { opacity: 1; } 99%, 100% { opacity: 0; } }
+.play .ticks i:nth-child(1)::after { animation: tick1 24s linear infinite; }
+.play .ticks i:nth-child(2)::after { animation: tick2 24s linear infinite; }
+.play .ticks i:nth-child(3)::after { animation: tick3 24s linear infinite; }
+
+/* ---------- reduced motion: freeze on the calm snapshot ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .play *, .play *::before, .play *::after { animation: none !important; }
+}
+
+/* ---------- mobile ---------- */
+@media (max-width: 760px) {
+  .board { grid-template-columns: 1fr; }
+  .trig-list { flex-direction: row; flex-wrap: wrap; }
+  .trig { flex: 1 1 45%; }
+  .stage { height: 280px; }
+  .head h1 { font-size: 1rem; }
+}
+</style>
+</head>
+<body>
+<div class="shell play" role="img" aria-label="Self-playing simulation of one engineered loop. Triggers fire runs on the left, each run passes the grader gate in the center, merging on green or retrying on amber, while completed runs fill a hill-climb meter on the right that ticks the harness version from v1.4 to v1.5.">
+  <div class="head">
+    <h1>The loop, running itself</h1>
+    <div class="legend">
+      <span class="lg lg-pass">grader pass</span>
+      <span class="lg lg-retry">retry</span>
+    </div>
+  </div>
+  <div class="board">
+    <div class="panel triggers">
+      <div class="p-head"><span class="p-dot"></span>Triggers</div>
+      <div class="trig-list">
+        <div class="trig t-hook"><i></i><b>Hook</b><span>PR opened → run</span></div>
+        <div class="trig t-cron"><i></i><b>Cron</b><span>Nightly 02:00 sweep</span></div>
+        <div class="trig t-goal"><i></i><b>Goal</b><span>Iterate until green</span></div>
+        <div class="trig t-beat"><i></i><b>Heartbeat</b><span>Every 6 min check</span></div>
+      </div>
+    </div>
+    <div class="panel corridor">
+      <div class="p-head"><span class="p-dot"></span>One governed run</div>
+      <div class="stage">
+        <svg viewBox="0 0 320 300" preserveAspectRatio="none" aria-hidden="true">
+          <line class="rail" x1="160" y1="40" x2="160" y2="255"/>
+          <path class="rail-retry" d="M 205 145 C 265 130, 265 70, 205 48"/>
+        </svg>
+        <div class="node n-run"><b>AGENT RUN</b><span class="run-dots"><i></i><i></i><i></i></span></div>
+        <div class="node n-gate"><b>GRADER GATE</b><span>rubric · tests · lint</span></div>
+        <div class="node n-merge"><b>MERGE</b><span>verified output</span></div>
+        <span class="token"></span>
+        <span class="gate-lamp"></span>
+        <span class="retry-tag">retry ↺</span>
+      </div>
+      <div class="tick-row">
+        <span class="tick-label">Merged this cycle</span>
+        <span class="ticks"><i></i><i></i><i></i></span>
+      </div>
+    </div>
+    <div class="panel harness">
+      <div class="p-head"><span class="p-dot"></span>Hill-climb</div>
+      <div class="h-version">
+        <span>Harness version</span>
+        <span class="chip"><b class="v1">v1.4</b><b class="v2">v1.5</b></span>
+      </div>
+      <div class="meter">
+        <div class="meter-label"><span>Traces analyzed</span><span>upgrade at 3</span></div>
+        <div class="meter-track"><i></i><i></i><i></i></div>
+      </div>
+      <div class="h-log">
+        <span class="h-line dim"><b>trace</b> run 0412 · pass · 2 tool calls</span>
+        <span class="h-line dim"><b>trace</b> run 0413 · retry · flaky test named</span>
+        <span class="h-line"><b>trace</b> run 0414 · pass · 6 tool calls</span>
+        <span class="h-line h-upgrade"><b>upgrade</b> grader learns: pin flaky test → v1.5</span>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+(() => {
+  /* Report content height so the parent frame hugs the content. */
+  if (document.documentElement.dataset.embedded === 'true') {
+    const postSize = () => window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+    if ('ResizeObserver' in window) new ResizeObserver(postSize).observe(document.body);
+    window.addEventListener('load', postSize);
+  }
+})();
+</script>
+</body>
+</html>

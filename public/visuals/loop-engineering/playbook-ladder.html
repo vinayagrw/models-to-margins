@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The loop playbook, five moves in order</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+/* Playbook Ladder. Desktop: rung rail left (01 bottom to 05 top) with a
+   climber marker gliding to the selected rung, detail panel right with
+   prev/next. Mobile: horizontal stepper on top, detail below. Arrow
+   keys step the ladder. Reduced motion: no glide, no pulse. */
+
+.shell { display: flex; flex-direction: column; gap: 10px; }
+:root[data-embedded="true"] .shell { padding: 14px clamp(14px, 2vw, 22px); }
+/* Embed: size to content and report it, the parent autosizes the frame. */
+:root[data-embedded="true"], :root[data-embedded="true"] body { height: auto; }
+:root[data-embedded="true"] .shell { height: auto; }
+
+.head h1 {
+  font-family: "Space Grotesk", sans-serif; font-weight: 700;
+  font-size: clamp(1.02rem, 2.2vw, 1.3rem); letter-spacing: -0.02em; color: var(--text-strong);
+}
+:root[data-embedded="true"] .head h1 { font-size: 1.02rem; }
+.head p { font: 500 0.72rem/1.4 "DM Sans", sans-serif; color: var(--muted); margin-top: 2px; }
+
+.board { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.4fr); gap: 12px; }
+
+/* ---------- ladder rail ---------- */
+.rail {
+  position: relative; background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+  box-shadow: var(--shadow-soft); padding: 12px 12px 12px 40px;
+  display: flex; flex-direction: column-reverse; justify-content: space-between; gap: 6px;
+}
+.rail::before {
+  content: ""; position: absolute; left: 22px; top: 16px; bottom: 16px; width: 3px; border-radius: 2px;
+  background: color-mix(in srgb, var(--accent) 25%, transparent);
+}
+.climber {
+  position: absolute; left: 15px; width: 17px; height: 17px; border-radius: 50%;
+  background: var(--accent); border: 3px solid var(--surface-strong);
+  box-shadow: 0 0 0 2px var(--accent), 0 0 12px color-mix(in srgb, var(--accent) 60%, transparent);
+  transition: top 0.45s cubic-bezier(0.45, 0.05, 0.35, 1.2);
+}
+.play .climber { animation: climber-pulse 2.4s ease-in-out infinite; }
+@keyframes climber-pulse {
+  0%, 100% { box-shadow: 0 0 0 2px var(--accent), 0 0 6px color-mix(in srgb, var(--accent) 45%, transparent); }
+  50% { box-shadow: 0 0 0 2px var(--accent), 0 0 16px color-mix(in srgb, var(--accent) 85%, transparent); }
+}
+.rung {
+  cursor: pointer; text-align: left; min-width: 0;
+  border: 1px solid var(--border-strong); border-radius: 10px;
+  background: var(--surface-strong); padding: 7px 10px;
+  display: flex; align-items: center; gap: 8px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.rung:hover { border-color: var(--rc); }
+.rung[aria-pressed="true"] {
+  border-color: var(--rc);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--rc) 22%, transparent);
+}
+.rung i {
+  font-style: normal; flex: none;
+  font: 700 0.66rem/1 "Space Grotesk", sans-serif; color: var(--rc);
+}
+.rung b { font: 700 0.68rem/1.25 "Space Grotesk", sans-serif; color: var(--text-strong); min-width: 0; }
+
+/* ---------- detail ---------- */
+.detail {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+  box-shadow: var(--shadow-soft); padding: 13px 15px; min-width: 0; min-height: 0; overflow: auto;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.d-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.d-title { display: flex; align-items: baseline; gap: 9px; }
+.d-title i { font-style: normal; font: 700 1.05rem/1 "Space Grotesk", sans-serif; color: var(--dc, var(--accent)); }
+.d-title b { font: 700 0.92rem/1.25 "Space Grotesk", sans-serif; color: var(--text-strong); }
+.plane {
+  font: 700 0.58rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--dc, var(--accent)); border: 1px solid color-mix(in srgb, var(--dc, var(--accent)) 45%, transparent);
+  border-radius: 999px; padding: 4px 9px; white-space: nowrap;
+}
+.d-what { font: 500 0.74rem/1.55 "DM Sans", sans-serif; color: var(--text); }
+.block { border-top: 1px solid var(--border); padding-top: 6px; }
+.block b {
+  display: block; font: 700 0.56rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.13em;
+  text-transform: uppercase; margin-bottom: 3px;
+}
+.block.b-pre b { color: var(--accent); }
+.block.b-min b { color: var(--good); }
+.block.b-anti b { color: var(--warn); }
+.block p { font: 500 0.7rem/1.5 "DM Sans", sans-serif; color: var(--text); }
+.block.b-anti p { color: var(--text); }
+.nav { display: flex; gap: 7px; margin-top: auto; padding-top: 4px; }
+.nav button {
+  cursor: pointer; border: 1px solid var(--border-strong); border-radius: 999px; background: none;
+  font: 700 0.66rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--muted); padding: 8px 14px; min-height: 24px;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+.nav button:hover:not(:disabled) { color: var(--text-strong); border-color: var(--accent); }
+.nav button:disabled { opacity: 0.4; cursor: default; }
+
+.foot {
+  border: 1px dashed var(--border-strong); border-radius: 10px; padding: 7px 12px; text-align: center;
+  font: 600 0.68rem/1.45 "DM Sans", sans-serif; color: var(--muted);
+}
+.foot b { color: var(--text-strong); }
+
+/* ---------- mobile ---------- */
+@media (max-width: 760px) {
+  .head h1 { font-size: 1rem; }
+  .board { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+  .rail { flex-direction: row; padding: 12px; gap: 5px; }
+  .rail::before { left: 14px; right: 14px; top: auto; bottom: 9px; width: auto; height: 3px; }
+  .climber { display: none; }
+  .rung { flex: 1 1 0; flex-direction: column; align-items: flex-start; gap: 3px; padding: 6px 7px; }
+  .rung b { font-size: 0.66rem; }
+  .d-what { font-size: 0.76rem; }
+  .block p { font-size: 0.73rem; }
+  .foot { font-size: 0.7rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .climber { transition: none; }
+  .play .climber { animation: none !important; }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="head">
+    <h1>The loop playbook</h1>
+    <p>Five moves, in the order that earns trust. The ranks are sequence, not priority.</p>
+  </div>
+
+  <div class="board">
+    <div class="rail" id="rail">
+      <div class="climber" id="climber" aria-hidden="true"></div>
+      <button class="rung" style="--rc: var(--T-hook)" data-i="0" aria-pressed="true"><i>01</i><b>One hook loop, one repo</b></button>
+      <button class="rung" style="--rc: var(--LV2)" data-i="1" aria-pressed="false"><i>02</i><b>Grader + retry</b></button>
+      <button class="rung" style="--rc: var(--T-cron)" data-i="2" aria-pressed="false"><i>03</i><b>Maintenance on a schedule</b></button>
+      <button class="rung" style="--rc: var(--T-goal)" data-i="3" aria-pressed="false"><i>04</i><b>Goal loops, capped</b></button>
+      <button class="rung" style="--rc: var(--LV4)" data-i="4" aria-pressed="false"><i>05</i><b>Trace-fed hill-climbing</b></button>
+    </div>
+
+    <div class="detail" aria-live="polite">
+      <div class="d-top">
+        <span class="d-title"><i id="d-rank"></i><b id="d-name"></b></span>
+        <span class="plane" id="d-plane"></span>
+      </div>
+      <p class="d-what" id="d-what"></p>
+      <div class="block b-pre"><b>Prerequisite</b><p id="d-pre"></p></div>
+      <div class="block b-min"><b>Minimum move</b><p id="d-min"></p></div>
+      <div class="block b-anti"><b>Anti-pattern</b><p id="d-anti"></p></div>
+      <div class="nav">
+        <button id="prev">&larr; Prev</button>
+        <button id="next">Next &rarr;</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot"><b>Not everything loops.</b> Judgment calls, unfalsifiable finish lines, and brownfield codebases stay attended, and the discipline is saying so out loud.</div>
+</div>
+<script>
+(() => {
+  const DATA = [
+    { rank: '01', name: 'One hook loop, one repo', plane: 'L3 · hook', color: 'var(--T-hook)',
+      what: 'A reviewer agent on PR-open, in refute mode, on one repository. The smallest loop that runs without being asked, and the team’s first look at unattended output.',
+      pre: 'A repo with CI and a team that reads its PRs.',
+      min: 'On pull_request → reviewer agent, skipped when the author is the agent.',
+      anti: 'Letting the loop’s own PRs trigger the hook. Loop-breaker guard first.' },
+    { rank: '02', name: 'Grader + retry', plane: 'L2 · verify', color: 'var(--LV2)',
+      what: 'A gate on the exit: deterministic checks where they exist, a rubric only where they cannot. Stripe runs this with a hard cap, two CI runs per attempt, then a human.',
+      pre: 'Move 01 running, so there is output worth grading.',
+      min: 'One refute-mode reviewer sub-agent plus the test suite as a hard gate.',
+      anti: 'A rubric grading what a test could check deterministically.' },
+    { rank: '03', name: 'Maintenance on a schedule', plane: 'L3 · cron', color: 'var(--T-cron)',
+      what: 'Nightly CI-failure triage, weekly dependency bumps, garbage-collection sweeps. The slow-loop pattern: a nightly trigger, four PRs waiting by morning. Bounded, reviewable, boring on purpose.',
+      pre: 'Move 02, so scheduled output arrives pre-graded.',
+      min: 'One nightly cron triaging today’s CI failures into one issue per root cause.',
+      anti: 'Scheduling more output than the team reviews. The Monday pile-up is a stop-rule failure.' },
+    { rank: '04', name: 'Goal loops, capped', plane: 'L1&ndash;L2 · goal', color: 'var(--T-goal)',
+      what: 'Iterate-until-verified for machine-checkable finish lines: tests green, benchmark under threshold, migration compiling. Autonomy over attempts, never over shipping.',
+      pre: 'Graders the team has validated against human judgment.',
+      min: '/goal all tests pass, a two-hour budget, a bounded task.',
+      anti: 'An unfalsifiable goal. Make it better is not a finish line, it is a subscription.' },
+    { rank: '05', name: 'Trace-fed hill-climbing', plane: 'L4 · climb', color: 'var(--LV4)',
+      what: 'Production traces feed a weekly analysis pass, human ritual first, agent later. The Agentic Principle running on cron instead of memory.',
+      pre: 'Traces worth reading: moves 01 to 04 logging every run.',
+      min: 'A weekly hour reading failed runs, ending in one committed harness change.',
+      anti: 'Automating the analysis before the human version has run long enough to trust.' }
+  ];
+  const rungs = Array.from(document.querySelectorAll('.rung'));
+  const climber = document.getElementById('climber');
+  const el = (id) => document.getElementById(id);
+  let current = 0;
+
+  const placeClimber = () => {
+    const rail = document.getElementById('rail');
+    const btn = rungs[current];
+    if (getComputedStyle(climber).display === 'none') return;
+    const top = btn.offsetTop + btn.offsetHeight / 2 - climber.offsetHeight / 2;
+    climber.style.top = top + 'px';
+    void rail;
+  };
+  const render = (i) => {
+    current = i;
+    const d = DATA[i];
+    rungs.forEach((b, k) => b.setAttribute('aria-pressed', String(k === i)));
+    const detail = document.querySelector('.detail');
+    detail.style.setProperty('--dc', d.color);
+    el('d-rank').textContent = d.rank;
+    el('d-name').textContent = d.name;
+    el('d-plane').innerHTML = d.plane;
+    el('d-what').textContent = d.what;
+    el('d-pre').textContent = d.pre;
+    el('d-min').innerHTML = d.min;
+    el('d-anti').textContent = d.anti;
+    el('prev').disabled = i === 0;
+    el('next').disabled = i === DATA.length - 1;
+    placeClimber();
+  };
+  rungs.forEach((btn) => btn.addEventListener('click', () => render(Number(btn.dataset.i))));
+  el('prev').addEventListener('click', () => { if (current > 0) render(current - 1); });
+  el('next').addEventListener('click', () => { if (current < DATA.length - 1) render(current + 1); });
+  document.addEventListener('keydown', (ev) => {
+    if (ev.key === 'ArrowUp' || ev.key === 'ArrowRight') { if (current < DATA.length - 1) { render(current + 1); ev.preventDefault(); } }
+    if (ev.key === 'ArrowDown' || ev.key === 'ArrowLeft') { if (current > 0) { render(current - 1); ev.preventDefault(); } }
+  });
+  window.addEventListener('resize', placeClimber);
+  render(0);
+
+  const shell = document.querySelector('.shell');
+  const start = () => { shell.classList.add('play'); placeClimber(); };
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((en) => { if (en.isIntersecting) { start(); io.disconnect(); } });
+    }, { threshold: 0.2 });
+    io.observe(shell);
+  } else { start(); }
+  /* Report content height so the parent frame hugs the content. */
+  if (document.documentElement.dataset.embedded === 'true') {
+    const postSize = () => window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+    if ('ResizeObserver' in window) new ResizeObserver(postSize).observe(document.body);
+    window.addEventListener('load', postSize);
+  }
+})();
+</script>
+</body>
+</html>

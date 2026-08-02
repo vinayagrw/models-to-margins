@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The evidence wall, loud numbers and counterweights</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+/* Evidence Wall. Two sections. Section A: six loud claim cards in a
+   3x2 grid, each with a count-up headline number, a sub-line with the
+   date kept on the card, a self-reported V badge where flagged, and a
+   flip toggle between the PROVES face and the DOES NOT PROVE face.
+   Section B: four counterweight cards, green dashed border and a
+   stamp label, straight text, no flip. Footer strip repeats the V
+   disclaimer. Count-ups and entrance motion run only under .play
+   (IntersectionObserver). Reduced motion: final values, no movement. */
+
+.shell { display: flex; flex-direction: column; gap: 10px; }
+:root[data-embedded="true"] .shell { padding: 14px clamp(14px, 2vw, 22px); }
+/* Embed: size to content and report it, the parent autosizes the frame. */
+:root[data-embedded="true"], :root[data-embedded="true"] body { height: auto; }
+:root[data-embedded="true"] .shell { height: auto; }
+
+/* ---------- header ---------- */
+.head h1 {
+  font-family: "Space Grotesk", sans-serif; font-weight: 700;
+  font-size: clamp(1.02rem, 2.2vw, 1.3rem); letter-spacing: -0.02em; color: var(--text-strong);
+}
+:root[data-embedded="true"] .head h1 { font-size: 1.02rem; }
+.head p { font: 500 0.72rem/1.4 "DM Sans", sans-serif; color: var(--muted); margin-top: 2px; }
+
+/* ---------- section labels ---------- */
+.sec { display: flex; align-items: center; gap: 10px; }
+.sec b {
+  font: 700 0.64rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.16em;
+  text-transform: uppercase; white-space: nowrap;
+}
+.sec b.sec-loud { color: var(--accent-2); }
+.sec b.sec-cw { color: var(--good); }
+.sec i { flex: 1; height: 1px; background: var(--border); }
+.sec span { font: 500 0.62rem/1.3 "DM Sans", sans-serif; color: var(--muted-soft); white-space: nowrap; }
+
+/* ---------- section A: claim cards ---------- */
+.grid-a {
+  flex: 1; min-height: 0;
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-auto-rows: 1fr; gap: 10px;
+}
+.claim {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+  box-shadow: var(--shadow-soft); padding: 10px 12px; min-width: 0; min-height: 0;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.c-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+
+.badge {
+  display: inline-flex; align-items: center; gap: 5px; white-space: nowrap;
+  font: 700 0.55rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.09em; text-transform: uppercase;
+  border: 1px solid; border-radius: 999px; padding: 3px 8px;
+}
+.badge.b-v {
+  color: var(--accent-2); border-color: color-mix(in srgb, var(--accent-2) 50%, transparent);
+  background: color-mix(in srgb, var(--accent-2) 8%, transparent);
+}
+.badge.b-v i {
+  font-style: normal; font-weight: 700; width: 12px; height: 12px; flex: none;
+  display: grid; place-items: center; border: 1.5px solid currentColor; border-radius: 4px;
+}
+.badge.b-ok {
+  color: var(--good); border-color: color-mix(in srgb, var(--good) 50%, transparent);
+  background: color-mix(in srgb, var(--good) 8%, transparent);
+}
+
+.flip {
+  border: 1px solid var(--border-strong); border-radius: 999px; background: none; cursor: pointer;
+  font: 700 0.6rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.09em; text-transform: uppercase;
+  color: var(--muted); padding: 7px 10px; min-height: 24px; white-space: nowrap; flex: none;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+.flip:hover { color: var(--text-strong); }
+.flip[aria-pressed="true"] { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 55%, transparent); }
+
+.c-val { font: 700 1.42rem/1.1 "Space Grotesk", sans-serif; color: var(--text-strong); }
+.c-val .num { font-variant-numeric: tabular-nums; }
+.c-val em { font: 500 0.64rem/1.3 "DM Sans", sans-serif; font-style: normal; color: var(--muted); margin-left: 6px; }
+.c-sub { font: 500 0.66rem/1.45 "DM Sans", sans-serif; color: var(--muted); }
+
+.c-face { margin-top: auto; }
+.face { border-left: 3px solid; border-radius: 4px; padding: 6px 9px; }
+.face b {
+  display: block; font: 700 0.55rem/1 "Space Grotesk", sans-serif;
+  letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 4px;
+}
+.face p { font: 500 0.68rem/1.45 "DM Sans", sans-serif; color: var(--text); }
+.face.face-p { border-color: var(--good); background: color-mix(in srgb, var(--good) 7%, transparent); }
+.face.face-p b { color: var(--good); }
+.face.face-n { border-color: var(--warn); background: color-mix(in srgb, var(--warn) 7%, transparent); }
+.face.face-n b { color: var(--warn); }
+.claim .face.face-n { display: none; }
+.claim[data-face="n"] .face.face-p { display: none; }
+.claim[data-face="n"] .face.face-n { display: block; }
+
+/* ---------- section B: counterweights ---------- */
+.grid-b { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.cw {
+  background: var(--surface); border-radius: 14px; padding: 10px 12px; min-width: 0;
+  border: 1.5px dashed color-mix(in srgb, var(--good) 55%, transparent);
+  display: flex; flex-direction: column; gap: 7px;
+}
+.stamp {
+  align-self: flex-start;
+  font: 700 0.58rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--good); border: 2px solid color-mix(in srgb, var(--good) 70%, transparent);
+  border-radius: 6px; padding: 4px 8px; transform: rotate(-2deg); white-space: nowrap;
+}
+.cw p { font: 500 0.66rem/1.5 "DM Sans", sans-serif; color: var(--text); }
+
+/* ---------- footer strip ---------- */
+.foot {
+  display: flex; align-items: center; gap: 9px;
+  border: 1px solid var(--border); border-radius: 10px; padding: 7px 12px;
+  background: color-mix(in srgb, var(--text) 3%, transparent);
+}
+.foot i {
+  font-style: normal; font-weight: 700; flex: none; width: 15px; height: 15px;
+  display: grid; place-items: center; font: 700 0.6rem/1 "Space Grotesk", sans-serif;
+  color: var(--accent-2); border: 1.5px solid color-mix(in srgb, var(--accent-2) 60%, transparent);
+  border-radius: 4px;
+}
+.foot p { font: 500 0.66rem/1.4 "DM Sans", sans-serif; color: var(--muted); }
+
+/* ---------- entrance motion, gated on .play ---------- */
+@keyframes card-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+.play .grid-a .claim { animation: card-in 0.5s ease-out backwards; }
+.play .grid-a .claim:nth-child(2) { animation-delay: 0.06s; }
+.play .grid-a .claim:nth-child(3) { animation-delay: 0.12s; }
+.play .grid-a .claim:nth-child(4) { animation-delay: 0.18s; }
+.play .grid-a .claim:nth-child(5) { animation-delay: 0.24s; }
+.play .grid-a .claim:nth-child(6) { animation-delay: 0.3s; }
+.play .grid-b .cw { animation: card-in 0.5s ease-out backwards; }
+.play .grid-b .cw:nth-child(1) { animation-delay: 0.42s; }
+.play .grid-b .cw:nth-child(2) { animation-delay: 0.5s; }
+.play .grid-b .cw:nth-child(3) { animation-delay: 0.58s; }
+.play .grid-b .cw:nth-child(4) { animation-delay: 0.66s; }
+@keyframes stamp-in {
+  0% { opacity: 0; transform: scale(1.7) rotate(-10deg); }
+  55% { opacity: 1; transform: scale(0.94) rotate(-1deg); }
+  100% { opacity: 1; transform: scale(1) rotate(-2deg); }
+}
+.play .grid-b .cw .stamp { animation: stamp-in 0.45s ease-out backwards; }
+.play .grid-b .cw:nth-child(1) .stamp { animation-delay: 0.7s; }
+.play .grid-b .cw:nth-child(2) .stamp { animation-delay: 0.8s; }
+.play .grid-b .cw:nth-child(3) .stamp { animation-delay: 0.9s; }
+.play .grid-b .cw:nth-child(4) .stamp { animation-delay: 1s; }
+
+/* ---------- reduced motion: everything static, end-state visible ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .play *, .play *::before, .play *::after { animation: none !important; }
+}
+
+/* ---------- mobile ---------- */
+@media (max-width: 760px) {
+  .head h1 { font-size: 1rem; }
+  .grid-a { grid-template-columns: 1fr; grid-auto-rows: auto; gap: 8px; }
+  .grid-b { grid-template-columns: 1fr; gap: 8px; }
+  .c-val { font-size: 1.3rem; }
+  .c-sub { font-size: 0.7rem; }
+  .face p { font-size: 0.72rem; }
+  .cw p { font-size: 0.72rem; }
+  .foot p { font-size: 0.68rem; }
+  .badge, .flip { font-size: 0.6rem; }
+  .face b, .stamp { font-size: 0.62rem; }
+  .sec span { display: none; }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="head">
+    <h1>The evidence wall</h1>
+    <p>Six loud claims, flip each one to see what it does not prove, then read the counterweights.</p>
+  </div>
+
+  <div class="sec"><b class="sec-loud">The loud numbers</b><i></i><span>flip each claim</span></div>
+  <div class="grid-a">
+
+    <div class="claim" data-face="p">
+      <div class="c-top">
+        <span class="badge b-v"><i>V</i>self-reported</span>
+        <button class="flip" aria-pressed="false">Does not prove</button>
+      </div>
+      <div class="c-val"><span class="num" data-target="1300" data-comma="1" data-suf="+">1,300+</span><em>PRs a week</em></div>
+      <p class="c-sub">Stripe Minions, zero human-written code, hard cap of two CI runs per attempt (Feb 2026).</p>
+      <div class="c-face" aria-live="polite">
+        <div class="face face-p"><b>Proves</b><p>Hook loops work at enterprise scale with bounded retries.</p></div>
+        <div class="face face-n"><b>Does not prove</b><p>Merge counts say nothing about review depth.</p></div>
+      </div>
+    </div>
+
+    <div class="claim" data-face="p">
+      <div class="c-top">
+        <span class="badge b-v"><i>V</i>self-reported</span>
+        <button class="flip" aria-pressed="false">Does not prove</button>
+      </div>
+      <div class="c-val"><span class="num" data-target="14" data-pre="1 per " data-suf=" min">1 per 14 min</span><em>merged PRs</em></div>
+      <p class="c-sub">Spotify Honk, 1,000 PRs every 10 days, up from 1,000 per 90 days (Mar 2026).</p>
+      <div class="c-face" aria-live="polite">
+        <div class="face face-p"><b>Proves</b><p>Fleet-migration loops compound fast.</p></div>
+        <div class="face face-n"><b>Does not prove</b><p>Spotify itself says PR review is now the bottleneck.</p></div>
+      </div>
+    </div>
+
+    <div class="claim" data-face="p">
+      <div class="c-top">
+        <span class="badge b-v"><i>V</i>self-reported</span>
+        <button class="flip" aria-pressed="false">Does not prove</button>
+      </div>
+      <div class="c-val"><span class="num" data-target="1" data-dec="2" data-suf="M">1M</span><em>lines</em></div>
+      <p class="c-sub">OpenAI internal build, 1,500 PRs, zero hand-written, 3 to 7 engineers, 3.5 PRs per engineer per day (Feb 2026).</p>
+      <div class="c-face" aria-live="polite">
+        <div class="face face-p"><b>Proves</b><p>Architecture-as-harness leverage is real.</p></div>
+        <div class="face face-n"><b>Does not prove</b><p>Greenfield, elite operators, unaudited line count.</p></div>
+      </div>
+    </div>
+
+    <div class="claim" data-face="p">
+      <div class="c-top">
+        <span class="badge b-v"><i>V</i>self-reported</span>
+        <button class="flip" aria-pressed="false">Does not prove</button>
+      </div>
+      <div class="c-val"><span class="num" data-target="1.3" data-dec="1" data-pre="$" data-suf="M">$1.3M</span><em>/mo</em></div>
+      <p class="c-sub">Steinberger's fleet by May 2026: about 100 agents, 603B tokens, 7.6M requests. Run by a team of three, the bill footed by OpenAI.</p>
+      <div class="c-face" aria-live="polite">
+        <div class="face face-p"><b>Proves</b><p>The ceiling on one operator moved by orders of magnitude.</p></div>
+        <div class="face face-n"><b>Does not prove</b><p>Commit and spend counts measure activity, not surviving value.</p></div>
+      </div>
+    </div>
+
+    <div class="claim" data-face="p">
+      <div class="c-top">
+        <span class="badge b-ok">public leaderboard</span>
+        <button class="flip" aria-pressed="false">Does not prove</button>
+      </div>
+      <div class="c-val"><span class="num" data-target="12.1" data-dec="1" data-pre="+">+12.1</span><em>pts</em></div>
+      <p class="c-sub">Terminal Bench 2.1, environment fixes only, same agent and model (Claude Code + Opus 4.6).</p>
+      <div class="c-face" aria-live="polite">
+        <div class="face face-p"><b>Proves</b><p>The harness and environment eat your benchmark score.</p></div>
+        <div class="face face-n"><b>Does not prove</b><p>Little, this one is controlled and public.</p></div>
+      </div>
+    </div>
+
+    <div class="claim" data-face="p">
+      <div class="c-top">
+        <span class="badge b-ok">independent lab</span>
+        <button class="flip" aria-pressed="false">Does not prove</button>
+      </div>
+      <div class="c-val"><span class="num" data-target="14.5" data-dec="1">14.5</span><em>hrs</em></div>
+      <p class="c-sub">METR 50 percent time horizon for Opus 4.6, doubling roughly every 89 days. A separate GAIA study puts scaffold choice at up to 28 points on the same model.</p>
+      <div class="c-face" aria-live="polite">
+        <div class="face face-p"><b>Proves</b><p>Loop length is growing on an exponential.</p></div>
+        <div class="face face-n"><b>Does not prove</b><p>Confidence intervals are wide and the suite saturates past 16 hours.</p></div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="sec"><b class="sec-cw">The counterweights</b><i></i><span>the checks that keep the wall honest</span></div>
+  <div class="grid-b">
+    <div class="cw">
+      <span class="stamp">Not worse</span>
+      <p>Greptile telemetry across 65,000 orgs: AI PRs are 27.6 percent of merges. Codex reverts 1.19 per 1,000 vs a human baseline of 2.72. Two of four agents beat humans.</p>
+    </div>
+    <div class="cw">
+      <span class="stamp">Durability down</span>
+      <p>GitClear, 211M changed lines: churn doubled from 3.3 to 7.1 percent as AI adoption rose. Throughput up, rework up.</p>
+    </div>
+    <div class="cw">
+      <span class="stamp">Grader gap</span>
+      <p>LangChain survey, 1,340 respondents: 89 percent have observability, only 37.3 percent run online evals. Most loops fly ungraded.</p>
+    </div>
+    <div class="cw">
+      <span class="stamp">Review ghosting</span>
+      <p>MSR 2026 study of 33,707 agent PRs: 28.3 percent merge almost instantly, but agents abandon PRs when iterative human review pushes back.</p>
+    </div>
+  </div>
+
+  <div class="foot">
+    <i>V</i>
+    <p>Every V number is self-reported and unaudited. Counterweights cite published telemetry and studies, dates stay on the cards.</p>
+  </div>
+</div>
+<script>
+(() => {
+  const shell = document.querySelector('.shell');
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* flip toggles: PROVES face <-> DOES NOT PROVE face */
+  document.querySelectorAll('.claim').forEach((card) => {
+    const btn = card.querySelector('.flip');
+    btn.addEventListener('click', () => {
+      const flipped = card.dataset.face === 'n';
+      card.dataset.face = flipped ? 'p' : 'n';
+      btn.setAttribute('aria-pressed', String(!flipped));
+      btn.textContent = flipped ? 'Does not prove' : 'Proves';
+    });
+  });
+
+  /* count-up numbers. HTML ships final values so the pre-play and
+     reduced-motion states are already the meaningful end-state. */
+  const fmt = (v, dec, comma) => {
+    let s = v.toFixed(dec);
+    if (dec > 0) s = s.replace(/\.?0+$/, '');
+    if (comma) s = Number(s).toLocaleString('en-US');
+    return s;
+  };
+  const runCounts = () => {
+    document.querySelectorAll('.num').forEach((el, i) => {
+      const target = parseFloat(el.dataset.target);
+      const dec = parseInt(el.dataset.dec || '0', 10);
+      const pre = el.dataset.pre || '';
+      const suf = el.dataset.suf || '';
+      const comma = el.dataset.comma === '1';
+      const dur = 1200;
+      /* t0 comes from the rAF clock itself: in a sandboxed iframe
+         performance.now() and the rAF timestamp can disagree by minutes. */
+      let t0 = null;
+      const step = (now) => {
+        if (t0 === null) t0 = now + i * 130;
+        const t = Math.min(Math.max((now - t0) / dur, 0), 1);
+        const e = 1 - Math.pow(1 - t, 3);
+        el.textContent = pre + fmt(target * e, dec, comma) + suf;
+        if (t < 1) requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+    });
+  };
+
+  /* play gate */
+  const start = () => {
+    if (shell.classList.contains('play')) return;
+    shell.classList.add('play');
+    if (!reduced) runCounts();
+  };
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((en) => {
+        if (en.isIntersecting) { start(); io.disconnect(); }
+      });
+    }, { threshold: 0.2 });
+    io.observe(shell);
+  } else {
+    start();
+  }
+  /* Report content height so the parent frame hugs the content. */
+  if (document.documentElement.dataset.embedded === 'true') {
+    const postSize = () => window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+    if ('ResizeObserver' in window) new ResizeObserver(postSize).observe(document.body);
+    window.addEventListener('load', postSize);
+  }
+})();
+</script>
+</body>
+</html>

@@ -20,7 +20,7 @@
     }
   };
   const getSystemTheme = () => media.matches ? 'dark' : 'light';
-  const getPreferredTheme = () => normalizeTheme(params.get('theme')) ?? getStoredTheme() ?? getSystemTheme();
+  const getPreferredTheme = () => normalizeTheme(params.get('theme')) ?? getStoredTheme() ?? 'dark';
 
   root.dataset.embedded = params.get('embed') === '1' ? 'true' : 'false';
 
