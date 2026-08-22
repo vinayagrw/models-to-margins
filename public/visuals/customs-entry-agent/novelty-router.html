@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Route on novelty, not difficulty</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="./_theme-bootstrap.js"></script>
+<script src="./_glossary.js" defer></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+/* Novelty Router. A deterministic ten-line router card at the top, three
+   clickable tier lanes (recall / deduce / decide) fed by animated line-item
+   dots, a detail panel, two corollary cards, and a HOLD assumption chip. */
+
+.shell { display: flex; flex-direction: column; gap: 10px; }
+:root[data-embedded="true"] .shell { padding: 14px clamp(14px, 2vw, 22px); }
+
+.head h1 {
+  font-family: "Space Grotesk", sans-serif; font-weight: 700;
+  font-size: clamp(1.02rem, 2.2vw, 1.3rem); letter-spacing: -0.02em; color: var(--text-strong);
+}
+:root[data-embedded="true"] .head h1 { font-size: 1.02rem; }
+.head p { font: 500 0.72rem/1.4 "DM Sans", sans-serif; color: var(--muted); margin-top: 2px; }
+
+/* ---------- router card ---------- */
+.router {
+  border: 1px solid var(--border-strong); border-radius: 10px;
+  background: var(--surface-strong); box-shadow: var(--shadow-soft);
+  padding: 9px 12px; display: flex; flex-direction: column; gap: 6px;
+}
+.router .r-title {
+  font: 700 0.58rem/1 "IBM Plex Mono", monospace; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--accent-2);
+}
+.router pre {
+  font: 500 0.68rem/1.55 "IBM Plex Mono", monospace; color: var(--text);
+  white-space: pre; overflow-x: auto;
+}
+.router pre b { font-weight: 700; }
+.router pre .t0 { color: var(--T0); } .router pre .t1 { color: var(--T1); } .router pre .t2 { color: var(--T2); }
+
+/* ---------- dot streams from router into lanes ---------- */
+.streams { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; height: 22px; }
+.stream { position: relative; overflow: hidden; }
+.stream i {
+  position: absolute; left: 50%; top: -6px; width: 5px; height: 5px; border-radius: 50%;
+  background: var(--sc); margin-left: -2.5px; opacity: 0.9;
+}
+.play .stream i { animation: drop 1.6s linear infinite; }
+.stream i:nth-child(2) { animation-delay: 0.5s; left: 42%; }
+.stream i:nth-child(3) { animation-delay: 1.0s; left: 58%; }
+.stream--t1 i:nth-child(3) { display: none; }
+.stream--t2 i:nth-child(2), .stream--t2 i:nth-child(3) { display: none; }
+@keyframes drop { from { top: -6px; opacity: 0; } 15% { opacity: 0.9; } to { top: 24px; opacity: 0; } }
+
+/* ---------- tier lanes ---------- */
+.lanes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.lane {
+  cursor: pointer; text-align: left; min-width: 0;
+  border: 1px solid var(--border-strong); border-top: 3px solid var(--tc);
+  border-radius: 10px; background: var(--surface); box-shadow: var(--shadow-soft);
+  padding: 9px 10px 8px; display: flex; flex-direction: column; gap: 4px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.lane:hover { border-color: var(--tc); }
+.lane[aria-pressed="true"] {
+  border-color: var(--tc);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--tc) 22%, transparent), var(--shadow-soft);
+}
+.lane b { font: 700 0.74rem/1.2 "Space Grotesk", sans-serif; color: var(--text-strong); }
+.lane .share { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.lane .share code { font: 700 0.8rem/1.1 "IBM Plex Mono", monospace; color: var(--tc); }
+.lane .share .stamp { font-size: 0.58rem; }
+.lane span { font: 500 0.66rem/1.4 "DM Sans", sans-serif; color: var(--muted); }
+.lane .llm { font: 700 0.58rem/1 "IBM Plex Mono", monospace; letter-spacing: 0.1em; text-transform: uppercase; color: var(--tc); margin-top: 2px; }
+.play .lane { animation: lane-in 0.45s ease-out backwards; }
+.play .lane:nth-child(1) { animation-delay: 0.12s; }
+.play .lane:nth-child(2) { animation-delay: 0.26s; }
+.play .lane:nth-child(3) { animation-delay: 0.40s; }
+@keyframes lane-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+
+/* ---------- detail panel ---------- */
+.detail {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+  box-shadow: var(--shadow-soft); padding: 11px 13px;
+  display: flex; flex-direction: column; gap: 5px;
+}
+.d-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.d-name {
+  font: 700 0.6rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--dc, var(--accent)); border: 1px solid color-mix(in srgb, var(--dc, var(--accent)) 45%, transparent);
+  border-radius: 999px; padding: 4px 10px;
+}
+.d-mech { font: 600 0.62rem/1 "IBM Plex Mono", monospace; color: var(--muted); }
+.d-text { font: 500 0.76rem/1.55 "DM Sans", sans-serif; color: var(--text); }
+
+/* ---------- corollaries + assumption ---------- */
+.foot { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.card {
+  border: 1px solid var(--border); border-left: 3px solid var(--fc);
+  border-radius: 10px; background: var(--surface); padding: 8px 11px; min-width: 0;
+}
+.card b { display: block; font: 700 0.62rem/1.25 "Space Grotesk", sans-serif; letter-spacing: 0.1em; text-transform: uppercase; color: var(--fc); }
+.card span { display: block; font: 500 0.68rem/1.5 "DM Sans", sans-serif; color: var(--muted); margin-top: 3px; }
+.card span b { display: inline; font: 700 0.68rem/1.5 "DM Sans", sans-serif; letter-spacing: 0; text-transform: none; color: var(--text-strong); }
+.assume {
+  border: 1px solid color-mix(in srgb, var(--warn) 45%, transparent); border-radius: 10px;
+  background: color-mix(in srgb, var(--warn) 8%, transparent);
+  padding: 8px 11px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+}
+.assume span { font: 500 0.72rem/1.5 "DM Sans", sans-serif; color: var(--text); }
+.assume span b { color: var(--text-strong); font-weight: 700; }
+
+@media (max-width: 760px) {
+  .head h1 { font-size: 1rem; }
+  .lanes { grid-template-columns: minmax(0, 1fr); }
+  .streams { display: none; }
+  .foot { grid-template-columns: minmax(0, 1fr); }
+  .router pre { font-size: 0.62rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .play .lane, .play .stream i { animation: none !important; }
+  .stream i { top: 8px; opacity: 0.9; }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="head">
+    <h1>Sort by what you have seen before, not by what looks hard</h1>
+    <p>The same SKUs ship week after week. Click a tier lane.</p>
+  </div>
+
+  <div class="router">
+    <span class="r-title">Deterministic router · readable in ten lines</span>
+    <p class="r-gloss">Two words the rules below use. A <b>SKU</b> is one distinct product.
+      The <b>product master</b> is the customer's own catalogue, one row per product, with
+      its approved customs answers attached.</p>
+    <pre aria-label="The routing rules as pseudocode. Tier 0 requires an exact supplier and part number match in the product master with unchanged material attributes, no rulebook invalidation flag, and a human-approved decision. Tier 1 covers fuzzy matches to a known SKU family or one drifted material attribute. Tier 2 is everything else, high materiality, AD/CVD, or PGA."><b class="t0">Tier 0</b>  if exact (supplier, part number) match in product master
+        and material attributes unchanged
+        and no rulebook invalidation flag
+        and decision was human-approved
+<b class="t1">Tier 1</b>  if fuzzy match to a known SKU family
+        or one material attribute drifted
+<b class="t2">Tier 2</b>  otherwise, or high materiality, or AD/CVD, or PGA</pre>
+  </div>
+
+  <div class="streams" aria-hidden="true">
+    <div class="stream" style="--sc: var(--T0)"><i></i><i></i><i></i></div>
+    <div class="stream stream--t1" style="--sc: var(--T1)"><i></i><i></i><i></i></div>
+    <div class="stream stream--t2" style="--sc: var(--T2)"><i></i><i></i><i></i></div>
+  </div>
+
+  <div class="lanes" role="group" aria-label="The three novelty tiers">
+    <button class="lane" style="--tc: var(--T0)" data-i="0" aria-pressed="false">
+      <b>Tier 0 · Recall</b>
+      <span class="share"><code>70 to 85%</code><span class="stamp stamp--proposed">design target</span></span>
+      <span>Deterministic product-master lookup pinned to a prior human-approved decision.</span>
+      <span class="llm">Zero LLM calls</span>
+    </button>
+    <button class="lane" style="--tc: var(--T1)" data-i="1" aria-pressed="false">
+      <b>Tier 1 · Deduce</b>
+      <span class="share"><code>10 to 20%</code><span class="stamp stamp--proposed">design target</span></span>
+      <span>Retrieval plus bounded reasoning, behind a multi-signal confidence gate.</span>
+      <span class="llm">Bounded reasoning</span>
+    </button>
+    <button class="lane" style="--tc: var(--T2)" data-i="2" aria-pressed="false">
+      <b>Tier 2 · Decide</b>
+      <span class="share"><code>5 to 15%</code><span class="stamp stamp--proposed">design target</span></span>
+      <span>Full orchestrator-workers reasoning with a mandatory human decision.</span>
+      <span class="llm">Human decides</span>
+    </button>
+  </div>
+
+  <div class="detail" aria-live="polite">
+    <div class="d-top"><span class="d-name" id="d-name"></span><span class="d-mech" id="d-mech"></span></div>
+    <p class="d-text" id="d-text"></p>
+  </div>
+
+  <div class="foot">
+    <div class="card" style="--fc: var(--accent-3)">
+      <b>The product master is the actual asset</b>
+      <span>The customer's own catalogue, <b>one row per product</b>, with its approved customs answers attached. This is a decision cache with a reasoning engine attached, not the reverse. Every human decision becomes a permanent Tier 0 recall, so value compounds with use.</span>
+    </div>
+    <div class="card" style="--fc: var(--S-lodged)">
+      <b>The rulebook is a versioned input</b>
+      <span>When s338 lands on Canada the system must know <b>which prior decisions just became invalid</b>. That is deterministic dependency invalidation, never delegated to a model.</span>
+    </div>
+  </div>
+
+  <div class="assume">
+    <span class="stamp stamp--hold">Hold</span>
+    <span><b>Load-bearing assumption:</b> if the customer's real SKU repeat rate is below 50%, the economics invert. Measure it in week one.</span>
+  </div>
+</div>
+<script>
+(() => {
+  const DATA = [
+    { name: 'Tier 0 · Recall', color: 'var(--T0)', mech: 'lookup · zero LLM calls',
+      text: 'Every human decision becomes a permanent recall. The product master is the asset, the model is a replaceable commodity behind it.' },
+    { name: 'Tier 1 · Deduce', color: 'var(--T1)', mech: 'retrieval + bounded reasoning',
+      text: 'Retrieval plus bounded reasoning over the product master, prior entries, and CROSS rulings, behind a multi-signal confidence gate.' },
+    { name: 'Tier 2 · Decide', color: 'var(--T2)', mech: 'orchestrator-workers · human decides',
+      text: 'Full orchestrator-workers reasoning with GRI-structured analysis and a mandatory human decision. High materiality, AD/CVD, and PGA lines always land here.' }
+  ];
+  const lanes = document.querySelectorAll('.lane');
+  const el = (id) => document.getElementById(id);
+  const select = (i) => {
+    lanes.forEach((b) => b.setAttribute('aria-pressed', String(Number(b.dataset.i) === i)));
+    const d = DATA[i];
+    el('d-name').textContent = d.name;
+    el('d-name').style.setProperty('--dc', d.color);
+    el('d-mech').textContent = d.mech;
+    el('d-text').textContent = d.text;
+  };
+  lanes.forEach((btn) => btn.addEventListener('click', () => select(Number(btn.dataset.i))));
+  select(0);
+
+  const shell = document.querySelector('.shell');
+  const start = () => shell.classList.add('play');
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((en) => { if (en.isIntersecting) { start(); io.disconnect(); } });
+    }, { threshold: 0 });
+    io.observe(shell);
+  } else { start(); }
+  /* Report content height so the parent frame hugs the content. */
+  if (document.documentElement.dataset.embedded === 'true') {
+    const postSize = () => window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+    if ('ResizeObserver' in window) new ResizeObserver(postSize).observe(document.body);
+    window.addEventListener('load', postSize);
+  }
+})();
+</script>
+</body>
+</html>

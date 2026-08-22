@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Run your own entry ledger</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="./_theme-bootstrap.js"></script>
+<script src="./_glossary.js" defer></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+/* ROI model. Four sliders drive an illustrative entry-cost ledger: STP rate,
+   reviewed volume, reviewer headcount, cost per line vs a manual baseline,
+   plus two kill-criteria lamps. Pure recompute on input, no rAF tweens. */
+
+.shell { display: flex; flex-direction: column; gap: 10px; }
+:root[data-embedded="true"] .shell { padding: 14px clamp(14px, 2vw, 22px); }
+
+.head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.head h1 {
+  font-family: "Space Grotesk", sans-serif; font-weight: 700;
+  font-size: clamp(1.02rem, 2.2vw, 1.3rem); letter-spacing: -0.02em; color: var(--text-strong);
+}
+:root[data-embedded="true"] .head h1 { font-size: 1.02rem; }
+.head p { font: 500 0.72rem/1.4 "DM Sans", sans-serif; color: var(--muted); margin-top: 2px; }
+.head .stamp { font-size: 0.72rem; padding: 5px 10px; margin-top: 2px; }
+
+/* ---------- sliders ---------- */
+.sliders { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.sl {
+  border: 1px solid var(--border-strong); border-radius: 10px; background: var(--surface);
+  box-shadow: var(--shadow-soft); padding: 9px 11px 10px; min-width: 0;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.sl-top { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.sl label { font: 700 0.66rem/1.25 "Space Grotesk", sans-serif; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-strong); }
+.sl output { font: 700 0.78rem/1 "IBM Plex Mono", monospace; color: var(--accent-2); white-space: nowrap; }
+.sl input[type="range"] { width: 100%; accent-color: var(--accent-2); cursor: pointer; }
+
+/* ---------- assumptions ---------- */
+.assume {
+  border: 1px dashed var(--border-strong); border-radius: 10px; background: var(--surface);
+  padding: 8px 11px; display: flex; flex-direction: column; gap: 4px;
+}
+.assume b { font: 700 0.58rem/1 "IBM Plex Mono", monospace; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+.assume p { font: 500 0.66rem/1.55 "IBM Plex Mono", monospace; color: var(--muted); }
+
+/* ---------- output tiles ---------- */
+.tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.tile {
+  border: 1px solid var(--border); border-left: 3px solid var(--tc, var(--accent-2));
+  border-radius: 10px; background: var(--surface-strong); box-shadow: var(--shadow-soft);
+  padding: 8px 11px; min-width: 0; display: flex; flex-direction: column; gap: 3px;
+}
+.tile b { font: 700 0.6rem/1.25 "Space Grotesk", sans-serif; letter-spacing: 0.1em; text-transform: uppercase; color: var(--tc, var(--accent-2)); }
+.tile strong { font: 700 1.05rem/1.1 "IBM Plex Mono", monospace; color: var(--text-strong); }
+.tile span { font: 500 0.64rem/1.4 "DM Sans", sans-serif; color: var(--muted); }
+.tile .chip {
+  align-self: flex-start; font: 700 0.58rem/1 "IBM Plex Mono", monospace; letter-spacing: 0.1em;
+  text-transform: uppercase; border-radius: 3px; padding: 3px 6px; margin-top: 2px;
+  color: var(--cc); border: 1px solid var(--cc);
+  background: color-mix(in srgb, var(--cc) 10%, transparent);
+}
+
+/* ---------- kill-criteria lamps ---------- */
+.lamps { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.lamp {
+  border: 1px solid color-mix(in srgb, var(--lc) 45%, transparent); border-radius: 10px;
+  background: color-mix(in srgb, var(--lc) 8%, transparent);
+  padding: 8px 11px; min-width: 0; display: flex; align-items: flex-start; gap: 9px;
+}
+.lamp .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--lc); margin-top: 3px; flex: none;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--lc) 25%, transparent); }
+.lamp .lt { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.lamp b { font: 700 0.6rem/1.25 "Space Grotesk", sans-serif; letter-spacing: 0.1em; text-transform: uppercase; color: var(--lc); }
+.lamp span { font: 500 0.68rem/1.45 "DM Sans", sans-serif; color: var(--text); }
+.lamp .stamp { align-self: flex-start; margin-top: 1px; }
+
+.cap { font: 500 0.68rem/1.5 "DM Sans", sans-serif; color: var(--muted); }
+.cap i { font-style: normal; color: var(--muted-soft); }
+
+/* reveal */
+.play .sl, .play .assume, .play .tile, .play .lamp { animation: rise-in 0.45s ease-out backwards; }
+.play .sl:nth-child(2), .play .tile:nth-child(2) { animation-delay: 0.08s; }
+.play .sl:nth-child(3), .play .tile:nth-child(3) { animation-delay: 0.16s; }
+.play .sl:nth-child(4), .play .tile:nth-child(4) { animation-delay: 0.24s; }
+.play .tile:nth-child(5) { animation-delay: 0.32s; }
+.play .tile:nth-child(6) { animation-delay: 0.40s; }
+.play .assume { animation-delay: 0.30s; }
+.play .lamp:nth-child(1) { animation-delay: 0.44s; }
+.play .lamp:nth-child(2) { animation-delay: 0.52s; }
+@keyframes rise-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+
+@media (max-width: 760px) {
+  .head h1 { font-size: 1rem; }
+  .sliders, .lamps { grid-template-columns: minmax(0, 1fr); }
+  .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .play .sl, .play .assume, .play .tile, .play .lamp { animation: none !important; }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="head">
+    <div>
+      <h1>Run your own entry ledger</h1>
+      <p>Mechanism, not measurement. Defaults are design targets, sliders are yours.</p>
+    </div>
+    <span class="stamp stamp--illustrative">Illustrative model</span>
+  </div>
+
+  <div class="sliders">
+    <div class="sl">
+      <div class="sl-top"><label for="in-lines">Monthly line items</label><output id="o-lines">20,000</output></div>
+      <input type="range" id="in-lines" min="1000" max="100000" step="1000" value="20000">
+    </div>
+    <div class="sl">
+      <div class="sl-top"><label for="in-repeat">SKU repeat rate · Tier 0 share</label><output id="o-repeat">62%</output></div>
+      <input type="range" id="in-repeat" min="30" max="90" step="1" value="62">
+    </div>
+    <div class="sl">
+      <div class="sl-top"><label for="in-mins">Median review minutes per reviewed line</label><output id="o-mins">1.5</output></div>
+      <input type="range" id="in-mins" min="0.5" max="4" step="0.1" value="1.5">
+    </div>
+    <div class="sl">
+      <div class="sl-top"><label for="in-rate">Loaded reviewer cost per hour</label><output id="o-rate">$100</output></div>
+      <input type="range" id="in-rate" min="60" max="160" step="5" value="100">
+    </div>
+  </div>
+
+  <div class="assume">
+    <b>Assumptions, illustrative</b>
+    <p>Of non-repeat lines, 60% route Tier 1 and 40% route Tier 2 · the gate auto-accepts 55% of Tier 1 lines · inference cost $0.15 per Tier 1 line and $0.90 per Tier 2 line · a reviewer has 6,700 productive minutes per month (160 h at 70% utilisation) · manual baseline is 3.0 minutes per line at the same loaded rate · fixed infrastructure is excluded because it is customer-specific, so this is the marginal cost per line.</p>
+  </div>
+
+  <div class="tiles" aria-live="polite">
+    <div class="tile" style="--tc: var(--T0)"><b>STP rate</b><strong id="t-stp"></strong><span>Tier 0 share plus 55% of Tier 1 lines auto-accepted</span></div>
+    <div class="tile" style="--tc: var(--S-review)"><b>Reviewed lines / month</b><strong id="t-rev"></strong><span>lines a human still reads</span></div>
+    <div class="tile" style="--tc: var(--S-lodged)"><b>Reviewers needed</b><strong id="t-fte"></strong><span>at 6,700 productive minutes each</span></div>
+    <div class="tile" style="--tc: var(--accent-2)"><b>AI-assisted cost / line</b><strong id="t-ai"></strong><span>inference plus review minutes</span></div>
+    <div class="tile" style="--tc: var(--muted)"><b>Manual baseline / line</b><strong id="t-man"></strong><span>3.0 minutes at the loaded rate</span></div>
+    <div class="tile" style="--tc: var(--accent)"><b>Cost ratio</b><strong id="t-ratio"></strong><span class="chip" id="t-chip">Cost target: under 15% of manual</span></div>
+  </div>
+
+  <div class="lamps" aria-live="polite">
+    <div class="lamp" id="lamp-a"><i class="dot" aria-hidden="true"></i>
+      <div class="lt"><b>C1 · repeat-rate thesis</b><span id="lamp-a-txt"></span><span class="stamp stamp--hold" id="lamp-a-stamp" hidden>Hold</span></div>
+    </div>
+    <div class="lamp" id="lamp-b"><i class="dot" aria-hidden="true"></i>
+      <div class="lt"><b>Reviewer capacity</b><span id="lamp-b-txt"></span><span class="stamp stamp--hold" id="lamp-b-stamp" hidden>Hold</span></div>
+    </div>
+  </div>
+
+  <p class="cap"><i>Reviewer minutes dominate total cost at any realistic token price. The tier mix is the business case, not the model choice.</i></p>
+</div>
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const ins = ['in-lines', 'in-repeat', 'in-mins', 'in-rate'].map($);
+  const money = (v) => v < 1 ? Math.round(v * 100) + '¢' : '$' + v.toFixed(2);
+  const recompute = () => {
+    const lines = Number($('in-lines').value);
+    const repeat = Number($('in-repeat').value) / 100;
+    const mins = Number($('in-mins').value);
+    const rate = Number($('in-rate').value);
+    $('o-lines').textContent = lines.toLocaleString('en-US');
+    $('o-repeat').textContent = Math.round(repeat * 100) + '%';
+    $('o-mins').textContent = mins.toFixed(1);
+    $('o-rate').textContent = '$' + rate;
+
+    const t1 = (1 - repeat) * 0.6;
+    const t2 = (1 - repeat) * 0.4;
+    const stp = repeat + 0.55 * t1;
+    const reviewed = lines * (1 - stp);
+    const fte = reviewed * mins / 6700;
+    const aiCost = t1 * 0.15 + t2 * 0.90 + (1 - stp) * mins * rate / 60;
+    const manCost = 3.0 * rate / 60;
+    const ratio = aiCost / manCost;
+
+    $('t-stp').textContent = (stp * 100).toFixed(1) + '%';
+    $('t-rev').textContent = Math.round(reviewed).toLocaleString('en-US');
+    $('t-fte').textContent = fte.toFixed(1);
+    $('t-ai').textContent = money(aiCost);
+    $('t-man').textContent = money(manCost);
+    $('t-ratio').textContent = (ratio * 100).toFixed(1) + '%';
+    const chip = $('t-chip');
+    chip.style.setProperty('--cc', ratio < 0.15 ? 'var(--good)' : 'var(--warn)');
+    chip.textContent = ratio < 0.15 ? 'Cost target met: under 15% of manual' : 'Cost target: under 15% of manual, not met';
+
+    const setLamp = (id, hold, txt) => {
+      $(id).style.setProperty('--lc', hold ? 'var(--S-hold)' : 'var(--S-cleared)');
+      $(id + '-txt').textContent = txt;
+      $(id + '-stamp').hidden = !hold;
+    };
+    setLamp('lamp-a', repeat < 0.5,
+      repeat < 0.5 ? 'C1 kill criterion. The thesis fails at this repeat rate. Stop and redesign.'
+                   : 'repeat-rate assumption holds');
+    const perReviewer = Math.round(6700 / mins);
+    setLamp('lamp-b', mins > 3.35,
+      perReviewer.toLocaleString('en-US') + ' reviewed lines per licensed reviewer per month' +
+      (mins > 3.35 ? ', reviewer capacity below the kill criterion of 2,000' : ', above the 2,000 kill criterion'));
+  };
+  ins.forEach((el) => el.addEventListener('input', recompute));
+  recompute();
+
+  const shell = document.querySelector('.shell');
+  const start = () => shell.classList.add('play');
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((en) => { if (en.isIntersecting) { start(); io.disconnect(); } });
+    }, { threshold: 0 });
+    io.observe(shell);
+  } else { start(); }
+  /* Report content height so the parent frame hugs the content. */
+  if (document.documentElement.dataset.embedded === 'true') {
+    const postSize = () => window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+    if ('ResizeObserver' in window) new ResizeObserver(postSize).observe(document.body);
+    window.addEventListener('load', postSize);
+  }
+})();
+</script>
+</body>
+</html>

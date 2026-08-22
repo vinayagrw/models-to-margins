@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The documentation trap &middot; the same shipment, run twice</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="./_theme-bootstrap.js"></script>
+<script src="./_glossary.js" defer></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+  /* ============================================================================
+   * THE DOCUMENTATION TRAP
+   *
+   * Icon-led. The test this has to pass: blur the text out and the story still
+   * reads. A document strip where one sheet carries a warning triangle, then two
+   * journeys of doc / truck / crane / customs / warehouse icons where one convoy
+   * stops dead at a lowered barrier and the other reaches the shed. Captions are
+   * captions, never the carrier of the argument.
+   *
+   * The stock version of this story is a five-step pipeline with green ticks, a
+   * checklist where one row fails, a red DELAY box quoting "48 to 72 hours", and
+   * a green band promising better documentation. Two things are wrong with it.
+   *
+   * First, it asserts the payoff instead of showing it. So this figure runs the
+   * SAME shipment twice, on one axis, as a race: once with the error caught at
+   * the border, once caught at the moment the invoice line is written. The gap
+   * between the two finishes is the argument, and the reader watches it open
+   * rather than being told about it.
+   *
+   * Second, and more important, the 48-to-72-hour number has no primary source.
+   * Neither does the eight-to-fifteen-thousand dollars. CBP publishes no hold
+   * duration and no hold rate at all. So this figure refuses to animate a clock
+   * it cannot source: the held run gets a hatched bar that grows off the edge
+   * labelled "duration: not published". Inventing a number here would be the
+   * exact sin the figure exists to point at.
+   * ==========================================================================*/
+
+  .shell { gap: 15px; }
+  .head .stampline { margin-top: 9px; }
+  .head { margin-bottom: 2px; }
+
+  .lead { font-size: 0.88rem; line-height: 1.6; color: var(--muted); max-width: 78ch; }
+  .capt {
+    display: flex; align-items: center; gap: 7px; margin-bottom: 8px;
+    font: 600 0.78rem/1.4 "Space Grotesk", system-ui, sans-serif;
+    color: var(--text-strong);
+  }
+  .capt .ic { color: var(--accent-2); }
+
+  /* Icons are inline <svg><use>, so they inherit currentColor and theme with
+     everything else. The sprite at the top of <body> is the single source. */
+  .ic { width: 26px; height: 26px; flex: none; display: block; }
+  .ic-lg { width: 34px; height: 34px; }
+
+  /* ---------- the document strip ---------- */
+  .docs {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(158px, 1fr));
+    align-items: start; gap: 7px;
+  }
+  .doc {
+    display: flex; align-items: flex-start; gap: 8px;
+    padding: 9px 10px;
+    background: var(--surface);
+    border: 1px solid var(--border); border-radius: 5px;
+    font: 500 0.76rem/1.35 "DM Sans", system-ui, sans-serif;
+    color: var(--text);
+  }
+  .doc .ic { color: var(--muted-soft); margin-top: 1px; }
+  .doc .tick { width: 19px; height: 19px; color: var(--good); margin-left: auto; margin-top: 2px; }
+  .doc.bad {
+    border-color: var(--accent); border-width: 1.5px;
+    background: color-mix(in srgb, var(--accent) 9%, var(--surface));
+  }
+  .doc.bad .ic, .doc.bad .tick { color: var(--accent); }
+  .doc-why {
+    display: block; margin-top: 3px;
+    font: 500 0.66rem/1.4 "IBM Plex Mono", ui-monospace, monospace;
+    color: var(--accent);
+  }
+  .doc-more {
+    display: flex; align-items: flex-start; gap: 8px;
+    padding: 9px 10px;
+    font: 500 0.67rem/1.35 "IBM Plex Mono", ui-monospace, monospace;
+    color: var(--muted-soft);
+    border: 1px dashed var(--border-strong); border-radius: 5px;
+  }
+  .doc-more .ic { color: var(--muted-soft); margin-top: 0; }
+
+  /* ---------- the race ---------- */
+  .racehead {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
+    justify-content: space-between; margin-bottom: 10px;
+  }
+  .ctl { display: flex; gap: 7px; }
+  .ctl button {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 7px 14px; min-height: 38px;
+    font: 700 0.68rem/1 "IBM Plex Mono", ui-monospace, monospace;
+    letter-spacing: 0.09em; text-transform: uppercase;
+    color: var(--surface-strong); background: var(--accent-2);
+    border: 1px solid var(--accent-2); border-radius: 5px; cursor: pointer;
+  }
+  .ctl button.ghost { color: var(--text); background: none; border-color: var(--border-strong); }
+  .ctl button:hover { filter: brightness(1.12); }
+  .ctl .ic { width: 19px; height: 19px; }
+
+  .track {
+    position: relative; padding: 12px 13px 13px;
+    background: var(--surface);
+    border: 1px solid var(--border); border-radius: 6px;
+  }
+  .track + .track { margin-top: 10px; }
+  .track.won { border-color: var(--good); }
+  .track.held { border-color: var(--accent); }
+
+  .tlabel { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px; margin-bottom: 11px; }
+  .tname {
+    font: 700 0.66rem/1 "IBM Plex Mono", ui-monospace, monospace;
+    letter-spacing: 0.11em; text-transform: uppercase; color: var(--accent-2);
+  }
+  .track.held .tname { color: var(--accent); }
+  .track.won .tname { color: var(--good); }
+  .tdesc { font: 400 0.78rem/1.45 "DM Sans", system-ui, sans-serif; color: var(--muted); }
+
+  /* ---------- the rail of icon stations ---------- */
+  .rail { position: relative; padding-top: 6px; --half: 66px; }
+  .lane { position: relative; height: 30px; margin-top: 6px; }
+  .line {
+    position: absolute; left: var(--half); right: var(--half); top: 13px;
+    height: 3px; border-radius: 2px;
+    background: var(--border-strong); overflow: hidden;
+  }
+  /* The dashed march shows direction of travel before anything else moves. */
+  .line::before {
+    content: ""; position: absolute; inset: 0;
+    background: repeating-linear-gradient(90deg,
+      var(--muted-soft) 0 9px, transparent 9px 20px);
+    opacity: 0.5;
+  }
+  .fill {
+    position: absolute; left: var(--half); top: 13px;
+    height: 3px; width: 0; border-radius: 2px;
+    background: var(--good); z-index: 1;
+  }
+  .track.held .fill { background: var(--accent); }
+
+  .stations { position: relative; display: flex; justify-content: space-between; z-index: 2; }
+  .st { display: flex; flex-direction: column; align-items: center; width: 132px; }
+  .st-wrap { position: relative; }
+  .st-tile {
+    display: grid; place-items: center;
+    width: 92px; height: 92px; border-radius: 20px;
+    background: var(--surface-strong);
+    border: 1.5px solid var(--border-strong);
+    color: var(--muted);
+    transition: background 220ms ease, border-color 220ms ease, color 220ms ease;
+  }
+  .st.done .st-tile   { border-color: var(--good);     color: var(--good);     background: color-mix(in srgb, var(--good) 13%, var(--surface-strong)); }
+  .st.fail .st-tile   { border-color: var(--accent);   color: var(--accent);   background: color-mix(in srgb, var(--accent) 16%, var(--surface-strong)); }
+  .st.caught .st-tile { border-color: var(--accent-2); color: var(--accent-2); background: color-mix(in srgb, var(--accent-2) 14%, var(--surface-strong)); }
+
+  /* The verdict badge sits on the tile, so state is legible from shape as well
+     as colour — a reader who cannot separate red from green still gets it. */
+  .st-badge {
+    position: absolute; right: -4px; top: -4px;
+    width: 26px; height: 26px; border-radius: 50%;
+    display: none; place-items: center;
+    background: var(--good); color: var(--surface-strong);
+    border: 2px solid var(--surface);
+  }
+  .st.done .st-badge, .st.fail .st-badge, .st.caught .st-badge { display: grid; }
+  .st.fail .st-badge   { background: var(--accent); }
+  .st.caught .st-badge { background: var(--accent-2); }
+  .st-badge .ic { width: 16px; height: 16px; }
+
+  .st-cap {
+    margin-top: 7px; text-align: center;
+    font: 500 0.61rem/1.3 "IBM Plex Mono", ui-monospace, monospace;
+    letter-spacing: 0.02em; color: var(--muted-soft);
+  }
+  .st.fail .st-cap, .st.caught .st-cap { color: var(--text-strong); font-weight: 700; }
+
+  /* The travelling vehicle. An actual truck, not a dot. */
+  .veh {
+    position: absolute; left: var(--half); top: 0;
+    width: 40px; height: 40px; margin-left: -20px;
+    display: grid; place-items: center; border-radius: 9px;
+    background: var(--accent-2); color: var(--surface-strong);
+    box-shadow: 0 1px 5px var(--shadow-soft, rgba(0,0,0,0.22));
+    transform: translateX(0); z-index: 3;
+  }
+  .veh .ic { width: 28px; height: 28px; }
+  .track.held .veh { background: var(--accent); }
+  .track.won  .veh { background: var(--good); }
+
+  /* ---------- the outcome strip ---------- */
+  .outcome {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px;
+    margin-top: 14px; min-height: 30px;
+  }
+  .oword {
+    display: inline-flex; align-items: center; gap: 7px;
+    font: 700 0.76rem/1.3 "Space Grotesk", system-ui, sans-serif; color: var(--text-strong);
+  }
+  .track.held .oword { color: var(--accent); }
+  .track.won  .oword { color: var(--good); }
+  .onote { font: 400 0.74rem/1.45 "DM Sans", system-ui, sans-serif; color: var(--muted); }
+
+  /* Grows off the right edge and never resolves, because the duration genuinely
+     is not published. A number here would be invented. */
+  .grow {
+    position: relative; flex: 1 1 150px; min-width: 110px; height: 10px;
+    overflow: hidden; border-radius: 5px;
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
+  }
+  .grow::after {
+    content: ""; position: absolute; inset: 0 auto 0 0; width: 0;
+    background: repeating-linear-gradient(-45deg,
+      var(--accent) 0 7px, color-mix(in srgb, var(--accent) 45%, transparent) 7px 14px);
+  }
+  .fixed-bar { flex: 0 0 56px; height: 10px; border-radius: 5px; background: var(--good); }
+
+  /* ---------- what is actually known ---------- */
+  .known { display: grid; gap: 7px; }
+  .krow {
+    display: grid;
+    grid-template-columns: 24px minmax(0, 1fr) auto minmax(0, 1.5fr);
+    gap: 10px; align-items: baseline;
+    padding: 9px 11px;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 5px;
+  }
+  .krow .ic { color: var(--muted-soft); align-self: center; }
+  .krow.solid { border-color: var(--good); background: color-mix(in srgb, var(--good) 7%, var(--surface)); }
+  .krow.solid .ic { color: var(--good); }
+  .knum { font: 700 0.84rem/1.25 "Space Grotesk", system-ui, sans-serif; color: var(--text-strong); }
+  .ksrc { font: 400 0.74rem/1.45 "DM Sans", system-ui, sans-serif; color: var(--muted); }
+  .kstamp { justify-self: start; }
+
+  .foot { font: 400 0.68rem/1.55 "IBM Plex Mono", ui-monospace, monospace; color: var(--muted-soft); }
+
+  @media (max-width: 760px) {
+    .krow { grid-template-columns: 24px minmax(0, 1fr); }
+    .krow .kstamp, .krow .ksrc { grid-column: 2; }
+    .racehead { flex-direction: column; align-items: stretch; }
+    .ctl button { flex: 1; justify-content: center; }
+    .st { width: 78px; }
+    .st-tile { width: 62px; height: 62px; border-radius: 14px; }
+    .st-tile .ic { width: 36px; height: 36px; }
+    .st-cap { font-size: 0.54rem; }
+    .rail { --half: 39px; }
+    .lane { height: 26px; }
+    .line, .fill { top: 11px; }
+    .veh { width: 34px; height: 34px; margin-left: -17px; }
+    .veh .ic { width: 22px; height: 22px; }
+  }
+
+  /* ---------- motion ----------
+     Opt-in. Under reduce the script paints the finished state at once, so a calm
+     reader gets the whole argument rather than a frozen half of it. */
+  @media (prefers-reduced-motion: no-preference) {
+    .veh  { transition: transform var(--leg, 800ms) cubic-bezier(0.42, 0, 0.3, 1); }
+    .fill { transition: width var(--leg, 800ms) cubic-bezier(0.42, 0, 0.3, 1); }
+    .line::before { animation: march 1.5s linear infinite; }
+    @keyframes march { to { background-position: 20px 0; } }
+    .st.fail .st-tile { animation: flare 1.7s ease-in-out infinite; }
+    @keyframes flare {
+      0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 42%, transparent); }
+      60%      { box-shadow: 0 0 0 9px color-mix(in srgb, var(--accent) 0%, transparent); }
+    }
+    .grow.run::after { animation: grow 2.8s cubic-bezier(0.2, 0.7, 0.4, 1) forwards; }
+    @keyframes grow { to { width: 100%; } }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .grow::after { width: 100%; }
+  }
+  /* Embedded, the frame is narrower than the phone viewport: a 375px screen
+     leaves the iframe about 313px. Five stops at the 760px sizes need 310px
+     before padding, so the track overflows inside the page while the file
+     looks fine opened on its own. .st can only shrink to its tile, so the
+     tile is what has to come down. */
+  @media (max-width: 430px) {
+    .st { width: 58px; }
+    .st-tile { width: 50px; height: 50px; border-radius: 12px; }
+    .st-tile .ic { width: 28px; height: 28px; }
+    .st-cap { font-size: 0.5rem; }
+    .veh { width: 28px; height: 28px; margin-left: -14px; }
+    .veh .ic { width: 18px; height: 18px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Icon sprite. Same line-art system as ./flow-icons/ (24x24, 1.65 stroke,
+     round caps), inlined so every icon inherits currentColor and themes with
+     the figure instead of shipping a fixed ink colour. -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="i-doc" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M6 2.6h7.4L19 8.2V21.4H6z"/><path d="M13.2 2.6v5.8H19"/><path d="M9 12.4h7M9 15.6h7M9 18.4h4"/>
+  </symbol>
+  <symbol id="i-warning" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 3.4 22 20.6H2z"/><path d="M12 9.6v5"/><path d="M12 17.6h.01"/>
+  </symbol>
+  <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M4.5 12.6 9.6 17.8 19.6 6.6"/>
+  </symbol>
+  <symbol id="i-cross" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M6 6l12 12M18 6 6 18"/>
+  </symbol>
+  <symbol id="i-truck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M2.6 6.2h10.8v10.4H2.6z"/><path d="M13.4 9.8h3.6l3.4 3.5v3.3h-7z"/><circle cx="6.6" cy="18.6" r="2"/><circle cx="17" cy="18.6" r="2"/><path d="M8.6 18.6h6.4"/>
+  </symbol>
+  <symbol id="i-crane" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M6.2 21.4V4.6"/><path d="M2.6 4.6h16.8"/><path d="M14.6 4.6v4.4"/><path d="M11.8 9h5.6v4.2h-5.6z"/><path d="M3 21.4h6.4"/>
+  </symbol>
+  <symbol id="i-gov" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 2.6 21.4 8H2.6z"/><path d="M5 8v9.4M9.6 8v9.4M14.4 8v9.4M19 8v9.4"/><path d="M2.6 17.4h18.8"/><path d="M2.6 21.4h18.8"/>
+  </symbol>
+  <symbol id="i-barrier" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M4.4 21.4V8.4"/><circle cx="4.4" cy="6.6" r="1.9"/><path d="M6.6 9.6 21.4 6.2v3.6L6.6 13.2z"/><path d="M11.4 8.5v3.5M16.2 7.4v3.5"/><path d="M2 21.4h6"/>
+  </symbol>
+  <symbol id="i-warehouse" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M2.6 21.4V9.2L12 4.2l9.4 5v12.2z"/><path d="M8.4 21.4v-6.6h7.2v6.6"/><path d="M8.4 17.8h7.2"/>
+  </symbol>
+  <symbol id="i-play" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M6.5 4.4 19 12 6.5 19.6z"/>
+  </symbol>
+  <symbol id="i-reset" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M3.5 12a8.5 8.5 0 1 1 2.6 6.1"/><path d="M3.2 18.6V12.8h5.8"/>
+  </symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="9.2"/><path d="M12 6.6V12l3.8 2.4"/>
+  </symbol>
+  <symbol id="i-scales" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 3.4v17.2"/><path d="M6 20.6h12"/><path d="M4 8h16"/><path d="M4 8 1.6 14h4.8z"/><path d="M20 8l-2.4 6h4.8z"/>
+  </symbol>
+  <symbol id="i-coins" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <ellipse cx="12" cy="6.4" rx="7.6" ry="3"/><path d="M4.4 6.4v5.2c0 1.7 3.4 3 7.6 3s7.6-1.3 7.6-3V6.4"/><path d="M4.4 11.6v5.2c0 1.7 3.4 3 7.6 3s7.6-1.3 7.6-3v-5.2"/>
+  </symbol>
+  <symbol id="i-gauge" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M3.2 18.4a9.6 9.6 0 1 1 17.6 0"/><path d="M12 18.4 16.4 11"/><circle cx="12" cy="18.4" r="1.3"/>
+  </symbol>
+</svg>
+
+<div class="shell">
+  <div class="head">
+    <span class="eyebrow">Fig. 0 &middot; before any of the machinery, the thing it exists to stop</span>
+    <h1>One field is wrong, and nothing downstream can tell</h1>
+    <p class="lead">A shipment does not usually fail because a ship was late. It fails because a line on a form was wrong before the ship sailed, and every checkpoint after that waved it through. Below, the same consignment runs twice: once the way it happens now, once with a check at the moment the line is written.</p>
+    <div class="stampline">
+      <span class="stamp stamp--illustrative">Illustrative run</span>
+      <span class="stamp stamp--open">Delay figures unsourced &mdash; see below</span>
+    </div>
+  </div>
+
+  <div>
+    <p class="capt"><svg class="ic"><use href="#i-doc"></use></svg> The packet leaves complete. Eleven documents, one wrong field.</p>
+    <div class="docs" id="docs"></div>
+  </div>
+
+  <div>
+    <div class="racehead">
+      <span class="capt" style="margin:0"><svg class="ic"><use href="#i-gauge"></use></svg> The same shipment, run twice</span>
+      <div class="ctl">
+        <button type="button" id="go"><svg class="ic"><use href="#i-play"></use></svg>Run it</button>
+        <button type="button" id="rs" class="ghost"><svg class="ic"><use href="#i-reset"></use></svg>Reset</button>
+      </div>
+    </div>
+
+    <div class="track" id="trackA">
+      <div class="tlabel">
+        <span class="tname">Run A &middot; as it happens now</span>
+        <span class="tdesc">The wrong code is found by customs, four stops after it was written.</span>
+      </div>
+      <div class="rail">
+        <div class="stations" id="stA"></div>
+        <div class="lane">
+          <div class="line"></div><div class="fill" id="flA"></div>
+          <div class="veh" id="tkA"><svg class="ic"><use href="#i-truck"></use></svg></div>
+        </div>
+      </div>
+      <div class="outcome" id="outA"></div>
+    </div>
+
+    <div class="track" id="trackB">
+      <div class="tlabel">
+        <span class="tname">Run B &middot; with a check at the source</span>
+        <span class="tdesc">The same wrong code cannot be saved onto the invoice line.</span>
+      </div>
+      <div class="rail">
+        <div class="stations" id="stB"></div>
+        <div class="lane">
+          <div class="line"></div><div class="fill" id="flB"></div>
+          <div class="veh" id="tkB"><svg class="ic"><use href="#i-truck"></use></svg></div>
+        </div>
+      </div>
+      <div class="outcome" id="outB"></div>
+    </div>
+  </div>
+
+  <div>
+    <p class="capt"><svg class="ic"><use href="#i-scales"></use></svg> What the delay actually costs, and how much of that is knowable.</p>
+    <div class="known" id="known"></div>
+  </div>
+
+  <p class="foot">The consignment and its route are composed. The three delay figures are the ones circulating in trade commentary, reproduced here with their real provenance rather than restated as fact. CBP publishes queue times live and publishes no hold duration and no hold rate at all, so the held run above carries no number.</p>
+</div>
+
+<script>
+/* ============================================================================
+ * DATA
+ * ==========================================================================*/
+const DOCS = [
+  { n: 'Bill of Lading', ok: true },
+  { n: 'Commercial Invoice', ok: true },
+  { n: 'Packing List', ok: true },
+  { n: 'HTS code classification', ok: false, why: 'off by one digit' },
+  { n: 'Certificate of Origin', ok: true },
+  { n: 'Customs Declaration', ok: true }
+];
+const MORE = '+5 more: insurance certificate, export declaration, import licence, certificate of compliance, phytosanitary certificate';
+
+/* Each station is an icon first. The caption underneath is a caption. */
+const STATIONS = [
+  { icon: 'i-doc',       cap: 'Invoice line written' },
+  { icon: 'i-truck',     cap: 'Picked up' },
+  { icon: 'i-crane',     cap: 'Arrives at port' },
+  { icon: 'i-gov',       cap: 'Customs' },
+  { icon: 'i-warehouse', cap: 'Delivered' }
+];
+/* Run A's customs stop swaps the government building for a lowered barrier, so
+   the blocked state is legible from the drawing and not only from the colour. */
+const A_BLOCKED_ICON = 'i-barrier';
+
+const KNOWN = [
+  { icon: 'i-gauge', num: 'One in four shipments delayed', grade: 'open', label: 'Open',
+    src: 'Attributed to a single operational assessment at an unnamed mid-sized shipping company. No sample, no period, no publisher.' },
+  { icon: 'i-clock', num: '48 to 72 hours held', grade: 'vendor', label: 'Vendor claim',
+    src: 'Repeated across trade commentary and vendor marketing. No primary source states it, and CBP publishes no hold duration.' },
+  { icon: 'i-coins', num: '$8,000 to $15,000 per incident', grade: 'open', label: 'Open',
+    src: 'No stated method, sample or publisher anywhere it appears.' },
+  { icon: 'i-check', num: '40 minutes', grade: 'confirmed', label: 'Confirmed', solid: true,
+    src: 'The worst commercial standard-lane delay anywhere on either US land border, in a live pull of CBP’s Border Wait Times feed on 21 August 2026. This is queue time, which is the thing that is measured. It is not hold time, which is the thing everyone quotes.' }
+];
+
+const use = (id, cls) => '<svg class="ic' + (cls ? ' ' + cls : '') + '"><use href="#' + id + '"></use></svg>';
+
+/* ============================================================================
+ * BUILD
+ * ==========================================================================*/
+const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+const docs = document.getElementById('docs');
+DOCS.forEach((d) => {
+  const el = document.createElement('div');
+  el.className = 'doc' + (d.ok ? '' : ' bad');
+  el.innerHTML =
+    use(d.ok ? 'i-doc' : 'i-warning') +
+    '<span>' + d.n + (d.why ? '<span class="doc-why">' + d.why + '</span>' : '') + '</span>' +
+    use(d.ok ? 'i-check' : 'i-cross', 'tick');
+  docs.appendChild(el);
+});
+const more = document.createElement('div');
+more.className = 'doc-more';
+more.innerHTML = use('i-doc') + '<span>' + MORE + '</span>';
+docs.appendChild(more);
+
+const known = document.getElementById('known');
+KNOWN.forEach((k) => {
+  const el = document.createElement('div');
+  el.className = 'krow' + (k.solid ? ' solid' : '');
+  el.innerHTML =
+    use(k.icon) +
+    '<span class="knum">' + k.num + '</span>' +
+    '<span class="kstamp"><span class="stamp stamp--' + k.grade + '">' + k.label + '</span></span>' +
+    '<span class="ksrc">' + k.src + '</span>';
+  known.appendChild(el);
+});
+
+function buildStations(hostId) {
+  const host = document.getElementById(hostId);
+  return STATIONS.map((s) => {
+    const el = document.createElement('div');
+    el.className = 'st';
+    el.innerHTML =
+      '<span class="st-wrap"><span class="st-tile">' + use(s.icon, 'ic-lg') + '</span>' +
+      '<span class="st-badge">' + use('i-check') + '</span></span>' +
+      '<span class="st-cap">' + s.cap + '</span>';
+    host.appendChild(el);
+    return el;
+  });
+}
+const stA = buildStations('stA');
+const stB = buildStations('stB');
+
+const setIcon  = (st, id) => st.querySelector('.st-tile use').setAttribute('href', '#' + id);
+const setBadge = (st, id) => st.querySelector('.st-badge use').setAttribute('href', '#' + id);
+
+/* ============================================================================
+ * THE RACE
+ *
+ * Both runs move at the same speed per leg, so the only difference the reader
+ * sees is where each one stops. That is the point: run B is not faster freight,
+ * it is the same freight that never had to stop.
+ * ==========================================================================*/
+const LEG = 800;
+const tkA = document.getElementById('tkA'), tkB = document.getElementById('tkB');
+const flA = document.getElementById('flA'), flB = document.getElementById('flB');
+const trackA = document.getElementById('trackA'), trackB = document.getElementById('trackB');
+const outA = document.getElementById('outA'), outB = document.getElementById('outB');
+let timers = [];
+
+const span = (track) => track.querySelector('.line').getBoundingClientRect().width;
+const after = (ms, fn) => timers.push(setTimeout(fn, ms));
+
+function move(veh, fill, track, i) {
+  const x = (span(track) * i) / (STATIONS.length - 1);
+  veh.style.transform = 'translateX(' + x + 'px)';
+  fill.style.width = x + 'px';
+}
+
+function reset() {
+  timers.forEach(clearTimeout); timers = [];
+  [[tkA, flA, trackA], [tkB, flB, trackB]].forEach(([v, f, t]) => {
+    v.style.setProperty('--leg', LEG + 'ms');
+    f.style.setProperty('--leg', LEG + 'ms');
+    move(v, f, t, 0);
+  });
+  [trackA, trackB].forEach((t) => t.classList.remove('held', 'won'));
+  [...stA, ...stB].forEach((s) => { s.classList.remove('done', 'fail', 'caught'); setBadge(s, 'i-check'); });
+  setIcon(stA[3], STATIONS[3].icon);
+  outA.innerHTML = '<span class="onote">Not started.</span>';
+  outB.innerHTML = '<span class="onote">Not started.</span>';
+}
+
+const HELD_OUT =
+  '<span class="oword">' + use('i-barrier') + 'Held at customs</span>' +
+  '<span class="grow RUNCLS"></span>' +
+  '<span class="onote">Duration: not published. Nobody measures this.</span>';
+const WON_OUT =
+  '<span class="oword">' + use('i-warehouse') + 'Cleared and delivered</span>' +
+  '<span class="fixed-bar"></span>' +
+  '<span class="onote">The error never left the desk it was made on.</span>';
+
+function paintFinal() {
+  /* The end state, drawn at once. This is what a reduced-motion reader sees and
+     it has to carry the whole argument on its own. */
+  move(tkA, flA, trackA, 3);
+  move(tkB, flB, trackB, 4);
+  stA.forEach((s, i) => { if (i < 3) s.classList.add('done'); });
+  stA[3].classList.add('fail'); setIcon(stA[3], A_BLOCKED_ICON); setBadge(stA[3], 'i-cross');
+  stB.forEach((s, i) => { if (i === 0) { s.classList.add('caught'); setBadge(s, 'i-cross'); } else s.classList.add('done'); });
+  trackA.classList.add('held'); trackB.classList.add('won');
+  outA.innerHTML = HELD_OUT.replace('RUNCLS', reduced ? '' : 'run');
+  outB.innerHTML = WON_OUT;
+}
+
+function run() {
+  reset();
+  if (reduced) { paintFinal(); report(); return; }
+
+  // Run B: the check fires before the freight moves.
+  after(120, () => {
+    stB[0].classList.add('caught'); setBadge(stB[0], 'i-cross');
+    outB.innerHTML = '<span class="oword" style="color:var(--accent-2)">' + use('i-warning') +
+      'Rejected at the source</span><span class="onote">The line cannot be saved with a code that does not resolve.</span>';
+  });
+  for (let i = 1; i <= 4; i++) {
+    after(400 + i * LEG, () => { move(tkB, flB, trackB, i); stB[i].classList.add('done'); });
+  }
+  after(400 + 4 * LEG + 280, () => { trackB.classList.add('won'); outB.innerHTML = WON_OUT; report(); });
+
+  // Run A: the same freight, carrying an error nothing checks for.
+  after(120, () => {
+    outA.innerHTML = '<span class="onote">Wrong code saved. Every checkpoint ahead will pass it.</span>';
+  });
+  for (let i = 1; i <= 3; i++) {
+    after(400 + i * LEG, () => { move(tkA, flA, trackA, i); stA[i - 1].classList.add('done'); });
+  }
+  after(400 + 3 * LEG + 320, () => {
+    stA[3].classList.add('fail'); setIcon(stA[3], A_BLOCKED_ICON); setBadge(stA[3], 'i-cross');
+    trackA.classList.add('held');
+    outA.innerHTML = HELD_OUT.replace('RUNCLS', 'run');
+    report();
+  });
+}
+
+let userActed = false;
+document.getElementById('go').addEventListener('click', () => { userActed = true; run(); });
+document.getElementById('rs').addEventListener('click', () => { userActed = true; reset(); report(); });
+
+reset();
+/* The figure must state its argument before anyone presses anything, because
+   most readers never will. So it plays once on its own and the button replays
+   it. Deliberately a bare setTimeout: reset() clears the `timers` list, so
+   scheduling this through after() would let the run cancel its own kickoff. */
+setTimeout(() => { if (!userActed) run(); }, reduced ? 0 : 700);
+
+let rt = 0;
+window.addEventListener('resize', () => {
+  clearTimeout(rt);
+  rt = setTimeout(() => { if (trackA.classList.contains('held')) paintFinal(); report(); }, 90);
+});
+
+/* Report height so the host frame collapses to the content instead of leaving
+   a band of empty frame. Autosize is opt-in and this is the opt-in. */
+function report() {
+  if (document.documentElement.dataset.embedded !== 'true') return;
+  window.parent.postMessage(
+    { type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+}
+if (document.documentElement.dataset.embedded === 'true') {
+  if ('ResizeObserver' in window) new ResizeObserver(report).observe(document.body);
+  window.addEventListener('load', report);
+  report();
+}
+</script>
+</body>
+</html>

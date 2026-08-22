@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Integration map &middot; every external system, with its contract</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="./_theme-bootstrap.js"></script>
+<script src="./_glossary.js" defer></script>
+<link rel="stylesheet" href="./_theme.css">
+<link rel="stylesheet" href="./stencil.css">
+<style>
+  :root[data-embedded="true"] .head h1 { font-size: 1.02rem; }
+  body { background: transparent; }
+
+  /* ---------- caption-first poster ----------
+     Copied deliberately from entry-lifecycle-flow.html, which solved this same
+     problem for the other figure that drives this engine. Below 760px a
+     pan-and-zoom stencil rendered at 315px is a drawing nobody can read, sitting
+     inside a canvas that is more than half empty, under six rows of controls for
+     a diagram that cannot be used. So below 760px this card is the default and
+     the full map is one tap away. At or above 760px the boot script swaps it for
+     the engine straight away. With scripting off the card stays, which is the
+     only readable state this figure has without JS. */
+  .poster { display: flex; flex-direction: column; gap: 13px; }
+  .shell.is-poster > :not(#poster):not(.vis) { display: none; }
+  /* The visibility panel is a summary, so it belongs in BOTH states. The
+     poster auto-dismisses at desktop width, so anything left inside it is
+     invisible on a wide screen — which is exactly how the first version of
+     this panel got lost. */
+  #poster[hidden] { display: none; }
+
+  .poster h1 {
+    font-family: "Space Grotesk", "DM Sans", system-ui, sans-serif; font-weight: 700;
+    font-size: clamp(1.05rem, 2.4vw, 1.34rem); letter-spacing: -0.02em;
+    line-height: 1.2; color: var(--text-strong);
+  }
+  .poster-claim {
+    font: 500 clamp(0.82rem, 1.5vw, 0.92rem)/1.5 "DM Sans", system-ui, sans-serif;
+    color: var(--text); max-width: 68ch;
+    border-left: 2px solid var(--accent-2); padding-left: 10px;
+  }
+
+  /* One card, three rows. The lifecycle poster learned this the hard way: three
+     bulleted columns ran to 1100px at 375px, longer than the stencil they were
+     previewing. This card's job is to name the three groups and the boundary
+     between them, not to re-narrate the paragraph above the frame. */
+  .pcol {
+    border: 1px solid var(--border-strong); border-radius: 10px;
+    background: var(--surface); padding: 11px 13px 12px;
+  }
+  .pcol > h2 {
+    font: 700 0.7rem/1.3 "IBM Plex Mono", ui-monospace, monospace;
+    letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-2);
+    margin-bottom: 9px;
+  }
+
+  .prail { font: 600 0.76rem/1.5 "DM Sans", system-ui, sans-serif; color: var(--text); }
+  .prail > span {
+    display: block; margin-bottom: 2px;
+    font: 700 0.62rem/1.3 "IBM Plex Mono", ui-monospace, monospace;
+    letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted-soft);
+  }
+  .prail em { font-style: normal; color: var(--accent-2); padding: 0 2px; }
+  .prail--in  { margin-bottom: 10px; padding-bottom: 9px; border-bottom: 1px dashed var(--border-strong); }
+  .prail--out { margin-top: 10px; padding-top: 9px; border-top: 1px dashed var(--border-strong); }
+  .prail--out em { color: #dd3522; }
+  .pcol ul { list-style: none; }
+  .pcol li {
+    position: relative; margin-left: 3px; padding: 0 0 9px 14px;
+    border-left: 1px solid var(--border-strong);
+  }
+  .pcol li:last-child { border-left-color: transparent; padding-bottom: 0; }
+  .pcol li::before {
+    content: ""; position: absolute; left: -4px; top: 5px;
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--dot, var(--accent-2));
+  }
+  .pcol li b {
+    display: block; color: var(--text-strong);
+    font: 700 0.8rem/1.28 "Space Grotesk", "DM Sans", system-ui, sans-serif;
+  }
+  .pcol li i {
+    float: right; margin-left: 8px; font-style: normal;
+    font: 700 0.7rem/1.28 "IBM Plex Mono", ui-monospace, monospace;
+    letter-spacing: 0.04em; color: var(--dot, var(--accent-2));
+  }
+  .pcol li span {
+    display: block; margin-top: 1px; color: var(--muted);
+    font: 500 0.74rem/1.4 "DM Sans", system-ui, sans-serif;
+  }
+  .pcol li.g-comm { --dot: #8a5a10; }
+  .pcol li.g-auth { --dot: #7aa116; }
+  .pcol li.g-out  { --dot: var(--accent-2); }
+
+  .pfoot { display: flex; flex-wrap: wrap; align-items: center; gap: 9px 14px; }
+  .pgo {
+    min-height: 44px; padding: 12px 17px; border-radius: 8px;
+    font: 700 0.72rem/1 "IBM Plex Mono", ui-monospace, monospace;
+    letter-spacing: 0.07em; text-transform: uppercase;
+    color: var(--bg-mid); background: var(--accent-2); border: 1px solid var(--accent-2);
+  }
+  .pgo:hover { color: var(--bg-mid); border-color: var(--accent-2); filter: brightness(1.1); }
+  .phint {
+    flex: 1 1 15rem; min-width: 13rem;
+    font: 500 0.72rem/1.4 "DM Sans", system-ui, sans-serif; color: var(--muted-soft);
+  }
+  /* ---- five visibility areas -------------------------------------------
+     Moved in from the page prose. The map already supplies four of the five
+     areas people mean by "end to end visibility". The fifth is the point of
+     the panel: nothing here reads the broker's own working data, which is
+     why the audit ledger has to keep its own record. */
+  .vis {
+    border: 1px solid var(--border-strong); border-radius: 10px;
+    background: var(--surface); padding: 11px 13px 12px;
+  }
+  .vis-note {
+    margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--border-strong);
+    font: 500 0.74rem/1.45 "DM Sans", system-ui, sans-serif; color: var(--muted);
+  }
+  .vis > h3 {
+    font: 700 0.7rem/1.3 "IBM Plex Mono", ui-monospace, monospace;
+    letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted-soft);
+    margin-bottom: 8px;
+  }
+  .vis ol { list-style: none; display: grid; gap: 5px; }
+  .vis li {
+    display: grid; grid-template-columns: 22px minmax(0, 1fr) auto;
+    align-items: center; gap: 9px;
+    padding: 7px 9px; border-radius: 7px;
+    border: 1px solid var(--border); background: var(--surface-strong);
+    font: 500 0.74rem/1.35 "DM Sans", system-ui, sans-serif; color: var(--text);
+  }
+  .vis li svg { width: 22px; height: 22px; color: var(--accent-2); }
+  .vis li b { color: var(--text-strong); font-weight: 700; }
+  .vis li .src {
+    justify-self: end; white-space: nowrap;
+    font: 700 0.6rem/1 "IBM Plex Mono", ui-monospace, monospace;
+    letter-spacing: 0.05em; text-transform: uppercase; color: var(--accent-2);
+  }
+  .vis li.gap { border-color: #dd3522; border-style: dashed; }
+  .vis li.gap svg, .vis li.gap .src { color: #dd3522; }
+
+  /* ---- glossed term ----------------------------------------------------
+     Reveals on hover AND on tap, because a touch reader has no hover. The
+     button carries the definition in its own popup rather than a title
+     attribute, which screen readers and phones both handle badly. */
+  .gl { position: relative; display: inline; }
+  .gl > button {
+    font: inherit; color: var(--accent-2); background: none; border: 0;
+    padding: 0; cursor: help;
+    border-bottom: 1px dashed currentColor;
+  }
+  .gl > span {
+    position: absolute; left: 0; top: calc(100% + 6px); z-index: 5;
+    width: max-content; max-width: 28ch; padding: 8px 10px;
+    border-radius: 7px; border: 1px solid var(--accent-2);
+    background: var(--bg-mid, var(--surface-strong)); color: var(--text);
+    font: 500 0.72rem/1.4 "DM Sans", system-ui, sans-serif;
+    opacity: 0; visibility: hidden; transition: opacity 0.16s ease;
+  }
+  .gl:hover > span, .gl > button:focus-visible + span, .gl.open > span { opacity: 1; visibility: visible; }
+</style>
+</head>
+<body>
+<div class="shell is-poster">
+
+  <section class="poster" id="poster" aria-labelledby="poster-h">
+    <div class="stampline"><span class="stamp stamp--confirmed">Contracts from the design doc, &sect;19</span></div>
+    <h1 id="poster-h">Ten external systems, ten contracts</h1>
+    <p class="poster-claim">Every system that touches this platform has a written contract. It sets how the data arrives, how often, what makes a repeat a repeat, and what happens when it fails.</p>
+
+    <div class="pfoot">
+      <button type="button" class="pgo" id="poster-go" aria-describedby="poster-hint">Open the full integration map</button>
+      <p class="phint" id="poster-hint">Fifteen systems over one drawing, nine steps, and a contract card on every one.</p>
+    </div>
+    <noscript>
+      <style>#poster-go { display: none; }</style>
+      <p class="phint">The interactive map needs JavaScript. The card below carries the same argument.</p>
+    </noscript>
+
+    <div class="pcol">
+      <h2>Three groups, one boundary</h2>
+
+      <p class="prail prail--in"><span>The rule that does the work</span>Grey frames sit outside the platform <em>&rsaquo;</em> coloured frames sit inside it</p>
+
+      <ul>
+        <li class="g-comm"><i>3 in</i><b>Customer and partner systems</b><span>The importer ERP or TMS, supplier email, EDI over AS2. Untrusted, so everything lands in one sandboxed intake. Each source repeats itself differently, so each carries its own idempotency key.</span></li>
+        <li class="g-auth"><i>4 in</i><b>Authority feeds, read only</b><span>The Federal Register, CBP CSMS, the USITC tariff schedule, the CROSS rulings corpus. One watcher each, with its own alarm at 24 hours without a successful poll.</span></li>
+        <li class="g-out"><i>3 out</i><b>Government, and back to the customer</b><span>One deterministic filing path to CBP that contains no model, the agency message sets inside the same transmission, and the exposure export that files nothing.</span></li>
+      </ul>
+
+      <p class="prail prail--out"><span>The route that does not exist</span>Decisioning reads the rulebook <em>&#10007;</em> and cannot write it</p>
+
+    </div>
+  </section>
+  <div class="head">
+    <h1 id="h-title">Integration map</h1>
+    <p id="h-intro"></p>
+    <div class="stampline"><span class="stamp stamp--confirmed">Contracts from the design doc, &sect;19</span></div>
+  </div>
+
+  <div class="bar" id="scenbar" hidden><span class="lbl">Direction</span></div>
+
+  <div class="bar" id="ctlbar">
+    <span class="lbl">Flow</span>
+    <button id="b-play" aria-pressed="false">Play</button>
+    <button id="b-all">Show all</button>
+    <span class="lbl" style="margin-left:8px">View</span>
+    <button id="b-fit">Fit</button>
+    <button id="b-full" aria-pressed="false">Fullscreen</button>
+    <span class="cam">
+      <button id="b-out" aria-label="Zoom out">&minus;</button>
+      <button id="b-in" aria-label="Zoom in">+</button>
+    </span>
+    <span class="hint" style="margin-left:6px">Drag to pan &middot; wheel or pinch to zoom</span>
+  </div>
+
+  <div class="stage" id="stage" tabindex="0" role="application" aria-label="Integration map, pan and zoom">
+    <div class="fsbar" id="fsbar"></div>
+    <div class="world" id="world">
+      <div class="diagram" id="diagram">
+        <svg class="wires" id="svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" aria-hidden="true"></svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="narr" id="narr">
+    <span class="num" id="n-num">All steps</span>
+    <span class="cap" id="n-cap"></span>
+  </div>
+  <div class="bar scrub" id="scrub"><span class="lbl">Step</span></div>
+
+  <div class="legend" id="legend"></div>
+
+  <div class="vis">
+    <h3>Five visibility areas &middot; this map supplies four</h3>
+    <ol>
+      <li><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2.6 16.4V8.6L12 4l9.4 4.6v7.8L12 21z"/><path d="M2.6 8.6 12 13.2l9.4-4.6M12 13.2V21"/></svg><span><b>Supply chain</b> where the goods are and what is on them</span><span class="src">ERP and TMS</span></li>
+      <li><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h16v4.6H4z"/><path d="M6 13.6V20M18 13.6V20M5.6 13.6 9 9M10.6 13.6 14 9M15.6 13.6 19 9"/></svg><span><b>Customs</b> what was declared and what came back</span><span class="src">Filing channel</span></li>
+      <li><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9.4 9.4h4.2a1.9 1.9 0 0 1 0 3.8h-3.2a1.9 1.9 0 0 0 0 3.8h4.2"/></svg><span><b>Financial</b> what the duty exposure actually is</span><span class="src">Exposure export</span></li>
+      <li><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4"/><path d="M9.2 12h6M9.2 15.6h4"/></svg><span><b>Regulatory</b> which rules changed and when</span><span class="src">Four authority feeds</span></li>
+      <li class="gap"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.6 3.6 2.3 18a1.6 1.6 0 0 0 1.4 2.4h16.6A1.6 1.6 0 0 0 21.7 18L13.4 3.6a1.6 1.6 0 0 0-2.8 0Z"/><path d="M12 9.4v4.2M12 17.2h.01"/></svg><span><b>The broker desk</b> nothing here reads the broker&rsquo;s own working data</span><span class="src">No feed</span></li>
+    </ol>
+    <p class="vis-note">Every one of those feeds carries an
+      <span class="gl"><button type="button">idempotency key</button><span>A unique tag on each message, so a retry can never file the same entry twice.</span></span>,
+      because each source repeats itself differently.</p>
+  </div>
+
+  <div class="card" id="card" hidden>
+    <button class="x" id="card-x" aria-label="Close">&times;</button>
+    <h3><span class="ci" id="card-ic"></span><span id="card-nm"></span></h3>
+    <div class="svc" id="card-sv"></div>
+    <p id="card-ds"></p>
+    <div class="where" id="card-wh"></div>
+  </div>
+</div>
+
+<script>
+/* ============================================================================
+ * The only authored block. Everything else is the shared stencil engine.
+ * The detail card carries each integration's contract: transport, cadence,
+ * idempotency key, and what happens when it fails. The failure semantics are
+ * the design — every one of these has a happy path and only some have a safe
+ * unhappy one.
+ * ==========================================================================*/
+window.STENCIL = {
+  title: 'Integration map &middot; every external system, with its contract',
+  intro: 'Ten external systems, ten contracts. Click any one for its transport, cadence, idempotency key and failure semantics. Pick a direction to narrow the drawing to that side of the boundary.',
+  iconBase: './flow-icons/',
+  scenarioLabel: 'Direction',
+  outsideLabel: 'Outside the platform boundary.',
+
+  types: {
+    comm:  { color: '#8a5a10',         label: 'Inbound commercial data' },
+    auth:  { color: '#7aa116',         label: 'Read-only authority feed' },
+    file:  { color: 'var(--ink)',      label: 'Filing and response' },
+    exp:   { color: 'var(--accent-2)', label: 'Customer-facing export' },
+    block: { color: '#dd3522',         label: 'Route that does not exist', dash: true, blocked: true }
+  },
+
+  nodes: {
+    erp:    { ic: 'building',  sv: 'In &middot; S3 drop / SFTP / REST', nm: 'Importer ERP / TMS', ds: 'Product master, parties and orders. Transport: S3 drop, SFTP or REST. Cadence: nightly full plus event-driven delta. Idempotency: upsert on tenant, supplier, part number, source version. On failure: stale is acceptable, silently stale is not — a missed sync raises an alarm, because a product master quietly six weeks old poisons every Tier 0 recall.' },
+    email:  { ic: 'envelope',  sv: 'In &middot; Amazon SES',            nm: 'Supplier email',     ds: 'Invoices, packing lists and certificates. Transport: SES receipt rules to S3 to EventBridge. Cadence: continuous. Idempotency: content hash of the attachment set. On failure: an unparseable document goes to an intake exception queue, human-visible within minutes, never silently dropped — a dropped document is an invisible missed deadline.' },
+    edi:    { ic: 'exchange',  sv: 'In &middot; B2B Data Interchange',  nm: 'EDI / AS2 partners', ds: 'X12 from forwarders and carriers. Transport: AWS B2B Data Interchange over AS2. Cadence: continuous. Idempotency: interchange control number. On failure: MDN handling per partner agreement. Managed AS2 avoids running a VAN, and a partner who requires a certified interconnect flips that decision.' },
+
+    fr:     { ic: 'document',  sv: 'In &middot; public JSON API',       nm: 'Federal Register',   ds: 'Proclamations and notices. Cadence: daily poll. Idempotency: document number. On failure: a miss is staleness, not an error, so the alarm fires at 24 hours without a successful poll. The July 2026 Section 338 proclamations arrived through this feed with a month of notice, and that is the generous case.' },
+    csms:   { ic: 'megaphone', sv: 'In &middot; bulletin subscription', nm: 'CBP CSMS',           ds: 'Operational guidance, parsed. Cadence: daily. Idempotency: message number. On failure: the same staleness contract. CSMS is where operational guidance lands first, often before the legal text is easy to act on.' },
+    hts:    { ic: 'table',     sv: 'In &middot; revision export',       nm: 'USITC HTS',          ds: 'The tariff schedule itself. Cadence: per revision plus a weekly check. Idempotency: revision id and file hash. On failure: a new revision creates a new pinned rulebook version, never an in-place edit, and every decision records exactly which revision it used.' },
+    cross:  { ic: 'book',      sv: 'In &middot; bulk fetch',            nm: 'CBP CROSS rulings',  ds: 'The rulings corpus, embedded to pgvector. Cadence: weekly. Idempotency: ruling number. On failure: the corpus version bumps on each refresh, so a classification citing HQ H123456 records which corpus version that ruling came from.' },
+
+    intake: { ic: 'inbox',     sv: 'Boundary',                          nm: 'Intake and normalisation', ds: 'Quarantine parse and entity resolution. Everything inbound converges here before anything downstream reads it, which is what makes one sandbox sufficient.' },
+    core:   { ic: 'cpu',       sv: 'Core',                              nm: 'Decisioning and gate',     ds: 'Router, workers, validators, calibrated confidence and the review queue. The only component that decides anything.' },
+    watch:  { ic: 'radar',     sv: 'Watcher',                           nm: 'Rulebook watcher',         ds: 'One Lambda per feed, each with its own staleness alarm. A single cron job would let one feed fail invisibly, which is the failure this design is most afraid of.' },
+    corpus: { ic: 'archive',   sv: 'Pinned corpus',                     nm: 'Rulebook versions',        ds: 'Hashed, promoted like code, and cited by every decision. It lives in a separate shared-services account because production must not be able to write its own authorities.' },
+    abi:    { ic: 'transmit',  sv: 'Filing',                            nm: 'ABI adapter',              ds: "Deterministic, contains no model, and transmits under the broker's certified filer code. The component that talks to CBP cannot improvise." },
+
+    cbp:    { ic: 'gov',       sv: 'Out + async responses',             nm: 'CBP ACE via ABI',    ds: 'The filing itself, and everything CBP sends back. Cadence: per entry. Idempotency: entry number and filer code. On failure: never auto-resubmit — a reject returns to the review queue with the CBP reason rendered, because a rejected filing is a compliance event, not a retryable HTTP call. CF-28 and CF-29 arrive out of band through the ACE portal and are ingested as their own feed with their own staleness contract.' },
+    pga:    { ic: 'badge',     sv: 'Out &middot; within the transmission', nm: 'PGA message sets', ds: 'FDA, USDA, EPA and friends. Cadence: per entry when applicable. Idempotency: same as the entry. On failure: MAY PROCEED, NOTICE and HOLD are reconciled, and a HOLD is an operational event rather than an error. Each agency is effectively a separate integration, one epic each, prioritised by the customer&rsquo;s commodity mix.' },
+    bi:     { ic: 'chart',     sv: 'Out &middot; S3 Parquet + Athena',  nm: 'Customer BI and exposure', ds: 'What changed, what it costs, per change event. Cadence: per change event. Idempotency: none, because the export is a projection rather than a transaction. On failure: a stale export is visible in the dashboard&rsquo;s own timestamp. This is the Wave 1 deliverable: when a rulebook change lands, the customer sees which SKUs are exposed and what it costs before anything refiles.' }
+  },
+
+  /* Columns are the boundary crossing: outside on the left, the platform in the
+     middle, outside again on the right. Rows separate commercial data from
+     authority data, because they have opposite trust properties. */
+  layout: {
+    erp: [0, 1], email: [0, 2], edi: [0, 3],
+    fr: [0, 4], csms: [0, 5], hts: [1, 4], cross: [1, 5],
+    intake: [3, 2], core: [4, 2], watch: [3, 4], corpus: [4, 4], abi: [5, 2],
+    cbp: [6, 1], pga: [6, 2], bi: [6, 4]
+  },
+
+  /* Grey frames are outside the platform, coloured frames are inside it. That
+     one rule does more work than any label: the boundary is visible before a
+     single word is read. */
+  groups: [
+    { id: 'comm',  cls: 'plain',   label: 'Customer and partner systems', pad: 18, head: 25, nodes: ['erp', 'email', 'edi'] },
+    { id: 'auth',  cls: 'plain',   label: 'Authority feeds &middot; read only, never written to', pad: 18, head: 25, nodes: ['fr', 'csms', 'hts', 'cross'] },
+    { id: 'plat',  cls: 'cloud',   label: 'The platform', pad: 22, head: 30, nodes: [], kids: ['run', 'know'] },
+    { id: 'run',   cls: 'vpc',     label: 'Per-entry path', pad: 15, head: 23, nodes: ['intake', 'core', 'abi'] },
+    { id: 'know',  cls: 'account', label: 'Rulebook plane &middot; separate account', pad: 15, head: 23, nodes: ['watch', 'corpus'] },
+    { id: 'gover', cls: 'plain',   label: 'Government', pad: 18, head: 25, nodes: ['cbp', 'pga'] },
+    { id: 'cust',  cls: 'plain',   label: 'Back to the customer', pad: 18, head: 25, nodes: ['bi'] }
+  ],
+
+  edges: [
+    { f: 'erp',    t: 'intake', ty: 'comm', s: 1, n: 1 },
+    { f: 'email',  t: 'intake', ty: 'comm', s: 1, n: 2 },
+    { f: 'edi',    t: 'intake', ty: 'comm', s: 1, n: 3 },
+    { f: 'intake', t: 'core',   ty: 'comm', s: 2, n: 4 },
+
+    { f: 'fr',     t: 'watch',  ty: 'auth', s: 3, n: 5 },
+    { f: 'csms',   t: 'watch',  ty: 'auth', s: 3 },
+    { f: 'hts',    t: 'watch',  ty: 'auth', s: 3 },
+    { f: 'cross',  t: 'corpus', ty: 'auth', s: 3 },
+    { f: 'watch',  t: 'corpus', ty: 'auth', s: 4, n: 6 },
+    { f: 'corpus', t: 'core',   ty: 'auth', s: 5, n: 7 },
+    { f: 'core',   t: 'corpus', ty: 'block', s: 0 },
+
+    { f: 'core',   t: 'abi',    ty: 'file', s: 6, n: 8 },
+    { f: 'abi',    t: 'cbp',    ty: 'file', s: 7, n: 9 },
+    { f: 'abi',    t: 'pga',    ty: 'file', s: 7 },
+    { f: 'cbp',    t: 'core',   ty: 'file', s: 8, n: 10 },
+
+    { f: 'watch',  t: 'bi',     ty: 'exp',  s: 9, n: 11 }
+  ],
+
+  steps: [
+    'Three inbound commercial paths, one landing zone. Idempotency differs per path — upsert keys for the ERP, a content hash for email, the interchange control number for EDI — because each source repeats itself in a different way and none of them can be trusted not to.',
+    'Everything crosses the boundary through intake, so quarantine parsing and entity resolution happen in exactly one place. A second intake path is a second sandbox to get right.',
+    'Four read-only authority feeds, one Lambda each, each with its own staleness alarm at 24 hours without a successful poll. A single cron job would let one feed fail invisibly, and a feed that stops returning results looks exactly like a quiet week.',
+    'Each refresh mints a new pinned, hashed rulebook version rather than editing one in place. Versions are promoted like code, so what the system believed on a given date is a fact you can retrieve rather than reconstruct.',
+    'Decisions read the corpus and record the exact version they used. The dashed route is the one that does not exist: the corpus lives in a separate shared-services account, so production can read its authorities and cannot write them.',
+    'The filing service is deterministic and contains no model. Whatever the decisioning side concluded, the thing that transmits to CBP cannot improvise its way into a false declaration.',
+    'One transmission carries the entry and the PGA record sets inside it, under the broker&rsquo;s certified filer code. Each agency is effectively a separate integration with its own epic, prioritised by the customer&rsquo;s commodity mix.',
+    'Responses come back over the same connection, asynchronously. A reject is never auto-resubmitted — it returns to the review queue with the CBP reason rendered, because a rejected filing is a compliance event rather than a retryable HTTP call.',
+    'The export the customer actually asks for: when a rulebook change lands, which SKUs are exposed and what it costs, before anything refiles. This is the Wave 1 deliverable and it files nothing, so it cannot mis-file anything.'
+  ],
+
+  scenarios: [
+    { id: 'in', label: 'Inbound', steps: [1, 2, 3, 4, 5],
+      ds: 'What comes in, and on what terms. Commercial data is untrusted and sandboxed. Authority data is read-only and versioned. The two are kept apart because they have opposite trust properties.' },
+    { id: 'out', label: 'Outbound', steps: [6, 7, 8, 9],
+      ds: 'What leaves, and what comes back. Exactly one path out, deterministic and model-free, so whatever the decisioning side concluded, nothing improvises at the moment of transmission. What returns is a compliance event, never a retry.' },
+    { id: 'rule', label: 'The rulebook plane', steps: [3, 4, 5, 9],
+      ds: 'The half of the system that files nothing. Four feeds, one versioned corpus, and a read-only path into decisioning — plus the exposure report, which is the first thing worth shipping.' }
+  ],
+
+  dwell: 4600,
+  allLabel: 'All integrations'
+};
+</script>
+<script>
+/* ============================================================================
+ * Boot. The engine used to load from a static script src, so a phone paid 34KB
+ * and a full layout pass before it could see anything, and what it then saw was
+ * a desktop-scale node graph squeezed into 315px. Now the poster above is the
+ * first paint and the engine is injected: at once on a wide viewport, on the
+ * button press below 760px. The shell is revealed before the script is
+ * appended, because the engine measures real node boxes and a display:none
+ * stage measures zero.
+ *
+ * Nothing here touches stencil-engine.js or stencil.css, both of which are
+ * shared with entry-lifecycle-flow.html.
+ * ==========================================================================*/
+(() => {
+  const shell = document.querySelector('.shell');
+  const poster = document.getElementById('poster');
+  const embedded = document.documentElement.dataset.embedded === 'true';
+  const WIDE = 760;
+  /* A frame that is not laid out yet reports 0, which is not narrow, it is
+     unknown. Treating it as settled would strand a desktop reader on the
+     poster, so the width is re-checked on every size report. */
+  const isWide = () => document.documentElement.clientWidth >= WIDE;
+
+  /* While the poster is the whole document the engine's own reporter does not
+     exist yet, so the shell reports its height itself. Without this the parent
+     keeps the authored --vf-h-m and the reader gets a band of empty frame. */
+  let ro = null;
+  const postSize = () => {
+    if (isWide()) boot(false);
+    if (!embedded) return;
+    window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+  };
+
+  let booted = false;
+  const boot = (moveFocus) => {
+    if (booted) return;
+    booted = true;
+    if (ro) { ro.disconnect(); ro = null; }
+    shell.classList.remove('is-poster');
+    poster.hidden = true;
+    const el = document.createElement('script');
+    el.src = './stencil-engine.js';
+    el.addEventListener('load', () => {
+      /* Same focus rescue the atlas spine uses: the control that opened the
+         thing is gone, so focus goes to what replaced it rather than the top. */
+      if (moveFocus) { const stage = document.getElementById('stage'); if (stage) stage.focus(); }
+      postSize();
+    });
+    document.body.appendChild(el);
+  };
+
+  document.getElementById('poster-go').addEventListener('click', () => boot(true));
+
+  if (isWide()) {
+    boot(false);
+  } else {
+    postSize();
+    window.addEventListener('load', postSize);
+    if ('ResizeObserver' in window) { ro = new ResizeObserver(postSize); ro.observe(document.body); }
+    /* A rotation into landscape crosses the same breakpoint the engine uses for
+       its own camera, so it gets the same treatment a wide load would have. */
+    let rt = 0;
+    window.addEventListener('resize', () => {
+      clearTimeout(rt);
+      rt = setTimeout(() => { if (isWide()) boot(false); }, 160);
+    });
+  }
+})();
+
+/* Glossed terms reveal on hover for a mouse and on tap for a phone, which has
+   no hover state at all. Escape and an outside tap both close. */
+document.querySelectorAll('.gl > button').forEach((b) => {
+  b.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const gl = b.parentElement;
+    document.querySelectorAll('.gl.open').forEach((o) => { if (o !== gl) o.classList.remove('open'); });
+    gl.classList.toggle('open');
+  });
+});
+document.addEventListener('click', () => document.querySelectorAll('.gl.open').forEach((o) => o.classList.remove('open')));
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') document.querySelectorAll('.gl.open').forEach((o) => o.classList.remove('open'));
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Three waves, each with an exit gate</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="./_theme-bootstrap.js"></script>
+<script src="./_glossary.js" defer></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+/* Wave Plan. Three clickable delivery-wave cards on a timeline, a shared
+   detail panel with scope, team, and exit gate, then a kill-criteria strip
+   and an open-questions docket. Closing visual of the article. */
+
+.shell { display: flex; flex-direction: column; gap: 10px; }
+:root[data-embedded="true"] .shell { padding: 14px clamp(14px, 2vw, 22px); }
+
+.head h1 {
+  font-family: "Space Grotesk", sans-serif; font-weight: 700;
+  font-size: clamp(1.02rem, 2.2vw, 1.3rem); letter-spacing: -0.02em; color: var(--text-strong);
+}
+:root[data-embedded="true"] .head h1 { font-size: 1.02rem; }
+.head p { font: 500 0.72rem/1.4 "DM Sans", sans-serif; color: var(--muted); margin-top: 2px; }
+
+/* ---------- wave timeline ---------- */
+.waves { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; position: relative; }
+.wave {
+  cursor: pointer; text-align: left; min-width: 0;
+  border: 1px solid var(--border-strong); border-top: 3px solid var(--wc);
+  border-radius: 10px; background: var(--surface); box-shadow: var(--shadow-soft);
+  padding: 9px 10px 9px; display: flex; flex-direction: column; gap: 5px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.wave:hover { border-color: var(--wc); }
+.wave[aria-pressed="true"] {
+  border-color: var(--wc);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--wc) 22%, transparent), var(--shadow-soft);
+}
+.w-num { font: 700 0.58rem/1 "IBM Plex Mono", monospace; letter-spacing: 0.14em; text-transform: uppercase; color: var(--wc); }
+.wave b { font: 700 0.76rem/1.25 "Space Grotesk", sans-serif; color: var(--text-strong); }
+.wave code { font: 600 0.62rem/1.3 "IBM Plex Mono", monospace; color: var(--muted); }
+.wave .stamp { align-self: flex-start; }
+.wave span { font: 500 0.64rem/1.35 "DM Sans", sans-serif; color: var(--muted); }
+.play .wave { animation: wave-in 0.45s ease-out backwards; }
+.play .wave:nth-child(1) { animation-delay: 0.10s; }
+.play .wave:nth-child(2) { animation-delay: 0.24s; }
+.play .wave:nth-child(3) { animation-delay: 0.38s; }
+@keyframes wave-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+
+.rail { position: relative; height: 4px; border-radius: 3px; background: color-mix(in srgb, var(--accent-2) 18%, transparent); overflow: hidden; }
+.rail i {
+  position: absolute; top: 0; bottom: 0; width: 46px; border-radius: 3px;
+  background: linear-gradient(90deg, transparent, var(--accent-2), transparent); left: -50px;
+}
+.play .rail i { animation: rail-run 6s linear infinite; }
+@keyframes rail-run { from { left: -50px; } to { left: 100%; } }
+
+/* ---------- detail panel ---------- */
+.detail {
+  background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--dc, var(--border-strong));
+  border-radius: 12px; box-shadow: var(--shadow-soft); padding: 11px 13px;
+  display: flex; flex-direction: column; gap: 7px;
+}
+.d-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.d-name {
+  font: 700 0.6rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--dc, var(--accent)); border: 1px solid color-mix(in srgb, var(--dc, var(--accent)) 45%, transparent);
+  border-radius: 999px; padding: 4px 10px;
+}
+.d-time { font: 600 0.62rem/1 "IBM Plex Mono", monospace; color: var(--muted); }
+.d-scope { font: 500 0.76rem/1.55 "DM Sans", sans-serif; color: var(--text); }
+.d-team { font: 500 0.72rem/1.5 "DM Sans", sans-serif; color: var(--muted); }
+.d-team b, .d-gate b { font-weight: 700; }
+.d-gate {
+  font: 500 0.74rem/1.55 "DM Sans", sans-serif; color: var(--text);
+  border: 1px dashed color-mix(in srgb, var(--dc, var(--accent)) 50%, transparent);
+  border-radius: 8px; padding: 7px 10px;
+  background: color-mix(in srgb, var(--dc, var(--accent)) 7%, transparent);
+}
+.d-gate .g-label {
+  display: inline-block; font: 700 0.58rem/1 "IBM Plex Mono", monospace; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--dc, var(--accent)); margin-right: 6px;
+}
+
+/* ---------- kill strip ---------- */
+.kill {
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent); border-left: 3px solid var(--accent);
+  border-radius: 10px; background: color-mix(in srgb, var(--accent) 6%, transparent);
+  padding: 9px 12px; display: flex; align-items: flex-start; gap: 10px; flex-wrap: wrap;
+}
+.kill p { font: 500 0.74rem/1.55 "DM Sans", sans-serif; color: var(--text); flex: 1 1 260px; min-width: 0; }
+.kill p b { color: var(--text-strong); font-weight: 700; }
+.play .kill { animation: wave-in 0.45s ease-out 0.5s backwards; }
+
+/* ---------- open-questions docket ---------- */
+.docket {
+  border: 1px solid var(--border); border-radius: 10px; background: var(--surface);
+  box-shadow: var(--shadow-soft); padding: 9px 12px; display: flex; flex-direction: column; gap: 6px;
+}
+.docket > b {
+  font: 700 0.62rem/1.25 "Space Grotesk", sans-serif; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--warn);
+}
+.q { display: flex; align-items: baseline; gap: 9px; padding: 4px 0; border-top: 1px dashed var(--border); }
+.q .stamp { flex: 0 0 auto; }
+.q p { font: 500 0.72rem/1.5 "DM Sans", sans-serif; color: var(--text); min-width: 0; }
+.q p em { font-style: normal; color: var(--muted); }
+.play .q { animation: wave-in 0.4s ease-out backwards; }
+.play .q:nth-of-type(1) { animation-delay: 0.58s; }
+.play .q:nth-of-type(2) { animation-delay: 0.68s; }
+.play .q:nth-of-type(3) { animation-delay: 0.78s; }
+.play .q:nth-of-type(4) { animation-delay: 0.88s; }
+
+.caption { font: 500 0.72rem/1.5 "DM Sans", sans-serif; color: var(--muted); }
+.caption b { color: var(--text-strong); font-weight: 700; }
+
+@media (max-width: 760px) {
+  .head h1 { font-size: 1rem; }
+  .waves { grid-template-columns: minmax(0, 1fr); }
+  .q { flex-direction: column; gap: 4px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .play .wave, .play .rail i, .play .kill, .play .shadow, .play .q { animation: none !important; }
+  .rail i { left: 40%; }
+}
+/* ---- shadow mode ------------------------------------------------------
+   Wave 3's exit gate names a shadow-mode threshold without ever saying what
+   shadow mode IS, which the page prose used to carry. This band states the
+   mechanism: it runs on real entries and files nothing, so a wrong answer
+   costs a score and not a penalty. */
+.shadow {
+  display: flex; align-items: flex-start; gap: 12px;
+  border: 1px dashed var(--S-hold, var(--accent)); border-radius: 10px;
+  background: var(--surface); padding: 11px 13px;
+}
+.shadow > svg { width: 34px; height: 34px; flex: none; color: var(--S-hold, var(--accent)); }
+.shadow p { font: 500 0.76rem/1.5 "DM Sans", system-ui, sans-serif; color: var(--text); }
+.shadow b { color: var(--text-strong); font-weight: 700; }
+.play .shadow { animation: wave-in 0.45s ease-out 0.44s backwards; }
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="head">
+    <h1>Three waves, each with an exit gate</h1>
+    <p>No gate, no next wave. Click a wave.</p>
+  </div>
+
+  <div class="rail" aria-hidden="true"><i></i></div>
+
+  <div class="waves" role="group" aria-label="Three delivery waves, click one to see scope, team, and exit gate">
+    <button class="wave" style="--wc: var(--S-cleared)" data-i="0" aria-pressed="false">
+      <span class="w-num">Wave 1</span>
+      <b>Rulebook watcher + re-audit</b>
+      <code>about 8 to 10 weeks</code>
+      <span class="stamp stamp--confirmed">Confirmed</span>
+      <span>Files nothing, cannot mis-file</span>
+    </button>
+    <button class="wave" style="--wc: var(--S-review)" data-i="1" aria-pressed="false">
+      <span class="w-num">Wave 2</span>
+      <b>Assisted drafting</b>
+      <code>about 12 to 16 weeks</code>
+      <span class="stamp stamp--proposed">Proposed</span>
+      <span>Human files everything</span>
+    </button>
+    <button class="wave" style="--wc: var(--S-hold)" data-i="2" aria-pressed="false">
+      <span class="w-num">Wave 3</span>
+      <b>Selective straight-through</b>
+      <code>about 12 weeks</code>
+      <span class="stamp stamp--hold">Hold</span>
+      <span>Graduated, narrowest band first</span>
+    </button>
+  </div>
+
+  <div class="detail" aria-live="polite">
+    <div class="d-top"><span class="d-name" id="d-name"></span><span class="d-time" id="d-time"></span></div>
+    <p class="d-scope" id="d-scope"></p>
+    <p class="d-team" id="d-team"></p>
+    <p class="d-gate"><span class="g-label">Exit gate</span><span id="d-gate"></span></p>
+  </div>
+
+  <div class="shadow">
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M2.6 12S6 5.6 12 5.6 21.4 12 21.4 12 18 18.4 12 18.4 2.6 12 2.6 12Z"/><circle cx="12" cy="12" r="3"/><path d="m3.4 3.4 17.2 17.2"/>
+    </svg>
+    <p><b>Shadow mode is how Wave 3 is earned.</b> The system runs on real entries and scores itself against what the licensed reviewers actually filed, while <b>filing nothing itself</b>. A confidently wrong answer costs a score, not a penalty. Only after the silent-failure rate holds under <b>0.5% for four consecutive weeks</b> does any line auto-accept.</p>
+  </div>
+
+  <div class="kill">
+    <span class="stamp stamp--hold">Kill criteria</span>
+    <p>Stop and redesign if measured SKU repeat rate is below <b>50%</b>, or if the customer cannot staff about <b>one licensed reviewer per 2,000 reviewed lines per month</b>. Both measurable in week one against historical entries.</p>
+  </div>
+
+  <div class="docket">
+    <b>Open-questions docket</b>
+    <div class="q"><span class="stamp stamp--open">Open</span><p>Does 40% transfer to routine goods <em>· measure on the customer's own entries in week one</em></p></div>
+    <div class="q"><span class="stamp stamp--open">Open</span><p>Tier 0 decision drift <em>· genuinely under-studied, mitigate by sampling audit</em></p></div>
+    <div class="q"><span class="stamp stamp--open">Open</span><p>19 CFR 111.28 and AI <em>· put in front of counsel early, cheap to ask, expensive to discover</em></p></div>
+    <div class="q"><span class="stamp stamp--open">Open</span><p>Which ABI filer path <em>· the customer's broker, their own filer code, or a certified provider, decide before Wave 3</em></p></div>
+  </div>
+
+  <p class="caption"><b>Wave 1 is chosen for a risk reason, not a value reason.</b> It is the cheapest possible way to find out whether the thesis applies to this customer at all.</p>
+</div>
+<script>
+(() => {
+  const DATA = [
+    { name: 'Wave 1 · Rulebook watcher + re-audit', color: 'var(--S-cleared)', time: 'about 8 to 10 weeks',
+      scope: 'Ingest Federal Register, CSMS, and HTS feeds, model existing decisions with dependencies, run the invalidation join, ship exposure reports. Scope additions from the gap analysis: the prior-disclosure counsel path and the bond-sufficiency monitor.',
+      team: 'Team: 1 tech lead, 2 backend, 1 data engineer, half-time trade SME, half-time designer.',
+      gate: 'Measured SKU repeat rate against the C1 kill criterion, dependency coverage over existing decisions, and a July 2026 tariff replay with quantified over- and under-invalidation.' },
+    { name: 'Wave 2 · Assisted drafting', color: 'var(--S-review)', time: 'about 12 to 16 weeks',
+      scope: 'Intake, normalisation, product master, Tiers 0 and 1, the confidence gate in shadow, and the review queue, the largest single work item.',
+      team: 'Adds 2 backend, 1 frontend, 1 ML engineer, SME to full time.',
+      gate: '1,000 to 2,000 calibration labels, ECARB at least 2x at a 30% review budget, measured median review minutes, and silent-failure measurable in shadow.' },
+    { name: 'Wave 3 · Selective straight-through', color: 'var(--S-hold)', time: 'about 12 weeks',
+      scope: 'Tier 2 workers, the ABI/ACE adapter under the customer\'s existing filer path, CBP certification in staging, then graduated auto-accept starting on the lowest-materiality band.',
+      team: 'Team carries over from Wave 2.',
+      gate: 'Silent-failure under 0.5% in shadow for four consecutive weeks BEFORE any line auto-accepts.' }
+  ];
+  const waves = document.querySelectorAll('.wave');
+  const detail = document.querySelector('.detail');
+  const el = (id) => document.getElementById(id);
+  const select = (i) => {
+    const d = DATA[i];
+    waves.forEach((b) => b.setAttribute('aria-pressed', String(Number(b.dataset.i) === i)));
+    detail.style.setProperty('--dc', d.color);
+    el('d-name').textContent = d.name;
+    el('d-time').textContent = d.time;
+    el('d-scope').textContent = d.scope;
+    el('d-team').textContent = d.team;
+    el('d-gate').textContent = d.gate;
+  };
+  waves.forEach((btn) => btn.addEventListener('click', () => select(Number(btn.dataset.i))));
+  select(0);
+
+  const shell = document.querySelector('.shell');
+  const start = () => shell.classList.add('play');
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((en) => { if (en.isIntersecting) { start(); io.disconnect(); } });
+    }, { threshold: 0 });
+    io.observe(shell);
+  } else { start(); }
+  /* Report content height so the parent frame hugs the content. */
+  if (document.documentElement.dataset.embedded === 'true') {
+    const postSize = () => window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+    if ('ResizeObserver' in window) new ResizeObserver(postSize).observe(document.body);
+    window.addEventListener('load', postSize);
+  }
+})();
+</script>
+</body>
+</html>

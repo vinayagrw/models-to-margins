@@ -17,6 +17,13 @@ const { Content } = await render(entry);
 const tmpl = entry.data.template;
 const isBlueprint = tmpl === 'blueprint';
 const isConsole = tmpl === 'console';
+const isLedger = tmpl === 'ledger';
+const isAtlas = tmpl === 'atlas';
+const isBoardroom = tmpl === 'boardroom';
+const isGantry = tmpl === 'gantry';
+const isSitrep = tmpl === 'sitrep';
+const isWaybill = tmpl === 'waybill';
+const isTower = tmpl === 'tower';
 
 // Header readout strings for the bespoke templates.
 const rev = (entry.data.updatedDate ?? entry.data.pubDate)
@@ -56,7 +63,363 @@ const bpCoords = entry.data.bpCoords ?? [];
       <link rel="stylesheet" href="/styles/deep-dive-console.css" />
     </Fragment>
   )}
-  {isConsole ? (
+  {isLedger && (
+    <Fragment slot="head">
+      <link rel="preconnect" href="https://fonts.googleapis.com" />
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+      <link
+        href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,500;0,600;0,700;0,800;1,500&family=Public+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap"
+        rel="stylesheet"
+      />
+      <link rel="stylesheet" href="/styles/deep-dive-ledger.css" />
+    </Fragment>
+  )}
+  {isAtlas && (
+    <Fragment slot="head">
+      <link rel="preconnect" href="https://fonts.googleapis.com" />
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+      <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap"
+        rel="stylesheet"
+      />
+      <link rel="stylesheet" href="/styles/deep-dive-atlas.css" />
+    </Fragment>
+  )}
+  {isBoardroom && (
+    <Fragment slot="head">
+      <link rel="preconnect" href="https://fonts.googleapis.com" />
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+      <link
+        href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Source+Sans+3:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap"
+        rel="stylesheet"
+      />
+      <link rel="stylesheet" href="/styles/deep-dive-boardroom.css" />
+    </Fragment>
+  )}
+  {isGantry && (
+    <Fragment slot="head">
+      <link rel="preconnect" href="https://fonts.googleapis.com" />
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+      <link
+        href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@500;600;700;800&family=Inter:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap"
+        rel="stylesheet"
+      />
+      <link rel="stylesheet" href="/styles/deep-dive-gantry.css" />
+    </Fragment>
+  )}
+  {isSitrep && (
+    <Fragment slot="head">
+      <link rel="preconnect" href="https://fonts.googleapis.com" />
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+      <link
+        href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap"
+        rel="stylesheet"
+      />
+      <link rel="stylesheet" href="/styles/deep-dive-sitrep.css" />
+    </Fragment>
+  )}
+  {isWaybill && (
+    <Fragment slot="head">
+      <link rel="preconnect" href="https://fonts.googleapis.com" />
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+      <link
+        href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600&family=Work+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Roboto+Mono:wght@400;500;600&display=swap"
+        rel="stylesheet"
+      />
+      <link rel="stylesheet" href="/styles/deep-dive-waybill.css" />
+    </Fragment>
+  )}
+  {isTower && (
+    <Fragment slot="head">
+      <link rel="preconnect" href="https://fonts.googleapis.com" />
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+      <link
+        href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+        rel="stylesheet"
+      />
+      <link rel="stylesheet" href="/styles/deep-dive-tower.css" />
+    </Fragment>
+  )}
+  {isWaybill ? (
+    <article class="article-shell dd-waybill">
+      <header class="wb-header">
+        <div class="wb-formline">
+          <span class="wb-formline-tag">Deep Dive</span>
+          {bpEyebrow && <span class="wb-formline-sep">&middot;</span>}
+          {bpEyebrow && <span class="wb-formline-no">{bpEyebrow}</span>}
+          <span class="wb-formline-status">Consigned</span>
+        </div>
+        <h1 class="wb-title">{bpTitle}</h1>
+        {bpSubtitle && <p class="wb-subtitle">{bpSubtitle}</p>}
+        <p class="wb-lead">{entry.data.summary}</p>
+        <div class="wb-coords" role="presentation">
+          {bpCoords.map((c: string) => <span>{c}</span>)}<span>Rev&nbsp;{rev}</span>
+        </div>
+        <div class="wb-header-foot">
+          <BackLink href="/deep-dives" label="Back to Deep Dives" />
+          <EntryMeta
+            date={entry.data.pubDate}
+            primary={entry.data.geography}
+            readTime={entry.data.readTime}
+            extra={entry.data.horizon}
+          />
+        </div>
+        <div class="tag-row">
+          {entry.data.tags.map((tag: string) => <span class="tag">{tag}</span>)}
+        </div>
+      </header>
+
+      <div class="wb-layout">
+        <nav class="wb-spine-index" aria-label="Custody chain"></nav>
+        <div class="article-body wb-body">
+          <Content />
+        </div>
+      </div>
+
+      <script is:inline src="/scripts/spine-waybill.js" defer></script>
+      <script is:inline src="/scripts/frame-autosize.js" defer></script>
+    </article>
+  ) : isTower ? (
+    <article class="article-shell dd-tower">
+      <header class="tw-header">
+        <div class="tw-readout">
+          <span class="tw-readout-tag">Deep Dive</span>
+          {bpEyebrow && <span class="tw-readout-sep">&middot;</span>}
+          {bpEyebrow && <span class="tw-readout-no">{bpEyebrow}</span>}
+          <span class="tw-readout-status">Watch active</span>
+        </div>
+        <h1 class="tw-title">{bpTitle}</h1>
+        {bpSubtitle && <p class="tw-subtitle">{bpSubtitle}</p>}
+        <p class="tw-lead">{entry.data.summary}</p>
+        <div class="tw-coords" role="presentation">
+          {bpCoords.map((c: string) => <span>{c}</span>)}<span>Rev&nbsp;{rev}</span>
+        </div>
+        <div class="tw-header-foot">
+          <BackLink href="/deep-dives" label="Back to Deep Dives" />
+          <EntryMeta
+            date={entry.data.pubDate}
+            primary={entry.data.geography}
+            readTime={entry.data.readTime}
+            extra={entry.data.horizon}
+          />
+        </div>
+        <div class="tag-row">
+          {entry.data.tags.map((tag: string) => <span class="tag">{tag}</span>)}
+        </div>
+      </header>
+
+      <div class="tw-layout">
+        <nav class="tw-spine-index" aria-label="Station index"></nav>
+        <div class="article-body tw-body">
+          <Content />
+        </div>
+      </div>
+
+      <script is:inline src="/scripts/spine-tower.js" defer></script>
+      <script is:inline src="/scripts/frame-autosize.js" defer></script>
+    </article>
+  ) : isBoardroom ? (
+    <article class="article-shell dd-boardroom">
+      <header class="br-header">
+        <div class="br-formline">
+          <span class="br-formline-tag">Deep Dive</span>
+          {bpEyebrow && <span class="br-formline-sep">&middot;</span>}
+          {bpEyebrow && <span class="br-formline-no">{bpEyebrow}</span>}
+          <span class="br-stamp">Filed</span>
+        </div>
+        <h1 class="br-title">{bpTitle}</h1>
+        {bpSubtitle && (
+          <p class="br-subtitle"><span class="br-rule-mark" aria-hidden="true">&sect;</span> {bpSubtitle}</p>
+        )}
+        <p class="br-lead">{entry.data.summary}</p>
+        <div class="br-coords" role="presentation">
+          {bpCoords.map((c: string) => <span>{c}</span>)}<span>Rev&nbsp;{rev}</span>
+        </div>
+        <div class="br-header-foot">
+          <BackLink href="/deep-dives" label="Back to Deep Dives" />
+          <EntryMeta
+            date={entry.data.pubDate}
+            primary={entry.data.geography}
+            readTime={entry.data.readTime}
+            extra={entry.data.horizon}
+          />
+        </div>
+        <div class="tag-row">
+          {entry.data.tags.map((tag: string) => <span class="tag">{tag}</span>)}
+        </div>
+      </header>
+
+      <div class="br-layout">
+        <nav class="br-spine-index" aria-label="Agenda"></nav>
+        <div class="article-body br-body">
+          <Content />
+        </div>
+      </div>
+
+      <script is:inline src="/scripts/spine-boardroom.js" defer></script>
+      <script is:inline src="/scripts/frame-autosize.js" defer></script>
+    </article>
+  ) : isGantry ? (
+    <article class="article-shell dd-gantry">
+      <header class="gy-header">
+        <div class="gy-routing">
+          <span class="gy-routing-tag">Deep Dive</span>
+          {bpEyebrow && <span class="gy-routing-sep">/</span>}
+          {bpEyebrow && <span class="gy-routing-no">{bpEyebrow}</span>}
+          <span class="gy-routing-status">In service</span>
+        </div>
+        <h1 class="gy-title">{bpTitle}</h1>
+        {bpSubtitle && <p class="gy-subtitle">{bpSubtitle}</p>}
+        <p class="gy-lead">{entry.data.summary}</p>
+        <div class="gy-coords" role="presentation">
+          {bpCoords.map((c: string) => <span>{c}</span>)}<span>Rev&nbsp;{rev}</span>
+        </div>
+        <div class="gy-header-foot">
+          <BackLink href="/deep-dives" label="Back to Deep Dives" />
+          <EntryMeta
+            date={entry.data.pubDate}
+            primary={entry.data.geography}
+            readTime={entry.data.readTime}
+            extra={entry.data.horizon}
+          />
+        </div>
+        <div class="tag-row">
+          {entry.data.tags.map((tag: string) => <span class="tag">{tag}</span>)}
+        </div>
+      </header>
+
+      <div class="gy-layout">
+        <nav class="gy-spine-index" aria-label="Dock index"></nav>
+        <div class="article-body gy-body">
+          <Content />
+        </div>
+      </div>
+
+      <script is:inline src="/scripts/spine-gantry.js" defer></script>
+      <script is:inline src="/scripts/frame-autosize.js" defer></script>
+    </article>
+  ) : isSitrep ? (
+    <article class="article-shell dd-sitrep">
+      <header class="sr-header">
+        <div class="sr-coversheet">
+          <span class="sr-cover-tag">Deep Dive</span>
+          {bpEyebrow && <span class="sr-cover-sep">&middot;</span>}
+          {bpEyebrow && <span class="sr-cover-no">{bpEyebrow}</span>}
+          <span class="sr-cover-notice">Not an official record</span>
+        </div>
+        <h1 class="sr-title">{bpTitle}</h1>
+        {bpSubtitle && <p class="sr-subtitle">{bpSubtitle}</p>}
+        <p class="sr-lead">{entry.data.summary}</p>
+        <div class="sr-coords" role="presentation">
+          {bpCoords.map((c: string) => <span>{c}</span>)}<span>Rev&nbsp;{rev}</span>
+        </div>
+        <div class="sr-header-foot">
+          <BackLink href="/deep-dives" label="Back to Deep Dives" />
+          <EntryMeta
+            date={entry.data.pubDate}
+            primary={entry.data.geography}
+            readTime={entry.data.readTime}
+            extra={entry.data.horizon}
+          />
+        </div>
+        <div class="tag-row">
+          {entry.data.tags.map((tag: string) => <span class="tag">{tag}</span>)}
+        </div>
+      </header>
+
+      <div class="sr-layout">
+        <nav class="sr-spine-index" aria-label="Report sections"></nav>
+        <div class="article-body sr-body">
+          <Content />
+        </div>
+      </div>
+
+      <script is:inline src="/scripts/spine-sitrep.js" defer></script>
+      <script is:inline src="/scripts/frame-autosize.js" defer></script>
+    </article>
+  ) : isAtlas ? (
+    <article class="article-shell dd-atlas">
+      <header class="at-header">
+        <div class="at-eyebrow">
+          <span class="at-eyebrow-tag">Deep Dive</span>
+          {bpEyebrow && <span class="at-eyebrow-sep">/</span>}
+          {bpEyebrow && <span class="at-eyebrow-no">{bpEyebrow}</span>}
+          <span class="at-eyebrow-live"><span class="at-dot" aria-hidden="true"></span> Interactive</span>
+        </div>
+        <h1 class="at-title">{bpTitle}</h1>
+        {bpSubtitle && (
+          <p class="at-subtitle"><span class="at-slash" aria-hidden="true">//</span> {bpSubtitle}</p>
+        )}
+        <p class="at-lead">{entry.data.summary}</p>
+        <div class="at-coords" role="presentation">
+          {bpCoords.map((c: string) => <span>{c}</span>)}<span>Rev&nbsp;{rev}</span>
+        </div>
+        <div class="at-header-foot">
+          <BackLink href="/deep-dives" label="Back to Deep Dives" />
+          <EntryMeta
+            date={entry.data.pubDate}
+            primary={entry.data.geography}
+            readTime={entry.data.readTime}
+            extra={entry.data.horizon}
+          />
+        </div>
+        <div class="tag-row">
+          {entry.data.tags.map((tag: string) => <span class="tag">{tag}</span>)}
+        </div>
+      </header>
+
+      <nav class="at-rail" aria-label="Chapters and figures">
+        <div class="at-rail-track"></div>
+      </nav>
+      <div class="article-body at-body">
+        <Content />
+      </div>
+
+      <script is:inline src="/scripts/spine-atlas.js" defer></script>
+      <script is:inline src="/scripts/frame-autosize.js" defer></script>
+    </article>
+  ) : isLedger ? (
+    <article class="article-shell dd-ledger">
+      <header class="ld-header">
+        <div class="ld-formline">
+          <span class="ld-formline-tag">Deep Dive</span>
+          {bpEyebrow && <span class="ld-formline-sep">·</span>}
+          {bpEyebrow && <span class="ld-formline-no">{bpEyebrow}</span>}
+          <span class="ld-stamp ld-stamp--confirmed">Filed</span>
+        </div>
+        <h1 class="ld-title">{bpTitle}</h1>
+        {bpSubtitle && (
+          <p class="ld-subtitle"><span class="ld-rule-mark" aria-hidden="true">&sect;</span> {bpSubtitle}</p>
+        )}
+        <p class="ld-lead">{entry.data.summary}</p>
+        <div class="ld-coords" role="presentation">
+          {bpCoords.map((c: string) => <span>{c}</span>)}<span>Rev&nbsp;{rev}</span>
+        </div>
+        <div class="ld-header-foot">
+          <BackLink href="/deep-dives" label="Back to Deep Dives" />
+          <EntryMeta
+            date={entry.data.pubDate}
+            primary={entry.data.geography}
+            readTime={entry.data.readTime}
+            extra={entry.data.horizon}
+          />
+        </div>
+        <div class="tag-row">
+          {entry.data.tags.map((tag: string) => <span class="tag">{tag}</span>)}
+        </div>
+      </header>
+
+      <div class="ld-layout">
+        <nav class="ld-spine-index" aria-label="Scene index"></nav>
+        <div class="article-body ld-body">
+          <Content />
+        </div>
+      </div>
+
+      <script is:inline src="/scripts/spine-ledger.js" defer></script>
+      <script is:inline src="/scripts/frame-autosize.js" defer></script>
+    </article>
+  ) : isConsole ? (
     <article class="article-shell dd-console">
       <header class="cr-header">
         <div class="cr-eyebrow">

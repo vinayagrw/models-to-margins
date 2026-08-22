@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Eight gaps the market keeps leaving &middot; and what closes each one</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="./_theme-bootstrap.js"></script>
+<script src="./_glossary.js" defer></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+  /* ============================================================================
+   * MARKET GAPS
+   *
+   * Eight recurring gaps in what the market currently sells. On the page these
+   * were two paragraphs of flowing prose, which is the wrong shape for a
+   * scorecard. This is a scan instead: a sweep runs down the eight, each lands
+   * with a verdict, and opening one shows the gap against what closes it.
+   *
+   * No vendor is named anywhere, deliberately. The claim is about a pattern that
+   * repeats across the category, and pinning it to one product would make it a
+   * smaller and less defensible claim.
+   * ==========================================================================*/
+
+  .shell { gap: 14px; }
+  .lead { font-size: 0.88rem; line-height: 1.6; color: var(--muted); max-width: 76ch; }
+  .ic { width: 26px; height: 26px; flex: none; display: block; }
+  .ic-sm { width: 16px; height: 16px; }
+
+  .ctl { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .ctl button {
+    display: inline-flex; align-items: center; gap: 7px;
+    font: 600 0.74rem/1 "IBM Plex Mono", ui-monospace, monospace;
+    padding: 9px 13px; border-radius: 7px; cursor: pointer;
+    background: var(--surface-strong); color: var(--text-strong);
+    border: 1.5px solid var(--border-strong);
+  }
+  .ctl button:hover { border-color: var(--accent-2); color: var(--accent-2); }
+  .ctl .ic { width: 19px; height: 19px; }
+
+  /* ---------- the eight ---------- */
+  .rows { display: flex; flex-direction: column; gap: 7px; }
+
+  .row {
+    display: grid;
+    grid-template-columns: 92px minmax(0, 1.15fr) 22px minmax(0, 1fr) auto;
+    align-items: center; gap: 13px;
+    padding: 10px 13px 10px 10px;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-left: 3px solid var(--border);
+    border-radius: 9px;
+    text-align: left; cursor: pointer; color: var(--text);
+    opacity: 0.34;
+  }
+  .row.lit { opacity: 1; border-left-color: var(--accent); }
+  .row[aria-pressed="true"] { border-color: var(--accent-2); border-left-color: var(--accent-2); background: var(--surface-strong); }
+
+  .row .tile {
+    display: grid; place-items: center;
+    width: 92px; height: 92px; border-radius: 20px;
+    background: var(--surface-strong);
+    border: 1.5px solid var(--border-strong);
+    color: var(--muted);
+  }
+  .row.lit .tile { border-color: var(--accent); color: var(--accent); background: color-mix(in srgb, var(--accent) 13%, var(--surface-strong)); }
+  .row .tile .ic { width: 52px; height: 52px; }
+
+  /* The control sits in the row itself, so the pairing reads at a glance and the
+     row does not leave a dead band across the middle at desktop width. */
+  .row .pair { display: grid; place-items: center; color: var(--border-strong); }
+  .row .pair svg { width: 22px; height: 22px; }
+  .row .ctl-mini { min-width: 0; }
+  .row .ctl-mini .tag {
+    display: inline-flex; align-items: center; gap: 5px;
+    font: 600 0.58rem/1 "IBM Plex Mono", ui-monospace, monospace;
+    letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent-2);
+  }
+  .row .ctl-mini .tag svg { width: 14px; height: 14px; }
+  .row .ctl-mini em {
+    display: block; margin-top: 4px; font-style: normal;
+    font: 600 0.82rem/1.3 "Space Grotesk", system-ui, sans-serif; color: var(--text-strong);
+  }
+
+  .row b { display: block; font: 600 0.95rem/1.25 "Space Grotesk", system-ui, sans-serif; color: var(--text-strong); }
+  .row .sub { display: block; margin-top: 3px; font: 500 0.74rem/1.45 "DM Sans", system-ui, sans-serif; color: var(--muted); }
+
+  /* The verdict carries an icon as well as a word, so the scorecard is legible
+     before any of the text is read. */
+  .row .verdict {
+    display: inline-flex; align-items: center; gap: 5px; justify-self: end;
+    font: 600 0.62rem/1 "IBM Plex Mono", ui-monospace, monospace;
+    letter-spacing: 0.05em; text-transform: uppercase; white-space: nowrap;
+    padding: 6px 9px; border-radius: 999px;
+    background: color-mix(in srgb, var(--accent) 15%, transparent);
+    color: var(--accent); border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+    opacity: 0;
+  }
+  .row.lit .verdict { opacity: 1; }
+
+  /* ---------- the reveal ---------- */
+  .reveal { display: grid; grid-template-columns: 1fr 40px 1fr; gap: 10px; align-items: stretch; }
+  .panel {
+    background: var(--surface); border: 1.5px solid var(--border);
+    border-radius: 9px; padding: 13px 14px;
+  }
+  .panel.answer { border-left: 3px solid var(--accent-2); }
+  .panel .ptag {
+    display: inline-flex; align-items: center; gap: 6px;
+    font: 600 0.62rem/1 "IBM Plex Mono", ui-monospace, monospace;
+    letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent);
+  }
+  .panel.answer .ptag { color: var(--accent-2); }
+  .panel h2 { margin-top: 8px; font: 600 0.94rem/1.3 "Space Grotesk", system-ui, sans-serif; color: var(--text-strong); }
+  .panel p { margin-top: 6px; font: 500 0.8rem/1.55 "DM Sans", system-ui, sans-serif; color: var(--text); }
+  .panel .where { display: block; margin-top: 9px; padding-top: 8px; border-top: 1px solid var(--border); font: 500 0.68rem/1.4 "DM Sans", system-ui, sans-serif; color: var(--muted); }
+
+  .arrow { display: grid; place-items: center; color: var(--border-strong); }
+  .arrow svg { width: 40px; height: 40px; }
+  .arrow .dot { fill: var(--accent-2); }
+
+  .foot { font: 400 0.68rem/1.55 "IBM Plex Mono", ui-monospace, monospace; color: var(--muted-soft); }
+
+  @media (max-width: 720px) {
+    .row { grid-template-columns: 68px minmax(0, 1fr); grid-template-areas: "tile text" "ctl ctl" "verdict verdict"; row-gap: 8px; }
+    .row .pair { display: none; }
+    .row .ctl-mini { grid-area: ctl; padding-top: 8px; border-top: 1px solid var(--border); }
+    .row .tile { grid-area: tile; width: 68px; height: 68px; border-radius: 15px; }
+    .row .tile .ic { width: 40px; height: 40px; }
+    .row .txt { grid-area: text; }
+    .row .verdict { grid-area: verdict; justify-self: start; }
+    .reveal { grid-template-columns: 1fr; }
+    .arrow { height: 40px; transform: rotate(90deg); }
+  }
+
+  /* Motion is opt-in, so a reduced-motion reader gets the finished scorecard at
+     once rather than a frozen half of it. */
+  @media (prefers-reduced-motion: no-preference) {
+    .row { transition: opacity 300ms ease, border-color 200ms ease, background 200ms ease, transform 180ms ease; }
+    .row .verdict { transition: opacity 260ms ease 120ms; }
+    .row:hover { transform: translateX(3px); }
+    .row.lit .tile { animation: land 420ms cubic-bezier(0.34, 1.5, 0.64, 1); }
+    @keyframes land { 0% { transform: scale(0.82); } 60% { transform: scale(1.07); } 100% { transform: scale(1); } }
+  }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" aria-hidden="true" style="position:absolute">
+  <symbol id="i-ruler" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="2.2" y="7.6" width="19.6" height="8.8" rx="1.6"/><path d="M6.5 7.6v3.4M10.5 7.6v5M14.5 7.6v3.4M18.5 7.6v5"/>
+  </symbol>
+  <symbol id="i-quote" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M4 6.5h13M4 11h11M4 15.5h7"/><circle cx="17.4" cy="16" r="3.6"/><path d="m20.2 18.8 1.8 1.8"/>
+  </symbol>
+  <symbol id="i-stack" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <path d="m12 3 8.6 4.3L12 11.6 3.4 7.3 12 3Z"/><path d="m3.4 12 8.6 4.3 8.6-4.3"/><path d="m3.4 16.6 8.6 4.3 8.6-4.3"/>
+  </symbol>
+  <symbol id="i-gauge2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M3.3 18a9.4 9.4 0 1 1 17.4 0"/><path d="M12 18 16.4 11"/><circle cx="12" cy="18" r="1.5"/>
+  </symbol>
+  <symbol id="i-calendar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="3.2" y="4.8" width="17.6" height="16" rx="2.2"/><path d="M3.2 9.6h17.6M8 2.8v3.6M16 2.8v3.6"/><path d="M8.4 14h2M13.6 14h2M8.4 17.4h2"/>
+  </symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="9.2"/><path d="M2.8 12h18.4"/><path d="M12 2.8a14.4 14.4 0 0 1 0 18.4 14.4 14.4 0 0 1 0-18.4Z"/>
+  </symbol>
+  <symbol id="i-liability" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 2.9 4.2 6.2v5.4c0 4.4 3.2 8.1 7.8 9.5 4.6-1.4 7.8-5.1 7.8-9.5V6.2L12 2.9Z"/><path d="M9.3 12.2h5.4M12 9.5v5.4"/>
+  </symbol>
+  <symbol id="i-badge" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="3.2" y="4.5" width="17.6" height="12" rx="2.2"/><circle cx="8.6" cy="9.6" r="2"/><path d="M5.4 14.1a3.4 3.4 0 0 1 6.4 0M14.4 9h4M14.4 12.4h3"/><path d="m8.6 16.5-1.4 3 1.4-.7 1.4.7-1.4-3"/>
+  </symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 2.9 4.2 6.2v5.4c0 4.4 3.2 8.1 7.8 9.5 4.6-1.4 7.8-5.1 7.8-9.5V6.2L12 2.9Z"/><path d="m8.7 12 2.3 2.3 4.3-4.6"/>
+  </symbol>
+  <symbol id="i-warning" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M10.6 3.6 2.3 18a1.6 1.6 0 0 0 1.4 2.4h16.6A1.6 1.6 0 0 0 21.7 18L13.4 3.6a1.6 1.6 0 0 0-2.8 0Z"/><path d="M12 9.4v4.2M12 17.2h.01"/>
+  </symbol>
+  <symbol id="i-play" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M7 4.6 19 12 7 19.4V4.6Z"/>
+  </symbol>
+  <symbol id="i-reset" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M3.6 12a8.4 8.4 0 1 0 2.5-6"/><path d="M3.2 3.6v4.8h4.8"/>
+  </symbol>
+  <symbol id="i-question" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="9.4"/><path d="M9.4 9.2a2.7 2.7 0 0 1 5.2 1c0 1.8-2.6 2.3-2.6 4"/><path d="M12 17.4h.01"/>
+  </symbol>
+</svg>
+
+<div class="shell">
+  <div class="head">
+    <span class="eyebrow">Fig. 1d &middot; what the market sells, and what it keeps leaving out</span>
+    <h1>Eight gaps that recur, whoever is selling</h1>
+    <p class="lead">Scan what is currently on the market and the same eight gaps come back. No product is named here on purpose. The claim is about a pattern that repeats across the category. Pinning it to one vendor would make it a smaller claim than it is. Run the scan, then open any gap.</p>
+    <div class="stampline">
+      <span class="stamp stamp--illustrative">Category pattern, not a product review</span>
+    </div>
+  </div>
+
+  <div class="ctl">
+    <button type="button" id="run"><svg class="ic" aria-hidden="true"><use href="#i-play"/></svg>Run the scan</button>
+    <button type="button" id="reset"><svg class="ic" aria-hidden="true"><use href="#i-reset"/></svg>Reset</button>
+  </div>
+
+  <div class="rows" id="rows" role="group" aria-label="Eight recurring market gaps"></div>
+
+  <div class="reveal" id="reveal"></div>
+
+  <p class="foot">Each control named is drawn in full further down this page. The gaps are stated as a recurring category pattern and graded accordingly, not as measured findings about any named product.</p>
+</div>
+
+<script>
+const GAPS = [
+  {
+    icon: 'i-badge', name: 'Unlicensed past the sixth digit',
+    sub: 'A ten-digit answer that steers a filing is customs business.',
+    verdict: 'Unlicensed',
+    gap: 'CBP ruled in January 2026 on where automation stops. Derive tariff subheadings past six digits, in a way that steers an entry, and the tool is conducting customs business. That needs a broker licence. To six digits it does not. Most tools sell the ten-digit answer as the product, which is the half that carries the licence.',
+    ctrl: 'Every ten-digit answer routes to a licensed reviewer',
+    ctrlText: 'The routing is not a quality preference, it is the compliance boundary. Nothing reaches a filing at ten digits without a licensed reviewer standing behind it. The licence sits with a person, not with the software.',
+    where: 'See how every line is routed, Chapter 3'
+  },
+  {
+    icon: 'i-ruler', name: 'Accuracy quoted at the easy digit',
+    sub: 'Headline numbers are six-digit. Liability is ten-digit.',
+    verdict: 'Wrong unit',
+    gap: 'The first six digits are internationally harmonised and comparatively easy. The last four are national, they set the duty rate and they carry the penalty. Six digits is also the level an unlicensed tool is allowed to reach. A six-digit headline therefore scores the easy half and the legal half at once, then charges for the other half.',
+    ctrl: 'This page states its own number at ten digits',
+    ctrlText: 'The benchmark this design is built against reports roughly 40% at ten digits on the contested rulings it uses. That was September 2025, on a 200-item test set, and the qualifier travels with the number everywhere it appears here.',
+    where: 'See the evidence docket, Chapter 1'
+  },
+  {
+    icon: 'i-quote', name: 'No ruling cited per answer',
+    sub: 'An officer asks on what authority. Few tools can answer.',
+    verdict: 'Unciteable',
+    gap: 'A customs question is not how confident are you. It is on what authority. A classification with no specific ruling behind it cannot be defended at the counter, so the reviewer rebuilds the reasoning from scratch anyway.',
+    ctrl: 'A hash-pinned rulebook, cited per decision',
+    ctrlText: 'Every decision pins the exact version of the authority it used, and the citation is stored with the answer rather than regenerated later. The ledger keeps it whether or not the filing is ever questioned.',
+    where: 'See the audit ledger, Chapter 3'
+  },
+  {
+    icon: 'i-stack', name: 'The duty stack flagged, not computed',
+    sub: 'A warning that something may apply is not a number.',
+    verdict: 'Half done',
+    gap: 'US duty is a stack, not a rate. Section 301, Section 232, anti-dumping and countervailing orders and reciprocal measures each sit on the base rate in a defined sequence. Saying one might apply leaves the arithmetic undone.',
+    ctrl: 'The stack is computed in sequence',
+    ctrlText: 'The design treats the order of application as part of the answer rather than as a footnote, because the sequence changes the total. The exposure figure that leaves the system is computed, with its components shown.',
+    where: 'See the anatomy of one entry, Chapter 1'
+  },
+  {
+    icon: 'i-gauge2', name: 'Confidence not calibrated',
+    sub: 'A score that does not predict correctness tells you nothing.',
+    verdict: 'Uncalibrated',
+    gap: 'Almost everything reports a confidence number. Almost nothing publishes whether that number is calibrated, meaning whether answers scored at 90% are right about 90% of the time. Without that, the score cannot decide what to check.',
+    ctrl: 'A gate built on fused signals, not one score',
+    ctrlText: 'The confidence gate fuses several independent signals rather than trusting a single self-reported number, and the design commits to measuring the gate against outcomes rather than assuming it works.',
+    where: 'See the confidence gate, Chapter 2'
+  },
+  {
+    icon: 'i-calendar', name: 'Update cadence asserted, not evidenced',
+    sub: 'In a year when the rulebook moved four times in a month.',
+    verdict: 'Unproven',
+    gap: 'Continuously updated is a claim with no observable proof attached. The reader cannot tell how fast a change actually lands, and cannot tell whether answers filed before the change were ever revisited.',
+    ctrl: 'Per-feed staleness alarms and a sweep',
+    ctrlText: 'Each authority feed carries its own staleness alarm, so a feed that quietly stops is visible rather than invisible. The invalidation sweep then goes back and finds the past answers a rule change has made wrong.',
+    where: 'See the invalidation sweep, Chapter 2'
+  },
+  {
+    icon: 'i-globe', name: 'Breadth bought with depth',
+    sub: 'Many countries covered, none of them deeply.',
+    verdict: 'Shallow',
+    gap: 'Coverage across many jurisdictions sells well and is genuinely hard, but depth in any single one tends to suffer. For an importer filing into one country, breadth elsewhere is not a feature they can use.',
+    ctrl: 'One jurisdiction, taken seriously',
+    ctrlText: 'This design is scoped to US import through CBP and ACE and says so in its own title. The gap register is explicit about what that excludes rather than implying wider coverage than exists.',
+    where: 'See the gap register, Chapter 5'
+  },
+  {
+    icon: 'i-liability', name: 'Liability never actually moves',
+    sub: 'The importer of record still signs, whatever the marketing says.',
+    verdict: 'Unchanged',
+    gap: 'No software moves legal responsibility off the importer of record. Marketing implying otherwise sells a comfort the law does not supply, and a team that believes it will under-resource the review function.',
+    ctrl: 'Accountability stated as a boundary, not a feature',
+    ctrlText: 'The design names the licensed reviewer as the accountable party and sizes the review function at roughly one licensed reviewer per 2,000 reviewed lines a month. The gate exists to protect that person, not to replace them.',
+    where: 'See the ROI model and the kill criteria, Chapters 4 and 5'
+  }
+];
+
+const rowsEl = document.getElementById('rows');
+const reveal = document.getElementById('reveal');
+const runBtn = document.getElementById('run');
+const resetBtn = document.getElementById('reset');
+const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+const use = (id, cls) => '<svg class="ic ' + (cls || '') + '" aria-hidden="true"><use href="#' + id + '"/></svg>';
+
+rowsEl.innerHTML = GAPS.map((g, i) =>
+  '<button type="button" class="row" data-i="' + i + '" aria-pressed="false">' +
+    '<span class="tile">' + use(g.icon) + '</span>' +
+    '<span class="txt"><b>' + g.name + '</b><span class="sub">' + g.sub + '</span></span>' +
+    '<span class="pair" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+      'stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' +
+      '<path d="M3.5 12h14"/><path d="m13.5 7 5 5-5 5"/></svg></span>' +
+    '<span class="ctl-mini"><span class="tag">' + use('i-shield') + 'Closed by</span><em>' + g.ctrl + '</em></span>' +
+    '<span class="verdict">' + use('i-warning', 'ic-sm') + g.verdict + '</span>' +
+  '</button>').join('');
+
+const rows = [...rowsEl.querySelectorAll('.row')];
+let timers = [];
+let userActed = false;
+const clear = () => { timers.forEach(clearTimeout); timers = []; };
+const after = (ms, fn) => timers.push(setTimeout(fn, ms));
+
+function run() {
+  clear();
+  rows.forEach((r) => r.classList.remove('lit'));
+  if (reduced) { rows.forEach((r) => r.classList.add('lit')); return; }
+  rows.forEach((r, i) => after(140 + i * 190, () => { r.classList.add('lit'); report(); }));
+}
+
+function reset() {
+  clear();
+  rows.forEach((r) => { r.classList.remove('lit'); r.setAttribute('aria-pressed', 'false'); });
+  initial();
+}
+
+const ARROW =
+  '<div class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+  'stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' +
+  '<path d="M3.5 12h14"/><path d="m13.5 7 5 5-5 5"/><circle class="dot" cx="3.5" cy="12" r="2" stroke="none"/></svg></div>';
+
+function pick(i) {
+  const g = GAPS[i];
+  rows.forEach((r, j) => r.setAttribute('aria-pressed', String(j === i)));
+  reveal.innerHTML =
+    '<div class="panel"><span class="ptag">' + use('i-warning', 'ic-sm') + 'The gap</span>' +
+    '<h2>' + g.name + '</h2><p>' + g.gap + '</p></div>' +
+    ARROW +
+    '<div class="panel answer"><span class="ptag">' + use('i-shield', 'ic-sm') + 'What closes it here</span>' +
+    '<h2>' + g.ctrl + '</h2><p>' + g.ctrlText + '</p>' +
+    '<span class="where">' + g.where + '</span></div>';
+  report();
+}
+
+function initial() {
+  reveal.innerHTML =
+    '<div class="panel" style="grid-column:1/-1;border-left:3px solid var(--accent-2)">' +
+    '<span class="ptag" style="color:var(--accent-2)">' + use('i-question', 'ic-sm') + 'Open any gap above</span>' +
+    '<p>Eight gaps, and every one of them is a reason a buyer ends up doing the work twice. Choose one to see what it costs and which control in this design is aimed at it.</p></div>';
+  report();
+}
+
+rowsEl.addEventListener('click', (e) => {
+  const btn = e.target.closest('.row');
+  if (!btn) return;
+  userActed = true;
+  clear();
+  rows.forEach((r) => r.classList.add('lit'));
+  pick(Number(btn.dataset.i));
+});
+runBtn.addEventListener('click', () => { userActed = true; run(); });
+resetBtn.addEventListener('click', () => { userActed = true; reset(); });
+
+initial();
+if (reduced) {
+  rows.forEach((r) => r.classList.add('lit'));
+} else {
+  /* reset() clears the timers list, so scheduling this kickoff through after()
+     would let a run cancel its own start. A bare timeout plus the userActed
+     flag keeps the auto-run from fighting a reader who got there first. */
+  setTimeout(() => { if (!userActed) run(); }, 500);
+}
+
+/* Report height so the host frame collapses to the content instead of leaving
+   a band of empty frame. Autosize is opt-in and this is the opt-in. */
+function report() {
+  if (document.documentElement.dataset.embedded !== 'true') return;
+  window.parent.postMessage(
+    { type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+}
+if (document.documentElement.dataset.embedded === 'true') {
+  if ('ResizeObserver' in window) new ResizeObserver(report).observe(document.body);
+  window.addEventListener('load', report);
+}
+</script>
+</body>
+</html>

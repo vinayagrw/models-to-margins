@@ -1,0 +1,1295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWS architecture · icon stencil with animated flow</title>
+<!-- Fonts must not block the first paint: the summary card is the default view on a
+     narrow screen and has to be readable before anything on the network resolves. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet"></noscript>
+<script src="./_theme-bootstrap.js"></script>
+<script src="./_glossary.js" defer></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+/* AWS solution-architecture stencil — the drawing an architect would hand you,
+   with the flow animated on top.
+
+   Everything derives from three tables: LAYOUT (grid cell per service),
+   GROUPS (frames whose boxes are computed from their members, never authored),
+   and EDGES. Connectors are routed as true orthogonal polylines at runtime:
+   ports are lane-packed per node side, jogs are allocated into shared channels
+   so parallel runs never overlap, and every candidate is collision-tested
+   against the node rects before it is drawn.
+
+   Measurement uses an offsetParent walk, not getBoundingClientRect, because the
+   world carries a camera transform and getBoundingClientRect returns
+   post-transform pixels. */
+
+.shell { display: flex; flex-direction: column; gap: 12px; }
+:root[data-embedded="true"] .shell { padding: 14px clamp(14px, 2vw, 22px) 18px; }
+
+.head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.head h1 {
+  font-family: "Space Grotesk", sans-serif; font-weight: 700;
+  font-size: clamp(1.02rem, 2.2vw, 1.3rem); letter-spacing: -0.02em; color: var(--text-strong);
+}
+:root[data-embedded="true"] .head h1 { font-size: 1.02rem; }
+.head p { font: 500 0.72rem/1.4 "DM Sans", sans-serif; color: var(--muted); margin-top: 2px; max-width: 62ch; }
+/* The takeaway leads. The operating instruction sits under it, never removed. */
+.head p.claim {
+  font: 600 0.82rem/1.45 "DM Sans", sans-serif; color: var(--text-strong);
+  margin-top: 6px; border-left: 2px solid #dd3522; padding-left: 10px;
+}
+.head p.howto { margin-top: 6px; }
+
+/* ---------- control bars ---------- */
+.bar { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.bar .lbl {
+  font: 700 0.56rem/1 "IBM Plex Mono", monospace; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--muted-soft); margin-right: 2px;
+}
+button {
+  cursor: pointer; font: 700 0.6rem/1 "IBM Plex Mono", monospace; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--muted); background: var(--surface);
+  border: 1px solid var(--border-strong); border-radius: 6px; padding: 7px 10px;
+}
+button:hover { color: var(--text-strong); border-color: var(--muted); }
+button[aria-pressed="true"] {
+  color: var(--accent-2); border-color: var(--accent-2);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-2) 16%, transparent);
+}
+button:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 2px; }
+.cam button { min-width: 34px; text-align: center; }
+
+/* ---------- stage / camera ---------- */
+.stage {
+  position: relative; overflow: hidden; touch-action: pan-y;
+  height: var(--stage-h, 640px);
+  border: 1px solid var(--border-strong); border-radius: 12px;
+  background: var(--paper);
+  cursor: grab;
+}
+.stage.dragging { cursor: grabbing; }
+.stage:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 2px; }
+.stage:fullscreen { border-radius: 0; height: 100vh !important; }
+
+.world {
+  position: absolute; top: 0; left: 0;
+  width: var(--ww, 1900px); height: var(--wh, 1060px);
+  transform: translate(var(--cx, 0px), var(--cy, 0px)) scale(var(--k, 1));
+  transform-origin: 0 0;
+}
+
+/* Stencil canvas: deliberately paper-white in light, ink-navy in dark, so the
+   official icons (which carry their own colour) read as the only colour. */
+:root, :root[data-theme="light"] {
+  --paper: #ffffff;
+  --ink: #4a4a52;
+  --ink-soft: #8a8a95;
+  --gframe: #9aa0aa;
+  --glabel: #6b7280;
+}
+:root[data-theme="dark"] {
+  --paper: #0d1424;
+  --ink: #9fb0cc;
+  --ink-soft: #64748b;
+  --gframe: #48566f;
+  --glabel: #8fa1bd;
+}
+
+/* ---------- group frames ---------- */
+.g {
+  position: absolute; border-radius: 4px; pointer-events: none;
+  border: 1.5px dashed var(--gc, var(--gframe));
+}
+.g.solid { border-style: solid; }
+/* The label carries the canvas colour so connectors routed through the corridor
+   a frame's top edge sits in pass cleanly behind the text instead of through it. */
+.g-label {
+  position: absolute; top: 3px; left: 7px; display: flex; align-items: center; gap: 6px;
+  font: 600 12px/1 "DM Sans", sans-serif; color: var(--gc, var(--glabel)); white-space: nowrap;
+  background: var(--paper); padding: 4px 7px; border-radius: 3px;
+}
+.g-label img { width: 24px; height: 24px; }
+.g-label b { font-weight: 700; }
+
+/* AWS's own frame palette */
+.g.cloud   { --gc: #232f3e; border-width: 1.5px; }
+:root[data-theme="dark"] .g.cloud { --gc: #c8d3e4; }
+.g.region  { --gc: #00a4a6; }
+.g.vpc     { --gc: #8c4fff; border-style: solid; }
+.g.subnet  { --gc: #7aa116; }
+.g.subnetq { --gc: #dd3522; }
+.g.account { --gc: #e7157b; }
+.g.plain   { --gc: var(--gframe); }
+
+/* ---------- nodes ---------- */
+.node {
+  position: absolute; width: 164px; height: 154px;
+  display: flex; flex-direction: column; align-items: center; gap: 5px;
+  text-align: center; cursor: pointer; background: none; border: 0; padding: 0;
+  text-transform: none; letter-spacing: normal;
+}
+.node .ic {
+  width: 92px; height: 92px; border-radius: 10px; background: #fff;
+  display: grid; place-items: center; flex: 0 0 auto;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
+  transition: transform 180ms cubic-bezier(0.34, 1.4, 0.64, 1), box-shadow 180ms ease;
+}
+.node .ic img { width: 72px; height: 72px; display: block; }
+.node .nm {
+  font: 700 11px/1.22 "DM Sans", sans-serif; color: var(--text-strong);
+  max-width: 164px; text-transform: none; letter-spacing: 0;
+}
+.node .sv {
+  font: 500 9.5px/1.2 "IBM Plex Mono", monospace; color: var(--ink-soft);
+  max-width: 164px; text-transform: none; letter-spacing: 0.01em;
+}
+.node:hover .ic, .node:focus-visible .ic {
+  transform: translateY(-3px) scale(1.06);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.26);
+}
+.node:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 3px; border-radius: 6px; }
+.node[aria-pressed="true"] .ic { box-shadow: 0 0 0 3px var(--accent-2), 0 6px 14px rgba(0, 0, 0, 0.22); }
+
+/* dimming while a step is active */
+.diagram.stepping .node:not(.on) { opacity: 0.24; }
+.diagram.stepping .g { opacity: 0.5; }
+.node, .g { transition: opacity 260ms ease; }
+
+/* ---------- wires ---------- */
+.wires { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+.wire { fill: none; stroke: var(--ink); stroke-width: 1.6; stroke-linejoin: round; stroke-linecap: round; }
+.wire.t-auth { stroke: #7aa116; }
+.wire.t-file { stroke: #e7157b; }
+.wire.t-block { stroke: #dd3522; stroke-dasharray: 5 5; stroke-width: 1.4; opacity: 0.85; }
+.head-a { fill: var(--ink); }
+.head-a.t-auth { fill: #7aa116; }
+.head-a.t-file { fill: #e7157b; }
+.head-a.t-block { fill: #dd3522; }
+.diagram.stepping .wire:not(.on), .diagram.stepping .head-a:not(.on) { opacity: 0.1; }
+.wire.on { stroke-width: 2.6; }
+.wire, .head-a { transition: opacity 260ms ease, stroke-width 200ms ease; }
+
+/* numbered flow badges */
+.bdg circle { fill: #16181d; }
+:root[data-theme="dark"] .bdg circle { fill: #e9edf7; }
+.bdg text {
+  font: 700 11px/1 "IBM Plex Mono", monospace; fill: #fff;
+  text-anchor: middle; dominant-baseline: central;
+}
+:root[data-theme="dark"] .bdg text { fill: #0d1424; }
+.diagram.stepping .bdg:not(.on) { opacity: 0.12; }
+.bdg { transition: opacity 260ms ease; }
+
+/* blocked-route cross */
+.xmark { stroke: #dd3522; stroke-width: 2.2; stroke-linecap: round; }
+
+/* ---------- narration ---------- */
+.narr {
+  display: grid; grid-template-columns: auto 1fr; gap: 12px; align-items: center;
+  border: 1px solid var(--border-strong); border-radius: 10px;
+  background: var(--surface); padding: 10px 13px;
+}
+.narr .num {
+  font: 700 0.72rem/1 "IBM Plex Mono", monospace; letter-spacing: 0.06em;
+  color: var(--accent-2); white-space: nowrap;
+}
+.narr .cap { font: 500 0.78rem/1.45 "DM Sans", sans-serif; color: var(--text); }
+.scrub { display: flex; gap: 3px; flex-wrap: wrap; align-items: center; }
+.tick {
+  width: 30px; height: 30px; padding: 0; border-radius: 5px;
+  font: 700 0.6rem/1 "IBM Plex Mono", monospace; display: grid; place-items: center;
+}
+
+/* ---------- detail card ---------- */
+.card {
+  position: absolute; z-index: 5; width: min(300px, 78vw);
+  border: 1px solid var(--border-strong); border-radius: 10px;
+  background: var(--surface-strong); box-shadow: var(--shadow); padding: 12px 13px;
+}
+.card[hidden] { display: none; }
+.card h3 {
+  font: 700 0.86rem/1.25 "Space Grotesk", sans-serif; color: var(--text-strong);
+  display: flex; align-items: center; gap: 8px;
+}
+.card h3 img { width: 38px; height: 38px; background: #fff; border-radius: 4px; padding: 2px; }
+.card .svc {
+  font: 600 0.6rem/1 "IBM Plex Mono", monospace; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--accent-2); margin-top: 7px;
+}
+.card p { font: 500 0.76rem/1.5 "DM Sans", sans-serif; color: var(--text); margin-top: 6px; }
+.card .where {
+  font: 500 0.68rem/1.4 "DM Sans", sans-serif; color: var(--muted); margin-top: 8px;
+  padding-top: 8px; border-top: 1px solid var(--border);
+}
+.card .x { position: absolute; top: 8px; right: 8px; padding: 4px 7px; }
+
+/* ---------- legend ---------- */
+.legend { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; }
+.lg { display: flex; align-items: center; gap: 6px; font: 500 0.68rem/1 "DM Sans", sans-serif; color: var(--muted); }
+.lg i { width: 20px; height: 0; border-top: 2px solid var(--k, var(--ink)); display: block; }
+.lg.dash i { border-top-style: dashed; }
+
+.fsbar { position: absolute; top: 10px; left: 10px; right: 10px; z-index: 6; display: none; gap: 8px; flex-wrap: wrap; }
+.stage:fullscreen .fsbar { display: flex; }
+.stage:fullscreen .fsbar > * {
+  background: var(--surface-strong); border-radius: 8px; padding: 5px;
+  box-shadow: var(--shadow-soft);
+}
+
+.hint { font: 500 0.66rem/1.4 "DM Sans", sans-serif; color: var(--muted-soft); }
+
+/* ---------- motion ---------- */
+@media (prefers-reduced-motion: no-preference) {
+  /* draw-on: wires narrate in flow order */
+  .wire.draw {
+    stroke-dasharray: var(--len); stroke-dashoffset: var(--len);
+    animation: draw 620ms cubic-bezier(0.33, 0.9, 0.3, 1) forwards;
+    animation-delay: calc(var(--i) * 70ms);
+  }
+  .wire.t-block.draw { stroke-dasharray: 5 5; stroke-dashoffset: 0; animation: fadein 500ms ease forwards; }
+  .head-a.draw { opacity: 0; animation: fadein 300ms ease forwards; animation-delay: calc(var(--i) * 70ms + 480ms); }
+  .bdg.draw { opacity: 0; animation: pop 420ms cubic-bezier(0.34, 1.5, 0.64, 1) forwards; animation-delay: calc(var(--i) * 70ms + 520ms); }
+
+  @keyframes draw { to { stroke-dashoffset: 0; } }
+  @keyframes fadein { to { opacity: 1; } }
+  @keyframes pop { 0% { opacity: 0; transform: scale(0.4); } 100% { opacity: 1; transform: scale(1); } }
+
+  /* packets ride the elbow paths */
+  .pk {
+    offset-rotate: 0deg; fill: var(--wc, var(--ink));
+    animation: ride var(--dur, 5s) linear infinite;
+    animation-delay: calc(var(--i) * 300ms);
+  }
+  .pk-halo { fill: var(--wc, var(--ink)); opacity: 0.2; animation: ride var(--dur, 5s) linear infinite; animation-delay: calc(var(--i) * 300ms); }
+  @keyframes ride {
+    0% { offset-distance: 0%; opacity: 0; }
+    7% { opacity: 1; }
+    88% { opacity: 1; }
+    100% { offset-distance: 100%; opacity: 0; }
+  }
+  /* a blocked route kills its packet at the boundary */
+  .pk.dead { animation: stall var(--dur, 3.6s) cubic-bezier(0.2, 0.8, 0.3, 1) infinite; }
+  @keyframes stall {
+    0% { offset-distance: 0%; opacity: 0; }
+    10% { opacity: 1; }
+    54% { offset-distance: 52%; opacity: 1; }
+    68% { offset-distance: 52%; opacity: 0.15; }
+    100% { offset-distance: 52%; opacity: 0; }
+  }
+  .diagram.stepping .pk, .diagram.stepping .pk-halo { display: none; }
+  .diagram.stepping .pk.on, .diagram.stepping .pk-halo.on { display: block; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .node .ic { transition: none; }
+}
+
+/* ---------- summary card (the narrow-screen default view) ----------
+   This block is inline markup in <body>, first in DOM and first visually, so it
+   paints with the HTML before any script or font has resolved. Below 760px it is
+   the default and the full stencil is one button press away. At 760px and up it
+   is display:none and the stencil boots straight away, because the frame is
+   authored tall enough to hold the drawing there.
+
+   The swap is a body class, never a CSS order reversal, so DOM order and reading
+   order stay identical (WCAG 1.3.2 and 2.4.3) and the route is a real button. */
+.poster { display: none; }
+.poster-in {
+  display: flex; flex-direction: column; gap: 12px;
+  padding: 16px 16px 18px; max-width: 560px; margin: 0 auto;
+}
+.poster h1 {
+  font-family: "Space Grotesk", sans-serif; font-weight: 700; font-size: 1.02rem;
+  letter-spacing: -0.02em; color: var(--text-strong); margin: 0;
+}
+.poster .claim {
+  font: 600 0.92rem/1.45 "DM Sans", sans-serif; color: var(--text-strong); margin: 0;
+  border-left: 2px solid #dd3522; padding-left: 10px;
+}
+.poster .sub { font: 500 0.72rem/1.45 "DM Sans", sans-serif; color: var(--muted); margin: 0; }
+.poster figure { margin: 0; }
+/* Capped so the card's height barely moves across the phone width range. The host
+   frame authors one --vf-h-m and only corrects it by postMessage afterwards, so a
+   sketch that grew with the viewport would leave a band of empty frame. */
+.poster svg { display: block; width: 100%; max-width: 360px; height: auto; }
+.pf-box { fill: var(--surface); stroke: var(--border-strong); stroke-width: 1; }
+.pf-nm { font: 600 10px "DM Sans", sans-serif; fill: var(--text-strong); }
+.pf-sub { font: 500 8.5px "IBM Plex Mono", monospace; fill: var(--muted-soft); letter-spacing: 0.04em; }
+.pf-block { stroke: #dd3522; stroke-width: 1.6; stroke-dasharray: 5 5; fill: none; }
+.pf-x { stroke: #dd3522; stroke-width: 2; stroke-linecap: round; }
+.pf-tag { font: 600 8.5px "IBM Plex Mono", monospace; fill: #dd3522; letter-spacing: 0.06em; }
+.poster .go {
+  align-self: flex-start; padding: 10px 14px; font-size: 0.64rem;
+  color: var(--text-strong); border-color: var(--muted);
+}
+.poster .go:hover { border-color: var(--accent-2); color: var(--accent-2); }
+
+@media screen and (max-width: 759px) {
+  body:not(.stencil-live) .poster { display: block; }
+  body:not(.stencil-live) .shell { display: none; }
+}
+
+/* ---------- print ---------- */
+@media print {
+  .poster { display: none !important; }
+  .bar, .narr, .hint, .fsbar, .legend { display: none !important; }
+  .stage { height: auto !important; overflow: visible !important; border: 0; }
+  .world { transform: scale(var(--pk, 0.55)); }
+}
+/* ---- glossed term ----------------------------------------------------
+   The drawing frames things as VPC and subnet without ever saying what
+   those are, which the page prose used to carry. Reveals on hover for a
+   mouse and on tap for a phone, which has no hover state. */
+.gl { position: relative; display: inline; }
+.gl > button {
+  font: inherit; color: var(--accent-2); background: none; border: 0;
+  padding: 0; cursor: help; border-bottom: 1px dashed currentColor;
+}
+.gl > span {
+  position: absolute; left: 0; top: calc(100% + 6px); z-index: 20;
+  width: max-content; max-width: 30ch; padding: 8px 10px;
+  border-radius: 7px; border: 1px solid var(--accent-2);
+  background: var(--bg-mid, var(--surface-strong)); color: var(--text);
+  font: 500 0.72rem/1.4 "DM Sans", system-ui, sans-serif;
+  opacity: 0; visibility: hidden; transition: opacity 0.16s ease;
+}
+.gl:hover > span, .gl > button:focus-visible + span, .gl.open > span { opacity: 1; visibility: visible; }
+@media (max-width: 430px) {
+  /* Embedded, this frame is only about 313px wide. An absolutely positioned
+     popup still counts toward the document scroll width while it is hidden, so
+     a trigger sitting right of centre widened the whole figure by 42px with
+     nothing visible to show for it. Anchor the popup to the paragraph rather
+     than to the word, so it can never begin mid-line. */
+  .claim { position: relative; }
+  .gl { position: static; }
+  .gl > span { left: 0; right: 0; width: auto; max-width: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- The summary card. Static markup, no script, no web font needed: this is what a
+     reader on a phone sees the instant the frame loads, and the button below is the
+     one tap to the full stencil. -->
+<div class="poster" id="poster">
+  <div class="poster-in">
+    <h1>AWS architecture &middot; icon stencil</h1>
+    <p class="claim">The two crossed red routes are the paths that do not exist. The sandboxed parser sits in its own <span class="gl"><button type="button">subnet</button><span>A walled-off section of a <abbr title="Virtual Private Cloud">VPC</abbr>, which is itself a private network inside AWS.</span></span> and cannot reach the model, and the workers that call the model cannot touch the filing credentials.</p>
+    <figure>
+      <svg viewBox="0 0 340 188" role="img" xmlns="http://www.w3.org/2000/svg"
+           aria-label="Two schematic routes, each drawn as a dashed red line crossed out. The first runs from the sandboxed parser to the Bedrock model and is blocked by a quarantine subnet with no egress. The second runs from the decision workers to the CBP filing credentials and is blocked by a separate identity with no access.">
+        <!-- route 1: parser has no path to the model -->
+        <rect class="pf-box" x="6" y="20" width="112" height="42" rx="7"></rect>
+        <text class="pf-nm" x="16" y="38">Sandboxed parser</text>
+        <text class="pf-sub" x="16" y="52">per document</text>
+        <rect class="pf-box" x="222" y="20" width="112" height="42" rx="7"></rect>
+        <text class="pf-nm" x="232" y="38">Bedrock model</text>
+        <text class="pf-sub" x="232" y="52">inference</text>
+        <path class="pf-block" d="M118 41 H160"></path>
+        <path class="pf-block" d="M180 41 H222"></path>
+        <path class="pf-x" d="M163 34 L177 48 M177 34 L163 48"></path>
+        <text class="pf-tag" x="170" y="80" text-anchor="middle">QUARANTINE SUBNET, NO EGRESS</text>
+
+        <!-- route 2: the model path has no filing credentials -->
+        <rect class="pf-box" x="6" y="112" width="112" height="42" rx="7"></rect>
+        <text class="pf-nm" x="16" y="130">Decision workers</text>
+        <text class="pf-sub" x="16" y="144">call the model</text>
+        <rect class="pf-box" x="222" y="112" width="112" height="42" rx="7"></rect>
+        <text class="pf-nm" x="232" y="130">Filing credentials</text>
+        <text class="pf-sub" x="232" y="144">CBP and ABI</text>
+        <path class="pf-block" d="M118 133 H160"></path>
+        <path class="pf-block" d="M180 133 H222"></path>
+        <path class="pf-x" d="M163 126 L177 140 M177 126 L163 140"></path>
+        <text class="pf-tag" x="170" y="172" text-anchor="middle">SEPARATE IDENTITY, NO ACCESS</text>
+      </svg>
+    </figure>
+    <p class="sub">The full stencil pans and zooms, walks the flow in eleven steps, and opens a detail card for each service.</p>
+    <button type="button" class="go" id="poster-go">Open the full AWS stencil</button>
+  </div>
+</div>
+
+<div class="shell">
+  <div class="head">
+    <div>
+      <h1>AWS architecture &middot; icon stencil</h1>
+      <p class="claim">The two crossed red routes are the paths that do not exist. The sandboxed parser sits in its own <span class="gl"><button type="button">subnet</button><span>A walled-off section of a <abbr title="Virtual Private Cloud">VPC</abbr>, which is itself a private network inside AWS.</span></span> and cannot reach the model, and the workers that call the model cannot touch the filing credentials.</p>
+      <p class="howto">Click any icon for its role. Step through the flow with the scrubber.</p>
+    </div>
+  </div>
+
+  <div class="bar" id="ctlbar">
+    <span class="lbl">Flow</span>
+    <button id="b-play" aria-pressed="false">Play</button>
+    <button id="b-all">Show all</button>
+    <span class="lbl" style="margin-left:8px">View</span>
+    <button id="b-fit">Fit</button>
+    <button id="b-full" aria-pressed="false">Fullscreen</button>
+    <span class="cam" style="display:flex;gap:4px;margin-left:4px">
+      <button id="b-out" aria-label="Zoom out">&minus;</button>
+      <button id="b-in" aria-label="Zoom in">+</button>
+    </span>
+    <span class="hint" style="margin-left:6px">Drag to pan &middot; wheel or pinch to zoom</span>
+  </div>
+
+  <div class="stage" id="stage" tabindex="0" role="application" aria-label="AWS architecture stencil, pan and zoom">
+    <div class="fsbar" id="fsbar"></div>
+    <div class="world" id="world">
+      <div class="diagram" id="diagram">
+        <!-- viewBox is replaced with the measured world box once layout runs -->
+        <svg class="wires" id="svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1886 1174" aria-hidden="true"></svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="narr">
+    <span class="num" id="n-num">All steps</span>
+    <span class="cap" id="n-cap">The whole architecture, every route live.</span>
+  </div>
+  <div class="bar scrub" id="scrub"><span class="lbl">Step</span></div>
+
+  <div class="legend">
+    <span class="lg" style="--k:var(--ink)"><i></i>Documents and decisions</span>
+    <span class="lg" style="--k:#7aa116"><i></i>Authorities and artefacts</span>
+    <span class="lg" style="--k:#e7157b"><i></i>Filing to the government</span>
+    <span class="lg dash" style="--k:#dd3522"><i></i>Route that does not exist, by construction</span>
+  </div>
+
+  <div class="card" id="card" hidden>
+    <button class="x" id="card-x" aria-label="Close">&times;</button>
+    <h3><img id="card-ic" alt=""><span id="card-nm"></span></h3>
+    <div class="svc" id="card-sv"></div>
+    <p id="card-ds"></p>
+    <div class="where" id="card-wh"></div>
+  </div>
+</div>
+
+<script>
+/* The engine is a function now, not a self-calling block. Below 760px it is not
+   called until the reader asks for the full stencil, so the summary card above is
+   the only thing that has to render for the figure to be useful. */
+window.__bootStencil = () => {
+  const $ = (id) => document.getElementById(id);
+  const NS = 'http://www.w3.org/2000/svg';
+  const mk = (t) => document.createElementNS(NS, t);
+  const stage = $('stage'), world = $('world'), diagram = $('diagram'), svg = $('svg');
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ================= model ================= */
+  const S = {
+    ops:      { ic: 'users',           sv: 'Persona',                nm: 'Importer ops',        ds: 'Uploads document sets through the portal. The people whose day this system is meant to give back.' },
+    erp:      { ic: 'g-corporate',     sv: 'Customer system',        nm: 'Importer ERP / TMS',  ds: 'Nightly sync plus deltas, alarmed on silence so a quiet feed is an incident rather than a surprise.' },
+    email:    { ic: 'documents',       sv: 'Customer system',        nm: 'Supplier email',      ds: 'Invoices and packing lists forwarded to a per-tenant address. SES receipt rules drop them straight to S3.' },
+    edi:      { ic: 'internet',        sv: 'Trading partners',       nm: 'EDI / AS2 partners',  ds: 'X12 over AS2, interchange control numbers reconciled so a duplicate transmission is detectable.' },
+    idp:      { ic: 'saml',            sv: 'Customer system',        nm: 'Customer IdP',        ds: 'SAML or OIDC federation into Cognito. Reviewers sign in with their own corporate identity, never a local account.' },
+
+    apigw:    { ic: 'api-gateway',     sv: 'API Gateway + WAF',      nm: 'Portal and partner API', ds: 'Customer uploads and ERP pushes. WAF in front, request signing behind.' },
+    ses:      { ic: 'ses',             sv: 'Amazon SES',             nm: 'Email intake',        ds: 'Receipt rules write the raw message to S3 unopened. Nothing parses mail in the mail path.' },
+    xfer:     { ic: 'transfer-family', sv: 'AWS Transfer Family',    nm: 'SFTP and AS2',        ds: 'EDI and ERP drops via B2B Data Interchange, landing in the same content-addressed store.' },
+
+    s3docs:   { ic: 's3',              sv: 'Amazon S3 + KMS',        nm: 'Document store',      ds: 'Content-addressed, per-tenant customer-managed keys, legal hold available per object. Every intake path ends here and nowhere else.' },
+
+    evb:      { ic: 'eventbridge',     sv: 'Amazon EventBridge',     nm: 'Trigger spine',       ds: 'One S3 event starts exactly one execution. The execution name is the idempotency hash, so redelivery is a no-op rather than a duplicate filing.' },
+    sqs:      { ic: 'sqs',             sv: 'Amazon SQS',             nm: 'DLQ per stage',       ds: 'Poison messages land somewhere a human actually looks, per stage, rather than disappearing into a retry loop.' },
+    obs:      { ic: 'cloudwatch',      sv: 'CloudWatch + ADOT',      nm: 'Observability',       ds: 'Alarms here, decision-quality metrics in Athena. The two are deliberately separate systems.' },
+    guard:    { ic: 'guardduty',       sv: 'GuardDuty + Security Hub', nm: 'Detection',         ds: 'Lives in the org-security account. The parser-egress alarm is the highest-signal event this system can emit.' },
+
+    stepfn:   { ic: 'step-functions',  sv: 'AWS Step Functions',     nm: 'Entry orchestrator',  ds: 'One durable execution per entry, with the statutory clock running as a parallel branch. A reviewer may take four hours or four days and the execution simply waits.' },
+    rulebook: { ic: 's3-bucket',       sv: 'S3 + Object Lock',       nm: 'Rulebook corpus',     ds: 'Versioned and hash-pinned into every decision record. Production roles can read it and cannot write it, so tampering means compromising a different AWS account.' },
+    secrets:  { ic: 'secrets-manager', sv: 'AWS Secrets Manager',    nm: 'CBP / ABI credentials', ds: 'Never reachable from a process that holds model context. The filing credentials and the inference path share nothing.' },
+
+    parser:   { ic: 'lambda',          sv: 'AWS Lambda',             nm: 'Sandboxed parser',    ds: 'One microVM per document, no NAT, no internet gateway, a gateway endpoint to a single S3 prefix. Its only route out is an interface endpoint to Textract, scoped by security group, which is why the model path stays blocked. A hostile PDF buys a dead microVM and an alarm.' },
+    textract: { ic: 'textract',        sv: 'Amazon Textract',        nm: 'OCR and layout',      ds: 'Forms, tables and rendered page images travel together, so a human reviewer sees what the model saw.' },
+
+    router:   { ic: 'lambda',          sv: 'AWS Lambda',             nm: 'Novelty router',      ds: 'A deterministic tier split with no model in it. Known goods take the cheap path, novel ones take the expensive one.' },
+    workers:  { ic: 'fargate',         sv: 'AWS Fargate',            nm: 'Decision workers',    ds: 'Classifier, valuer, origin, duty engine and validators. Every answer carries its citations or it does not count as an answer.' },
+    mgw:      { ic: 'fargate',         sv: 'Internal service',       nm: 'Model gateway',       ds: 'The single audited inference egress. Everything the model is asked, and everything it answers, is recorded here.' },
+
+    conf:     { ic: 'fargate',         sv: 'AWS Fargate',            nm: 'Confidence gate',     ds: 'Signal fusion with per-field calibration. The gate decides what a human must see, and it is tuned per field rather than per document.' },
+    review:   { ic: 'elb',             sv: 'ALB + Cognito',          nm: 'Review queue app',    ds: 'Internet-facing load balancer, tasks running private. Human decisions return to the execution as task tokens.' },
+    bedrock:  { ic: 'bedrock',         sv: 'Interface endpoint',     nm: 'Amazon Bedrock',      ds: 'Reached over a VPC endpoint only. There is no public route to the model from anywhere in this account.' },
+
+    aurora:   { ic: 'aurora',          sv: 'Amazon Aurora',          nm: 'Product master + pgvector', ds: 'Decisions, embeddings and an append-only log. The product master is what makes the second entry cheaper than the first.' },
+    cache:    { ic: 'elasticache',     sv: 'Amazon ElastiCache',     nm: 'Router hot path',     ds: 'The tier split runs from memory, so the cheap path stays cheap under load.' },
+
+    abi:      { ic: 'fargate',         sv: 'AWS Fargate',            nm: 'ABI / ACE adapter',   ds: 'Schema-gated 3461, 7501 and PGA assembly. CI asserts its dependency graph contains no inference client, so the last hop to the government has no model in it by construction.' },
+    cred:     { ic: 'secrets-manager', sv: 'Internal service',       nm: 'Credential proxy',    ds: 'Only the ABI adapter may assume its role, and its egress allowlist contains CBP endpoints and nothing else.' },
+
+    ledger:   { ic: 's3-bucket',       sv: 'S3 Object Lock',         nm: 'Audit ledger replica', ds: 'Compliance mode, in the org log-archive account. Deletable by no one who holds production access.' },
+    athena:   { ic: 'athena',          sv: 'Amazon Athena',          nm: 'Evidence queries',    ds: 'Years-old evidence answered without a restore, which is what turns an audit from a project into a query.' },
+
+    cbp:      { ic: 'internet',        sv: 'Government endpoint',    nm: 'CBP ACE',             ds: 'The only external destination in the whole architecture. Responses and CF-28 / 29 requests come back over the same connection.' },
+    pga:      { ic: 'internet',        sv: 'Within the transmission', nm: 'PGA message sets',   ds: 'FDA, USDA and friends. Each agency is its own epic, carried inside the same transmission.' }
+  };
+
+  /* grid cell per service: [col, row] */
+  const LAYOUT = {
+    ops: [0, 1], erp: [0, 2], email: [0, 3], edi: [0, 4], idp: [0, 5],
+    apigw: [1, 1], ses: [1, 3], xfer: [1, 4],
+    s3docs: [2, 1],
+    evb: [3, 1], sqs: [3, 2], obs: [3, 3], guard: [3, 4],
+    stepfn: [4, 1], rulebook: [4, 2], secrets: [4, 4],
+    parser: [5, 0], textract: [7, 0],
+    router: [5, 1], workers: [6, 1], mgw: [7, 1],
+    conf: [5, 2], review: [6, 2], bedrock: [7, 2],
+    aurora: [5, 3], cache: [6, 3],
+    abi: [5, 4], cred: [6, 4],
+    ledger: [5, 5], athena: [6, 5],
+    cbp: [8, 4], pga: [8, 5]
+  };
+
+  /* Frames. box = bounding box of `nodes` plus any `kids`, inflated by `pad`,
+     with `head` extra pixels of room at the top for the label. Never authored. */
+  const GROUPS = [
+    { id: 'ext', cls: 'plain', label: 'Customer and partner systems', pad: 16, head: 24,
+      nodes: ['ops', 'erp', 'email', 'edi', 'idp'] },
+    { id: 'cloud', cls: 'cloud solid', label: 'AWS Cloud', icon: 'g-aws-cloud', pad: 22, head: 30,
+      nodes: [], kids: ['workload', 'shared', 'sec', 'evidence'] },
+    { id: 'workload', cls: 'account', label: 'workload-prod account', icon: 'g-account', pad: 20, head: 28,
+      nodes: [], kids: ['region'] },
+    { id: 'region', cls: 'region', label: 'Region &middot; us-east-1', icon: 'g-region', pad: 18, head: 26,
+      nodes: ['apigw', 'ses', 'xfer', 's3docs', 'evb', 'sqs', 'obs', 'stepfn', 'secrets'],
+      kids: ['vpc', 'intake', 'orch'] },
+    { id: 'intake', cls: 'plain', label: 'Intake component', pad: 14, head: 22,
+      nodes: ['apigw', 'ses', 'xfer'] },
+    { id: 'orch', cls: 'plain', label: 'Orchestration and ops component', pad: 14, head: 22,
+      nodes: ['evb', 'sqs', 'obs'] },
+    { id: 'shared', cls: 'account', label: 'shared-services account', icon: 'g-account', pad: 13, head: 22,
+      nodes: ['rulebook'] },
+    { id: 'sec', cls: 'account', label: 'org-security account', icon: 'g-account', pad: 13, head: 22,
+      nodes: ['guard'] },
+    { id: 'evidence', cls: 'account', label: 'log-archive account', icon: 'g-account', pad: 13, head: 22,
+      nodes: ['ledger', 'athena'] },
+    { id: 'vpc', cls: 'vpc', label: 'VPC', icon: 'g-vpc', pad: 18, head: 26,
+      nodes: [], kids: ['sn-q', 'sn-d', 'sn-a', 'sn-data', 'sn-f', 'sn-e'] },
+    { id: 'sn-q', cls: 'subnetq', label: 'Quarantine subnet &middot; no egress', icon: 'g-private-subnet', pad: 13, head: 22,
+      nodes: ['parser'] },
+    { id: 'sn-d', cls: 'subnet', label: 'Decision subnet', icon: 'g-private-subnet', pad: 13, head: 22,
+      nodes: ['router', 'workers', 'mgw'] },
+    { id: 'sn-a', cls: 'subnet', label: 'Application subnet', icon: 'g-private-subnet', pad: 13, head: 22,
+      nodes: ['conf', 'review'] },
+    { id: 'sn-e', cls: 'subnet', label: 'Endpoint subnet', icon: 'g-private-subnet', pad: 13, head: 22,
+      nodes: ['bedrock', 'textract'] },
+    { id: 'sn-data', cls: 'subnet', label: 'Data subnet', icon: 'g-private-subnet', pad: 13, head: 22,
+      nodes: ['aurora', 'cache'] },
+    { id: 'sn-f', cls: 'subnet', label: 'Filing subnet', icon: 'g-private-subnet', pad: 13, head: 22,
+      nodes: ['abi', 'cred'] }
+  ];
+
+  /* n = the numbered badge on the wire; s = narration step; 0 = always-on context */
+  const EDGES = [
+    { f: 'ops', t: 'apigw', ty: 'doc', s: 1 },
+    { f: 'erp', t: 'xfer', ty: 'doc', s: 1 },
+    { f: 'email', t: 'ses', ty: 'doc', s: 1 },
+    { f: 'edi', t: 'xfer', ty: 'doc', s: 1 },
+    { f: 'apigw', t: 's3docs', ty: 'doc', s: 1, n: 1 },
+    { f: 'ses', t: 's3docs', ty: 'doc', s: 1 },
+    { f: 'xfer', t: 's3docs', ty: 'doc', s: 1 },
+    { f: 's3docs', t: 'evb', ty: 'doc', s: 2, n: 2 },
+    { f: 'evb', t: 'stepfn', ty: 'dec', s: 2, n: 3 },
+    { f: 's3docs', t: 'parser', ty: 'doc', s: 3, n: 4 },
+    { f: 'parser', t: 'textract', ty: 'doc', s: 3, n: 5 },
+    { f: 'parser', t: 'stepfn', ty: 'doc', s: 3, n: 6 },
+    { f: 'stepfn', t: 'router', ty: 'dec', s: 4, n: 7 },
+    { f: 'router', t: 'cache', ty: 'dec', s: 4 },
+    { f: 'router', t: 'workers', ty: 'dec', s: 5, n: 8 },
+    { f: 'rulebook', t: 'workers', ty: 'auth', s: 5 },
+    { f: 'workers', t: 'mgw', ty: 'dec', s: 6, n: 9 },
+    { f: 'mgw', t: 'bedrock', ty: 'dec', s: 6, n: 10 },
+    { f: 'workers', t: 'aurora', ty: 'dec', s: 6 },
+    { f: 'workers', t: 'conf', ty: 'dec', s: 7, n: 11 },
+    { f: 'conf', t: 'review', ty: 'dec', s: 7, n: 12 },
+    { f: 'idp', t: 'review', ty: 'dec', s: 7 },
+    { f: 'review', t: 'stepfn', ty: 'dec', s: 7, n: 13 },
+    { f: 'stepfn', t: 'abi', ty: 'file', s: 8, n: 14 },
+    { f: 'abi', t: 'cred', ty: 'file', s: 8 },
+    { f: 'cred', t: 'secrets', ty: 'file', s: 8 },
+    { f: 'abi', t: 'cbp', ty: 'file', s: 9, n: 15 },
+    { f: 'abi', t: 'pga', ty: 'file', s: 9 },
+    { f: 'cbp', t: 'abi', ty: 'file', s: 10, n: 16 },
+    { f: 'abi', t: 'review', ty: 'file', s: 10 },
+    { f: 'aurora', t: 'ledger', ty: 'dec', s: 11, n: 17 },
+    { f: 'ledger', t: 'athena', ty: 'dec', s: 11, n: 18 },
+    { f: 'stepfn', t: 'sqs', ty: 'dec', s: 0 },
+    { f: 'stepfn', t: 'obs', ty: 'dec', s: 0 },
+    { f: 'obs', t: 'guard', ty: 'auth', s: 0 },
+    { f: 'parser', t: 'bedrock', ty: 'block', s: 3 },
+    { f: 'workers', t: 'secrets', ty: 'block', s: 8 },
+    /* The gate is the only way in to filing. Drawn as a blocked route rather
+       than left to a click card, because a boundary nobody opens is not shown. */
+    { f: 'workers', t: 'abi', ty: 'block', s: 8 }
+  ];
+
+  const STEPS = [
+    { k: 'Step 1 of 11', v: 'Four intake paths — portal, ERP, supplier email and EDI — all end in one content-addressed S3 store. Nothing is parsed on the way in.' },
+    { k: 'Step 2 of 11', v: 'The S3 event starts exactly one Step Functions execution. Its name is the idempotency hash, so a redelivered event is a no-op rather than a second filing.' },
+    { k: 'Step 3 of 11', v: 'Parsing happens in quarantine, one microVM per document. The subnet has no egress, so the dashed route to the model endpoint does not exist. A hostile PDF buys a dead microVM and an alarm.' },
+    { k: 'Step 4 of 11', v: 'A deterministic novelty router, with no model in it, splits known goods from novel ones. The split runs from memory.' },
+    { k: 'Step 5 of 11', v: 'Decision workers classify, value and check origin. They read the hash-pinned rulebook and cannot write it.' },
+    { k: 'Step 6 of 11', v: 'All inference leaves through one audited gateway to a Bedrock interface endpoint. There is no public route to the model, and every prompt and answer is recorded.' },
+    { k: 'Step 7 of 11', v: 'The calibrated confidence gate decides what a human must see. Reviewers sign in through the customer’s own IdP, and their decision returns as a task token.' },
+    { k: 'Step 8 of 11', v: 'The ABI adapter assembles 3461, 7501 and PGA sets behind a hard schema gate, fetching credentials through a proxy the decision workers cannot reach.' },
+    { k: 'Step 9 of 11', v: 'One deterministic hop to CBP ACE under the broker’s filer code. This is the only external destination in the architecture.' },
+    { k: 'Step 10 of 11', v: 'CBP answers asynchronously over the same connection. A reject is routed to the review queue with the reason rendered, never auto-resubmitted.' },
+    { k: 'Step 11 of 11', v: 'Every decision, version and transmission record mirrors to Object Lock in the log-archive account, queryable years later without a restore.' }
+  ];
+
+  const WHERE = {};
+  GROUPS.forEach((g) => (g.nodes || []).forEach((k) => { WHERE[k] = (WHERE[k] ? WHERE[k] + ' › ' : '') + g.label.replace(/&middot;/g, '·'); }));
+
+  /* ================= build DOM ================= */
+  const NW = 138, NH = 100, GAPX = 74, GAPY = 62;
+  const PITCHX = NW + GAPX, PITCHY = NH + GAPY;
+  /* Set by the two-pass layout below, once the frame overhang is known. */
+  let MX = 0, MY = 0;
+
+  const cellX = (c) => MX + c * PITCHX;
+  const cellY = (r) => MY + r * PITCHY;
+
+  const gEls = {}, nEls = {};
+  GROUPS.forEach((g) => {
+    const el = document.createElement('div');
+    el.className = 'g ' + g.cls;
+    el.id = 'g-' + g.id;
+    const lb = document.createElement('span');
+    lb.className = 'g-label';
+    if (g.icon) {
+      const im = document.createElement('img');
+      im.src = './aws-icons/' + g.icon + '.svg';
+      im.alt = '';
+      lb.appendChild(im);
+    }
+    const tx = document.createElement('b');
+    tx.innerHTML = g.label;
+    lb.appendChild(tx);
+    el.appendChild(lb);
+    diagram.appendChild(el);
+    gEls[g.id] = el;
+  });
+
+  Object.keys(LAYOUT).forEach((k) => {
+    const [c, r] = LAYOUT[k], d = S[k];
+    const el = document.createElement('button');
+    el.className = 'node';
+    el.id = 'n-' + k;
+    el.type = 'button';
+    el.setAttribute('aria-pressed', 'false');
+    el.innerHTML =
+      '<span class="ic"><img src="./aws-icons/' + d.ic + '.svg" alt=""></span>' +
+      '<span class="nm">' + d.nm + '</span>' +
+      '<span class="sv">' + d.sv + '</span>';
+    el.setAttribute('aria-label', d.nm + ', ' + d.sv);
+    diagram.appendChild(el);
+    nEls[k] = el;
+  });
+
+  /* Frame boxes, innermost first so a parent can absorb its children. */
+  let boxes = {};
+  const computeBox = (g) => {
+    if (boxes[g.id]) return boxes[g.id];
+    let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+    (g.nodes || []).forEach((k) => {
+      const [c, r] = LAYOUT[k];
+      x0 = Math.min(x0, cellX(c)); y0 = Math.min(y0, cellY(r));
+      x1 = Math.max(x1, cellX(c) + NW); y1 = Math.max(y1, cellY(r) + NH);
+    });
+    (g.kids || []).forEach((kid) => {
+      const cg = GROUPS.find((z) => z.id === kid);
+      const b = computeBox(cg);
+      x0 = Math.min(x0, b.x); y0 = Math.min(y0, b.y);
+      x1 = Math.max(x1, b.x + b.w); y1 = Math.max(y1, b.y + b.h);
+    });
+    const b = { x: x0 - g.pad, y: y0 - g.pad - g.head, w: (x1 - x0) + g.pad * 2, h: (y1 - y0) + g.pad * 2 + g.head };
+    boxes[g.id] = b;
+    return b;
+  };
+  /* Frames nest four deep — AWS Cloud wraps Region wraps VPC wraps subnet — so
+     how far the outermost frame overhangs the grid is not knowable until the
+     boxes exist. Lay out once at the origin, measure the overhang, then lay out
+     again with exactly that margin. Getting this wrong clips the AWS Cloud
+     label off the top of the world, which is how the bug showed up. */
+  const EDGEPAD = 18;
+  GROUPS.forEach(computeBox);
+  let minX = Infinity, minY = Infinity;
+  GROUPS.forEach((g) => { minX = Math.min(minX, boxes[g.id].x); minY = Math.min(minY, boxes[g.id].y); });
+  MX = EDGEPAD - minX;
+  MY = EDGEPAD - minY;
+  boxes = {};
+  GROUPS.forEach(computeBox);
+
+  GROUPS.forEach((g) => {
+    const b = boxes[g.id], el = gEls[g.id];
+    el.style.left = b.x + 'px'; el.style.top = b.y + 'px';
+    el.style.width = b.w + 'px'; el.style.height = b.h + 'px';
+  });
+  Object.keys(LAYOUT).forEach((k) => {
+    const [c, r] = LAYOUT[k];
+    nEls[k].style.left = cellX(c) + 'px';
+    nEls[k].style.top = cellY(r) + 'px';
+  });
+
+  /* World size from the true content extent, so there is never a dead band. */
+  let WX = 0, WY = 0;
+  GROUPS.forEach((g) => { const b = boxes[g.id]; WX = Math.max(WX, b.x + b.w); WY = Math.max(WY, b.y + b.h); });
+  Object.keys(LAYOUT).forEach((k) => {
+    const [c, r] = LAYOUT[k];
+    WX = Math.max(WX, cellX(c) + NW); WY = Math.max(WY, cellY(r) + NH);
+  });
+  const WW = Math.round(WX + EDGEPAD), WH = Math.round(WY + EDGEPAD);
+  world.style.setProperty('--ww', WW + 'px');
+  world.style.setProperty('--wh', WH + 'px');
+  diagram.style.width = WW + 'px';
+  diagram.style.height = WH + 'px';
+  svg.setAttribute('viewBox', '0 0 ' + WW + ' ' + WH);
+
+  /* ================= orthogonal router =================
+     Connectors travel in the corridors between rows and columns, never across
+     a node. For each edge a ladder of candidate shapes is generated cheapest
+     first — straight, single elbow, Z through one corridor — and the first one
+     that clears every other node's box is kept. The last candidate is a
+     five-segment corridor route that is collision-free by construction, so the
+     search always terminates with a legal path. */
+  const ICON = 46;
+  const rectOf = (k) => {
+    const [c, r] = LAYOUT[k];
+    const x = cellX(c), y = cellY(r);
+    return { k, c, r, left: x, right: x + NW, top: y, bottom: y + NH,
+             cx: x + NW / 2, icy: y + ICON / 2 };
+  };
+  const RECTS = {};
+  Object.keys(LAYOUT).forEach((k) => (RECTS[k] = rectOf(k)));
+  const ALL = Object.keys(RECTS).map((k) => RECTS[k]);
+
+  const seg = (a, b) => ({ x0: Math.min(a.x, b.x), y0: Math.min(a.y, b.y), x1: Math.max(a.x, b.x), y1: Math.max(a.y, b.y) });
+  const hits = (pts, skip) => {
+    const PAD = 7;
+    for (let i = 0; i < pts.length - 1; i++) {
+      const s = seg(pts[i], pts[i + 1]);
+      for (const r of ALL) {
+        if (skip.includes(r)) continue;
+        if (s.x1 < r.left - PAD || s.x0 > r.right + PAD) continue;
+        if (s.y1 < r.top - PAD || s.y0 > r.bottom + PAD) continue;
+        return true;
+      }
+    }
+    return false;
+  };
+
+  /* corridor centre lines */
+  const gxR = (i) => cellX(i) + NW + GAPX / 2;  /* corridor right of column i */
+  const gxL = (i) => cellX(i) - GAPX / 2;       /* corridor left of column i  */
+  const gyB = (j) => cellY(j) + NH + GAPY / 2;  /* corridor below row j       */
+  const gyT = (j) => cellY(j) - GAPY / 2;       /* corridor above row j       */
+
+  /* Attach points sit on the icon for horizontal runs and on the labelled
+     shape for vertical ones, which is how AWS's own stencils connect. */
+  const PORT = {
+    E: (r, o) => ({ x: r.cx + 30, y: r.icy + o }),
+    W: (r, o) => ({ x: r.cx - 30, y: r.icy + o }),
+    N: (r, o) => ({ x: r.cx + o, y: r.top - 2 }),
+    S: (r, o) => ({ x: r.cx + o, y: r.bottom + 2 })
+  };
+  const clean = (pts) => pts.filter((p, i) =>
+    i === 0 || Math.abs(p.x - pts[i - 1].x) > 0.5 || Math.abs(p.y - pts[i - 1].y) > 0.5);
+
+  const candidates = (A, B) => {
+    const out = [];
+    const right = B.c > A.c, down = B.r > A.r;
+    const sameR = A.r === B.r, sameC = A.c === B.c;
+    const EA = right ? 'E' : 'W', EB = right ? 'W' : 'E';
+    const VA = down ? 'S' : 'N', VB = down ? 'N' : 'S';
+    const P = (s, r, o) => PORT[s](r, o);
+
+    /* A straight run takes the SAME lane offset at both ends. Letting each end
+       pick its own leaves the line a few pixels off level, which reads as a
+       sloppy drawing rather than a stencil. */
+    if (sameR) out.push({ sa: EA, sb: EB, pts: (a) => [P(EA, A, a), P(EB, B, a)] });
+    if (sameC) out.push({ sa: VA, sb: VB, pts: (a) => [P(VA, A, a), P(VB, B, a)] });
+    if (!sameR) out.push({ sa: EA, sb: VB, pts: (a, b) => { const p = P(EA, A, a), q = P(VB, B, b); return [p, { x: q.x, y: p.y }, q]; } });
+    if (!sameC) out.push({ sa: VA, sb: EB, pts: (a, b) => { const p = P(VA, A, a), q = P(EB, B, b); return [p, { x: p.x, y: q.y }, q]; } });
+
+    /* Z through a vertical corridor */
+    if (!sameC) {
+      const lo = Math.min(A.c, B.c), hi = Math.max(A.c, B.c);
+      for (let i = lo; i < hi; i++) {
+        const X = gxR(i);
+        out.push({ sa: EA, sb: EB, key: 'v' + i, pts: (a, b, g) => {
+          const p = P(EA, A, a), q = P(EB, B, b);
+          return [p, { x: X + g, y: p.y }, { x: X + g, y: q.y }, q];
+        } });
+      }
+    }
+    /* Z through a horizontal corridor */
+    {
+      const ys = [];
+      const lo = Math.min(A.r, B.r), hi = Math.max(A.r, B.r);
+      for (let j = lo; j < hi; j++) ys.push([gyB(j), 'h' + j]);
+      if (sameR) { ys.push([gyB(A.r), 'h' + A.r]); ys.push([gyT(A.r), 'h' + (A.r - 1)]); }
+      ys.forEach(([Y, key]) => {
+        const va = Y > A.bottom ? 'S' : 'N', vb = Y > B.bottom ? 'S' : 'N';
+        out.push({ sa: va, sb: vb, key, pts: (a, b, g) => {
+          const p = P(va, A, a), q = P(vb, B, b);
+          return [p, { x: p.x, y: Y + g }, { x: q.x, y: Y + g }, q];
+        } });
+      });
+    }
+    /* Corridor route: legal by construction — every long run is in a corridor. */
+    {
+      const gA = down ? gyB(A.r) : gyT(A.r);
+      const gB = down ? gyT(B.r) : gyB(B.r);
+      const X = right ? gxL(B.c) : gxR(B.c);
+      const va = down ? 'S' : 'N', vb = down ? 'N' : 'S';
+      out.push({ sa: va, sb: vb, key: 'c' + A.r + '_' + B.r + '_' + B.c, safe: true, pts: (a, b, g) => {
+        const p = P(va, A, a), q = P(vb, B, b);
+        return [p, { x: p.x, y: gA + g }, { x: X + g, y: gA + g }, { x: X + g, y: gB - g }, { x: q.x, y: gB - g }, q];
+      } });
+    }
+    return out;
+  };
+
+  /* Pass 1 — pick the cheapest shape that clears every node. */
+  const routed = EDGES.map((e) => {
+    const A = RECTS[e.f], B = RECTS[e.t];
+    const list = candidates(A, B);
+    for (const c of list) {
+      const pts = clean(c.pts(0, 0, 0));
+      if (!hits(pts, [A, B])) return { e, A, B, c, pts };
+    }
+    const last = list[list.length - 1];
+    return { e, A, B, c: last, pts: clean(last.pts(0, 0, 0)), forced: true };
+  });
+
+  /* Pass 2 — fan connections out across each node side, and spread wires that
+     share a corridor, keeping the offset only when it stays collision-free. */
+  const sideMap = {}, corridor = {};
+  routed.forEach((r) => {
+    (sideMap[r.e.f + r.c.sa] = sideMap[r.e.f + r.c.sa] || []).push(r);
+    (sideMap[r.e.t + r.c.sb] = sideMap[r.e.t + r.c.sb] || []).push(r);
+    if (r.c.key) (corridor[r.c.key] = corridor[r.c.key] || []).push(r);
+  });
+  const spread = (bucket, r, step, cap) => {
+    if (!bucket || bucket.length < 2) return 0;
+    const i = bucket.indexOf(r), n = bucket.length;
+    return Math.max(-cap, Math.min(cap, (i - (n - 1) / 2) * step));
+  };
+  routed.forEach((r) => {
+    const sa = r.c.sa, sb = r.c.sb;
+    const a = spread(sideMap[r.e.f + sa], r, (sa === 'E' || sa === 'W') ? 10 : 26, (sa === 'E' || sa === 'W') ? 16 : 40);
+    const b = spread(sideMap[r.e.t + sb], r, (sb === 'E' || sb === 'W') ? 10 : 26, (sb === 'E' || sb === 'W') ? 16 : 40);
+    const g = r.c.key ? spread(corridor[r.c.key], r, 14, 20) : 0;
+    if (!a && !b && !g) return;
+    const pts = clean(r.c.pts(a, b, g));
+    if (!hits(pts, [r.A, r.B])) r.pts = pts;
+  });
+
+  /* Rounded elbows, drawio style. */
+  const toPath = (pts) => {
+    const R = 8;
+    let d = 'M ' + pts[0].x.toFixed(1) + ' ' + pts[0].y.toFixed(1);
+    for (let i = 1; i < pts.length - 1; i++) {
+      const a = pts[i - 1], b = pts[i], c = pts[i + 1];
+      const l1 = Math.hypot(b.x - a.x, b.y - a.y), l2 = Math.hypot(c.x - b.x, c.y - b.y);
+      const r = Math.min(R, l1 / 2, l2 / 2);
+      if (r < 1.5) { d += ' L ' + b.x.toFixed(1) + ' ' + b.y.toFixed(1); continue; }
+      const p1 = { x: b.x + (a.x - b.x) / l1 * r, y: b.y + (a.y - b.y) / l1 * r };
+      const p2 = { x: b.x + (c.x - b.x) / l2 * r, y: b.y + (c.y - b.y) / l2 * r };
+      d += ' L ' + p1.x.toFixed(1) + ' ' + p1.y.toFixed(1) +
+           ' Q ' + b.x.toFixed(1) + ' ' + b.y.toFixed(1) + ' ' + p2.x.toFixed(1) + ' ' + p2.y.toFixed(1);
+    }
+    const e = pts[pts.length - 1];
+    d += ' L ' + e.x.toFixed(1) + ' ' + e.y.toFixed(1);
+    return d;
+  };
+
+  const wires = [];
+  let collisions = 0;
+
+  routed.forEach((rt, idx) => {
+    const { e, pts } = rt;
+    if (rt.forced) collisions++;
+    const d = toPath(pts);
+    const path = mk('path');
+    path.setAttribute('d', d);
+    path.setAttribute('class', 'wire t-' + e.ty);
+    path.dataset.i = idx;
+    svg.appendChild(path);
+
+    /* arrowhead, oriented from the final segment */
+    const last = pts[pts.length - 1], prev = pts[pts.length - 2];
+    const ang = Math.atan2(last.y - prev.y, last.x - prev.x) * 180 / Math.PI;
+    const head = mk('path');
+    head.setAttribute('d', 'M 0 0 L -8 -4 L -8 4 Z');
+    head.setAttribute('transform', 'translate(' + last.x.toFixed(1) + ',' + last.y.toFixed(1) + ') rotate(' + ang.toFixed(1) + ')');
+    head.setAttribute('class', 'head-a t-' + e.ty);
+    svg.appendChild(head);
+
+    let bdg = null;
+    if (e.n) {
+      const L = path.getTotalLength();
+      const mp = path.getPointAtLength(L * 0.5);
+      bdg = mk('g');
+      bdg.setAttribute('class', 'bdg');
+      const c = mk('circle');
+      c.setAttribute('cx', mp.x); c.setAttribute('cy', mp.y); c.setAttribute('r', 11);
+      const t = mk('text');
+      t.setAttribute('x', mp.x); t.setAttribute('y', mp.y);
+      t.textContent = e.n;
+      bdg.appendChild(c); bdg.appendChild(t);
+      svg.appendChild(bdg);
+    }
+
+    /* blocked routes get a cross at the boundary they never pass */
+    if (e.ty === 'block') {
+      const L = path.getTotalLength(), mp = path.getPointAtLength(L * 0.52);
+      const g = mk('g');
+      g.setAttribute('class', 'bdg xg');
+      [[-6, -6, 6, 6], [-6, 6, 6, -6]].forEach(([x1, y1, x2, y2]) => {
+        const ln = mk('line');
+        ln.setAttribute('x1', mp.x + x1); ln.setAttribute('y1', mp.y + y1);
+        ln.setAttribute('x2', mp.x + x2); ln.setAttribute('y2', mp.y + y2);
+        ln.setAttribute('class', 'xmark');
+        g.appendChild(ln);
+      });
+      svg.appendChild(g);
+    }
+
+    wires.push({ e, path, head, bdg, d, len: path.getTotalLength(), pk: null, halo: null });
+  });
+
+  /* ---------- packets ---------- */
+  const PKC = { doc: 'var(--ink)', dec: 'var(--accent-2)', auth: '#7aa116', file: '#e7157b', block: '#dd3522' };
+  if (!reduced) {
+    wires.forEach((w, i) => {
+      if (w.e.s === 0 && w.e.ty !== 'block') return;
+      const dur = Math.max(2.4, Math.min(7, w.len / 130));
+      const halo = mk('circle');
+      halo.setAttribute('r', 7);
+      halo.setAttribute('class', 'pk-halo');
+      const pk = mk('circle');
+      pk.setAttribute('r', 3.6);
+      pk.setAttribute('class', 'pk' + (w.e.ty === 'block' ? ' dead' : ''));
+      [halo, pk].forEach((n) => {
+        n.style.offsetPath = 'path("' + w.d + '")';
+        n.style.setProperty('--wc', PKC[w.e.ty]);
+        n.style.setProperty('--i', w.e.n || i % 8);
+        n.style.setProperty('--dur', dur + 's');
+      });
+      if (w.e.ty === 'block') { pk.style.setProperty('--dur', '3.6s'); svg.appendChild(pk); w.pk = pk; return; }
+      svg.appendChild(halo); svg.appendChild(pk);
+      w.pk = pk; w.halo = halo;
+    });
+  }
+
+  /* draw-on, ordered by badge number so the drawing narrates itself */
+  if (!reduced) {
+    wires.forEach((w) => {
+      const order = w.e.n ? w.e.n : 19;
+      w.path.style.setProperty('--len', w.len);
+      w.path.style.setProperty('--i', order);
+      w.path.classList.add('draw');
+      w.head.style.setProperty('--i', order);
+      w.head.classList.add('draw');
+      if (w.bdg) { w.bdg.style.setProperty('--i', order); w.bdg.classList.add('draw'); }
+    });
+  }
+
+  /* ================= narration ================= */
+  let step = 0; /* 0 = show everything */
+  const scrub = $('scrub');
+  const ticks = [];
+  STEPS.forEach((_, i) => {
+    const b = document.createElement('button');
+    b.className = 'tick';
+    b.textContent = i + 1;
+    b.setAttribute('aria-pressed', 'false');
+    b.setAttribute('aria-label', 'Step ' + (i + 1));
+    b.addEventListener('click', () => { stopPlay(); setStep(step === i + 1 ? 0 : i + 1); });
+    scrub.appendChild(b);
+    ticks.push(b);
+  });
+
+  const setStep = (s) => {
+    step = s;
+    diagram.classList.toggle('stepping', s > 0);
+    ticks.forEach((b, i) => b.setAttribute('aria-pressed', String(i + 1 === s)));
+    if (s === 0) {
+      $('n-num').textContent = 'All steps';
+      $('n-cap').textContent = 'The whole architecture, every route live. Pick a step to walk the entry through it.';
+    } else {
+      $('n-num').textContent = STEPS[s - 1].k;
+      $('n-cap').textContent = STEPS[s - 1].v;
+    }
+    const live = new Set();
+    wires.forEach((w) => {
+      const on = s > 0 && w.e.s === s;
+      w.path.classList.toggle('on', on);
+      w.head.classList.toggle('on', on);
+      if (w.bdg) w.bdg.classList.toggle('on', on);
+      if (w.pk) w.pk.classList.toggle('on', on);
+      if (w.halo) w.halo.classList.toggle('on', on);
+      if (on) { live.add(w.e.f); live.add(w.e.t); }
+    });
+    Object.keys(nEls).forEach((k) => nEls[k].classList.toggle('on', live.has(k)));
+  };
+
+  let timer = null;
+  const stopPlay = () => { if (timer) { clearInterval(timer); timer = null; } $('b-play').setAttribute('aria-pressed', 'false'); $('b-play').textContent = 'Play'; };
+  $('b-play').addEventListener('click', () => {
+    if (timer) { stopPlay(); return; }
+    $('b-play').setAttribute('aria-pressed', 'true');
+    $('b-play').textContent = 'Pause';
+    if (step === 0) setStep(1);
+    timer = setInterval(() => setStep(step >= STEPS.length ? 1 : step + 1), 4200);
+  });
+  $('b-all').addEventListener('click', () => { stopPlay(); setStep(0); });
+
+  /* ================= detail cards ================= */
+  const card = $('card');
+  let openKey = null;
+  const closeCard = () => {
+    card.hidden = true;
+    if (openKey) nEls[openKey].setAttribute('aria-pressed', 'false');
+    openKey = null;
+  };
+  const openCard = (k, el) => {
+    if (openKey === k) { closeCard(); return; }
+    closeCard();
+    openKey = k;
+    el.setAttribute('aria-pressed', 'true');
+    const d = S[k];
+    $('card-ic').src = './aws-icons/' + d.ic + '.svg';
+    $('card-nm').textContent = d.nm;
+    $('card-sv').textContent = d.sv;
+    $('card-ds').textContent = d.ds;
+    $('card-wh').textContent = WHERE[k] ? 'Sits in: ' + WHERE[k] : 'Outside the AWS account boundary.';
+    card.hidden = false;
+    /* Anchor to the icon in screen space, then keep the card inside the shell. */
+    const sr = stage.getBoundingClientRect(), er = el.getBoundingClientRect();
+    const host = card.offsetParent.getBoundingClientRect();
+    let x = er.left - host.left + er.width / 2 - card.offsetWidth / 2;
+    let y = er.bottom - host.top + 8;
+    if (y + card.offsetHeight > sr.bottom - host.top - 6) y = er.top - host.top - card.offsetHeight - 8;
+    x = Math.max(6, Math.min(x, host.width - card.offsetWidth - 6));
+    y = Math.max(sr.top - host.top + 6, y);
+    card.style.left = x + 'px';
+    card.style.top = y + 'px';
+  };
+  Object.keys(nEls).forEach((k) => nEls[k].addEventListener('click', (ev) => { ev.stopPropagation(); openCard(k, nEls[k]); }));
+  $('card-x').addEventListener('click', closeCard);
+  stage.addEventListener('pointerdown', (ev) => { if (!card.hidden && !ev.target.closest('.node')) closeCard(); });
+
+  /* ================= camera ================= */
+  const MINK = 0.14, MAXK = 2.6;
+  let cam = { x: 0, y: 0, k: 0.5 }, tw = 0;
+  const stageSize = () => ({ w: stage.clientWidth, h: stage.clientHeight });
+  const fitK = () => {
+    const s = stageSize();
+    return Math.min(MAXK, Math.max(MINK, Math.min((s.w - 20) / WW, (s.h - 20) / WH)));
+  };
+  const minK = () => Math.max(MINK, fitK() * 0.9);
+  const clamp = (c) => {
+    const s = stageSize(), w = WW * c.k, h = WH * c.k;
+    c.x = w <= s.w ? (s.w - w) / 2 : Math.min(0, Math.max(s.w - w, c.x));
+    c.y = h <= s.h ? (s.h - h) / 2 : Math.min(0, Math.max(s.h - h, c.y));
+    return c;
+  };
+  const setCam = (x, y, k) => {
+    cam = clamp({ x, y, k: Math.max(minK(), Math.min(MAXK, k)) });
+    world.style.setProperty('--cx', cam.x + 'px');
+    world.style.setProperty('--cy', cam.y + 'px');
+    world.style.setProperty('--k', cam.k);
+  };
+  const fit = () => {
+    const k = fitK(), s = stageSize();
+    cancelAnimationFrame(tw);
+    setCam((s.w - WW * k) / 2, (s.h - WH * k) / 2, k);
+  };
+  const zoomAt = (px, py, nk) => {
+    const k = Math.max(minK(), Math.min(MAXK, nk));
+    setCam(px - (px - cam.x) * (k / cam.k), py - (py - cam.y) * (k / cam.k), k);
+  };
+  const zoomCentre = (f) => { const s = stageSize(); zoomAt(s.w / 2, s.h / 2, cam.k * f); };
+
+  $('b-fit').addEventListener('click', fit);
+  $('b-in').addEventListener('click', () => zoomCentre(1.28));
+  $('b-out').addEventListener('click', () => zoomCentre(1 / 1.28));
+
+  let drag = null;
+  stage.addEventListener('pointerdown', (ev) => {
+    if (ev.target.closest('.node, button')) return;
+    drag = { x: ev.clientX, y: ev.clientY, cx: cam.x, cy: cam.y };
+    stage.classList.add('dragging');
+    stage.setPointerCapture(ev.pointerId);
+  });
+  stage.addEventListener('pointermove', (ev) => {
+    if (!drag) return;
+    setCam(drag.cx + (ev.clientX - drag.x), drag.cy + (ev.clientY - drag.y), cam.k);
+  });
+  const endDrag = () => { drag = null; stage.classList.remove('dragging'); };
+  stage.addEventListener('pointerup', endDrag);
+  stage.addEventListener('pointercancel', endDrag);
+
+  /* Wheel must never hijack the article's scroll: it zooms only with ctrl/⌘
+     held, or once the reader has focused the stage. */
+  stage.addEventListener('wheel', (ev) => {
+    if (!ev.ctrlKey && !ev.metaKey && document.activeElement !== stage) return;
+    ev.preventDefault();
+    const r = stage.getBoundingClientRect();
+    zoomAt(ev.clientX - r.left, ev.clientY - r.top, cam.k * Math.exp(-ev.deltaY * ((ev.ctrlKey || ev.metaKey) ? 0.011 : 0.0022)));
+  }, { passive: false });
+
+  let pinch = null;
+  stage.addEventListener('touchstart', (ev) => {
+    if (ev.touches.length !== 2) return;
+    const [a, b] = ev.touches;
+    pinch = { d: Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY), k: cam.k };
+  }, { passive: true });
+  stage.addEventListener('touchmove', (ev) => {
+    if (!pinch || ev.touches.length !== 2) return;
+    ev.preventDefault();
+    const [a, b] = ev.touches;
+    const d = Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
+    const r = stage.getBoundingClientRect();
+    zoomAt((a.clientX + b.clientX) / 2 - r.left, (a.clientY + b.clientY) / 2 - r.top, pinch.k * (d / pinch.d));
+  }, { passive: false });
+  stage.addEventListener('touchend', () => { pinch = null; });
+
+  stage.addEventListener('keydown', (ev) => {
+    const P = 70;
+    const map = { ArrowLeft: [P, 0], ArrowRight: [-P, 0], ArrowUp: [0, P], ArrowDown: [0, -P] };
+    if (map[ev.key]) { ev.preventDefault(); setCam(cam.x + map[ev.key][0], cam.y + map[ev.key][1], cam.k); return; }
+    if (ev.key === '+' || ev.key === '=') { ev.preventDefault(); zoomCentre(1.28); }
+    else if (ev.key === '-') { ev.preventDefault(); zoomCentre(1 / 1.28); }
+    else if (ev.key === '0') { ev.preventDefault(); fit(); }
+    else if (ev.key === 'Escape') { closeCard(); stopPlay(); setStep(0); }
+  });
+
+  /* Fullscreen: nothing outside the fullscreen element is reachable, so the
+     controls have to move inside it and come home on exit. */
+  /* The step scrubber has to come with them: stepping through the flow is the
+     whole reason to be in fullscreen. */
+  const DOCK = ['#ctlbar', '#scrub', '.narr'].map((s) => {
+    const el = document.querySelector(s);
+    return { el, home: el.parentNode, after: el.nextSibling };
+  });
+  $('b-full').addEventListener('click', () => {
+    if (document.fullscreenElement) document.exitFullscreen();
+    else if (stage.requestFullscreen) stage.requestFullscreen().catch(() => {});
+  });
+  document.addEventListener('fullscreenchange', () => {
+    const on = document.fullscreenElement === stage;
+    $('b-full').setAttribute('aria-pressed', String(on));
+    $('b-full').textContent = on ? 'Exit full' : 'Fullscreen';
+    DOCK.forEach((d) => { if (on) $('fsbar').appendChild(d.el); else d.home.insertBefore(d.el, d.after); });
+    setTimeout(() => { sizeStage(); fit(); }, 80);
+  });
+
+  /* Stage takes its aspect from the world, so the drawing never floats in a band. */
+  const sizeStage = () => {
+    const vw = document.documentElement.clientWidth;
+    if (document.fullscreenElement === stage) return;
+    const sw = stage.clientWidth || vw;
+    const ideal = sw * (WH / WW) + 24;
+    const h = vw >= 760 ? Math.round(Math.min(760, Math.max(400, ideal)))
+                        : Math.round(Math.min(600, Math.max(400, ideal)));
+    document.documentElement.style.setProperty('--stage-h', h + 'px');
+  };
+
+  /* A 1886px-wide stencil fitted to a phone is unreadable and still leaves a
+     band top and bottom. Open closer than fit so the world overflows both axes
+     and the reader pans, which is legible and has no dead space either.
+
+     This has to be a named function, not a one-shot at the end of boot. The host
+     frame corrects its height by postMessage the moment the stencil appears, and
+     that fires a resize inside the iframe, whose handler re-fits and would zoom
+     the drawing straight back out into the band this rule exists to remove. */
+  const openCam = () => {
+    if (document.documentElement.clientWidth >= 760) { fit(); return; }
+    const s = stageSize(), k = Math.max(fitK(), 0.42);
+    setCam((s.w - WW * k) / 2, 0, k);
+  };
+
+  let rt = 0;
+  window.addEventListener('resize', () => {
+    clearTimeout(rt);
+    rt = setTimeout(() => { closeCard(); sizeStage(); openCam(); }, 140);
+  });
+
+  window.addEventListener('beforeprint', () => {
+    document.documentElement.style.setProperty('--pk', Math.min(1, 1040 / WW));
+  });
+
+  sizeStage();
+  fit();
+  setStep(0);
+  openCam();
+
+  window.__stencil = { WW, WH, wires, routed, collisions, boxes, RECTS, fitK, cam: () => cam, setStep, step: () => step };
+};
+
+/* ---------- boot / deferred boot ----------
+   Wide: boot immediately, unchanged behaviour. Narrow: the summary card is the
+   default and the engine is built on the button press, which is also where focus
+   moves. Frame sizing is reported from whichever state is showing, so the host
+   frame is correct before the engine exists and again after it does. */
+(() => {
+  const NARROW = () => document.documentElement.clientWidth < 760;
+  const poster = document.getElementById('poster');
+  const go = document.getElementById('poster-go');
+  let booted = false;
+
+  const boot = () => {
+    if (booted) return;
+    booted = true;
+    document.body.classList.add('stencil-live');
+    window.__bootStencil();
+  };
+
+  if (document.documentElement.dataset.embedded === 'true') {
+    const postSize = () => window.parent.postMessage(
+      { type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+    if ('ResizeObserver' in window) new ResizeObserver(postSize).observe(document.body);
+    window.addEventListener('load', postSize);
+    postSize();
+  }
+
+  go.addEventListener('click', () => {
+    boot();
+    /* Focus follows the reader into what the button opened, the same focus rescue
+       the atlas spine does. Without it the tab order restarts at the top. */
+    const stage = document.getElementById('stage');
+    if (stage) stage.focus();
+  });
+
+  if (!NARROW()) boot();
+  else {
+    /* A rotation or a desktop resize reveals the shell through the media query,
+       so the engine has to exist by then. */
+    const wide = window.matchMedia('(min-width: 760px)');
+    const onWide = (e) => { if (e.matches) boot(); };
+    if (wide.addEventListener) wide.addEventListener('change', onWide);
+    else wide.addListener(onWide);
+  }
+  if (booted) poster.remove();
+})();
+
+/* Glossed terms reveal on hover for a mouse and on tap for a phone, which has
+   no hover state at all. Escape and an outside tap both close. */
+document.querySelectorAll('.gl > button').forEach((b) => {
+  b.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const gl = b.parentElement;
+    document.querySelectorAll('.gl.open').forEach((o) => { if (o !== gl) o.classList.remove('open'); });
+    gl.classList.toggle('open');
+  });
+});
+document.addEventListener('click', () => document.querySelectorAll('.gl.open').forEach((o) => o.classList.remove('open')));
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') document.querySelectorAll('.gl.open').forEach((o) => o.classList.remove('open'));
+});
+</script>
+</body>
+</html>

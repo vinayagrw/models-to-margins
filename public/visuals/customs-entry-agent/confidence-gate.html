@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The gate is the product</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="./_theme-bootstrap.js"></script>
+<script src="./_glossary.js" defer></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+/* Confidence Gate. A left-to-right chain of four clickable gate stages
+   feeding three outcome lanes, a detail panel per stage, sourced evidence
+   tiles with count-up numbers, a review-queue product card, and a HOLD
+   warning on silent failure. Reduced motion: everything visible, static. */
+
+.shell { display: flex; flex-direction: column; gap: 10px; }
+:root[data-embedded="true"] .shell { padding: 14px clamp(14px, 2vw, 22px); }
+
+.head h1 {
+  font-family: "Space Grotesk", sans-serif; font-weight: 700;
+  font-size: clamp(1.02rem, 2.2vw, 1.3rem); letter-spacing: -0.02em; color: var(--text-strong);
+}
+:root[data-embedded="true"] .head h1 { font-size: 1.02rem; }
+.head p { font: 500 0.72rem/1.4 "DM Sans", sans-serif; color: var(--muted); margin-top: 2px; }
+
+/* ---------- gate flow ---------- */
+.flow { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.stage {
+  cursor: pointer; text-align: left; min-width: 0;
+  border: 1px solid var(--border-strong); border-top: 3px solid var(--sc);
+  border-radius: 10px; background: var(--surface); box-shadow: var(--shadow-soft);
+  padding: 9px 10px 8px; display: flex; flex-direction: column; gap: 3px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.stage b { font: 700 0.72rem/1.2 "Space Grotesk", sans-serif; color: var(--text-strong); }
+.stage code { font: 600 0.62rem/1.3 "IBM Plex Mono", monospace; color: var(--sc); }
+.stage span { font: 500 0.64rem/1.35 "DM Sans", sans-serif; color: var(--muted); }
+.stage:hover { border-color: var(--sc); }
+.stage[aria-pressed="true"] {
+  border-color: var(--sc);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--sc) 22%, transparent), var(--shadow-soft);
+}
+.play .stage { animation: pop-in 0.45s ease-out backwards; }
+.play .stage:nth-child(1) { animation-delay: 0.08s; }
+.play .stage:nth-child(2) { animation-delay: 0.18s; }
+.play .stage:nth-child(3) { animation-delay: 0.28s; }
+.play .stage:nth-child(4) { animation-delay: 0.38s; }
+@keyframes pop-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+
+.rail { position: relative; height: 4px; border-radius: 3px; background: color-mix(in srgb, var(--accent-2) 18%, transparent); overflow: hidden; }
+.rail i {
+  position: absolute; top: 0; bottom: 0; width: 46px; border-radius: 3px;
+  background: linear-gradient(90deg, transparent, var(--accent-2), transparent); left: -50px;
+}
+.play .rail i { animation: rail-run 6s linear infinite; }
+@keyframes rail-run { from { left: -50px; } to { left: 100%; } }
+
+/* outcome lanes */
+.lanes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.lane {
+  border: 1px solid var(--border); border-left: 3px solid var(--lc);
+  border-radius: 10px; background: color-mix(in srgb, var(--lc) 7%, var(--surface));
+  padding: 8px 11px; min-width: 0;
+}
+.lane b { display: block; font: 700 0.62rem/1.25 "Space Grotesk", sans-serif; letter-spacing: 0.1em; text-transform: uppercase; color: var(--lc); }
+.lane span { display: block; font: 500 0.66rem/1.45 "DM Sans", sans-serif; color: var(--muted); margin-top: 3px; }
+.play .lane { animation: pop-in 0.45s ease-out backwards; }
+.play .lane:nth-child(1) { animation-delay: 0.5s; }
+.play .lane:nth-child(2) { animation-delay: 0.6s; }
+.play .lane:nth-child(3) { animation-delay: 0.7s; }
+
+/* ---------- detail panel ---------- */
+.detail {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+  box-shadow: var(--shadow-soft); padding: 11px 13px;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.d-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.d-name {
+  font: 700 0.6rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--dc, var(--accent)); border: 1px solid color-mix(in srgb, var(--dc, var(--accent)) 45%, transparent);
+  border-radius: 999px; padding: 4px 10px;
+}
+.d-src { font: 600 0.62rem/1 "IBM Plex Mono", monospace; color: var(--muted); }
+.d-text { font: 500 0.76rem/1.55 "DM Sans", sans-serif; color: var(--text); }
+.d-text b { color: var(--text-strong); }
+
+/* ---------- evidence tiles ---------- */
+.ev-label { display: flex; align-items: center; gap: 8px; }
+.ev-label .stamp { transform: rotate(-1.6deg); }
+.tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.tile {
+  border: 1px solid var(--border); border-radius: 10px; background: var(--surface);
+  padding: 9px 11px; min-width: 0;
+}
+.tile .num { font: 700 1.1rem/1.1 "IBM Plex Mono", monospace; color: var(--tc); display: block; }
+.tile .num small { font-size: 0.72rem; font-weight: 600; color: var(--muted); }
+.tile span { display: block; font: 500 0.66rem/1.45 "DM Sans", sans-serif; color: var(--muted); margin-top: 3px; }
+
+/* ---------- queue card + warning ---------- */
+.queue {
+  border: 1px solid var(--border); border-left: 3px solid var(--S-review);
+  border-radius: 10px; background: var(--surface); padding: 9px 12px;
+}
+.queue b.title { display: block; font: 700 0.62rem/1.25 "Space Grotesk", sans-serif; letter-spacing: 0.1em; text-transform: uppercase; color: var(--S-review); margin-bottom: 5px; }
+.queue ul { list-style: none; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px 12px; }
+.queue li { font: 500 0.7rem/1.45 "DM Sans", sans-serif; color: var(--muted); padding-left: 12px; position: relative; }
+.queue li::before { content: ""; position: absolute; left: 0; top: 0.5em; width: 5px; height: 5px; border-radius: 50%; background: var(--S-review); }
+.queue li b { color: var(--text-strong); }
+.queue li code { font: 600 0.66rem/1.4 "IBM Plex Mono", monospace; color: var(--accent-2); }
+
+.warnrow {
+  border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent); border-radius: 10px;
+  background: color-mix(in srgb, var(--accent) 7%, var(--surface));
+  padding: 9px 12px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+}
+.warnrow p { font: 500 0.72rem/1.5 "DM Sans", sans-serif; color: var(--text); flex: 1; min-width: 200px; }
+.warnrow p b { color: var(--accent); }
+
+@media (max-width: 760px) {
+  .head h1 { font-size: 1rem; }
+  .flow { grid-template-columns: 1fr 1fr; }
+  .lanes { grid-template-columns: minmax(0, 1fr); }
+  .tiles { grid-template-columns: minmax(0, 1fr); }
+  .queue ul { grid-template-columns: minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .play .stage, .play .lane, .play .rail i { animation: none !important; }
+  .rail i { left: 40%; }
+}
+/* ---- glossed term ----------------------------------------------------
+   The ECE tile below states a calibration error without ever saying what
+   calibration means, which the page prose used to carry. Reveals on hover
+   for a mouse and on tap for a phone, which has no hover state. */
+.gl { position: relative; display: inline; }
+.gl > button {
+  font: inherit; color: var(--accent-2); background: none; border: 0;
+  padding: 0; cursor: help; border-bottom: 1px dashed currentColor;
+}
+.gl > span {
+  position: absolute; left: 0; bottom: calc(100% + 6px); z-index: 5;
+  width: max-content; max-width: 30ch; padding: 8px 10px;
+  border-radius: 7px; border: 1px solid var(--accent-2);
+  background: var(--bg-mid, var(--surface-strong)); color: var(--text);
+  font: 500 0.72rem/1.4 "DM Sans", system-ui, sans-serif; text-transform: none;
+  letter-spacing: normal; opacity: 0; visibility: hidden; transition: opacity 0.16s ease;
+}
+.gl:hover > span, .gl > button:focus-visible + span, .gl.open > span { opacity: 1; visibility: visible; }
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="head">
+    <h1>The gate is the product</h1>
+    <p>Six signals fuse into one calibrated number, and the queue is built for seconds. Click a stage.</p>
+  </div>
+
+  <div class="flow" role="group" aria-label="The four stages of the confidence gate">
+    <button class="stage" style="--sc: var(--accent-2)" data-i="0" aria-pressed="false">
+      <b>Six signals</b><code>logprob + 5 more</code><span>a logprob is the model's own score for how likely its answer was, and no single signal is trusted alone</span>
+    </button>
+    <button class="stage" style="--sc: var(--T1)" data-i="1" aria-pressed="false">
+      <b>Fusion model</b><code>gradient boosting</code><span>trained on labelled decisions</span>
+    </button>
+    <button class="stage" style="--sc: var(--T2)" data-i="2" aria-pressed="false">
+      <b>Calibration</b><code>per field, per tenant</code><span>thresholds are never global</span>
+    </button>
+    <button class="stage" style="--sc: var(--accent)" data-i="3" aria-pressed="false">
+      <b>Materiality check</b><code>duty at risk</code><span>stakes move the threshold</span>
+    </button>
+  </div>
+
+  <div class="rail" aria-hidden="true"><i></i></div>
+
+  <div class="lanes" role="group" aria-label="Three outcome lanes">
+    <div class="lane" style="--lc: var(--S-cleared)">
+      <b>Auto-accept</b><span>High calibrated confidence, low duty at risk. Straight to the filing pipeline.</span>
+    </div>
+    <div class="lane" style="--lc: var(--S-review)">
+      <b>Broker review queue</b><span>Uncertain or mid-stakes. Ranked for a human decision in seconds.</span>
+    </div>
+    <div class="lane" style="--lc: var(--S-hold)">
+      <b>Licensed broker sign-off</b><span>High duty at risk or novel ground. A licence goes on the line.</span>
+    </div>
+  </div>
+
+  <div class="detail" aria-live="polite">
+    <div class="d-top"><span class="d-name" id="d-name"></span><span class="d-src" id="d-src"></span></div>
+    <p class="d-text" id="d-text"></p>
+  </div>
+
+  <div class="ev-label"><span class="stamp stamp--sourced">Sourced</span></div>
+  <div class="tiles">
+    <div class="tile" style="--tc: var(--S-cleared)">
+      <span class="num"><span data-count="71" data-dec="0">0</span>%<small> vs 30%</small></span>
+      <span>median productivity gain for escalation-based review vs approve-everything review (Unstract 2026)</span>
+    </div>
+    <div class="tile" style="--tc: var(--accent-2)">
+      <span class="num"><span data-count="2.43" data-dec="2">0.00</span>x</span>
+      <span><span class="gl"><button type="button">ECARB</button><span>The benchmark's measure of how well a system picks which answers to send for review. It counts the errors found when only part of the work can be checked.</span></span> errors caught vs random sampling at a 30% review budget (ConfBench, best model)</span>
+    </div>
+    <div class="tile" style="--tc: var(--T1)">
+      <span class="num"><span data-count="0.05" data-dec="2">0.00</span><small> vs 0.31</small></span>
+      <span>ECE, best vs weak model <span class="gl"><button type="button">calibration</button><span>Calibrated means a 90%-confident answer is right about 90% of the time. How well a model states its own certainty varies from model to model.</span></span> error (ConfBench)</span>
+    </div>
+  </div>
+
+  <div class="queue">
+    <b class="title">The queue is a product surface</b>
+    <ul>
+      <li>Rank by <b>expected value of review</b>, P(error) x duty at risk, never FIFO</li>
+      <li>Present the <b>decision</b>, not the document</li>
+      <li><b>One-keystroke</b> accept or override, with the override reason captured as a training label</li>
+      <li>Never show a bare confidence number, show why it is uncertain (<code>"6-digit stable, 10-digit split between .51 and .60"</code>)</li>
+    </ul>
+  </div>
+
+  <div class="warnrow">
+    <span class="stamp stamp--hold">Hold</span>
+    <p>Confidently wrong is the deployment risk. The silent-failure rate on auto-accepted lines, <b>under 0.5%</b>, is the single most important metric in the system.</p>
+  </div>
+</div>
+<script>
+(() => {
+  const DATA = [
+    { name: 'Six signals', color: 'var(--accent-2)', src: 'fused, never trusted alone',
+      text: 'First-token logprob, self-consistency across samples at the 10, 8, and 6-digit levels (partial agreement is informative), retrieval quality of the top rulings, product-master proximity, validator residue, and materiality (duty at risk moves the threshold rather than the score).' },
+    { name: 'Fusion model', color: 'var(--T1)', src: 'Beyond Logprobs, June 2026',
+      text: 'The signals are fused by a gradient-boosting model trained on labelled decisions (the Beyond Logprobs approach, June 2026). Verbalised confidence alone is model-dependent and unreliable, ConfBench found it beats logprobs on some models and loses on others.' },
+    { name: 'Calibration', color: 'var(--T2)', src: 'per field · per risk · re-fit on change',
+      text: 'Thresholds are per-field and per-risk, never global. A $200 known SKU and a $2M AD/CVD-exposed line do not share a gate. Calibration drifts, so it is re-fit on schedule and on rulebook change.' },
+    { name: 'Materiality check', color: 'var(--accent)', src: 'stakes override score',
+      text: 'High duty-at-risk escalates straight to a licensed broker regardless of confidence. The gate is not asking how sure the model is, it is asking how much a wrong answer would cost.' }
+  ];
+  const stages = document.querySelectorAll('.stage');
+  const el = (id) => document.getElementById(id);
+  const render = (i) => {
+    const d = DATA[i];
+    el('d-name').textContent = d.name;
+    el('d-name').style.setProperty('--dc', d.color);
+    el('d-src').textContent = d.src;
+    el('d-text').textContent = d.text;
+  };
+  const select = (i) => {
+    stages.forEach((b) => b.setAttribute('aria-pressed', String(Number(b.dataset.i) === i)));
+    render(i);
+  };
+  stages.forEach((btn) => btn.addEventListener('click', () => select(Number(btn.dataset.i))));
+  select(0);
+
+  /* count-ups: t0 is the first rAF timestamp, settle fallback snaps final */
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const runCounts = () => {
+    document.querySelectorAll('[data-count]').forEach((node) => {
+      const target = parseFloat(node.dataset.count);
+      const dec = Number(node.dataset.dec);
+      if (reduce) { node.textContent = target.toFixed(dec); return; }
+      const dur = 900;
+      let t0 = null, done = false;
+      const finish = () => { if (!done) { done = true; node.textContent = target.toFixed(dec); } };
+      const step = (ts) => {
+        if (done) return;
+        if (t0 === null) t0 = ts;
+        const p = Math.min(1, (ts - t0) / dur);
+        const eased = 1 - Math.pow(1 - p, 3);
+        node.textContent = (target * eased).toFixed(dec);
+        if (p < 1) requestAnimationFrame(step); else finish();
+      };
+      requestAnimationFrame(step);
+      setTimeout(finish, dur + 300);
+    });
+  };
+
+  const shell = document.querySelector('.shell');
+  let counted = false;
+  const start = () => {
+    shell.classList.add('play');
+    if (!counted) { counted = true; runCounts(); }
+  };
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((en) => { if (en.isIntersecting) { start(); io.disconnect(); } });
+    }, { threshold: 0 });
+    io.observe(shell);
+  } else { start(); }
+  /* Report content height so the parent frame hugs the content. */
+  if (document.documentElement.dataset.embedded === 'true') {
+    const postSize = () => window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+    if ('ResizeObserver' in window) new ResizeObserver(postSize).observe(document.body);
+    window.addEventListener('load', postSize);
+  }
+})();
+
+/* Glossed terms reveal on hover for a mouse and on tap for a phone, which has
+   no hover state at all. Escape and an outside tap both close. */
+document.querySelectorAll('.gl > button').forEach((b) => {
+  b.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const gl = b.parentElement;
+    document.querySelectorAll('.gl.open').forEach((o) => { if (o !== gl) o.classList.remove('open'); });
+    gl.classList.toggle('open');
+  });
+});
+document.addEventListener('click', () => document.querySelectorAll('.gl.open').forEach((o) => o.classList.remove('open')));
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') document.querySelectorAll('.gl.open').forEach((o) => o.classList.remove('open'));
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The scope boundary &middot; what this design can help, and what it cannot fix</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="./_theme-bootstrap.js"></script>
+<script src="./_glossary.js" defer></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+  /* ============================================================================
+   * SCOPE BOUNDARY
+   *
+   * Ported from the retired shipment-story brief. Its one claim the deep dive
+   * lacked: the explicit line between what a customs-entry design can help
+   * with and the border problems it cannot touch. Drawn as a border wall the
+   * fixable items pass through and the unavoidable ones bounce off.
+   * ==========================================================================*/
+
+  .shell { gap: 16px; }
+  .lead { font-size: 0.88rem; line-height: 1.6; color: var(--muted); max-width: 76ch; }
+  .ic { display: block; flex: none; }
+
+  .board { display: grid; grid-template-columns: minmax(0, 1fr) 60px minmax(0, 1fr); gap: 14px; align-items: stretch; }
+
+  .col { display: flex; flex-direction: column; gap: 8px; }
+  .col .colhead {
+    display: flex; align-items: center; gap: 10px;
+    padding: 11px 13px; border-radius: 10px;
+    border: 1.5px solid var(--border-strong); background: var(--surface-strong);
+  }
+  .col .colhead .ic { width: 34px; height: 34px; }
+  .col .colhead b { font: 600 0.95rem/1.25 "Space Grotesk", system-ui, sans-serif; color: var(--text-strong); }
+  .col.can .colhead { border-left: 3px solid var(--accent-2); }
+  .col.can .colhead .ic { color: var(--accent-2); }
+  .col.cannot .colhead { border-left: 3px solid var(--warn, #d98032); }
+  .col.cannot .colhead .ic { color: var(--warn, #d98032); }
+
+  .item {
+    display: grid; grid-template-columns: 52px minmax(0, 1fr) auto; align-items: center; gap: 11px;
+    padding: 9px 11px; border-radius: 9px;
+    background: var(--surface); border: 1.5px solid var(--border);
+    opacity: 0.34;
+  }
+  .item.lit { opacity: 1; }
+  .item .tile {
+    display: grid; place-items: center;
+    width: 52px; height: 52px; border-radius: 12px;
+    background: var(--surface-strong); border: 1.5px solid var(--border-strong);
+    color: var(--muted);
+  }
+  .item .tile .ic { width: 32px; height: 32px; }
+  .col.can .item.lit { border-color: color-mix(in srgb, var(--accent-2) 45%, var(--border)); }
+  .col.can .item.lit .tile { color: var(--accent-2); border-color: var(--accent-2); background: color-mix(in srgb, var(--accent-2) 12%, var(--surface-strong)); }
+  .col.cannot .item.lit { border-color: color-mix(in srgb, var(--warn, #d98032) 45%, var(--border)); }
+  .col.cannot .item.lit .tile { color: var(--warn, #d98032); border-color: var(--warn, #d98032); background: color-mix(in srgb, var(--warn, #d98032) 12%, var(--surface-strong)); }
+  .item p { margin: 0; font: 500 0.86rem/1.45 "DM Sans", system-ui, sans-serif; color: var(--text); }
+
+  /* Each row names WHERE it acts, so the wide side of the row carries
+     information instead of leaving a dead band across the card. */
+  .item .when {
+    display: inline-flex; align-items: center; gap: 6px; justify-self: end;
+    font: 600 0.6rem/1 "IBM Plex Mono", ui-monospace, monospace;
+    letter-spacing: 0.06em; text-transform: uppercase; white-space: nowrap;
+    padding: 7px 10px; border-radius: 999px;
+    border: 1.5px solid var(--border-strong); color: var(--muted);
+  }
+  .item .when svg { width: 15px; height: 15px; }
+  .col.can .item.lit .when { border-color: color-mix(in srgb, var(--accent-2) 55%, var(--border)); color: var(--accent-2); }
+  .col.cannot .item.lit .when { border-color: color-mix(in srgb, var(--warn, #d98032) 55%, var(--border)); color: var(--warn, #d98032); }
+
+  /* the wall between the two columns */
+  .wall { position: relative; display: grid; place-items: center; }
+  .wall::before {
+    content: ""; position: absolute; top: 6px; bottom: 6px; left: 50%;
+    width: 0; border-left: 3px dashed var(--border-strong);
+  }
+  .wall .badge {
+    position: relative; display: grid; place-items: center;
+    width: 52px; height: 52px; border-radius: 50%;
+    background: var(--surface-strong); border: 1.5px solid var(--border-strong);
+    color: var(--muted);
+  }
+  .wall .badge .ic { width: 30px; height: 30px; }
+
+  .footline {
+    display: flex; align-items: center; gap: 11px;
+    padding: 11px 14px; border-radius: 10px;
+    background: var(--surface-strong); border: 1.5px solid var(--border-strong);
+    border-left: 3px solid var(--accent);
+  }
+  .footline .ic { width: 28px; height: 28px; color: var(--accent); flex: none; }
+  .footline p { margin: 0; font: 500 0.84rem/1.5 "DM Sans", system-ui, sans-serif; color: var(--text); }
+  .footline b { color: var(--text-strong); }
+
+  /* Everything is lit by default. Motion is the opt-in stagger. */
+  .item { opacity: 1; }
+  .item.lit { opacity: 1; }
+  @media (prefers-reduced-motion: no-preference) {
+    .motion .item { opacity: 0.34; transition: opacity 0.4s ease, border-color 0.4s ease; }
+    .motion .item.lit { opacity: 1; }
+  }
+
+  @media (max-width: 760px) {
+    .board { grid-template-columns: 1fr; }
+    .wall { min-height: 60px; }
+    .wall::before { top: 50%; bottom: auto; left: 8px; right: 8px; width: auto; border-left: 0; border-top: 3px dashed var(--border-strong); }
+    .item { grid-template-columns: 52px minmax(0, 1fr); }
+    .item .when { grid-column: 1 / -1; justify-self: start; }
+  }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 2.9 4.2 6.2v5.4c0 4.4 3.2 8.1 7.8 9.5 4.6-1.4 7.8-5.1 7.8-9.5V6.2L12 2.9Z"/><path d="m8.7 12 2.3 2.3 4.3-4.6"/>
+  </symbol>
+  <symbol id="i-barrier" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M4 9h16v4.6H4z"/><path d="m5.6 13.6 3.4-4.6M10.6 13.6 14 9M15.6 13.6 19 9"/><path d="M6 13.6V20M18 13.6V20"/>
+  </symbol>
+  <symbol id="i-diff" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="3" y="3.4" width="8.2" height="10.4" rx="1.6"/><rect x="12.8" y="10.2" width="8.2" height="10.4" rx="1.6"/><path d="M5.6 7h3M5.6 9.8h3M15.4 14.2h3M15.4 17h3"/>
+  </symbol>
+  <symbol id="i-repeat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M17.4 3.6 21 7.2l-3.6 3.6"/><path d="M3 12V9.4A2.4 2.4 0 0 1 5.4 7H21"/><path d="M6.6 20.4 3 16.8l3.6-3.6"/><path d="M21 12v2.6a2.4 2.4 0 0 1-2.4 2.4H3"/>
+  </symbol>
+  <symbol id="i-search-doc" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M14 3H6.4A1.4 1.4 0 0 0 5 4.4v15.2A1.4 1.4 0 0 0 6.4 21h11.2a1.4 1.4 0 0 0 1.4-1.4V8z"/><path d="M14 3v5h5"/><circle cx="11" cy="13.4" r="2.6"/><path d="m12.9 15.3 2.3 2.3"/>
+  </symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M18 8.4a6 6 0 1 0-12 0c0 6-2.6 7.4-2.6 7.4h17.2S18 14.4 18 8.4Z"/><path d="M10.2 19.6a2 2 0 0 0 3.6 0"/>
+  </symbol>
+  <symbol id="i-route-person" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="17.4" cy="7" r="2.8"/><path d="M12.6 20.2a4.8 4.8 0 0 1 9.6 0"/><path d="M2.6 5.4h4.2a2.6 2.6 0 0 1 2.6 2.6v6a2.6 2.6 0 0 0 2.6 2.6"/><path d="m5 3 -2.4 2.4L5 7.8"/>
+  </symbol>
+  <symbol id="i-congestion" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M3 17.4h18"/><rect x="3.4" y="11.6" width="6.4" height="5.8" rx="1"/><rect x="11" y="13" width="5" height="4.4" rx="1"/><rect x="17.2" y="12.2" width="4" height="5.2" rx="1"/><path d="M5 11.6 6.2 9h2.4l1.2 2.6"/>
+  </symbol>
+  <symbol id="i-inspect" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="10.6" cy="10.6" r="6.4"/><path d="m15.4 15.4 5 5"/><path d="M8 10.6h5.2M10.6 8v5.2"/>
+  </symbol>
+  <symbol id="i-storm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M17.4 15.8a4.2 4.2 0 0 0-.6-8.36 5.6 5.6 0 0 0-10.9 1.5A3.8 3.8 0 0 0 6.6 16"/><path d="m12.6 12.2-2.4 4h3.2l-2.4 4"/>
+  </symbol>
+  <symbol id="i-broken-box" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M20.6 7.6 12 3.4 3.4 7.6v8.8L12 20.6l8.6-4.2z"/><path d="M3.4 7.6 12 11.8l8.6-4.2M12 11.8v8.8"/><path d="m9.2 5 5.6 2.8"/>
+  </symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="9.2"/><path d="M2.8 12h18.4"/><path d="M12 2.8a14.4 14.4 0 0 1 0 18.4 14.4 14.4 0 0 1 0-18.4Z"/>
+  </symbol>
+  <symbol id="i-owner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="8" r="3.2"/><path d="M5.4 20a6.6 6.6 0 0 1 13.2 0"/>
+  </symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="9"/><path d="M12 7v5.2l3.4 2"/>
+  </symbol>
+  <symbol id="i-scales" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 3.4v17.2M7 20.6h10"/><path d="M12 5.6 5.6 7.4M12 5.6l6.4 1.8"/><path d="M3 12.8 5.6 7.4l2.6 5.4a3.1 3.1 0 0 1-5.2 0ZM15.8 12.8l2.6-5.4 2.6 5.4a3.1 3.1 0 0 1-5.2 0Z"/>
+  </symbol>
+</svg>
+
+<div class="shell motion" id="root">
+  <div class="head">
+    <span class="eyebrow">Fig. 1g &middot; the boundary, folded in from the shipment story</span>
+    <h1>What this design can help. What it cannot fix.</h1>
+    <p class="lead">This is a customs-entry and compliance design, not a promise to automate the whole border. The wall in the middle is the claim. Five kinds of problem sit on the fixable side. Five stay on the other side no matter how good the software is.</p>
+    <div class="stampline">
+      <span class="stamp stamp--proposed">Scope claim of the design</span>
+    </div>
+  </div>
+
+  <div class="board">
+    <div class="col can">
+      <div class="colhead"><svg class="ic" aria-hidden="true"><use href="#i-shield"/></svg><b>This design can help</b></div>
+      <div class="item"><span class="tile"><svg class="ic" aria-hidden="true"><use href="#i-diff"/></svg></span><p>Find fields that disagree across documents.</p><span class="when"><svg aria-hidden="true"><use href="#i-clock"/></svg>Before filing</span></div>
+      <div class="item"><span class="tile"><svg class="ic" aria-hidden="true"><use href="#i-repeat"/></svg></span><p>Recognise products that were approved before.</p><span class="when"><svg aria-hidden="true"><use href="#i-clock"/></svg>At intake</span></div>
+      <div class="item"><span class="tile"><svg class="ic" aria-hidden="true"><use href="#i-search-doc"/></svg></span><p>Surface missing value or origin evidence early.</p><span class="when"><svg aria-hidden="true"><use href="#i-clock"/></svg>Before filing</span></div>
+      <div class="item"><span class="tile"><svg class="ic" aria-hidden="true"><use href="#i-bell"/></svg></span><p>Flag past decisions affected by a rule change.</p><span class="when"><svg aria-hidden="true"><use href="#i-clock"/></svg>On rule change</span></div>
+      <div class="item"><span class="tile"><svg class="ic" aria-hidden="true"><use href="#i-route-person"/></svg></span><p>Send uncertainty to the right reviewer before filing.</p><span class="when"><svg aria-hidden="true"><use href="#i-clock"/></svg>At the gate</span></div>
+    </div>
+
+    <div class="wall" aria-hidden="true">
+      <span class="badge"><svg class="ic"><use href="#i-barrier"/></svg></span>
+    </div>
+
+    <div class="col cannot">
+      <div class="colhead"><svg class="ic" aria-hidden="true"><use href="#i-barrier"/></svg><b>This design cannot fix</b></div>
+      <div class="item"><span class="tile"><svg class="ic" aria-hidden="true"><use href="#i-congestion"/></svg></span><p>Border congestion or infrastructure limits.</p><span class="when"><svg aria-hidden="true"><use href="#i-owner"/></svg>Port and infrastructure</span></div>
+      <div class="item"><span class="tile"><svg class="ic" aria-hidden="true"><use href="#i-inspect"/></svg></span><p>Random government inspections.</p><span class="when"><svg aria-hidden="true"><use href="#i-owner"/></svg>Government</span></div>
+      <div class="item"><span class="tile"><svg class="ic" aria-hidden="true"><use href="#i-storm"/></svg></span><p>Weather, theft, or carrier capacity.</p><span class="when"><svg aria-hidden="true"><use href="#i-owner"/></svg>Weather and carrier</span></div>
+      <div class="item"><span class="tile"><svg class="ic" aria-hidden="true"><use href="#i-broken-box"/></svg></span><p>Physical damage or a missed pickup.</p><span class="when"><svg aria-hidden="true"><use href="#i-owner"/></svg>Carrier and handling</span></div>
+      <div class="item"><span class="tile"><svg class="ic" aria-hidden="true"><use href="#i-globe"/></svg></span><p>Every source of cross-border disruption.</p><span class="when"><svg aria-hidden="true"><use href="#i-owner"/></svg>The wider chain</span></div>
+    </div>
+  </div>
+
+  <div class="footline">
+    <svg class="ic" aria-hidden="true"><use href="#i-scales"/></svg>
+    <p><b>The importer stays accountable either way.</b> Software can make the work faster and more consistent, but it cannot make that accountability disappear.</p>
+  </div>
+</div>
+
+<script>
+/* Items light in reading order, fixable column first, so the boundary reads as
+   a sweep rather than a static pair of lists. Reduced motion gets everything
+   lit from the start because the stagger styles are gated behind .motion +
+   the no-preference media query. */
+const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const items = Array.from(document.querySelectorAll('.item'));
+if (reduced) {
+  items.forEach((it) => it.classList.add('lit'));
+} else {
+  items.forEach((it, i) => setTimeout(() => it.classList.add('lit'), 350 + i * 170));
+}
+
+function report() {
+  if (document.documentElement.dataset.embedded !== 'true') return;
+  window.parent.postMessage(
+    { type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+}
+if (document.documentElement.dataset.embedded === 'true') {
+  if ('ResizeObserver' in window) new ResizeObserver(report).observe(document.body);
+  window.addEventListener('load', report);
+}
+</script>
+</body>
+</html>

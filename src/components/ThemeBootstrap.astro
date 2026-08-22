@@ -8,6 +8,7 @@
     window.__m2mInitTheme = () => {
       const storageKey = 'm2m-theme';
       const root = document.documentElement;
+      const media = window.matchMedia('(prefers-color-scheme: dark)');
       const normalizeTheme = (value) => value === 'dark' || value === 'light' ? value : null;
       const getStoredTheme = () => {
         try {
@@ -37,16 +38,10 @@
 
       window.__m2mApplyTheme(getPreferredTheme(), false);
 
-      const syncSystemTheme = (event) => {
-        if (getStoredTheme()) return;
-        window.__m2mApplyTheme(event.matches ? 'dark' : 'light', false);
-      };
-
-      if (typeof media.addEventListener === 'function') {
-        media.addEventListener('change', syncSystemTheme);
-      } else if (typeof media.addListener === 'function') {
-        media.addListener(syncSystemTheme);
-      }
+      // Deliberately no prefers-color-scheme listener. Dark is the site default, so an
+      // unstored session must stay dark even if the OS scheme flips mid-session. A stored
+      // preference is the only thing that changes the theme, and the toggle sets that.
+      void media;
     };
 
     window.__m2mInitTheme();

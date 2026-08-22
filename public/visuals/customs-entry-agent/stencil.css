@@ -1,0 +1,269 @@
+/* stencil.css — the look. Pairs with stencil-engine.js.
+ *
+ * Host themes win by default: the token defaults live in @layer stencil-base,
+ * and any unlayered rule from a host stylesheet beats a layered one regardless
+ * of specificity. So this file is self-sufficient standalone and gets out of the
+ * way the moment it is dropped into a site that has its own design tokens. */
+
+@layer stencil-base {
+  :root {
+    --text-strong: #16181d; --text: #33363f; --muted: #6b7280; --muted-soft: #9aa0aa;
+    --surface: #f7f8fa; --surface-strong: #ffffff; --border: #e3e6ec; --border-strong: #d3d8e0;
+    --accent-2: #0b7285; --shadow: 0 10px 30px rgba(16, 20, 30, 0.14);
+  }
+  :root[data-theme="dark"] {
+    --text-strong: #e9edf7; --text: #c3cbdc; --muted: #8b97ad; --muted-soft: #64748b;
+    --surface: #131c2f; --surface-strong: #18223a; --border: #24304a; --border-strong: #2e3b58;
+    --accent-2: #4dd0c7; --shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --text-strong: #e9edf7; --text: #c3cbdc; --muted: #8b97ad; --muted-soft: #64748b;
+      --surface: #131c2f; --surface-strong: #18223a; --border: #24304a; --border-strong: #2e3b58;
+      --accent-2: #4dd0c7; --shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+  }
+}
+
+/* The canvas is deliberately paper-white in light and ink-navy in dark, so the
+   official icons (which carry their own colour) read as the only colour on it. */
+:root, :root[data-theme="light"] {
+  --paper: #ffffff; --ink: #4a4a52; --ink-soft: #8a8a95; --gframe: #9aa0aa; --glabel: #6b7280;
+}
+:root[data-theme="dark"] {
+  --paper: #0d1424; --ink: #9fb0cc; --ink-soft: #64748b; --gframe: #48566f; --glabel: #8fa1bd;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0d1424; --ink: #9fb0cc; --ink-soft: #64748b; --gframe: #48566f; --glabel: #8fa1bd;
+  }
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--surface); color: var(--text); -webkit-font-smoothing: antialiased; }
+
+.shell { display: flex; flex-direction: column; gap: 12px; padding: 14px clamp(14px, 2vw, 22px) 18px; }
+
+.head h1 {
+  font-family: "Space Grotesk", "DM Sans", system-ui, sans-serif; font-weight: 700;
+  font-size: clamp(1.02rem, 2.2vw, 1.3rem); letter-spacing: -0.02em; color: var(--text-strong);
+}
+.head p { font: 500 0.72rem/1.4 "DM Sans", system-ui, sans-serif; color: var(--muted); margin-top: 2px; max-width: 62ch; }
+
+/* ---------- control bars ---------- */
+.bar { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.bar .lbl {
+  font: 700 0.56rem/1 "IBM Plex Mono", ui-monospace, monospace; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--muted-soft); margin-right: 2px;
+}
+button {
+  cursor: pointer; font: 700 0.6rem/1 "IBM Plex Mono", ui-monospace, monospace; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--muted); background: var(--surface);
+  border: 1px solid var(--border-strong); border-radius: 6px; padding: 7px 10px;
+}
+button:hover { color: var(--text-strong); border-color: var(--muted); }
+button[aria-pressed="true"] {
+  color: var(--accent-2); border-color: var(--accent-2);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-2) 16%, transparent);
+}
+button:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 2px; }
+.cam { display: flex; gap: 4px; margin-left: 4px; }
+.cam button { min-width: 34px; text-align: center; }
+
+/* ---------- stage / camera ---------- */
+.stage {
+  position: relative; overflow: hidden; touch-action: pan-y;
+  height: var(--stage-h, 640px);
+  border: 1px solid var(--border-strong); border-radius: 12px;
+  background: var(--paper); cursor: grab;
+}
+.stage.dragging { cursor: grabbing; }
+.stage:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 2px; }
+.stage:fullscreen { border-radius: 0; height: 100vh !important; }
+
+.world {
+  position: absolute; top: 0; left: 0;
+  width: var(--ww, 1900px); height: var(--wh, 1060px);
+  transform: translate(var(--cx, 0px), var(--cy, 0px)) scale(var(--k, 1));
+  transform-origin: 0 0;
+}
+
+/* ---------- group frames ---------- */
+.g { position: absolute; border-radius: 4px; pointer-events: none; border: 1.5px dashed var(--gc, var(--gframe)); }
+.g.solid { border-style: solid; }
+/* The label carries the canvas colour so a connector routed through the corridor
+   that a frame's top edge sits in passes cleanly behind the text, not through
+   it. Occluding the label is what drawio does, and it beats making labels hard
+   routing obstacles — frame tops live inside corridors, so avoidance forces
+   long useless detours. */
+.g-label {
+  position: absolute; top: 3px; left: 7px; display: flex; align-items: center; gap: 6px;
+  font: 600 12px/1 "DM Sans", system-ui, sans-serif; color: var(--gc, var(--glabel)); white-space: nowrap;
+  background: var(--paper); padding: 4px 7px; border-radius: 3px;
+}
+.g-label img { width: 24px; height: 24px; }
+
+/* AWS's own frame palette */
+.g.cloud  { --gc: #232f3e; border-style: solid; }
+:root[data-theme="dark"] .g.cloud { --gc: #c8d3e4; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .g.cloud { --gc: #c8d3e4; } }
+.g.region  { --gc: #00a4a6; }
+.g.vpc     { --gc: #8c4fff; border-style: solid; }
+.g.subnet  { --gc: #7aa116; }
+.g.subnetq { --gc: #dd3522; }
+.g.account { --gc: #e7157b; }
+.g.plain   { --gc: var(--gframe); }
+
+/* ---------- nodes ---------- */
+.node {
+  position: absolute; width: 164px; height: 154px;
+  display: flex; flex-direction: column; align-items: center; gap: 5px;
+  text-align: center; cursor: pointer; background: none; border: 0; padding: 0;
+  text-transform: none; letter-spacing: normal;
+}
+.node .ic {
+  width: 92px; height: 92px; border-radius: 10px; background: #fff;
+  display: grid; place-items: center; flex: 0 0 auto;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
+  transition: transform 180ms cubic-bezier(0.34, 1.4, 0.64, 1), box-shadow 180ms ease;
+}
+.node .ic img { width: 72px; height: 72px; display: block; }
+.ic-ph { font: 700 15px/1 "IBM Plex Mono", ui-monospace, monospace; color: #232f3e; }
+.node .nm { font: 700 11px/1.22 "DM Sans", system-ui, sans-serif; color: var(--text-strong); max-width: 164px; }
+.node .sv { font: 500 9.5px/1.2 "IBM Plex Mono", ui-monospace, monospace; color: var(--ink-soft); max-width: 164px; }
+.node:hover .ic, .node:focus-visible .ic { transform: translateY(-3px) scale(1.06); box-shadow: 0 6px 14px rgba(0, 0, 0, 0.26); }
+.node:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 3px; border-radius: 6px; }
+.node[aria-pressed="true"] .ic { box-shadow: 0 0 0 3px var(--accent-2), 0 6px 14px rgba(0, 0, 0, 0.22); }
+
+/* dimming while a step is active */
+.diagram.stepping .node:not(.on) { opacity: 0.24; }
+.diagram.stepping .g { opacity: 0.5; }
+.node, .g { transition: opacity 260ms ease; }
+
+/* Out of the selected scenario. Pushed back rather than hidden: the reader is
+   meant to keep seeing the whole system and understand that this journey does
+   not use that part of it, which is the argument a scenario is making. */
+/* The two themes need different floors, not the same opacity number. --text-strong
+   near-white on a near-black --paper stays legible even dimmed hard; the same
+   opacity on near-black text over white paper crosses into WCAG-failing grey well
+   before it gets that faint. So light theme carries its own, higher floor. */
+.diagram.scoped .node.oos { opacity: 0.55; }
+.diagram.scoped .wire.oos, .diagram.scoped .head-a.oos { opacity: 0.22; }
+:root[data-theme="dark"] .diagram.scoped .node.oos { opacity: 0.32; }
+:root[data-theme="dark"] .diagram.scoped .wire.oos, :root[data-theme="dark"] .diagram.scoped .head-a.oos { opacity: 0.07; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .diagram.scoped .node.oos { opacity: 0.32; }
+  :root:not([data-theme="light"]) .diagram.scoped .wire.oos, :root:not([data-theme="light"]) .diagram.scoped .head-a.oos { opacity: 0.07; }
+}
+/* A numbered badge belonging to another journey is hidden outright. Ghosted it
+   still reads as a badge, and a badge floating clear of any visible wire looks
+   like a rendering bug rather than a deliberate omission. */
+.diagram.scoped .bdg.oos { display: none; }
+.diagram.scoped .pk.oos, .diagram.scoped .pk-halo.oos { display: none; }
+#scenbar[hidden] { display: none; }
+
+/* ---------- wires ---------- */
+.wires { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+.wire { fill: none; stroke: var(--ink); stroke-width: 1.6; stroke-linejoin: round; stroke-linecap: round; }
+.wire.dashed { stroke-dasharray: 5 5; stroke-width: 1.4; opacity: 0.85; }
+.head-a { fill: var(--ink); }
+.diagram.stepping .wire:not(.on), .diagram.stepping .head-a:not(.on) { opacity: 0.1; }
+.wire.on { stroke-width: 2.6; }
+.wire, .head-a { transition: opacity 260ms ease, stroke-width 200ms ease; }
+
+.bdg circle { fill: #16181d; }
+:root[data-theme="dark"] .bdg circle { fill: #e9edf7; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .bdg circle { fill: #e9edf7; } }
+.bdg text {
+  font: 700 11px/1 "IBM Plex Mono", ui-monospace, monospace; fill: #fff;
+  text-anchor: middle; dominant-baseline: central;
+}
+:root[data-theme="dark"] .bdg text { fill: #0d1424; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .bdg text { fill: #0d1424; } }
+.diagram.stepping .bdg:not(.on) { opacity: 0.12; }
+.bdg { transition: opacity 260ms ease; }
+.xmark { stroke-width: 2.2; stroke-linecap: round; }
+
+/* ---------- narration ---------- */
+.narr {
+  display: grid; grid-template-columns: auto 1fr; gap: 12px; align-items: center;
+  border: 1px solid var(--border-strong); border-radius: 10px;
+  background: var(--surface); padding: 10px 13px;
+}
+.narr[hidden] { display: none; }
+.narr .num { font: 700 0.72rem/1 "IBM Plex Mono", ui-monospace, monospace; letter-spacing: 0.06em; color: var(--accent-2); white-space: nowrap; }
+.narr .cap { font: 500 0.78rem/1.45 "DM Sans", system-ui, sans-serif; color: var(--text); }
+.scrub { display: flex; gap: 3px; flex-wrap: wrap; align-items: center; }
+.scrub[hidden] { display: none; }
+.tick { width: 30px; height: 30px; padding: 0; border-radius: 5px; font: 700 0.6rem/1 "IBM Plex Mono", ui-monospace, monospace; display: grid; place-items: center; }
+
+/* ---------- detail card ---------- */
+.card {
+  position: absolute; z-index: 5; width: min(300px, 78vw);
+  border: 1px solid var(--border-strong); border-radius: 10px;
+  background: var(--surface-strong); box-shadow: var(--shadow); padding: 12px 13px;
+}
+.card[hidden] { display: none; }
+.card h3 { font: 700 0.86rem/1.25 "Space Grotesk", "DM Sans", system-ui, sans-serif; color: var(--text-strong); display: flex; align-items: center; gap: 8px; }
+.card h3 .ci { width: 38px; height: 38px; background: #fff; border-radius: 4px; padding: 2px; display: grid; place-items: center; flex: 0 0 auto; }
+.card h3 .ci img { width: 32px; height: 32px; display: block; }
+.card .svc { font: 600 0.6rem/1 "IBM Plex Mono", ui-monospace, monospace; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-2); margin-top: 7px; }
+.card p { font: 500 0.76rem/1.5 "DM Sans", system-ui, sans-serif; color: var(--text); margin-top: 6px; }
+.card .where { font: 500 0.68rem/1.4 "DM Sans", system-ui, sans-serif; color: var(--muted); margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); }
+.card .x { position: absolute; top: 8px; right: 8px; padding: 4px 7px; }
+
+/* ---------- legend ---------- */
+.legend { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; }
+.lg { display: flex; align-items: center; gap: 6px; font: 500 0.68rem/1 "DM Sans", system-ui, sans-serif; color: var(--muted); }
+.lg i { width: 26px; height: 0; border-top: 2px solid var(--k, var(--ink)); display: block; }
+.lg.dash i { border-top-style: dashed; }
+
+.fsbar { position: absolute; top: 10px; left: 10px; right: 10px; z-index: 6; display: none; gap: 8px; flex-wrap: wrap; }
+.stage:fullscreen .fsbar { display: flex; }
+.stage:fullscreen .fsbar > * { background: var(--surface-strong); border-radius: 8px; padding: 5px; box-shadow: var(--shadow); }
+
+.hint { font: 500 0.66rem/1.4 "DM Sans", system-ui, sans-serif; color: var(--muted-soft); }
+
+/* ---------- motion ----------
+   Everything that moves is opt-in under no-preference, so a reader who has asked
+   for calm gets a complete, legible, static drawing rather than a degraded one. */
+@media (prefers-reduced-motion: no-preference) {
+  .wire.draw {
+    stroke-dasharray: var(--len); stroke-dashoffset: var(--len);
+    animation: draw 620ms cubic-bezier(0.33, 0.9, 0.3, 1) forwards;
+    animation-delay: calc(var(--i) * 70ms);
+  }
+  .wire.dashed.draw { stroke-dasharray: 5 5; stroke-dashoffset: 0; animation: fadein 500ms ease forwards; }
+  .head-a.draw { opacity: 0; animation: fadein 300ms ease forwards; animation-delay: calc(var(--i) * 70ms + 480ms); }
+  .bdg.draw { opacity: 0; animation: pop 420ms cubic-bezier(0.34, 1.5, 0.64, 1) forwards; animation-delay: calc(var(--i) * 70ms + 520ms); }
+  @keyframes draw { to { stroke-dashoffset: 0; } }
+  @keyframes fadein { to { opacity: 1; } }
+  @keyframes pop { 0% { opacity: 0; transform: scale(0.4); } 100% { opacity: 1; transform: scale(1); } }
+
+  .pk { offset-rotate: 0deg; fill: var(--wc, var(--ink)); animation: ride var(--dur, 5s) linear infinite; animation-delay: calc(var(--i) * 300ms); }
+  .pk-halo { fill: var(--wc, var(--ink)); opacity: 0.2; animation: ride var(--dur, 5s) linear infinite; animation-delay: calc(var(--i) * 300ms); }
+  @keyframes ride {
+    0% { offset-distance: 0%; opacity: 0; }
+    7% { opacity: 1; }
+    88% { opacity: 1; }
+    100% { offset-distance: 100%; opacity: 0; }
+  }
+  /* a blocked route kills its packet at the boundary it never crosses */
+  .pk.dead { animation: stall var(--dur, 3.6s) cubic-bezier(0.2, 0.8, 0.3, 1) infinite; }
+  @keyframes stall {
+    0% { offset-distance: 0%; opacity: 0; }
+    10% { opacity: 1; }
+    54% { offset-distance: 52%; opacity: 1; }
+    68% { offset-distance: 52%; opacity: 0.15; }
+    100% { offset-distance: 52%; opacity: 0; }
+  }
+  .diagram.stepping .pk, .diagram.stepping .pk-halo { display: none; }
+  .diagram.stepping .pk.on, .diagram.stepping .pk-halo.on { display: block; }
+}
+@media (prefers-reduced-motion: reduce) { .node .ic { transition: none; } }
+
+@media print {
+  .bar, .narr, .hint, .fsbar, .legend { display: none !important; }
+  .stage { height: auto !important; overflow: visible !important; border: 0; }
+  .world { transform: scale(var(--pk, 0.55)); }
+}

@@ -1,0 +1,1222 @@
+/* ============================================================================
+   Systems Atlas — bespoke "atlas" template for visual-first deep-dives.
+   Every rule is scoped under .dd-atlas so nothing leaks to other pages.
+   Identity: a mission-control systems atlas. Dark (site default) is a
+   near-black blue ground with a faint engineering grid; light is a pale
+   blueprint grey with the same signal accents darkened. No sidebar: a
+   sticky horizontal chapter rail frees the full width for figures.
+   Token base below is the light blueprint; [data-theme="dark"] re-skins it.
+   ========================================================================== */
+
+.dd-atlas.article-shell {
+  /* blueprint grey (light) */
+  --at-bg-0: #eef1f6;
+  --at-bg-1: #e5eaf2;
+  --at-panel: #f8fafd;
+  --at-panel-2: #edf1f8;
+  --at-line: #bfc9db;
+  --at-line-soft: rgba(52, 72, 108, 0.28);
+  --at-line-faint: rgba(52, 72, 108, 0.08);
+  --at-ink: #121a29;
+  --at-ink-2: #3b4962;
+  --at-ink-3: #56617a;
+  --at-signal: #23527c;
+  --at-signal-dim: rgba(35, 82, 124, 0.11);
+  --at-good: #226444;
+  --at-good-dim: rgba(34, 100, 68, 0.12);
+  --at-warn: #8a5a10;
+  --at-warn-dim: rgba(138, 90, 16, 0.12);
+  --at-alert: #992a22;
+  --at-alert-dim: rgba(153, 42, 34, 0.11);
+  --at-glow: none;
+  --at-shadow: rgba(30, 42, 66, 0.20);
+
+  --at-display: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif;
+  --at-body-font: "DM Sans", "Segoe UI", system-ui, sans-serif;
+  --at-mono: "IBM Plex Mono", "Cascadia Code", ui-monospace, monospace;
+
+  /* layout scale */
+  --at-prose: clamp(40rem, 64vw, 64rem);
+  --at-wide: clamp(1240px, 92vw, 1600px);
+
+  position: relative;
+  color: var(--at-ink);
+  font-family: var(--at-body-font);
+  /* faint engineering grid over the ground */
+  background:
+    repeating-linear-gradient(0deg, transparent 0 47px, var(--at-line-faint) 47px 48px),
+    repeating-linear-gradient(90deg, transparent 0 47px, var(--at-line-faint) 47px 48px),
+    linear-gradient(180deg, var(--at-bg-0), var(--at-bg-1));
+  border: 1px solid var(--at-line);
+  border-radius: 10px;
+  box-shadow: 0 18px 50px -28px var(--at-shadow);
+  padding: clamp(20px, 3.5vw, 44px);
+  margin-top: 8px;
+  /* clip, not hidden: clips decoration without creating a scroll container,
+     so the sticky chapter rail keeps pinning. */
+  overflow: clip;
+}
+
+/* ============================================================
+   Mission control (dark) — the site default mode.
+   ============================================================ */
+[data-theme="dark"] .dd-atlas.article-shell {
+  --at-bg-0: #070b14;
+  --at-bg-1: #0a101d;
+  --at-panel: #101828;
+  --at-panel-2: #0c1322;
+  --at-line: #24344f;
+  --at-line-soft: rgba(130, 158, 208, 0.26);
+  --at-line-faint: rgba(130, 158, 208, 0.06);
+  --at-ink: #e9edf7;
+  --at-ink-2: #c0cadd;
+  --at-ink-3: #8d9ab4;
+  --at-signal: #6fa8dc;
+  --at-signal-dim: rgba(111, 168, 220, 0.13);
+  --at-good: #45d493;
+  --at-good-dim: rgba(69, 212, 147, 0.13);
+  --at-warn: #e6b25c;
+  --at-warn-dim: rgba(230, 178, 92, 0.13);
+  --at-alert: #ef6459;
+  --at-alert-dim: rgba(239, 100, 89, 0.13);
+  --at-glow: 0 0 9px;
+  --at-shadow: rgba(0, 0, 0, 0.75);
+
+  box-shadow: 0 0 0 1px rgba(36, 52, 79, 0.4), 0 30px 80px -40px rgba(0, 0, 0, 0.9);
+}
+
+/* corner registration marks — pure decoration */
+.dd-atlas::before,
+.dd-atlas::after {
+  content: "";
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid var(--at-line-soft);
+  pointer-events: none;
+}
+.dd-atlas::before {
+  top: 12px;
+  left: 12px;
+  border-right: 0;
+  border-bottom: 0;
+}
+.dd-atlas::after {
+  bottom: 12px;
+  right: 12px;
+  border-left: 0;
+  border-top: 0;
+}
+
+/* ----------------------------------------------------------------- Header -- */
+.dd-atlas .at-header {
+  max-width: var(--at-wide);
+  margin: 0 auto;
+  border-bottom: 1px solid var(--at-line);
+  padding-bottom: clamp(18px, 3vw, 28px);
+  margin-bottom: 0;
+}
+
+.dd-atlas .at-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-family: var(--at-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--at-ink-2);
+  padding: 6px 12px;
+  border: 1px solid var(--at-line);
+  border-radius: 999px;
+  background: var(--at-panel-2);
+}
+.dd-atlas .at-eyebrow-sep { color: var(--at-signal); }
+.dd-atlas .at-eyebrow-no { color: var(--at-signal); font-weight: 600; }
+.dd-atlas .at-eyebrow-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--at-good);
+  font-weight: 600;
+}
+.dd-atlas .at-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--at-good);
+  box-shadow: var(--at-glow) var(--at-good);
+}
+
+.dd-atlas .at-title {
+  font-family: var(--at-display);
+  font-weight: 700;
+  font-size: clamp(2.2rem, 5.6vw, 4rem);
+  line-height: 1.02;
+  letter-spacing: -0.025em;
+  overflow-wrap: break-word;
+  color: var(--at-ink);
+  margin: 0.5em 0 0;
+}
+
+.dd-atlas .at-subtitle {
+  font-family: var(--at-mono);
+  font-size: clamp(0.88rem, 1.7vw, 1.02rem);
+  color: var(--at-signal);
+  margin: 0.85rem 0 0;
+  max-width: 72ch;
+}
+.dd-atlas .at-slash { color: var(--at-alert); font-weight: 700; }
+
+.dd-atlas .at-lead {
+  font-family: var(--at-body-font);
+  font-weight: 400;
+  font-size: clamp(1.05rem, 1.8vw, 1.22rem);
+  line-height: 1.62;
+  color: var(--at-ink-2);
+  margin: 1.1rem 0 0;
+  max-width: 88ch;
+}
+
+/* instrument readout strip. Author coords as "Label · value" strings. */
+.dd-atlas .at-coords {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 1.4rem 0 0;
+}
+.dd-atlas .at-coords span {
+  font-family: var(--at-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--at-ink-2);
+  padding: 7px 13px;
+  border: 1px solid var(--at-line);
+  border-radius: 6px;
+  background: var(--at-panel);
+}
+
+.dd-atlas .at-header-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px 22px;
+  margin-top: 1.5rem;
+}
+.dd-atlas .back-link,
+.dd-atlas .meta-row,
+.dd-atlas .meta-pill,
+.dd-atlas .entry-meta { color: var(--at-ink-2); }
+.dd-atlas .tag-row { margin-top: 1.2rem; }
+.dd-atlas .tag {
+  background: transparent;
+  border: 1px solid var(--at-line-soft);
+  border-radius: 4px;
+  color: var(--at-ink-2);
+  font-family: var(--at-mono);
+  font-size: 0.69rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 5px 10px;
+}
+
+/* ----------------------------------------------------- Sticky chapter rail -- */
+/* Pins just below the sticky site header (top 16px + ~76px pill). */
+.dd-atlas .at-rail {
+  position: sticky;
+  top: 92px;
+  z-index: 5;
+  margin: 0 calc(-1 * clamp(20px, 3.5vw, 44px));
+  padding: 0 clamp(20px, 3.5vw, 44px);
+  background: linear-gradient(180deg, var(--at-bg-0), var(--at-bg-1));
+  border-bottom: 1px solid var(--at-line);
+}
+.dd-atlas .at-rail-track {
+  display: flex;
+  align-items: stretch;
+  gap: 2px;
+  max-width: var(--at-wide);
+  margin: 0 auto;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+}
+.dd-atlas .at-rail-link {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 13px 14px 11px;
+  border-bottom: 2px solid transparent;
+  text-decoration: none;
+  color: var(--at-ink-3);
+  white-space: nowrap;
+  transition: color 0.18s ease, border-color 0.18s ease;
+}
+.dd-atlas .at-rail-no {
+  font-family: var(--at-mono);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--at-ink-3);
+}
+.dd-atlas .at-rail-label {
+  font-family: var(--at-display);
+  font-size: 0.82rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+.dd-atlas .at-rail-link:hover { color: var(--at-ink); }
+.dd-atlas .at-rail-link.is-active {
+  color: var(--at-ink);
+  border-bottom-color: var(--at-signal);
+}
+.dd-atlas .at-rail-link.is-active .at-rail-no {
+  color: var(--at-signal);
+  text-shadow: var(--at-glow) var(--at-signal);
+}
+.dd-atlas .at-rail-link:focus-visible {
+  outline: 2px solid var(--at-signal);
+  outline-offset: -2px;
+}
+/* The rail is grouped chapter-by-chapter in the markup so the wide layout can
+   nest figures under their chapter. In the horizontal band the grouping must
+   not exist as a box, or each chapter becomes its own flex item and the chips
+   stop sitting in one row — hence display: contents, and figures hidden. */
+.dd-atlas .at-rail-group { display: contents; }
+.dd-atlas .at-rail-fig { display: none; }
+.dd-atlas .article-body .visual-frame { scroll-margin-top: 150px; }
+
+/* ============================================================
+   Typography reset — neutralize the global terminal aesthetic.
+   :where() keeps this at (0,2,0): above the global reset at (0,1,2),
+   below this sheet's own element rules at (0,2,1). Any custom class
+   used INSIDE the body must be styled at (0,3,0) via
+   .dd-atlas .article-body .the-class — see the chip block below.
+   ============================================================ */
+.dd-atlas .article-body :where(:not(pre > code)) {
+  display: revert;
+  padding: revert;
+  border: revert;
+  border-radius: 0;
+  background: none;
+  font-family: var(--at-body-font);
+  font-size: revert;
+  color: revert;
+}
+
+.dd-atlas .article-body {
+  position: relative;
+  margin-top: 0;
+  padding-top: clamp(20px, 3vw, 32px);
+  color: var(--at-ink-2);
+  font-size: 1.06rem;
+  line-height: 1.68;
+}
+
+/* Prose and instruments/figures both fill the full content column. */
+.dd-atlas .article-body > p,
+.dd-atlas .article-body > ul,
+.dd-atlas .article-body > ol,
+.dd-atlas .article-body > h3,
+.dd-atlas .article-body > h4,
+.dd-atlas .article-body > blockquote {
+  max-width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+.dd-atlas .article-body > .note-panel,
+.dd-atlas .article-body > .callout {
+  max-width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+.dd-atlas .article-body > .signal-grid,
+.dd-atlas .article-body > .stat-strip,
+.dd-atlas .article-body > .visual-frame,
+.dd-atlas .article-body > details,
+.dd-atlas .article-body > table {
+  max-width: var(--at-wide);
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.dd-atlas .article-body p,
+.dd-atlas .article-body li { color: var(--at-ink-2); }
+.dd-atlas .article-body strong { color: var(--at-ink); font-weight: 600; }
+.dd-atlas .article-body em { color: var(--at-signal); font-style: italic; }
+.dd-atlas .article-body a {
+  color: var(--at-signal);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-thickness: 1px;
+}
+
+/* chapter headings styled as full-width section bands */
+.dd-atlas .at-body h2 {
+  position: relative;
+  max-width: var(--at-wide);
+  font-family: var(--at-display);
+  font-weight: 700;
+  font-size: clamp(1.6rem, 3.4vw, 2.4rem);
+  line-height: 1.1;
+  letter-spacing: -0.015em;
+  color: var(--at-ink);
+  margin: 3.4rem auto 1.2rem;
+  padding: 22px 0 0;
+  border-top: 1px solid var(--at-line);
+  scroll-margin-top: 152px;
+}
+.dd-atlas .at-body h2:first-of-type { margin-top: 0.8rem; border-top: 0; padding-top: 0; }
+/* signal tick on the band — lights when the chapter is current */
+.dd-atlas .at-body h2::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: 0;
+  width: 64px;
+  height: 3px;
+  background: var(--at-line-soft);
+  transition: background 0.2s ease, box-shadow 0.2s ease, width 0.25s ease;
+}
+.dd-atlas .at-body h2:first-of-type::before { top: -14px; }
+.dd-atlas .at-body h2.is-current::before {
+  width: 120px;
+  background: var(--at-signal);
+  box-shadow: var(--at-glow) var(--at-signal);
+}
+
+.dd-atlas .at-body h3,
+.dd-atlas .at-body h4 {
+  font-family: var(--at-display);
+  font-weight: 600;
+  color: var(--at-ink);
+  margin: 1.8rem auto 0.6rem;
+}
+
+/* inline code chip + terminal pre */
+.dd-atlas .article-body :not(pre) > code {
+  font-family: var(--at-mono);
+  font-size: 0.86em;
+  color: var(--at-ink);
+  background: var(--at-panel-2);
+  border: 1px solid var(--at-line-soft);
+  border-radius: 4px;
+  padding: 0.08em 0.36em;
+}
+.dd-atlas .article-body pre {
+  border-radius: 8px;
+  border: 1px solid var(--at-line);
+  background: var(--at-panel-2);
+}
+.dd-atlas .article-body pre code {
+  font-family: var(--at-mono);
+  color: var(--at-ink);
+}
+
+/* --------------------------------------------------------- Verdict chips -- */
+/* Signal-LED chips. Used in the header and inline in the body; both
+   selectors carry (0,3,0)+ so the typography revert cannot strip them. */
+.dd-atlas .at-chip,
+.dd-atlas .article-body .at-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--at-mono);
+  font-size: 0.64rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  padding: 4px 9px;
+  color: var(--at-ink-2);
+  background: transparent;
+  white-space: nowrap;
+}
+.dd-atlas .at-chip::before,
+.dd-atlas .article-body .at-chip::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: var(--at-glow) currentColor;
+}
+.dd-atlas .at-chip--confirmed { color: var(--at-good); background: var(--at-good-dim); }
+.dd-atlas .at-chip--proposed { color: var(--at-ink-2); background: transparent; }
+.dd-atlas .at-chip--open { color: var(--at-warn); background: var(--at-warn-dim); }
+.dd-atlas .at-chip--vendor-claim { color: var(--at-signal); background: var(--at-signal-dim); }
+.dd-atlas .at-chip--hold { color: var(--at-alert); background: var(--at-alert-dim); }
+.dd-atlas .at-chip--illustrative { color: var(--at-signal); background: var(--at-signal-dim); border-style: dashed; }
+
+/* ------------------------------------------------------------ Stat tiles -- */
+.dd-atlas .article-body .stat-strip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+.dd-atlas .article-body .at-stat {
+  border: 1px solid var(--at-line);
+  border-radius: 10px;
+  background: var(--at-panel);
+  padding: 1rem 1.05rem 1.05rem;
+  min-width: 0;
+}
+.dd-atlas .article-body .at-stat > b {
+  display: block;
+  font-family: var(--at-mono);
+  font-weight: 600;
+  font-size: clamp(1.5rem, 2.6vw, 2.1rem);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--at-signal);
+  font-variant-numeric: tabular-nums;
+}
+.dd-atlas .article-body .at-stat.good > b { color: var(--at-good); }
+.dd-atlas .article-body .at-stat.warn > b { color: var(--at-warn); }
+.dd-atlas .article-body .at-stat.alert > b { color: var(--at-alert); }
+.dd-atlas .article-body .at-stat > span {
+  display: block;
+  font-size: 0.85rem;
+  line-height: 1.45;
+  color: var(--at-ink-2);
+  margin-top: 0.45rem;
+}
+/* Third tile slot. The value keeps the display type slot in <b>; a sentence
+   set at clamp(1.5rem, 2.6vw, 2.1rem) wraps four lines and the four-column
+   grid goes ragged, so the claim gets its own smaller line underneath. */
+.dd-atlas .article-body .at-stat-claim {
+  display: block;
+  margin-top: 0.5rem;
+  font-family: var(--at-display);
+  font-size: 0.98rem;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--at-ink);
+}
+.dd-atlas .article-body .at-stat-claim + span { margin-top: 0.3rem; }
+
+/* ---------------------------------------------------------- Mission brief -- */
+.dd-atlas .article-body .note-panel {
+  display: block;
+  border: 1px solid var(--at-line);
+  border-radius: 10px;
+  background: var(--at-panel);
+  padding: 0 1.15rem 1rem;
+  margin-top: 0;
+  margin-bottom: 1.6rem;
+  overflow: hidden;
+}
+.dd-atlas .article-body .note-panel::before {
+  content: "Mission brief";
+  display: block;
+  margin: 0 -1.15rem 0.9rem;
+  padding: 9px 14px;
+  font-family: var(--at-mono);
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--at-signal);
+  background: var(--at-panel-2);
+  border-bottom: 1px solid var(--at-line);
+}
+.dd-atlas .article-body .note-panel p { margin: 0.5rem 0 0; font-size: 0.98rem; }
+.dd-atlas .article-body .note-panel p:first-of-type { margin-top: 0; }
+
+/* --------------------------------------------------------- Reading routes -- */
+/* A route is a row of anchors and it sits in the same panel as the verdict
+   chips, so a stop is square, dotless and unlined — .at-chip owns the
+   pill-plus-LED vocabulary. All (0,3,0), above the typography revert. */
+.dd-atlas .article-body .at-routes { display: block; margin: 0.9rem 0 0.1rem; }
+.dd-atlas .article-body .at-route {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.dd-atlas .article-body .at-route-who {
+  flex: 0 0 auto;
+  min-width: 8.6rem;
+  font-family: var(--at-mono);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--at-ink-3);
+}
+.dd-atlas .article-body .at-route-stop {
+  display: inline-block;
+  font-family: var(--at-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 4px 9px;
+  border: 1px solid var(--at-line);
+  border-radius: 4px;
+  background: var(--at-panel-2);
+  color: var(--at-ink-2);
+  text-decoration: none;
+}
+.dd-atlas .article-body .at-route-stop:hover { color: var(--at-ink); border-color: var(--at-signal); }
+.dd-atlas .article-body .at-route-stop:focus-visible {
+  outline: 2px solid var(--at-signal);
+  outline-offset: 2px;
+}
+
+/* ------------------------------------------------ End-to-end solution map -- */
+.dd-atlas .article-body .at-solution-map {
+  max-width: var(--at-wide);
+  margin: 0 auto 2rem;
+  padding: 1.1rem;
+  border: 1px solid var(--at-line);
+  border-radius: 10px;
+  background: var(--at-panel);
+  scroll-margin-top: 152px;
+}
+.dd-atlas .article-body .at-solution-map:focus-visible {
+  outline: 2px solid var(--at-signal);
+  outline-offset: 3px;
+}
+.dd-atlas .article-body .at-solution-map__head {
+  display: grid;
+  gap: 0.35rem;
+  max-width: 76ch;
+}
+.dd-atlas .article-body .at-solution-map__head > span {
+  font-family: var(--at-mono);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--at-signal);
+}
+.dd-atlas .article-body .at-solution-map__head > strong {
+  font-family: var(--at-display);
+  font-size: clamp(1.15rem, 2vw, 1.45rem);
+  line-height: 1.25;
+  color: var(--at-ink);
+}
+.dd-atlas .article-body .at-solution-map__head > p {
+  margin: 0;
+  color: var(--at-ink-2);
+}
+.dd-atlas .article-body .at-solution-map ol {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 8px;
+  margin: 1rem 0;
+  padding: 0;
+  list-style: none;
+}
+.dd-atlas .article-body .at-solution-map li {
+  min-width: 0;
+}
+.dd-atlas .article-body .at-solution-map li > a {
+  display: grid;
+  align-content: start;
+  gap: 0.35rem;
+  height: 100%;
+  padding: 0.8rem;
+  border: 1px solid var(--at-line-soft);
+  border-radius: 7px;
+  background: var(--at-panel-2);
+  color: var(--at-ink);
+  text-decoration: none;
+}
+.dd-atlas .article-body .at-solution-map li > a:hover {
+  border-color: var(--at-signal);
+}
+.dd-atlas .article-body .at-solution-map li > a:focus-visible {
+  outline: 2px solid var(--at-signal);
+  outline-offset: 2px;
+}
+.dd-atlas .article-body .at-solution-map li b {
+  font-family: var(--at-mono);
+  font-size: 0.7rem;
+  color: var(--at-signal);
+}
+.dd-atlas .article-body .at-solution-map li strong {
+  font-family: var(--at-display);
+  font-size: 0.9rem;
+  line-height: 1.25;
+  color: var(--at-ink);
+}
+.dd-atlas .article-body .at-solution-map li span {
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: var(--at-ink-2);
+}
+.dd-atlas .article-body .at-solution-map__proof {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.dd-atlas .article-body .at-solution-map__proof p {
+  display: grid;
+  gap: 0.25rem;
+  margin: 0;
+  padding: 0.7rem 0.8rem;
+  border-left: 3px solid var(--at-good);
+  background: var(--at-good-dim);
+}
+.dd-atlas .article-body .at-solution-map__proof strong {
+  font-family: var(--at-mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--at-good);
+}
+.dd-atlas .article-body .at-solution-map__proof span {
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: var(--at-ink-2);
+}
+/* Anchor-only target for prose that cannot carry an id itself. */
+.dd-atlas .article-body .at-anchor { display: block; height: 0; margin: 0; }
+/* Fragment jumps have to clear the sticky header — same 152px as the h2 rule
+   above, dropping to 64px below 720px where the site header goes static. */
+.dd-atlas .article-body .at-anchor,
+.dd-atlas .article-body .stat-strip,
+.dd-atlas .article-body .callout { scroll-margin-top: 152px; }
+
+/* ---------------------------------------------------------- Signal cards -- */
+.dd-atlas .article-body .signal-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+.dd-atlas .article-body .signal-card {
+  border: 1px solid var(--at-line);
+  border-top: 3px solid var(--at-signal);
+  border-radius: 10px;
+  background: var(--at-panel);
+  padding: 0.9rem 1rem 1rem;
+  min-width: 0;
+}
+.dd-atlas .article-body .signal-label {
+  display: inline-block;
+  font-family: var(--at-mono);
+  font-size: 0.64rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--at-signal);
+  margin-bottom: 0.5rem;
+}
+.dd-atlas .article-body .signal-card > strong {
+  display: block;
+  font-family: var(--at-display);
+  font-weight: 700;
+  font-size: 1.02rem;
+  line-height: 1.3;
+  color: var(--at-ink);
+  margin-bottom: 0.35rem;
+}
+.dd-atlas .article-body .signal-card p {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.52;
+  color: var(--at-ink-2);
+}
+
+/* -------------------------------------------------------------- Callouts -- */
+.dd-atlas .article-body .callout {
+  display: block;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--at-line);
+  border-left: 4px solid var(--at-line);
+  border-radius: 10px;
+  background: var(--at-panel);
+  color: var(--at-ink-2);
+  margin-top: 1.4rem;
+  margin-bottom: 1.4rem;
+}
+.dd-atlas .article-body .callout > strong {
+  display: block;
+  font-family: var(--at-mono);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--at-ink);
+  margin: 0 0 0.4rem;
+}
+.dd-atlas .article-body .callout p { margin: 0; font-size: 0.96rem; }
+.dd-atlas .article-body .callout.warm { border-left-color: var(--at-warn); }
+.dd-atlas .article-body .callout.warm > strong { color: var(--at-warn); }
+.dd-atlas .article-body .callout.alert { border-left-color: var(--at-alert); }
+.dd-atlas .article-body .callout.alert > strong { color: var(--at-alert); }
+.dd-atlas .article-body .callout.green,
+.dd-atlas .article-body .callout.neutral { border-left-color: var(--at-good); }
+.dd-atlas .article-body .callout.green > strong,
+.dd-atlas .article-body .callout.neutral > strong { color: var(--at-good); }
+
+/* -------------------------------------------------------- Operator's note -- */
+.dd-atlas .article-body blockquote {
+  position: relative;
+  margin-top: 1.6rem;
+  margin-bottom: 1.6rem;
+  padding: 1rem 1.2rem 1rem 1.3rem;
+  border-left: 3px solid var(--at-signal);
+  background: var(--at-signal-dim);
+  border-radius: 0 10px 10px 0;
+}
+.dd-atlas .article-body blockquote::before {
+  content: "Operator's note";
+  display: block;
+  font-family: var(--at-mono);
+  font-size: 0.64rem;
+  font-weight: 600;
+  font-style: normal;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--at-signal);
+  margin-bottom: 0.4rem;
+}
+.dd-atlas .article-body blockquote p {
+  font-family: var(--at-display);
+  font-style: normal;
+  font-weight: 500;
+  font-size: 1.04rem;
+  line-height: 1.58;
+  color: var(--at-ink);
+  margin: 0;
+}
+.dd-atlas .article-body blockquote p + p { margin-top: 0.6rem; }
+
+/* ------------------------------------------------------------- Tables ----- */
+.dd-atlas .article-body table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1.6rem;
+  margin-bottom: 1.6rem;
+  border: 1px solid var(--at-line);
+  border-radius: 10px;
+  font-size: 0.93rem;
+}
+.dd-atlas .article-body th,
+.dd-atlas .article-body td {
+  display: table-cell;
+  padding: 9px 13px;
+  border: 0;
+  border-bottom: 1px solid var(--at-line-faint);
+  text-align: left;
+  vertical-align: top;
+  color: var(--at-ink-2);
+}
+.dd-atlas .article-body td { font-variant-numeric: tabular-nums; }
+.dd-atlas .article-body th {
+  font-family: var(--at-mono);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--at-ink);
+  background: var(--at-panel-2);
+  border-bottom: 1px solid var(--at-line);
+}
+.dd-atlas .article-body tbody tr:last-child td { border-bottom: 0; }
+.dd-atlas .article-body tbody tr:nth-child(even) td { background: var(--at-line-faint); }
+.dd-atlas .article-body td strong { color: var(--at-ink); }
+
+/* ----------------------------------------------------- Details / summary -- */
+/* Collapsible registers — the revert neutralizes the global look. */
+.dd-atlas .article-body details {
+  margin-top: 1.4rem;
+  margin-bottom: 2rem;
+  border: 1px solid var(--at-line);
+  border-radius: 10px;
+  background: var(--at-panel);
+  overflow: hidden;
+}
+.dd-atlas .article-body summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  font-family: var(--at-mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--at-ink);
+  background: var(--at-panel-2);
+}
+.dd-atlas .article-body summary::before {
+  content: "Register";
+  flex: 0 0 auto;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--at-signal);
+  border: 1px solid var(--at-signal);
+  border-radius: 999px;
+  padding: 3px 8px;
+}
+/* "Register" is the wrong word for a glossary, and the glossaries are the one
+   details variant that opens itself on wide viewports (see spine-atlas.js). */
+.dd-atlas .article-body details.at-glossary > summary::before { content: "Plain words"; }
+.dd-atlas .article-body summary::after {
+  content: "+";
+  flex: 0 0 auto;
+  margin-left: auto;
+  font-size: 0.9rem;
+  color: var(--at-signal);
+}
+.dd-atlas .article-body summary::-webkit-details-marker { display: none; }
+.dd-atlas .article-body details[open] summary::after { content: "\2212"; }
+.dd-atlas .article-body details[open] summary {
+  border-bottom: 1px solid var(--at-line);
+}
+.dd-atlas .article-body summary:focus-visible {
+  outline: 2px solid var(--at-signal);
+  outline-offset: -2px;
+}
+.dd-atlas .article-body details table { margin: 0; border: 0; }
+.dd-atlas .article-body details table + table { margin-top: 1rem; }
+.dd-atlas .article-body details > div > table { margin: 0; border: 0; }
+
+/* section separator */
+.dd-atlas .article-body hr {
+  border: 0;
+  border-top: 1px dashed var(--at-line);
+  max-width: var(--at-wide);
+  margin: 2.4rem auto;
+}
+
+/* ------------------------------------------------------- Figure frames ---- */
+/* Chrome bar is exactly 26px — the site-wide +26px authoring rule for
+   --vf-h/--vf-h-m applies; autosizing visuals self-correct via postMessage. */
+.dd-atlas .article-body { counter-reset: figure; }
+/* Claim line. It sits OUTSIDE the frame, above it: .visual-frame is
+   height:var(--vf-h) with overflow:hidden, so anything inside is clipped.
+   At (0,3,0) this beats the > p { max-width: 100% } rule further up, which is
+   what keeps the claim on the figure's own column instead of running wider
+   than the figure it introduces. */
+.dd-atlas .article-body .at-fig-claim {
+  max-width: var(--at-wide);
+  margin: 1.7rem auto 0.5rem;
+  font-family: var(--at-display);
+  font-size: 1.12rem;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--at-ink);
+  border-left: 2px solid var(--at-signal);
+  padding-left: 12px;
+}
+.dd-atlas .article-body .at-fig-claim + .visual-frame { margin-top: 0.9rem; }
+.dd-atlas .article-body .visual-frame {
+  position: relative;
+  counter-increment: figure;
+  border: 1px solid var(--at-line);
+  border-radius: 10px;
+  background: var(--at-panel);
+  margin-top: 1.7rem;
+  margin-bottom: 2.2rem;
+  padding-top: 26px;
+  overflow: hidden;
+}
+.dd-atlas .article-body .visual-frame::before {
+  content: "Fig. " counter(figure, decimal-leading-zero) " · Interactive";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  font-family: var(--at-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--at-ink-2);
+  background: var(--at-panel-2);
+  border-bottom: 1px solid var(--at-line);
+  z-index: 1;
+}
+.dd-atlas .article-body .visual-frame::after {
+  content: "";
+  position: absolute;
+  top: 9px;
+  right: 12px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--at-signal);
+  box-shadow: var(--at-glow) var(--at-signal);
+  z-index: 2;
+}
+.dd-atlas .article-body .visual-frame iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: var(--at-panel);
+}
+
+/* ------------------------------------------------------------- Motion ----- */
+@media (prefers-reduced-motion: no-preference) {
+  .dd-atlas .at-title,
+  .dd-atlas .at-subtitle,
+  .dd-atlas .at-lead,
+  .dd-atlas .at-coords {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  .dd-atlas.at-loaded .at-title,
+  .dd-atlas.at-loaded .at-subtitle,
+  .dd-atlas.at-loaded .at-lead,
+  .dd-atlas.at-loaded .at-coords {
+    animation: at-rise 0.6s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+  }
+  .dd-atlas.at-loaded .at-subtitle { animation-delay: 0.08s; }
+  .dd-atlas.at-loaded .at-lead { animation-delay: 0.16s; }
+  .dd-atlas.at-loaded .at-coords { animation-delay: 0.24s; }
+}
+@keyframes at-rise { to { opacity: 1; transform: translateY(0); } }
+
+/* ================================================================
+   Wide screens: the rail stands up.
+
+   Below 1640px this page is a header, a horizontal chapter band and a
+   centred column, and nothing here applies. Above it the band becomes a
+   vertical index down the left and the shell breaks out to 1800px, which
+   is the only way the figures actually gain width — a 236px rail inside
+   the site's 1560px shell would eat exactly what the figures would win.
+
+   Consequence worth knowing: this page then reads wider than the site
+   header and every other page. That is deliberate (an atlas is a wide
+   thing) and it is one line to undo.
+   ================================================================ */
+/* The whole block is gated on :has() support, because the shell breakout and
+   the two-column grid only make sense together. Without :has() the shell
+   stays at 1560px, and a 236px rail inside it would leave the figures
+   NARROWER than the horizontal-rail layout they replaced. */
+@supports selector(:has(*)) {
+@media (min-width: 1640px) {
+  .site-shell:has(.dd-atlas) { --max-width: 1800px; }
+
+  .dd-atlas.article-shell {
+    display: grid;
+    grid-template-columns: 236px minmax(0, 1fr);
+    column-gap: 40px;
+    /* figures and headings now fill the body column rather than a fixed cap */
+    --at-wide: 100%;
+  }
+  .dd-atlas .at-header {
+    grid-column: 2;
+    max-width: none;
+    margin: 0;
+  }
+  .dd-atlas .at-body { grid-column: 2; min-width: 0; }
+
+  /* The rail item stretches to the full row height so the track inside it
+     has somewhere to travel. Sticking the item itself would do nothing:
+     a stretched grid item is already as tall as its containing block. */
+  .dd-atlas .at-rail {
+    grid-column: 1;
+    position: static;
+    margin: 0;
+    padding: 0;
+    background: none;
+    border-bottom: 0;
+    border-right: 1px solid var(--at-line);
+  }
+  .dd-atlas .at-rail-track {
+    position: sticky;
+    top: 92px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    max-width: none;
+    margin: 0;
+    padding: clamp(20px, 3vw, 32px) 14px 20px 0;
+    max-height: calc(100vh - 116px);
+    overflow-x: hidden;
+    overflow-y: auto;
+    scrollbar-width: thin;
+  }
+  .dd-atlas .at-rail-track::-webkit-scrollbar { width: 6px; }
+
+  .dd-atlas .at-rail-group { display: block; }
+  .dd-atlas .at-rail-group + .at-rail-group { margin-top: 4px; }
+  .dd-atlas .at-rail-link {
+    align-items: baseline;
+    padding: 9px 10px 9px 13px;
+    border-bottom: 0;
+    border-left: 2px solid transparent;
+    white-space: normal;
+  }
+  .dd-atlas .at-rail-link.is-active {
+    border-bottom-color: transparent;
+    border-left-color: var(--at-signal);
+    background: var(--at-signal-dim);
+  }
+  .dd-atlas .at-rail-fig {
+    padding: 5px 10px 5px 34px;
+    border-left: 2px solid transparent;
+    font-family: var(--at-body-font);
+    font-size: 0.76rem;
+    line-height: 1.35;
+    color: var(--at-ink-3);
+    text-decoration: none;
+    transition: color 0.16s ease, border-color 0.16s ease;
+  }
+  .dd-atlas .at-rail-fig::before {
+    content: "";
+    display: inline-block;
+    width: 5px;
+    height: 5px;
+    margin: 0 8px 2px -13px;
+    border: 1px solid var(--at-line-soft);
+    border-radius: 1px;
+  }
+  .dd-atlas .at-rail-fig:hover { color: var(--at-ink); }
+  .dd-atlas .at-rail-fig:hover::before { border-color: var(--at-signal); background: var(--at-signal); }
+  .dd-atlas .at-rail-fig:focus-visible { outline: 2px solid var(--at-signal); outline-offset: -2px; }
+  /* Only the chapter you are reading expands its figures; the rest collapse so
+     the index stays scannable instead of becoming a wall of fifteen links. */
+  .dd-atlas .at-rail-group.is-open .at-rail-fig { display: block; }
+}
+}
+
+/* ----------------------------------------------------------- Responsive --- */
+@media (max-width: 960px) {
+  .dd-atlas .article-body .signal-grid,
+  .dd-atlas .article-body .stat-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .dd-atlas .article-body .at-solution-map ol { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 760px) {
+  .dd-atlas .article-body .signal-grid { grid-template-columns: minmax(0, 1fr); }
+  .dd-atlas .article-body .at-solution-map__proof { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 720px) {
+  /* the site header goes static at this width, so the rail owns the top */
+  .dd-atlas .at-rail { top: 0; }
+  .dd-atlas .at-body h2 { scroll-margin-top: 64px; }
+  .dd-atlas .article-body .at-anchor,
+  .dd-atlas .article-body .stat-strip,
+  .dd-atlas .article-body .callout,
+  .dd-atlas .article-body .at-solution-map,
+  .dd-atlas .article-body .visual-frame { scroll-margin-top: 64px; }
+  .dd-atlas .article-body .at-route-who { min-width: 100%; }
+}
+@media (max-width: 560px) {
+  .dd-atlas .article-body .stat-strip { grid-template-columns: minmax(0, 1fr); }
+  .dd-atlas .article-body .at-solution-map ol { grid-template-columns: minmax(0, 1fr); }
+  .dd-atlas::before,
+  .dd-atlas::after { display: none; }
+}
+
+/* ============================================================================
+   Plain-words glossary
+   ----------------------------------------------------------------------------
+   .at-term marks a word this page cannot avoid using. The definition is
+   authored in data-def and spine-atlas.js upgrades the span into a button
+   carrying a real .at-pop element, so the text is in the DOM and gets
+   announced rather than living in CSS content where screen readers cannot
+   reach it. Positioned absolute against the term itself, not appended to
+   body: the shell uses `overflow: clip`, but the prose column sits well
+   inside the shell padding so a popover under a word is never trimmed.
+   .at-term--end flips it right-aligned when it would run past the column.
+   Without JS the term still reads as ordinary prose and every definition
+   remains reachable in the vocabulary-board figure.
+   ========================================================================== */
+.dd-atlas .article-body .at-term {
+  position: relative;
+  display: inline;
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  border-bottom: 1px dashed var(--at-signal);
+  padding: 0;
+  margin: 0;
+  cursor: help;
+  text-align: inherit;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.dd-atlas .article-body button.at-term:hover,
+.dd-atlas .article-body button.at-term:focus-visible {
+  background: var(--at-signal-dim);
+  border-bottom-style: solid;
+  outline: none;
+}
+.dd-atlas .article-body button.at-term:focus-visible {
+  outline: 2px solid var(--at-signal);
+  outline-offset: 2px;
+}
+.dd-atlas .article-body .at-pop {
+  position: absolute;
+  top: calc(100% + 7px);
+  left: 0;
+  z-index: 40;
+  width: max-content;
+  max-width: min(30ch, 78vw);
+  padding: 7px 10px;
+  border: 1px solid var(--at-line);
+  border-radius: 8px;
+  background: var(--at-panel);
+  box-shadow: 0 12px 28px -14px var(--at-shadow);
+  color: var(--at-ink-2);
+  font: 500 0.78rem/1.5 var(--at-body-font);
+  text-transform: none;
+  letter-spacing: normal;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-3px);
+  transition: opacity 0.14s ease, transform 0.14s ease, visibility 0.14s;
+  pointer-events: none;
+}
+.dd-atlas .article-body .at-term--end .at-pop { left: auto; right: 0; }
+.dd-atlas .article-body button.at-term:hover .at-pop,
+.dd-atlas .article-body button.at-term:focus-visible .at-pop,
+.dd-atlas .article-body button.at-term.is-open .at-pop {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+@media (prefers-reduced-motion: reduce) {
+  .dd-atlas .article-body .at-pop { transition: none; }
+}
+
+/* ============================================================================
+   Plain-words layer
+   ----------------------------------------------------------------------------
+   .at-plain-first is the zero-jargon opener: the whole argument before any
+   term is introduced. .at-plain is the one-line restatement under each chapter
+   heading. Both are deliberately styled as a different register from the body
+   prose so a reader can skim only these and still get the argument, and both
+   sit ahead of the technical text rather than replacing it.
+   ========================================================================== */
+.dd-atlas .article-body .at-plain-first {
+  border-left: 3px solid var(--at-good);
+  background: linear-gradient(180deg, var(--at-good-dim), transparent 78%), var(--at-panel);
+}
+.dd-atlas .article-body .at-plain-first p:first-child {
+  font-family: var(--at-display);
+  letter-spacing: 0.01em;
+}
+.dd-atlas .article-body .at-plain {
+  margin: -0.35rem 0 1.15rem;
+  padding: 0 0 0 0.85rem;
+  border-left: 2px solid var(--at-signal);
+  color: var(--at-ink-2);
+  font: 500 1.02rem/1.62 var(--at-body-font);
+  font-style: italic;
+}
+@media (max-width: 760px) {
+  .dd-atlas .article-body .at-plain { font-size: 0.96rem; }
+}

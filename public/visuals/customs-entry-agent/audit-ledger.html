@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nothing is ever overwritten, or it never happened</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="./_theme-bootstrap.js"></script>
+<script src="./_glossary.js" defer></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+/* Audit Ledger. Four append-only DECISION record versions for one SKU,
+   chained by supersedes arrows, each clickable into a detail panel. Below,
+   a three-card rules strip and a dashed OPEN counterweight card. */
+
+.shell { display: flex; flex-direction: column; gap: 10px; }
+:root[data-embedded="true"] .shell { padding: 14px clamp(14px, 2vw, 22px); }
+
+.head h1 {
+  font-family: "Space Grotesk", sans-serif; font-weight: 700;
+  font-size: clamp(1.02rem, 2.2vw, 1.3rem); letter-spacing: -0.02em; color: var(--text-strong);
+}
+:root[data-embedded="true"] .head h1 { font-size: 1.02rem; }
+.head p { font: 500 0.72rem/1.4 "DM Sans", sans-serif; color: var(--muted); margin-top: 2px; }
+
+.sku {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  font: 600 0.66rem/1.4 "IBM Plex Mono", monospace; color: var(--text);
+}
+.sku b { color: var(--text-strong); }
+
+/* ---------- record chain ---------- */
+.chain { display: grid; grid-template-columns: 1fr 16px 1fr 16px 1fr 16px 1fr; gap: 4px; align-items: stretch; }
+.rec {
+  cursor: pointer; text-align: left; min-width: 0;
+  border: 1px solid var(--border-strong); border-top: 3px double var(--rc);
+  border-radius: 8px; background: var(--surface-strong); box-shadow: var(--shadow-soft);
+  padding: 8px 9px; display: flex; flex-direction: column; gap: 5px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.rec:hover { border-color: var(--rc); }
+.rec[aria-pressed="true"] {
+  border-color: var(--rc);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--rc) 22%, transparent), var(--shadow-soft);
+}
+.rec .top { display: flex; align-items: center; justify-content: space-between; gap: 6px; flex-wrap: wrap; }
+.rec .ver { font: 700 0.72rem/1 "Space Grotesk", sans-serif; color: var(--text-strong); }
+.rec .date { font: 600 0.58rem/1.2 "IBM Plex Mono", monospace; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted-soft); }
+.rec .line { font: 600 0.66rem/1.35 "IBM Plex Mono", monospace; color: var(--text); border-top: 1px solid var(--border); padding-top: 5px; }
+.rec .line b { color: var(--rc); font-weight: 700; }
+.rec .status { font: 500 0.62rem/1.35 "DM Sans", sans-serif; color: var(--muted); }
+.pins { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 6px; border-top: 1px dashed var(--border); padding-top: 5px; }
+.pins i { font: 500 0.58rem/1.3 "IBM Plex Mono", monospace; font-style: normal; color: var(--muted-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pins i b { color: var(--muted); font-weight: 600; }
+
+.arrow { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; color: var(--muted-soft); }
+.arrow span { font: 700 0.58rem/1 "IBM Plex Mono", monospace; writing-mode: vertical-rl; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted-soft); }
+.arrow i { font-style: normal; font: 700 0.72rem/1 "IBM Plex Mono", monospace; }
+
+.play .rec { animation: rec-in 0.45s ease-out backwards; }
+.play .rec:nth-of-type(1) { animation-delay: 0.10s; }
+.play .rec:nth-of-type(2) { animation-delay: 0.24s; }
+.play .rec:nth-of-type(3) { animation-delay: 0.38s; }
+.play .rec:nth-of-type(4) { animation-delay: 0.52s; }
+@keyframes rec-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+
+/* ---------- detail panel ---------- */
+.detail {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+  box-shadow: var(--shadow-soft); padding: 11px 13px;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.d-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.d-meta { font: 600 0.62rem/1.3 "IBM Plex Mono", monospace; color: var(--muted); }
+.d-text { font: 500 0.76rem/1.55 "DM Sans", sans-serif; color: var(--text); }
+.d-pins { font: 500 0.72rem/1.5 "DM Sans", sans-serif; color: var(--muted); }
+.d-pins b { color: var(--accent); font-weight: 700; }
+
+/* ---------- rules strip + counterweight ---------- */
+.rules { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.card {
+  border: 1px solid var(--border); border-left: 3px solid var(--fc, var(--accent-2));
+  border-radius: 10px; background: var(--surface); padding: 8px 11px; min-width: 0;
+}
+.card b { display: block; font: 700 0.62rem/1.25 "Space Grotesk", sans-serif; letter-spacing: 0.1em; text-transform: uppercase; color: var(--fc, var(--accent-2)); }
+.card span { display: block; font: 500 0.66rem/1.45 "DM Sans", sans-serif; color: var(--muted); margin-top: 3px; }
+.card span b { display: inline; font: 700 0.66rem/1.45 "DM Sans", sans-serif; letter-spacing: 0; text-transform: none; color: var(--text-strong); }
+.play .rules .card, .play .counter { animation: rec-in 0.45s ease-out backwards; animation-delay: 0.6s; }
+
+.counter {
+  border: 1.5px dashed var(--warn); border-radius: 10px;
+  background: color-mix(in srgb, var(--warn) 6%, transparent);
+  padding: 9px 12px; display: flex; align-items: flex-start; gap: 10px; flex-wrap: wrap;
+}
+.counter p { font: 500 0.72rem/1.5 "DM Sans", sans-serif; color: var(--text); flex: 1; min-width: 220px; }
+.counter p b { color: var(--text-strong); }
+
+@media (max-width: 760px) {
+  .head h1 { font-size: 1rem; }
+  .chain { grid-template-columns: 1fr; }
+  .arrow { flex-direction: row; height: 18px; }
+  .arrow span { writing-mode: horizontal-tb; }
+  .arrow i { transform: rotate(90deg); }
+  .rules { grid-template-columns: minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .play .rec, .play .rules .card, .play .counter { animation: none !important; }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="head">
+    <h1>Nothing is ever overwritten, or it never happened</h1>
+    <p>One SKU, four record versions, five years of retention. Click a record.</p>
+  </div>
+
+  <div class="sku">
+    <span class="stamp stamp--illustrative">Illustrative</span>
+    <span><b>SKU BRKT-88-1042-B</b> · DECISION records, classification decision, one row per version</span>
+  </div>
+
+  <div class="chain" role="group" aria-label="Four versions of one decision record, chained by supersedes links">
+    <button class="rec" style="--rc: var(--muted)" data-i="0" aria-pressed="false">
+      <div class="top"><span class="ver">v1</span><span class="stamp stamp--proposed">Proposed</span></div>
+      <span class="date">Feb 2026</span>
+      <div class="line">decided_by <b>agent:tier-2</b> · conf 0.62 · hts 8708.29.50</div>
+      <span class="status">status: superseded</span>
+      <div class="pins"><i><b>model</b> cs-4.5</i><i><b>prompt</b> v18</i><i><b>corpus</b> 2026.02.03</i><i><b>rulebook</b> 2026.01.29</i></div>
+    </button>
+    <div class="arrow" aria-hidden="true"><span>supersedes</span><i>&gt;</i></div>
+    <button class="rec" style="--rc: var(--S-cleared)" data-i="1" aria-pressed="false">
+      <div class="top"><span class="ver">v2</span><span class="stamp stamp--confirmed">Confirmed</span></div>
+      <span class="date">Feb 2026</span>
+      <div class="line">decided_by <b>human</b> · lic 21-004417 · hts 7616.99.51</div>
+      <span class="status">status: active until v4 · broker override</span>
+      <div class="pins"><i><b>model</b> n/a</i><i><b>prompt</b> n/a</i><i><b>corpus</b> 2026.02.03</i><i><b>rulebook</b> 2026.01.29</i></div>
+    </button>
+    <div class="arrow" aria-hidden="true"><span>supersedes</span><i>&gt;</i></div>
+    <button class="rec" style="--rc: var(--S-hold)" data-i="2" aria-pressed="false">
+      <div class="top"><span class="ver">v3</span><span class="stamp stamp--hold">Hold</span></div>
+      <span class="date">Jul 20 2026</span>
+      <div class="line">change event <b>s338 proclamations · Canada</b></div>
+      <span class="status">status: invalidated · written by the watcher join</span>
+      <div class="pins"><i><b>model</b> n/a</i><i><b>prompt</b> n/a</i><i><b>corpus</b> 2026.07.20</i><i><b>rulebook</b> 2026.07.20</i></div>
+    </button>
+    <div class="arrow" aria-hidden="true"><span>supersedes</span><i>&gt;</i></div>
+    <button class="rec" style="--rc: var(--S-cleared)" data-i="3" aria-pressed="false">
+      <div class="top"><span class="ver">v4</span><span class="stamp stamp--confirmed">Confirmed</span></div>
+      <span class="date">Jul 21 2026</span>
+      <div class="line">re-derived · <b>human re-approved</b> · hts 7616.99.51</div>
+      <span class="status">status: active · new duty stack recorded</span>
+      <div class="pins"><i><b>model</b> cs-4.5</i><i><b>prompt</b> v22</i><i><b>corpus</b> 2026.07.21</i><i><b>rulebook</b> 2026.07.20</i></div>
+    </button>
+  </div>
+
+  <div class="detail" aria-live="polite">
+    <div class="d-top"><span class="stamp" id="d-stamp"></span><span class="d-meta" id="d-meta"></span></div>
+    <p class="d-text" id="d-text"></p>
+    <p class="d-pins">The four reproducibility pins ride on every row: model_id, prompt_version, corpus_version, rulebook_version. <b>A null in any of these is a defect, not a missing nice-to-have.</b> They are how a 2026 decision is re-derived in 2031 during a 19 U.S.C. 1592 proceeding.</p>
+  </div>
+
+  <div class="rules">
+    <div class="card" style="--fc: var(--accent-2)">
+      <b>Never update</b>
+      <span>Rows are never updated. A change writes a new row with <b>supersedes_id</b>. Enforced by a database rule, not convention.</span>
+    </div>
+    <div class="card" style="--fc: var(--good)">
+      <b>Reasonable care</b>
+      <span>Reasonable care is a <b>process</b> standard. The defence is a record. Here is the documented basis, the ruling relied on, the licensed broker who approved it, the date, and the tariff version in force.</span>
+    </div>
+    <div class="card" style="--fc: var(--accent)">
+      <b>Retention</b>
+      <span>Five years from date of entry (19 CFR 163.4). Proposed <b>six years on S3 Object Lock compliance mode</b>, which nobody can shorten, including the account root.</span>
+    </div>
+  </div>
+
+  <div class="counter">
+    <span class="stamp stamp--open">Open</span>
+    <p><b>The ledger cuts both ways. It is discoverable.</b> "Model proposed X at 0.62, reviewer overrode in 14 seconds" is evidence of reasonable care in one pattern and evidence against it in another. Counsel decides what is recorded at what granularity <b>before</b> the schema ships.</p>
+  </div>
+</div>
+<script>
+(() => {
+  const DATA = [
+    { stamp: 'Proposed', cls: 'stamp--proposed', meta: 'v1 · Feb 2026 · decided_by agent:tier-2',
+      text: 'The Tier 2 agent proposed HTS 8708.29.50, a motor-vehicle body part, at confidence 0.62, below the auto-file floor, so it routed to a human. The row was never edited. When the broker decided otherwise, v2 was appended and v1 became a permanent record of what the model believed and why.' },
+    { stamp: 'Confirmed', cls: 'stamp--confirmed', meta: 'v2 · Feb 2026 · decided_by human · approved_by_licence 21-004417',
+      text: 'The broker override to HTS 7616.99.51, with the recorded rationale "GRI 1, note 2(b) to Section XVII excludes parts of general use, so an aluminium bracket falls to Section XV". This is the classic override the model missed. The reason became a training label, and this SKU became a Tier 0 recall from this day. Active until v4.' },
+    { stamp: 'Hold', cls: 'stamp--hold', meta: 'v3 · Jul 20 2026 · change event: s338 proclamations, Canada',
+      text: 'Invalidated by a rulebook change, not by anyone touching the record. The watcher join between change events and open decisions produced this row automatically. Nothing was edited in place, v2 simply stopped being the latest word.' },
+    { stamp: 'Confirmed', cls: 'stamp--confirmed', meta: 'v4 · Jul 21 2026 · re-derived under rulebook v2026.07.20',
+      text: 'The decision re-derived under rulebook v2026.07.20, human re-approved, with the new duty stack recorded. Four rows now tell the whole story of one SKU: proposal, override, invalidation, re-derivation, each pinned to the versions in force.' }
+  ];
+  const recs = document.querySelectorAll('.rec');
+  const stampEl = document.getElementById('d-stamp');
+  const select = (i) => {
+    recs.forEach((b) => b.setAttribute('aria-pressed', String(Number(b.dataset.i) === i)));
+    const d = DATA[i];
+    stampEl.className = 'stamp ' + d.cls;
+    stampEl.textContent = d.stamp;
+    document.getElementById('d-meta').textContent = d.meta;
+    document.getElementById('d-text').textContent = d.text;
+  };
+  recs.forEach((btn) => btn.addEventListener('click', () => select(Number(btn.dataset.i))));
+  select(1);
+
+  const shell = document.querySelector('.shell');
+  const start = () => shell.classList.add('play');
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((en) => { if (en.isIntersecting) { start(); io.disconnect(); } });
+    }, { threshold: 0 });
+    io.observe(shell);
+  } else { start(); }
+  /* Report content height so the parent frame hugs the content. */
+  if (document.documentElement.dataset.embedded === 'true') {
+    const postSize = () => window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+    if ('ResizeObserver' in window) new ResizeObserver(postSize).observe(document.body);
+    window.addEventListener('load', postSize);
+  }
+})();
+</script>
+</body>
+</html>

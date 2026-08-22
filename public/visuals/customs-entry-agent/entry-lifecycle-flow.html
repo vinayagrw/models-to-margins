@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>End to end &middot; one entry travels the system</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="./_theme-bootstrap.js"></script>
+<script src="./_glossary.js" defer></script>
+<link rel="stylesheet" href="./_theme.css">
+<link rel="stylesheet" href="./stencil.css">
+<style>
+  :root[data-embedded="true"] .head h1 { font-size: 1.02rem; }
+  body { background: transparent; }
+
+  /* ---------- caption-first poster ----------
+     A static route map that paints with the HTML, before any script runs, so
+     the first view is useful rather than an empty stage. Below 760px it is the
+     default and the full stencil is one tap away. At or above 760px the boot
+     script swaps it for the engine straight away. With scripting off it stays,
+     which is the only readable state this figure has ever had without JS. */
+  .poster { display: flex; flex-direction: column; gap: 13px; }
+  .shell.is-poster > :not(#poster) { display: none; }
+  #poster[hidden] { display: none; }
+
+  .poster h1 {
+    font-family: "Space Grotesk", "DM Sans", system-ui, sans-serif; font-weight: 700;
+    font-size: clamp(1.05rem, 2.4vw, 1.34rem); letter-spacing: -0.02em;
+    line-height: 1.2; color: var(--text-strong);
+  }
+  .poster-claim {
+    font: 500 clamp(0.82rem, 1.5vw, 0.92rem)/1.5 "DM Sans", system-ui, sans-serif;
+    color: var(--text); max-width: 68ch;
+    border-left: 2px solid var(--accent-2); padding-left: 10px;
+  }
+
+  /* One card, not three. The shared spine top and tail are single wrapping
+     text chains, because the poster's job is to show where the four journeys
+     differ, not to re-narrate a flow the paragraph above the frame already
+     tells. Three bulleted columns ran to 1100px at 375px, which is longer than
+     the stencil it was supposed to preview. */
+  .pcol {
+    border: 1px solid var(--border-strong); border-radius: 10px;
+    background: var(--surface); padding: 11px 13px 12px;
+  }
+  .pcol > h2 {
+    font: 700 0.7rem/1.3 "IBM Plex Mono", ui-monospace, monospace;
+    letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-2);
+    margin-bottom: 9px;
+  }
+
+  .prail { font: 600 0.76rem/1.5 "DM Sans", system-ui, sans-serif; color: var(--text); }
+  .prail > span {
+    display: block; margin-bottom: 2px;
+    font: 700 0.62rem/1.3 "IBM Plex Mono", ui-monospace, monospace;
+    letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted-soft);
+  }
+  .prail em { font-style: normal; color: var(--accent-2); padding: 0 2px; }
+  .prail--in  { margin-bottom: 10px; padding-bottom: 9px; border-bottom: 1px dashed var(--border-strong); }
+  .prail--out { margin-top: 10px; padding-top: 9px; border-top: 1px dashed var(--border-strong); }
+  .pcol ul { list-style: none; }
+  .pcol li {
+    position: relative; margin-left: 3px; padding: 0 0 9px 14px;
+    border-left: 1px solid var(--border-strong);
+  }
+  .pcol li:last-child { border-left-color: transparent; padding-bottom: 0; }
+  .pcol li::before {
+    content: ""; position: absolute; left: -4px; top: 5px;
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--dot, var(--accent-2));
+  }
+  .pcol li b {
+    display: block; color: var(--text-strong);
+    font: 700 0.8rem/1.28 "Space Grotesk", "DM Sans", system-ui, sans-serif;
+  }
+  .pcol li i {
+    float: right; margin-left: 8px; font-style: normal;
+    font: 700 0.7rem/1.28 "IBM Plex Mono", ui-monospace, monospace;
+    letter-spacing: 0.04em; color: var(--dot, var(--accent-2));
+  }
+  .pcol li span {
+    display: block; margin-top: 1px; color: var(--muted);
+    font: 500 0.74rem/1.4 "DM Sans", system-ui, sans-serif;
+  }
+  .pcol li.t0 { --dot: var(--T0); }
+  .pcol li.t1 { --dot: var(--T1); }
+  .pcol li.t2 { --dot: var(--T2); }
+
+  .ploop {
+    border: 1px dashed var(--border-strong); border-radius: 10px; padding: 10px 12px;
+    font: 500 0.74rem/1.45 "DM Sans", system-ui, sans-serif; color: var(--muted);
+  }
+  .ploop b {
+    display: block; color: var(--text-strong); margin-bottom: 3px;
+    font: 700 0.7rem/1.3 "IBM Plex Mono", ui-monospace, monospace;
+    letter-spacing: 0.08em; text-transform: uppercase;
+  }
+
+  .pfoot { display: flex; flex-wrap: wrap; align-items: center; gap: 9px 14px; }
+  .pgo {
+    min-height: 44px; padding: 12px 17px; border-radius: 8px;
+    font: 700 0.72rem/1 "IBM Plex Mono", ui-monospace, monospace;
+    letter-spacing: 0.07em; text-transform: uppercase;
+    color: var(--bg-mid); background: var(--accent-2); border: 1px solid var(--accent-2);
+  }
+  .pgo:hover { color: var(--bg-mid); border-color: var(--accent-2); filter: brightness(1.1); }
+  .phint {
+    flex: 1 1 15rem; min-width: 13rem;
+    font: 500 0.72rem/1.4 "DM Sans", system-ui, sans-serif; color: var(--muted-soft);
+  }
+</style>
+</head>
+<body>
+<div class="shell is-poster">
+
+  <section class="poster" id="poster" aria-labelledby="poster-h">
+    <div class="stampline"><span class="stamp stamp--illustrative">Illustrative walkthrough</span></div>
+    <h1 id="poster-h">One entry, four journeys, one system</h1>
+    <p class="poster-claim">Every line item travels the same spine. The four journeys differ only at the split and at the gate.</p>
+
+    <div class="pfoot">
+      <button type="button" class="pgo" id="poster-go" aria-describedby="poster-hint">Open the full end-to-end stencil</button>
+      <p class="phint" id="poster-hint">Four scenarios over one drawing, seventeen steps and a detail card on every stage.</p>
+    </div>
+    <noscript>
+      <style>#poster-go { display: none; }</style>
+      <p class="phint">The interactive stencil needs JavaScript. The card below carries the same argument.</p>
+    </noscript>
+
+    <div class="pcol">
+      <h2>Where the journeys diverge</h2>
+
+      <p class="prail prail--in"><span>Shared spine in</span>Documents arrive <em>&rsaquo;</em> sandboxed parse <em>&rsaquo;</em> entity resolution <em>&rsaquo;</em> the split</p>
+
+      <ul>
+        <li class="t0"><i>70&ndash;85%</i><b>Tier 0 &middot; Recall</b><span>Replays an approved decision for an identical SKU. No model call.</span></li>
+        <li class="t1"><i>10&ndash;20%</i><b>Tier 1 &middot; Deduce</b><span>Reasons from the nearest approved neighbour, which it must cite.</span></li>
+        <li class="t2"><i>5&ndash;15%</i><b>Tier 2 &middot; Reason</b><span>Full reasoning against the pinned rulebook. Never auto-accepted.</span></li>
+      </ul>
+
+      <p class="prail prail--out"><span>Shared spine out</span>Validator gauntlet <em>&rsaquo;</em> confidence gate <em>&rsaquo;</em> accept, review or sign off <em>&rsaquo;</em> assemble, file, record</p>
+    </div>
+
+    <p class="ploop"><b>And one journey that runs backwards</b>A rule changes, the watcher lists the past decisions that cited it, and they re-derive through the same gate and signature as a first decision.</p>
+  </section>
+
+  <div class="head">
+    <h1 id="h-title">End to end</h1>
+    <p id="h-intro"></p>
+    <div class="stampline"><span class="stamp stamp--illustrative">Illustrative walkthrough</span></div>
+  </div>
+
+  <div class="bar" id="scenbar" hidden><span class="lbl">Scenario</span></div>
+
+  <div class="bar" id="ctlbar">
+    <span class="lbl">Flow</span>
+    <button id="b-play" aria-pressed="false">Play</button>
+    <button id="b-all">Show all</button>
+    <span class="lbl" style="margin-left:8px">View</span>
+    <button id="b-fit">Fit</button>
+    <button id="b-full" aria-pressed="false">Fullscreen</button>
+    <span class="cam">
+      <button id="b-out" aria-label="Zoom out">&minus;</button>
+      <button id="b-in" aria-label="Zoom in">+</button>
+    </span>
+    <span class="hint" style="margin-left:6px">Drag to pan &middot; wheel or pinch to zoom</span>
+  </div>
+
+  <div class="stage" id="stage" tabindex="0" role="application" aria-label="Entry lifecycle stencil, pan and zoom">
+    <div class="fsbar" id="fsbar"></div>
+    <div class="world" id="world">
+      <div class="diagram" id="diagram">
+        <svg class="wires" id="svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" aria-hidden="true"></svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="narr" id="narr">
+    <span class="num" id="n-num">All steps</span>
+    <span class="cap" id="n-cap"></span>
+  </div>
+  <div class="bar scrub" id="scrub"><span class="lbl">Step</span></div>
+
+  <div class="legend" id="legend"></div>
+
+  <div class="card" id="card" hidden>
+    <button class="x" id="card-x" aria-label="Close">&times;</button>
+    <h3><span class="ci" id="card-ic"></span><span id="card-nm"></span></h3>
+    <div class="svc" id="card-sv"></div>
+    <p id="card-ds"></p>
+    <div class="where" id="card-wh"></div>
+  </div>
+</div>
+
+<script>
+/* ============================================================================
+ * The only authored block. Everything else is the shared stencil engine.
+ * ==========================================================================*/
+window.STENCIL = {
+  title: 'End to end &middot; one entry travels the system',
+  intro: 'One system, four journeys across it. Pick a scenario and the drawing narrows to the path that line item actually takes, then step through it. Click any stage for what it does.',
+  iconBase: './flow-icons/',
+  scenarioLabel: 'Scenario',
+  outsideLabel: 'Runs outside the per-entry execution.',
+
+  types: {
+    flow:  { color: 'var(--ink)',      label: 'Entry data flow' },
+    tier:  { color: '#8c4fff',         label: 'Novelty routing' },
+    human: { color: '#7aa116',         label: 'Human decision' },
+    watch: { color: 'var(--accent-2)', label: 'Rulebook watch and invalidation' }
+  },
+
+  nodes: {
+    intake:    { ic: 'inbox',      sv: 'Intake',              nm: 'Documents arrive',   ds: 'Invoice, packing list and bill of lading over SES, the portal or SFTP. Every path converges on one content-addressed store before anything is read, so there is exactly one place to sandbox.' },
+    parse:     { ic: 'shield',     sv: 'Quarantine',          nm: 'Sandboxed parse',    ds: 'One microVM per document, with no route out of the subnet. Prompt injection in a supplier PDF buys a dead sandbox and an alarm rather than a tool call.' },
+    normalise: { ic: 'merge',      sv: 'Normalise',           nm: 'Entity resolution',  ds: 'Supplier, part number and lane resolved against the product master. This step decides how much the rest of the entry costs, because it decides which tier the line lands in.' },
+    router:    { ic: 'split',      sv: 'The split',           nm: 'Novelty router',     ds: 'Deterministic code, readable in ten lines. Have we decided this exact SKU before, something near it, or nothing like it? The model is never asked to make this call.' },
+    t0:        { ic: 'bookmark',   sv: 'Tier 0 &middot; 70&ndash;85%', nm: 'Recall',     ds: 'Replay a human-approved decision for an identical SKU. Zero model calls and near zero cost. The whole economic argument is that most lines land here.' },
+    t1:        { ic: 'scales',     sv: 'Tier 1 &middot; 10&ndash;20%', nm: 'Deduce',     ds: 'Bounded reasoning from the nearest approved neighbour, which the model must cite. Bounded is the point: open-ended reasoning is what gets classification wrong.' },
+    t2:        { ic: 'gears',      sv: 'Tier 2 &middot; 5&ndash;15%',  nm: 'Reason',     ds: 'Four specialist workers, run in parallel where the sub-decisions are independent and in sequence where they are not, because origin and program eligibility take the classification as input. Each is grounded in retrieval against the pinned rulebook.' },
+    validate:  { ic: 'checklist',  sv: 'Free, deterministic', nm: 'Validator gauntlet', ds: 'Citation existence, HTS existence, arithmetic reconciliation, cross-field consistency and schema conformance. None of it needs a model, so all of it runs on every tier.' },
+    gate:      { ic: 'gauge',      sv: 'The product',         nm: 'Confidence gate',    ds: 'Six fused signals, calibrated per field, with thresholds that move with materiality. Confidence quality is not portable across model families, so it is measured here rather than trusted.' },
+    accept:    { ic: 'check',      sv: 'High confidence',     nm: 'Auto-accept',        ds: 'Opens only after the silent-failure rate has held under 0.5% in shadow for four consecutive weeks. Nothing auto-accepts on day one.' },
+    review:    { ic: 'personcheck', sv: 'Queue',              nm: 'Broker review',      ds: 'Ranked by expected value of review, with the proposal, its nearest neighbour and the diff on one screen, and one keystroke to accept.' },
+    signoff:   { ic: 'stamp',      sv: 'Mandatory',           nm: 'Licensed sign-off',  ds: 'Every Tier 2 first decision, no exceptions and regardless of score. The signature is the approval event; the ledger row it feeds, pinning the citation, corpus, rulebook version and approver, is the reasonable-care record.' },
+    file:      { ic: 'transmit',   sv: 'No model inside',     nm: 'Assemble and file',  ds: '3461, 7501 and PGA records behind a hard schema gate, transmitted over ABI to CBP ACE. The component that talks to CBP contains no model and cannot improvise.' },
+    ledger:    { ic: 'ledger',     sv: 'Append only',         nm: 'Audit ledger',       ds: 'A new row pinning model, prompt, corpus and rulebook versions, on six-year Object Lock compliance-mode retention that nobody can shorten. Rows are never updated. A correction is a new row that supersedes, and the old one stays forever.' },
+    watcher:   { ic: 'radar',      sv: 'Always on',           nm: 'Rulebook watcher',   ds: 'Monitors the HTS, proclamations and rulings feeds, and fires the invalidation join on change. It files nothing, so it cannot mis-file anything.' }
+  },
+
+  /* Columns are the journey, rows are the concern: row 1 cheap, row 2 the
+     spine, row 3 expensive, row 0 the control plane that never files. */
+  layout: {
+    intake: [0, 2], parse: [1, 2], normalise: [2, 2], router: [3, 2],
+    t0: [4, 1], t1: [4, 2], t2: [4, 3],
+    validate: [5, 2], gate: [6, 2],
+    accept: [7, 1], review: [7, 2], signoff: [7, 3],
+    file: [8, 2], ledger: [9, 2], watcher: [9, 0]
+  },
+
+  groups: [
+    { id: 'in',    cls: 'plain',   label: 'Intake', pad: 20, head: 26, nodes: ['intake', 'normalise'], kids: ['quar'] },
+    { id: 'quar',  cls: 'subnetq', label: 'Quarantine &middot; no route out', pad: 13, head: 22, nodes: ['parse'] },
+    { id: 'tiers', cls: 'vpc',     label: 'Decision tiers', pad: 16, head: 24, nodes: ['t0', 't1', 't2'] },
+    { id: 'chk',   cls: 'subnet',  label: 'Checks that cost nothing, then the gate', pad: 16, head: 24, nodes: ['validate', 'gate'] },
+    { id: 'disp',  cls: 'account', label: 'Disposition', pad: 16, head: 24, nodes: ['accept', 'review', 'signoff'] },
+    { id: 'rec',   cls: 'region',  label: 'Filing and record', pad: 16, head: 24, nodes: ['file', 'ledger'] }
+  ],
+
+  edges: [
+    { f: 'intake',    t: 'parse',     ty: 'flow',  s: 1,  n: 1 },
+    { f: 'parse',     t: 'normalise', ty: 'flow',  s: 2,  n: 2 },
+    { f: 'normalise', t: 'router',    ty: 'flow',  s: 3,  n: 3 },
+    /* Every branch owns its own steps, all the way through. A shared "and then
+       the validators run" or "and then it is filed" step would light all three
+       tiers, or all three routes into the filer, whichever journey the reader
+       picked — a drawing that contradicts the scenario it is showing. */
+    { f: 'router',    t: 't0',        ty: 'tier',  s: 4,  n: 4 },
+    { f: 't0',        t: 'validate',  ty: 'flow',  s: 5,  n: 5 },
+    { f: 'router',    t: 't1',        ty: 'tier',  s: 6 },
+    { f: 't1',        t: 'validate',  ty: 'flow',  s: 7 },
+    { f: 'router',    t: 't2',        ty: 'tier',  s: 8 },
+    { f: 't2',        t: 'validate',  ty: 'flow',  s: 9 },
+    { f: 'validate',  t: 'gate',      ty: 'flow',  s: 10, n: 6 },
+    { f: 'gate',      t: 'accept',    ty: 'flow',  s: 11, n: 7 },
+    { f: 'accept',    t: 'file',      ty: 'flow',  s: 11, n: 8 },
+    { f: 'gate',      t: 'review',    ty: 'human', s: 12 },
+    { f: 'review',    t: 'file',      ty: 'flow',  s: 12 },
+    { f: 'gate',      t: 'signoff',   ty: 'human', s: 13 },
+    { f: 'signoff',   t: 'file',      ty: 'flow',  s: 13 },
+    { f: 'file',      t: 'ledger',    ty: 'flow',  s: 14, n: 9 },
+    { f: 'watcher',   t: 'ledger',    ty: 'watch', s: 15, n: 10 },
+    { f: 'ledger',    t: 'review',    ty: 'watch', s: 16, n: 11 },
+    { f: 'review',    t: 't2',        ty: 'watch', s: 17, n: 12 }
+  ],
+
+  steps: [
+    'Every document parses alone in a quarantine microVM with no route out of the subnet. A hostile PDF from a new supplier buys a dead sandbox and an alarm, which is a guarantee the subnet design makes rather than a rule the prompt asks for.',
+    'Entity resolution matches supplier, part number and lane against the product master. This is the cheapest step on the page and the one that decides what everything after it costs.',
+    'The split. Deterministic code, readable in ten lines: have we decided this exact SKU before, something near it, or nothing like it. Asking a model to judge its own novelty is how the 60% error rate from the best published classifiers gets in.',
+    'Tier 0 replays a decision a human already approved for an identical SKU. Zero model calls. Everything about the business case depends on most lines landing here, which is why the repeat rate is the kill criterion.',
+    'Even a pure recall goes through the validator gauntlet. The checks are free and deterministic, so there is no reason to skip them, and a rulebook that has moved underneath a recalled decision shows up right here.',
+    'Tier 1 deduces from the nearest approved neighbour and must cite it. Bounded deduction is deliberately weaker than free reasoning, because the failure mode being avoided is a confident answer with no traceable basis.',
+    'The deduction chain is checked line by line, and the neighbour the model leaned on has to exist in the pinned corpus at the version recorded. A citation nobody verifies is decoration.',
+    'Tier 2 is full reasoning: four specialist workers deciding classification, valuation, origin and duty stacking, run in parallel where independent and in sequence where origin and program eligibility depend on the classification already reached, each grounded in retrieval against the pinned rulebook. Expensive, rare, and never auto-accepted.',
+    'Every citation is checked against the hash-pinned rulebook version, alongside HTS existence, arithmetic reconciliation, cross-field consistency and schema conformance. A fabricated ruling number is caught by an existence check, not by a reviewer remembering.',
+    'Six fused confidence signals, calibrated per field, with thresholds that move with materiality. Verbalised confidence beats logprobs on some model families and loses on others, so the gate fuses signals and measures them rather than trusting any one.',
+    'Auto-accept sends the line straight to assembly with no human anywhere on its path, and that lane opens only after the silent-failure rate has held under 0.5% in shadow for four consecutive weeks. It is earned by measurement rather than switched on at launch.',
+    'The gate routes to a broker with the proposal, its nearest neighbour and the diff on one screen, and one keystroke sends it on to assembly. Escalating what the system is unsure about beats asking a human to approve everything, and that gap is most of the productivity gain.',
+    'A Tier 2 first decision never auto-accepts, whatever the score says. A licensed broker signs it before it reaches assembly, and that signature plus the ledger row it feeds are the reasonable-care record the statute turns on.',
+    'The filing service assembles the 3461, the 7501 and the PGA records behind a hard schema gate, transmits over ABI, and writes an append-only row pinning model, prompt, corpus and rulebook versions. It contains no model at all, and its rows are never updated, because neither a filer that improvises nor a legal defence you can edit is worth having.',
+    'July 20. Three Section 338 proclamations land on Canadian goods. The watcher joins the change scope against every past decision and the authorities it recorded, and finds four matches, including one whose only reason was that the goods were USMCA-qualifying.',
+    'The affected decisions drop out of Tier 0 and back into the queue, flagged with the proclamation that broke them. A system that cannot invalidate its own past answers is wrong exactly when the rulebook moves, which is exactly when being wrong is expensive.',
+    'Re-derivation runs as Tier 2 against the new rulebook version, then takes the same validator, gate and sign-off path as a first decision. A superseding row lands and the old row stays, marked superseded.'
+  ],
+
+  scenarios: [
+    { id: 'repeat', label: 'Repeat SKU', steps: [1, 2, 3, 4, 5, 10, 11, 14],
+      ds: 'A weekly shipment: same supplier, same part number, same lane. Recall, validate, auto-accept, file. No model call anywhere on this path, and it is meant to be most of the volume.' },
+    { id: 'near', label: 'Near neighbour', steps: [1, 2, 3, 6, 7, 10, 12, 14],
+      ds: 'A known supplier ships a new variant. No exact match, but the product master holds close neighbours, so the model deduces from one and a broker confirms in a keystroke, and the confirmed decision becomes a Tier 0 recall for the next shipment.' },
+    { id: 'novel', label: 'Genuinely novel', steps: [1, 2, 3, 8, 9, 10, 13, 14],
+      ds: 'A new product from a new supplier, with nothing like it on record. Full reasoning and a licensed signature, and the resulting decision seeds the product master so the next shipment is Tier 0.' },
+    { id: 'rulebook', label: 'Rulebook change', steps: [15, 16, 17, 9, 10, 13, 14],
+      ds: 'The loop that runs backwards. A proclamation lands, the watcher finds the decisions it invalidates, and they re-derive through the same gate and signature as a first decision.' }
+  ],
+
+  dwell: 4600,
+  allLabel: 'All steps'
+};
+</script>
+<script>
+/* ============================================================================
+ * Boot. The engine used to load from a static <script src>, which meant a
+ * phone paid 34KB and a full layout pass before it could see anything at all.
+ * Now the poster above is the first paint and the engine is injected: at once
+ * on a wide viewport, on the button press below 760px. The shell is revealed
+ * before the script is appended, because the engine measures real node boxes
+ * and a display:none stage measures zero.
+ *
+ * Nothing here touches stencil-engine.js or stencil.css, both of which are
+ * shared with integration-map.html.
+ * ==========================================================================*/
+(() => {
+  const shell = document.querySelector('.shell');
+  const poster = document.getElementById('poster');
+  const embedded = document.documentElement.dataset.embedded === 'true';
+  const WIDE = 760;
+  /* A frame that is not laid out yet reports 0, which is not narrow, it is
+     unknown. Treating it as settled would strand a desktop reader on the poster,
+     so the width is re-checked on every size report, not only at first run. */
+  const isWide = () => document.documentElement.clientWidth >= WIDE;
+
+  /* While the poster is the whole document the engine's own reporter does not
+     exist yet, so the shell reports its height itself. Without this the parent
+     keeps the authored --vf-h-m and the reader gets a band of empty frame. */
+  let ro = null;
+  const postSize = () => {
+    if (isWide()) boot(false);
+    if (!embedded) return;
+    window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+  };
+
+  let booted = false;
+  const boot = (moveFocus) => {
+    if (booted) return;
+    booted = true;
+    if (ro) { ro.disconnect(); ro = null; }
+    shell.classList.remove('is-poster');
+    poster.hidden = true;
+    const s = document.createElement('script');
+    s.src = './stencil-engine.js';
+    s.addEventListener('load', () => {
+      /* Same focus rescue the atlas spine uses: the control that opened the
+         thing is gone, so focus goes to what replaced it rather than the top. */
+      if (moveFocus) { const stage = document.getElementById('stage'); if (stage) stage.focus(); }
+      postSize();
+    });
+    document.body.appendChild(s);
+  };
+
+  document.getElementById('poster-go').addEventListener('click', () => boot(true));
+
+  if (isWide()) {
+    boot(false);
+  } else {
+    postSize();
+    window.addEventListener('load', postSize);
+    if ('ResizeObserver' in window) { ro = new ResizeObserver(postSize); ro.observe(document.body); }
+    /* A rotation into landscape crosses the same breakpoint the engine uses for
+       its own camera, so it gets the same treatment a wide load would have. */
+    let rt = 0;
+    window.addEventListener('resize', () => {
+      clearTimeout(rt);
+      rt = setTimeout(() => { if (isWide()) boot(false); }, 160);
+    });
+  }
+})();
+</script>
+</body>
+</html>

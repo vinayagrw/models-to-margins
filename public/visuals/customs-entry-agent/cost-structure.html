@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Where the money actually goes</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="./_theme-bootstrap.js"></script>
+<script src="./_glossary.js" defer></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+/* Cost Structure. The unit-economics equation as a mono card, three
+   clickable tier columns with illustrative stacked cost bars, a detail
+   panel, two conclusion tiles, an honesty strip on straight-through
+   expectations, and the reviewer-capacity formula. */
+
+.shell { display: flex; flex-direction: column; gap: 10px; }
+:root[data-embedded="true"] .shell { padding: 14px clamp(14px, 2vw, 22px); }
+
+.head h1 {
+  font-family: "Space Grotesk", sans-serif; font-weight: 700;
+  font-size: clamp(1.02rem, 2.2vw, 1.3rem); letter-spacing: -0.02em; color: var(--text-strong);
+}
+:root[data-embedded="true"] .head h1 { font-size: 1.02rem; }
+.head p { font: 500 0.72rem/1.4 "DM Sans", sans-serif; color: var(--muted); margin-top: 2px; }
+
+/* ---------- formula cards ---------- */
+.formula {
+  border: 1px solid var(--border-strong); border-radius: 10px;
+  background: var(--surface-strong); box-shadow: var(--shadow-soft);
+  padding: 9px 12px; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;
+}
+.formula .tag {
+  font: 700 0.58rem/1 "IBM Plex Mono", monospace; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--accent-2); border: 1px solid var(--accent-2); border-radius: 3px; padding: 3px 7px;
+}
+.formula code { font: 500 0.72rem/1.6 "IBM Plex Mono", monospace; color: var(--text); }
+.formula code b { color: var(--text-strong); font-weight: 600; }
+.formula .note { flex-basis: 100%; font: 500 0.66rem/1.45 "DM Sans", sans-serif; color: var(--muted); }
+
+/* ---------- tier columns ---------- */
+.tiers { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.tier {
+  cursor: pointer; text-align: left; min-width: 0;
+  border: 1px solid var(--border-strong); border-top: 3px solid var(--tc);
+  border-radius: 10px; background: var(--surface); box-shadow: var(--shadow-soft);
+  padding: 9px 10px 10px; display: flex; flex-direction: column; gap: 6px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.tier:hover { border-color: var(--tc); }
+.tier[aria-pressed="true"] {
+  border-color: var(--tc);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--tc) 22%, transparent), var(--shadow-soft);
+}
+.tier b { font: 700 0.72rem/1.2 "Space Grotesk", sans-serif; color: var(--text-strong); }
+.tier .cost { font: 600 0.62rem/1.35 "IBM Plex Mono", monospace; color: var(--tc); }
+.tier .desc { font: 500 0.64rem/1.4 "DM Sans", sans-serif; color: var(--muted); }
+/* stacked cost bar, illustrative proportions */
+.bar { height: 84px; display: flex; flex-direction: column-reverse; justify-content: flex-start; gap: 2px; }
+.seg {
+  border-radius: 4px; min-height: 3px;
+  display: flex; align-items: center; justify-content: center; overflow: hidden;
+}
+.seg span {
+  font: 700 0.58rem/1 "IBM Plex Mono", monospace; letter-spacing: 0.1em; text-transform: uppercase;
+  white-space: nowrap;
+}
+.seg--inf { background: color-mix(in srgb, var(--tc) 26%, transparent); }
+.seg--inf span { color: var(--tc); }
+.seg--hum { background: color-mix(in srgb, var(--accent) 20%, transparent); }
+.seg--hum span { color: var(--accent); }
+.seg--zero { background: color-mix(in srgb, var(--tc) 10%, transparent); border: 1px dashed color-mix(in srgb, var(--tc) 55%, transparent); }
+.seg--zero span { color: var(--tc); }
+.play .tier { animation: rise 0.45s ease-out backwards; }
+.play .tier:nth-child(1) { animation-delay: 0.10s; }
+.play .tier:nth-child(2) { animation-delay: 0.22s; }
+.play .tier:nth-child(3) { animation-delay: 0.34s; }
+@keyframes rise { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+.bars-cap { font: 500 0.62rem/1.4 "DM Sans", sans-serif; color: var(--muted-soft); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+/* ---------- detail panel ---------- */
+.detail {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+  box-shadow: var(--shadow-soft); padding: 11px 13px;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.d-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.d-name {
+  font: 700 0.6rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--dc, var(--accent)); border: 1px solid color-mix(in srgb, var(--dc, var(--accent)) 45%, transparent);
+  border-radius: 999px; padding: 4px 10px;
+}
+.d-mech { font: 600 0.62rem/1.4 "IBM Plex Mono", monospace; color: var(--muted); }
+.d-text { font: 500 0.76rem/1.55 "DM Sans", sans-serif; color: var(--text); }
+
+/* ---------- conclusions + honesty ---------- */
+.tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.tile {
+  border: 1px solid var(--border); border-left: 3px solid var(--fc);
+  border-radius: 10px; background: var(--surface); padding: 8px 11px; min-width: 0;
+}
+.tile b { display: block; font: 700 0.62rem/1.25 "Space Grotesk", sans-serif; letter-spacing: 0.1em; text-transform: uppercase; color: var(--fc); }
+.tile span { display: block; font: 500 0.68rem/1.5 "DM Sans", sans-serif; color: var(--muted); margin-top: 3px; }
+.tile span b { display: inline; font: 700 0.68rem/1.5 "DM Sans", sans-serif; letter-spacing: 0; text-transform: none; color: var(--text-strong); }
+.honest {
+  border: 1px dashed var(--border-strong); border-radius: 10px;
+  background: color-mix(in srgb, var(--warn) 7%, transparent);
+  padding: 8px 11px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+}
+.honest p { font: 500 0.7rem/1.5 "DM Sans", sans-serif; color: var(--text); }
+.honest p b { color: var(--text-strong); font-weight: 700; }
+.play .tiles, .play .honest, .play .formula, .play .detail, .play .bars-cap { animation: rise 0.45s ease-out backwards; }
+.play .detail { animation-delay: 0.42s; }
+.play .tiles { animation-delay: 0.5s; }
+.play .honest { animation-delay: 0.58s; }
+
+@media (max-width: 760px) {
+  .head h1 { font-size: 1rem; }
+  .tiers { grid-template-columns: 1fr; }
+  .tiles { grid-template-columns: minmax(0, 1fr); }
+  .bar { height: 64px; }
+  .formula code { font-size: 0.68rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .play .tier, .play .tiles, .play .honest, .play .formula, .play .detail, .play .bars-cap { animation: none !important; }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="head">
+    <h1>Where the money actually goes</h1>
+    <p>The tier mix is the business case. Click a tier column.</p>
+  </div>
+
+  <div class="formula" aria-label="The cost per entry equation">
+    <span class="tag">Unit cost</span>
+    <code><b>cost per entry</b> = fixed infra / entries + &Sigma;<sub>lines</sub> share(tier) &times; inference(tier) + review minutes &times; loaded reviewer rate</code>
+  </div>
+
+  <div class="tiers" role="group" aria-label="Cost shape of the three tiers">
+    <button class="tier" style="--tc: var(--T0)" data-i="0" aria-pressed="false">
+      <b>Tier 0 · Recall</b>
+      <span class="cost">inference &asymp; $0</span>
+      <div class="bar" aria-hidden="true">
+        <div class="seg seg--zero" style="height: 8%"><span>&asymp; zero</span></div>
+      </div>
+      <span class="desc">a Redis lookup and a Postgres read, no model call at all</span>
+    </button>
+    <button class="tier" style="--tc: var(--T1)" data-i="1" aria-pressed="false">
+      <b>Tier 1 · Deduce</b>
+      <span class="cost">1 retrieval + 1 bounded call, &times; k</span>
+      <div class="bar" aria-hidden="true">
+        <div class="seg seg--inf" style="height: 34%"><span>inference &times; k</span></div>
+      </div>
+      <span class="desc">one bounded model call, multiplied by k for self-consistency sampling</span>
+    </button>
+    <button class="tier" style="--tc: var(--T2)" data-i="2" aria-pressed="false">
+      <b>Tier 2 · Decide</b>
+      <span class="cost">orchestrator + workers + human</span>
+      <div class="bar" aria-hidden="true">
+        <div class="seg seg--inf" style="height: 22%"><span>inference</span></div>
+        <div class="seg seg--hum" style="height: 74%"><span>human minutes</span></div>
+      </div>
+      <span class="desc">orchestrator plus up to four workers plus retrieval, plus human minutes</span>
+    </button>
+  </div>
+  <div class="bars-cap">
+    <span class="stamp stamp--illustrative">Illustrative</span>
+    <span>Bar proportions show the shape of each tier's cost, not measured values.</span>
+  </div>
+
+  <div class="detail" aria-live="polite">
+    <div class="d-top"><span class="d-name" id="d-name"></span><span class="d-mech" id="d-mech"></span></div>
+    <p class="d-text" id="d-text"></p>
+  </div>
+
+  <div class="tiles">
+    <div class="tile" style="--fc: var(--accent)">
+      <b>The real cost centre</b>
+      <span><b>Reviewer minutes dominate total cost</b> at any realistic token price. Optimising model cost is the wrong optimisation. Optimise Tier 0 hit rate and review-queue UX.</span>
+    </div>
+    <div class="tile" style="--fc: var(--T0)">
+      <b>How the target is met</b>
+      <span>The under-15%-of-human-cost target is achieved through <b>the tier mix, not model selection</b>. If the mix is wrong, no model is cheap enough to rescue it.</span>
+    </div>
+  </div>
+
+  <div class="honest">
+    <span class="stamp stamp--open">Honesty strip</span>
+    <p>Honest straight-through expectation: <b>60 to 75% of line items by month 12</b>, dominated by the customer's SKU repeat rate. Not the 95% <span class="stamp stamp--vendor">vendor claim</span> that vendor material implies.</p>
+  </div>
+
+  <div class="formula" aria-label="The reviewer capacity formula">
+    <span class="tag">Staffing</span>
+    <code><b>reviewers needed</b> = monthly lines &times; (1 &minus; STP) &times; review minutes / (monthly working minutes &times; utilisation)</code>
+    <span class="note">At 160 h per month and 70% utilisation one reviewer has about 6,700 productive minutes.</span>
+  </div>
+</div>
+<script>
+(() => {
+  const DATA = [
+    { name: 'Tier 0 · Recall', color: 'var(--T0)', mech: 'Redis lookup + Postgres read · no model call',
+      text: 'This is the entire economic argument. Protect it in code review: the easiest way to destroy the business case is a well-meaning "let the model double-check the cached answer".' },
+    { name: 'Tier 1 · Deduce', color: 'var(--T1)', mech: '1 retrieval + 1 bounded call, times k',
+      text: 'k is the multiplier people forget. Apply self-consistency selectively on materiality, never uniformly.' },
+    { name: 'Tier 2 · Decide', color: 'var(--T2)', mech: 'orchestrator + up to 4 workers + retrieval + human minutes',
+      text: 'Human time dominates by an order of magnitude. Tier 2 cost is a staffing question wearing an inference costume.' }
+  ];
+  const tiers = document.querySelectorAll('.tier');
+  const el = (id) => document.getElementById(id);
+  const select = (i) => {
+    tiers.forEach((b) => b.setAttribute('aria-pressed', String(Number(b.dataset.i) === i)));
+    const d = DATA[i];
+    el('d-name').textContent = d.name;
+    el('d-name').style.setProperty('--dc', d.color);
+    el('d-mech').textContent = d.mech;
+    el('d-text').textContent = d.text;
+  };
+  tiers.forEach((btn) => btn.addEventListener('click', () => select(Number(btn.dataset.i))));
+  select(0);
+
+  const shell = document.querySelector('.shell');
+  const start = () => shell.classList.add('play');
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((en) => { if (en.isIntersecting) { start(); io.disconnect(); } });
+    }, { threshold: 0 });
+    io.observe(shell);
+  } else { start(); }
+  /* Report content height so the parent frame hugs the content. */
+  if (document.documentElement.dataset.embedded === 'true') {
+    const postSize = () => window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+    if ('ResizeObserver' in window) new ResizeObserver(postSize).observe(document.body);
+    window.addEventListener('load', postSize);
+  }
+})();
+</script>
+</body>
+</html>

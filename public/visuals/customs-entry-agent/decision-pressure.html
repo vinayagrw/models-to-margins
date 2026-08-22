@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Which of the four costs you most &middot; and what answers it here</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="./_theme-bootstrap.js"></script>
+<script src="./_glossary.js" defer></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+  /* ============================================================================
+   * DECISION PRESSURE
+   *
+   * Icon-led, and a question rather than a statement. Every line carries four
+   * decisions; this asks the reader which one actually costs them sleep, then
+   * shows that decision's real failure mode and the specific control in this
+   * design that answers it.
+   *
+   * Four, not three. The page teaches four decisions in five other places, and
+   * dropping duty regimes to make a tidier question would contradict it.
+   *
+   * Nothing is stored and nothing is transmitted. The reveal is local.
+   * ==========================================================================*/
+
+  .shell { gap: 14px; }
+  .head .stampline { margin-top: 9px; }
+
+  .lead { font-size: 0.88rem; line-height: 1.6; color: var(--muted); max-width: 76ch; }
+  .ic { width: 26px; height: 26px; flex: none; display: block; }
+  .ic-xl { width: 64px; height: 64px; }
+
+  /* ---------- the four ---------- */
+  .picks {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 9px;
+  }
+  .pick {
+    display: flex; flex-direction: column; align-items: flex-start; gap: 8px;
+    padding: 14px 13px 13px;
+    text-align: left;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    color: var(--text);
+  }
+  .pick .badge {
+    display: grid; place-items: center;
+    width: 92px; height: 92px; border-radius: 20px;
+    background: var(--surface-strong);
+    border: 1.5px solid var(--border-strong);
+    color: var(--muted);
+    transition: color 200ms ease, border-color 200ms ease, background 200ms ease;
+  }
+  .pick b {
+    font: 600 0.94rem/1.2 "Space Grotesk", system-ui, sans-serif;
+    color: var(--text-strong);
+  }
+  .pick span.sub {
+    font: 400 0.74rem/1.45 "DM Sans", system-ui, sans-serif;
+    color: var(--muted);
+  }
+  .pick:hover .badge { color: var(--accent-2); border-color: var(--accent-2); }
+  .pick[aria-pressed="true"] {
+    border-color: var(--accent-2);
+    background: color-mix(in srgb, var(--accent-2) 8%, var(--surface));
+  }
+  .pick[aria-pressed="true"] .badge {
+    color: var(--surface-strong);
+    background: var(--accent-2);
+    border-color: var(--accent-2);
+  }
+
+  /* ---------- the reveal ---------- */
+  .reveal {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 34px minmax(0, 1fr);
+    align-items: stretch;
+    gap: 10px;
+  }
+  .panel {
+    padding: 13px 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+  }
+  .panel.problem { border-left: 3px solid var(--accent); }
+  .panel.answer  { border-left: 3px solid var(--good); }
+  .ptag {
+    display: flex; align-items: center; gap: 7px;
+    font: 700 0.62rem/1 "IBM Plex Mono", ui-monospace, monospace;
+    letter-spacing: 0.11em; text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .panel.problem .ptag { color: var(--accent); }
+  .panel.answer  .ptag { color: var(--good); }
+  .panel h2 {
+    font: 600 0.92rem/1.3 "Space Grotesk", system-ui, sans-serif;
+    color: var(--text-strong);
+    margin-bottom: 5px;
+  }
+  .panel p { font: 400 0.82rem/1.55 "DM Sans", system-ui, sans-serif; color: var(--muted); }
+  .panel .where {
+    display: inline-block; margin-top: 8px;
+    font: 500 0.68rem/1.4 "IBM Plex Mono", ui-monospace, monospace;
+    color: var(--muted-soft);
+  }
+
+  /* The arrow between problem and control. It is the whole claim of the figure:
+     this specific pain has this specific answer in the design. */
+  .arrow { display: grid; place-items: center; color: var(--border-strong); }
+  .arrow svg { width: 40px; height: 40px; }
+  .arrow .dot { fill: var(--accent-2); }
+
+  .foot { font: 400 0.68rem/1.55 "IBM Plex Mono", ui-monospace, monospace; color: var(--muted-soft); }
+
+  @media (max-width: 720px) {
+    .reveal { grid-template-columns: 1fr; }
+    .arrow { height: 40px; transform: rotate(90deg); }
+    /* The 72px badge would overflow a 375px column once the grid collapses to
+       one card per row, so step it down rather than let the card scroll. */
+    .picks { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+    .pick .badge { width: 68px; height: 68px; border-radius: 15px; }
+    .ic-xl { width: 48px; height: 48px; }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .pick { transition: border-color 200ms ease, background 200ms ease, transform 200ms ease; }
+    .pick:hover { transform: translateY(-2px); }
+    .panel { animation: rise 320ms cubic-bezier(0.3, 0.9, 0.35, 1); }
+    @keyframes rise { from { opacity: 0; transform: translateY(6px); } }
+    /* A pulse travels the connector each time a new answer is revealed. */
+    .arrow .dot { animation: slide 1.9s cubic-bezier(0.5, 0, 0.5, 1) infinite; }
+    @keyframes slide {
+      0%   { transform: translateX(-9px); opacity: 0; }
+      25%  { opacity: 1; }
+      75%  { opacity: 1; }
+      100% { transform: translateX(9px); opacity: 0; }
+    }
+  }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="i-tag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M11.4 2.6H21.4v10l-9.6 9.6a1.6 1.6 0 0 1-2.3 0l-7.7-7.7a1.6 1.6 0 0 1 0-2.3z"/><circle cx="17" cy="7" r="1.6"/>
+  </symbol>
+  <symbol id="i-coins" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <ellipse cx="12" cy="6.4" rx="7.6" ry="3"/><path d="M4.4 6.4v5.2c0 1.7 3.4 3 7.6 3s7.6-1.3 7.6-3V6.4"/><path d="M4.4 11.6v5.2c0 1.7 3.4 3 7.6 3s7.6-1.3 7.6-3v-5.2"/>
+  </symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="9.4"/><path d="M2.6 12h18.8"/><path d="M12 2.6a14.4 14.4 0 0 1 0 18.8"/><path d="M12 2.6a14.4 14.4 0 0 0 0 18.8"/>
+  </symbol>
+  <symbol id="i-layers" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 2.6 21.4 7.4 12 12.2 2.6 7.4z"/><path d="M2.6 12.2 12 17l9.4-4.8"/><path d="M2.6 16.6 12 21.4l9.4-4.8"/>
+  </symbol>
+  <symbol id="i-warning" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 3.4 22 20.6H2z"/><path d="M12 9.6v5"/><path d="M12 17.6h.01"/>
+  </symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 2.6 20.4 6v6.2c0 4.6-3.4 7.8-8.4 9.2-5-1.4-8.4-4.6-8.4-9.2V6z"/><path d="M8.6 12.2l2.4 2.4 4.4-4.6"/>
+  </symbol>
+  <symbol id="i-question" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="9.4"/><path d="M9.4 9.2a2.7 2.7 0 0 1 5.2 1c0 1.8-2.6 2.3-2.6 4"/><path d="M12 17.4h.01"/>
+  </symbol>
+</svg>
+
+<div class="shell">
+  <div class="head">
+    <span class="eyebrow">Fig. 1b &middot; four decisions, and the one that costs you most</span>
+    <h1>Which of the four actually costs you sleep?</h1>
+    <p class="lead">Every invoice line carries the same four decisions. They fail differently, they are audited differently, and almost nobody finds all four equally hard. Pick the one that causes you the most trouble. This shows how it really fails, and which control in this design is aimed at it.</p>
+    <div class="stampline">
+      <span class="stamp stamp--illustrative">Nothing is stored or sent</span>
+    </div>
+  </div>
+
+  <div class="picks" id="picks" role="group" aria-label="Four decisions, choose the hardest"></div>
+
+  <div class="reveal" id="reveal"></div>
+
+  <p class="foot">The failure modes are drawn from the design document behind this page. The controls named are the ones this architecture actually implements, and each is drawn in full further down the page.</p>
+</div>
+
+<script>
+const OPTIONS = [
+  {
+    id: 'classification', icon: 'i-tag', name: 'Classification',
+    sub: 'Which of 19,949 ten-digit codes is this?',
+    fail: 'It is a judgement, not a lookup. Two competent brokers can defend different codes for the same goods, and the tariff schedule offers no single obvious answer for anything novel. The best published automated classifier is right about 40% of the time at ten digits on contested rulings.',
+    ctrl: 'The novelty router',
+    ctrlText: 'The design refuses to guess. A line that matches something a human already approved reuses that answer with no model call at all. Only genuinely new goods get full reasoning, and those always reach a licensed reviewer.',
+    where: 'See the novelty router and the confidence gate, Chapter 2'
+  },
+  {
+    id: 'valuation', icon: 'i-coins', name: 'Valuation',
+    sub: 'What is the declared value, and what belongs in it?',
+    fail: 'The invoice price is often not the dutiable value. Assists, royalties, freight terms and related-party pricing all move it, and the adjustments live in commercial systems the filing process never sees. Errors here are quiet, because nothing about the entry looks wrong.',
+    ctrl: 'The deterministic checks',
+    ctrlText: 'Valuation is handled by rules rather than by a model, because the arithmetic is knowable and a model adds risk without adding accuracy. The checks run free, before any confidence is scored, and a failure stops the line rather than lowering its score.',
+    where: 'See the four workers and the gauntlet, Chapter 2'
+  },
+  {
+    id: 'origin', icon: 'i-globe', name: 'Origin',
+    sub: 'Where were these goods really made?',
+    fail: 'Origin is about substantial transformation, not the address on the box. It decides preference eligibility and it decides which extra tariffs bite, so it is the decision most often challenged after the fact. The evidence usually sits with a supplier who has no reason to keep it.',
+    ctrl: 'The evidence trail',
+    ctrlText: 'Every origin answer is stored with the documents and the rulebook version it relied on. When a rule changes, the ledger can find every past answer that depended on it, rather than waiting for an audit to find them first.',
+    where: 'See the audit ledger and the invalidation sweep, Chapters 2 and 3'
+  },
+  {
+    id: 'duty', icon: 'i-layers', name: 'Duty regimes',
+    sub: 'Which extra tariffs stack on top?',
+    fail: 'This is the one that moved four times in a single month. Several regimes can apply to the same line at once, the order they stack in matters, and a quote priced against last month’s rulebook is simply wrong. Most tools flag that a regime may apply rather than computing the stack.',
+    ctrl: 'The rulebook watcher',
+    ctrlText: 'The watcher is built first, before anything that files. It reads the authority feeds continuously, versions the rulebook, and pins every decision to the version it used. When a version moves, dependent lines are reopened automatically.',
+    where: 'See the invalidation sweep, Chapter 2, and the delivery plan, Chapter 5'
+  }
+];
+
+const use = (id, cls) => '<svg class="ic' + (cls ? ' ' + cls : '') + '"><use href="#' + id + '"></use></svg>';
+const picks = document.getElementById('picks');
+const reveal = document.getElementById('reveal');
+let current = -1;
+
+OPTIONS.forEach((o, i) => {
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'pick';
+  b.setAttribute('aria-pressed', 'false');
+  b.innerHTML =
+    '<span class="badge">' + use(o.icon, 'ic-xl') + '</span>' +
+    '<b>' + o.name + '</b>' +
+    '<span class="sub">' + o.sub + '</span>';
+  b.addEventListener('click', () => select(i));
+  picks.appendChild(b);
+});
+const buttons = Array.from(picks.querySelectorAll('.pick'));
+
+const ARROW =
+  '<div class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+  'stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' +
+  '<path d="M2 12h16"/><path d="M14.5 7.5 20 12l-5.5 4.5"/>' +
+  '<circle class="dot" cx="9" cy="12" r="2.1" stroke="none"/></svg></div>';
+
+function select(i) {
+  current = i;
+  buttons.forEach((b, j) => b.setAttribute('aria-pressed', String(j === i)));
+  const o = OPTIONS[i];
+  reveal.innerHTML =
+    '<div class="panel problem"><span class="ptag">' + use('i-warning') + 'How it really fails</span>' +
+    '<h2>' + o.name + '</h2><p>' + o.fail + '</p></div>' +
+    ARROW +
+    '<div class="panel answer"><span class="ptag">' + use('i-shield') + 'What answers it here</span>' +
+    '<h2>' + o.ctrl + '</h2><p>' + o.ctrlText + '</p>' +
+    '<span class="where">' + o.where + '</span></div>';
+  report();
+}
+
+function initial() {
+  reveal.innerHTML =
+    '<div class="panel" style="grid-column:1/-1;border-left:3px solid var(--accent-2)">' +
+    '<span class="ptag" style="color:var(--accent-2)">' + use('i-question') + 'Pick one above</span>' +
+    '<p>Most teams find one of these four far harder than the other three, and which one it is says a lot about where the money is going. Choose the one that causes you the most trouble.</p></div>';
+}
+initial();
+
+/* Report height so the host frame collapses to the content instead of leaving
+   a band of empty frame. Autosize is opt-in and this is the opt-in. */
+function report() {
+  if (document.documentElement.dataset.embedded !== 'true') return;
+  window.parent.postMessage(
+    { type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+}
+if (document.documentElement.dataset.embedded === 'true') {
+  if ('ResizeObserver' in window) new ResizeObserver(report).observe(document.body);
+  window.addEventListener('load', report);
+  report();
+}
+</script>
+</body>
+</html>

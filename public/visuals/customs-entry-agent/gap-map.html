@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Where it breaks · red team and gap map</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="./_theme-bootstrap.js"></script>
+<script src="./_glossary.js" defer></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+/* Gap Map. One instrument, two tabs. Tab 1: six red-team critique cards
+   with a detail panel. Tab 2: a lifecycle coverage strip showing what the
+   design covers versus ignores, plus three gap cards. Reduced motion: static. */
+
+.shell { display: flex; flex-direction: column; gap: 10px; }
+:root[data-embedded="true"] .shell { padding: 14px clamp(14px, 2vw, 22px); }
+
+.head h1 {
+  font-family: "Space Grotesk", sans-serif; font-weight: 700;
+  font-size: clamp(1.02rem, 2.2vw, 1.3rem); letter-spacing: -0.02em; color: var(--text-strong);
+}
+:root[data-embedded="true"] .head h1 { font-size: 1.02rem; }
+.head p { font: 500 0.72rem/1.4 "DM Sans", sans-serif; color: var(--muted); margin-top: 2px; }
+
+/* ---------- tabs ---------- */
+.tabs { display: flex; gap: 6px; }
+.tab {
+  cursor: pointer; font: 700 0.62rem/1 "Space Grotesk", sans-serif;
+  letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted);
+  background: var(--surface); border: 1px solid var(--border-strong);
+  border-radius: 999px; padding: 7px 14px;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+.tab:hover { color: var(--text-strong); }
+.tab[aria-selected="true"] {
+  color: var(--accent); border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
+}
+[role="tabpanel"] { display: flex; flex-direction: column; gap: 10px; }
+[role="tabpanel"][hidden] { display: none; }
+
+/* ---------- red team cards ---------- */
+.crit { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.ccard {
+  cursor: pointer; text-align: left; min-width: 0;
+  border: 1px solid var(--border-strong); border-top: 3px solid var(--cc);
+  border-radius: 10px; background: var(--surface); box-shadow: var(--shadow-soft);
+  padding: 9px 10px 8px; display: flex; flex-direction: column; gap: 4px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.ccard:hover { border-color: var(--cc); }
+.ccard[aria-pressed="true"] {
+  border-color: var(--cc);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--cc) 22%, transparent), var(--shadow-soft);
+}
+.ccard code { font: 700 0.6rem/1 "IBM Plex Mono", monospace; color: var(--cc); letter-spacing: 0.1em; }
+.ccard b { font: 700 0.72rem/1.25 "Space Grotesk", sans-serif; color: var(--text-strong); }
+.ccard .row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: auto; }
+.sev { font: 700 0.58rem/1 "IBM Plex Mono", monospace; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted-soft); }
+.play .ccard { animation: card-in 0.4s ease-out backwards; }
+.play .ccard:nth-child(1) { animation-delay: 0.06s; } .play .ccard:nth-child(2) { animation-delay: 0.13s; }
+.play .ccard:nth-child(3) { animation-delay: 0.20s; } .play .ccard:nth-child(4) { animation-delay: 0.27s; }
+.play .ccard:nth-child(5) { animation-delay: 0.34s; } .play .ccard:nth-child(6) { animation-delay: 0.41s; }
+@keyframes card-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+
+/* ---------- detail panel ---------- */
+.detail {
+  background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--dc, var(--accent));
+  border-radius: 12px; box-shadow: var(--shadow-soft); padding: 11px 13px;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.d-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.d-name {
+  font: 700 0.6rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--dc, var(--accent)); border: 1px solid color-mix(in srgb, var(--dc, var(--accent)) 45%, transparent);
+  border-radius: 999px; padding: 4px 10px;
+}
+.d-text { font: 500 0.76rem/1.55 "DM Sans", sans-serif; color: var(--text); }
+.d-fix { font: 500 0.72rem/1.5 "DM Sans", sans-serif; color: var(--muted); }
+.d-fix b { color: var(--text-strong); font-weight: 700; }
+
+/* ---------- lifecycle strip ---------- */
+.strip { display: flex; align-items: stretch; gap: 4px; flex-wrap: wrap; }
+.stage {
+  flex: 1 1 auto; min-width: 0; border-radius: 8px; background: var(--surface);
+  padding: 6px 8px; display: flex; flex-direction: column; gap: 2px;
+  border: 1.5px solid var(--muted-soft); border-style: dashed;
+}
+.stage.cov { border-style: solid; border-color: var(--S-cleared); background: color-mix(in srgb, var(--S-cleared) 8%, transparent); }
+.stage.part { border-style: solid; border-color: var(--S-review); background: color-mix(in srgb, var(--S-review) 8%, transparent); }
+.stage b { font: 700 0.6rem/1.25 "Space Grotesk", sans-serif; color: var(--text-strong); }
+.stage span { font: 600 0.58rem/1.2 "IBM Plex Mono", monospace; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted-soft); }
+.stage.cov span { color: var(--S-cleared); }
+.stage.part span { color: var(--S-review); }
+.arrow { align-self: center; font: 700 0.72rem/1 "IBM Plex Mono", monospace; color: var(--muted-soft); }
+.legend { display: flex; gap: 14px; flex-wrap: wrap; }
+.legend span { font: 600 0.6rem/1 "IBM Plex Mono", monospace; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); display: inline-flex; align-items: center; gap: 5px; }
+.legend i { width: 14px; height: 8px; border-radius: 3px; border: 1.5px solid var(--S-cleared); }
+.legend .l-part i { border-color: var(--S-review); }
+.legend .l-un i { border-color: var(--muted-soft); border-style: dashed; }
+.play .stage { animation: card-in 0.4s ease-out backwards; }
+.play .stage:nth-child(2n) { animation-delay: 0.12s; }
+.play .stage:nth-child(3n) { animation-delay: 0.22s; }
+
+/* ---------- gap cards ---------- */
+.gaps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.gcard {
+  border: 1px solid var(--border); border-left: 3px solid var(--gc);
+  border-radius: 10px; background: var(--surface); box-shadow: var(--shadow-soft);
+  padding: 9px 11px; min-width: 0; display: flex; flex-direction: column; gap: 5px;
+}
+.gcard .row { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+.gcard code { font: 700 0.6rem/1 "IBM Plex Mono", monospace; color: var(--gc); letter-spacing: 0.1em; }
+.gcard b { font: 700 0.7rem/1.25 "Space Grotesk", sans-serif; color: var(--text-strong); }
+.gcard p { font: 500 0.7rem/1.5 "DM Sans", sans-serif; color: var(--muted); }
+.gcard p b { display: inline; font: 700 0.7rem/1.5 "DM Sans", sans-serif; color: var(--text-strong); }
+.play .gcard { animation: card-in 0.45s ease-out backwards; }
+.play .gcard:nth-child(1) { animation-delay: 0.15s; }
+.play .gcard:nth-child(2) { animation-delay: 0.28s; }
+.play .gcard:nth-child(3) { animation-delay: 0.41s; }
+
+@media (max-width: 760px) {
+  .head h1 { font-size: 1rem; }
+  .crit { grid-template-columns: 1fr 1fr; }
+  .gaps { grid-template-columns: minmax(0, 1fr); }
+  .stage { flex: 1 1 44%; }
+  .arrow { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .play .ccard, .play .stage, .play .gcard { animation: none !important; }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="head">
+    <h1>Where it breaks</h1>
+    <p>The red team's six strongest objections, and the entry lifecycle the design does not yet cover.</p>
+  </div>
+
+  <div class="tabs" role="tablist" aria-label="Red team and lifecycle coverage views">
+    <button class="tab" role="tab" id="tab-red" aria-selected="true" aria-controls="panel-red">Red team</button>
+    <button class="tab" role="tab" id="tab-life" aria-selected="false" aria-controls="panel-life" tabindex="-1">Lifecycle coverage</button>
+  </div>
+
+  <div role="tabpanel" id="panel-red" aria-labelledby="tab-red" tabindex="0">
+    <div class="crit" role="group" aria-label="Six red team critiques, click a card for detail">
+      <button class="ccard" style="--cc: var(--accent)" data-i="0" aria-pressed="false">
+        <code>C1</code><b>The repetition assumption</b>
+        <div class="row"><span class="sev">Severity high</span><span class="stamp stamp--hold">Hold</span></div>
+      </button>
+      <button class="ccard" style="--cc: var(--accent)" data-i="1" aria-pressed="false">
+        <code>C2</code><b>Tier 0 replays errors forever</b>
+        <div class="row"><span class="stamp stamp--hold">Hold</span></div>
+      </button>
+      <button class="ccard" style="--cc: var(--warn)" data-i="2" aria-pressed="false">
+        <code>C3</code><b>The 40% may not transfer</b>
+        <div class="row"><span class="stamp stamp--open">Open</span></div>
+      </button>
+      <button class="ccard" style="--cc: var(--accent)" data-i="3" aria-pressed="false">
+        <code>C4</code><b>Reviewer supply is the ceiling</b>
+        <div class="row"><span class="stamp stamp--hold">Hold</span></div>
+      </button>
+      <button class="ccard" style="--cc: var(--warn)" data-i="4" aria-pressed="false">
+        <code>C6</code><b>The watcher is itself a correctness risk</b>
+        <div class="row"><span class="stamp stamp--open">Open</span></div>
+      </button>
+      <button class="ccard" style="--cc: var(--accent)" data-i="5" aria-pressed="false">
+        <code>G2</code><b>Automation bias, the gate may be theatre</b>
+        <div class="row"><span class="sev">Severity critical</span><span class="stamp stamp--hold">Hold</span></div>
+      </button>
+    </div>
+    <div class="detail" aria-live="polite">
+      <div class="d-top"><span class="d-name" id="d-name"></span></div>
+      <p class="d-text" id="d-text"></p>
+      <p class="d-fix" id="d-fix"></p>
+    </div>
+  </div>
+
+  <div role="tabpanel" id="panel-life" aria-labelledby="tab-life" tabindex="0" hidden>
+    <div class="strip" role="group" aria-label="Entry lifecycle stages and how far the design covers them">
+      <div class="stage"><b>ISF 10+2</b><span>Uncovered</span></div><span class="arrow" aria-hidden="true">&rsaquo;</span>
+      <div class="stage"><b>Manifest</b><span>Uncovered</span></div><span class="arrow" aria-hidden="true">&rsaquo;</span>
+      <div class="stage"><b>Bond sufficiency</b><span>Uncovered · G4</span></div><span class="arrow" aria-hidden="true">&rsaquo;</span>
+      <div class="stage cov"><b>Entry · intake, decide, gate, file</b><span>Covered</span></div><span class="arrow" aria-hidden="true">&rsaquo;</span>
+      <div class="stage"><b>Duty payment</b><span>Uncovered</span></div><span class="arrow" aria-hidden="true">&rsaquo;</span>
+      <div class="stage part"><b>Post Summary Correction</b><span>Partial</span></div><span class="arrow" aria-hidden="true">&rsaquo;</span>
+      <div class="stage"><b>Liquidation · about 314 days</b><span>Uncovered</span></div><span class="arrow" aria-hidden="true">&rsaquo;</span>
+      <div class="stage"><b>Protest · 180 days</b><span>Uncovered</span></div><span class="arrow" aria-hidden="true">&rsaquo;</span>
+      <div class="stage"><b>Drawback</b><span>Uncovered</span></div>
+    </div>
+    <div class="legend" aria-hidden="true">
+      <span><i></i>Covered</span>
+      <span class="l-part"><i></i>Partial</span>
+      <span class="l-un"><i></i>Uncovered</span>
+    </div>
+    <div class="gaps">
+      <div class="gcard" style="--gc: var(--accent)">
+        <div class="row"><code>G1</code><b>Prior disclosure</b><span class="stamp stamp--hold">Critical</span></div>
+        <p>When the watcher proves two years of misclassification, the tenant now has knowledge, and knowledge changes their legal position. A valid prior disclosure under 19 U.S.C. 1592(c)(4) can cut a gross-negligence penalty to interest. <b>Historical findings must route to counsel on a privileged path</b>, never into the ordinary review queue.</p>
+      </div>
+      <div class="gcard" style="--gc: var(--warn)">
+        <div class="row"><code>G4</code><b>Bond sufficiency</b><span class="stamp stamp--open">High</span></div>
+        <p>A continuous bond is a standing financial guarantee, about 10% of duties paid in the prior 12 months, with a $50,000 floor. CBP reviews it monthly, and an insufficient bond holds cargo at the port. Tariff churn mechanically breaks bonds. The system already has the duty data, projecting bond breach is arithmetic, and <b>it belongs in Wave 1</b>.</p>
+      </div>
+      <div class="gcard" style="--gc: var(--accent-2)">
+        <div class="row"><code>G5</code><b>Responsible supervision vs AI</b><span class="stamp stamp--open">Open</span></div>
+        <p>19 CFR 111.28 is written about people. Does a licensed broker approving 6,700 AI-drafted lines a month satisfy responsible supervision, or defeat it. No CBP guidance found. <b>Ask the customer's counsel before Wave 3</b>, not during it.</p>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+(() => {
+  const CRIT = [
+    { name: 'C1 · The repetition assumption', color: 'var(--accent)',
+      text: 'The thesis lives or dies on 70 to 85% SKU repeat. Plausible for a stable catalogue, much weaker for spot-market brokerage or dropship long tails. At 40% repeat the economics invert.',
+      fix: '<b>The load-bearing assumption</b>, measurable in week one.' },
+    { name: 'C2 · Tier 0 replays errors forever', color: 'var(--accent)',
+      text: 'A wrong-but-approved decision is recalled with perfect fidelity and accumulates false evidence of consistency.',
+      fix: 'The cache needs its own sampling audit: <b>monthly random re-derivation</b> through the Tier 2 path, mandatory re-derivation after 12 months, forced re-derivation on any dependency change.' },
+    { name: 'C3 · The 40% may not transfer', color: 'var(--warn)',
+      text: 'ATLAS is built from contested CROSS rulings. An independent benchmark of four commercial products on randomly drawn rulings measured 12.8% to 89.2% at ten digits. Sampling explains most of the spread. Routine goods are easier than 40% implies, but production accuracy on a given importer is still unmeasured.',
+      fix: 'Measure on the <b>customer’s own historical entries</b> in week one.' },
+    { name: 'C4 · Reviewer supply is the ceiling', color: 'var(--accent)',
+      text: 'Licensed brokers are a constrained, ageing population. A system converting 40% of lines into review tasks may be unstaffable regardless of accuracy.',
+      fix: 'Throughput planning must start from <b>reviewer headcount</b>, not model accuracy.' },
+    { name: 'C6 · The watcher is itself a correctness risk', color: 'var(--warn)',
+      text: 'Under-invalidate and you file against a stale rulebook, over-invalidate and every proclamation dumps the product master into the queue.',
+      fix: 'Test by replaying historical tariff events, <b>the July 2026 sequence is the regression fixture</b>.' },
+    { name: 'G2 · Automation bias, the gate may be theatre', color: 'var(--accent)',
+      text: 'Nothing verifies the human is deciding rather than clicking. If reviewers accept 98% regardless, errors move into the reviewed population where nobody samples.',
+      fix: 'Counters: <b>audit reviewed lines too</b>, track override rate per reviewer, run blind trials with the suggestion withheld, seed known-wrong suggestions and measure catch rate.' }
+  ];
+  const el = (id) => document.getElementById(id);
+  const cards = document.querySelectorAll('.ccard');
+  const select = (i) => {
+    cards.forEach((c) => c.setAttribute('aria-pressed', String(Number(c.dataset.i) === i)));
+    const d = CRIT[i];
+    el('d-name').textContent = d.name;
+    document.querySelector('.detail').style.setProperty('--dc', d.color);
+    el('d-name').style.setProperty('--dc', d.color);
+    el('d-text').textContent = d.text;
+    el('d-fix').innerHTML = d.fix;
+  };
+  cards.forEach((c) => c.addEventListener('click', () => select(Number(c.dataset.i))));
+  select(0);
+
+  const tabs = [el('tab-red'), el('tab-life')];
+  const panels = [el('panel-red'), el('panel-life')];
+  const pick = (i) => {
+    tabs.forEach((t, j) => {
+      t.setAttribute('aria-selected', String(j === i));
+      t.tabIndex = j === i ? 0 : -1;
+      panels[j].hidden = j !== i;
+    });
+  };
+  tabs.forEach((t, i) => {
+    t.addEventListener('click', () => pick(i));
+    t.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { const n = (i + 1) % 2; pick(n); tabs[n].focus(); }
+    });
+  });
+
+  const shell = document.querySelector('.shell');
+  const start = () => shell.classList.add('play');
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((en) => { if (en.isIntersecting) { start(); io.disconnect(); } });
+    }, { threshold: 0 });
+    io.observe(shell);
+  } else { start(); }
+  /* Report content height so the parent frame hugs the content. */
+  if (document.documentElement.dataset.embedded === 'true') {
+    const postSize = () => window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+    if ('ResizeObserver' in window) new ResizeObserver(postSize).observe(document.body);
+    window.addEventListener('load', postSize);
+  }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,243 @@
+/* Customs Entry Agent — shared theme tokens and base styles.
+   Family identity mirrors the page's "ledger / paper of record" template:
+   light = manila bond paper with stamp inks, dark = night-audit ink navy.
+   Used by every visual under /visuals/customs-entry-agent/. */
+
+:root,
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  /* Background gradient stops (manila bond) */
+  --bg-start: #f4ecdb;
+  --bg-mid: #efe6d0;
+  --bg-end: #ece0c6;
+
+  /* Text. Light values are tuned to hold WCAG AA (4.5:1) for small text
+     over --surface composited on --bg-mid. */
+  --text: #2b2312;
+  --text-strong: #1a1408;
+  --muted: rgba(58, 47, 22, 0.76);
+  --muted-soft: rgba(58, 47, 22, 0.66);
+
+  /* Surface */
+  --surface: rgba(252, 248, 238, 0.88);
+  --surface-strong: rgba(253, 250, 243, 0.96);
+  --border: rgba(80, 62, 30, 0.18);
+  --border-strong: rgba(80, 62, 30, 0.30);
+
+  /* Accent palette: stamp red, seal blue, clearance green */
+  --accent: #992a22;
+  --accent-2: #23527c;
+  --accent-3: #226444;
+
+  /* Status */
+  --warn: #8a5a10;
+  --good: #226444;
+
+  /* Tier palette (novelty router, cost structure, decision engine) */
+  --T0: #226444; /* Tier 0 recall — clearance green */
+  --T1: #8a5a10; /* Tier 1 deduce — hold amber */
+  --T2: #992a22; /* Tier 2 decide — stamp red */
+
+  /* Entry lifecycle statuses (anatomy, invalidation sweep, paper trail) */
+  --S-lodged: #23527c;  /* lodged / in process — seal blue */
+  --S-review: #8a5a10;  /* under review — hold amber */
+  --S-hold: #992a22;    /* hold / invalidated — stamp red */
+  --S-cleared: #226444; /* cleared / filed — clearance green */
+
+  /* Shadow */
+  --shadow: 0 18px 38px rgba(64, 48, 18, 0.14);
+  --shadow-soft: 0 12px 28px rgba(64, 48, 18, 0.10);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg-start: #0a101d;
+    --bg-mid: #0c1322;
+    --bg-end: #070c17;
+    --text: #e9edf7;
+    --text-strong: #ffffff;
+    --muted: rgba(233, 237, 247, 0.68);
+    --muted-soft: rgba(233, 237, 247, 0.55);
+    --surface: rgba(19, 27, 44, 0.86);
+    --surface-strong: rgba(22, 31, 50, 0.94);
+    --border: rgba(160, 186, 230, 0.16);
+    --border-strong: rgba(160, 186, 230, 0.32);
+    --accent: #ef6459;
+    --accent-2: #6fa8dc;
+    --accent-3: #45d493;
+    --warn: #e6b25c;
+    --good: #45d493;
+    --T0: #45d493;
+    --T1: #e6b25c;
+    --T2: #ef6459;
+    --S-lodged: #6fa8dc;
+    --S-review: #e6b25c;
+    --S-hold: #ef6459;
+    --S-cleared: #45d493;
+    --shadow: 0 22px 60px rgba(0, 0, 0, 0.42);
+    --shadow-soft: 0 14px 32px rgba(0, 0, 0, 0.30);
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg-start: #0a101d;
+  --bg-mid: #0c1322;
+  --bg-end: #070c17;
+  --text: #e9edf7;
+  --text-strong: #ffffff;
+  --muted: rgba(233, 237, 247, 0.68);
+  --muted-soft: rgba(233, 237, 247, 0.55);
+  --surface: rgba(19, 27, 44, 0.86);
+  --surface-strong: rgba(22, 31, 50, 0.94);
+  --border: rgba(160, 186, 230, 0.16);
+  --border-strong: rgba(160, 186, 230, 0.32);
+  --accent: #ef6459;
+  --accent-2: #6fa8dc;
+  --accent-3: #45d493;
+  --warn: #e6b25c;
+  --good: #45d493;
+  --T0: #45d493;
+  --T1: #e6b25c;
+  --T2: #ef6459;
+  --S-lodged: #6fa8dc;
+  --S-review: #e6b25c;
+  --S-hold: #ef6459;
+  --S-cleared: #45d493;
+  --shadow: 0 22px 60px rgba(0, 0, 0, 0.42);
+  --shadow-soft: 0 14px 32px rgba(0, 0, 0, 0.30);
+}
+
+/* Reset */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* Base body */
+body {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 14% 14%, rgba(153, 42, 34, 0.07), transparent 32%),
+    radial-gradient(circle at 86% 86%, rgba(35, 82, 124, 0.07), transparent 32%),
+    linear-gradient(180deg, var(--bg-start) 0%, var(--bg-mid) 48%, var(--bg-end) 100%);
+  font-family: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif;
+  color: var(--text);
+}
+
+/* Embed mode (?embed=1) — visual is loaded inside an iframe.
+   Every visual in this family autosizes: size to content, report the height
+   via postMessage({type:'m2m:frame-size'}), and the parent hugs the content.
+   Never lock to viewport height — no stretched, half-empty panels. */
+:root[data-embedded="true"],
+:root[data-embedded="true"] body {
+  height: auto;
+}
+:root[data-embedded="true"] body {
+  min-height: 0;
+}
+
+/* Shared shell layout */
+.shell {
+  width: min(calc(100% - 32px), 1280px);
+  margin: 0 auto;
+  padding: 28px 0 36px;
+}
+:root[data-embedded="true"] .shell {
+  width: 100%;
+  height: auto;
+  padding: 14px 18px;
+  /* Each visual's own .shell rule sets display + grid/flex template. */
+}
+
+/* Keyboard focus: explicit high-visibility ring on every interactive element */
+button:focus-visible,
+a:focus-visible,
+summary:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Shared typography utilities */
+.eyebrow {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+/* Rubber-stamp chip — shared across the family for verdict labels. */
+.stamp {
+  display: inline-block;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.62rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border: 1.5px solid currentColor;
+  border-radius: 3px;
+  padding: 3px 7px;
+  transform: rotate(-1.6deg);
+  white-space: nowrap;
+}
+.stamp--confirmed { color: var(--good); }
+.stamp--proposed { color: var(--muted); }
+.stamp--open { color: var(--warn); }
+.stamp--vendor { color: var(--accent-2); }
+.stamp--hold { color: var(--accent); }
+.stamp--illustrative { color: var(--accent-2); border-style: dashed; }
+.stamp--sourced { color: var(--good); border-style: dotted; }
+/* display: inline-block above would defeat the hidden attribute, re-assert it */
+.stamp[hidden] { display: none; }
+
+/* ==========================================================================
+   Plain-words strip (_glossary.js)
+   Appended after everything else in .shell, so it cannot collide with any
+   figure's own selectors. Closed by default with the terms shown as chips in
+   the summary, so a reader sees the words are covered without the figure
+   growing by a full definition list on load.
+   ========================================================================== */
+.g-words {
+  margin-top: 10px;
+  border: 1px dashed var(--border-strong, var(--border));
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--muted) 5%, transparent);
+}
+.g-words > summary {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 5px;
+  padding: 7px 10px; cursor: pointer; list-style: none;
+}
+.g-words > summary::-webkit-details-marker { display: none; }
+.g-words > summary::after {
+  content: "+"; margin-left: auto; color: var(--muted);
+  font: 700 0.8rem/1 "Space Grotesk", sans-serif;
+}
+.g-words[open] > summary::after { content: "2"; }
+.g-words > summary b {
+  font: 700 0.58rem/1.3 "Space Grotesk", sans-serif;
+  letter-spacing: 0.09em; text-transform: uppercase; color: var(--text-strong);
+}
+.g-words > summary i {
+  font: 500 0.6rem/1.35 "DM Sans", sans-serif; font-style: normal;
+  color: var(--muted); border: 1px solid var(--border);
+  border-radius: 20px; padding: 1px 7px; white-space: nowrap;
+}
+.g-words > summary:hover i, .g-words[open] > summary i { color: var(--text); }
+.g-words dl { margin: 0; padding: 0 10px 9px; display: grid; gap: 5px; }
+.g-words dl > div {
+  display: grid; grid-template-columns: minmax(96px, 148px) 1fr; gap: 4px 10px;
+  padding-top: 5px; border-top: 1px solid var(--border);
+}
+.g-words dt {
+  font: 700 0.66rem/1.45 "DM Sans", sans-serif; color: var(--text-strong);
+}
+.g-words dd {
+  margin: 0; font: 500 0.66rem/1.5 "DM Sans", sans-serif; color: var(--muted);
+}
+.g-words > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+@media (max-width: 760px) {
+  .g-words dl > div { grid-template-columns: minmax(0, 1fr); }
+}

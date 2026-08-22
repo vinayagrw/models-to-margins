@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The decision board &middot; one control model, three permissions</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="./_theme-bootstrap.js"></script>
+<script src="./_glossary.js" defer></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+  /* ============================================================================
+   * DECISION BOARD
+   *
+   * Ported from the retired executive brief page. Three product situations,
+   * one rule: the less the company knows, the less the system is allowed to
+   * decide. Each route answers the same four questions, so switching tabs
+   * shows permissions moving from the machine to the person.
+   * ==========================================================================*/
+
+  .shell { gap: 16px; }
+  .lead { font-size: 0.88rem; line-height: 1.6; color: var(--muted); max-width: 76ch; }
+  .ic { display: block; flex: none; }
+
+  .rule {
+    display: flex; align-items: center; gap: 12px;
+    padding: 11px 14px; border-radius: 10px;
+    background: var(--surface-strong); border: 1.5px solid var(--border-strong);
+    border-left: 3px solid var(--accent);
+  }
+  .rule .ic { width: 30px; height: 30px; color: var(--accent); }
+  .rule b { font: 600 0.92rem/1.35 "Space Grotesk", system-ui, sans-serif; color: var(--text-strong); }
+
+  /* ---------- tabs ---------- */
+  .tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+  .tab {
+    display: grid; grid-template-columns: 92px minmax(0, 1fr); align-items: center; gap: 12px;
+    padding: 12px; border-radius: 12px; cursor: pointer; text-align: left;
+    background: var(--surface); color: var(--text);
+    border: 1.5px solid var(--border);
+  }
+  .tab .tile {
+    display: grid; place-items: center;
+    width: 92px; height: 92px; border-radius: 20px;
+    background: var(--surface-strong); border: 1.5px solid var(--border-strong);
+    color: var(--muted);
+  }
+  .tab .tile .ic { width: 52px; height: 52px; }
+  .tab b { display: block; font: 600 0.98rem/1.2 "Space Grotesk", system-ui, sans-serif; color: var(--text-strong); }
+  .tab .tier { display: inline-block; margin-top: 4px; padding: 1px 6px; border-radius: 999px;
+    font: 600 0.66rem/1.5 "IBM Plex Mono", ui-monospace, monospace; letter-spacing: 0.04em;
+    border: 1px solid var(--tier-c, var(--border)); color: var(--tier-c, var(--muted)); }
+  .tab .sub { display: block; margin-top: 3px; font: 500 0.72rem/1.35 "IBM Plex Mono", ui-monospace, monospace; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
+  .tab:hover { border-color: var(--accent-2); }
+  .tab[aria-selected="true"] { border-color: var(--accent); background: var(--surface-strong); }
+  .tab[aria-selected="true"] .tile { border-color: var(--accent); color: var(--accent); background: color-mix(in srgb, var(--accent) 13%, var(--surface-strong)); }
+
+  /* ---------- automation meter: how much the machine is allowed ---------- */
+  /* The meter reads as the hinge between the tab row and the panel, so it gets
+     its own framed band rather than sitting flush against the tabs. */
+  .meter {
+    display: flex; align-items: center; gap: 14px;
+    padding: 12px 14px; border-radius: 10px;
+    background: var(--surface); border: 1.5px solid var(--border);
+  }
+  .meter .lab { font: 600 0.62rem/1 "IBM Plex Mono", ui-monospace, monospace; letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+  .meter .track { position: relative; flex: 1; height: 14px; border-radius: 6px; background: var(--surface-strong); border: 1.5px solid var(--border-strong); overflow: hidden; }
+  .meter .fill { position: absolute; inset: 0; width: 0; background: linear-gradient(90deg, var(--accent-2), var(--accent)); border-radius: 6px; transition: width 0.55s cubic-bezier(0.22, 1, 0.36, 1); }
+
+  /* ---------- panels ---------- */
+  .panel { display: none; flex-direction: column; gap: 12px; }
+  .panel.on { display: flex; }
+
+  .panel .headrow { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .panel .headrow h2 { font: 600 1.05rem/1.3 "Space Grotesk", system-ui, sans-serif; color: var(--text-strong); margin: 0; }
+  .verdict {
+    display: inline-flex; align-items: center; gap: 7px;
+    font: 600 0.66rem/1 "IBM Plex Mono", ui-monospace, monospace;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    padding: 8px 12px; border-radius: 999px;
+    border: 1.5px solid var(--accent-2); color: var(--accent-2);
+  }
+  .verdict .ic { width: 18px; height: 18px; }
+  .verdict.hold { border-color: var(--accent-3, #f0a24d); color: var(--accent-3, #f0a24d); }
+
+  .qgrid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+  .q {
+    display: flex; flex-direction: column; gap: 9px;
+    padding: 13px; border-radius: 11px;
+    background: var(--surface); border: 1.5px solid var(--border);
+    opacity: 0;
+    transform: none;
+  }
+  .q .qh { display: flex; align-items: center; gap: 9px; }
+  .q .qh .ic { width: 34px; height: 34px; color: var(--accent); }
+  .q .qh span { font: 600 0.62rem/1.35 "IBM Plex Mono", ui-monospace, monospace; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+  .q p { margin: 0; font: 500 0.82rem/1.55 "DM Sans", system-ui, sans-serif; color: var(--text); }
+  .q.human .qh .ic { color: var(--accent-2); }
+
+  /* Panels are complete by default. Motion is the opt-in. */
+  .q { opacity: 1; }
+  @media (prefers-reduced-motion: no-preference) {
+    .panel.on .q { opacity: 0; transform: translateY(7px); animation: qin 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+    .panel.on .q:nth-child(1) { animation-delay: 0.05s; }
+    .panel.on .q:nth-child(2) { animation-delay: 0.16s; }
+    .panel.on .q:nth-child(3) { animation-delay: 0.27s; }
+    .panel.on .q:nth-child(4) { animation-delay: 0.38s; }
+    @keyframes qin { to { opacity: 1; transform: none; } }
+  }
+
+  @media (max-width: 760px) {
+    .tabs { grid-template-columns: 1fr; }
+    .tab { grid-template-columns: 68px minmax(0, 1fr); }
+    .tab .tile { width: 68px; height: 68px; border-radius: 15px; }
+    .tab .tile .ic { width: 40px; height: 40px; }
+    .qgrid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-repeat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M17.4 3.6 21 7.2l-3.6 3.6"/><path d="M3 12V9.4A2.4 2.4 0 0 1 5.4 7H21"/><path d="M6.6 20.4 3 16.8l3.6-3.6"/><path d="M21 12v2.6a2.4 2.4 0 0 1-2.4 2.4H3"/>
+  </symbol>
+  <symbol id="i-similar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="3" y="3.4" width="10.4" height="13.2" rx="1.8"/><rect x="10.6" y="7.4" width="10.4" height="13.2" rx="1.8"/><path d="m13.4 14.6 1.6 1.6 3-3.2"/>
+  </symbol>
+  <symbol id="i-new" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 3v18M3 12h18"/><circle cx="12" cy="12" r="9.2" stroke-dasharray="3.4 3.4"/>
+  </symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M2.6 12S6 5.6 12 5.6 21.4 12 21.4 12 18 18.4 12 18.4 2.6 12 2.6 12Z"/><circle cx="12" cy="12" r="3"/>
+  </symbol>
+  <symbol id="i-cpu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="6" y="6" width="12" height="12" rx="1.8"/><rect x="9.4" y="9.4" width="5.2" height="5.2"/><path d="M9 2.6v2.2M15 2.6v2.2M9 19.2v2.2M15 19.2v2.2M2.6 9h2.2M2.6 15h2.2M19.2 9h2.2M19.2 15h2.2"/>
+  </symbol>
+  <symbol id="i-person" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="8" r="3.6"/><path d="M4.6 20.4a7.4 7.4 0 0 1 14.8 0"/>
+  </symbol>
+  <symbol id="i-flag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M5 21V4"/><path d="M5 4.6c4.2-2.4 7.4 2 11.6-.3v8.4C12.4 15 9.2 10.6 5 13"/>
+  </symbol>
+  <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="m4.6 12.4 5 5L19.4 7"/>
+  </symbol>
+  <symbol id="i-pause-hand" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M7.4 11.2V5.6a1.6 1.6 0 0 1 3.2 0v4.8m0-6a1.6 1.6 0 0 1 3.2 0v6m0-4.4a1.6 1.6 0 0 1 3.2 0v7.6a6.4 6.4 0 0 1-6.4 6.4h-.6a6.4 6.4 0 0 1-5.5-3.1l-2.3-3.8a1.5 1.5 0 0 1 2.4-1.8l1.6 1.8"/>
+  </symbol>
+  <symbol id="i-scales" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 3.4v17.2M7 20.6h10"/><path d="M12 5.6 5.6 7.4M12 5.6l6.4 1.8"/><path d="M3 12.8 5.6 7.4l2.6 5.4a3.1 3.1 0 0 1-5.2 0ZM15.8 12.8l2.6-5.4 2.6 5.4a3.1 3.1 0 0 1-5.2 0Z"/>
+  </symbol>
+</svg>
+
+<div class="shell">
+  <div class="head">
+    <span class="eyebrow">Fig. 2e &middot; the executive decision board, folded in from the brief</span>
+    <h1>One control model, three different permissions</h1>
+    <p class="lead">Pick the product situation. Every route answers the same four questions, so what changes between tabs is the permission line, not the process. Automate the repeatable preparation and keep judgment with customs professionals.</p>
+    <div class="stampline">
+      <span class="stamp stamp--proposed">Proposed control model</span>
+    </div>
+  </div>
+
+  <div class="rule">
+    <svg class="ic" aria-hidden="true"><use href="#i-scales"/></svg>
+    <b>The rule: the less the company knows about a product, the less the system is allowed to decide.</b>
+  </div>
+
+  <div class="tabs" role="tablist" aria-label="Product situations">
+    <button class="tab" type="button" role="tab" id="tab-repeat" aria-controls="panel-repeat" aria-selected="true" data-k="repeat">
+      <span class="tile"><svg class="ic" aria-hidden="true"><use href="#i-repeat"/></svg></span>
+      <span><b>Repeat product</b><span class="sub">The fast path</span><span class="tier" style="--tier-c:var(--T0)">Tier 0 · recall</span></span>
+    </button>
+    <button class="tab" type="button" role="tab" id="tab-similar" aria-controls="panel-similar" aria-selected="false" tabindex="-1" data-k="similar">
+      <span class="tile"><svg class="ic" aria-hidden="true"><use href="#i-similar"/></svg></span>
+      <span><b>Similar product</b><span class="sub">The assisted path</span><span class="tier" style="--tier-c:var(--T1)">Tier 1 · deduce</span></span>
+    </button>
+    <button class="tab" type="button" role="tab" id="tab-new" aria-controls="panel-new" aria-selected="false" tabindex="-1" data-k="new">
+      <span class="tile"><svg class="ic" aria-hidden="true"><use href="#i-new"/></svg></span>
+      <span><b>New product</b><span class="sub">The specialist path</span><span class="tier" style="--tier-c:var(--T2)">Tier 2 · decide</span></span>
+    </button>
+  </div>
+
+  <div class="meter" aria-hidden="true">
+    <span class="lab">Machine is allowed</span>
+    <div class="track"><div class="fill" id="meterFill"></div></div>
+    <span class="lab">Person decides</span>
+  </div>
+
+  <section class="panel on" role="tabpanel" id="panel-repeat" aria-labelledby="tab-repeat" tabindex="0">
+    <div class="headrow">
+      <h2>The same bracket has been approved before.</h2>
+      <span class="verdict"><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg>Proceed after validation</span>
+    </div>
+    <div class="qgrid">
+      <div class="q"><div class="qh"><svg class="ic" aria-hidden="true"><use href="#i-eye"/></svg><span>1 &middot; The system recognises</span></div><p>The supplier, part number, description, origin evidence and approved product record all match.</p></div>
+      <div class="q"><div class="qh"><svg class="ic" aria-hidden="true"><use href="#i-cpu"/></svg><span>2 &middot; AI is allowed to</span></div><p>Compare the new documents with the approved record, surface differences and assemble the evidence packet.</p></div>
+      <div class="q human"><div class="qh"><svg class="ic" aria-hidden="true"><use href="#i-person"/></svg><span>3 &middot; The human owns</span></div><p>The approval policy, audit samples and any difference that breaks the match.</p></div>
+      <div class="q"><div class="qh"><svg class="ic" aria-hidden="true"><use href="#i-flag"/></svg><span>4 &middot; Outcome</span></div><p>Reuse the approved answer, validate it against the current rulebook, pass the gate and file. No new classification guess is needed.</p></div>
+    </div>
+  </section>
+
+  <section class="panel" role="tabpanel" id="panel-similar" aria-labelledby="tab-similar" tabindex="0" hidden>
+    <div class="headrow">
+      <h2>It looks familiar, but one fact has changed.</h2>
+      <span class="verdict hold"><svg class="ic" aria-hidden="true"><use href="#i-pause-hand"/></svg>Broker review required</span>
+    </div>
+    <div class="qgrid">
+      <div class="q"><div class="qh"><svg class="ic" aria-hidden="true"><use href="#i-eye"/></svg><span>1 &middot; The system recognises</span></div><p>The line is close to a known product, but its material, use, origin, supplier or specification is different.</p></div>
+      <div class="q"><div class="qh"><svg class="ic" aria-hidden="true"><use href="#i-cpu"/></svg><span>2 &middot; AI is allowed to</span></div><p>Find the nearest approved decisions, identify the changed facts, retrieve relevant authorities and prepare a recommendation.</p></div>
+      <div class="q human"><div class="qh"><svg class="ic" aria-hidden="true"><use href="#i-person"/></svg><span>3 &middot; The human owns</span></div><p>A customs broker reviews the difference, accepts or corrects the recommendation and records the reason.</p></div>
+      <div class="q"><div class="qh"><svg class="ic" aria-hidden="true"><use href="#i-flag"/></svg><span>4 &middot; Outcome</span></div><p>Hold the line for broker review. The system prepares the case but does not turn similarity into certainty.</p></div>
+    </div>
+  </section>
+
+  <section class="panel" role="tabpanel" id="panel-new" aria-labelledby="tab-new" tabindex="0" hidden>
+    <div class="headrow">
+      <h2>There is no approved answer to reuse.</h2>
+      <span class="verdict hold"><svg class="ic" aria-hidden="true"><use href="#i-scales"/></svg>Licensed decision required</span>
+    </div>
+    <div class="qgrid">
+      <div class="q"><div class="qh"><svg class="ic" aria-hidden="true"><use href="#i-eye"/></svg><span>1 &middot; The system recognises</span></div><p>The product is genuinely new, the evidence conflicts, or the legal and financial stakes make automatic treatment unsafe.</p></div>
+      <div class="q"><div class="qh"><svg class="ic" aria-hidden="true"><use href="#i-cpu"/></svg><span>2 &middot; AI is allowed to</span></div><p>Organise source documents, retrieve candidate authorities, test arithmetic and show what remains uncertain.</p></div>
+      <div class="q human"><div class="qh"><svg class="ic" aria-hidden="true"><use href="#i-person"/></svg><span>3 &middot; The human owns</span></div><p>A licensed specialist makes the classification and other material decisions, then signs off on the filing path.</p></div>
+      <div class="q"><div class="qh"><svg class="ic" aria-hidden="true"><use href="#i-flag"/></svg><span>4 &middot; Outcome</span></div><p>No automatic filing. The new decision becomes a reusable record only after human approval and evidence capture.</p></div>
+    </div>
+  </section>
+</div>
+
+<script>
+const tabs = Array.from(document.querySelectorAll('.tab'));
+const panels = {
+  repeat: document.getElementById('panel-repeat'),
+  similar: document.getElementById('panel-similar'),
+  new: document.getElementById('panel-new'),
+};
+const meterFill = document.getElementById('meterFill');
+/* The meter reads left as machine, right as person, so the fill SHRINKS as
+   knowledge shrinks. Repeat = most automation allowed. */
+const meterWidth = { repeat: '78%', similar: '46%', new: '18%' };
+
+function select(k) {
+  tabs.forEach((t) => {
+    const on = t.dataset.k === k;
+    t.setAttribute('aria-selected', on ? 'true' : 'false');
+    t.tabIndex = on ? 0 : -1;
+  });
+  Object.entries(panels).forEach(([key, p]) => {
+    p.classList.toggle('on', key === k);
+    if (key === k) p.removeAttribute('hidden'); else p.setAttribute('hidden', '');
+  });
+  meterFill.style.width = meterWidth[k];
+  report();
+}
+
+tabs.forEach((t) => {
+  t.addEventListener('click', () => select(t.dataset.k));
+  t.addEventListener('keydown', (e) => {
+    if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+    const i = tabs.indexOf(t);
+    const next = tabs[(i + (e.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length];
+    next.focus(); select(next.dataset.k);
+  });
+});
+
+meterFill.style.width = meterWidth.repeat;
+
+function report() {
+  if (document.documentElement.dataset.embedded !== 'true') return;
+  window.parent.postMessage(
+    { type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+}
+if (document.documentElement.dataset.embedded === 'true') {
+  if ('ResizeObserver' in window) new ResizeObserver(report).observe(document.body);
+  window.addEventListener('load', report);
+}
+</script>
+</body>
+</html>

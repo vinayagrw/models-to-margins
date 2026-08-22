@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fourteen build choices &middot; and the alternative each one rejected</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="./_theme-bootstrap.js"></script>
+<script src="./_glossary.js" defer></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+  /* ============================================================================
+   * SERVICE REGISTER
+   *
+   * Fourteen build decisions, previously the largest table on the page. A table
+   * makes every row look equally weighted, which is false: four of these are
+   * load-bearing architectural commitments and the rest are ordinary good
+   * practice. The grid encodes that weight visually, and the reveal keeps the
+   * part a table cannot show well: what would flip the decision.
+   * ==========================================================================*/
+
+  .shell { gap: 14px; }
+  .lead { font-size: 0.88rem; line-height: 1.6; color: var(--muted); max-width: 76ch; }
+  .ic { width: 26px; height: 26px; flex: none; display: block; }
+  .ic-sm { width: 16px; height: 16px; }
+
+  .filters { display: flex; gap: 7px; flex-wrap: wrap; align-items: center; }
+  .filters button {
+    display: inline-flex; align-items: center; gap: 7px;
+    font: 600 0.72rem/1 "IBM Plex Mono", ui-monospace, monospace;
+    padding: 9px 12px; border-radius: 999px; cursor: pointer;
+    background: var(--surface); color: var(--muted);
+    border: 1.5px solid var(--border);
+  }
+  .filters button[aria-pressed="true"] { background: var(--surface-strong); color: var(--accent-2); border-color: var(--accent-2); }
+  .filters .ic { width: 17px; height: 17px; }
+
+  /* ---------- the grid ---------- */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(152px, 1fr));
+    gap: 8px;
+  }
+  .cell {
+    display: flex; flex-direction: column; align-items: center; gap: 9px;
+    padding: 13px 9px 11px;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    cursor: pointer; color: var(--text); text-align: center;
+  }
+  .cell[aria-pressed="true"] { border-color: var(--accent-2); background: var(--surface-strong); }
+  .cell.dim { opacity: 0.28; }
+
+  .cell .tile {
+    display: grid; place-items: center;
+    width: 92px; height: 92px; border-radius: 20px;
+    background: var(--surface-strong);
+    border: 1.5px solid var(--border-strong);
+    color: var(--muted);
+    position: relative;
+  }
+  .cell .tile .ic { width: 52px; height: 52px; }
+  /* Load-bearing choices carry a marked tile. The four that are genuinely
+     architectural should not look like the ten that are good hygiene. */
+  .cell.key .tile { border-color: var(--accent-2); color: var(--accent-2); background: color-mix(in srgb, var(--accent-2) 13%, var(--surface-strong)); }
+  .cell.key .tile::after {
+    content: ""; position: absolute; right: -3px; top: -3px;
+    width: 15px; height: 15px; border-radius: 50%;
+    background: var(--accent-2); border: 2.5px solid var(--surface);
+  }
+  .cell b { font: 600 0.79rem/1.25 "Space Grotesk", system-ui, sans-serif; color: var(--text-strong); }
+
+  /* ---------- the reveal ---------- */
+  .reveal { display: grid; grid-template-columns: 1fr 40px 1fr; gap: 10px; align-items: stretch; }
+  .panel { background: var(--surface); border: 1.5px solid var(--border); border-radius: 9px; padding: 13px 14px; }
+  .panel.chosen { border-left: 3px solid var(--accent-2); }
+  .panel.rejected { border-left: 3px solid var(--border-strong); }
+  .panel .ptag {
+    display: inline-flex; align-items: center; gap: 6px;
+    font: 600 0.62rem/1 "IBM Plex Mono", ui-monospace, monospace;
+    letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted);
+  }
+  .panel.chosen .ptag { color: var(--accent-2); }
+  .panel h2 { margin-top: 8px; font: 600 0.92rem/1.3 "Space Grotesk", system-ui, sans-serif; color: var(--text-strong); }
+  .panel p { margin-top: 6px; font: 500 0.8rem/1.55 "DM Sans", system-ui, sans-serif; color: var(--text); }
+  .panel .where { display: block; margin-top: 9px; padding-top: 8px; border-top: 1px solid var(--border); font: 500 0.68rem/1.4 "DM Sans", system-ui, sans-serif; color: var(--muted); }
+
+  .arrow { display: grid; place-items: center; color: var(--border-strong); }
+  .arrow svg { width: 40px; height: 40px; }
+  .arrow .dot { fill: var(--accent-2); }
+
+  .foot { font: 400 0.68rem/1.55 "IBM Plex Mono", ui-monospace, monospace; color: var(--muted-soft); }
+
+  @media (max-width: 720px) {
+    .grid { grid-template-columns: repeat(auto-fit, minmax(118px, 1fr)); }
+    .cell .tile { width: 68px; height: 68px; border-radius: 15px; }
+    .cell .tile .ic { width: 40px; height: 40px; }
+    .reveal { grid-template-columns: 1fr; }
+    .arrow { height: 40px; transform: rotate(90deg); }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .cell { transition: opacity 260ms ease, border-color 200ms ease, background 200ms ease, transform 180ms ease; }
+    .cell:hover { transform: translateY(-3px); }
+    .cell .tile { transition: transform 200ms cubic-bezier(0.34, 1.4, 0.64, 1); }
+    .cell:hover .tile { transform: scale(1.06); }
+    .cell.key .tile::after { animation: ping 2.6s ease-in-out infinite; }
+    @keyframes ping { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.28); } }
+  }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" aria-hidden="true" style="position:absolute">
+  <symbol id="s-flow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="2.6" y="3.2" width="7" height="5.4" rx="1.4"/><rect x="14.4" y="15.4" width="7" height="5.4" rx="1.4"/>
+    <path d="M6.1 8.6v5.2a2.4 2.4 0 0 0 2.4 2.4h5.9"/>
+  </symbol>
+  <symbol id="s-box" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="3" y="3" width="18" height="18" rx="2.4"/><path d="M8.4 8.4h7.2v7.2H8.4z"/>
+  </symbol>
+  <symbol id="s-cpu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="5.4" y="5.4" width="13.2" height="13.2" rx="2"/><rect x="9.4" y="9.4" width="5.2" height="5.2" rx="1"/>
+    <path d="M9.4 2.6v2.8M14.6 2.6v2.8M9.4 18.6v2.8M14.6 18.6v2.8M2.6 9.4h2.8M2.6 14.6h2.8M18.6 9.4h2.8M18.6 14.6h2.8"/>
+  </symbol>
+  <symbol id="s-db" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <ellipse cx="12" cy="5.6" rx="7.6" ry="2.9"/><path d="M4.4 5.6v12.8c0 1.6 3.4 2.9 7.6 2.9s7.6-1.3 7.6-2.9V5.6"/><path d="M4.4 12c0 1.6 3.4 2.9 7.6 2.9s7.6-1.3 7.6-2.9"/>
+  </symbol>
+  <symbol id="s-nof" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="9.2"/><path d="M5.5 5.5 18.5 18.5"/>
+  </symbol>
+  <symbol id="s-ledger" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M4.4 3.4h13a2 2 0 0 1 2 2v15.2H6.4a2 2 0 0 1-2-2V3.4Z"/><path d="M4.4 16.6h15"/><path d="M8.2 7.4h7.4M8.2 11.2h7.4"/>
+  </symbol>
+  <symbol id="s-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="4.4" y="10.4" width="15.2" height="10.2" rx="2.2"/><path d="M8.2 10.4V7.6a3.8 3.8 0 0 1 7.6 0v2.8"/><path d="M12 14.4v2.4"/>
+  </symbol>
+  <symbol id="s-queue" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="3.2" y="4" width="17.6" height="4.4" rx="1.4"/><rect x="3.2" y="9.8" width="17.6" height="4.4" rx="1.4"/><rect x="3.2" y="15.6" width="17.6" height="4.4" rx="1.4"/>
+  </symbol>
+  <symbol id="s-bolt" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M13.4 2.4 4.6 13.6h6.2l-1.2 8 8.8-11.2h-6.2l1.2-8Z"/>
+  </symbol>
+  <symbol id="s-gateway" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 2.6 3.6 6.4v5.2c0 4.2 3.4 7.8 8.4 9.8 5-2 8.4-5.6 8.4-9.8V6.4L12 2.6Z"/><path d="M8.6 12h6.8M13.2 9.6l2.4 2.4-2.4 2.4"/>
+  </symbol>
+  <symbol id="s-key" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="7.6" cy="16.4" r="3.8"/><path d="m10.3 13.7 8.4-8.4M15.6 8.4l2.4 2.4M18 6l2.4 2.4"/>
+  </symbol>
+  <symbol id="s-feed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M4.4 4.4a15.2 15.2 0 0 1 15.2 15.2"/><path d="M4.4 10.6a9 9 0 0 1 9 9"/><circle cx="5.6" cy="18.4" r="1.8"/>
+  </symbol>
+  <symbol id="s-scope" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="9.2"/><circle cx="12" cy="12" r="3.6"/><path d="M12 2.8v3.6M12 17.6v3.6M2.8 12h3.6M17.6 12h3.6"/>
+  </symbol>
+  <symbol id="s-accounts" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="2.6" y="3.4" width="8" height="8" rx="1.6"/><rect x="13.4" y="3.4" width="8" height="8" rx="1.6"/>
+    <rect x="2.6" y="14" width="8" height="6.6" rx="1.6"/><rect x="13.4" y="14" width="8" height="6.6" rx="1.6"/>
+  </symbol>
+  <symbol id="s-star" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <path d="m12 3 2.8 5.7 6.3.9-4.6 4.4 1.1 6.2L12 17.3 6.4 20.2l1.1-6.2L2.9 9.6l6.3-.9L12 3Z"/>
+  </symbol>
+  <symbol id="s-all" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="3.2" y="3.2" width="7.4" height="7.4" rx="1.6"/><rect x="13.4" y="3.2" width="7.4" height="7.4" rx="1.6"/>
+    <rect x="3.2" y="13.4" width="7.4" height="7.4" rx="1.6"/><rect x="13.4" y="13.4" width="7.4" height="7.4" rx="1.6"/>
+  </symbol>
+  <symbol id="s-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M6.4 6.4 17.6 17.6M17.6 6.4 6.4 17.6"/>
+  </symbol>
+  <symbol id="s-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+    <path d="m4.8 12.4 4.6 4.6 9.8-10.4"/>
+  </symbol>
+  <symbol id="s-question" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="9.4"/><path d="M9.4 9.2a2.7 2.7 0 0 1 5.2 1c0 1.8-2.6 2.3-2.6 4"/><path d="M12 17.4h.01"/>
+  </symbol>
+</svg>
+
+<div class="shell">
+  <div class="head">
+    <span class="eyebrow">Fig. 3d &middot; every build choice, and what it turned down</span>
+    <h1>Fourteen choices, four of them load-bearing</h1>
+    <p class="lead">A table makes all fourteen of these look equally weighted, and they are not. Four are architectural commitments the rest of the design rests on, marked here. The other ten are ordinary good practice. Open any tile for the alternative it rejected and what would flip it.</p>
+    <div class="stampline">
+      <span class="stamp stamp--proposed">Design decisions, not measurements</span>
+    </div>
+  </div>
+
+  <div class="filters" id="filters" role="group" aria-label="Filter the register">
+    <button type="button" data-f="all" aria-pressed="true"><svg class="ic" aria-hidden="true"><use href="#s-all"/></svg>All fourteen</button>
+    <button type="button" data-f="key" aria-pressed="false"><svg class="ic" aria-hidden="true"><use href="#s-star"/></svg>Load-bearing only</button>
+  </div>
+
+  <div class="grid" id="grid" role="group" aria-label="Fourteen build choices"></div>
+
+  <div class="reveal" id="reveal"></div>
+
+  <p class="foot">Load-bearing means the rest of the design changes shape if the decision is reversed. The other ten would cost effort to swap and would not move the argument.</p>
+</div>
+
+<script>
+const ITEMS = [
+  { icon: 's-flow', key: true, name: 'Orchestration',
+    choice: 'Step Functions Standard, one durable execution per entry',
+    choiceText: 'Each entry gets its own durable execution, so the state of a filing is a thing you can look at rather than a thing you infer from logs.',
+    alt: 'Temporal',
+    altText: 'Flip for unit-testable code-as-workflow, or for portability off AWS.' },
+  { icon: 's-box', name: 'Sandboxed parsing',
+    choice: 'Lambda, one invocation per document, in a no-egress quarantine subnet',
+    choiceText: 'Documents arrive from outside and are parsed where they cannot call out. One invocation per document keeps the blast radius to one document.',
+    alt: 'Fargate per document',
+    altText: 'Only worth it for scans past what Lambda will hold.' },
+  { icon: 's-cpu', name: 'Decision workers',
+    choice: 'ECS Fargate services calling Bedrock through a VPC endpoint',
+    choiceText: 'Long-lived services suit workers that hold warm context and run past a short timeout.',
+    alt: 'Lambda workers',
+    altText: 'Flipped if the per-line latency budget turns out to allow it.' },
+  { icon: 's-db', name: 'Retrieval and data',
+    choice: 'Aurora PostgreSQL with pgvector, one cluster',
+    choiceText: 'One store for both the relational entry data and the vectors, which keeps the join between an answer and its evidence trivial.',
+    alt: 'OpenSearch',
+    altText: 'Only when corpus scale genuinely demands a separate engine.' },
+  { icon: 's-nof', key: true, name: 'Agent framework',
+    choice: 'None. Orchestration is Step Functions plus code',
+    choiceText: 'The control flow is authored and reviewable. What runs is what a person wrote, which is the property the whole audit position depends on.',
+    alt: 'A model-decided control flow',
+    altText: 'Rejected outright. It removes the determinism this design is built on.' },
+  { icon: 's-ledger', key: true, name: 'Audit ledger',
+    choice: 'Aurora append-only, mirrored to S3 Object Lock in compliance mode',
+    choiceText: 'The record of what was decided and why cannot be edited afterwards, including by the people who run the platform.',
+    alt: 'A managed ledger database',
+    altText: 'An extra dependency for a property S3 Object Lock already gives.' },
+  { icon: 's-lock', key: true, name: 'Rulebook corpus',
+    choice: 'Versioned, Object-Locked S3 in a separate shared-services account, hash-pinned per decision',
+    choiceText: 'Every decision records the exact version of the authority it read, so an answer can be re-derived years later.',
+    alt: 'An in-VPC copy',
+    altText: 'Rejected because production must not be able to write its own authorities.' },
+  { icon: 's-queue', name: 'Review queue',
+    choice: 'A custom app on ALB and Cognito, task tokens back to Step Functions',
+    choiceText: 'Queue ranking and one-keystroke handling are the whole ergonomics of the reviewer role, so they are worth owning.',
+    alt: 'A ticketing tool',
+    altText: 'Rejected for the loss of queue-ranking and keystroke control.' },
+  { icon: 's-bolt', name: 'Trigger and async plumbing',
+    choice: 'S3 to EventBridge to StartExecution, with SQS and a dead-letter queue per stage',
+    choiceText: 'Every stage has somewhere for a poison message to land, and that somewhere is alarmed.',
+    alt: 'Direct S3-to-Lambda triggers',
+    altText: 'Rejected because a poison message has nowhere to go.' },
+  { icon: 's-gateway', name: 'Inference egress',
+    choice: 'A thin internal model gateway in front of Bedrock, one audited path',
+    choiceText: 'One place where model calls leave, so one place to audit, rate-limit and redact.',
+    alt: 'Direct vendor APIs',
+    altText: 'Flipped only if a required model is off Bedrock, and then behind the same gateway.' },
+  { icon: 's-key', name: 'Secrets',
+    choice: 'Secrets Manager behind a credential proxy only the ABI adapter can assume',
+    choiceText: 'The filing credential is reachable from exactly one component, which is the narrowest the design can make it.',
+    alt: 'Parameter Store',
+    altText: 'Adequate, but rotation and per-secret policies are cleaner here.' },
+  { icon: 's-feed', name: 'Rulebook feeds',
+    choice: 'EventBridge Scheduler to one Lambda per feed, with per-feed staleness alarms',
+    choiceText: 'A feed that quietly stops is the failure that matters, so each one is watched separately.',
+    alt: 'A single cron job',
+    altText: 'Rejected because one feed failing silently would be invisible.' },
+  { icon: 's-scope', name: 'Observability',
+    choice: 'CloudWatch and ADOT, with decision-quality metrics in Athena over the ledger',
+    choiceText: 'Operational health and decision quality are different questions, and only the second one tells you whether the design is working.',
+    alt: 'A vendor APM',
+    altText: 'Fine for the operational half. The quality metrics still need the warehouse.' },
+  { icon: 's-accounts', name: 'Account structure',
+    choice: 'Six accounts: security, log archive, shared services, nonprod, prod, and optionally per tenant',
+    choiceText: 'The separation between production and its own rulebook is an account boundary, not a policy statement.',
+    alt: 'One account with IAM boundaries',
+    altText: 'Rejected because a boundary the application can talk past is a control, not a guarantee.' }
+];
+
+const gridEl = document.getElementById('grid');
+const reveal = document.getElementById('reveal');
+const filters = document.getElementById('filters');
+
+const use = (id, cls) => '<svg class="ic ' + (cls || '') + '" aria-hidden="true"><use href="#' + id + '"/></svg>';
+
+gridEl.innerHTML = ITEMS.map((it, i) =>
+  '<button type="button" class="cell' + (it.key ? ' key' : '') + '" data-i="' + i + '" aria-pressed="false">' +
+    '<span class="tile">' + use(it.icon) + '</span><b>' + it.name + '</b></button>').join('');
+
+const cells = [...gridEl.querySelectorAll('.cell')];
+
+const ARROW =
+  '<div class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+  'stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' +
+  '<path d="M3.5 12h14"/><path d="m13.5 7 5 5-5 5"/><circle class="dot" cx="3.5" cy="12" r="2" stroke="none"/></svg></div>';
+
+function pick(i) {
+  const it = ITEMS[i];
+  cells.forEach((c, j) => c.setAttribute('aria-pressed', String(j === i)));
+  reveal.innerHTML =
+    '<div class="panel chosen"><span class="ptag">' + use('s-check', 'ic-sm') + 'Chosen' +
+    (it.key ? ' &middot; load-bearing' : '') + '</span>' +
+    '<h2>' + it.choice + '</h2><p>' + it.choiceText + '</p></div>' +
+    ARROW +
+    '<div class="panel rejected"><span class="ptag">' + use('s-x', 'ic-sm') + 'Rejected, and what would flip it</span>' +
+    '<h2>' + it.alt + '</h2><p>' + it.altText + '</p>' +
+    '<span class="where">' + it.name + ' &middot; drawn in the AWS stencil above</span></div>';
+  report();
+}
+
+function initial() {
+  reveal.innerHTML =
+    '<div class="panel" style="grid-column:1/-1;border-left:3px solid var(--accent-2)">' +
+    '<span class="ptag" style="color:var(--accent-2)">' + use('s-question', 'ic-sm') + 'Open any tile above</span>' +
+    '<p>Marked tiles are the four the rest of the design rests on. Reverse one of those and the argument changes. Reverse any of the other ten and you have a different bill of materials for the same argument.</p></div>';
+  report();
+}
+
+gridEl.addEventListener('click', (e) => {
+  const btn = e.target.closest('.cell');
+  if (btn) pick(Number(btn.dataset.i));
+});
+
+filters.addEventListener('click', (e) => {
+  const btn = e.target.closest('button');
+  if (!btn) return;
+  [...filters.querySelectorAll('button')].forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
+  const keyOnly = btn.dataset.f === 'key';
+  cells.forEach((c) => c.classList.toggle('dim', keyOnly && !c.classList.contains('key')));
+  report();
+});
+
+initial();
+
+/* Report height so the host frame collapses to the content instead of leaving
+   a band of empty frame. Autosize is opt-in and this is the opt-in. */
+function report() {
+  if (document.documentElement.dataset.embedded !== 'true') return;
+  window.parent.postMessage(
+    { type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+}
+if (document.documentElement.dataset.embedded === 'true') {
+  if ('ResizeObserver' in window) new ResizeObserver(report).observe(document.body);
+  window.addEventListener('load', report);
+}
+</script>
+</body>
+</html>
