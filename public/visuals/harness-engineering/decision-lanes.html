@@ -8,314 +8,400 @@
 <script src="./_theme-bootstrap.js"></script>
 <link rel="stylesheet" href="./_theme.css">
 <style>
-/* Scene-specific: 3 decision lanes — Agentic / Deterministic / Human authority */
-:root, :root[data-theme="light"] {
-  --lane-agentic: #0a8aab;
-  --lane-deterministic: #b8860b;
-  --lane-human: #d2451e;
-}
-:root[data-theme="dark"] {
-  --lane-agentic: #22d3ee;
-  --lane-deterministic: #f4cb73;
-  --lane-human: #ff776c;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --lane-agentic: #22d3ee;
-    --lane-deterministic: #f4cb73;
-    --lane-human: #ff776c;
-  }
-}
-body {
-  background:
-    radial-gradient(circle at 18% 12%, rgba(34, 211, 238, 0.10), transparent 30%),
-    radial-gradient(circle at 82% 88%, rgba(255, 119, 108, 0.08), transparent 32%),
-    linear-gradient(180deg, var(--bg-start) 0%, var(--bg-mid) 48%, var(--bg-end) 100%);
-}
-/* Embed mode: head + 3-lane row + foot, fluid sizing */
-:root[data-embedded="true"] .shell {
-  display: grid; grid-template-rows: auto 1fr auto;
-  gap: clamp(6px, 1vh, 12px); min-height: 0;
-  padding: clamp(10px, 1.6vh, 18px) clamp(14px, 2vw, 22px);
-}
-:root[data-embedded="true"] .head { margin-bottom: 0; }
-:root[data-embedded="true"] .head h1 { font-size: clamp(1rem, 2.2vh, 1.5rem); }
-:root[data-embedded="true"] .head p { font-size: clamp(0.78rem, 1.4vh, 0.92rem); max-width: none; }
-:root[data-embedded="true"] .lanes {
-  gap: clamp(8px, 1.2vw, 14px); min-height: 0;
-  align-items: stretch;
-}
-:root[data-embedded="true"] .lane {
-  padding: clamp(12px, 1.8vh, 18px) clamp(12px, 1.2vw, 16px);
-  gap: clamp(8px, 1.2vh, 14px);
-  min-height: 0; overflow: hidden;
-  display: flex; flex-direction: column;
-  /* Stack tight from top — let lane-section grow to absorb slack */
-  justify-content: flex-start;
-}
-:root[data-embedded="true"] .lane-section {
-  flex: 1; min-height: 0;
-  padding-top: clamp(8px, 1.2vh, 12px);
-  display: flex; flex-direction: column;
-}
-:root[data-embedded="true"] .lane-section ul {
-  /* Items fill the section — equal share of height */
-  flex: 1; display: grid; grid-auto-rows: 1fr;
-  gap: clamp(4px, 0.8vh, 8px);
-  align-items: center;
-}
-:root[data-embedded="true"] .lane-icon {
-  width: clamp(36px, 4.5vh, 48px); height: clamp(36px, 4.5vh, 48px);
-}
-:root[data-embedded="true"] .lane-icon svg {
-  width: clamp(20px, 2.6vh, 28px); height: clamp(20px, 2.6vh, 28px);
-}
-:root[data-embedded="true"] .lane-tag { font-size: clamp(0.62rem, 1vh, 0.7rem); }
-:root[data-embedded="true"] .lane-title { font-size: clamp(0.94rem, 1.7vh, 1.15rem); }
-:root[data-embedded="true"] .lane-sub { font-size: clamp(0.76rem, 1.3vh, 0.86rem); line-height: 1.35; }
-:root[data-embedded="true"] .lane-section { padding-top: clamp(6px, 1vh, 10px); }
-:root[data-embedded="true"] .lane-section h4 {
-  margin-bottom: clamp(4px, 0.6vh, 7px);
-  font-size: clamp(0.6rem, 0.95vh, 0.68rem);
-}
-:root[data-embedded="true"] .lane-section li { font-size: clamp(0.74rem, 1.2vh, 0.82rem); line-height: 1.32; }
-:root[data-embedded="true"] .lane-owner, :root[data-embedded="true"] .lane-trap {
-  font-size: clamp(0.72rem, 1.15vh, 0.8rem);
-  padding: clamp(8px, 1.1vh, 12px) clamp(9px, 1vw, 12px);
-  line-height: 1.32;
-}
-:root[data-embedded="true"] .foot {
-  margin-top: 0; padding: clamp(8px, 1.2vh, 12px) clamp(12px, 1.4vw, 18px);
-  flex-shrink: 0;
-}
-:root[data-embedded="true"] .foot-text { font-size: clamp(0.78rem, 1.3vh, 0.88rem); line-height: 1.4; }
-:root[data-embedded="true"] .foot-label { font-size: clamp(0.74rem, 1.2vh, 0.86rem); padding: 5px 10px; }
+/* Scene 8 — attribute-driven lane classifier */
+:root[data-embedded="true"], :root[data-embedded="true"] body { height: auto; overflow: visible; }
+:root[data-embedded="true"] .shell { width: 100%; height: auto; padding: 14px 18px; }
 
-.head { margin-bottom: 18px; text-align: center; }
+.shell { display: flex; flex-direction: column; gap: clamp(12px, 1.8vw, 18px); }
+.head { text-align: center; }
 .head h1 {
   font-family: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif; font-weight: 800;
-  font-size: clamp(1.4rem, 2.4vw, 1.95rem); line-height: 1.18;
+  font-size: clamp(1.25rem, 2.4vw, 1.95rem); line-height: 1.18;
   letter-spacing: -0.01em; color: var(--text-strong); margin-top: 6px;
 }
-.head h1 em { font-style: normal; color: var(--lane-human); }
-.head p { margin: 8px auto 0; color: var(--muted); font-size: 0.96rem; max-width: 64ch; }
-.lanes {
-  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px; align-items: stretch;
+.head h1 em { font-style: normal; color: var(--accent-2); }
+.head p { margin: 8px auto 0; color: var(--muted); font-size: clamp(0.82rem, 1.4vw, 0.96rem); line-height: 1.5; }
+
+button { font-family: inherit; cursor: pointer; }
+.picker {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr));
+  gap: clamp(8px, 1.4vw, 14px);
 }
-.lane {
-  position: relative;
-  border-radius: 22px; padding: 20px;
-  border: 1px solid color-mix(in srgb, var(--lane-c) 32%, var(--border));
-  background:
-    linear-gradient(180deg, color-mix(in srgb, var(--lane-c) 10%, transparent), transparent 40%),
-    var(--surface);
-  box-shadow: var(--shadow);
-  display: flex; flex-direction: column; gap: 14px;
-  overflow: hidden;
+.attr {
+  border-radius: 16px; padding: clamp(10px, 1.4vw, 14px);
+  border: 1px solid var(--border); background: var(--surface); box-shadow: var(--shadow-soft);
+  display: flex; flex-direction: column; gap: 8px;
 }
-.lane::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: var(--lane-c); }
-.lane-agentic { --lane-c: var(--lane-agentic); }
-.lane-deterministic { --lane-c: var(--lane-deterministic); }
-.lane-human { --lane-c: var(--lane-human); }
-.lane-head { display: flex; flex-direction: column; gap: 6px; }
-.lane-tag {
-  display: inline-flex; align-items: center; gap: 8px; align-self: flex-start;
-  font-size: 0.7rem; font-weight: 700; letter-spacing: 0.16em;
-  text-transform: uppercase; color: var(--lane-c);
-  padding: 4px 10px; border-radius: 999px;
-  background: color-mix(in srgb, var(--lane-c) 14%, transparent);
+.attr-label {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 0.64rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted);
 }
-.lane-icon {
-  width: 56px; height: 56px;
-  border-radius: 16px;
-  background: color-mix(in srgb, var(--lane-c) 18%, transparent);
-  display: grid; place-items: center;
-  margin-bottom: 4px;
+.attr-label .pic { width: 18px; height: 18px; color: var(--accent); flex: none; }
+.opts { display: flex; flex-wrap: wrap; gap: 6px; }
+.opt {
+  border-radius: 999px; border: 1px solid var(--border-strong);
+  background: color-mix(in srgb, var(--surface-strong) 70%, transparent); color: var(--text);
+  padding: 6px 11px; font-size: clamp(0.72rem, 1.15vw, 0.82rem); font-weight: 600;
+  transition: background 160ms ease, border-color 160ms ease, color 160ms ease, transform 160ms ease;
 }
-.lane-icon svg { width: 32px; height: 32px; color: var(--lane-c); }
-.lane-title {
-  font-family: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif; font-weight: 700;
-  font-size: 1.25rem; color: var(--text-strong); letter-spacing: -0.01em;
-  line-height: 1.2;
-}
-.lane-sub { color: var(--muted); font-size: 0.92rem; line-height: 1.45; }
-.lane-section {
-  border-top: 1px dashed color-mix(in srgb, var(--lane-c) 30%, var(--border));
-  padding-top: 12px;
-}
-.lane-section h4 {
-  font-size: 0.7rem; font-weight: 700; letter-spacing: 0.16em;
-  text-transform: uppercase; color: var(--lane-c); margin-bottom: 8px;
-}
-.lane-section ul { list-style: none; display: grid; gap: 6px; }
-.lane-section li {
-  display: grid; grid-template-columns: 16px minmax(0, 1fr); gap: 8px;
-  font-size: 0.88rem; line-height: 1.4; color: var(--text);
-}
-.lane-section li::before {
-  content: ""; width: 6px; height: 6px; border-radius: 50%;
-  background: var(--lane-c); margin-top: 8px;
-}
-.lane-owner {
-  margin-top: auto;
-  padding: 10px 12px; border-radius: 14px;
-  background: color-mix(in srgb, var(--lane-c) 12%, transparent);
-  font-size: 0.84rem; line-height: 1.4;
-  border-left: 3px solid var(--lane-c);
-}
-.lane-owner strong { display: block; margin-bottom: 2px; color: var(--text-strong); font-size: 0.7rem; letter-spacing: 0.14em; text-transform: uppercase; }
-.lane-trap {
-  padding: 10px 12px; border-radius: 14px;
-  background: color-mix(in srgb, var(--lane-human) 8%, transparent);
-  border: 1px dashed color-mix(in srgb, var(--lane-human) 40%, transparent);
-  font-size: 0.82rem; line-height: 1.4; color: var(--text);
-}
-.lane-trap strong { display: block; margin-bottom: 2px; color: var(--lane-human); font-size: 0.7rem; letter-spacing: 0.14em; text-transform: uppercase; }
-.foot {
-  margin-top: 18px;
-  padding: 14px 18px; border-radius: 18px;
-  border: 1px solid var(--border-strong); background: var(--surface-strong);
-  display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 14px; align-items: center;
-}
-.foot-label {
-  font-family: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif; font-weight: 800;
-  font-size: 0.86rem; letter-spacing: 0.06em;
-  padding: 6px 12px; border-radius: 999px;
-  background: linear-gradient(135deg, var(--lane-agentic), var(--lane-human));
-  color: #ffffff;
-}
-.foot-text { font-size: 0.92rem; line-height: 1.5; color: var(--text); }
-.foot-text strong { color: var(--text-strong); }
-@media (max-width: 980px) {
-  .lanes { grid-template-columns: 1fr; }
-  .foot { grid-template-columns: 1fr; }
+.opt:hover { border-color: var(--accent); }
+.opt[aria-pressed="true"] {
+  background: color-mix(in srgb, var(--accent) 20%, transparent);
+  border-color: var(--accent); color: var(--text-strong); transform: translateY(-1px);
 }
 
-/* Embed: size to content and report it, the parent autosizes the frame. */
-:root[data-embedded="true"], :root[data-embedded="true"] body { height: auto; }
-:root[data-embedded="true"] .shell { height: auto; }
+.bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: center; }
+.btn {
+  border-radius: 999px; border: 1px solid var(--border-strong); background: var(--surface); color: var(--text);
+  padding: 7px 14px; font-size: clamp(0.74rem, 1.2vw, 0.84rem); font-weight: 600;
+}
+.btn:hover { border-color: var(--accent); color: var(--text-strong); }
+
+.lanes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(10px, 1.6vw, 16px); }
+.lane {
+  position: relative; overflow: hidden;
+  border-radius: 20px; padding: clamp(12px, 1.6vw, 18px);
+  border: 1px solid color-mix(in srgb, var(--lane-c) 30%, var(--border));
+  background: linear-gradient(180deg, color-mix(in srgb, var(--lane-c) 9%, transparent), transparent 42%), var(--surface);
+  box-shadow: var(--shadow-soft);
+  display: flex; flex-direction: column; gap: 9px;
+  opacity: 1; transition: opacity 320ms ease, transform 320ms ease, box-shadow 320ms ease, border-color 320ms ease;
+}
+.lane::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: var(--lane-c); }
+.lane-agentic { --lane-c: var(--L3); }
+.lane-deterministic { --lane-c: var(--accent); }
+.lane-human { --lane-c: var(--accent-2); }
+.lane.dim { opacity: 0.42; }
+.lane.win {
+  border-color: var(--lane-c); transform: translateY(-3px);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--lane-c) 24%, transparent), var(--shadow);
+}
+.lane-icon {
+  width: clamp(38px, 5vw, 50px); height: clamp(38px, 5vw, 50px); border-radius: 14px;
+  background: color-mix(in srgb, var(--lane-c) 16%, transparent);
+  display: grid; place-items: center; color: var(--lane-c); padding: 9px;
+}
+.lane-tag {
+  align-self: flex-start; font-size: 0.62rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--lane-c); background: color-mix(in srgb, var(--lane-c) 14%, transparent);
+  padding: 3px 9px; border-radius: 999px;
+}
+.lane-title {
+  font-family: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif; font-weight: 700;
+  font-size: clamp(0.95rem, 1.6vw, 1.2rem); color: var(--text-strong); line-height: 1.2;
+}
+.lane-sub { color: var(--muted); font-size: clamp(0.78rem, 1.25vw, 0.9rem); line-height: 1.45; }
+.lane-meter { margin-top: auto; display: grid; gap: 5px; }
+.lane-meter .top { display: flex; justify-content: space-between; align-items: baseline; }
+.lane-meter .lab { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+.lane-meter .val { font-size: clamp(0.74rem, 1.2vw, 0.86rem); font-weight: 700; color: var(--lane-c); }
+.track { height: 9px; border-radius: 999px; background: color-mix(in srgb, var(--border-strong) 60%, transparent); overflow: hidden; }
+.fill { height: 100%; width: 0%; border-radius: 999px; background: var(--lane-c); transition: width 560ms cubic-bezier(.4,.1,.2,1); }
+
+.why {
+  border-radius: 18px; padding: clamp(12px, 1.6vw, 18px);
+  border: 1px solid var(--border-strong); background: var(--surface-strong);
+  display: grid; gap: 9px;
+}
+.why-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.why-head .pic { width: 24px; height: 24px; color: var(--vc, var(--muted)); flex: none; }
+.why-verdict {
+  font-family: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif; font-weight: 800;
+  font-size: clamp(0.95rem, 1.7vw, 1.2rem); color: var(--text-strong);
+}
+.why-msg { font-size: clamp(0.8rem, 1.3vw, 0.93rem); line-height: 1.5; color: var(--text); }
+.why-msg strong { color: var(--text-strong); }
+.why-list { list-style: none; display: flex; flex-wrap: wrap; gap: 6px; }
+.why-list li {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: clamp(0.7rem, 1.1vw, 0.79rem); padding: 4px 10px; border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--pc, var(--border-strong)) 45%, transparent);
+  background: color-mix(in srgb, var(--pc, var(--muted-soft)) 12%, transparent); color: var(--text);
+}
+.why-list li .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--pc, var(--muted-soft)); flex: none; }
+
+.foot {
+  padding: clamp(10px, 1.5vw, 15px) clamp(12px, 1.8vw, 18px); border-radius: 16px;
+  border: 1px solid var(--border-strong); background: var(--surface);
+  font-size: clamp(0.8rem, 1.3vw, 0.92rem); line-height: 1.5; color: var(--text);
+}
+.foot strong { color: var(--text-strong); }
+.pic svg { width: 100%; height: 100%; }
+.pic svg * { stroke: currentColor; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+.reveal { opacity: 0; transform: translateY(10px); }
+:root.io .reveal { transition: opacity 460ms ease, transform 460ms ease; }
+.reveal.in { opacity: 1; transform: none; }
+:root.io .lane.reveal.in { transition: opacity 460ms ease, transform 460ms ease, box-shadow 320ms ease, border-color 320ms ease; }
+
+@media (max-width: 760px) {
+  .lanes { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fill, .lane, .opt { transition: none; }
+  .reveal { opacity: 1; transform: none; transition: none; }
+}
 </style>
 </head>
 <body>
 <main class="shell">
   <header class="head">
-    <span class="eyebrow" style="color: var(--lane-agentic)">Pick the right lane — not everything wants a harness</span>
-    <h1>The right boundary is not "AI or no AI."<br>It's <em>agentic vs deterministic vs human authority</em>.</h1>
-    <p>A governed operating model uses all three lanes. Picking the wrong lane is how teams overspend on harnesses for work that should have been a script — or hand authority to an agent that should have stayed with a human.</p>
+    <span class="eyebrow" style="color: var(--accent)">Scene 8 · Which lane does this workload belong in?</span>
+    <h1>The right boundary is not “AI or no AI.”<br>It's <em>agentic vs deterministic vs human authority</em>.</h1>
+    <p>Describe the workload. The lane resolves live — with the reasoning, not just the verdict.</p>
   </header>
 
+  <div class="picker" id="picker"></div>
+
+  <div class="bar">
+    <button type="button" class="btn" id="reset">Reset</button>
+  </div>
+
   <section class="lanes">
-    <article class="lane lane-agentic">
-      <div class="lane-icon" aria-hidden="true">
-        <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="16" cy="16" r="6"/>
-          <path d="M16 4v3M16 25v3M4 16h3M25 16h3M7.5 7.5l2 2M22.5 22.5l2 2M7.5 24.5l2-2M22.5 9.5l2-2"/>
-        </svg>
-      </div>
-      <div class="lane-head">
-        <span class="lane-tag">Lane 1 · Agentic</span>
-        <h2 class="lane-title">Adaptive, tool-using, exploratory work</h2>
-        <p class="lane-sub">When the task needs search, synthesis, iterative inspection, and multi-step judgment against approved tools.</p>
-      </div>
-      <div class="lane-section">
-        <h4>Use it for</h4>
-        <ul>
-          <li>Discovery, analysis, comparison</li>
-          <li>Drafting and bounded implementation</li>
-          <li>Evidence preparation</li>
-          <li>Guided remediation</li>
-          <li>Runtime diagnosis support</li>
-        </ul>
-      </div>
-      <div class="lane-owner">
-        <strong>Owned through</strong>
-        A governed control loop, bounded tools, visible stop conditions, and the full 5-layer harness.
-      </div>
-      <div class="lane-trap">
-        <strong>Trap to avoid</strong>
-        "Agent" for work that's actually deterministic. You'll spend more on tokens than the script would have cost.
+    <article class="lane lane-agentic reveal" id="lane-agentic">
+      <div class="lane-icon pic" data-ic="robot" aria-hidden="true"></div>
+      <span class="lane-tag">Lane 1 · Agentic</span>
+      <h2 class="lane-title">Adaptive, tool-using, exploratory work</h2>
+      <p class="lane-sub">Search, synthesis, iterative inspection and multi-step judgement against approved tools.</p>
+      <div class="lane-meter">
+        <div class="top"><span class="lab">Match</span><span class="val" id="v-agentic">—</span></div>
+        <div class="track"><div class="fill" id="f-agentic"></div></div>
       </div>
     </article>
 
-    <article class="lane lane-deterministic">
-      <div class="lane-icon" aria-hidden="true">
-        <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="5" y="5" width="22" height="22" rx="3"/>
-          <path d="M10 12h12M10 16h12M10 20h8"/>
-        </svg>
-      </div>
-      <div class="lane-head">
-        <span class="lane-tag">Lane 2 · Deterministic</span>
-        <h2 class="lane-title">Known-path, rule-heavy, repeatable work</h2>
-        <p class="lane-sub">When the rules are already known and you want consistency more than open-ended reasoning.</p>
-      </div>
-      <div class="lane-section">
-        <h4>Use it for</h4>
-        <ul>
-          <li>Code mods and transforms</li>
-          <li>Policy and conformance checks</li>
-          <li>Schema and contract validation</li>
-          <li>Static analysis</li>
-          <li>Repeatable evidence assembly</li>
-        </ul>
-      </div>
-      <div class="lane-owner">
-        <strong>Owned by</strong>
-        Encoded rules, thresholds, predictable traces. No LLM in the loop unless it earns its place.
-      </div>
-      <div class="lane-trap">
-        <strong>Trap to avoid</strong>
-        Letting "agent" replace this lane just because it's faster to build a prompt. Repeatability and policy posture drift fast.
+    <article class="lane lane-deterministic reveal" id="lane-deterministic">
+      <div class="lane-icon pic" data-ic="gears" aria-hidden="true"></div>
+      <span class="lane-tag">Lane 2 · Deterministic</span>
+      <h2 class="lane-title">Known-path, rule-heavy, repeatable work</h2>
+      <p class="lane-sub">The rules are already known and consistency matters more than open-ended reasoning.</p>
+      <div class="lane-meter">
+        <div class="top"><span class="lab">Match</span><span class="val" id="v-deterministic">—</span></div>
+        <div class="track"><div class="fill" id="f-deterministic"></div></div>
       </div>
     </article>
 
-    <article class="lane lane-human">
-      <div class="lane-icon" aria-hidden="true">
-        <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="16" cy="11" r="4"/>
-          <path d="M8 26c0-4.5 3.5-8 8-8s8 3.5 8 8"/>
-          <path d="M22 11l3 3M19 14l3-3"/>
-        </svg>
-      </div>
-      <div class="lane-head">
-        <span class="lane-tag">Lane 3 · Human authority</span>
-        <h2 class="lane-title">Approval, exceptions, risk acceptance</h2>
-        <p class="lane-sub">Wherever the cost of error or ambiguity is material, the final word stays with a named human.</p>
-      </div>
-      <div class="lane-section">
-        <h4>Use it for</h4>
-        <ul>
-          <li>Release approval</li>
-          <li>Rollback decisions</li>
-          <li>Policy exceptions</li>
-          <li>Production access changes</li>
-          <li>High-risk customer outcomes</li>
-        </ul>
-      </div>
-      <div class="lane-owner">
-        <strong>Owned by</strong>
-        Named humans with visible authority and accountability. The harness packages evidence; humans decide.
-      </div>
-      <div class="lane-trap">
-        <strong>Trap to avoid</strong>
-        Collapsing this lane into automation "because the agent looked confident." That's how authority quietly transfers without anyone signing off.
+    <article class="lane lane-human reveal" id="lane-human">
+      <div class="lane-icon pic" data-ic="gavel" aria-hidden="true"></div>
+      <span class="lane-tag">Lane 3 · Human authority</span>
+      <h2 class="lane-title">Approval, exceptions, risk acceptance</h2>
+      <p class="lane-sub">Where the cost of error or ambiguity is material, the final word stays with a named human.</p>
+      <div class="lane-meter">
+        <div class="top"><span class="lab">Match</span><span class="val" id="v-human">—</span></div>
+        <div class="track"><div class="fill" id="f-human"></div></div>
       </div>
     </article>
   </section>
 
+  <div class="why" id="why" aria-live="polite">
+    <div class="why-head">
+      <span class="pic" data-ic="radar" aria-hidden="true" id="whyIcon"></span>
+      <span class="why-verdict" id="whyVerdict">Nothing selected yet</span>
+    </div>
+    <p class="why-msg" id="whyMsg">Pick the attributes that describe your workload above. No verdict is assumed before you do.</p>
+    <ul class="why-list" id="whyList"></ul>
+  </div>
+
   <div class="foot">
-    <div class="foot-label">The rule</div>
-    <div class="foot-text"><strong>Match the lane to the work, not the work to the lane you already invested in.</strong> A harness only earns its keep when the underlying work is genuinely agentic. Use deterministic pipelines for rule-heavy work and keep authority with named humans for risky or ambiguous decisions.</div>
+    <strong>Most harness overspend is a lane error</strong> — building five layers around work that was always a script.
   </div>
 </main>
 <script>
 (() => {
-  /* Report content height so the parent frame hugs the content. */
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const root = document.documentElement;
+  if (!reduced) root.classList.add('io');
+
+  const A = 'agentic', D = 'deterministic', H = 'human';
+  const GROUPS = [
+    { id: 'path', label: 'Path', icon: 'network', opts: [
+      { id: 'fixed', t: 'Known, fixed steps', w: { [D]: 3 } },
+      { id: 'varies', t: 'Varies per case', w: { [A]: 2, [H]: 1 } },
+      { id: 'unknown', t: 'Unknown until runtime', w: { [A]: 3 } } ] },
+    { id: 'tools', label: 'Tools', icon: 'cpu', opts: [
+      { id: 'few', t: 'One or two', w: { [D]: 3 } },
+      { id: 'handful', t: 'A handful', w: { [A]: 2, [D]: 1 } },
+      { id: 'broad', t: 'Broad and changing', w: { [A]: 3 } } ] },
+    { id: 'rev', label: 'Reversibility', icon: 'exchange', opts: [
+      { id: 'trivial', t: 'Trivially undone', w: { [A]: 2, [D]: 2 } },
+      { id: 'costly', t: 'Costly to undo', w: { [H]: 2, [A]: 1 } },
+      { id: 'irreversible', t: 'Irreversible', w: { [H]: 4 } } ] },
+    { id: 'judge', label: 'Judgement', icon: 'scales', opts: [
+      { id: 'rules', t: 'Rules decide it', w: { [D]: 3 } },
+      { id: 'interpret', t: 'Needs interpretation', w: { [A]: 3 } },
+      { id: 'authority', t: 'Needs accountable authority', w: { [H]: 4 } } ] },
+    { id: 'volume', label: 'Volume', icon: 'chart', opts: [
+      { id: 'rare', t: 'Rare', w: { [H]: 2 } },
+      { id: 'steady', t: 'Steady', w: { [A]: 1, [D]: 1 } },
+      { id: 'high', t: 'High and repeated', w: { [D]: 3, [A]: 1 } } ] },
+    { id: 'audit', label: 'Audit', icon: 'archive', opts: [
+      { id: 'none', t: 'Not required', w: { [A]: 1, [D]: 1 } },
+      { id: 'internal', t: 'Internal record', w: { [A]: 1, [D]: 1, [H]: 1 } },
+      { id: 'external', t: 'External / regulated', w: { [H]: 3 } } ] }
+  ];
+
+  const LANE_NAME = { agentic: 'Agentic', deterministic: 'Deterministic', human: 'Human authority' };
+  const LANE_VAR = { agentic: 'var(--L3)', deterministic: 'var(--accent)', human: 'var(--accent-2)' };
+  const LANE_ICON = { agentic: 'robot', deterministic: 'gears', human: 'gavel' };
+
+  const selected = new Set();
+  const byId = {};
+  GROUPS.forEach((g) => g.opts.forEach((o) => { byId[o.id] = { ...o, group: g.label }; }));
+
+  const picker = document.getElementById('picker');
+  GROUPS.forEach((g) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'attr'; wrap.setAttribute('role', 'group'); wrap.setAttribute('aria-label', g.label);
+    const lab = document.createElement('div');
+    lab.className = 'attr-label';
+    lab.innerHTML = '<span class="pic" data-ic="' + g.icon + '" aria-hidden="true"></span><span>' + g.label + '</span>';
+    const opts = document.createElement('div');
+    opts.className = 'opts';
+    g.opts.forEach((o) => {
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'opt'; b.id = 'opt-' + o.id;
+      b.setAttribute('aria-pressed', 'false'); b.textContent = o.t;
+      b.addEventListener('click', () => {
+        const on = b.getAttribute('aria-pressed') !== 'true';
+        b.setAttribute('aria-pressed', on ? 'true' : 'false');
+        if (on) selected.add(o.id); else selected.delete(o.id);
+        resolve();
+      });
+      opts.appendChild(b);
+    });
+    wrap.append(lab, opts); picker.appendChild(wrap);
+  });
+
+  const ICON_BASE = '../customs-entry-agent/flow-icons/';
+  const cache = {};
+  const load = (n) => cache[n] || (cache[n] = fetch(ICON_BASE + n + '.svg')
+    .then((r) => (r.ok ? r.text() : Promise.reject()))
+    .then((t) => t.replace(/stroke="#232f3e"/g, 'stroke="currentColor"')).catch(() => ''));
+  const paint = () => {
+    document.querySelectorAll('[data-ic]').forEach((slot) => {
+      load(slot.dataset.ic).then((svg) => { if (!slot.firstChild) slot.innerHTML = svg; });
+    });
+  };
+  paint();
+
+  const has = (id) => selected.has(id);
+  const $ = (id) => document.getElementById(id);
+
+  function scores() {
+    const s = { agentic: 0, deterministic: 0, human: 0 };
+    selected.forEach((id) => {
+      const w = byId[id].w;
+      Object.keys(w).forEach((k) => { s[k] += w[k]; });
+    });
+    const max = Math.max(1, s.agentic, s.deterministic, s.human);
+    return { raw: s, pct: {
+      agentic: Math.round((s.agentic / max) * 100),
+      deterministic: Math.round((s.deterministic / max) * 100),
+      human: Math.round((s.human / max) * 100)
+    } };
+  }
+
+  function drivers(ids) {
+    return ids.filter((id) => has(id)).map((id) => byId[id]);
+  }
+
+  function chip(item, laneVar) {
+    return '<li style="--pc:' + laneVar + '"><span class="dot"></span>' + item.group + ': ' + item.t + '</li>';
+  }
+
+  function resolve() {
+    const { pct } = scores();
+
+    if (selected.size === 0) {
+      ['agentic', 'deterministic', 'human'].forEach((k) => {
+        $('f-' + k).style.width = '0%'; $('v-' + k).textContent = '—';
+        $('lane-' + k).classList.remove('dim', 'win');
+      });
+      $('why').style.setProperty('--vc', 'var(--muted)');
+      $('whyIcon').dataset.ic = 'radar'; $('whyIcon').innerHTML = ''; load('radar').then((s) => { $('whyIcon').innerHTML = s; });
+      $('whyVerdict').textContent = 'Nothing selected yet';
+      $('whyMsg').textContent = 'Pick the attributes that describe your workload above. No verdict is assumed before you do.';
+      $('whyList').innerHTML = '';
+      return;
+    }
+
+    let winners = [], verdict = '', msg = '', chips = '';
+
+    const authorityDrivers = drivers(['irreversible', 'authority', 'external']);
+    if (authorityDrivers.length) {
+      winners = ['human'];
+      verdict = 'Human authority';
+      msg = '<strong>The authority to accept this outcome cannot be delegated.</strong> That is not a claim that a human does all the work — agents and scripts may still do most of it. It means the decision point itself carries a named human signature, and the harness exists to package the evidence that person signs against.';
+      chips = authorityDrivers.map((d) => chip(d, LANE_VAR.human)).join('');
+    } else if (has('fixed') && (has('few') || has('handful')) && has('rules')) {
+      winners = ['deterministic'];
+      verdict = 'Deterministic';
+      msg = '<strong>A harness here is overspend — this was always a script.</strong> Fixed path, a small tool surface and rules that already decide the answer. Encode it, thresholds and all, and spend the harness budget where the path is genuinely unknown.';
+      chips = drivers(['fixed', 'few', 'handful', 'rules']).map((d) => chip(d, LANE_VAR.deterministic)).join('');
+    } else if ((has('varies') || has('unknown')) && (has('handful') || has('broad')) && has('interpret')) {
+      winners = ['agentic'];
+      verdict = 'Agentic';
+      msg = '<strong>This is the only lane where a harness earns its keep.</strong> The path is not knowable in advance, the tool surface is wide, and the work needs interpretation rather than lookup — so constraint, context, execution, verification and lifecycle all have something to do.';
+      chips = drivers(['varies', 'unknown', 'handful', 'broad', 'interpret']).map((d) => chip(d, LANE_VAR.agentic)).join('');
+    } else {
+      const ranked = ['agentic', 'deterministic', 'human'].sort((a, b) => pct[b] - pct[a]);
+      winners = [ranked[0], ranked[1]];
+      verdict = LANE_NAME[ranked[0]] + ' + ' + LANE_NAME[ranked[1]];
+      msg = '<strong>Mixed signals — split the workload rather than forcing it into one lane.</strong> The attributes below pull in two directions. Carve the rule-bound or authority-bearing part out as its own step, and let each half sit in the lane it actually belongs to.';
+      chips = [...selected].map((id) => {
+        const item = byId[id];
+        const lane = Object.keys(item.w).sort((a, b) => item.w[b] - item.w[a])[0];
+        return chip(item, LANE_VAR[lane]);
+      }).join('');
+    }
+
+    ['agentic', 'deterministic', 'human'].forEach((k) => {
+      $('f-' + k).style.width = pct[k] + '%';
+      $('v-' + k).textContent = pct[k] + '%';
+      const el = $('lane-' + k);
+      el.classList.toggle('win', winners.includes(k));
+      el.classList.toggle('dim', !winners.includes(k));
+    });
+
+    const primary = winners[0];
+    $('why').style.setProperty('--vc', LANE_VAR[primary]);
+    const ic = $('whyIcon');
+    if (ic.dataset.ic !== LANE_ICON[primary]) { ic.dataset.ic = LANE_ICON[primary]; ic.innerHTML = ''; }
+    load(LANE_ICON[primary]).then((s) => { if (!ic.firstChild) ic.innerHTML = s; });
+    $('whyVerdict').textContent = verdict;
+    $('whyMsg').innerHTML = msg;
+    $('whyList').innerHTML = chips;
+  }
+
+  $('reset').addEventListener('click', () => {
+    selected.clear();
+    document.querySelectorAll('.opt').forEach((b) => b.setAttribute('aria-pressed', 'false'));
+    resolve();
+  });
+
+  resolve();
+
+  const reveals = [...document.querySelectorAll('.reveal')];
+  if (reduced || !('IntersectionObserver' in window)) {
+    reveals.forEach((el) => el.classList.add('in'));
+  } else {
+    const io = new IntersectionObserver((es) => {
+      es.forEach((e) => {
+        if (!e.isIntersecting) return;
+        const i = reveals.indexOf(e.target);
+        setTimeout(() => e.target.classList.add('in'), i * 120);
+        io.unobserve(e.target);
+      });
+    }, { threshold: 0.15 });
+    reveals.forEach((el) => io.observe(el));
+    setTimeout(() => reveals.forEach((el) => el.classList.add('in')), 2000);
+  }
+
   if (document.documentElement.dataset.embedded === 'true') {
     const postSize = () => window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
     if ('ResizeObserver' in window) new ResizeObserver(postSize).observe(document.body);
     window.addEventListener('load', postSize);
+    setTimeout(postSize, 400);
   }
 })();
 </script>

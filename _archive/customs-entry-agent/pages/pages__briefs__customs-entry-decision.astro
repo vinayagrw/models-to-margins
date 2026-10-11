@@ -1,0 +1,553 @@
+---
+import { getEntry, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import EntryMeta from '../../components/EntryMeta.astro';
+import BackLink from '../../components/BackLink.astro';
+import '../../styles/live-brief.css';
+
+const entry = await getEntry('briefs', 'customs-entry-decision');
+
+if (!entry) {
+  throw new Error('Expected the customs-entry-decision brief to exist in the briefs collection.');
+}
+
+const { Content } = await render(entry);
+
+const scenarios = [
+  {
+    id: 'repeat',
+    label: 'Repeat product',
+    eyebrow: 'The fast path',
+    title: 'The same bracket has been approved before.',
+    recognizes: 'The supplier, part number, product description, origin evidence, and approved product record all match.',
+    ai: 'Compare the new documents with the approved record, surface differences, and assemble the evidence packet.',
+    human: 'Set the approval policy, audit samples, and review any difference that breaks the match.',
+    outcome: 'Reuse the approved answer, validate it against the current rulebook, pass the gate, and file. No new classification guess is needed.',
+    verdict: 'Proceed after validation'
+  },
+  {
+    id: 'similar',
+    label: 'Similar product',
+    eyebrow: 'The assisted path',
+    title: 'It looks familiar, but one fact has changed.',
+    recognizes: 'The line is close to a known product, but its material, use, origin, supplier, or technical specification is different.',
+    ai: 'Find the nearest approved decisions, identify the changed facts, retrieve relevant authorities, and prepare a recommendation.',
+    human: 'A customs broker reviews the difference, accepts or corrects the recommendation, and records the reason.',
+    outcome: 'Hold the line for broker review. The system prepares the case but does not turn similarity into certainty.',
+    verdict: 'Broker review required'
+  },
+  {
+    id: 'new',
+    label: 'New product',
+    eyebrow: 'The specialist path',
+    title: 'There is no approved answer to reuse.',
+    recognizes: 'The product is genuinely new, the evidence conflicts, or the legal and financial stakes make automatic treatment unsafe.',
+    ai: 'Organize source documents, retrieve candidate authorities, test arithmetic, and show what remains uncertain.',
+    human: 'A licensed specialist makes the classification and other material decisions, then signs off on the filing path.',
+    outcome: 'No automatic filing. The new decision becomes a reusable record only after human approval and evidence capture.',
+    verdict: 'Licensed decision required'
+  }
+];
+---
+
+<BaseLayout
+  title={`${entry.data.title} | Models to Margins`}
+  description={entry.data.summary}
+  currentPath="/briefs"
+>
+  <article class="live-brief customs-decision-brief" data-tone="customs">
+    <section class="live-brief__hero">
+      <span class="eyebrow live-brief__eyebrow">{entry.data.eyebrow}</span>
+      <h1 class="live-brief__title">{entry.data.title}</h1>
+      <p class="lead live-brief__summary">{entry.data.summary}</p>
+      <BackLink href="/briefs" label="Back to Brief" />
+      <EntryMeta
+        date={entry.data.pubDate}
+        primary={entry.data.industry}
+        readTime={entry.data.readTime}
+      />
+      <p class="customs-decision-brief__thesis">
+        <strong>Automate the repeatable preparation.</strong> Keep judgment and accountability with customs professionals.
+      </p>
+    </section>
+
+    <section class="live-brief__support-grid" aria-label="Executive summary">
+      <article class="live-brief__support-card">
+        <p class="live-brief__label">Business problem</p>
+        <h2>Small data uncertainty becomes expensive at the border.</h2>
+        <p>Teams discover document conflicts late, then search across email, product files, and past entries while the shipment waits.</p>
+      </article>
+      <article class="live-brief__support-card">
+        <p class="live-brief__label">Proposed control</p>
+        <h2>Reuse what a human has already approved.</h2>
+        <p>Repeat products follow a validated fast path. Similar and new products receive more evidence, more review, and less automation.</p>
+      </article>
+      <article class="live-brief__support-card">
+        <p class="live-brief__label">Operating effect</p>
+        <h2>Experts spend time on exceptions, not every line.</h2>
+        <p>The system prepares and compares. Licensed professionals own ambiguity, material risk, and the final accountable decision.</p>
+      </article>
+    </section>
+
+    <section class="customs-decision-board" id="customs-decision-experience" aria-labelledby="shipment-selector-title">
+      <aside class="live-brief__panel customs-decision-board__controls">
+        <p class="live-brief__label">Interactive shipment selector</p>
+        <h2 id="shipment-selector-title">How much should the system be allowed to do?</h2>
+        <p class="live-brief__intro">Pick the product situation. The permitted automation changes with what the company already knows.</p>
+
+        <div class="customs-tabs" role="tablist" aria-label="Product situations">
+          {scenarios.map((scenario, index) => (
+            <button
+              class="live-brief__focus-button customs-tab"
+              type="button"
+              role="tab"
+              id={`scenario-tab-${scenario.id}`}
+              aria-label={scenario.label}
+              aria-controls={`scenario-panel-${scenario.id}`}
+              aria-selected={index === 0 ? 'true' : 'false'}
+              tabindex={index === 0 ? 0 : -1}
+              data-scenario-tab={scenario.id}
+            >
+              <span>{index + 1}</span>
+              <strong>{scenario.label}</strong>
+            </button>
+          ))}
+        </div>
+
+        <div class="live-brief__stack">
+          <strong>The rule</strong>
+          <span>The less the company knows, the less the system is allowed to decide.</span>
+        </div>
+
+        <noscript>
+          <p class="customs-noscript">All three routes are shown because JavaScript is off. No information is hidden.</p>
+        </noscript>
+      </aside>
+
+      <section class="live-brief__canvas customs-decision-board__canvas" aria-label="Selected decision route">
+        <div class="live-brief__canvas-copy">
+          <p class="live-brief__label">Decision route</p>
+          <h2>One control model, three different permissions</h2>
+          <p class="live-brief__intro">Each route answers four questions: what is recognized, what AI may do, what the human owns, and what happens next.</p>
+        </div>
+
+        <div class="customs-panels">
+          {scenarios.map((scenario) => (
+            <section
+              class="customs-scenario-panel"
+              role="tabpanel"
+              id={`scenario-panel-${scenario.id}`}
+              aria-labelledby={`scenario-tab-${scenario.id}`}
+              tabindex="0"
+              data-scenario-panel={scenario.id}
+            >
+              <div class="customs-scenario-panel__heading">
+                <div>
+                  <p class="live-brief__label">{scenario.eyebrow}</p>
+                  <h3>{scenario.title}</h3>
+                </div>
+                <span class="customs-verdict">{scenario.verdict}</span>
+              </div>
+
+              <div class="customs-decision-grid">
+                <article>
+                  <span>1 · The system recognizes</span>
+                  <p>{scenario.recognizes}</p>
+                </article>
+                <article>
+                  <span>2 · AI is allowed to</span>
+                  <p>{scenario.ai}</p>
+                </article>
+                <article>
+                  <span>3 · The human owns</span>
+                  <p>{scenario.human}</p>
+                </article>
+                <article>
+                  <span>4 · Outcome</span>
+                  <p>{scenario.outcome}</p>
+                </article>
+              </div>
+            </section>
+          ))}
+        </div>
+      </section>
+    </section>
+
+    <section class="customs-contrast" aria-labelledby="pitch-comparison-title">
+      <div class="customs-contrast__heading">
+        <p class="live-brief__label">Positioning choice</p>
+        <h2 id="pitch-comparison-title">A faster filing pitch is not the same as a safer operating design.</h2>
+      </div>
+      <div class="customs-contrast__grid">
+        <article class="live-brief__panel customs-contrast__card customs-contrast__card--pitch">
+          <p class="live-brief__label">Common market pitch</p>
+          <h3>Upload documents. Let AI choose a code. File faster.</h3>
+          <ul>
+            <li>Lead with extraction and speed.</li>
+            <li>Treat every line as a new model task.</li>
+            <li>Make human review sound like temporary friction.</li>
+            <li>Leave the rule-change and evidence loop unclear.</li>
+          </ul>
+        </article>
+        <article class="live-brief__panel customs-contrast__card customs-contrast__card--design">
+          <p class="live-brief__label">Proposed operating design</p>
+          <h3>Reconcile data. Reuse approved decisions. Escalate uncertainty.</h3>
+          <ul>
+            <li>Lead with repeat products and early validation.</li>
+            <li>Use AI to prepare evidence, not invent certainty.</li>
+            <li>Keep licensed judgment where the facts are new or material.</li>
+            <li>Record why each answer was used and which rule supported it.</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section aria-labelledby="business-case-title">
+      <div class="customs-section-heading">
+        <p class="live-brief__label">Compact business case</p>
+        <h2 id="business-case-title">Three numbers decide whether this should be built.</h2>
+        <p>These are proposed programme gates to test against the customer's own historical entries before any automatic filing begins.</p>
+      </div>
+
+      <div class="live-brief__support-grid">
+        <article class="live-brief__support-card customs-readiness-card">
+          <strong class="customs-readiness-card__number">50%+</strong>
+          <h3>Repeat-product rate</h3>
+          <p>At least half the lines should be products the customer has shipped before. Below that, too much work stays on the expensive specialist path.</p>
+        </article>
+        <article class="live-brief__support-card customs-readiness-card">
+          <strong class="customs-readiness-card__number">1 : 2,000</strong>
+          <h3>Licensed review capacity</h3>
+          <p>The operation needs about one licensed reviewer for every 2,000 lines that the system actually sends to review each month.</p>
+        </article>
+        <article class="live-brief__support-card customs-readiness-card">
+          <strong class="customs-readiness-card__number">&lt;0.5%</strong>
+          <h3>Silent-failure ceiling</h3>
+          <p>In shadow testing, confidently wrong answers the system would have auto-accepted must remain below 0.5% for four consecutive weeks.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="live-brief__article customs-decision-brief__cta" aria-labelledby="customs-next-step-title">
+      <p class="live-brief__label">Choose what to explore next</p>
+      <h2 id="customs-next-step-title">The board explains the decision. The deep dive carries the proof.</h2>
+      <p class="live-brief__article-intro">Open the full architecture for the evidence, AWS design, ROI model, delivery waves, kill criteria, and the failure modes the red team found.</p>
+      <div class="live-brief__toolbar">
+        <a class="button primary" href="/deep-dives/customs-entry-agent#end-to-end-solution">Explore the complete architecture and end-to-end flow</a>
+        <a class="button secondary" href="/briefs/customs-entry-story">Compare Concept A: the shipment story</a>
+      </div>
+    </section>
+
+    <section class="live-brief__article">
+      <div class="article-body">
+        <Content />
+      </div>
+    </section>
+  </article>
+
+  <style>
+    .customs-decision-brief {
+      --brief-accent: #1f90c4;
+      --brief-accent-2: #2e9567;
+      --brief-accent-3: #f0a24d;
+    }
+
+    .customs-decision-brief__thesis {
+      max-width: 76ch;
+      margin-top: 18px;
+      padding: 14px 16px;
+      border-left: 4px solid var(--brief-accent);
+      border-radius: 0 16px 16px 0;
+      background: color-mix(in srgb, var(--brief-accent) 9%, var(--brief-soft));
+      color: var(--muted);
+    }
+
+    .customs-decision-brief__thesis strong {
+      color: var(--text);
+    }
+
+    .customs-decision-board {
+      display: grid;
+      grid-template-columns: minmax(260px, 320px) minmax(0, 1fr);
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    .customs-decision-board__controls,
+    .customs-decision-board__canvas {
+      min-width: 0;
+    }
+
+    .customs-tabs {
+      display: grid;
+      gap: 10px;
+    }
+
+    .customs-tab {
+      display: grid;
+      grid-template-columns: 30px minmax(0, 1fr);
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      text-align: left;
+      border-radius: 16px;
+    }
+
+    .customs-tab > span {
+      display: grid;
+      place-items: center;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: color-mix(in srgb, var(--brief-accent) 15%, transparent);
+      color: var(--brief-accent);
+      font-weight: 700;
+    }
+
+    .customs-tab > strong {
+      color: var(--text);
+    }
+
+    .customs-tab[aria-selected="true"] {
+      border-color: color-mix(in srgb, var(--brief-accent) 60%, var(--brief-border));
+      background: color-mix(in srgb, var(--brief-accent) 15%, var(--brief-soft));
+    }
+
+    .customs-tab:focus-visible {
+      outline: 2px solid var(--brief-accent);
+      outline-offset: 3px;
+    }
+
+    .customs-noscript {
+      margin: 0;
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: color-mix(in srgb, var(--brief-accent-3) 12%, var(--brief-soft));
+      color: var(--muted);
+    }
+
+    .customs-panels {
+      display: grid;
+      gap: 14px;
+    }
+
+    .customs-scenario-panel {
+      display: grid;
+      gap: 16px;
+      padding: 18px;
+      border-radius: 22px;
+      border: 1px solid var(--brief-border);
+      background: var(--brief-soft);
+    }
+
+    .customs-scenario-panel:focus-visible {
+      outline: 2px solid var(--brief-accent);
+      outline-offset: 3px;
+    }
+
+    .customs-scenario-panel__heading {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: flex-start;
+    }
+
+    .customs-scenario-panel__heading h3 {
+      margin-top: 5px;
+      font-size: clamp(1.25rem, 2vw, 1.7rem);
+    }
+
+    .customs-verdict {
+      flex: 0 0 auto;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--brief-accent-2) 14%, transparent);
+      color: var(--brief-accent-2);
+      font-size: 0.74rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .customs-decision-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .customs-decision-grid article {
+      padding: 14px;
+      border-radius: 16px;
+      border: 1px solid color-mix(in srgb, var(--brief-border) 90%, transparent);
+      background: color-mix(in srgb, var(--brief-surface) 84%, transparent);
+    }
+
+    .customs-decision-grid span {
+      display: block;
+      margin-bottom: 7px;
+      color: var(--brief-accent);
+      font-size: 0.74rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .customs-decision-grid p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.58;
+    }
+
+    .customs-contrast,
+    .customs-section-heading {
+      display: grid;
+      gap: 14px;
+    }
+
+    .customs-contrast__heading,
+    .customs-section-heading {
+      max-width: 78ch;
+    }
+
+    .customs-contrast__heading h2,
+    .customs-section-heading h2,
+    .customs-decision-brief__cta h2 {
+      margin-top: 6px;
+      font-size: clamp(1.45rem, 2.8vw, 2rem);
+    }
+
+    .customs-section-heading > p:last-child {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .customs-contrast__grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .customs-contrast__card h3 {
+      margin: 0;
+      font-size: 1.18rem;
+    }
+
+    .customs-contrast__card ul {
+      margin: 0;
+      padding-left: 1.2rem;
+      color: var(--muted);
+    }
+
+    .customs-contrast__card--pitch {
+      border-color: color-mix(in srgb, var(--brief-accent-3) 38%, var(--brief-border));
+    }
+
+    .customs-contrast__card--design {
+      border-color: color-mix(in srgb, var(--brief-accent-2) 38%, var(--brief-border));
+    }
+
+    .customs-readiness-card__number {
+      color: var(--brief-accent);
+      font-size: clamp(1.8rem, 4vw, 2.7rem);
+      line-height: 1;
+      letter-spacing: -0.05em;
+    }
+
+    .customs-decision-brief__cta {
+      background: linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--brief-accent) 11%, var(--brief-surface)),
+        color-mix(in srgb, var(--brief-accent-2) 8%, var(--brief-surface))
+      );
+    }
+
+    @media (max-width: 960px) {
+      .customs-decision-board,
+      .customs-contrast__grid {
+        grid-template-columns: 1fr;
+      }
+
+      .customs-tabs {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .customs-tab {
+        grid-template-columns: 1fr;
+        justify-items: center;
+        text-align: center;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .customs-tabs,
+      .customs-decision-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .customs-tab {
+        grid-template-columns: 30px minmax(0, 1fr);
+        justify-items: stretch;
+        text-align: left;
+      }
+
+      .customs-scenario-panel__heading {
+        display: grid;
+      }
+
+      .customs-verdict {
+        width: fit-content;
+      }
+
+      .customs-decision-brief__cta .button {
+        width: 100%;
+        text-align: center;
+      }
+    }
+  </style>
+
+  <script>
+    (() => {
+      const root = document.getElementById('customs-decision-experience');
+      if (!root) return;
+
+      const tabs = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-scenario-tab]'));
+      const panels = Array.from(root.querySelectorAll<HTMLElement>('[data-scenario-panel]'));
+      root.dataset.enhanced = 'true';
+
+      const activate = (scenarioId, moveFocus = false) => {
+        tabs.forEach((tab) => {
+          const isActive = tab.getAttribute('data-scenario-tab') === scenarioId;
+          tab.setAttribute('aria-selected', String(isActive));
+          tab.setAttribute('tabindex', isActive ? '0' : '-1');
+          if (isActive && moveFocus) tab.focus();
+        });
+
+        panels.forEach((panel) => {
+          panel.hidden = panel.getAttribute('data-scenario-panel') !== scenarioId;
+        });
+      };
+
+      tabs.forEach((tab, index) => {
+        const scenarioId = tab.getAttribute('data-scenario-tab');
+        if (!scenarioId) return;
+
+        tab.addEventListener('click', () => activate(scenarioId));
+        tab.addEventListener('keydown', (event) => {
+          let nextIndex = index;
+
+          if (event.key === 'ArrowRight') nextIndex = (index + 1) % tabs.length;
+          else if (event.key === 'ArrowLeft') nextIndex = (index - 1 + tabs.length) % tabs.length;
+          else if (event.key === 'Home') nextIndex = 0;
+          else if (event.key === 'End') nextIndex = tabs.length - 1;
+          else return;
+
+          event.preventDefault();
+          const nextId = tabs[nextIndex].getAttribute('data-scenario-tab');
+          if (nextId) activate(nextId, true);
+        });
+      });
+
+      activate('repeat');
+    })();
+  </script>
+</BaseLayout>

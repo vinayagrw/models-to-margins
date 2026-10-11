@@ -4,13 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Operator Stories — A Day in the Life, Before and After AI</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="./_theme-bootstrap.js"></script>
 <link rel="stylesheet" href="./_theme.css">
 <style>
 /* Scene-specific: persona day-in-the-life stories.
-   Persona tabs, a Before AI / After AI toggle, a four-step timeline,
-   then automated vs still-human vs KPI chips. */
+   Persona tabs, a Before AI / After AI toggle, an icon-led four-step
+   timeline with staged reveal, then automated vs still-human vs KPI chips. */
 :root {
   --before: var(--warn);
   --after: var(--good);
@@ -18,11 +17,8 @@
   --m-promising: var(--accent);
   --m-marketing: var(--warn);
 }
+:root[data-embedded="true"], :root[data-embedded="true"] body { height: auto; }
 
-/* Embedded sizing note: the frame auto-sizes to our reported content height,
-   so spacing must not depend on vh. A vh-based clamp makes content height a
-   function of frame height, which needs several resize round-trips to settle
-   and clips mid-convergence. Fixed values keep sizing single-pass. */
 .shell { display: flex; flex-direction: column; gap: 10px; }
 :root[data-embedded="true"] .shell {
   display: flex; flex-direction: column; gap: 8px;
@@ -36,15 +32,23 @@
 }
 :root[data-embedded="true"] .head h1 { font-size: 1.05rem; }
 
+/* Inline icon slot: shared line-art SVGs, stroke swapped to currentColor */
+.ic { display: inline-grid; place-items: center; width: 18px; height: 18px; flex: none; }
+.ic svg { width: 100%; height: 100%; display: block; }
+.ic svg * { stroke: currentColor; }
+
 /* Persona tabs */
 .tabs { display: flex; gap: 7px; flex-wrap: wrap; }
 .tab {
+  display: inline-flex; align-items: center; gap: 6px;
   font: 700 0.72rem/1.2 "Space Grotesk", sans-serif; letter-spacing: 0.02em;
   color: var(--muted); background: var(--surface); border: 1px solid var(--border);
-  border-radius: 99px; padding: 7px 13px; cursor: pointer; font-family: "Space Grotesk", sans-serif;
+  border-radius: 99px; padding: 7px 13px; cursor: pointer;
   transition: border-color .18s ease, color .18s ease, background .18s ease;
 }
+.tab .ic { width: 15px; height: 15px; }
 .tab:hover { border-color: var(--border-strong); color: var(--text); }
+.tab:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .tab[aria-selected="true"] {
   color: var(--text-strong);
   border-color: color-mix(in srgb, var(--accent) 60%, var(--border-strong));
@@ -52,8 +56,8 @@
 }
 :root[data-embedded="true"] .tab { font-size: 0.7rem; padding: 5px clamp(9px, 1.2vw, 13px); }
 
-/* Mode toggle + summary line */
-.mode-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+/* Mode toggle + replay + summary line */
+.mode-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .mode {
   display: inline-flex; border: 1px solid var(--border-strong); border-radius: 99px;
   overflow: hidden; background: var(--surface);
@@ -63,18 +67,30 @@
   color: var(--muted); background: transparent; border: 0; padding: 8px 14px; cursor: pointer;
   transition: background .2s ease, color .2s ease;
 }
+.mode button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
 .mode button[aria-pressed="true"].m-before { background: color-mix(in srgb, var(--before) 14%, transparent); color: color-mix(in srgb, var(--before) 78%, var(--text-strong)); }
 .mode button[aria-pressed="true"].m-after { background: color-mix(in srgb, var(--after) 16%, transparent); color: color-mix(in srgb, var(--after) 70%, var(--text-strong)); }
 :root[data-embedded="true"] .mode button { font-size: 0.7rem; padding: 6px clamp(10px, 1.3vw, 14px); }
 
+.replay {
+  min-height: 32px; padding: 6px 12px; cursor: pointer; border-radius: 99px;
+  font: 700 0.66rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.07em; text-transform: uppercase;
+  color: var(--accent); background: transparent; border: 1px solid var(--accent);
+}
+.replay:hover { background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.replay:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
 .mat-badge {
+  display: inline-flex; align-items: center; gap: 6px;
   font: 700 0.69rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.09em; text-transform: uppercase;
   color: var(--mm); padding: 5px 10px; border-radius: 99px;
   border: 1px solid color-mix(in srgb, var(--mm) 45%, transparent);
   background: color-mix(in srgb, var(--mm) 8%, transparent);
 }
+.mat-badge .ic { width: 14px; height: 14px; }
 .summary { font: 400 0.75rem/1.45 "DM Sans", sans-serif; color: var(--muted); flex: 1 1 260px; min-width: 200px; }
 :root[data-embedded="true"] .summary { font-size: 0.72rem; }
+.hint { font: 400 0.68rem/1.3 "DM Sans", sans-serif; color: var(--muted-soft); }
 
 /* Story area (fades on switch) */
 .story { display: flex; flex-direction: column; gap: 10px; }
@@ -82,22 +98,40 @@
 .story.fade { animation: sfade .3s ease-out; }
 @keyframes sfade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 
-/* Timeline */
+/* Timeline: icon-led step cards with staged reveal + click-to-expand */
 .steps { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 9px; align-items: start; }
 :root[data-embedded="true"] .steps { gap: clamp(5px, 0.8vw, 9px); }
 .step {
   display: flex; flex-direction: column; gap: 5px; padding: 10px 12px; border-radius: 13px;
   border: 1px solid color-mix(in srgb, var(--mode-c) 30%, var(--border));
   background: var(--surface); box-shadow: var(--shadow-soft);
+  cursor: pointer; text-align: left; font-family: inherit; width: 100%;
+  opacity: 0.28; transform: translateY(4px);
+  transition: opacity .35s ease, transform .35s ease, border-color .35s ease;
 }
+.step.lit { opacity: 1; transform: none; }
+.step:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 :root[data-embedded="true"] .step { padding: 8px clamp(7px, 1.1vw, 12px); gap: 4px; }
 .step-time {
   font: 700 0.7rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.1em; color: var(--mode-c);
   display: flex; align-items: center; gap: 7px;
 }
 .step-time::after { content: ""; flex: 1; height: 1px; background: color-mix(in srgb, var(--mode-c) 35%, transparent); }
+.step-head { display: flex; align-items: flex-start; gap: 8px; }
+.step-pic {
+  width: 30px; height: 30px; flex: none; display: grid; place-items: center; border-radius: 9px;
+  border: 1.5px solid color-mix(in srgb, var(--mode-c) 40%, var(--border-strong));
+  color: var(--muted); transition: color .35s ease, box-shadow .35s ease;
+}
+.step-pic svg { width: 19px; height: 19px; display: block; }
+.step-pic svg * { stroke: currentColor; }
+.step.lit .step-pic { color: var(--mode-c); box-shadow: 0 0 0 3px color-mix(in srgb, var(--mode-c) 14%, transparent); }
 .step-title { font: 700 0.78rem/1.25 "Space Grotesk", sans-serif; color: var(--text-strong); letter-spacing: -0.01em; }
-.step-detail { font: 400 0.72rem/1.4 "DM Sans", sans-serif; color: var(--muted); }
+.step-detail {
+  display: none; font: 400 0.72rem/1.4 "DM Sans", sans-serif; color: var(--muted);
+  border-left: 2px solid color-mix(in srgb, var(--mode-c) 45%, transparent); padding-left: 8px;
+}
+.step[aria-expanded="true"] .step-detail { display: block; }
 :root[data-embedded="true"] .step-title { font-size: 0.75rem; }
 :root[data-embedded="true"] .step-detail { font-size: 0.7rem; }
 
@@ -110,7 +144,12 @@
   background: color-mix(in srgb, var(--fc) 5%, transparent);
 }
 :root[data-embedded="true"] .fact { padding: 7px clamp(7px, 1.1vw, 12px); gap: 5px; }
-.fact-label { font: 700 0.69rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.11em; text-transform: uppercase; color: color-mix(in srgb, var(--fc) 70%, var(--text-strong)); }
+.fact-label {
+  display: flex; align-items: center; gap: 6px;
+  font: 700 0.69rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.11em; text-transform: uppercase;
+  color: color-mix(in srgb, var(--fc) 70%, var(--text-strong));
+}
+.fact-label .ic { width: 15px; height: 15px; }
 .fact-chips { display: flex; flex-wrap: wrap; gap: 5px; }
 .fchip {
   font: 500 0.7rem/1.3 "DM Sans", sans-serif; color: var(--text);
@@ -120,7 +159,10 @@
 }
 :root[data-embedded="true"] .fchip { font-size: 0.7rem; }
 
-@media (prefers-reduced-motion: reduce) { .story.fade { animation: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .story.fade { animation: none; }
+  .step { transition: none; }
+}
 @media (max-width: 860px) { .steps { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 760px) {
   .facts { grid-template-columns: 1fr; }
@@ -145,23 +187,25 @@
       <button class="m-before" id="btn-before" aria-pressed="false">Before AI</button>
       <button class="m-after" id="btn-after" aria-pressed="true">After AI</button>
     </div>
+    <button type="button" class="replay" id="replay">Replay shift</button>
     <span class="mat-badge" id="mat"></span>
     <p class="summary" id="summary"></p>
   </div>
 
   <div class="story" id="story">
     <div class="steps" id="steps"></div>
+    <p class="hint">Tap a step for the detail. Switch persona or mode to replay the shift.</p>
     <div class="facts">
       <div class="fact" style="--fc:var(--after)">
-        <div class="fact-label">Automated</div>
+        <div class="fact-label"><span class="ic" data-ic="robot" aria-hidden="true"></span>Automated</div>
         <div class="fact-chips" id="chips-auto"></div>
       </div>
       <div class="fact" style="--fc:var(--accent-2)">
-        <div class="fact-label">Still human</div>
+        <div class="fact-label"><span class="ic" data-ic="personcheck" aria-hidden="true"></span>Still human</div>
         <div class="fact-chips" id="chips-human"></div>
       </div>
       <div class="fact" style="--fc:var(--accent)">
-        <div class="fact-label">KPIs to watch</div>
+        <div class="fact-label"><span class="ic" data-ic="chart" aria-hidden="true"></span>KPIs to watch</div>
         <div class="fact-chips" id="chips-kpi"></div>
       </div>
     </div>
@@ -176,21 +220,23 @@
     "tab": "Restaurant manager",
     "persona": "Restaurant store manager",
     "maturity": "promising",
+    "leadIcon": "person",
+    "taskIcon": "building",
     "summary": "The manager no longer starts the day by reconciling dashboards. The system surfaces what changed, collects data hands-free, and proposes follow-through.",
     "kpis": ["Faster counts", "Lower labor variance", "Fewer missed compliance issues"],
     "automated": ["Counting", "Issue detection", "Routine analysis", "Task generation"],
     "human": ["Staffing tradeoffs", "Coaching", "Guest recovery", "Local exception handling"],
     "before": [
-      { "time": "07:00", "title": "Open four systems to understand the day", "detail": "The manager checks labor, inventory, yesterday's exceptions, and shift notes across multiple screens before deciding what actually matters." },
-      { "time": "09:30", "title": "Type counts manually", "detail": "Back-of-house counts force the manager to keep switching between shelves, clipboard memory, and the app." },
-      { "time": "13:00", "title": "React after the lunch rush", "detail": "Operational issues appear only after customer experience and labor efficiency have already slipped." },
-      { "time": "17:00", "title": "Close the day with incomplete follow-through", "detail": "Audit issues and operational drift still depend on whether someone has time to turn them into tasks." }
+      { "time": "07:00", "icon": "monitor", "title": "Open four systems to understand the day", "detail": "The manager checks labor, inventory, yesterday's exceptions, and shift notes across multiple screens before deciding what actually matters." },
+      { "time": "09:30", "icon": "checklist", "title": "Type counts manually", "detail": "Back-of-house counts force the manager to keep switching between shelves, clipboard memory, and the app." },
+      { "time": "13:00", "icon": "warning", "title": "React after the lunch rush", "detail": "Operational issues appear only after customer experience and labor efficiency have already slipped." },
+      { "time": "17:00", "icon": "inbox", "title": "Close the day with incomplete follow-through", "detail": "Audit issues and operational drift still depend on whether someone has time to turn them into tasks." }
     ],
     "after": [
-      { "time": "07:00", "title": "AI Analyst surfaces the two issues that matter", "detail": "The day starts with ranked exceptions and plain-English context instead of dashboard reconciliation." },
-      { "time": "09:30", "title": "Voice inventory runs in motion", "detail": "Counts are spoken into the workflow while the manager keeps eyes on shelves and hands on the work." },
-      { "time": "13:00", "title": "Photo and form review catch drift sooner", "detail": "AI Actions and Photo Intelligence surface non-compliance earlier, before it compounds across the shift." },
-      { "time": "17:00", "title": "Only human decisions stay human", "detail": "The manager still owns staffing tradeoffs, coaching, and guest recovery, but the system has already created the follow-up path." }
+      { "time": "07:00", "icon": "radar", "title": "AI Analyst surfaces the two issues that matter", "detail": "The day starts with ranked exceptions and plain-English context instead of dashboard reconciliation." },
+      { "time": "09:30", "icon": "megaphone", "title": "Voice inventory runs in motion", "detail": "Counts are spoken into the workflow while the manager keeps eyes on shelves and hands on the work." },
+      { "time": "13:00", "icon": "eye", "title": "Photo and form review catch drift sooner", "detail": "AI Actions and Photo Intelligence surface non-compliance earlier, before it compounds across the shift." },
+      { "time": "17:00", "icon": "personcheck", "title": "Only human decisions stay human", "detail": "The manager still owns staffing tradeoffs, coaching, and guest recovery, but the system has already created the follow-up path." }
     ]
   },
   {
@@ -198,21 +244,23 @@
     "tab": "Grocery ops",
     "persona": "Grocery / store operations manager",
     "maturity": "proven",
+    "leadIcon": "person",
+    "taskIcon": "chart",
     "summary": "The operating day shifts from static replenishment rules and delayed shelf checks toward daily availability risk, automated reorder guidance, and visual store verification.",
     "kpis": ["In-stock rate", "Lost sales", "Waste", "Shelf compliance"],
     "automated": ["Reorder recommendations", "Shelf intelligence", "Store task creation"],
     "human": ["Promo judgment", "Local assortment choices", "Vendor escalation"],
     "before": [
-      { "time": "06:30", "title": "Review yesterday's shelf gaps", "detail": "Store and category teams still rely on stale or partial visibility into what was actually missing on shelves." },
-      { "time": "10:00", "title": "Override replenishment rules manually", "detail": "Promo changes, local demand, and one-off anomalies force repetitive manual corrections." },
-      { "time": "14:00", "title": "Ask field teams for proof", "detail": "By the time shelf photos or manual checks return, the window to recover the issue is narrower." },
-      { "time": "18:00", "title": "Hope the task reached the store", "detail": "Issue detection, task routing, and accountability often live in separate systems." }
+      { "time": "06:30", "icon": "table", "title": "Review yesterday's shelf gaps", "detail": "Store and category teams still rely on stale or partial visibility into what was actually missing on shelves." },
+      { "time": "10:00", "icon": "gears", "title": "Override replenishment rules manually", "detail": "Promo changes, local demand, and one-off anomalies force repetitive manual corrections." },
+      { "time": "14:00", "icon": "envelope", "title": "Ask field teams for proof", "detail": "By the time shelf photos or manual checks return, the window to recover the issue is narrower." },
+      { "time": "18:00", "icon": "warning", "title": "Hope the task reached the store", "detail": "Issue detection, task routing, and accountability often live in separate systems." }
     ],
     "after": [
-      { "time": "06:30", "title": "Availability risks arrive already prioritized", "detail": "The manager starts with the SKUs and stores most likely to matter today rather than a giant queue." },
-      { "time": "10:00", "title": "Replenishment is recommendation-first", "detail": "AI turns sales, supply, and demand signals into operational reorder guidance and exceptions that need real human judgment." },
-      { "time": "14:00", "title": "Shelf intelligence feeds action", "detail": "Photo and execution systems point directly to the store task or exception route instead of stopping at visibility." },
-      { "time": "18:00", "title": "Teams close the loop, not just the report", "detail": "The workday ends with tracked follow-through, not just better dashboards." }
+      { "time": "06:30", "icon": "radar", "title": "Availability risks arrive already prioritized", "detail": "The manager starts with the SKUs and stores most likely to matter today rather than a giant queue." },
+      { "time": "10:00", "icon": "robot", "title": "Replenishment is recommendation-first", "detail": "AI turns sales, supply, and demand signals into operational reorder guidance and exceptions that need real human judgment." },
+      { "time": "14:00", "icon": "eye", "title": "Shelf intelligence feeds action", "detail": "Photo and execution systems point directly to the store task or exception route instead of stopping at visibility." },
+      { "time": "18:00", "icon": "check", "title": "Teams close the loop, not just the report", "detail": "The workday ends with tracked follow-through, not just better dashboards." }
     ]
   },
   {
@@ -220,21 +268,23 @@
     "tab": "Warehouse lead",
     "persona": "Warehouse shift lead",
     "maturity": "promising",
+    "leadIcon": "person",
+    "taskIcon": "warehouse",
     "summary": "The shift lead stops treating the WMS as a reporting surface and starts using an operating layer that prioritizes exceptions and gives real next moves.",
     "kpis": ["Throughput", "SLA attainment", "Labor productivity", "Rework"],
     "automated": ["Exception triage", "Decision support", "Visual verification", "Alert prioritization"],
     "human": ["Floor decisions in unusual conditions", "Unusual service tradeoffs"],
     "before": [
-      { "time": "05:45", "title": "Walk the floor to find the bottleneck", "detail": "The shift lead trusts direct observation because the system signals are spread across tools and too noisy." },
-      { "time": "09:15", "title": "Triaging alerts eats the morning", "detail": "Queue pressure, congestion, or damage exceptions appear, but the system does not tell the team which one matters most." },
-      { "time": "13:30", "title": "Labor rebalancing happens late", "detail": "By the time the team reshuffles labor, the SLA impact is already baked in." },
-      { "time": "19:00", "title": "Root-cause analysis happens after the shift", "detail": "The real diagnosis lands too late to help the day that just happened." }
+      { "time": "05:45", "icon": "person", "title": "Walk the floor to find the bottleneck", "detail": "The shift lead trusts direct observation because the system signals are spread across tools and too noisy." },
+      { "time": "09:15", "icon": "bell", "title": "Triaging alerts eats the morning", "detail": "Queue pressure, congestion, or damage exceptions appear, but the system does not tell the team which one matters most." },
+      { "time": "13:30", "icon": "clock", "title": "Labor rebalancing happens late", "detail": "By the time the team reshuffles labor, the SLA impact is already baked in." },
+      { "time": "19:00", "icon": "flask", "title": "Root-cause analysis happens after the shift", "detail": "The real diagnosis lands too late to help the day that just happened." }
     ],
     "after": [
-      { "time": "05:45", "title": "The control layer highlights the likely pressure points", "detail": "The shift begins with a ranked view of where congestion, dwell, or labor imbalance will hit first." },
-      { "time": "09:15", "title": "Exceptions come with decisions attached", "detail": "The team sees the issue, why it matters, and the most likely operational move in one view." },
-      { "time": "13:30", "title": "Labor moves faster than the bottleneck", "detail": "Managers act on prioritized recommendations instead of doing manual reconciliation mid-shift." },
-      { "time": "19:00", "title": "The post-shift readout already tells the story", "detail": "The system closes the day with a root-cause narrative instead of a pile of disconnected stats." }
+      { "time": "05:45", "icon": "radar", "title": "The control layer highlights the likely pressure points", "detail": "The shift begins with a ranked view of where congestion, dwell, or labor imbalance will hit first." },
+      { "time": "09:15", "icon": "split", "title": "Exceptions come with decisions attached", "detail": "The team sees the issue, why it matters, and the most likely operational move in one view." },
+      { "time": "13:30", "icon": "gauge", "title": "Labor moves faster than the bottleneck", "detail": "Managers act on prioritized recommendations instead of doing manual reconciliation mid-shift." },
+      { "time": "19:00", "icon": "book", "title": "The post-shift readout already tells the story", "detail": "The system closes the day with a root-cause narrative instead of a pile of disconnected stats." }
     ]
   },
   {
@@ -242,21 +292,23 @@
     "tab": "Fleet ops",
     "persona": "Transportation / fleet ops manager",
     "maturity": "promising",
+    "leadIcon": "person",
+    "taskIcon": "truck",
     "summary": "The control-tower day shifts from reactive firefighting toward exception-first routing and more structured operational context from the field.",
     "kpis": ["Cost per shipment", "On-time performance", "Expedite spend", "Dispatcher load"],
     "automated": ["Routine quote comparison", "Low-risk exception routing", "Operational context capture"],
     "human": ["Commercial tradeoffs", "Customer recovery", "Non-standard approvals"],
     "before": [
-      { "time": "07:15", "title": "Review the board and start calling", "detail": "The manager sees what is late, but still has to call for context and decide the response manually." },
-      { "time": "11:00", "title": "Compare quotes or carriers by hand", "detail": "Even where data exists, ranking the best move across vendors and constraints stays labor-intensive." },
-      { "time": "15:30", "title": "Recover service failures after the fact", "detail": "Exceptions get handled once they are visible enough to hurt, not while they are still manageable." },
-      { "time": "18:30", "title": "Settle the administrative trail later", "detail": "Operational action, freight cost logic, and documentation rarely sit in the same loop." }
+      { "time": "07:15", "icon": "monitor", "title": "Review the board and start calling", "detail": "The manager sees what is late, but still has to call for context and decide the response manually." },
+      { "time": "11:00", "icon": "scales", "title": "Compare quotes or carriers by hand", "detail": "Even where data exists, ranking the best move across vendors and constraints stays labor-intensive." },
+      { "time": "15:30", "icon": "warning", "title": "Recover service failures after the fact", "detail": "Exceptions get handled once they are visible enough to hurt, not while they are still manageable." },
+      { "time": "18:30", "icon": "ledger", "title": "Settle the administrative trail later", "detail": "Operational action, freight cost logic, and documentation rarely sit in the same loop." }
     ],
     "after": [
-      { "time": "07:15", "title": "The system opens with ranked transport risk", "detail": "The manager starts from the routes and lanes most likely to damage service or cost today." },
-      { "time": "11:00", "title": "Routine moves become recommendation-first", "detail": "Quote comparison, carrier ranking, and standard re-plan options arrive with context attached." },
-      { "time": "15:30", "title": "Field notes and proof feed the same loop", "detail": "Voice and document context from dispatch or drivers lands inside the same operational record." },
-      { "time": "18:30", "title": "Humans focus on the expensive edge cases", "detail": "The manager still owns commercial tradeoffs and service recovery, but routine exception handling gets narrower and faster." }
+      { "time": "07:15", "icon": "radar", "title": "The system opens with ranked transport risk", "detail": "The manager starts from the routes and lanes most likely to damage service or cost today." },
+      { "time": "11:00", "icon": "robot", "title": "Routine moves become recommendation-first", "detail": "Quote comparison, carrier ranking, and standard re-plan options arrive with context attached." },
+      { "time": "15:30", "icon": "transmit", "title": "Field notes and proof feed the same loop", "detail": "Voice and document context from dispatch or drivers lands inside the same operational record." },
+      { "time": "18:30", "icon": "personcheck", "title": "Humans focus on the expensive edge cases", "detail": "The manager still owns commercial tradeoffs and service recovery, but routine exception handling gets narrower and faster." }
     ]
   },
   {
@@ -264,27 +316,31 @@
     "tab": "Claims lead",
     "persona": "Claims / back-office operations lead",
     "maturity": "proven",
+    "leadIcon": "person",
+    "taskIcon": "document",
     "summary": "The team's day changes most when document intake and routing become structured before a human ever opens the case.",
     "kpis": ["Turnaround time", "Touch time", "Auditability", "Operational consistency"],
     "automated": ["Intake", "Extraction", "Classification", "Routing", "Traceability logging"],
     "human": ["Disputed adjudication", "High-value cases", "Policy exceptions", "Sensitive communication"],
     "before": [
-      { "time": "08:30", "title": "Sort emails, attachments, and forms", "detail": "The team starts by making the data usable before it can even decide what the case is." },
-      { "time": "11:00", "title": "Classify and route manually", "detail": "Ownership, severity, and evidence still depend on human pattern matching." },
-      { "time": "14:30", "title": "Escalate SLA risk too late", "detail": "Supervisors often notice backlog or stuck cases only after the breach is already near." },
-      { "time": "17:30", "title": "Audit readiness is reconstructed", "detail": "The team spends extra time making the decision trail defensible after the fact." }
+      { "time": "08:30", "icon": "inbox", "title": "Sort emails, attachments, and forms", "detail": "The team starts by making the data usable before it can even decide what the case is." },
+      { "time": "11:00", "icon": "split", "title": "Classify and route manually", "detail": "Ownership, severity, and evidence still depend on human pattern matching." },
+      { "time": "14:30", "icon": "bell", "title": "Escalate SLA risk too late", "detail": "Supervisors often notice backlog or stuck cases only after the breach is already near." },
+      { "time": "17:30", "icon": "archive", "title": "Audit readiness is reconstructed", "detail": "The team spends extra time making the decision trail defensible after the fact." }
     ],
     "after": [
-      { "time": "08:30", "title": "Documents land pre-structured", "detail": "The intake layer extracts core fields, classifies evidence, and prepares the case state before review." },
-      { "time": "11:00", "title": "Routing follows urgency and policy", "detail": "Cases are pre-ranked by SLA risk and case type, which lets humans focus on the expensive exceptions." },
-      { "time": "14:30", "title": "The queue tells the team what to attack next", "detail": "Backlog management shifts from passive monitoring to active triage." },
-      { "time": "17:30", "title": "The trail is already audit-ready", "detail": "Traceability is part of the workflow instead of a cleanup task at the end." }
+      { "time": "08:30", "icon": "document", "title": "Documents land pre-structured", "detail": "The intake layer extracts core fields, classifies evidence, and prepares the case state before review." },
+      { "time": "11:00", "icon": "split", "title": "Routing follows urgency and policy", "detail": "Cases are pre-ranked by SLA risk and case type, which lets humans focus on the expensive exceptions." },
+      { "time": "14:30", "icon": "gauge", "title": "The queue tells the team what to attack next", "detail": "Backlog management shifts from passive monitoring to active triage." },
+      { "time": "17:30", "icon": "stamp", "title": "The trail is already audit-ready", "detail": "Traceability is part of the workflow instead of a cleanup task at the end." }
     ]
   }
 ]
 </script>
 <script>
 (() => {
+  const ICON_BASE = '../customs-entry-agent/flow-icons/';
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const stories = JSON.parse(document.getElementById('data').textContent);
   const tabs = document.getElementById('tabs');
   const story = document.getElementById('story');
@@ -296,8 +352,30 @@
   const matColor = { proven: 'var(--m-proven)', promising: 'var(--m-promising)', marketing: 'var(--m-marketing)' };
   const matLabel = { proven: 'Proven', promising: 'Promising', marketing: 'Marketing' };
 
+  /* Shared line-art icons, fetched once per name and inlined with the stroke
+     swapped to currentColor. A failed fetch leaves the slot empty and the
+     text still carries the card. */
+  const iconCache = new Map();
+  function loadIcon(name) {
+    if (!iconCache.has(name)) {
+      iconCache.set(name, fetch(ICON_BASE + name + '.svg')
+        .then((r) => (r.ok ? r.text() : Promise.reject()))
+        .then((t) => t.replace(/stroke="#232f3e"/g, 'stroke="currentColor"'))
+        .catch(() => ''));
+    }
+    return iconCache.get(name);
+  }
+  function fillIcons(root) {
+    root.querySelectorAll('[data-ic]').forEach((slot) => {
+      loadIcon(slot.dataset.ic).then((svg) => { slot.innerHTML = svg; });
+    });
+  }
+  fillIcons(document);
+
   let current = stories[0];
   let mode = 'after';
+  let seen = false;
+  let raf = 0;
 
   stories.forEach((s, i) => {
     const tab = document.createElement('button');
@@ -305,7 +383,7 @@
     tab.type = 'button';
     tab.setAttribute('role', 'tab');
     tab.setAttribute('aria-selected', i === 0 ? 'true' : 'false');
-    tab.textContent = s.tab;
+    tab.innerHTML = '<span class="ic" data-ic="' + s.taskIcon + '" aria-hidden="true"></span>' + s.tab;
     tab.addEventListener('click', () => {
       current = s;
       tabs.querySelectorAll('.tab').forEach(t =>
@@ -313,6 +391,7 @@
       render();
     });
     tabs.appendChild(tab);
+    fillIcons(tab);
   });
 
   btnBefore.addEventListener('click', () => setMode('before'));
@@ -330,54 +409,78 @@
       list.map(t => '<span class="fchip">' + t + '</span>').join('');
   }
 
+  /* Staged reveal: the shift lights up step by step. rAF t0 comes from the
+     first frame timestamp, never performance.now(): sandboxed iframes can
+     disagree between the two clocks. Reduced motion jumps straight to the
+     finished, fully-lit state. */
+  const STAGGER = 320;
+  function reveal() {
+    cancelAnimationFrame(raf);
+    const cards = Array.from(stepsEl.querySelectorAll('.step'));
+    cards.forEach((c) => c.classList.remove('lit'));
+    if (reduced) { cards.forEach((c) => c.classList.add('lit')); return; }
+    let t0 = null;
+    const step = (ts) => {
+      if (t0 === null) t0 = ts;
+      const n = Math.min(cards.length, Math.floor((ts - t0) / STAGGER) + 1);
+      for (let k = 0; k < n; k++) cards[k].classList.add('lit');
+      if (n < cards.length) raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+  }
+
   function render() {
     story.classList.remove('fade');
     void story.offsetWidth;
     story.classList.add('fade');
     const modeColor = mode === 'before' ? 'var(--before)' : 'var(--after)';
     summary.textContent = current.summary;
-    mat.textContent = matLabel[current.maturity] + ' · ' + current.persona;
+    mat.innerHTML =
+      '<span class="ic" data-ic="' + current.leadIcon + '" aria-hidden="true"></span>' +
+      '<span class="ic" data-ic="' + current.taskIcon + '" aria-hidden="true"></span>' +
+      matLabel[current.maturity] + ' · ' + current.persona;
     mat.style.setProperty('--mm', matColor[current.maturity]);
     stepsEl.innerHTML = current[mode].map(step =>
-      '<div class="step" style="--mode-c:' + modeColor + '">' +
-        '<div class="step-time">' + step.time + '</div>' +
-        '<div class="step-title">' + step.title + '</div>' +
-        '<div class="step-detail">' + step.detail + '</div>' +
-      '</div>').join('');
+      '<button type="button" class="step" aria-expanded="false" style="--mode-c:' + modeColor + '">' +
+        '<span class="step-time">' + step.time + '</span>' +
+        '<span class="step-head">' +
+          '<span class="step-pic" data-ic="' + step.icon + '" aria-hidden="true"></span>' +
+          '<span class="step-title">' + step.title + '</span>' +
+        '</span>' +
+        '<span class="step-detail">' + step.detail + '</span>' +
+      '</button>').join('');
+    fillIcons(stepsEl);
+    stepsEl.querySelectorAll('.step').forEach((card) => {
+      card.addEventListener('click', () => {
+        const open = card.getAttribute('aria-expanded') === 'true';
+        card.setAttribute('aria-expanded', String(!open));
+      });
+    });
     chips('chips-auto', current.automated);
     chips('chips-human', current.human);
     chips('chips-kpi', current.kpis);
-    reportSize();
+    if (seen) reveal();
   }
 
-  // When embedded, tell the parent our true content height so the frame can
-  // hug the content instead of using a fixed height. Measures the bottom of
-  // the last block plus the shell's bottom padding, because the shell itself
-  // is locked to 100% of the iframe in embed mode.
-  const embedded = document.documentElement.dataset.embedded === 'true';
-  function postSize() {
-    const shell = document.querySelector('.shell');
-    const facts = document.querySelector('.facts');
-    if (!shell || !facts) return;
-    const padBottom = parseFloat(getComputedStyle(shell).paddingBottom) || 0;
-    const height = Math.ceil(facts.getBoundingClientRect().bottom + padBottom);
-    parent.postMessage({ type: 'm2m:frame-size', height }, '*');
-  }
-  function reportSize() {
-    if (!embedded) return;
-    // Measure synchronously (layout is up to date after the innerHTML write)
-    // and again on a macrotask, so a hidden or throttled tab still reports
-    // once rendering settles. requestAnimationFrame is avoided because it is
-    // paused while the document is hidden.
-    postSize();
-    setTimeout(postSize, 60);
-  }
+  document.getElementById('replay').addEventListener('click', reveal);
 
-  let rt;
-  window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(reportSize, 150); });
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(reportSize);
+  /* Autoplay once when the figure scrolls into view. threshold 0, not 0.2:
+     the figure can exceed a phone viewport, and a fraction of a too-tall
+     element never intersects. */
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting)) { io.disconnect(); seen = true; reveal(); }
+    }, { threshold: 0 });
+    io.observe(story);
+  } else { seen = true; reveal(); }
 
   render();
+
+  if (document.documentElement.dataset.embedded === 'true') {
+    const postSize = () => window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+    if ('ResizeObserver' in window) new ResizeObserver(postSize).observe(document.body);
+    window.addEventListener('load', postSize);
+  }
 })();
 </script>
 </body>

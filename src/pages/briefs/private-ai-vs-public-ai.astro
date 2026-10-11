@@ -21,7 +21,7 @@ const openItems = [
   {
     id: 'unit-economics',
     title: 'Predictable high-volume usage',
-    copy: 'Once workloads are stable and repetitive, self-hosted open models can change the cost curve.'
+    copy: 'Once workloads are stable and repetitive, open models can change the cost curve — served either on your own GPUs or through a managed open-weight catalogue. Open weights no longer imply self-hosting.'
   },
   {
     id: 'workflow-control',
@@ -31,7 +31,7 @@ const openItems = [
   {
     id: 'sovereign-deployment',
     title: 'Sovereign deployment',
-    copy: 'Air-gapped, regional, or on-prem deployments push buyers toward private model paths.'
+    copy: 'Air-gapped, regional, and on-prem deployments once forced open weights. Since 2026 closed vendors ship appliances too, so sovereignty now selects a position on a spectrum rather than a side.'
   },
   {
     id: 'platform-leverage',
@@ -44,7 +44,7 @@ const closedItems = [
   {
     id: 'frontier-quality',
     title: 'Frontier quality',
-    copy: 'Closed models still win when absolute reasoning, multimodality, or broad quality matters more than infrastructure control.'
+    copy: 'Still ahead on average, but the top of the table closed to about one index point in August 2026. The reliable closed advantage is now breadth across the model range, not a ceiling.'
   },
   {
     id: 'speed-to-ship',
@@ -752,6 +752,19 @@ const focusData = {
           height: 520px;
         }
       }
+
+      /* Companion line — points at the deep dive that carries the detail. */
+      .companion-line {
+        margin: 14px 0 0;
+        padding: 10px 14px;
+        border-left: 3px solid var(--accent, #077693);
+        background: color-mix(in srgb, currentColor 5%, transparent);
+        border-radius: 4px;
+        font-size: 0.92rem;
+        line-height: 1.55;
+        max-width: 100%;
+      }
+      .companion-line a { font-weight: 600; }
     </style>
   </head>
   <body>
@@ -762,6 +775,12 @@ const focusData = {
         <h1>Private AI vs public AI, shown as one portfolio operating model.</h1>
         <p class="subtitle">
           {entry.data.summary}
+        </p>
+        <p class="companion-line">
+          Refreshed August 2026 —
+          <a href="/deep-dives/private-vs-public-ai-architecture">read the full architecture deep dive</a>,
+          which carries the five deployment positions, the gateway reference architecture, the request lifecycle
+          and a dated record of everything that changed since this board was written.
         </p>
         <BackLink href="/briefs" label="Back to Brief" />
         <EntryMeta className="meta-strip" date={entry.data.pubDate} primary={entry.data.industry} readTime={entry.data.readTime} />

@@ -1,0 +1,1750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWS architecture · reference, pipeline, and landing zone</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+/* The AWS build in the three standard AWS diagram styles, one figure:
+   1) Reference architecture — official AWS Architecture Icons, standard
+      group frames (AWS Cloud / Region / VPC / subnets / accounts), numbered
+      flow badges with a legend, layer chips, trust boundaries, runtime mode.
+   2) Serverless pipeline — the per-entry event flow left to right.
+   3) Landing zone — one container per AWS account.
+   Node cards are generated from one shared SERVICES model into per-view
+   slots; an SVG layer draws the active view's wires from measured rects. */
+
+.shell { display: flex; flex-direction: column; gap: 12px; }
+:root[data-embedded="true"] .shell { padding: 14px clamp(14px, 2vw, 22px) 18px; }
+
+.head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.head h1 {
+  font-family: "Space Grotesk", sans-serif; font-weight: 700;
+  font-size: clamp(1.02rem, 2.2vw, 1.3rem); letter-spacing: -0.02em; color: var(--text-strong);
+}
+:root[data-embedded="true"] .head h1 { font-size: 1.02rem; }
+.head p { font: 500 0.72rem/1.4 "DM Sans", sans-serif; color: var(--muted); margin-top: 2px; }
+
+/* view switch */
+.modes { display: flex; gap: 6px; flex-wrap: wrap; }
+.mode {
+  cursor: pointer; font: 700 0.62rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.09em;
+  text-transform: uppercase; color: var(--muted); background: var(--surface);
+  border: 1px solid var(--border-strong); border-radius: 999px; padding: 8px 13px;
+}
+.mode[aria-pressed="true"] {
+  color: var(--accent-2); border-color: var(--accent-2);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-2) 18%, transparent);
+}
+
+/* layer chips (reference view only) */
+.chips { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.chips .lbl {
+  font: 700 0.56rem/1 "IBM Plex Mono", monospace; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--muted-soft);
+}
+.chip {
+  cursor: pointer; font: 700 0.6rem/1 "IBM Plex Mono", monospace; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--muted); background: var(--surface);
+  border: 1px solid var(--border-strong); border-radius: 6px; padding: 7px 10px;
+}
+.chip[aria-pressed="true"] {
+  color: var(--good); border-color: var(--good);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--good) 16%, transparent);
+}
+
+/* ---------- diagram + views ---------- */
+.diagram { position: relative; }
+.wires { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+.view { position: relative; z-index: 1; }
+.view[hidden] { display: none; }
+
+/* ---------- AWS group frames (official group conventions) ---------- */
+.awsg {
+  --gc: var(--border-strong);
+  position: relative; border: 1.5px solid var(--gc); border-radius: 2px;
+  padding: 34px 10px 10px 10px; min-width: 0;
+}
+.awsg.dashed { border-style: dashed; }
+.awsg > .g-head {
+  position: absolute; top: 0; left: 0; display: flex; align-items: center; gap: 7px;
+  padding: 4px 8px 4px 4px; max-width: 100%;
+}
+.awsg > .g-head img { width: 22px; height: 22px; display: block; }
+.awsg > .g-head b {
+  font: 700 0.6rem/1.2 "IBM Plex Mono", monospace; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--gc); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.awsg > .g-head .g-badges { display: flex; gap: 5px; flex-wrap: wrap; }
+.badge {
+  font: 700 0.53rem/1 "IBM Plex Mono", monospace; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--gc); border: 1px solid color-mix(in srgb, var(--gc) 55%, transparent);
+  border-radius: 3px; padding: 3px 5px; white-space: nowrap;
+}
+/* official-ish group colours, readable on both themes */
+.g-cloud { --gc: #8b96a8; }
+:root[data-theme="light"] .g-cloud, .g-cloud.on-light { --gc: #232f3e; }
+.g-region { --gc: #00a4a6; }
+.g-vpc { --gc: #8c4fff; }
+.g-pub { --gc: #7aa116; }
+.g-priv { --gc: #00a4a6; }
+.g-acct { --gc: #e7157b; }
+.g-corp { --gc: #7d8998; }
+.g-ext { --gc: #7d8998; }
+.g-sec { --gc: #dd3522; }
+
+.badge.deny { color: #dd3522; border-color: color-mix(in srgb, #dd3522 55%, transparent); }
+.outvpc-lbl {
+  font: 700 0.55rem/1 "IBM Plex Mono", monospace; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--muted-soft); margin: 2px 0 8px;
+}
+
+.grow { display: flex; flex-wrap: wrap; gap: 8px; }
+.gcol { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+
+/* ---------- node cards ---------- */
+.node {
+  position: relative; min-width: 0; flex: 1 1 138px;
+  border: 1px solid var(--border-strong);
+  border-radius: 6px; background: var(--surface); box-shadow: var(--shadow-soft);
+  padding: 7px 8px 8px; display: flex; gap: 8px; align-items: flex-start;
+  transition: opacity 0.25s ease, filter 0.25s ease, box-shadow 0.25s ease;
+}
+.gcol .node, .acct-col .node { flex: 0 0 auto; }
+.node .tile {
+  flex: 0 0 auto; width: 36px; height: 36px; border-radius: 5px; background: #fff;
+  border: 1px solid rgba(35, 47, 62, 0.18); display: grid; place-items: center;
+}
+.node .tile img { width: 30px; height: 30px; display: block; }
+.node .txt { min-width: 0; }
+.node .svc {
+  display: block; font: 600 0.5rem/1.2 "IBM Plex Mono", monospace; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--muted-soft); margin-bottom: 2px;
+}
+.node b { display: block; font: 700 0.64rem/1.25 "Space Grotesk", sans-serif; color: var(--text-strong); }
+.node span.desc { display: block; font: 500 0.57rem/1.35 "DM Sans", sans-serif; color: var(--muted); margin-top: 2px; }
+.node .stepno {
+  position: absolute; top: -9px; right: -6px; width: 20px; height: 20px; border-radius: 50%;
+  background: #232f3e; color: #fff; border: 2px solid #ff9900;
+  font: 700 0.62rem/16px "IBM Plex Mono", monospace; text-align: center;
+}
+.diagram.layered .node.offlayer { opacity: 0.2; filter: saturate(0.3); }
+.diagram.focused .node { opacity: 0.28; filter: saturate(0.4); }
+.diagram.focused .node.member {
+  opacity: 1; filter: none;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--fc, var(--accent-2)) 30%, transparent), var(--shadow-soft);
+}
+.diagram.stepping .node { opacity: 0.28; filter: saturate(0.4); }
+.diagram.stepping .node.member { opacity: 1; filter: none;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-2) 30%, transparent), var(--shadow-soft); }
+
+/* wires */
+.wire { fill: none; stroke: var(--wc); stroke-width: 1.8; opacity: 0.75; }
+.wire.blocked { stroke-dasharray: 4 5; opacity: 0.65; }
+.arrowhead { fill: var(--wc); opacity: 0.85; }
+.blockmark { font: 700 9px "IBM Plex Mono", monospace; fill: var(--wc); }
+.diagram.layered .wire.offlayer, .diagram.layered .arrowhead.offlayer { opacity: 0.05; }
+.diagram.focused .wire, .diagram.stepping .wire { opacity: 0.10; }
+.diagram.focused .wire.member, .diagram.stepping .wire.member { opacity: 1; stroke-width: 2.4; }
+.diagram.focused .arrowhead, .diagram.stepping .arrowhead { opacity: 0.10; }
+.diagram.focused .arrowhead.member, .diagram.stepping .arrowhead.member { opacity: 1; }
+/* ---------- motion layer ----------
+   Hero motion: an entry travelling the system. Packets ride the wire paths in flow
+   order, wires draw themselves in that same order on every view switch, and the
+   runtime step glows. Only transform/opacity/offset-distance animate. */
+@property --ang { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+
+.packet { fill: var(--wc); opacity: 0; }
+.packet-halo { fill: var(--wc); opacity: 0; }
+.diagram.focused .packet, .diagram.stepping .packet,
+.diagram.focused .packet-halo, .diagram.stepping .packet-halo { display: none; }
+.diagram.stepping .packet.member, .diagram.stepping .packet-halo.member { display: block; }
+.diagram.layered .packet.offlayer, .diagram.layered .packet-halo.offlayer { display: none; }
+
+@media (prefers-reduced-motion: no-preference) {
+  /* wires draw on in story order */
+  .wire.drawin {
+    animation: drawin 0.62s cubic-bezier(0.22, 0.61, 0.36, 1) backwards;
+    animation-delay: calc(var(--i, 0) * 60ms);
+  }
+  @keyframes drawin { from { stroke-dashoffset: var(--len, 0); } to { stroke-dashoffset: 0; } }
+  .arrowhead.drawin {
+    transform-box: fill-box; transform-origin: center;
+    animation: headpop 0.32s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+    animation-delay: calc(var(--i, 0) * 60ms + 0.46s);
+  }
+  @keyframes headpop { from { opacity: 0; transform: scale(0.3); } to { opacity: 0.85; transform: none; } }
+
+  /* packets ride the path, staggered so the eye reads a sequence not a swarm */
+  .packet, .packet-halo {
+    animation: travel var(--dur, 3s) linear infinite, packetfade var(--dur, 3s) linear infinite;
+    animation-delay: calc(var(--i, 0) * -0.34s);
+  }
+  .packet-halo { animation-name: travel, halofade; }
+  @keyframes travel { from { offset-distance: 0%; } to { offset-distance: 100%; } }
+  @keyframes packetfade { 0% { opacity: 0; } 12%, 84% { opacity: 0.95; } 100% { opacity: 0; } }
+  @keyframes halofade { 0% { opacity: 0; } 12%, 84% { opacity: 0.22; } 100% { opacity: 0; } }
+
+  /* a blocked route is a packet that reaches the boundary and dies there */
+  .packet.deadend { animation-name: stall, stallfade; animation-timing-function: cubic-bezier(0.3, 0, 0.7, 1), linear; }
+  @keyframes stall { 0% { offset-distance: 0%; } 62%, 100% { offset-distance: 47%; } }
+  @keyframes stallfade { 0% { opacity: 0; } 20% { opacity: 0.95; } 62% { opacity: 0.95; } 78%, 100% { opacity: 0; } }
+
+  /* the executing step glows and its packets hurry */
+  .diagram.stepping .wire.member { filter: url(#awsglow); }
+  .diagram.stepping .packet.member { animation-duration: calc(var(--dur, 3s) * 0.55); }
+  .diagram.stepping .packet-halo.member { animation-duration: calc(var(--dur, 3s) * 0.55); }
+
+  /* the active step's number badge carries a rotating ring */
+  .diagram.stepping .node.member .stepno::after {
+    content: ""; position: absolute; inset: -4px; border-radius: 50%;
+    background: conic-gradient(from var(--ang), transparent 0deg, #ff9900 70deg, transparent 150deg);
+    -webkit-mask: radial-gradient(closest-side, transparent 70%, #000 72%);
+    mask: radial-gradient(closest-side, transparent 70%, #000 72%);
+    animation: ringspin 1.9s linear infinite; pointer-events: none;
+  }
+  @keyframes ringspin { to { --ang: 360deg; } }
+}
+
+/* ---------- reference view layout ---------- */
+.ref-cols { display: grid; grid-template-columns: minmax(0, 0.82fr) minmax(0, 3.2fr); gap: 14px; }
+.ref-cloud-inner { display: grid; grid-template-columns: minmax(0, 2.2fr) minmax(0, 1fr); gap: 12px; }
+.subgrid { display: flex; flex-direction: column; gap: 10px; }
+.nrow { display: flex; flex-wrap: wrap; gap: 8px; }
+.ref-right-out { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
+.ref-out-row { display: grid; grid-template-columns: minmax(0, 0.82fr) minmax(0, 3.2fr); gap: 14px; }
+
+/* numbered legend strip */
+.flowlegend {
+  display: flex; flex-wrap: wrap; gap: 5px 14px;
+  border: 1px solid var(--border); border-radius: 8px; background: var(--surface); padding: 8px 12px;
+}
+.flowlegend i {
+  display: inline-flex; align-items: center; gap: 6px; font: 500 0.62rem/1.3 "DM Sans", sans-serif;
+  font-style: normal; color: var(--muted);
+}
+.flowlegend i b {
+  flex: 0 0 auto; width: 17px; height: 17px; border-radius: 50%; background: #232f3e; color: #fff;
+  border: 1.5px solid #ff9900; font: 700 0.56rem/14px "IBM Plex Mono", monospace; text-align: center;
+}
+
+/* boundary buttons (reference view) */
+.bounds { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.bound {
+  cursor: pointer; text-align: left; min-width: 0;
+  border: 1px solid var(--border-strong); border-top: 3px solid var(--bc);
+  border-radius: 10px; background: var(--surface); box-shadow: var(--shadow-soft);
+  padding: 8px 10px; display: flex; flex-direction: column; gap: 3px;
+}
+.bound b { font: 700 0.68rem/1.2 "Space Grotesk", sans-serif; color: var(--text-strong); }
+.bound span { font: 500 0.6rem/1.35 "DM Sans", sans-serif; color: var(--muted); }
+.bound:hover { border-color: var(--bc); }
+.bound[aria-pressed="true"] {
+  border-color: var(--bc);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--bc) 22%, transparent), var(--shadow-soft);
+}
+
+/* ---------- pipeline view ---------- */
+.pipe-lane { margin-bottom: 4px; }
+.pipe-lane .lane-title {
+  font: 700 0.6rem/1 "IBM Plex Mono", monospace; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--muted-soft); margin: 10px 0 8px;
+}
+.pipe-row { display: flex; flex-wrap: wrap; gap: 22px 26px; align-items: stretch; }
+.pipe-row .node { flex: 1 1 128px; max-width: 190px; }
+
+/* ---------- landing zone view ---------- */
+.lz-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.acct-col { display: flex; flex-direction: column; gap: 8px; }
+.awsg .scp {
+  font: 500 0.57rem/1.4 "DM Sans", sans-serif; color: var(--muted); border-top: 1px dashed var(--border);
+  padding-top: 6px; margin-top: 2px;
+}
+
+/* ---------- readout + transport ---------- */
+.readout {
+  min-height: 40px; display: flex; align-items: center; gap: 10px;
+  border: 1px solid var(--border); border-left: 3px solid var(--rc, var(--accent-2));
+  border-radius: 8px; background: var(--surface); padding: 8px 12px;
+}
+.readout .k {
+  font: 700 0.58rem/1 "IBM Plex Mono", monospace; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--rc, var(--accent-2)); white-space: nowrap;
+}
+.readout .v { font: 500 0.74rem/1.45 "DM Sans", sans-serif; color: var(--text); }
+.transport { display: none; gap: 6px; margin-left: auto; }
+.transport.show { display: flex; }
+.tbtn {
+  cursor: pointer; font: 700 0.64rem/1 "IBM Plex Mono", monospace; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--accent-2); background: var(--surface);
+  border: 1px solid var(--accent-2); border-radius: 6px; padding: 8px 12px;
+}
+.tbtn:hover { filter: brightness(1.12); }
+
+/* path legend */
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; }
+.legend i {
+  display: inline-flex; align-items: center; gap: 6px; font: 500 0.62rem/1 "DM Sans", sans-serif;
+  font-style: normal; color: var(--muted);
+}
+.legend i::before { content: ""; width: 16px; height: 0; border-top: 2.5px solid var(--lc); border-top-style: var(--ls, solid); }
+
+/* ---------- the camera ----------
+   The diagram no longer sets its own height. It is authored once at a fixed world
+   width and the reader drives a fixed-ratio viewport over it: drag to pan, wheel or
+   pinch to zoom, and the level of detail changes with the zoom the way a map's does.
+   Because the world width is constant, the diagram never reflows to a mobile stack. */
+.stage {
+  /* pan-y so a one-finger swipe still scrolls the article past the figure;
+     two fingers pan and zoom the map instead. */
+  position: relative; overflow: hidden; touch-action: pan-y; cursor: grab;
+  height: var(--stage-h, 620px);
+  border: 1px solid var(--border-strong); border-radius: 10px;
+  background: var(--surface); box-shadow: var(--shadow-soft) inset;
+}
+.stage.grabbing { cursor: grabbing; }
+.stage:fullscreen { height: 100vh; border-radius: 0; }
+.stage:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 2px; }
+.world {
+  position: absolute; top: 0; left: 0; width: var(--world-w, 1760px); padding: 20px;
+  transform-origin: 0 0;
+  transform: translate(var(--cx, 0px), var(--cy, 0px)) scale(var(--k, 1));
+}
+
+/* camera controls */
+.cam { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.cam .lbl {
+  font: 700 0.56rem/1 "IBM Plex Mono", monospace; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--muted-soft);
+}
+.cbtn {
+  cursor: pointer; font: 700 0.6rem/1 "IBM Plex Mono", monospace; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--muted); background: var(--surface);
+  border: 1px solid var(--border-strong); border-radius: 6px; padding: 7px 10px;
+}
+.cbtn:hover { color: var(--accent-2); border-color: var(--accent-2); }
+.cbtn[aria-pressed="true"] {
+  color: var(--accent-2); border-color: var(--accent-2);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-2) 16%, transparent);
+}
+.zval {
+  font: 700 0.58rem/1 "IBM Plex Mono", monospace; color: var(--muted-soft);
+  min-width: 44px; text-align: center;
+}
+
+/* level-of-detail overlays, positioned from the measured detail layout */
+.lodpill {
+  position: absolute; left: 10px; top: 10px; z-index: 4; pointer-events: none;
+  display: flex; align-items: center; gap: 8px; max-width: calc(100% - 20px);
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  border: 1px solid var(--border-strong); border-radius: 999px; padding: 6px 12px;
+  font: 700 0.56rem/1.3 "IBM Plex Mono", monospace; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--muted-soft);
+}
+.lodpill b { color: var(--accent-2); }
+.lodlayer {
+  position: absolute; inset: 0; z-index: 3; pointer-events: none;
+  opacity: 0; transition: opacity 0.3s ease;
+}
+.diagram[data-lod="1"] .lodlayer.l1, .diagram[data-lod="2"] .lodlayer.l2 { opacity: 1; }
+.lbox {
+  position: absolute; border-radius: 10px; border: 2px solid var(--lb, var(--accent-2));
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
+  display: flex; flex-direction: column; justify-content: center; gap: 0.35em;
+  padding: 0.9em 1.1em; overflow: hidden;
+}
+/* label type is sized in world units from the box it sits in, so a label can never
+   outgrow its own box the way a counter-scaled one does at low zoom */
+.lbox i {
+  font-style: normal; font-family: "IBM Plex Mono", monospace; font-weight: 700;
+  letter-spacing: 0.1em; text-transform: uppercase; color: var(--lb);
+  font-size: calc(var(--fs, 15px) * 0.5); line-height: 1.1;
+}
+.lbox b {
+  font-family: "Space Grotesk", sans-serif; font-weight: 700; color: var(--text-strong);
+  font-size: var(--fs, 15px); line-height: 1.15; letter-spacing: -0.01em;
+}
+.lbox span {
+  font-family: "DM Sans", sans-serif; font-weight: 500; color: var(--muted);
+  font-size: calc(var(--fs, 15px) * 0.62); line-height: 1.3;
+}
+/* L2 is a labelled overview, not a cover: the structure beneath stays visible so the
+   reader can see what they are about to zoom into. L1 is opaque, because at that
+   distance the detail is noise. */
+.lbox.tight {
+  flex-direction: row; align-items: baseline; gap: 0.55em; padding: 0.3em 0.8em;
+}
+.lbox.tight span { flex: 1 1 auto; min-width: 0; }
+.lodlayer.l2 .lbox {
+  border-width: 1.5px; padding: 0.7em 0.9em;
+  background: color-mix(in srgb, var(--surface) 80%, transparent);
+}
+.view, .wires { transition: opacity 0.3s ease; }
+.diagram[data-lod="1"] .view, .diagram[data-lod="1"] .wires { opacity: 0.12; }
+.diagram[data-lod="2"] .view { opacity: 0.45; }
+.diagram[data-lod="2"] .wires { opacity: 0.6; }
+
+/* the fullscreen control dock */
+.fsbar {
+  position: absolute; top: 10px; right: 10px; z-index: 6; display: none;
+  flex-direction: column; gap: 8px; align-items: flex-end;
+  max-width: calc(100% - 20px);
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  border: 1px solid var(--border-strong); border-radius: 10px; padding: 9px 11px;
+  box-shadow: var(--shadow-soft);
+}
+.stage:fullscreen .fsbar { display: flex; }
+.fsbar > * { justify-content: flex-end; }
+
+/* guided tour */
+.tourbar {
+  position: absolute; left: 10px; right: 10px; bottom: 10px; z-index: 5;
+  display: none; align-items: center; gap: 10px;
+  background: color-mix(in srgb, var(--surface) 95%, transparent);
+  border: 1px solid var(--accent-2); border-radius: 10px; padding: 9px 12px;
+  box-shadow: var(--shadow-soft);
+}
+.tourbar.show { display: flex; }
+.tourbar .tstep {
+  font: 700 0.56rem/1 "IBM Plex Mono", monospace; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--accent-2); white-space: nowrap; flex: 0 0 auto;
+}
+.tourbar .tcap { font: 500 0.7rem/1.4 "DM Sans", sans-serif; color: var(--text); min-width: 0; }
+.tourbar .tctl { margin-left: auto; display: flex; gap: 6px; flex: 0 0 auto; }
+
+/* the flow legend folds away on narrow screens, where it costs more height than it earns */
+.fold > summary {
+  cursor: pointer; list-style: none; display: inline-flex; align-items: center; gap: 7px;
+  font: 700 0.58rem/1 "IBM Plex Mono", monospace; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--muted-soft); padding: 4px 0;
+}
+.fold > summary::-webkit-details-marker { display: none; }
+.fold > summary::before { content: "▸"; color: var(--accent-2); }
+.fold[open] > summary::before { content: "▾"; }
+.fold[open] > summary { margin-bottom: 8px; }
+
+/* poster: the wall-chart read of the same map */
+.shell.poster .head p, .shell.poster .chips, .shell.poster .bounds,
+.shell.poster .readout, .shell.poster .modes { display: none !important; }
+
+@media (max-width: 760px) {
+  .head h1 { font-size: 1rem; }
+  .bounds { grid-template-columns: minmax(0, 1fr); }
+  .tourbar { flex-wrap: wrap; }
+  /* the control bar costs more rows than it earns on a phone */
+  #c-print { display: none; }
+  .cbtn, .chip, .mode { padding: 6px 8px; }
+}
+
+@media print {
+  @page { size: landscape; margin: 8mm; }
+  .head p, .chips, .cam, .bounds, .readout, .tourbar, .lodpill, .modes { display: none !important; }
+  .stage { height: var(--print-h, 700px) !important; border: none; box-shadow: none; }
+  .lodlayer { display: none !important; }
+  .view, .wires { opacity: 1 !important; }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="head">
+    <div>
+      <h1>The AWS build, in the language AWS uses</h1>
+      <p>Official AWS Architecture Icons, standard group frames, numbered flow. Three standard diagram styles of one system, plus a runtime step-through.</p>
+    </div>
+    <div class="modes" role="group" aria-label="Diagram style">
+      <button class="mode" id="m-ref" aria-pressed="true">Reference</button>
+      <button class="mode" id="m-run" aria-pressed="false">Runtime</button>
+      <button class="mode" id="m-pipe" aria-pressed="false">Pipeline</button>
+      <button class="mode" id="m-lz" aria-pressed="false">Landing zone</button>
+    </div>
+  </div>
+
+  <div class="chips" id="chips" role="group" aria-label="Layers">
+    <span class="lbl">Layer</span>
+    <button class="chip" data-l="core" aria-pressed="true">Core path</button>
+    <button class="chip" data-l="integ" aria-pressed="false">+ Integrations</button>
+    <button class="chip" data-l="sec" aria-pressed="false">+ Security &amp; ops</button>
+    <button class="chip" data-l="all" aria-pressed="false">Everything</button>
+  </div>
+
+  <div class="cam" role="group" aria-label="Zoom and view controls">
+    <span class="lbl">Map</span>
+    <button class="cbtn" id="c-out" aria-label="Zoom out">&minus;</button>
+    <span class="zval" id="c-val" aria-live="off">100%</span>
+    <button class="cbtn" id="c-in" aria-label="Zoom in">+</button>
+    <button class="cbtn" id="c-fit">Fit</button>
+    <span class="lbl">Detail</span>
+    <button class="cbtn lodbtn" data-lv="1" aria-pressed="false">Context</button>
+    <button class="cbtn lodbtn" data-lv="2" aria-pressed="false">Accounts</button>
+    <button class="cbtn lodbtn" data-lv="3" aria-pressed="false">Services</button>
+    <button class="cbtn" id="c-tour" aria-pressed="false">Guided tour</button>
+    <button class="cbtn" id="c-poster" aria-pressed="false">Poster</button>
+    <button class="cbtn" id="c-print">Print</button>
+    <button class="cbtn" id="c-full" aria-pressed="false">Fullscreen</button>
+  </div>
+
+  <div class="stage" id="stage" tabindex="0" role="application"
+       aria-label="Zoomable AWS architecture map. Drag to pan, scroll or pinch to zoom, arrow keys to pan, plus and minus to zoom, 0 to fit, F for fullscreen.">
+    <div class="lodpill" id="lodpill"><b id="lod-name">Context</b><span id="lod-hint">&middot; Zoom in for detail</span></div>
+    <!-- in fullscreen the controls move in here, because everything outside the
+         fullscreen element is unreachable -->
+    <div class="fsbar" id="fsbar"></div>
+    <div class="world" id="world">
+  <div class="diagram" id="diagram">
+    <svg class="wires" id="wires" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" aria-hidden="true"></svg>
+    <div class="lodlayer l1" id="lod1"></div>
+    <div class="lodlayer l2" id="lod2"></div>
+
+    <!-- ============ VIEW 1 · reference architecture ============ -->
+    <div class="view" id="view-ref">
+      <div class="ref-cols">
+        <div class="gcol">
+          <div class="awsg g-corp">
+            <div class="g-head"><img src="./aws-icons/g-corporate.svg" alt=""><b>Customer side</b></div>
+            <div class="gcol">
+              <div class="slot" data-n="ops"></div>
+              <div class="slot" data-n="erp"></div>
+              <div class="slot" data-n="email"></div>
+              <div class="slot" data-n="edi"></div>
+              <div class="slot" data-n="idp"></div>
+            </div>
+          </div>
+          <div class="awsg g-ext dashed">
+            <div class="g-head"><img src="./aws-icons/internet.svg" alt=""><b>Authority feeds · read only</b></div>
+            <div class="gcol">
+              <div class="slot" data-n="fr"></div>
+              <div class="slot" data-n="csms"></div>
+              <div class="slot" data-n="hts"></div>
+              <div class="slot" data-n="cross"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="awsg g-cloud">
+          <div class="g-head"><img src="./aws-icons/g-aws-cloud.svg" alt=""><b>AWS Cloud</b></div>
+          <div class="ref-cloud-inner">
+            <div class="awsg g-acct">
+              <div class="g-head"><img src="./aws-icons/g-account.svg" alt=""><b>workload-prod</b></div>
+              <div class="awsg g-region dashed">
+              <div class="g-head"><img src="./aws-icons/g-region.svg" alt=""><b>Region</b></div>
+              <div class="subgrid">
+                <div class="nrow" data-lbl="Intake edges" data-sub="Email, portal and partner API, SFTP and AS2">
+                  <div class="slot" data-n="ses"></div>
+                  <div class="slot" data-n="apigw"></div>
+                  <div class="slot" data-n="xfer"></div>
+                </div>
+                <div class="nrow" data-lbl="Event spine" data-sub="One execution per entry, dead letters where a human looks">
+                  <div class="slot" data-n="evb"></div>
+                  <div class="slot" data-n="sqs"></div>
+                </div>
+                <div class="outvpc">
+                  <div class="outvpc-lbl">Regional services · outside the VPC, reached over endpoints</div>
+                  <div class="nrow" data-lbl="Regional services" data-sub="Storage, OCR, the model endpoint, secrets and telemetry, all over VPC endpoints">
+                    <div class="slot" data-n="s3docs"></div>
+                    <div class="slot" data-n="textract"></div>
+                    <div class="slot" data-n="bedrock"></div>
+                    <div class="slot" data-n="secrets"></div>
+                    <div class="slot" data-n="obs"></div>
+                    <div class="slot" data-n="watch"></div>
+                  </div>
+                
+                <div class="awsg g-vpc">
+                  <div class="g-head"><img src="./aws-icons/g-vpc.svg" alt=""><b>VPC · 3 AZs</b></div>
+                  <div class="subgrid">
+                    <div class="awsg g-priv dashed">
+                      <div class="g-head"><img src="./aws-icons/g-private-subnet.svg" alt=""><b>Quarantine subnet</b>
+                        <span class="g-badges"><span class="badge deny">No NAT</span><span class="badge deny">No IGW</span><span class="badge">S3 + Textract endpoints only</span></span></div>
+                      <div class="nrow">
+                        <div class="slot" data-n="parser"></div>
+                      </div>
+                    </div>
+                    <div class="awsg g-pub">
+                      <div class="g-head"><img src="./aws-icons/g-public-subnet.svg" alt=""><b>Public subnets</b>
+                        <span class="g-badges"><span class="badge">Reviewer ingress only</span></span></div>
+                      <div class="nrow">
+                        <div class="slot" data-n="review"></div>
+                      </div>
+                    </div>
+                    <div class="awsg g-priv">
+                      <div class="g-head"><img src="./aws-icons/g-private-subnet.svg" alt=""><b>Application subnets</b>
+                        <span class="g-badges"><span class="badge deny">No internet egress</span></span></div>
+                      <div class="nrow">
+                        <div class="slot" data-n="stepfn"></div>
+                        <div class="slot" data-n="router"></div>
+                        <div class="slot" data-n="workers"></div>
+                        <div class="slot" data-n="mgw"></div>
+                        <div class="slot" data-n="conf"></div>
+                        <div class="slot" data-n="cred"></div>
+                      </div>
+                    </div>
+                    <div class="awsg g-priv">
+                      <div class="g-head"><img src="./aws-icons/g-private-subnet.svg" alt=""><b>Data subnets</b>
+                        <span class="g-badges"><span class="badge deny">No egress</span></span></div>
+                      <div class="nrow">
+                        <div class="slot" data-n="aurora"></div>
+                        <div class="slot" data-n="cache"></div>
+                      </div>
+                    </div>
+                    <div class="awsg g-priv">
+                      <div class="g-head"><img src="./aws-icons/g-private-subnet.svg" alt=""><b>Filing subnet</b>
+                        <span class="g-badges"><span class="badge deny">No AI</span><span class="badge">Egress proxy · CBP endpoints only</span></span></div>
+                      <div class="nrow">
+                        <div class="slot" data-n="abi"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+</div>
+              </div>
+              </div>
+            </div>
+
+            <div class="gcol">
+              <div class="awsg g-acct">
+                <div class="g-head"><img src="./aws-icons/g-account.svg" alt=""><b>shared-services</b></div>
+                <div class="gcol">
+                  <div class="slot" data-n="rulebook"></div>
+                  <div class="slot" data-n="registry"></div>
+                  <div class="slot" data-n="cicd"></div>
+                </div>
+              </div>
+              <div class="awsg g-acct">
+                <div class="g-head"><img src="./aws-icons/g-account.svg" alt=""><b>org-log-archive</b></div>
+                <div class="gcol"><div class="slot" data-n="ledger"></div></div>
+              </div>
+              <div class="awsg g-acct">
+                <div class="g-head"><img src="./aws-icons/g-account.svg" alt=""><b>org-security</b></div>
+                <div class="gcol"><div class="slot" data-n="guard"></div></div>
+              </div>
+              <div class="awsg g-acct dashed">
+                <div class="g-head"><img src="./aws-icons/g-account.svg" alt=""><b>workload-nonprod</b></div>
+                <div class="gcol"><div class="slot" data-n="nonprod"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ref-out-row">
+        <div></div>
+        <div class="awsg g-ext dashed" style="margin-top: 12px">
+          <div class="g-head"><img src="./aws-icons/internet.svg" alt=""><b>Outside AWS</b></div>
+          <div class="nrow">
+            <div class="slot" data-n="cbp"></div>
+            <div class="slot" data-n="pga"></div>
+            <div class="slot" data-n="bi"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ============ VIEW 2 · serverless pipeline ============ -->
+    <div class="view" id="view-pipe" hidden>
+      <div class="pipe-lane">
+        <div class="lane-title">The entry path · one event at a time</div>
+        <div class="pipe-row">
+          <div class="slot" data-n="ops"></div>
+          <div class="slot" data-n="s3docs"></div>
+          <div class="slot" data-n="evb"></div>
+          <div class="slot" data-n="stepfn"></div>
+          <div class="slot" data-n="parser"></div>
+          <div class="slot" data-n="router"></div>
+          <div class="slot" data-n="workers"></div>
+          <div class="slot" data-n="conf"></div>
+          <div class="slot" data-n="review"></div>
+          <div class="slot" data-n="abi"></div>
+          <div class="slot" data-n="cbp"></div>
+        </div>
+      </div>
+      <div class="pipe-lane">
+        <div class="lane-title">Model call · the only inference egress</div>
+        <div class="pipe-row" style="max-width: 560px">
+          <div class="slot" data-n="mgw"></div>
+          <div class="slot" data-n="bedrock"></div>
+        </div>
+      </div>
+      <div class="pipe-lane">
+        <div class="lane-title">The response loop · async, never auto-resubmitted</div>
+        <div class="pipe-row" style="max-width: 560px">
+          <div class="slot" data-n="cbpret"></div>
+          <div class="slot" data-n="reviewret"></div>
+        </div>
+      </div>
+      <div class="pipe-lane">
+        <div class="lane-title">The evidence path · every decision, forever</div>
+        <div class="pipe-row" style="max-width: 900px">
+          <div class="slot" data-n="aurora"></div>
+          <div class="slot" data-n="firehose"></div>
+          <div class="slot" data-n="ledger"></div>
+          <div class="slot" data-n="athena"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ VIEW 3 · landing zone ============ -->
+    <div class="view" id="view-lz" hidden>
+      <div class="lz-grid">
+        <div class="awsg g-acct">
+          <div class="g-head"><img src="./aws-icons/g-account.svg" alt=""><b>org-security</b></div>
+          <div class="acct-col">
+            <div class="slot" data-n="guard"></div>
+            <div class="slot" data-n="idc"></div>
+            <div class="scp">Detection must survive compromise of the workload account. Delegated admin for GuardDuty and Security Hub lives here.</div>
+          </div>
+        </div>
+        <div class="awsg g-acct">
+          <div class="g-head"><img src="./aws-icons/g-account.svg" alt=""><b>org-log-archive</b></div>
+          <div class="acct-col">
+            <div class="slot" data-n="ledger"></div>
+            <div class="slot" data-n="trail"></div>
+            <div class="scp">The § 1592 evidence must not be deletable by anyone with production access. Object Lock compliance mode, six-year retention.</div>
+          </div>
+        </div>
+        <div class="awsg g-acct">
+          <div class="g-head"><img src="./aws-icons/g-account.svg" alt=""><b>shared-services</b></div>
+          <div class="acct-col">
+            <div class="slot" data-n="rulebook"></div>
+            <div class="slot" data-n="registry"></div>
+            <div class="slot" data-n="cicd"></div>
+            <div class="scp">Artefacts are promoted into environments. Nothing in prod can mutate the rulebook, the models, or the pipelines that ship them.</div>
+          </div>
+        </div>
+        <div class="awsg g-acct dashed">
+          <div class="g-head"><img src="./aws-icons/g-account.svg" alt=""><b>workload-nonprod</b></div>
+          <div class="acct-col">
+            <div class="slot" data-n="nonprod"></div>
+            <div class="scp">Dev, staging, and the CBP/ABI certification environment. Certification testing runs on CBP's schedule, never in prod.</div>
+          </div>
+        </div>
+        <div class="awsg g-acct">
+          <div class="g-head"><img src="./aws-icons/g-account.svg" alt=""><b>workload-prod</b></div>
+          <div class="acct-col">
+            <div class="slot" data-n="stepfn"></div>
+            <div class="slot" data-n="workers"></div>
+            <div class="slot" data-n="aurora"></div>
+            <div class="slot" data-n="abi"></div>
+            <div class="scp">The running system: the VPC, its four subnet tiers, and everything in the Reference view. Reads authorities, mirrors evidence out.</div>
+          </div>
+        </div>
+        <div class="awsg g-acct dashed">
+          <div class="g-head"><img src="./aws-icons/g-account.svg" alt=""><b>workload-prod-tenant · optional</b></div>
+          <div class="acct-col">
+            <div class="slot" data-n="tenant"></div>
+            <div class="scp">A dedicated stack for a tenant who contractually requires it. A sales concession with a real engineering cost, priced as one.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+    </div>
+    <div class="tourbar" id="tourbar">
+      <span class="tstep" id="t-step">Stop 1</span>
+      <span class="tcap" id="t-cap"></span>
+      <span class="tctl">
+        <button class="cbtn" id="t-prev">Prev</button>
+        <button class="cbtn" id="t-play" aria-pressed="true">Pause</button>
+        <button class="cbtn" id="t-next">Next</button>
+        <button class="cbtn" id="t-exit">Exit</button>
+      </span>
+    </div>
+  </div>
+
+  <details class="fold" id="flowfold" open>
+    <summary>The numbered flow, 1 to 10</summary>
+    <div class="flowlegend" id="flowlegend" aria-hidden="false"></div>
+  </details>
+
+  <div class="bounds" id="bounds" role="group" aria-label="The three trust boundaries">
+    <button class="bound" style="--bc: var(--S-hold)" data-b="0" aria-pressed="false">
+      <b>Untrusted input boundary</b><span>Hostile documents die in the quarantine subnet</span>
+    </button>
+    <button class="bound" style="--bc: var(--good)" data-b="1" aria-pressed="false">
+      <b>Authority boundary</b><span>The rulebook lives in another account</span>
+    </button>
+    <button class="bound" style="--bc: var(--S-cleared)" data-b="2" aria-pressed="false">
+      <b>Filing boundary</b><span>The only path to CBP contains no model</span>
+    </button>
+  </div>
+
+  <div class="readout" aria-live="polite">
+    <span class="k" id="ro-k">Paths</span>
+    <span class="v" id="ro-v"></span>
+    <div class="transport" id="transport">
+      <button class="tbtn" id="prev">Prev</button>
+      <button class="tbtn" id="next">Next</button>
+    </div>
+  </div>
+
+  <div class="legend" aria-hidden="true">
+    <i style="--lc: var(--warn)">Document path</i>
+    <i style="--lc: var(--accent-2)">Decision path</i>
+    <i style="--lc: var(--good)">Authority read / promotion</i>
+    <i style="--lc: var(--accent)">Filing loop</i>
+    <i style="--lc: var(--accent); --ls: dashed">Blocked route</i>
+  </div>
+</div>
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const diagram = $('diagram');
+  const svg = $('wires');
+
+  /* ---------- one shared service model ---------- */
+  /* layers: core | integ | sec — chips show core, core+integ, core+sec, all */
+  const SERVICES = {
+    ops:      { icon: 'users', svc: 'Persona', name: 'Importer ops', desc: 'Uploads document sets via the portal', layers: ['integ'] },
+    erp:      { icon: 'g-corporate', svc: 'Customer system', name: 'Importer ERP / TMS', desc: 'Nightly sync plus deltas, alarmed on silence', layers: ['integ'] },
+    email:    { icon: 'documents', svc: 'Customer system', name: 'Supplier email', desc: 'Invoices and packing lists, forwarded', layers: ['integ'] },
+    edi:      { icon: 'internet', svc: 'Trading partners', name: 'EDI / AS2 partners', desc: 'X12 over AS2, interchange control numbers', layers: ['integ'] },
+    idp:      { icon: 'saml', svc: 'Customer system', name: 'Customer IdP', desc: 'SAML / OIDC federation into Cognito', layers: ['integ'] },
+    fr:       { icon: 'internet', svc: 'Public API · daily', name: 'Federal Register', desc: 'Proclamations, notices', layers: ['integ'] },
+    csms:     { icon: 'internet', svc: 'Bulletins · daily', name: 'CBP CSMS', desc: 'Operational guidance', layers: ['integ'] },
+    hts:      { icon: 'internet', svc: 'Revisions · weekly', name: 'USITC HTS', desc: 'New revision, new pinned version', layers: ['integ'] },
+    cross:    { icon: 'internet', svc: 'Bulk fetch · weekly', name: 'CBP CROSS', desc: 'Rulings, embedded to pgvector', layers: ['integ'] },
+    ses:      { icon: 'ses', svc: 'Amazon SES', name: 'Email intake', desc: 'Receipt rules to S3', layers: ['core'] },
+    apigw:    { icon: 'api-gateway', svc: 'API Gateway + WAF', name: 'Portal and partner API', desc: 'Customer uploads, ERP push', layers: ['core'] },
+    xfer:     { icon: 'transfer-family', svc: 'AWS Transfer Family', name: 'SFTP and AS2', desc: 'EDI and ERP drops, B2B Data Interchange', layers: ['core'] },
+    evb:      { icon: 'eventbridge', svc: 'Amazon EventBridge', name: 'Trigger spine', desc: 'S3 event starts one execution per entry, name is the idempotency hash', layers: ['core'] },
+    sqs:      { icon: 'sqs', svc: 'Amazon SQS', name: 'DLQ per stage', desc: 'Poison messages land where a human looks', layers: ['sec'] },
+    parser:   { icon: 'lambda', svc: 'AWS Lambda', name: 'Sandboxed parser', desc: 'One microVM per document. Hostile PDFs die here', layers: ['core'] },
+    textract: { icon: 'textract', svc: 'Amazon Textract', name: 'OCR + layout', desc: 'Forms, tables, plus rendered page images', layers: ['core'] },
+    stepfn:   { icon: 'step-functions', svc: 'AWS Step Functions', name: 'Entry orchestrator', desc: 'One durable execution per entry, statutory clock in parallel', layers: ['core'] },
+    router:   { icon: 'lambda', svc: 'AWS Lambda', name: 'Novelty router', desc: 'Deterministic tier split, no model', layers: ['core'] },
+    workers:  { icon: 'fargate', svc: 'AWS Fargate', name: 'Decision workers', desc: 'Classifier, valuer, origin, duty engine, validators', layers: ['core'] },
+    mgw:      { icon: 'fargate', svc: 'Internal service', name: 'Model gateway', desc: 'The only audited inference egress', layers: ['core'] },
+    conf:     { icon: 'fargate', svc: 'AWS Fargate', name: 'Confidence gate', desc: 'Signal fusion, per-field calibration', layers: ['core'] },
+    review:   { icon: 'elb', svc: 'ALB + Cognito', name: 'Review queue app', desc: 'Internet-facing ALB, tasks run private, task tokens back to the execution', layers: ['core'] },
+    watch:    { icon: 'lambda', svc: 'Scheduler + Lambda', name: 'Rulebook watcher', desc: 'One Lambda per feed, staleness-alarmed', layers: ['integ'] },
+    cred:     { icon: 'secrets-manager', svc: 'Internal service', name: 'Credential proxy', desc: 'Only the ABI adapter may assume its role', layers: ['sec'] },
+    aurora:   { icon: 'aurora', svc: 'Amazon Aurora', name: 'Product master + pgvector', desc: 'Decisions, embeddings, append-only log', layers: ['core'] },
+    cache:    { icon: 'elasticache', svc: 'Amazon ElastiCache', name: 'Router hot path', desc: 'The tier split runs from memory', layers: ['core'] },
+    abi:      { icon: 'fargate', svc: 'AWS Fargate', name: 'ABI / ACE adapter', desc: 'Schema-gated 3461 / 7501 / PGA, no inference client', layers: ['core'] },
+    s3docs:   { icon: 's3', svc: 'Amazon S3 + KMS', name: 'Document store', desc: 'Content-addressed, per-tenant CMKs, legal hold', layers: ['core'] },
+    bedrock:  { icon: 'bedrock', svc: 'Amazon Bedrock', name: 'Model endpoint', desc: 'VPC endpoint only, no public path', layers: ['core'] },
+    secrets:  { icon: 'secrets-manager', svc: 'AWS Secrets Manager', name: 'CBP / ABI credentials', desc: 'Never in a process that holds model context', layers: ['sec'] },
+    obs:      { icon: 'cloudwatch', svc: 'CloudWatch + ADOT', name: 'Observability', desc: 'Alarms here, quality metrics in Athena', layers: ['sec'] },
+    rulebook: { icon: 's3-bucket', svc: 'S3 + Object Lock', name: 'Rulebook corpus', desc: 'Versioned, hash-pinned into every decision', layers: ['core'] },
+    registry: { icon: 'ecr', svc: 'Artefact store + ECR', name: 'Model + prompt registry', desc: 'Model, prompt, thresholds promoted together', layers: ['sec'] },
+    cicd:     { icon: 'codepipeline', svc: 'CI/CD + Terraform', name: 'Promotion pipeline', desc: 'Promoted into prod, never mutated in prod', layers: ['sec'] },
+    ledger:   { icon: 's3-bucket', svc: 'S3 Object Lock · compliance', name: 'Audit ledger replica', desc: 'Deletable by no one with prod access', layers: ['core'] },
+    guard:    { icon: 'guardduty', svc: 'GuardDuty + Security Hub', name: 'Detection', desc: 'The parser-egress alarm lands here', layers: ['sec'] },
+    nonprod:  { icon: 'g-account', svc: 'workload-nonprod', name: 'Dev, staging, ABI cert', desc: 'CBP certification testing, never in prod', layers: ['sec'] },
+    cbp:      { icon: 'internet', svc: 'Government endpoint', name: 'CBP ACE', desc: 'The only external destination. Responses and CF-28 / 29 come back', layers: ['core'] },
+    pga:      { icon: 'internet', svc: 'Within the transmission', name: 'PGA message sets', desc: 'FDA, USDA and friends, one epic per agency', layers: ['integ'] },
+    bi:       { icon: 'athena', svc: 'S3 Parquet + Athena', name: 'Customer BI', desc: 'Exposure reports per change event', layers: ['integ'] },
+    /* pipeline / landing-zone extras */
+    cbpret:   { icon: 'internet', svc: 'Async from CBP', name: 'Response, CF-28 / 29', desc: 'Accept, reject, or a request for information', layers: ['core'] },
+    reviewret:{ icon: 'elb', svc: 'Back to the queue', name: 'Human works the reject', desc: 'Reason rendered, never auto-resubmitted', layers: ['core'] },
+    firehose: { icon: 'firehose', svc: 'Amazon Data Firehose', name: 'Ledger mirror stream', desc: 'Parquet, partitioned per tenant and day', layers: ['core'] },
+    athena:   { icon: 'athena', svc: 'Amazon Athena', name: 'Evidence queries', desc: 'Years-old evidence without a restore', layers: ['core'] },
+    idc:      { icon: 'identity-center', svc: 'IAM Identity Center', name: 'Workforce identity', desc: 'Human access, centrally granted', layers: ['sec'] },
+    trail:    { icon: 'cloudtrail', svc: 'CloudTrail + flow logs', name: 'Org trail', desc: 'Every API call, every flow, one-way in', layers: ['sec'] },
+    tenant:   { icon: 'g-account', svc: 'Dedicated stack', name: 'Per-tenant prod', desc: 'Same Terraform, separate blast radius', layers: ['sec'] }
+  };
+
+  /* numbered flow badges (reference view) + legend */
+  const FLOW = [
+    ['s3docs', 'Documents land in S3'],
+    ['evb', 'EventBridge starts the execution'],
+    ['parser', 'Quarantine parse, one microVM each'],
+    ['router', 'Deterministic novelty routing'],
+    ['workers', 'Decide with citations, via the model gateway'],
+    ['conf', 'Calibrated confidence gate'],
+    ['review', 'Human review on task tokens'],
+    ['abi', 'Schema-gated ABI assembly'],
+    ['cbp', 'Transmit, await the async response'],
+    ['ledger', 'Everything mirrors to Object Lock']
+  ];
+
+  const C = { doc: 'var(--warn)', dec: 'var(--accent-2)', auth: 'var(--good)', file: 'var(--accent)', block: 'var(--accent)' };
+
+  /* reference-view edges {f, t, type, layers} — ids are node keys */
+  const EDGES_REF = [
+    { f: 'ses', t: 's3docs', type: 'doc', layers: ['core'] },
+    { f: 'apigw', t: 's3docs', type: 'doc', layers: ['core'] },
+    { f: 'xfer', t: 's3docs', type: 'doc', layers: ['core'] },
+    { f: 's3docs', t: 'evb', type: 'doc', layers: ['core'] },
+    { f: 'evb', t: 'stepfn', type: 'dec', layers: ['core'] },
+    { f: 's3docs', t: 'parser', type: 'doc', layers: ['core'] },
+    { f: 'parser', t: 'textract', type: 'doc', layers: ['core'] },
+    { f: 'parser', t: 'stepfn', type: 'doc', layers: ['core'] },
+    { f: 'stepfn', t: 'router', type: 'dec', layers: ['core'] },
+    { f: 'router', t: 'cache', type: 'dec', layers: ['core'] },
+    { f: 'router', t: 'workers', type: 'dec', layers: ['core'] },
+    { f: 'workers', t: 'mgw', type: 'dec', layers: ['core'] },
+    { f: 'mgw', t: 'bedrock', type: 'dec', layers: ['core'] },
+    { f: 'workers', t: 'aurora', type: 'dec', layers: ['core'] },
+    { f: 'workers', t: 'conf', type: 'dec', layers: ['core'] },
+    { f: 'conf', t: 'review', type: 'dec', layers: ['core'] },
+    { f: 'review', t: 'stepfn', type: 'dec', layers: ['core'] },
+    { f: 'stepfn', t: 'abi', type: 'dec', layers: ['core'] },
+    { f: 'rulebook', t: 'workers', type: 'auth', layers: ['core'] },
+    { f: 'aurora', t: 'ledger', type: 'dec', layers: ['core'] },
+    { f: 'abi', t: 'cbp', type: 'file', layers: ['core'] },
+    { f: 'cbp', t: 'abi', type: 'file', layers: ['core', 'integ'] },
+    { f: 'abi', t: 'review', type: 'file', layers: ['core', 'integ'] },
+    { f: 'ops', t: 'apigw', type: 'doc', layers: ['integ'] },
+    { f: 'email', t: 'ses', type: 'doc', layers: ['integ'] },
+    { f: 'erp', t: 'xfer', type: 'doc', layers: ['integ'] },
+    { f: 'edi', t: 'xfer', type: 'doc', layers: ['integ'] },
+    { f: 'idp', t: 'review', type: 'dec', layers: ['integ'] },
+    { f: 'fr', t: 'watch', type: 'auth', layers: ['integ'] },
+    { f: 'csms', t: 'watch', type: 'auth', layers: ['integ'] },
+    { f: 'hts', t: 'watch', type: 'auth', layers: ['integ'] },
+    { f: 'cross', t: 'watch', type: 'auth', layers: ['integ'] },
+    { f: 'watch', t: 'rulebook', type: 'auth', layers: ['integ'] },
+    { f: 'abi', t: 'pga', type: 'file', layers: ['integ'] },
+    { f: 'aurora', t: 'bi', type: 'dec', layers: ['integ'] },
+    { f: 'abi', t: 'cred', type: 'file', layers: ['sec'] },
+    { f: 'cred', t: 'secrets', type: 'file', layers: ['sec'] },
+    { f: 'stepfn', t: 'sqs', type: 'dec', layers: ['sec'] },
+    { f: 'stepfn', t: 'obs', type: 'dec', layers: ['sec'] },
+    { f: 'obs', t: 'guard', type: 'auth', layers: ['sec'] },
+    { f: 'cicd', t: 'workers', type: 'auth', layers: ['sec'] },
+    { f: 'registry', t: 'mgw', type: 'auth', layers: ['sec'] },
+    { f: 'parser', t: 'bedrock', type: 'block', layers: ['core', 'sec'] },
+    { f: 'workers', t: 'rulebook', type: 'block', layers: ['core', 'sec'] },
+    { f: 'workers', t: 'secrets', type: 'block', layers: ['sec'] }
+  ];
+
+  /* pipeline-view edges: consecutive along each lane */
+  const PIPE_LANES = [
+    ['ops', 's3docs', 'evb', 'stepfn', 'parser', 'router', 'workers', 'conf', 'review', 'abi', 'cbp'],
+    ['mgw', 'bedrock'],
+    ['cbpret', 'reviewret'],
+    ['aurora', 'firehose', 'ledger', 'athena']
+  ];
+  const PIPE_TYPES = ['doc', 'dec', 'file', 'dec'];
+
+  /* landing-zone edges (cross-account) */
+  const EDGES_LZ = [
+    { f: 'rulebook', t: 'workers', type: 'auth' },
+    { f: 'cicd', t: 'stepfn', type: 'auth' },
+    { f: 'aurora', t: 'ledger', type: 'dec' },
+    { f: 'trail', t: 'guard', type: 'auth' },
+    { f: 'cicd', t: 'nonprod', type: 'auth' },
+    { f: 'cicd', t: 'tenant', type: 'auth' }
+  ];
+
+  const BOUNDS = [
+    { name: 'Untrusted input boundary', color: 'var(--S-hold)',
+      nodes: ['parser', 'textract', 's3docs'],
+      edges: [['s3docs', 'parser'], ['parser', 'textract'], ['parser', 'stepfn'], ['parser', 'bedrock']],
+      text: 'The quarantine subnet has no NAT, no IGW, a gateway endpoint to exactly one S3 prefix, an interface endpoint to Textract, and a role with no Bedrock or Secrets Manager access. The dashed route to the model endpoint does not exist. A hostile document buys a dead microVM and the highest-signal alarm in the system, delivered to the org-security account.' },
+    { name: 'Authority boundary', color: 'var(--good)',
+      nodes: ['rulebook', 'registry', 'watch', 'workers', 'fr', 'csms', 'hts', 'cross'],
+      edges: [['rulebook', 'workers'], ['workers', 'rulebook'], ['watch', 'rulebook'], ['fr', 'watch'], ['csms', 'watch'], ['hts', 'watch'], ['cross', 'watch']],
+      text: 'The rulebook corpus lives versioned and Object-Locked in the shared-services account, fed only by the watcher pipeline, hash-pinned into every decision record. Production roles can only read, so the dashed write route does not exist. Tampering with the authorities requires compromising a different AWS account.' },
+    { name: 'Filing boundary', color: 'var(--S-cleared)',
+      nodes: ['abi', 'cred', 'secrets', 'cbp', 'pga', 'stepfn'],
+      edges: [['stepfn', 'abi'], ['abi', 'cred'], ['cred', 'secrets'], ['abi', 'cbp'], ['abi', 'pga'], ['workers', 'secrets']],
+      text: 'The ABI adapter is the only principal that can assume the credential-proxy role, its egress allowlist contains only CBP endpoints, and CI asserts its dependency graph does not include the inference client. Filing runs under the broker’s certified filer code. The last hop to the government contains no model, by construction.' }
+  ];
+
+  const STEPS = [
+    { nodes: ['s3docs', 'evb', 'stepfn'], edges: [['s3docs', 'evb'], ['evb', 'stepfn']],
+      k: 'Step 1/8', v: 'Documents land in S3, EventBridge starts the execution. Its name is sha256 of tenant, entry reference and document-set hash, so redelivery is a no-op.' },
+    { nodes: ['s3docs', 'parser', 'textract', 'stepfn'], edges: [['s3docs', 'parser'], ['parser', 'textract'], ['parser', 'stepfn']],
+      k: 'Step 2/8', v: 'Parse in quarantine. Each document gets its own microVM, Textract output and page images travel together, then everything is normalised and entity-resolved.' },
+    { nodes: ['stepfn', 'router', 'cache', 'workers', 'mgw', 'bedrock', 'aurora', 'rulebook', 'conf'],
+      edges: [['stepfn', 'router'], ['router', 'cache'], ['router', 'workers'], ['workers', 'mgw'], ['mgw', 'bedrock'], ['workers', 'aurora'], ['rulebook', 'workers'], ['workers', 'conf']],
+      k: 'Step 3/8', v: 'Map fan-out per line item. Route tier from cache, decide through the model gateway, validate, gate. Workers read the rulebook, never write it.' },
+    { nodes: ['conf', 'review', 'idp', 'stepfn'], edges: [['conf', 'review'], ['idp', 'review'], ['review', 'stepfn']],
+      k: 'Step 4/8', v: 'Human review via task tokens, signed in through the customer’s own IdP. A reviewer may take four hours or four days, the execution simply resumes.' },
+    { nodes: ['stepfn'], edges: [],
+      k: 'Step 5/8', v: 'The parallel statutory-clock branch holds a timer to release date plus 10 working days minus buffer. It escalates to a human. It never files.' },
+    { nodes: ['stepfn', 'abi', 'cred', 'secrets', 'cbp', 'pga'],
+      edges: [['stepfn', 'abi'], ['abi', 'cred'], ['cred', 'secrets'], ['abi', 'cbp'], ['abi', 'pga']],
+      k: 'Step 6/8', v: 'Assemble 3461 / 7501 / PGA, hard schema gate, fetch credentials through the proxy, transmit over ABI under the broker’s filer code.' },
+    { nodes: ['cbp', 'abi', 'review', 'stepfn'], edges: [['cbp', 'abi'], ['abi', 'review']],
+      k: 'Step 7/8', v: 'CBP answers asynchronously over the same filer connection, so the response lands back at the adapter. A reject is routed to the review queue with the CBP reason rendered, never auto-resubmitted.' },
+    { nodes: ['aurora', 'ledger', 'bi'], edges: [['aurora', 'ledger'], ['aurora', 'bi']],
+      k: 'Step 8/8', v: 'Every decision, version and transmission record mirrors to Object Lock in the log-archive account, and exposure reports flow to customer BI.' }
+  ];
+
+  const LAYER_TEXT = {
+    core: 'Core path, numbered 1 to 10. Documents in, one execution per entry, decisions through the gate, one deterministic hop to CBP, evidence mirrored out.',
+    integ: 'Integrations added. People and commercial systems feed intake, four authority feeds keep the rulebook current, and the CBP response loop, PGA sets and customer BI flow out.',
+    sec: 'Security and ops added. Credentials sit behind a proxy the workers cannot reach, DLQs and telemetry are alarmed, detection lives in its own account, artefacts are promoted by CI.',
+    all: 'Everything at once. Six accounts, four subnet tiers, every integration and every guarded route, in AWS’s own diagram language.'
+  };
+  const VIEW_TEXT = {
+    pipe: 'Style 2 of 3, the serverless pipeline. The same system read as an event flow: each arrow is an event, each service does one thing, and the model call is a side branch that the filing path never touches.',
+    lz: 'Style 3 of 3, the landing zone. Six AWS accounts, because a boundary the application can talk past is a control, not a guarantee. Green arrows are promotion and read-only authority, blue is the evidence mirror.'
+  };
+
+  /* ---------- render node cards into slots ---------- */
+  const FLOWNO = {}; FLOW.forEach(([k], i) => { FLOWNO[k] = i + 1; });
+  document.querySelectorAll('.view').forEach((view) => {
+    const v = view.id.replace('view-', '');
+    view.querySelectorAll('.slot').forEach((slot) => {
+      const key = slot.dataset.n;
+      const s = SERVICES[key];
+      slot.className = 'node';
+      slot.id = `${v}-${key}`;
+      const badge = (v === 'ref' && FLOWNO[key]) ? `<i class="stepno">${FLOWNO[key]}</i>` : '';
+      slot.innerHTML = `${badge}<span class="tile"><img src="./aws-icons/${s.icon}.svg" alt="" loading="lazy"></span><span class="txt"><span class="svc">${s.svc}</span><b>${s.name}</b><span class="desc">${s.desc}</span></span>`;
+    });
+  });
+  $('flowlegend').innerHTML = FLOW.map(([k, t], i) => `<i><b>${i + 1}</b>${t}</i>`).join('');
+
+  /* ---------- wires ---------- */
+  let wires = [];   /* current view's drawn wires, aligned to current edge list */
+  let curEdges = [];
+  /* Rect of an element in the diagram's own layout coordinates.
+     getBoundingClientRect would return post-transform pixels, which the camera scales,
+     so every measurement walks the offsetParent chain instead. Layout offsets are
+     immune to an ancestor transform, which is what lets the wires survive zooming. */
+  const rectOf = (el) => {
+    let x = 0, y = 0, n = el;
+    while (n && n !== diagram) {
+      x += n.offsetLeft; y += n.offsetTop;
+      n = n.offsetParent;
+    }
+    if (n !== diagram) return null;   /* element is detached or in a hidden view */
+    return { left: x, top: y, width: el.offsetWidth, height: el.offsetHeight,
+             right: x + el.offsetWidth, bottom: y + el.offsetHeight };
+  };
+  const anchor = (r, o) => {
+    const vGap = o.top > r.bottom ? o.top - r.bottom : (r.top > o.bottom ? r.top - o.bottom : 0);
+    const hGap = o.left > r.right ? o.left - r.right : (r.left > o.right ? r.left - o.right : 0);
+    if (hGap > vGap) {
+      return { x: o.left > r.left ? r.right : r.left, y: r.top + r.height / 2 };
+    }
+    return { x: r.left + r.width / 2, y: o.top > r.top ? r.bottom : r.top };
+  };
+  const edgesForMode = () => {
+    if (mode === 'pipe') {
+      const list = [];
+      PIPE_LANES.forEach((lane, li) => {
+        for (let i = 0; i < lane.length - 1; i++) list.push({ f: lane[i], t: lane[i + 1], type: PIPE_TYPES[li], layers: ['core'] });
+      });
+      return list;
+    }
+    if (mode === 'lz') return EDGES_LZ.map((e) => ({ ...e, layers: ['core'] }));
+    return EDGES_REF;
+  };
+  const viewPrefix = () => (mode === 'pipe' ? 'pipe' : mode === 'lz' ? 'lz' : 'ref');
+
+  /* ---------- motion: the entry's journey, in order ----------
+     Packets ride only this chain in the reference view, so the motion narrates one
+     path instead of animating all 45 wires at once. */
+  const HERO = [
+    ['s3docs', 'evb'], ['evb', 'stepfn'], ['s3docs', 'parser'], ['parser', 'textract'],
+    ['parser', 'stepfn'], ['stepfn', 'router'], ['router', 'workers'], ['workers', 'mgw'],
+    ['mgw', 'bedrock'], ['workers', 'conf'], ['conf', 'review'], ['review', 'stepfn'],
+    ['stepfn', 'abi'], ['abi', 'cbp'], ['cbp', 'abi'], ['aurora', 'ledger']
+  ];
+  const heroIdx = (f, t) => HERO.findIndex((h) => h[0] === f && h[1] === t);
+  const REDUCE = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const NS = 'http://www.w3.org/2000/svg';
+  const mk = (tag) => document.createElementNS(NS, tag);
+  const glowDefs = () => {
+    const defs = mk('defs');
+    defs.innerHTML =
+      '<filter id="awsglow" x="-40%" y="-40%" width="180%" height="180%">' +
+      '<feGaussianBlur stdDeviation="2.6" result="b"/>' +
+      '<feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>';
+    return defs;
+  };
+
+  const draw = () => {
+    const W = diagram.offsetWidth, H = diagram.offsetHeight;
+    svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+    svg.innerHTML = '';
+    svg.appendChild(glowDefs());
+    wires = [];
+    curEdges = edgesForMode();
+    const p = viewPrefix();
+    curEdges.forEach(({ f, t, type }, ei) => {
+      const fe = $(`${p}-${f}`), te = $(`${p}-${t}`);
+      if (!fe || !te) { wires.push(null); return; }
+      const fr = rectOf(fe), tr = rectOf(te);
+      if (!fr || !tr) { wires.push(null); return; }
+      const p1 = anchor(fr, tr);
+      const p2 = anchor(tr, fr);
+      const dx = p2.x - p1.x, dy = p2.y - p1.y;
+      let d;
+      if (Math.abs(dy) < 8 || Math.abs(dx) < 8) {
+        d = `M ${p1.x} ${p1.y} L ${p2.x} ${p2.y}`;
+      } else {
+        const kx = Math.sign(dx) * Math.min(46, Math.abs(dx) / 2);
+        const ky = Math.sign(dy) * Math.min(46, Math.abs(dy) / 2);
+        d = Math.abs(dy) >= Math.abs(dx)
+          ? `M ${p1.x} ${p1.y} C ${p1.x} ${p1.y + ky}, ${p2.x} ${p2.y - ky}, ${p2.x} ${p2.y}`
+          : `M ${p1.x} ${p1.y} C ${p1.x + kx} ${p1.y}, ${p2.x - kx} ${p2.y}, ${p2.x} ${p2.y}`;
+      }
+      const el = mk('path');
+      el.setAttribute('d', d);
+      el.setAttribute('class', 'wire' + (type === 'block' ? ' blocked' : ' flow'));
+      el.style.setProperty('--wc', C[type]);
+      svg.appendChild(el);
+      const len = el.getTotalLength();
+
+      /* draw-on order: the hero chain narrates, everything else follows behind it */
+      const hi = mode === 'ref' || mode === 'run' ? heroIdx(f, t) : ei;
+      const order = hi >= 0 ? hi : HERO.length + ei;
+      if (!REDUCE && type !== 'block') {
+        el.style.strokeDasharray = len;
+        el.style.setProperty('--len', len);
+        el.style.setProperty('--i', order);
+        el.classList.add('drawin');
+      }
+      const pe = el.getPointAtLength(len);
+      const pn = el.getPointAtLength(Math.max(0, len - 8));
+      const ang = Math.atan2(pe.y - pn.y, pe.x - pn.x);
+      let head = null;
+      if (type !== 'block') {
+        head = mk('path');
+        const s = 6;
+        head.setAttribute('d', `M ${pe.x} ${pe.y} L ${pe.x - s * Math.cos(ang - 0.45)} ${pe.y - s * Math.sin(ang - 0.45)} L ${pe.x - s * Math.cos(ang + 0.45)} ${pe.y - s * Math.sin(ang + 0.45)} Z`);
+        head.setAttribute('class', 'arrowhead');
+        head.style.setProperty('--wc', C[type]);
+        if (!REDUCE) { head.style.setProperty('--i', order); head.classList.add('drawin'); }
+        svg.appendChild(head);
+      } else {
+        const mid = el.getPointAtLength(len / 2);
+        const x = mk('text');
+        x.setAttribute('x', mid.x); x.setAttribute('y', mid.y + 3);
+        x.setAttribute('text-anchor', 'middle');
+        x.setAttribute('class', 'blockmark');
+        x.style.setProperty('--wc', C.block);
+        x.textContent = '✕ no route';
+        svg.appendChild(x);
+        head = x;
+      }
+
+      /* the hero motion: a packet riding this wire */
+      let pk = null, halo = null;
+      const carries = !REDUCE && mode !== 'lz' && (mode === 'pipe' || hi >= 0 || type === 'block');
+      if (carries) {
+        const dur = Math.min(5.2, Math.max(1.5, len / 105));
+        halo = mk('circle');
+        halo.setAttribute('r', 7);
+        halo.setAttribute('class', 'packet-halo');
+        pk = mk('circle');
+        pk.setAttribute('r', 3.4);
+        pk.setAttribute('class', 'packet' + (type === 'block' ? ' deadend' : ''));
+        [halo, pk].forEach((n) => {
+          n.style.offsetPath = `path("${d}")`;
+          n.style.setProperty('--wc', C[type]);
+          n.style.setProperty('--i', order);
+          n.style.setProperty('--dur', dur + 's');
+        });
+        if (type === 'block') { halo = null; pk.style.setProperty('--dur', '3.4s'); }
+        if (halo) svg.appendChild(halo);
+        svg.appendChild(pk);
+      }
+      wires.push({ line: el, head, pk, halo });
+    });
+    buildLod();
+    applyState();
+  };
+
+  /* ---------- interaction state ---------- */
+  let mode = 'ref', bound = -1, step = 0, layer = 'core';
+  const layerSet = () => (layer === 'all' ? null : (layer === 'core' ? ['core'] : ['core', layer]));
+  const inLayer = (layers) => {
+    const ls = layerSet();
+    return !ls || layers.some((l) => ls.includes(l));
+  };
+  const readout = (k, v, color) => {
+    $('ro-k').textContent = k;
+    $('ro-v').textContent = v;
+    document.querySelector('.readout').style.setProperty('--rc', color || 'var(--accent-2)');
+  };
+  const eIdx = (f, t) => curEdges.findIndex((e) => e.f === f && e.t === t);
+  const clearMembers = () => {
+    diagram.querySelectorAll('.node').forEach((n) => n.classList.remove('member'));
+    wires.forEach((w) => {
+      if (!w) return;
+      w.line.classList.remove('member');
+      w.head.classList.remove('member');
+      if (w.pk) w.pk.classList.remove('member');
+      if (w.halo) w.halo.classList.remove('member');
+    });
+  };
+  const setMembers = (nodeKeys, edgePairs, color) => {
+    clearMembers();
+    const p = viewPrefix();
+    nodeKeys.forEach((k) => { const n = $(`${p}-${k}`); if (n) n.classList.add('member'); });
+    edgePairs.forEach(([f, t]) => {
+      const i = eIdx(f, t);
+      if (i >= 0 && wires[i]) {
+        const w = wires[i];
+        w.line.classList.add('member');
+        w.head.classList.add('member');
+        if (w.pk) w.pk.classList.add('member');
+        if (w.halo) w.halo.classList.add('member');
+      }
+    });
+    diagram.style.setProperty('--fc', color);
+  };
+  const applyLayer = () => {
+    const active = mode === 'ref' && bound < 0;
+    diagram.classList.toggle('layered', active && layer !== 'all');
+    document.querySelectorAll('#view-ref .node').forEach((n) => {
+      const key = n.id.replace('ref-', '');
+      n.classList.toggle('offlayer', active && !inLayer(SERVICES[key].layers));
+    });
+    curEdges.forEach((e, i) => {
+      if (!wires[i]) return;
+      const off = active && mode === 'ref' && !inLayer(e.layers);
+      wires[i].line.classList.toggle('offlayer', off);
+      wires[i].head.classList.toggle('offlayer', off);
+      if (wires[i].pk) wires[i].pk.classList.toggle('offlayer', off);
+      if (wires[i].halo) wires[i].halo.classList.toggle('offlayer', off);
+    });
+  };
+  const applyState = () => {
+    diagram.classList.toggle('focused', mode === 'ref' && bound >= 0);
+    diagram.classList.toggle('stepping', mode === 'run');
+    if (mode === 'ref' && bound >= 0) {
+      const bd = BOUNDS[bound];
+      setMembers(bd.nodes, bd.edges, bd.color);
+      readout(bd.name, bd.text, bd.color);
+    } else if (mode === 'run') {
+      const st = STEPS[step];
+      setMembers(st.nodes, st.edges, 'var(--accent-2)');
+      readout(st.k, st.v);
+    } else if (mode === 'pipe' || mode === 'lz') {
+      clearMembers();
+      readout(mode === 'pipe' ? 'Pipeline' : 'Landing zone', VIEW_TEXT[mode]);
+    } else {
+      clearMembers();
+      readout('Layer', LAYER_TEXT[layer]);
+    }
+    applyLayer();
+  };
+
+  document.querySelectorAll('.chip').forEach((c) =>
+    c.addEventListener('click', () => {
+      layer = c.dataset.l;
+      bound = -1;
+      document.querySelectorAll('.bound').forEach((x) => x.setAttribute('aria-pressed', 'false'));
+      document.querySelectorAll('.chip').forEach((x) => x.setAttribute('aria-pressed', String(x.dataset.l === layer)));
+      applyState();
+    }));
+
+  document.querySelectorAll('.bound').forEach((b) =>
+    b.addEventListener('click', () => {
+      const i = Number(b.dataset.b);
+      bound = bound === i ? -1 : i;
+      document.querySelectorAll('.bound').forEach((x) => x.setAttribute('aria-pressed', String(Number(x.dataset.b) === bound)));
+      applyState();
+    }));
+
+  const MODE_BTN = { ref: 'm-ref', run: 'm-run', pipe: 'm-pipe', lz: 'm-lz' };
+  const setMode = (m) => {
+    mode = m;
+    const refLike = m === 'ref' || m === 'run';
+    $('view-ref').hidden = !refLike;
+    $('view-pipe').hidden = m !== 'pipe';
+    $('view-lz').hidden = m !== 'lz';
+    $('chips').style.display = m === 'ref' ? '' : 'none';
+    $('bounds').style.display = refLike ? '' : 'none';
+    $('flowfold').style.display = refLike ? '' : 'none';
+    $('transport').classList.toggle('show', m === 'run');
+    Object.entries(MODE_BTN).forEach(([k, id]) => $(id).setAttribute('aria-pressed', String(k === m)));
+    if (m === 'run') step = 0;
+    bound = -1;
+    document.querySelectorAll('.bound').forEach((x) => x.setAttribute('aria-pressed', 'false'));
+    exitTour();
+    draw();
+    /* each view is a different shape, so the viewport and the camera both reframe
+       rather than keeping a position that meant something on the previous map */
+    sizeStage();
+    lod = 0;
+    land();
+    if (m === 'run') { const r = unionOf(STEPS[0].nodes.map((k) => $(`ref-${k}`))); if (r) flyToRect(r, 1.1); }
+  };
+  Object.entries(MODE_BTN).forEach(([k, id]) => $(id).addEventListener('click', () => setMode(k)));
+  /* stepping the runtime walks the camera to the step, so the 8 steps read as a
+     journey across the map rather than as opacity changing in place */
+  const goStep = (n) => {
+    step = Math.min(STEPS.length - 1, Math.max(0, n));
+    applyState();
+    const r = unionOf(STEPS[step].nodes.map((k) => $(`ref-${k}`)));
+    if (r) flyToRect(r, Math.max(0.95, Math.min(1.4, 620 / Math.max(r.width, r.height * 1.5))));
+  };
+  $('next').addEventListener('click', () => goStep(step + 1));
+  $('prev').addEventListener('click', () => goStep(step - 1));
+
+  /* ---------- level of detail ----------
+     L1 and L2 are not separate drawings. Each box is positioned from the measured
+     layout of the detail beneath it, so the three levels are guaranteed to be the
+     same map and a zoom reads as going closer rather than as a slide change. */
+  const GC = { grey: '#7d8998', teal: '#00a4a6', vpc: '#8c4fff', acct: '#e7157b' };
+  const LOD = {
+    ref: {
+      1: [
+        { keys: ['ops', 'erp', 'email', 'edi', 'idp'], kicker: 'Customer side', c: GC.grey,
+          t: 'Brokerage and importer systems', s: 'Portal, ERP and TMS, supplier email, EDI partners, and the customer’s own identity provider' },
+        { keys: ['fr', 'csms', 'hts', 'cross'], kicker: 'Authority feeds', c: GC.grey,
+          t: 'Four read-only sources', s: 'Federal Register, CBP CSMS, USITC HTS revisions, CROSS rulings' },
+        { keys: ['ses', 'apigw', 'xfer', 'evb', 'sqs'], kicker: 'Ingestion', c: GC.teal,
+          t: 'Intake and the event spine', s: 'However a document set arrives, it becomes exactly one idempotent execution' },
+        { keys: ['s3docs', 'textract', 'bedrock', 'secrets', 'obs', 'watch'], kicker: 'Regional services', c: GC.teal,
+          t: 'Storage, OCR, models, secrets, telemetry', s: 'Outside the VPC, reached over endpoints, never over the public internet' },
+        { sel: '#view-ref .awsg.g-vpc', kicker: 'Agent platform', c: GC.vpc,
+          t: 'One VPC, four subnet tiers', s: 'Quarantine, application, data, and a filing tier that contains no model' },
+        { sel: '#view-ref .ref-cloud-inner > .gcol', kicker: 'Separate accounts', c: GC.acct,
+          t: 'Control and evidence', s: 'Rulebook, audit ledger, detection and non-prod each live where production cannot reach them' },
+        { sel: '#view-ref .ref-out-row .awsg', kicker: 'Outside AWS', c: GC.grey,
+          t: 'CBP ACE and partners', s: 'The only external destination the system files into' }
+      ],
+      /* every L2 box is derived from a real container in the detail layout, never from
+         an ad-hoc union of nodes — a union of items inside a wrapping row overlaps its
+         neighbours as soon as the row wraps */
+      2: [
+        { each: '#view-ref .ref-cols > .gcol > .awsg', kicker: 'Outside the cloud', c: GC.grey },
+        { each: '#view-ref .g-region > .subgrid > .nrow', kicker: 'Ingestion', c: GC.teal },
+        { each: '#view-ref .outvpc > .nrow', kicker: 'Outside the VPC', c: GC.teal },
+        { each: '#view-ref .awsg.g-vpc .awsg', kicker: 'Subnet tier', c: GC.vpc },
+        { each: '#view-ref .ref-cloud-inner > .gcol > .awsg', kicker: 'AWS account', c: GC.acct },
+        { each: '#view-ref .ref-out-row .awsg', kicker: 'Outside AWS', c: GC.grey }
+      ]
+    },
+    pipe: { 2: [{ each: '#view-pipe .pipe-lane', kicker: 'Event lane', c: 'var(--accent-2)' }] },
+    lz: { 2: [{ each: '#view-lz .awsg.g-acct', kicker: 'AWS account', c: GC.acct }] }
+  };
+  const LOD_NAME = { 1: 'Context', 2: 'Accounts and network', 3: 'Full reference' };
+  const LOD_HINT = { 1: '· Zoom in for accounts', 2: '· Zoom in for services', 3: '· Every service, wire and packet' };
+
+  const WPAD = 20;   /* .world padding, so world coords = diagram coords + WPAD */
+  const unionOf = (els) => {
+    let r = null;
+    els.forEach((el) => {
+      const q = el && rectOf(el);
+      if (!q) return;
+      r = r ? { left: Math.min(r.left, q.left), top: Math.min(r.top, q.top),
+                right: Math.max(r.right, q.right), bottom: Math.max(r.bottom, q.bottom) } : { ...q };
+    });
+    if (!r) return null;
+    r.width = r.right - r.left; r.height = r.bottom - r.top;
+    return r;
+  };
+  const specsFor = (lv) => {
+    const set = LOD[mode === 'run' ? 'ref' : mode] || LOD.ref;
+    return set[lv] || set[2] || [];
+  };
+  const BPAD = 5;
+  /* Type is sized from the box, so a supporting line is dropped when it would clip.
+     That decision is taken once per layer rather than per box, because a kicker on
+     three boxes out of nine reads as an accident rather than as a rule. */
+  const buildLod = () => {
+    const p = viewPrefix();
+    [1, 2].forEach((lv) => {
+      const layer = $('lod' + lv);
+      layer.innerHTML = '';
+      const boxes = [];
+      /* A band-shaped box reads its label on one line, a block-shaped one stacks
+         kicker, label and detail. Either way every box keeps its detail line, and the
+         type is sized so it cannot clip. */
+      const push = (r, kicker, title, sub, c) => {
+        if (!r) return;
+        const w = r.width + BPAD * 2, h = r.height + BPAD * 2;
+        const tight = h < 96;
+        const fs = tight
+          ? Math.max(11, Math.min(30, w / 9, h / 2.4))
+          : Math.max(11, Math.min(34, w / 8.5, h / 5));
+        boxes.push({ r, w, h, kicker, title, sub, c, fs, tight });
+      };
+      specsFor(lv).forEach((sp) => {
+        if (sp.each) {
+          document.querySelectorAll(sp.each).forEach((el) => {
+            const lbl = el.querySelector('.g-head b, .lane-title');
+            const n = el.querySelectorAll('.node').length;
+            push(rectOf(el), sp.kicker,
+              el.dataset.lbl || (lbl ? lbl.textContent.trim() : ''),
+              el.dataset.sub || (n ? n + (n === 1 ? ' service' : ' services') : ''), sp.c);
+          });
+          return;
+        }
+        push(unionOf(sp.sel ? [document.querySelector(sp.sel)] : sp.keys.map((k) => $(`${p}-${k}`))),
+          sp.kicker, sp.t, sp.s, sp.c);
+      });
+      boxes.forEach((b) => {
+        const d = document.createElement('div');
+        d.className = 'lbox' + (b.tight ? ' tight' : '');
+        d.style.left = (b.r.left - BPAD) + 'px'; d.style.top = (b.r.top - BPAD) + 'px';
+        d.style.width = b.w + 'px'; d.style.height = b.h + 'px';
+        d.style.setProperty('--lb', b.c);
+        d.style.setProperty('--fs', b.fs + 'px');
+        if (!b.tight && b.kicker) d.appendChild(Object.assign(document.createElement('i'), { textContent: b.kicker }));
+        d.appendChild(Object.assign(document.createElement('b'), { textContent: b.title }));
+        if (b.sub) d.appendChild(Object.assign(document.createElement('span'), { textContent: b.sub }));
+        layer.appendChild(d);
+      });
+    });
+  };
+
+  /* ---------- the camera ---------- */
+  const stage = $('stage'), world = $('world'), shell = document.querySelector('.shell');
+  const MINK = 0.16, MAXK = 2.4, T1 = 0.40, T2 = 0.86, HYST = 0.045;
+  const cam = { x: 0, y: 0, k: 1 };
+  let lod = 0, lodLock = 0, poster = false;
+
+  const worldSize = () => ({ w: world.offsetWidth, h: world.offsetHeight });
+  const stageSize = () => ({ w: stage.clientWidth, h: stage.clientHeight });
+  const clampCam = () => {
+    const W = worldSize(), S = stageSize(), m = 60;
+    const ww = W.w * cam.k, wh = W.h * cam.k;
+    cam.x = ww <= S.w ? (S.w - ww) / 2 : Math.min(m, Math.max(S.w - ww - m, cam.x));
+    cam.y = wh <= S.h ? (S.h - wh) / 2 : Math.min(m, Math.max(S.h - wh - m, cam.y));
+  };
+  const lodFor = (k) => {
+    if (lodLock) return lodLock;
+    const t1 = lod === 1 ? T1 + HYST : T1 - HYST;
+    const t2 = lod === 3 ? T2 - HYST : T2 + HYST;
+    return k < t1 ? 1 : (k < t2 ? 2 : 3);
+  };
+  const apply = () => {
+    world.style.setProperty('--cx', cam.x + 'px');
+    world.style.setProperty('--cy', cam.y + 'px');
+    world.style.setProperty('--k', cam.k);
+    world.style.setProperty('--inv', 1 / cam.k);
+    $('c-val').textContent = Math.round(cam.k * 100) + '%';
+    const n = lodFor(cam.k);
+    if (n !== lod) {
+      lod = n;
+      diagram.dataset.lod = String(n);
+      $('lod-name').textContent = LOD_NAME[n];
+      $('lod-hint').textContent = LOD_HINT[n];
+      paintLodBtns();
+    }
+  };
+  const setCam = (x, y, k) => {
+    cam.k = Math.min(MAXK, Math.max(minK(), k));
+    cam.x = x; cam.y = y;
+    clampCam(); apply();
+  };
+  /* zooming out never goes meaningfully past "everything visible", so the map can
+     never be shrunk into an island of dead space */
+  const fitK = () => {
+    const W = worldSize(), S = stageSize();
+    return Math.min(MAXK, Math.max(MINK, Math.min((S.w - 24) / W.w, (S.h - 24) / W.h)));
+  };
+  const minK = () => Math.max(MINK, fitK() * 0.92);
+  const fitCam = () => {
+    const W = worldSize(), S = stageSize(), k = fitK();
+    return { x: (S.w - W.w * k) / 2, y: (S.h - W.h * k) / 2, k };
+  };
+  /* The zoom at which each level is actually readable. A phone cannot show a 40-node
+     reference architecture at all, but it can show the context read perfectly well, so
+     the map opens at the scale the level needs and overflows the viewport rather than
+     shrinking into an illegible island with bands of dead space around it. */
+  const LEVEL_K = { 1: 0.34, 2: 0.55, 3: 0.95 };
+  const frameCam = (k) => {
+    const W = worldSize(), S = stageSize();
+    return { x: (S.w - W.w * k) / 2, y: (S.h - W.h * k) / 2, k };
+  };
+  let tw = 0;
+  const tweenTo = (x, y, k) => {
+    cancelAnimationFrame(tw);
+    if (REDUCE) { setCam(x, y, k); return; }
+    const s = { ...cam }, t0 = performance.now(), D = 700;
+    const ease = (u) => (u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2);
+    const frame = (now) => {
+      const u = Math.min(1, (now - t0) / D), e = ease(u);
+      setCam(s.x + (x - s.x) * e, s.y + (y - s.y) * e, s.k + (k - s.k) * e);
+      if (u < 1) tw = requestAnimationFrame(frame);
+    };
+    tw = requestAnimationFrame(frame);
+  };
+  const fit = (animate) => {
+    const f = fitCam();
+    animate ? tweenTo(f.x, f.y, f.k) : (cancelAnimationFrame(tw), setCam(f.x, f.y, f.k));
+  };
+  /* the opening frame: everything visible where that is legible, the context read where it is not */
+  const land = () => { const f = frameCam(Math.max(fitK(), LEVEL_K[1])); cancelAnimationFrame(tw); setCam(f.x, f.y, f.k); };
+  /* kMax is a ceiling, not the answer: the zoom that actually gets used is whatever
+     frames the target, so a wide target is never flown to at a zoom that cuts it in half.
+     The vertical allowance leaves room for the tour caption bar. */
+  const flyToRect = (r, kMax) => {
+    const S = stageSize();
+    const k = Math.max(minK(), Math.min(kMax, (S.w - 90) / r.width, (S.h - 150) / r.height));
+    tweenTo(S.w / 2 - k * (r.left + r.width / 2 + WPAD), S.h / 2 - k * (r.top + r.height / 2 + WPAD), k);
+  };
+  const zoomAt = (sx, sy, nk) => {
+    const k2 = Math.min(MAXK, Math.max(minK(), nk));
+    const wx = (sx - cam.x) / cam.k, wy = (sy - cam.y) / cam.k;
+    setCam(sx - k2 * wx, sy - k2 * wy, k2);
+  };
+  const zoomCentre = (f) => { const S = stageSize(); cancelAnimationFrame(tw); zoomAt(S.w / 2, S.h / 2, cam.k * f); };
+
+  /* The three levels are directly selectable, because a reader on a wide screen can
+     never zoom out far enough to reach Context on their own. These buttons move the
+     camera rather than overriding the level, so the zoom and the level can never
+     disagree — the level is always just a reading of the current scale. */
+  const paintLodBtns = () => document.querySelectorAll('.lodbtn')
+    .forEach((b) => b.setAttribute('aria-pressed', String(Number(b.dataset.lv) === lod)));
+  const goLevel = (lv) => {
+    exitTour();
+    if (poster) return;
+    const k = lv === 1 ? Math.max(fitK(), LEVEL_K[1]) : Math.max(LEVEL_K[lv], minK());
+    const f = frameCam(k);
+    tweenTo(f.x, f.y, f.k);
+  };
+  const freeLod = () => {};
+  document.querySelectorAll('.lodbtn').forEach((b) => b.addEventListener('click', () => goLevel(Number(b.dataset.lv))));
+
+  /* pointer: drag to pan, two fingers to pinch */
+  const pts = new Map();
+  let drag = null, pinch = null;
+  const dist = () => {
+    const [a, b] = [...pts.values()];
+    return { d: Math.hypot(a.x - b.x, a.y - b.y), mx: (a.x + b.x) / 2, my: (a.y + b.y) / 2 };
+  };
+  stage.addEventListener('pointerdown', (e) => {
+    if (e.target.closest('.tourbar') || e.target.closest('.lodpill')) return;
+    stage.focus({ preventScroll: true });
+    pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    stage.setPointerCapture(e.pointerId);
+    if (pts.size === 2) { const g = dist(); pinch = { d0: g.d, k0: cam.k }; drag = null; }
+    else if (pts.size === 1 && e.pointerType !== 'touch') {
+      cancelAnimationFrame(tw);
+      drag = { id: e.pointerId, x: e.clientX, y: e.clientY, cx: cam.x, cy: cam.y, moved: 0 };
+      stage.classList.add('grabbing');
+    }
+  });
+  stage.addEventListener('pointermove', (e) => {
+    if (!pts.has(e.pointerId)) return;
+    pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    const r = stage.getBoundingClientRect();
+    if (pinch && pts.size >= 2) {
+      const g = dist();
+      exitTour(); freeLod();
+      zoomAt(g.mx - r.left, g.my - r.top, pinch.k0 * (g.d / Math.max(1, pinch.d0)));
+      return;
+    }
+    if (!drag || e.pointerId !== drag.id) return;
+    const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+    drag.moved = Math.max(drag.moved, Math.abs(dx) + Math.abs(dy));
+    if (drag.moved > 4) exitTour();
+    setCam(drag.cx + dx, drag.cy + dy, cam.k);
+  });
+  const liftPointer = (e) => {
+    pts.delete(e.pointerId);
+    if (pts.size < 2) pinch = null;
+    if (pts.size === 0) { drag = null; stage.classList.remove('grabbing'); }
+  };
+  stage.addEventListener('pointerup', liftPointer);
+  stage.addEventListener('pointercancel', liftPointer);
+
+  /* The wheel only zooms once the reader has engaged with the map, or on a trackpad
+     pinch, so scrolling the article past the figure is never hijacked. */
+  stage.addEventListener('wheel', (e) => {
+    if (!e.ctrlKey && document.activeElement !== stage) return;
+    e.preventDefault();
+    exitTour(); freeLod();
+    cancelAnimationFrame(tw);
+    const r = stage.getBoundingClientRect();
+    zoomAt(e.clientX - r.left, e.clientY - r.top, cam.k * Math.exp(-e.deltaY * (e.ctrlKey ? 0.011 : 0.0022)));
+  }, { passive: false });
+
+  stage.addEventListener('dblclick', (e) => {
+    exitTour(); freeLod();
+    const n = e.target.closest('.node');
+    const r = n && rectOf(n);
+    if (r) flyToRect(r, Math.max(1.35, cam.k * 1.6));
+    else zoomCentre(1.5);
+  });
+
+  stage.addEventListener('keydown', (e) => {
+    const pan = e.shiftKey ? 220 : 90;
+    const map = { ArrowLeft: [pan, 0], ArrowRight: [-pan, 0], ArrowUp: [0, pan], ArrowDown: [0, -pan] };
+    if (map[e.key]) { e.preventDefault(); exitTour(); setCam(cam.x + map[e.key][0], cam.y + map[e.key][1], cam.k); return; }
+    if (e.key === '+' || e.key === '=') { e.preventDefault(); exitTour(); freeLod(); zoomCentre(1.25); }
+    else if (e.key === '-' || e.key === '_') { e.preventDefault(); exitTour(); freeLod(); zoomCentre(0.8); }
+    else if (e.key === '0') { e.preventDefault(); exitTour(); freeLod(); fit(true); }
+    else if (e.key === 'f' || e.key === 'F') { e.preventDefault(); toggleFull(); }
+    else if (e.key === 'Escape' && tour.on) { exitTour(); }
+  });
+
+  $('c-in').addEventListener('click', () => { exitTour(); freeLod(); zoomCentre(1.25); });
+  $('c-out').addEventListener('click', () => { exitTour(); freeLod(); zoomCentre(0.8); });
+  $('c-fit').addEventListener('click', () => { exitTour(); freeLod(); fit(true); });
+
+  const toggleFull = () => {
+    if (document.fullscreenElement) document.exitFullscreen();
+    else if (stage.requestFullscreen) stage.requestFullscreen().catch(() => {});
+  };
+  $('c-full').addEventListener('click', toggleFull);
+
+  /* Nothing outside the fullscreen element can be clicked, so the controls travel
+     into the stage on the way in and go home on the way out. */
+  const DOCKED = ['.modes', '.chips', '.cam'].map((s) => {
+    const el = document.querySelector(s);
+    return { el, home: el.parentNode, after: el.nextSibling };
+  });
+  document.addEventListener('fullscreenchange', () => {
+    const on = document.fullscreenElement === stage;
+    $('c-full').setAttribute('aria-pressed', String(on));
+    $('c-full').textContent = on ? 'Exit full' : 'Fullscreen';
+    DOCKED.forEach((d) => {
+      if (on) $('fsbar').appendChild(d.el);
+      else d.home.insertBefore(d.el, d.after);
+    });
+    setTimeout(() => { sizeStage(); lod = 0; land(); }, 80);
+  });
+
+  /* ---------- guided tour ---------- */
+  const TOURS = {
+    ref: [
+      { t: 'The whole map', fit: true, cap: 'Six AWS accounts, one VPC with four subnet tiers, and exactly one path out to the government.' },
+      { t: 'Documents arrive', keys: ['ses', 'apigw', 'xfer', 's3docs'], k: 1.1,
+        cap: 'Email, portal and EDI all land the same way, content-addressed in S3 under a per-tenant key.' },
+      { t: 'One execution per entry', keys: ['evb', 'stepfn'], k: 1.25,
+        cap: 'The execution name is a hash of tenant, entry reference and document set, so a redelivery is a no-op rather than a duplicate filing.' },
+      { t: 'Hostile documents die here', keys: ['parser', 'textract'], k: 1.3,
+        cap: 'The quarantine subnet has no NAT and no IGW. A malicious PDF buys a dead microVM and the highest-signal alarm in the system.' },
+      { t: 'Decide, then gate', keys: ['router', 'workers', 'mgw', 'conf'], k: 1.0,
+        cap: 'Deterministic routing first, then specialist workers through the single audited inference egress, then a calibrated confidence gate.' },
+      { t: 'The human stays in the loop', keys: ['review', 'idp'], k: 1.25,
+        cap: 'Review runs on task tokens, so a reviewer may take four hours or four days and the execution simply resumes where it paused.' },
+      { t: 'The filing boundary', keys: ['abi', 'cred', 'secrets', 'cbp'], k: 1.05,
+        cap: 'The last hop to CBP contains no model. Only the ABI adapter can assume the credential-proxy role, and its egress allowlist holds CBP endpoints alone.' },
+      { t: 'Evidence outlives production', keys: ['aurora', 'ledger'], k: 1.15,
+        cap: 'Every decision mirrors to Object Lock in the log-archive account, where nobody holding production access can delete it.' }
+    ],
+    pipe: [
+      { t: 'The whole flow', fit: true, cap: 'The same system read as an event flow. Each arrow is an event and each service does one thing.' },
+      { t: 'The entry path', sel: '#view-pipe .pipe-lane:nth-of-type(1)', k: 0.95,
+        cap: 'Eleven hops from upload to transmission, every one of them idempotent on the same execution name.' },
+      { t: 'The model call is a side branch', sel: '#view-pipe .pipe-lane:nth-of-type(2)', k: 1.2,
+        cap: 'Inference hangs off the side of the path. The filing lane never touches it.' },
+      { t: 'The response loop', sel: '#view-pipe .pipe-lane:nth-of-type(3)', k: 1.2,
+        cap: 'CBP answers asynchronously. A reject is rendered for a human and never auto-resubmitted.' },
+      { t: 'The evidence path', sel: '#view-pipe .pipe-lane:nth-of-type(4)', k: 1.1,
+        cap: 'Decisions stream to Parquet under Object Lock, queryable years later without a restore.' }
+    ],
+    lz: [
+      { t: 'Six accounts', fit: true, cap: 'A boundary the application can talk past is a control, not a guarantee. So the boundaries are account boundaries.' },
+      { t: 'Detection survives compromise', sel: '#view-lz .awsg.g-acct:nth-of-type(1)', k: 1.15,
+        cap: 'Security tooling lives where a compromised workload account cannot switch it off.' },
+      { t: 'Evidence nobody can delete', sel: '#view-lz .awsg.g-acct:nth-of-type(2)', k: 1.15,
+        cap: 'Object Lock in compliance mode, six-year retention, in an account production has no write path into.' },
+      { t: 'Artefacts are promoted, never mutated', sel: '#view-lz .awsg.g-acct:nth-of-type(3)', k: 1.15,
+        cap: 'The rulebook, the models and the pipelines that ship them all live outside production.' }
+    ]
+  };
+  const tour = { on: false, i: 0, playing: true, timer: 0 };
+  const stops = () => TOURS[mode === 'run' ? 'ref' : mode] || TOURS.ref;
+  const schedule = () => {
+    clearTimeout(tour.timer);
+    if (tour.on && tour.playing && !REDUCE) tour.timer = setTimeout(() => gotoStop(tour.i + 1), 6800);
+  };
+  const gotoStop = (i) => {
+    const st = stops();
+    tour.i = ((i % st.length) + st.length) % st.length;
+    const s = st[tour.i];
+    $('t-step').textContent = `Stop ${tour.i + 1}/${st.length} · ${s.t}`;
+    $('t-cap').textContent = s.cap;
+    if (s.fit) fit(true);
+    else {
+      const els = s.sel ? [document.querySelector(s.sel)] : s.keys.map((k) => $(`${viewPrefix()}-${k}`));
+      const r = unionOf(els);
+      if (r) flyToRect(r, s.k); else fit(true);
+    }
+    schedule();
+  };
+  const startTour = () => {
+    tour.on = true; tour.playing = true;
+    $('tourbar').classList.add('show');
+    $('c-tour').setAttribute('aria-pressed', 'true');
+    $('t-play').textContent = 'Pause';
+    $('t-play').setAttribute('aria-pressed', 'true');
+    gotoStop(0);
+  };
+  function exitTour() {
+    if (!tour.on) return;
+    tour.on = false;
+    clearTimeout(tour.timer);
+    $('tourbar').classList.remove('show');
+    $('c-tour').setAttribute('aria-pressed', 'false');
+  }
+  $('c-tour').addEventListener('click', () => (tour.on ? exitTour() : startTour()));
+  $('t-next').addEventListener('click', () => gotoStop(tour.i + 1));
+  $('t-prev').addEventListener('click', () => gotoStop(tour.i - 1));
+  $('t-exit').addEventListener('click', exitTour);
+  $('t-play').addEventListener('click', () => {
+    tour.playing = !tour.playing;
+    $('t-play').textContent = tour.playing ? 'Pause' : 'Play';
+    $('t-play').setAttribute('aria-pressed', String(tour.playing));
+    schedule();
+  });
+
+  /* ---------- poster and print ---------- */
+  let layerBeforePoster = 'core';
+  $('c-poster').addEventListener('click', () => {
+    poster = !poster;
+    exitTour();
+    shell.classList.toggle('poster', poster);
+    $('c-poster').setAttribute('aria-pressed', String(poster));
+    $('c-poster').textContent = poster ? 'Exit poster' : 'Poster';
+    lodLock = poster ? 3 : 0;
+    lod = 0;
+    /* a wall chart that dims two thirds of its own services is not a wall chart */
+    if (poster) { layerBeforePoster = layer; layer = 'all'; bound = -1; }
+    else layer = layerBeforePoster;
+    document.querySelectorAll('.chip').forEach((x) => x.setAttribute('aria-pressed', String(x.dataset.l === layer)));
+    applyState();
+    paintLodBtns();
+    fit(false);
+  });
+  const prepPrint = () => {
+    lodLock = 3; lod = 0;
+    const W = worldSize();
+    const k = Math.min(1, (stage.clientWidth - 20) / W.w);
+    setCam(0, 0, k);
+    document.documentElement.style.setProperty('--print-h', Math.ceil(W.h * k + 14) + 'px');
+  };
+  window.addEventListener('beforeprint', prepPrint);
+  window.addEventListener('afterprint', () => { if (!poster) { lodLock = 0; lod = 0; fit(false); } });
+  $('c-print').addEventListener('click', () => { exitTour(); prepPrint(); setTimeout(() => window.print(), 80); });
+
+  /* ---------- sizing ----------
+     The figure reports a fixed-ratio height rather than hugging its content, which is
+     what stops a 40-node diagram from growing into a tower on a narrow screen. */
+  /* The viewport takes its ratio from the map currently in it, within bounds. A fixed
+     16:10 box would leave the wide, short pipeline view floating in dead space, and the
+     reference view cramped. The height is bounded either way, so no view can grow a tower. */
+  const sizeStage = () => {
+    const vw = document.documentElement.clientWidth;
+    $('flowfold').open = vw >= 760;
+    const sw = stage.clientWidth || vw;
+    const W = world.offsetWidth || 1760, H = world.offsetHeight || 1240;
+    const ideal = sw * (H / W) + 26;
+    const h = vw >= 760
+      ? Math.round(Math.min(780, Math.max(400, ideal)))
+      : Math.round(Math.min(640, Math.max(420, ideal)));
+    document.documentElement.style.setProperty('--stage-h', h + 'px');
+  };
+  sizeStage();
+
+  let rt = 0;
+  const relayout = () => { clearTimeout(rt); rt = setTimeout(() => { draw(); sizeStage(); lod = 0; land(); }, 60); };
+  if ('ResizeObserver' in window) new ResizeObserver(relayout).observe(diagram);
+  window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { sizeStage(); lod = 0; land(); }, 120); });
+  window.addEventListener('load', () => { draw(); sizeStage(); land(); });
+  readout('Layer', LAYER_TEXT.core);
+  draw();
+  sizeStage();
+  land();
+
+  /* Report the frame height so the parent sizes the embed. */
+  if (document.documentElement.dataset.embedded === 'true') {
+    const postSize = () => window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+    if ('ResizeObserver' in window) new ResizeObserver(postSize).observe(document.body);
+    window.addEventListener('load', postSize);
+  }
+})();
+</script>
+</body>
+</html>

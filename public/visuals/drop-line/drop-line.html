@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The drop line &middot; what falls out of each handoff, and where it bills</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+  /* ============================================================================
+   * THE DROP LINE
+   *
+   * Two figures fused. The custody chain showed WHERE a loss happens and WHEN it
+   * resurfaces. The state board showed WHAT was dropped and WHO fails to own it.
+   * Neither could show the one thing that actually makes the argument: that the
+   * point where something is dropped and the point where it bills are different
+   * places, often several handoffs apart.
+   *
+   * So everything sits on one time axis, in three registers:
+   *
+   *   1. the chain    warm sepia   parties and handoffs, left to right
+   *   2. the gutter   cool cyan    what fell out, who owns it, what clock runs
+   *   3. the bill     red          the two places it all surfaces
+   *
+   * The arcs from register 2 to register 3 are the figure. They converge, and the
+   * convergence is the finding: six unwatched states, two places where they bill.
+   *
+   * LAYOUT. One CSS grid, two arrangements. Above 760px the axis runs left to
+   * right across five columns. Below it the axis rotates to vertical and each leg
+   * becomes a row, which is close to the shape the custody chain already used and
+   * is already known to read at 375px. DOM order is leg-major in both cases, so
+   * reading order and visual order never diverge (WCAG 1.3.2, 2.4.3) and there is
+   * no mobile fallback figure to keep in sync.
+   *
+   * The arcs are measured from real element rects rather than authored, so the
+   * rotation costs nothing — the router re-reads the boxes and redraws.
+   * ==========================================================================*/
+
+  .legend {
+    display: flex; flex-wrap: wrap; gap: 6px 16px;
+    font-family: var(--mono);
+    font-size: 0.63rem; letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+
+  /* ---------- the board ---------- */
+  .board {
+    position: relative;
+    display: grid;
+    --gap: clamp(6px, 1vw, 12px);
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    column-gap: var(--gap);
+    row-gap: 0;
+    padding: 4px 0 0;
+  }
+
+  .wires {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    overflow: visible;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ---------- register 1: the chain ---------- */
+  .leg {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  /* The spine. Drawn per leg rather than as one element so it survives the
+     rotation: horizontal between the dots at width, vertical through them
+     when the axis turns. */
+  .dotrow { position: relative; height: 17px; flex: none; }
+  /* Bleed each segment out by the column gap, or the spine breaks at every
+     gutter and reads as five stubs rather than one line. */
+  .dotrow::before {
+    content: "";
+    position: absolute;
+    top: 7px;
+    left: calc(-1 * var(--gap)); right: calc(-1 * var(--gap));
+    height: 2px;
+    background: var(--rule-strong);
+  }
+  .leg:first-child .dotrow::before { left: 50%; }
+  .leg:last-child  .dotrow::before { right: 50%; }
+
+  .dot {
+    position: absolute;
+    top: 1px; left: 50%;
+    width: 15px; height: 15px;
+    margin-left: -7.5px;
+    border-radius: 50%;
+    background: var(--panel);
+    border: 2px solid var(--rule-strong);
+  }
+  .leg.is-on .dot { background: var(--chain); border-color: var(--chain); }
+
+  .party { padding: 7px 2px 10px; min-height: 4.3em; }
+  .party b {
+    display: block;
+    font-family: var(--display);
+    font-size: 0.9rem; font-weight: 600;
+    line-height: 1.2;
+    color: var(--ink);
+  }
+  .party i {
+    display: block;
+    font-family: var(--mono); font-style: normal;
+    font-size: 0.6rem; font-weight: 500;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--ink-3);
+    margin-top: 3px;
+  }
+
+  /* ---------- register 2: the gutter ---------- */
+  .drop {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 100%;
+    text-align: left;
+    padding: 9px 10px 10px;
+    background: var(--panel);
+    border: 1px solid var(--rule);
+    border-top: 2px solid var(--gutter);
+    border-radius: 3px;
+    flex: 1;
+  }
+  .drop:hover .drop-what { color: var(--gutter); }
+  .drop[aria-pressed="true"] {
+    background: var(--gutter-dim);
+    border-color: var(--gutter);
+  }
+
+  .drop-tag {
+    font-family: var(--mono);
+    font-size: 0.56rem; font-weight: 600;
+    letter-spacing: 0.11em; text-transform: uppercase;
+    color: var(--gutter);
+  }
+  .drop-what {
+    font-family: var(--display);
+    font-size: 0.83rem; font-weight: 600;
+    line-height: 1.28;
+    color: var(--ink);
+    transition: color 0.15s ease;
+  }
+  .drop-owner {
+    display: flex; align-items: center; gap: 6px;
+    font-family: var(--mono);
+    font-size: 0.6rem; font-weight: 500;
+    letter-spacing: 0.05em;
+    color: var(--ink-3);
+    margin-top: auto;
+  }
+  .drop-clock {
+    font-family: var(--mono);
+    font-size: 0.6rem; font-weight: 500;
+    letter-spacing: 0.05em;
+    color: var(--ink-3);
+  }
+  .drop-clock b { font-size: 0.76rem; font-weight: 600; color: var(--ink-2); }
+  .drop.t-alarm .drop-clock b { color: var(--alarm); }
+  .drop.t-warn  .drop-clock b { color: var(--warn); }
+
+  /* ---------- register 3: the bill ---------- */
+  .billband {
+    grid-column: 1 / -1;
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    column-gap: var(--gap);
+    margin-top: 46px;   /* the arc needs somewhere to travel */
+  }
+  .bill[data-col="4"] { grid-column: 4; }
+  .bill[data-col="5"] { grid-column: 5; }
+  .bill {
+    padding: 9px 11px 10px;
+    background: var(--alarm-dim);
+    border: 1px solid var(--alarm);
+    border-radius: 3px;
+    min-width: 0;
+  }
+  .bill-tag {
+    display: block;
+    font-family: var(--mono);
+    font-size: 0.56rem; font-weight: 600;
+    letter-spacing: 0.11em; text-transform: uppercase;
+    color: var(--alarm);
+  }
+  .bill-what {
+    display: block;
+    font-family: var(--display);
+    font-size: 0.86rem; font-weight: 600;
+    line-height: 1.25;
+    color: var(--ink);
+    margin-top: 2px;
+  }
+  .bill-note {
+    display: block;
+    font-size: 0.76rem;
+    line-height: 1.45;
+    color: var(--ink-2);
+    margin-top: 4px;
+  }
+  .bill-count {
+    display: inline-block;
+    margin-top: 6px;
+    font-family: var(--mono);
+    font-size: 0.58rem; font-weight: 600;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--alarm);
+  }
+
+  /* ---------- the one that is not a handoff ---------- */
+  .ambient {
+    grid-column: 1 / -1;
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 5px 12px;
+    width: 100%;
+    text-align: left;
+    margin-top: 30px;
+    padding: 9px 12px 10px;
+    background: var(--panel-2);
+    border: 1px dashed var(--rule-strong);
+    border-radius: 3px;
+  }
+  .ambient[aria-pressed="true"] { background: var(--gutter-dim); border-color: var(--gutter); }
+  .ambient:hover .amb-what { color: var(--gutter); }
+  .amb-tag {
+    font-family: var(--mono);
+    font-size: 0.56rem; font-weight: 600;
+    letter-spacing: 0.11em; text-transform: uppercase;
+    color: var(--ink-3);
+  }
+  .amb-what {
+    font-family: var(--display);
+    font-size: 0.83rem; font-weight: 600;
+    color: var(--ink);
+    transition: color 0.15s ease;
+  }
+  .amb-meta {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    color: var(--ink-3);
+  }
+
+  /* ---------- the plate ---------- */
+  .plate {
+    padding: 13px 15px;
+    background: var(--panel);
+    border: 1px solid var(--rule);
+    border-left: 3px solid var(--gutter);
+    border-radius: 3px;
+  }
+  .plate h2 {
+    font-family: var(--display);
+    font-size: 0.98rem; font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 3px;
+  }
+  .plate .where {
+    display: block;
+    font-family: var(--mono);
+    font-size: 0.6rem; font-weight: 500;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--ink-3);
+    margin-bottom: 10px;
+  }
+  .plate dl { display: grid; gap: 9px; }
+  .plate dt {
+    font-family: var(--mono);
+    font-size: 0.6rem; font-weight: 600;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--ink-3);
+    margin-bottom: 2px;
+  }
+  .plate dd { font-size: 0.86rem; line-height: 1.55; color: var(--ink-2); }
+  .plate dd.cost { color: var(--alarm); }
+  .plate dd.fix  { color: var(--ink); }
+  .plate .grade { margin-top: 4px; }
+
+  .foot {
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.04em;
+    color: var(--ink-3);
+    line-height: 1.55;
+  }
+
+  /* ---------- wires ---------- */
+  .wire {
+    fill: none;
+    stroke: var(--gutter);
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    opacity: 0.42;
+    transition: opacity 240ms ease, stroke-width 200ms ease;
+  }
+  .board.is-picking .wire { opacity: 0.12; }
+  .board.is-picking .wire.on { opacity: 1; stroke-width: 2.6; }
+  .arrowhead {
+    fill: var(--gutter);
+    opacity: 0.42;
+    transition: opacity 240ms ease;
+  }
+  .board.is-picking .arrowhead { opacity: 0.12; }
+  .board.is-picking .arrowhead.on { opacity: 1; }
+
+  /* ---------- the axis rotates below 760px ---------- */
+  @media (max-width: 759px) {
+    .board { grid-template-columns: 1fr; row-gap: 0; }
+
+    .leg {
+      display: grid;
+      grid-template-columns: 19px minmax(0, 1fr);
+      column-gap: 11px;
+      padding-bottom: 12px;
+    }
+    /* The spine turns with the axis: now a vertical rule down the dot column. */
+    .dotrow {
+      grid-row: 1 / span 2;
+      height: auto;
+      width: 19px;
+    }
+    .dotrow::before {
+      top: 0; bottom: 0; left: 9px; right: auto;
+      width: 2px; height: auto;
+    }
+    .leg:first-child .dotrow::before { left: 9px; top: 8px; }
+    .leg:last-child  .dotrow::before { left: 9px; bottom: auto; height: 8px; }
+    .dot { top: 1px; left: 2px; margin-left: 0; }
+
+    .party { min-height: 0; padding: 0 0 7px; }
+    .party b { font-size: 0.94rem; }
+
+    /* Kept side by side rather than stacked. Two bills next to each other is
+       the comparison the figure exists to make, and stacking them would add
+       height for nothing. */
+    .billband {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      column-gap: 8px;
+      margin-top: 58px;
+    }
+    .bill[data-col="4"] { grid-column: 1; }
+    .bill[data-col="5"] { grid-column: 2; }
+    .ambient { margin-top: 22px; }
+  }
+
+  /* ---------- motion ----------
+     Opt-in under no-preference, so a reader who has asked for calm gets the
+     complete drawing rather than a degraded one. Everything below is decoration
+     over a diagram that is already finished and legible without it. */
+  @media (prefers-reduced-motion: no-preference) {
+    .wire.draw {
+      stroke-dasharray: var(--len);
+      stroke-dashoffset: var(--len);
+      animation: draw 700ms cubic-bezier(0.33, 0.9, 0.3, 1) forwards;
+      animation-delay: calc(var(--i) * 90ms);
+    }
+    @keyframes draw { to { stroke-dashoffset: 0; } }
+
+    .arrowhead { opacity: 0; animation: fade 300ms ease forwards; animation-delay: calc(var(--i) * 90ms + 640ms); }
+    @keyframes fade { to { opacity: 0.42; } }
+    .board.is-picking .arrowhead { animation: none; }
+
+    /* The drop itself. A token leaves the gutter card and rides the arc to the
+       place it bills. One slow shared clock, staggered per handoff, so the page
+       shows a steady trickle rather than a synchronised burst. */
+    .pk {
+      offset-rotate: 0deg;
+      fill: var(--gutter);
+      animation: ride var(--dur, 7s) linear infinite;
+      animation-delay: calc(var(--i) * 900ms);
+    }
+    @keyframes ride {
+      0%   { offset-distance: 0%;   opacity: 0; }
+      8%   { opacity: 1; }
+      82%  { opacity: 1; }
+      100% { offset-distance: 100%; opacity: 0; }
+    }
+    /* The selected arc runs hot: brighter, larger, and faster. */
+    .board.is-picking .pk { opacity: 0.12; }
+    .board.is-picking .pk.on {
+      opacity: 1;
+      fill: var(--alarm);
+      animation-duration: calc(var(--dur, 7s) / 2.1);
+      animation-delay: 0s;
+    }
+  }
+  /* No no-preference match means no .pk was ever appended, so nothing here has
+     to undo motion — the arcs are simply drawn at full opacity by default. */
+  @media (prefers-reduced-motion: reduce) {
+    .wire, .arrowhead, .drop-what, .amb-what { transition: none; }
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="head">
+    <span class="eyebrow">Fig. C &middot; five handoffs, six unwatched states, two places where it bills</span>
+    <h1>Every handoff drops something, nobody is watching it, and it bills somewhere else</h1>
+    <p>One consignment of powered hand tools, Guadalajara to Chicago. The top row is who touches it. The middle row is what fell out of each handoff, who owns that, and what clock is already running. The arcs show where it surfaces as cost. Select any card for the full account.</p>
+    <div class="stampline">
+      <span class="stamp stamp--illustrative">Illustrative consignment</span>
+      <span class="stamp stamp--confirmed">Sourced claims marked in the plate</span>
+    </div>
+  </div>
+
+  <div class="legend">
+    <span><i class="lamp lamp--alarm"></i> Nobody owns it</span>
+    <span><i class="lamp lamp--warn"></i> Owned, not watched</span>
+    <span><i class="lamp lamp--ok"></i> Owned and watched</span>
+  </div>
+
+  <div class="board" id="board"></div>
+
+  <div class="plate" id="plate" aria-live="polite"></div>
+
+  <p class="foot">The consignment, its route and its clocks are composed to show order of magnitude. The failure mode at each handoff is documented, and the two sourced figures carry their grade in the plate. Nothing here is a measurement of a real shipment.</p>
+</div>
+
+<script>
+/* ============================================================================
+ * DATA
+ *
+ * The five legs come from the custody chain, the owner and clock fields from
+ * the state board. They do not pair one to one, and the figure does not pretend
+ * they do: duty exposure is not a handoff failure at all, so it sits outside the
+ * chain as a dashed card rather than being forced into a column it does not
+ * belong in.
+ *
+ * `bills` names which marker in the bill band this drop arcs to. Four of the six
+ * land on the border hold. That convergence is the finding.
+ * ==========================================================================*/
+const LEGS = [
+  {
+    party: 'Shipper', place: 'Guadalajara',
+    what: 'Whether the description can be classified',
+    owner: 'nobody', tone: 'alarm',
+    clockL: 'detected', clockV: '+6 days',
+    bills: 'border',
+    knew: 'The supplier knows exactly what is in the box. The parts list carries the motor and the country it was made in.',
+    lost: 'The invoice line reads "power tool kit". That is a fine description for a purchase order and a useless one for a customs entry.',
+    should: 'The shipper, at the moment the line is written. It is the only point where the goods and the description are in the same room.',
+    cost: 'The 2026 tariff schedule carries 19,949 ten-digit lines, and the entry must name exactly one. A description that resolves to none of them is decided six days later, by someone who never saw the goods.',
+    grade: 'confirmed', gradeText: 'Confirmed &middot; 19,949 lines counted from the USITC schedule export',
+    fix: 'A classifiability check at invoice creation, refusing to accept a line that cannot resolve to a code.'
+  },
+  {
+    party: 'Origin carrier', place: 'Pickup and consolidation',
+    what: 'Whether the pallet matches the invoice line',
+    owner: 'nobody', tone: 'alarm',
+    clockL: 'detected', clockV: 'at the border',
+    bills: 'border',
+    knew: 'The carrier knows the real gross weight, the pallet count and the trailer it went on.',
+    lost: 'The link between the physical pallet and the invoice line. From here two systems describe the same goods and neither can prove they agree.',
+    should: 'The origin carrier at pickup. It is the last moment the goods and the paperwork are in the same place.',
+    cost: 'Weights and counts are re-keyed rather than reconciled. Nothing compares the two records until customs does, and customs calls it a discrepancy rather than a typo.',
+    fix: 'A reconciliation at pickup that fails loudly, rather than a re-key that fails silently.'
+  },
+  {
+    party: 'Customs broker', place: 'Entry preparation',
+    what: 'Whether the supporting documents ever arrived',
+    owner: 'the broker, blind', tone: 'warn',
+    clockL: 'decided', clockV: 'at filing',
+    bills: 'border',
+    knew: 'The broker knows the tariff schedule, the current duty regimes and what a defensible entry looks like.',
+    lost: 'Any way to check the description against the goods, or to read a certificate of origin that was never forwarded.',
+    should: 'Whoever assembles the document packet. Today no party is accountable for whether it is complete.',
+    cost: 'Getting it wrong costs more than it used to. An executive order of 3 June 2026 puts a floor under penalties, and mitigation may not fall below half the assessed penalty.',
+    grade: 'confirmed', gradeText: 'Confirmed &middot; Executive Order 14411, quoted from the Federal Register',
+    fix: 'A completeness gate on the packet. The entry cannot be filed while a document the classification depends on is missing.'
+  },
+  {
+    party: 'The border', place: 'Entry transmitted, shipment held',
+    what: 'Whether an exception has an owner and a deadline',
+    owner: 'whoever notices', tone: 'alarm',
+    clockL: 'charges accrue', clockV: 'from hour 0',
+    bills: 'border',
+    knew: 'Customs knows precisely why it stopped this shipment.',
+    lost: 'Everything upstream. The shipper still believes the goods are moving, because their last tracking event was the pickup four days ago.',
+    should: 'Every exception opened as an object with an assignee, a clock and an escalation rule, the way an incident is.',
+    cost: 'The clock starts at the moment of the hold. Ownership starts when somebody opens an email, and the gap between the two is the entire problem.',
+    grade: 'open', gradeText: 'Open &middot; no examination or hold rate is published, so the frequency is not knowable',
+    fix: 'An exception queue with ownership and a clock, not a mailbox.'
+  },
+  {
+    party: 'Consignee', place: 'Chicago',
+    what: 'Where the shipment physically is',
+    owner: 'nobody, between carriers', tone: 'alarm',
+    clockL: 'blind for', clockV: '4 days',
+    bills: 'invoice',
+    knew: 'The consignee knows the goods were late and the landed cost was higher than quoted.',
+    lost: 'The cause. The failure was written at Leg 1 and only became visible at Leg 4, and no system holds both ends.',
+    should: 'One layer holding position across every leg, so a handoff is an event rather than a blackout.',
+    cost: 'The delay is recorded against the destination carrier, because it is the only party with a tracking event near the failure. The correction lands on a party that did nothing wrong.',
+    fix: 'Treat custody transfer as a first-class event, with a required acknowledgement on both sides.'
+  }
+];
+
+/* The sixth state. It has an owner and it still goes unwatched, which is why it
+   belongs in the figure — and it is not attached to any handoff, which is why it
+   is drawn outside the chain instead of inside it. */
+const AMBIENT = {
+  what: 'The current duty exposure on this product',
+  owner: 'finance, quarterly', tone: 'warn',
+  clockL: 'refreshed', clockV: 'quarterly',
+  bills: 'invoice',
+  knew: 'Finance knows the rate that was used when the quote was priced.',
+  lost: 'Nothing links a quote to the rulebook version it was priced against, so nothing can be re-derived when the rulebook moves.',
+  should: 'A watcher on every authority feed, refreshing continuously, with every quote recording the version it used.',
+  cost: 'The rulebook changed four times in six months. The average effective US tariff rate was 7.1 per cent in June 2026, against 2.3 per cent in January 2025.',
+  grade: 'confirmed', gradeText: 'Confirmed &middot; Penn Wharton Budget Model, updated 10 August 2026',
+  fix: 'Version the rulebook, pin every quote to a version, and re-derive exposure when the version moves.'
+};
+
+const BILLS = {
+  border: {
+    col: 4,
+    tag: 'It bills here',
+    what: 'The border hold',
+    note: 'Charges begin at the moment of the hold and run until the shipment is released, whatever the examination finds.'
+  },
+  invoice: {
+    col: 5,
+    tag: 'It bills here',
+    what: 'The landed cost',
+    note: 'The number on the invoice is higher than the number in the quote, and by now nothing can say which handoff made it so.'
+  }
+};
+
+/* ============================================================================
+ * BUILD
+ * ==========================================================================*/
+const board = document.getElementById('board');
+const plate = document.getElementById('plate');
+const SVGNS = 'http://www.w3.org/2000/svg';
+const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+const svg = document.createElementNS(SVGNS, 'svg');
+svg.setAttribute('class', 'wires');
+svg.setAttribute('aria-hidden', 'true');
+board.appendChild(svg);
+
+const esc = (s) => s;
+const dropCards = [];
+
+LEGS.forEach((leg, i) => {
+  const cell = document.createElement('div');
+  cell.className = 'leg';
+
+  const dotrow = document.createElement('div');
+  dotrow.className = 'dotrow';
+  dotrow.innerHTML = '<span class="dot"></span>';
+  cell.appendChild(dotrow);
+
+  const party = document.createElement('div');
+  party.className = 'party';
+  party.innerHTML = '<b>' + esc(leg.party) + '</b><i>' + esc(leg.place) + '</i>';
+  cell.appendChild(party);
+
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'drop t-' + leg.tone;
+  b.setAttribute('aria-pressed', 'false');
+  b.innerHTML =
+    '<span class="drop-tag">Dropped here</span>' +
+    '<span class="drop-what">' + esc(leg.what) + '</span>' +
+    '<span class="drop-owner"><i class="lamp lamp--' + leg.tone + '"></i>Owner: ' + esc(leg.owner) + '</span>' +
+    '<span class="drop-clock"><b>' + esc(leg.clockV) + '</b> ' + esc(leg.clockL) + '</span>';
+  b.addEventListener('click', () => select(i));
+  cell.appendChild(b);
+
+  board.appendChild(cell);
+  dropCards.push({ el: b, cell, bills: leg.bills });
+});
+
+/* The bill band. Built after the legs so it lands in the last grid row. */
+const billband = document.createElement('div');
+billband.className = 'billband';
+const billEls = {};
+Object.keys(BILLS).forEach((key) => {
+  const cfg = BILLS[key];
+  const n = LEGS.filter((l) => l.bills === key).length + (AMBIENT.bills === key ? 1 : 0);
+  const d = document.createElement('div');
+  d.className = 'bill';
+  d.dataset.col = String(cfg.col);
+  d.innerHTML =
+    '<span class="bill-tag">' + cfg.tag + '</span>' +
+    '<span class="bill-what">' + cfg.what + '</span>' +
+    '<span class="bill-note">' + cfg.note + '</span>' +
+    '<span class="bill-count">' + n + ' of the 6 land here</span>';
+  billband.appendChild(d);
+  billEls[key] = d;
+});
+board.appendChild(billband);
+
+/* The sixth state, outside the chain because it is not a handoff failure. */
+const amb = document.createElement('button');
+amb.type = 'button';
+amb.className = 'ambient';
+amb.setAttribute('aria-pressed', 'false');
+amb.innerHTML =
+  '<span class="amb-tag">Not a handoff &middot; always running</span>' +
+  '<span class="amb-what">' + AMBIENT.what + '</span>' +
+  '<span class="amb-meta"><i class="lamp lamp--' + AMBIENT.tone + '"></i>Owner: ' + AMBIENT.owner +
+    ' &middot; ' + AMBIENT.clockL + ' ' + AMBIENT.clockV + '</span>';
+amb.addEventListener('click', () => select(5));
+board.insertBefore(amb, billband);
+dropCards.push({ el: amb, cell: amb, bills: AMBIENT.bills });
+
+const ALL = LEGS.concat([AMBIENT]);
+
+/* ============================================================================
+ * THE ROUTER
+ *
+ * Arcs are measured from real element rects rather than authored, which is what
+ * makes the 760px axis rotation free: the boxes move, the router re-reads them,
+ * and the same code draws a different picture. Adapted from the measured-rect
+ * routing in customs-entry-agent/user-flow.html.
+ * ==========================================================================*/
+let wires = [];
+
+function draw() {
+  const b = board.getBoundingClientRect();
+  if (!b.width || !b.height) return;
+  svg.setAttribute('viewBox', '0 0 ' + b.width + ' ' + b.height);
+  svg.innerHTML = '';
+  wires = [];
+
+  dropCards.forEach((card, i) => {
+    const target = billEls[card.bills];
+    if (!target) return;
+    const r = card.el.getBoundingClientRect();
+    const t = target.getBoundingClientRect();
+
+    /* Leave from the bottom of the card that dropped it, arrive at the top of
+       the thing it pays for. Below 760px the bill band sits under a tall stack,
+       so the same two anchors still describe the journey correctly. */
+    const x1 = r.left + r.width / 2 - b.left;
+    const y1 = r.bottom - b.top;
+    const x2 = t.left + t.width / 2 - b.left;
+    const y2 = t.top - b.top;
+    if (y2 <= y1) return;
+
+    const k = Math.min(64, (y2 - y1) / 2);
+    const d = 'M ' + x1 + ' ' + y1 +
+              ' C ' + x1 + ' ' + (y1 + k) + ', ' + x2 + ' ' + (y2 - k) + ', ' + x2 + ' ' + y2;
+
+    const path = document.createElementNS(SVGNS, 'path');
+    path.setAttribute('d', d);
+    path.setAttribute('class', 'wire');
+    path.style.setProperty('--i', String(i));
+    svg.appendChild(path);
+
+    const len = path.getTotalLength();
+    path.style.setProperty('--len', String(len));
+    if (!reduced) path.classList.add('draw');
+
+    /* Arrowhead, angled off the last few pixels of the real path rather than
+       guessed, so it still points correctly after the axis rotates. */
+    const pe = path.getPointAtLength(len);
+    const pn = path.getPointAtLength(Math.max(0, len - 9));
+    const ang = Math.atan2(pe.y - pn.y, pe.x - pn.x);
+    const s = 6;
+    const head = document.createElementNS(SVGNS, 'path');
+    head.setAttribute('d',
+      'M ' + pe.x + ' ' + pe.y +
+      ' L ' + (pe.x - s * Math.cos(ang - 0.45)) + ' ' + (pe.y - s * Math.sin(ang - 0.45)) +
+      ' L ' + (pe.x - s * Math.cos(ang + 0.45)) + ' ' + (pe.y - s * Math.sin(ang + 0.45)) + ' Z');
+    head.setAttribute('class', 'arrowhead');
+    head.style.setProperty('--i', String(i));
+    svg.appendChild(head);
+
+    let pk = null;
+    if (!reduced) {
+      pk = document.createElementNS(SVGNS, 'circle');
+      pk.setAttribute('class', 'pk');
+      pk.setAttribute('r', '3.2');
+      pk.style.offsetPath = 'path("' + d + '")';
+      pk.style.setProperty('--i', String(i));
+      pk.style.setProperty('--dur', (6.4 + i * 0.35) + 's');
+      svg.appendChild(pk);
+    }
+
+    wires.push({ path, head, pk });
+  });
+
+  paint();
+}
+
+/* ============================================================================
+ * SELECTION
+ * ==========================================================================*/
+let current = -1;
+
+function paint() {
+  board.classList.toggle('is-picking', current >= 0);
+  dropCards.forEach((c, i) => {
+    c.el.setAttribute('aria-pressed', String(i === current));
+    if (c.cell !== c.el) c.cell.classList.toggle('is-on', i === current);
+  });
+  wires.forEach((w, i) => {
+    const on = i === current;
+    w.path.classList.toggle('on', on);
+    w.head.classList.toggle('on', on);
+    if (w.pk) {
+      w.pk.classList.toggle('on', on);
+      /* Attribute, not CSS. WebKit does not support `r` as a CSS property. */
+      w.pk.setAttribute('r', on ? '4.6' : '3.2');
+    }
+  });
+  Object.keys(billEls).forEach((k) => {
+    const active = current >= 0 && ALL[current].bills === k;
+    billEls[k].style.outline = active ? '2px solid var(--alarm)' : '';
+    billEls[k].style.outlineOffset = active ? '2px' : '';
+  });
+}
+
+function select(i) {
+  current = (current === i) ? -1 : i;
+  render();
+  paint();
+  report();
+}
+
+function render() {
+  if (current < 0) {
+    plate.innerHTML =
+      '<h2>Six states, two places where they bill</h2>' +
+      '<span class="where">Select any card above</span>' +
+      '<dl><div><dt>What the arcs show</dt><dd>Nothing here fails where it is dropped. Four of the six surface at the border hold and two at the landed cost, which is why fixing the place it surfaced never fixes the cause.</dd></div></dl>';
+    return;
+  }
+  const r = ALL[current];
+  const bill = BILLS[r.bills];
+  const where = current < 5
+    ? 'Dropped at ' + LEGS[current].party + ' &middot; bills at ' + bill.what.toLowerCase()
+    : 'Not a handoff &middot; bills at ' + bill.what.toLowerCase();
+  plate.innerHTML =
+    '<h2>' + r.what + '</h2>' +
+    '<span class="where">' + where + '</span>' +
+    '<dl>' +
+      '<div><dt>What this party knew</dt><dd>' + r.knew + '</dd></div>' +
+      '<div><dt>What it could not pass on</dt><dd>' + r.lost + '</dd></div>' +
+      '<div><dt>Who should have owned it</dt><dd>' + r.should + '</dd></div>' +
+      '<div><dt>Where it surfaces as cost</dt><dd class="cost">' + r.cost + '</dd>' +
+        (r.grade ? '<dd class="grade"><span class="stamp stamp--' + r.grade + '">' + r.gradeText + '</span></dd>' : '') +
+      '</div>' +
+      '<div><dt>The control that would close it</dt><dd class="fix">' + r.fix + '</dd></div>' +
+    '</dl>';
+}
+
+render();
+paint();
+
+/* The SVG viewBox is board-pixel space, so it is stale the moment anything
+   reflows. Debounced because a drag-resize fires continuously. */
+let rt = 0;
+const relayout = () => { clearTimeout(rt); rt = setTimeout(draw, 60); };
+if ('ResizeObserver' in window) new ResizeObserver(relayout).observe(board);
+window.addEventListener('load', () => { draw(); report(); });
+window.addEventListener('resize', relayout);
+draw();
+
+/* Report height so the host frame collapses to the content instead of leaving
+   a band of empty frame. Autosize is opt-in and this is the opt-in. */
+function report() {
+  if (document.documentElement.dataset.embedded !== 'true') return;
+  window.parent.postMessage(
+    { type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+}
+if (document.documentElement.dataset.embedded === 'true') {
+  if ('ResizeObserver' in window) new ResizeObserver(report).observe(document.body);
+  window.addEventListener('load', report);
+  report();
+}
+</script>
+</body>
+</html>

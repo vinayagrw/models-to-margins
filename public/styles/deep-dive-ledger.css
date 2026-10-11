@@ -1,0 +1,834 @@
+/* ============================================================================
+   Paper of Record — bespoke "ledger" template for compliance deep-dives.
+   Every rule is scoped under .dd-ledger so nothing leaks to other pages.
+   Identity: an official customs entry file. Light is manila bond paper with
+   ruled ledger lines and rubber-stamp inks; dark is the same file read at the
+   night-audit desk (deep ink-navy paper, pale ink, stamps kept red/green).
+   Token base below is the bond paper; [data-theme="dark"] re-skins it.
+   ========================================================================== */
+
+.dd-ledger.article-shell {
+  /* bond paper (light) */
+  --ld-paper-0: #f2e9d6;
+  --ld-paper-1: #ebdfc6;
+  --ld-panel: #faf5e9;
+  --ld-panel-2: #f0e7d2;
+  --ld-rule: #b3a17a;
+  --ld-rule-soft: rgba(93, 75, 41, 0.30);
+  --ld-rule-faint: rgba(93, 75, 41, 0.10);
+  --ld-ink: #251e10;
+  --ld-ink-2: #4d422a;
+  --ld-ink-3: #6e6146;
+  --ld-stamp: #992a22;
+  --ld-stamp-dim: rgba(153, 42, 34, 0.11);
+  --ld-clear: #226444;
+  --ld-clear-dim: rgba(34, 100, 68, 0.12);
+  --ld-hold: #8a5a10;
+  --ld-hold-dim: rgba(138, 90, 16, 0.12);
+  --ld-seal: #23527c;
+  --ld-seal-dim: rgba(35, 82, 124, 0.11);
+  --ld-glow: none;
+  --ld-shadow: rgba(64, 48, 18, 0.20);
+
+  --ld-display: "Spectral", Georgia, "Times New Roman", serif;
+  --ld-body: "Public Sans", "Segoe UI", system-ui, sans-serif;
+  --ld-mono: "IBM Plex Mono", "Cascadia Code", ui-monospace, monospace;
+
+  position: relative;
+  color: var(--ld-ink);
+  font-family: var(--ld-body);
+  /* Ruled ledger lines over a bond-paper gradient. */
+  background:
+    repeating-linear-gradient(
+      0deg,
+      transparent 0 31px,
+      var(--ld-rule-faint) 31px 32px
+    ),
+    linear-gradient(180deg, var(--ld-paper-0), var(--ld-paper-1));
+  border: 1px solid var(--ld-rule);
+  border-radius: 3px;
+  box-shadow: 0 18px 50px -28px var(--ld-shadow);
+  padding: clamp(20px, 4vw, 48px);
+  padding-left: clamp(30px, 5vw, 58px);
+  margin-top: 8px;
+  /* clip, not hidden: clips decoration without creating a scroll container,
+     so the sticky index of entries keeps pinning. */
+  overflow: clip;
+}
+
+/* ============================================================
+   Night audit (dark) — the site default mode.
+   ============================================================ */
+[data-theme="dark"] .dd-ledger.article-shell {
+  --ld-paper-0: #0b101c;
+  --ld-paper-1: #0d1424;
+  --ld-panel: #141c2e;
+  --ld-panel-2: #0f1728;
+  --ld-rule: #2c3b58;
+  --ld-rule-soft: rgba(130, 158, 208, 0.24);
+  --ld-rule-faint: rgba(130, 158, 208, 0.07);
+  --ld-ink: #e9edf7;
+  --ld-ink-2: #c0cadd;
+  --ld-ink-3: #8d9ab4;
+  --ld-stamp: #ef6459;
+  --ld-stamp-dim: rgba(239, 100, 89, 0.14);
+  --ld-clear: #45d493;
+  --ld-clear-dim: rgba(69, 212, 147, 0.14);
+  --ld-hold: #e6b25c;
+  --ld-hold-dim: rgba(230, 178, 92, 0.14);
+  --ld-seal: #6fa8dc;
+  --ld-seal-dim: rgba(111, 168, 220, 0.14);
+  --ld-glow: 0 0 9px;
+  --ld-shadow: rgba(0, 0, 0, 0.75);
+
+  box-shadow: 0 0 0 1px rgba(44, 59, 88, 0.4), 0 30px 80px -40px rgba(0, 0, 0, 0.9);
+}
+
+/* left-edge perforation strip + corner seal — pure decoration */
+.dd-ledger::before {
+  content: "";
+  position: absolute;
+  top: 10px;
+  bottom: 10px;
+  left: 7px;
+  width: 8px;
+  background-image: radial-gradient(circle at 4px 9px, var(--ld-rule-soft) 2.2px, transparent 3px);
+  background-size: 8px 22px;
+  background-repeat: repeat-y;
+  pointer-events: none;
+  opacity: 0.8;
+}
+.dd-ledger::after {
+  content: "";
+  position: absolute;
+  bottom: 14px;
+  right: 16px;
+  width: 34px;
+  height: 34px;
+  border: 1.5px solid var(--ld-stamp);
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 3px transparent, inset 0 0 0 4px var(--ld-stamp);
+  transform: rotate(-8deg);
+  pointer-events: none;
+  opacity: 0.22;
+}
+
+/* ----------------------------------------------------------------- Header -- */
+.dd-ledger .ld-header {
+  border-bottom: 3px double var(--ld-rule);
+  padding-bottom: clamp(18px, 3vw, 28px);
+  margin-bottom: clamp(10px, 2vw, 20px);
+}
+
+.dd-ledger .ld-formline {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-family: var(--ld-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ld-ink-2);
+  padding: 5px 10px;
+  border: 1px solid var(--ld-rule);
+  background: var(--ld-panel-2);
+}
+.dd-ledger .ld-formline-sep { color: var(--ld-stamp); }
+.dd-ledger .ld-formline-no { color: var(--ld-stamp); font-weight: 600; }
+
+/* Rubber-stamp chips. Used in the header formline and inline in the body.
+   The .article-body variant is (0,3,0) so the typography revert below
+   cannot strip the chip styling off in-body stamps. */
+.dd-ledger .ld-stamp,
+.dd-ledger .article-body .ld-stamp {
+  display: inline-block;
+  font-family: var(--ld-mono);
+  font-size: 0.66rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border: 1.5px solid currentColor;
+  border-radius: 3px;
+  padding: 3px 8px;
+  transform: rotate(-1.6deg);
+  color: var(--ld-ink-2);
+  background: transparent;
+  white-space: nowrap;
+}
+.dd-ledger .ld-stamp:nth-of-type(even) { transform: rotate(0.9deg); }
+/* Each variant is duplicated with the .article-body ancestor prefix so its
+   specificity (0,0,3,0) matches the base in-body rule above and always wins
+   on source order — otherwise inline verdict chips inside prose (everywhere
+   except the header formline) all collapse to the base ink colour. */
+.dd-ledger .ld-stamp--confirmed,
+.dd-ledger .article-body .ld-stamp--confirmed { color: var(--ld-clear); background: var(--ld-clear-dim); }
+.dd-ledger .ld-stamp--proposed,
+.dd-ledger .article-body .ld-stamp--proposed { color: var(--ld-ink-2); background: transparent; }
+.dd-ledger .ld-stamp--open,
+.dd-ledger .article-body .ld-stamp--open { color: var(--ld-hold); background: var(--ld-hold-dim); }
+.dd-ledger .ld-stamp--vendor-claim,
+.dd-ledger .article-body .ld-stamp--vendor-claim { color: var(--ld-seal); background: var(--ld-seal-dim); }
+.dd-ledger .ld-stamp--hold,
+.dd-ledger .article-body .ld-stamp--hold { color: var(--ld-stamp); background: var(--ld-stamp-dim); }
+.dd-ledger .ld-stamp--illustrative,
+.dd-ledger .article-body .ld-stamp--illustrative { color: var(--ld-seal); background: var(--ld-seal-dim); border-style: dashed; }
+
+.dd-ledger .ld-title {
+  font-family: var(--ld-display);
+  font-weight: 800;
+  font-size: clamp(2.1rem, 5.2vw, 3.6rem);
+  line-height: 1.04;
+  letter-spacing: -0.01em;
+  overflow-wrap: break-word;
+  color: var(--ld-ink);
+  margin: 0.5em 0 0;
+}
+.dd-ledger .ld-rule-mark { color: var(--ld-stamp); font-weight: 700; }
+
+.dd-ledger .ld-subtitle {
+  font-family: var(--ld-mono);
+  font-size: clamp(0.88rem, 1.7vw, 1.02rem);
+  color: var(--ld-ink-2);
+  margin: 0.85rem 0 0;
+  max-width: 100%;
+}
+
+.dd-ledger .ld-lead {
+  font-family: var(--ld-display);
+  font-weight: 500;
+  font-size: clamp(1.08rem, 1.8vw, 1.26rem);
+  line-height: 1.58;
+  color: var(--ld-ink-2);
+  margin: 1.1rem 0 0;
+  max-width: none;
+}
+
+/* Entry-form field boxes. Author coords as "Label · value" strings. */
+.dd-ledger .ld-coords {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  margin: 1.4rem 0 0;
+  border: 1px solid var(--ld-rule);
+  background: var(--ld-panel);
+  width: max-content;
+  max-width: 100%;
+}
+.dd-ledger .ld-coords span {
+  font-family: var(--ld-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ld-ink-2);
+  padding: 7px 14px;
+  border-right: 1px solid var(--ld-rule-soft);
+}
+.dd-ledger .ld-coords span:last-child { border-right: 0; }
+
+.dd-ledger .ld-header-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px 22px;
+  margin-top: 1.5rem;
+}
+.dd-ledger .back-link,
+.dd-ledger .meta-row,
+.dd-ledger .meta-pill,
+.dd-ledger .entry-meta { color: var(--ld-ink-2); }
+.dd-ledger .tag-row { margin-top: 1.2rem; }
+.dd-ledger .tag {
+  background: transparent;
+  border: 1px solid var(--ld-rule-soft);
+  border-radius: 2px;
+  color: var(--ld-ink-2);
+  font-family: var(--ld-mono);
+  font-size: 0.69rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 5px 10px;
+}
+
+/* ------------------------------------------------------- Layout + spine --- */
+.dd-ledger .ld-layout {
+  display: grid;
+  grid-template-columns: 216px minmax(0, 1fr);
+  gap: clamp(20px, 3vw, 40px);
+  margin-top: clamp(18px, 2.5vw, 30px);
+}
+
+/* Sticky index styled as the file's table of entries, with dotted leaders. */
+.dd-ledger .ld-spine-index {
+  position: sticky;
+  top: 92px;
+  align-self: start;
+  height: max-content;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--ld-rule);
+  background: var(--ld-panel);
+  padding: 0 0 6px;
+}
+.dd-ledger .ld-spine-index::before {
+  content: "Index of entries";
+  display: block;
+  padding: 8px 12px;
+  margin-bottom: 4px;
+  font-family: var(--ld-mono);
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ld-ink-2);
+  background: var(--ld-panel-2);
+  border-bottom: 1px solid var(--ld-rule);
+}
+.dd-ledger .ld-index-link {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: baseline;
+  gap: 9px;
+  padding: 6px 12px;
+  margin-left: 0;
+  border-left: 3px solid transparent;
+  text-decoration: none;
+  color: var(--ld-ink-3);
+  transition: color 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+}
+.dd-ledger .ld-index-no {
+  font-family: var(--ld-mono);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--ld-ink-3);
+}
+.dd-ledger .ld-index-label {
+  font-size: 0.78rem;
+  line-height: 1.3;
+  border-bottom: 1px dotted var(--ld-rule-soft);
+  padding-bottom: 3px;
+}
+.dd-ledger .ld-index-link:last-child .ld-index-label { border-bottom: 0; }
+.dd-ledger .ld-index-link:hover { color: var(--ld-ink); }
+.dd-ledger .ld-index-link.is-active {
+  color: var(--ld-ink);
+  border-left-color: var(--ld-stamp);
+  background: var(--ld-stamp-dim);
+  font-weight: 500;
+}
+.dd-ledger .ld-index-link.is-active .ld-index-no { color: var(--ld-stamp); }
+.dd-ledger .ld-index-link:focus-visible {
+  outline: 2px solid var(--ld-stamp);
+  outline-offset: 2px;
+}
+
+/* ============================================================
+   Typography reset — neutralize the global terminal aesthetic.
+   :where() keeps this at (0,2,0): above the global reset at (0,1,2),
+   below this sheet's own element rules at (0,2,1).
+   ============================================================ */
+.dd-ledger .article-body :where(:not(pre > code)) {
+  display: revert;
+  padding: revert;
+  border: revert;
+  border-radius: 0;
+  background: none;
+  font-family: var(--ld-body);
+  font-size: revert;
+  color: revert;
+}
+
+.dd-ledger .article-body {
+  position: relative;
+  margin-top: 0;
+  padding-left: 42px;
+  color: var(--ld-ink-2);
+  font-size: 1.08rem;
+  line-height: 1.68;
+}
+/* The classic ledger margin line, doubling as the scene rail. */
+.dd-ledger .article-body::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 14px;
+  width: 2px;
+  background: var(--ld-stamp);
+  opacity: 0.32;
+  pointer-events: none;
+}
+.dd-ledger .article-body p,
+.dd-ledger .article-body li { color: var(--ld-ink-2); }
+.dd-ledger .article-body strong { color: var(--ld-ink); font-weight: 600; }
+.dd-ledger .article-body em { color: var(--ld-stamp); font-style: italic; }
+.dd-ledger .article-body a {
+  color: var(--ld-stamp);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-thickness: 1px;
+}
+
+/* scene headings styled as ledger section rules with a margin checkbox */
+.dd-ledger .ld-body h2 {
+  position: relative;
+  font-family: var(--ld-display);
+  font-weight: 700;
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  line-height: 1.14;
+  letter-spacing: 0.002em;
+  color: var(--ld-ink);
+  margin: 3rem 0 1rem;
+  padding: 10px 0 10px 0;
+  border-bottom: 3px double var(--ld-rule);
+  scroll-margin-top: 90px;
+}
+.dd-ledger .ld-body h2:first-of-type { margin-top: 0.6rem; }
+/* the margin checkbox — ticks red when the scene is current */
+.dd-ledger .ld-body h2::before {
+  content: "";
+  position: absolute;
+  left: -37px;
+  top: 18px;
+  width: 12px;
+  height: 12px;
+  border: 1.5px solid var(--ld-rule);
+  background: var(--ld-panel);
+  transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.dd-ledger .ld-body h2.is-current::before {
+  border-color: var(--ld-stamp);
+  background: var(--ld-stamp);
+  box-shadow: var(--ld-glow) var(--ld-stamp);
+}
+
+.dd-ledger .ld-body h3,
+.dd-ledger .ld-body h4 {
+  font-family: var(--ld-display);
+  font-weight: 600;
+  color: var(--ld-ink);
+  margin: 1.8rem 0 0.6rem;
+}
+
+/* inline code chip + carbon-copy pre */
+.dd-ledger .article-body :not(pre) > code {
+  font-family: var(--ld-mono);
+  font-size: 0.86em;
+  color: var(--ld-ink);
+  background: var(--ld-panel-2);
+  border: 1px solid var(--ld-rule-soft);
+  border-radius: 2px;
+  padding: 0.08em 0.36em;
+}
+.dd-ledger .article-body pre {
+  border-radius: 2px;
+  border: 1px solid var(--ld-rule);
+  background: var(--ld-panel-2);
+}
+.dd-ledger .article-body pre code {
+  font-family: var(--ld-mono);
+  color: var(--ld-ink);
+}
+
+/* --------------------------------------------------------- Case-file note -- */
+.dd-ledger .article-body .note-panel {
+  display: block;
+  border: 1px solid var(--ld-rule);
+  border-radius: 2px;
+  background: var(--ld-panel);
+  padding: 0 1.15rem 1rem;
+  margin: 0 0 1.6rem;
+}
+.dd-ledger .article-body .note-panel::before {
+  content: "Case file · Summary of record";
+  display: block;
+  margin: 0 -1.15rem 0.9rem;
+  padding: 8px 14px;
+  font-family: var(--ld-mono);
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ld-ink-2);
+  background: var(--ld-panel-2);
+  border-bottom: 1px solid var(--ld-rule);
+}
+.dd-ledger .article-body .note-panel p { margin: 0.5rem 0 0; font-size: 0.98rem; }
+.dd-ledger .article-body .note-panel p:first-of-type { margin-top: 0; }
+
+/* ---------------------------------------------------------- Signal cards -- */
+.dd-ledger .article-body .signal-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 1.5rem 0;
+}
+.dd-ledger .article-body .signal-card {
+  border: 1px solid var(--ld-rule);
+  border-radius: 2px;
+  background: var(--ld-panel);
+  padding: 0.9rem 1rem 1rem;
+}
+.dd-ledger .article-body .signal-label {
+  display: inline-block;
+  font-family: var(--ld-mono);
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ld-stamp);
+  border-bottom: 1px solid var(--ld-rule-soft);
+  padding-bottom: 3px;
+  margin-bottom: 0.5rem;
+}
+.dd-ledger .article-body .signal-card > strong {
+  display: block;
+  font-family: var(--ld-display);
+  font-weight: 700;
+  font-size: 1.06rem;
+  color: var(--ld-ink);
+  margin-bottom: 0.35rem;
+}
+.dd-ledger .article-body .signal-card p {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: var(--ld-ink-2);
+}
+
+/* --------------------------------------------------------- Reading map ---- */
+.dd-ledger .article-body .reading-map {
+  border: 1px dashed var(--ld-rule);
+  border-radius: 2px;
+  padding: 1rem 1.1rem 1.15rem;
+  background: var(--ld-panel);
+  margin: 1.6rem 0;
+}
+.dd-ledger .article-body .reading-map-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.dd-ledger .article-body .reading-map-label {
+  display: inline-block;
+  font-family: var(--ld-mono);
+  font-size: 0.69rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ld-stamp);
+  margin-bottom: 0.6rem;
+}
+.dd-ledger .article-body .reading-link {
+  display: block;
+  padding: 9px 11px;
+  border: 1px solid var(--ld-rule-soft);
+  border-radius: 2px;
+  background: var(--ld-panel-2);
+  text-decoration: none;
+  color: var(--ld-ink-2);
+  transition: border-color 0.16s ease, transform 0.16s ease;
+}
+.dd-ledger .article-body .reading-link:hover {
+  border-color: var(--ld-stamp);
+  transform: translateY(-1px);
+}
+.dd-ledger .article-body .reading-link > strong {
+  display: block;
+  font-family: var(--ld-display);
+  font-weight: 700;
+  color: var(--ld-ink);
+  margin-bottom: 2px;
+}
+.dd-ledger .article-body .reading-link > span { font-size: 0.88rem; color: var(--ld-ink-3); }
+.dd-ledger .article-body .reading-link:focus-visible {
+  outline: 2px solid var(--ld-stamp);
+  outline-offset: 2px;
+}
+
+/* -------------------------------------------------------------- Callouts -- */
+.dd-ledger .article-body .callout {
+  display: block;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--ld-rule);
+  border-left: 4px solid var(--ld-rule);
+  border-radius: 2px;
+  background: var(--ld-panel);
+  color: var(--ld-ink-2);
+  margin: 1.4rem 0;
+}
+.dd-ledger .article-body .callout > strong {
+  display: block;
+  font-family: var(--ld-mono);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ld-ink);
+  margin: 0 0 0.4rem;
+}
+.dd-ledger .article-body .callout p { margin: 0; font-size: 0.98rem; }
+.dd-ledger .article-body .callout.warm { border-left-color: var(--ld-hold); }
+.dd-ledger .article-body .callout.warm > strong { color: var(--ld-hold); }
+.dd-ledger .article-body .callout.alert { border-left-color: var(--ld-stamp); }
+.dd-ledger .article-body .callout.alert > strong { color: var(--ld-stamp); }
+.dd-ledger .article-body .callout.green,
+.dd-ledger .article-body .callout.neutral { border-left-color: var(--ld-clear); }
+.dd-ledger .article-body .callout.green > strong,
+.dd-ledger .article-body .callout.neutral > strong { color: var(--ld-clear); }
+
+/* ------------------------------------------------------- Examiner's note -- */
+.dd-ledger .article-body blockquote {
+  position: relative;
+  margin: 1.6rem 0;
+  padding: 1rem 1.2rem 1rem 1.3rem;
+  border-left: 3px double var(--ld-stamp);
+  background: var(--ld-stamp-dim);
+  border-radius: 0 2px 2px 0;
+}
+.dd-ledger .article-body blockquote::before {
+  content: "Examiner's note";
+  display: block;
+  font-family: var(--ld-mono);
+  font-size: 0.64rem;
+  font-weight: 600;
+  font-style: normal;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ld-stamp);
+  margin-bottom: 0.4rem;
+}
+.dd-ledger .article-body blockquote p {
+  font-family: var(--ld-display);
+  font-style: italic;
+  font-size: 1.04rem;
+  line-height: 1.6;
+  color: var(--ld-ink);
+  margin: 0;
+}
+.dd-ledger .article-body blockquote p + p { margin-top: 0.6rem; }
+
+/* ------------------------------------------------------------- Tables ----- */
+/* Ledger ruling: heavy double outer frame, horizontal rules only. */
+.dd-ledger .article-body table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.6rem 0;
+  border: 3px double var(--ld-rule);
+  font-size: 0.95rem;
+}
+.dd-ledger .article-body th,
+.dd-ledger .article-body td {
+  display: table-cell;
+  padding: 9px 13px;
+  border: 0;
+  border-bottom: 1px solid var(--ld-rule-soft);
+  text-align: left;
+  vertical-align: top;
+  color: var(--ld-ink-2);
+}
+.dd-ledger .article-body td { font-variant-numeric: tabular-nums; }
+.dd-ledger .article-body th {
+  font-family: var(--ld-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ld-ink);
+  background: var(--ld-panel-2);
+  border-bottom: 2px solid var(--ld-rule);
+}
+.dd-ledger .article-body tbody tr:last-child td { border-bottom: 0; }
+.dd-ledger .article-body tbody tr:nth-child(even) td { background: var(--ld-rule-faint); }
+.dd-ledger .article-body td strong { color: var(--ld-ink); }
+
+/* ----------------------------------------------------- Details / summary -- */
+/* Collapsible annexes — the revert neutralizes the global look, restyle fully. */
+.dd-ledger .article-body details {
+  margin: 1.4rem 0 2rem;
+  border: 1px solid var(--ld-rule);
+  border-radius: 2px;
+  background: var(--ld-panel);
+  overflow: hidden;
+}
+.dd-ledger .article-body summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  font-family: var(--ld-mono);
+  font-size: 0.76rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ld-ink);
+  background: var(--ld-panel-2);
+}
+.dd-ledger .article-body summary::before {
+  content: "Annex";
+  flex: 0 0 auto;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--ld-seal);
+  border: 1px solid var(--ld-seal);
+  border-radius: 2px;
+  padding: 2px 6px;
+}
+.dd-ledger .article-body summary::after {
+  content: "+";
+  flex: 0 0 auto;
+  margin-left: auto;
+  font-size: 0.9rem;
+  color: var(--ld-stamp);
+}
+.dd-ledger .article-body summary::-webkit-details-marker { display: none; }
+.dd-ledger .article-body details[open] summary::after { content: "\2212"; }
+.dd-ledger .article-body details[open] summary {
+  border-bottom: 1px solid var(--ld-rule);
+}
+.dd-ledger .article-body summary:focus-visible {
+  outline: 2px solid var(--ld-stamp);
+  outline-offset: -2px;
+}
+.dd-ledger .article-body details table { margin: 0; border: 0; }
+.dd-ledger .article-body details table + table { margin-top: 1rem; }
+
+/* tear line */
+.dd-ledger .article-body hr {
+  border: 0;
+  border-top: 1px dashed var(--ld-rule);
+  margin: 2.4rem 0;
+}
+
+/* ------------------------------------------------------ Exhibit frames ---- */
+/* Chrome bar is exactly 26px — the site-wide +26px authoring rule for
+   --vf-h/--vf-h-m applies; autosizing visuals self-correct via postMessage. */
+.dd-ledger .article-body { counter-reset: exhibit; }
+.dd-ledger .article-body .visual-frame {
+  position: relative;
+  counter-increment: exhibit;
+  border: 1px solid var(--ld-rule);
+  border-radius: 2px;
+  background: var(--ld-panel);
+  margin: 1.7rem 0 2.2rem;
+  padding-top: 26px;
+  overflow: hidden;
+}
+.dd-ledger .article-body .visual-frame::before {
+  content: "Exhibit " counter(exhibit, upper-alpha) " · Live record";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  font-family: var(--ld-mono);
+  font-size: 0.69rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ld-ink-2);
+  background: var(--ld-panel-2);
+  border-bottom: 1px solid var(--ld-rule);
+  z-index: 1;
+}
+.dd-ledger .article-body .visual-frame::after {
+  content: "";
+  position: absolute;
+  top: 9px;
+  right: 12px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ld-clear);
+  box-shadow: var(--ld-glow) var(--ld-clear);
+  z-index: 2;
+}
+.dd-ledger .article-body .visual-frame iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: var(--ld-panel);
+}
+
+/* ------------------------------------------------------------- Motion ----- */
+@media (prefers-reduced-motion: no-preference) {
+  .dd-ledger .ld-title,
+  .dd-ledger .ld-subtitle,
+  .dd-ledger .ld-lead,
+  .dd-ledger .ld-coords {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  .dd-ledger.ld-loaded .ld-title,
+  .dd-ledger.ld-loaded .ld-subtitle,
+  .dd-ledger.ld-loaded .ld-lead,
+  .dd-ledger.ld-loaded .ld-coords {
+    animation: ld-rise 0.6s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+  }
+  .dd-ledger.ld-loaded .ld-subtitle { animation-delay: 0.08s; }
+  .dd-ledger.ld-loaded .ld-lead { animation-delay: 0.16s; }
+  .dd-ledger.ld-loaded .ld-coords { animation-delay: 0.24s; }
+
+  /* the header "Filed" chip thumps down like a hand stamp */
+  .dd-ledger .ld-formline .ld-stamp { opacity: 0; }
+  .dd-ledger.ld-loaded .ld-formline .ld-stamp {
+    animation: ld-stamp-in 0.45s cubic-bezier(0.34, 1.4, 0.64, 1) 0.35s forwards;
+  }
+}
+@keyframes ld-rise { to { opacity: 1; transform: translateY(0); } }
+@keyframes ld-stamp-in {
+  0% { opacity: 0; transform: rotate(-8deg) scale(1.7); }
+  100% { opacity: 1; transform: rotate(-1.6deg) scale(1); }
+}
+
+/* ----------------------------------------------------------- Responsive --- */
+@media (max-width: 960px) {
+  /* minmax(0,1fr), never bare 1fr: a wide table's min-content would inflate
+     the column past the viewport, invisibly, under the shell's overflow:clip. */
+  .dd-ledger .ld-layout { grid-template-columns: minmax(0, 1fr); }
+  .dd-ledger .ld-spine-index {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    flex-direction: row;
+    align-self: stretch;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: thin;
+    border: 0;
+    border-bottom: 2px solid var(--ld-rule);
+    margin-bottom: 16px;
+    padding: 4px 0;
+    background: linear-gradient(180deg, var(--ld-paper-0), var(--ld-paper-1));
+  }
+  .dd-ledger .ld-spine-index::before { display: none; }
+  .dd-ledger .ld-index-link {
+    flex: 0 0 auto;
+    white-space: nowrap;
+    border-left: 0;
+    border-bottom: 3px solid transparent;
+  }
+  .dd-ledger .ld-index-link .ld-index-label { border-bottom: 0; padding-bottom: 0; }
+  .dd-ledger .ld-index-link.is-active {
+    border-left-color: transparent;
+    border-bottom-color: var(--ld-stamp);
+  }
+}
+@media (max-width: 760px) {
+  .dd-ledger .article-body .signal-grid,
+  .dd-ledger .article-body .reading-map-grid { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 560px) {
+  .dd-ledger.article-shell { padding-left: clamp(20px, 4vw, 30px); }
+  .dd-ledger::before { display: none; }
+  .dd-ledger .article-body { padding-left: 24px; }
+  .dd-ledger .article-body::before { left: 6px; }
+  .dd-ledger .ld-body h2::before { left: -22px; width: 10px; height: 10px; }
+}

@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The claim ledger, side by side</title>
+<script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+.shell { display: flex; flex-direction: column; gap: 12px; }
+:root[data-embedded="true"] .shell { padding: 14px clamp(14px, 2vw, 22px); }
+
+.head h1 { font-family: "Archivo", sans-serif; font-weight: 700; font-size: clamp(1.0rem, 2.2vw, 1.26rem); color: var(--text-strong); }
+.head p { font: 500 0.76rem/1.4 "IBM Plex Sans", sans-serif; color: var(--muted); margin-top: 3px; }
+
+.ctl { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.ctl button {
+  min-height: 34px; padding: 6px 12px; cursor: pointer;
+  font: 600 0.64rem/1 "IBM Plex Mono", monospace; letter-spacing: 0.07em; text-transform: uppercase;
+  color: var(--accent); background: transparent; border: 1px solid var(--accent);
+}
+.ctl button:hover { background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.ctl button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.filters { display: flex; gap: 6px; flex-wrap: wrap; }
+.filters button { color: var(--muted); border-color: var(--border-strong); }
+.filters button[aria-pressed="true"] { color: var(--accent); border-color: var(--accent); }
+.ctl .hint { font: 500 0.68rem/1.3 "IBM Plex Sans", sans-serif; color: var(--muted-soft); }
+
+.legend { display: flex; gap: 14px; flex-wrap: wrap; font: 500 0.68rem/1.3 "IBM Plex Mono", monospace; letter-spacing: 0.04em; color: var(--muted); }
+.legend span b { color: var(--text-strong); }
+
+/* One column of claim rows. An icon rail (the spine) carries a pictogram per
+   claim, each row holds both accounts as icon-tagged source lines, and the
+   status stamps in as the row reveals. */
+.ledger { border: 1px solid var(--border-strong); background: var(--surface); }
+.lrow { display: grid; grid-template-columns: 52px 1fr; opacity: 0.18; transform: translateY(5px); transition: opacity 320ms ease, transform 320ms ease; }
+.lrow.on { opacity: 1; transform: none; }
+.lrow[hidden] { display: none; }   /* display:grid above would defeat [hidden] without this */
+.lrow + .lrow { border-top: 1px solid var(--border); }
+.lrow.disputed { border-left: 3px solid var(--T2); }
+
+.rail { position: relative; }
+.rail .spine { position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; background: var(--border-strong); transform: translateX(-50%); }
+.lrow:first-child .rail .spine { top: 30px; }
+.lrow:last-child .rail .spine { bottom: calc(100% - 30px); }
+.pic {
+  position: absolute; left: 50%; top: 13px; transform: translateX(-50%);
+  width: 34px; height: 34px; display: grid; place-items: center;
+  background: var(--surface); border: 1.5px solid var(--border-strong); color: var(--muted);
+  transition: color 300ms, border-color 300ms;
+}
+.pic svg { width: 22px; height: 22px; display: block; }
+.pic svg * { stroke: currentColor; }
+.lrow.on .pic { color: var(--accent); border-color: var(--accent); }
+.lrow.on.disputed .pic { color: var(--T2); border-color: var(--T2); }
+
+.body { padding: 10px 12px 10px 2px; min-width: 0; display: flex; flex-direction: column; gap: 7px; }
+.top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.top b { font: 600 0.78rem/1.3 "IBM Plex Sans", sans-serif; color: var(--text-strong); }
+
+.chip { display: inline-flex; align-items: center; gap: 5px; font: 600 0.6rem/1.1 "IBM Plex Mono", monospace; letter-spacing: 0.05em; text-transform: uppercase; border: 1px solid currentColor; padding: 2px 6px; }
+.chip.diverges { color: var(--T2); }
+.chip.open { color: var(--T1); }
+.chip .spic { transform: scale(2.1); opacity: 0; transition: transform 260ms ease, opacity 260ms ease; }
+.lrow.stamped .chip .spic { transform: none; opacity: 1; }
+
+.spic { width: 14px; height: 14px; display: inline-grid; place-items: center; flex: 0 0 auto; }
+.spic svg { width: 14px; height: 14px; display: block; }
+.spic svg * { stroke: currentColor; }
+
+/* one source line per account: source icon, source label, the claim text */
+.src { display: grid; grid-template-columns: 16px 74px minmax(0, 1fr); gap: 4px 8px; align-items: start; font: 500 0.76rem/1.45 "IBM Plex Sans", sans-serif; color: var(--text); }
+.src .spic { color: var(--muted); margin-top: 2px; }
+.src .lab { font: 600 0.62rem/1.6 "IBM Plex Mono", monospace; letter-spacing: 0.04em; text-transform: uppercase; color: var(--accent-2); }
+.src .val { grid-column: 3; min-width: 0; }
+.notadopted { font: 600 0.66rem/1.3 "IBM Plex Mono", monospace; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted-soft); }
+
+.caption { font: 500 0.72rem/1.5 "IBM Plex Sans", sans-serif; color: var(--muted); }
+.caption b { color: var(--text-strong); font-weight: 600; }
+
+@media (max-width: 620px) {
+  .lrow { grid-template-columns: 44px 1fr; }
+  /* stack the claim text under its source label so ~110px columns never happen */
+  .src { grid-template-columns: 16px minmax(0, 1fr); }
+  .src .val { grid-column: 2; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lrow, .chip .spic, .pic { transition: none; }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="head">
+    <h1>Dream / FT account vs. MODA account</h1>
+    <p>What the affected government actually confirmed, row by row.</p>
+  </div>
+
+  <div class="ctl">
+    <button type="button" id="replay">Replay ledger</button>
+    <div class="filters" role="group" aria-label="Filter rows by status">
+      <button type="button" data-show="all" aria-pressed="true">All</button>
+      <button type="button" data-show="diverges" aria-pressed="false">Diverging</button>
+      <button type="button" data-show="na" aria-pressed="false">Not adopted</button>
+    </div>
+    <span class="hint">Not adopted keeps the counts MODA never confirmed.</span>
+  </div>
+
+  <div class="legend">
+    <span><b>Dream / FT</b> = Dream, via Financial Times, Aug 12</span>
+    <span><b>MODA</b> = Taiwan Ministry of Digital Affairs, Aug 12-13</span>
+    <span>Warning mark = accounts diverge</span>
+  </div>
+
+  <div class="ledger" id="ledger" role="list" aria-label="Claim ledger comparing Dream and MODA accounts">
+    <div class="lrow disputed" role="listitem">
+      <span class="rail"><span class="spine" aria-hidden="true"></span><span class="pic" data-icon="robot" aria-hidden="true"></span></span>
+      <div class="body">
+        <div class="top"><b>Characterization</b><span class="chip diverges"><span class="spic" data-icon="warning" aria-hidden="true"></span>Diverges</span></div>
+        <div class="src"><span class="spic" data-icon="megaphone" aria-hidden="true"></span><span class="lab">Dream / FT</span><span class="val">Near-autonomous / end-to-end autonomous attack</span></div>
+        <div class="src"><span class="spic" data-icon="gov" aria-hidden="true"></span><span class="lab">MODA</span><span class="val">Hybrid: manual operations combined with AI agent assistance</span></div>
+      </div>
+    </div>
+
+    <div class="lrow disputed" data-na role="listitem">
+      <span class="rail"><span class="spine" aria-hidden="true"></span><span class="pic" data-icon="network" aria-hidden="true"></span></span>
+      <div class="body">
+        <div class="top"><b>Systems mapped</b><span class="chip diverges"><span class="spic" data-icon="warning" aria-hidden="true"></span>Diverges</span></div>
+        <div class="src"><span class="spic" data-icon="megaphone" aria-hidden="true"></span><span class="lab">Dream / FT</span><span class="val">21 government systems</span></div>
+        <div class="src"><span class="spic" data-icon="gov" aria-hidden="true"></span><span class="lab">MODA</span><span class="val"><span class="notadopted">Not adopted</span></span></div>
+      </div>
+    </div>
+
+    <div class="lrow disputed" data-na role="listitem">
+      <span class="rail"><span class="spine" aria-hidden="true"></span><span class="pic" data-icon="lock" aria-hidden="true"></span></span>
+      <div class="body">
+        <div class="top"><b>Accounts compromised</b><span class="chip diverges"><span class="spic" data-icon="warning" aria-hidden="true"></span>Diverges</span></div>
+        <div class="src"><span class="spic" data-icon="megaphone" aria-hidden="true"></span><span class="lab">Dream / FT</span><span class="val">85 accounts</span></div>
+        <div class="src"><span class="spic" data-icon="gov" aria-hidden="true"></span><span class="lab">MODA</span><span class="val"><span class="notadopted">Not adopted</span></span></div>
+      </div>
+    </div>
+
+    <div class="lrow disputed" data-na role="listitem">
+      <span class="rail"><span class="spine" aria-hidden="true"></span><span class="pic" data-icon="archive" aria-hidden="true"></span></span>
+      <div class="body">
+        <div class="top"><b>Records extracted</b><span class="chip diverges"><span class="spic" data-icon="warning" aria-hidden="true"></span>Diverges</span></div>
+        <div class="src"><span class="spic" data-icon="megaphone" aria-hidden="true"></span><span class="lab">Dream / FT</span><span class="val">2,500+ personnel records</span></div>
+        <div class="src"><span class="spic" data-icon="gov" aria-hidden="true"></span><span class="lab">MODA</span><span class="val"><span class="notadopted">Not adopted</span></span></div>
+      </div>
+    </div>
+
+    <div class="lrow disputed" role="listitem">
+      <span class="rail"><span class="spine" aria-hidden="true"></span><span class="pic" data-icon="factory" aria-hidden="true"></span></span>
+      <div class="body">
+        <div class="top"><b>Named victim sectors</b><span class="chip diverges"><span class="spic" data-icon="warning" aria-hidden="true"></span>Diverges</span></div>
+        <div class="src"><span class="spic" data-icon="megaphone" aria-hidden="true"></span><span class="lab">Dream / FT</span><span class="val">Government, nuclear safety agency, 7+ energy companies</span></div>
+        <div class="src"><span class="spic" data-icon="gov" aria-hidden="true"></span><span class="lab">MODA</span><span class="val">Government agencies, sector detail <span class="notadopted">not confirmed</span></span></div>
+      </div>
+    </div>
+
+    <div class="lrow disputed" role="listitem">
+      <span class="rail"><span class="spine" aria-hidden="true"></span><span class="pic" data-icon="calendar" aria-hidden="true"></span></span>
+      <div class="body">
+        <div class="top"><b>Timeline</b><span class="chip diverges"><span class="spic" data-icon="warning" aria-hidden="true"></span>Diverges</span></div>
+        <div class="src"><span class="spic" data-icon="megaphone" aria-hidden="true"></span><span class="lab">Dream / FT</span><span class="val">Jul 1 to 4, four-day operation</span></div>
+        <div class="src"><span class="spic" data-icon="gov" aria-hidden="true"></span><span class="lab">MODA</span><span class="val">Alerts issued from Jul 20, no public link to Dream's window</span></div>
+      </div>
+    </div>
+
+    <div class="lrow" role="listitem">
+      <span class="rail"><span class="spine" aria-hidden="true"></span><span class="pic" data-icon="satellite" aria-hidden="true"></span></span>
+      <div class="body">
+        <div class="top"><b>Attribution</b><span class="chip open"><span class="spic" data-icon="scales" aria-hidden="true"></span>Open</span></div>
+        <div class="src"><span class="spic" data-icon="megaphone" aria-hidden="true"></span><span class="lab">Dream / FT</span><span class="val">"High probability" China-linked, Simplified Chinese comms, no named group</span></div>
+        <div class="src"><span class="spic" data-icon="gov" aria-hidden="true"></span><span class="lab">MODA</span><span class="val">"Overseas source," declined to name a country</span></div>
+      </div>
+    </div>
+  </div>
+
+  <p class="caption">Taiwan's Ministry of Digital Affairs confirmed AI-assisted attacks occurred. It did not confirm <b>any</b> of Dream's specific counts, and it describes the activity in a materially different way. That is not a footnote, it is the finding.</p>
+</div>
+<script>
+(() => {
+  const ICON_BASE = '../customs-entry-agent/flow-icons/';
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const ledger = document.getElementById('ledger');
+  const rows = Array.from(ledger.querySelectorAll('.lrow'));
+
+  /* Icons are shared line-art SVGs; fetched once per name, inlined with the
+     stroke swapped to currentColor so they follow the theme. A failed fetch
+     leaves the slot empty and the text still carries the row. */
+  const cache = {};
+  document.querySelectorAll('[data-icon]').forEach((slot) => {
+    const name = slot.dataset.icon;
+    cache[name] = cache[name] || fetch(ICON_BASE + name + '.svg').then((r) => (r.ok ? r.text() : Promise.reject()));
+    cache[name]
+      .then((t) => { slot.innerHTML = t.replace(/stroke="#232f3e"/g, 'stroke="currentColor"'); })
+      .catch(() => {});
+  });
+
+  /* Rows reveal in sequence, then each status chip stamps in. rAF t0 comes
+     from the first frame timestamp, never performance.now(): sandboxed
+     iframes can disagree between the two clocks. */
+  const STEP = 380, STAMP = 200;
+  let raf = 0;
+  const settle = () => rows.forEach((r) => r.classList.add('on', 'stamped'));
+  const run = () => {
+    cancelAnimationFrame(raf);
+    rows.forEach((r) => r.classList.remove('on', 'stamped'));
+    if (reduced) { settle(); return; }
+    const live = rows.filter((r) => !r.hidden);
+    const total = STEP * live.length + STAMP;
+    let t0 = null;
+    const step = (ts) => {
+      if (t0 === null) t0 = ts;
+      const t = ts - t0;
+      live.forEach((r, i) => {
+        if (t >= i * STEP) r.classList.add('on');
+        if (t >= i * STEP + STAMP) r.classList.add('stamped');
+      });
+      if (t < total) raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+  };
+
+  document.getElementById('replay').addEventListener('click', run);
+
+  /* status filter: aria-pressed toggles, hidden rows drop out of the flow */
+  const filters = Array.from(document.querySelectorAll('.filters button'));
+  filters.forEach((btn) => btn.addEventListener('click', () => {
+    const mode = btn.dataset.show;
+    filters.forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
+    cancelAnimationFrame(raf);
+    rows.forEach((r) => {
+      const show = mode === 'all'
+        || (mode === 'diverges' && r.classList.contains('disputed'))
+        || (mode === 'na' && r.hasAttribute('data-na'));
+      r.hidden = !show;
+    });
+    settle();  /* filtering shows the finished state, replay re-animates it */
+  }));
+
+  /* threshold 0, not 0.2: the ledger can exceed a phone viewport, and a
+     fraction of a too-tall element never intersects. */
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting)) { io.disconnect(); run(); }
+    }, { threshold: 0 });
+    io.observe(ledger);
+  } else { run(); }
+
+  if (document.documentElement.dataset.embedded === 'true') {
+    const postSize = () => window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+    if ('ResizeObserver' in window) new ResizeObserver(postSize).observe(document.body);
+    window.addEventListener('load', postSize);
+    window.addEventListener('resize', postSize);
+  }
+})();
+</script>
+</body>
+</html>

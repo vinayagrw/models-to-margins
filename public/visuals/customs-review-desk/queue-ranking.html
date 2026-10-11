@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The queue is a portfolio, not a list</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+/* Queue ranking. Three small illustrative queues (FIFO, expected-value, deadline-
+   forced) showing which errors each ordering catches first and which it starves.
+   Toggle buttons swap the active ordering. Reduced motion: static highlight. */
+
+.shell { display: flex; flex-direction: column; gap: 10px; }
+:root[data-embedded="true"] .shell { padding: 14px clamp(14px, 2vw, 22px); }
+
+.head h1 {
+  font-family: "Space Grotesk", sans-serif; font-weight: 700;
+  font-size: clamp(1.02rem, 2.2vw, 1.3rem); letter-spacing: -0.02em; color: var(--text-strong);
+}
+:root[data-embedded="true"] .head h1 { font-size: 1.02rem; }
+.head p { font: 500 0.72rem/1.4 "DM Sans", sans-serif; color: var(--muted); margin-top: 2px; }
+
+.tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+.tab {
+  cursor: pointer; font: 700 0.66rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.04em;
+  border: 1px solid var(--border-strong); border-radius: 999px; background: var(--surface);
+  color: var(--muted); padding: 7px 13px;
+}
+.tab[aria-pressed="true"] { color: #fff; background: var(--accent-2); border-color: var(--accent-2); }
+
+.queue { display: flex; flex-direction: column; gap: 5px; }
+.item {
+  display: grid; grid-template-columns: 20px 1fr auto auto; gap: 8px; align-items: center;
+  border: 1px solid var(--border); border-left: 3px solid var(--ic); border-radius: 8px;
+  background: var(--surface); padding: 7px 10px; transition: transform 0.2s ease;
+}
+.item .pos { font: 700 0.7rem/1 "IBM Plex Mono", monospace; color: var(--muted); }
+.item .name { font: 600 0.72rem/1.3 "DM Sans", sans-serif; color: var(--text-strong); }
+.item .name small { display: block; font: 500 0.62rem/1.3 "DM Sans", sans-serif; color: var(--muted); font-weight: 500; }
+.item .ev { font: 600 0.64rem/1 "IBM Plex Mono", monospace; color: var(--ic); text-align: right; }
+.item .flag { font: 700 0.58rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 7px; border-radius: 999px; border: 1px solid var(--ic); color: var(--ic); white-space: nowrap; }
+.item.dim { opacity: 0.4; }
+
+.callout {
+  border: 1px solid var(--border); border-left: 3px solid var(--warn); border-radius: 10px;
+  background: color-mix(in srgb, var(--warn) 8%, var(--surface)); padding: 9px 12px;
+}
+.callout p { font: 500 0.72rem/1.5 "DM Sans", sans-serif; color: var(--text); }
+.callout p b { color: var(--warn); }
+
+@media (max-width: 760px) {
+  .head h1 { font-size: 1rem; }
+  .item { grid-template-columns: 16px 1fr; grid-template-areas: "pos name" "pos ev"; }
+  .item .ev { grid-column: 2; justify-self: start; }
+  .item .flag { grid-column: 2; justify-self: start; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .item { transition: none; }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="head">
+    <h1>The queue is a portfolio, not a list</h1>
+    <p>Illustrative re-sort of one queue snapshot under three orderings. Toggle to see who moves.</p>
+  </div>
+
+  <div class="tabs" role="group" aria-label="Queue ordering">
+    <button class="tab" data-o="fifo" aria-pressed="true">FIFO</button>
+    <button class="tab" data-o="ev" aria-pressed="false">Expected value of review</button>
+    <button class="tab" data-o="deadline" aria-pressed="false">Deadline-forced order</button>
+  </div>
+
+  <div class="queue" id="queue" role="list" aria-label="Review queue, current ordering"></div>
+
+  <div class="callout" id="callout"></div>
+</div>
+<script>
+(() => {
+  const ITEMS = [
+    { id: 'A', name: 'Entry 4471-A', tag: 'Filed 09:02', ev: 0.02, agedays: 0, wrong: false },
+    { id: 'B', name: 'Entry 4471-B', tag: 'Filed 09:04', ev: 0.85, agedays: 0, wrong: true },
+    { id: 'C', name: 'Entry 4471-C', tag: 'Filed 09:07', ev: 0.03, agedays: 8, wrong: true },
+    { id: 'D', name: 'Entry 4471-D', tag: 'Filed 09:11', ev: 0.61, agedays: 1, wrong: false },
+    { id: 'E', name: 'Entry 4471-E', tag: 'Filed 09:15', ev: 0.05, agedays: 0, wrong: false },
+    { id: 'F', name: 'Entry 4471-F', tag: 'Filed 09:20', ev: 0.34, agedays: 2, wrong: false }
+  ];
+  const orderings = {
+    fifo: [...ITEMS],
+    ev: [...ITEMS].sort((a, b) => b.ev - a.ev),
+    deadline: (() => {
+      const aged = ITEMS.filter((i) => i.agedays >= 6);
+      const rest = [...ITEMS].filter((i) => i.agedays < 6).sort((a, b) => b.ev - a.ev);
+      return [...aged, ...rest];
+    })()
+  };
+  const notes = {
+    fifo: 'FIFO catches nothing on purpose. C, a low-score item the model actually got wrong, sits behind the whole filed order and ages to day 8 unseen.',
+    ev: 'Pure expected-value ranking surfaces B first, the highest-stakes item. But C, low-scored and wrong, is starved: nothing in this ordering ever promotes it.',
+    deadline: 'A max-wait bound promotes C once it crosses the aging threshold, even though its expected value is low. This is the ordering that catches both B and C.'
+  };
+  const queueEl = document.getElementById('queue');
+  const calloutEl = document.getElementById('callout');
+  const tabs = document.querySelectorAll('.tab');
+
+  const render = (key) => {
+    const list = orderings[key];
+    queueEl.innerHTML = '';
+    list.forEach((it, i) => {
+      const starved = key !== 'fifo' && it.wrong && it.ev < 0.5 && key === 'ev';
+      const promoted = key === 'deadline' && it.agedays >= 6;
+      const color = it.wrong ? 'var(--accent)' : (it.ev > 0.5 ? 'var(--warn)' : 'var(--S-cleared)');
+      const row = document.createElement('div');
+      row.className = 'item' + (starved ? '' : '');
+      row.style.setProperty('--ic', color);
+      row.setAttribute('role', 'listitem');
+      row.innerHTML = `<span class="pos">${i + 1}</span>
+        <span class="name">${it.name}<small>${it.tag}${it.wrong ? ' · model got this one wrong' : ''}</small></span>
+        <span class="ev">EV ${it.ev.toFixed(2)}</span>
+        <span class="flag">${promoted ? 'Promoted, max-wait' : (starved ? 'Starved' : (it.agedays > 0 ? it.agedays + 'd old' : 'fresh'))}</span>`;
+      queueEl.appendChild(row);
+    });
+    calloutEl.innerHTML = `<p><b>${key === 'fifo' ? 'FIFO' : key === 'ev' ? 'Expected value' : 'Deadline-forced'}:</b> ${notes[key]}</p>`;
+  };
+
+  tabs.forEach((tab) => tab.addEventListener('click', () => {
+    tabs.forEach((t) => t.setAttribute('aria-pressed', String(t === tab)));
+    render(tab.dataset.o);
+  }));
+  render('fifo');
+
+  if (document.documentElement.dataset.embedded === 'true') {
+    const postSize = () => window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+    if ('ResizeObserver' in window) new ResizeObserver(postSize).observe(document.body);
+    window.addEventListener('load', postSize);
+  }
+})();
+</script>
+</body>
+</html>

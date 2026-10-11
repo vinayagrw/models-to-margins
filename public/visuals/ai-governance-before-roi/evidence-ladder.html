@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The seven-rung evidence ladder</title>
+<script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+.shell { display:flex; flex-direction:column; gap:12px; }
+:root[data-embedded="true"] .shell { padding: 14px clamp(14px, 2vw, 22px); }
+.head h1 { font-family:"Fraunces",serif; font-weight:700; font-size:clamp(1rem,2.1vw,1.2rem); color:var(--text-strong); }
+.head p { font:400 0.78rem/1.5 "Source Sans 3",sans-serif; color:var(--muted); margin-top:3px; }
+
+.ctl { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.toggle { display:flex; gap:6px; }
+.toggle button { font-family:"IBM Plex Mono",monospace; font-size:0.62rem; letter-spacing:0.08em; text-transform:uppercase; border:1px solid var(--border-strong); background:var(--surface); color:var(--muted); padding:5px 10px; cursor:pointer; border-radius:2px; }
+.toggle button[aria-pressed="true"] { color:var(--text-strong); border-color:var(--accent-2); background:var(--surface-strong); }
+.replay { font-family:"IBM Plex Mono",monospace; font-size:0.62rem; letter-spacing:0.08em; text-transform:uppercase; border:1px solid var(--accent); background:transparent; color:var(--accent); padding:5px 10px; cursor:pointer; border-radius:2px; min-height:30px; }
+.replay:hover { background:color-mix(in srgb, var(--accent) 12%, transparent); }
+.hint { font:400 0.68rem/1.3 "Source Sans 3",sans-serif; color:var(--muted-soft); }
+
+/* The ladder: an icon rail carries the climb from weakest evidence at the
+   bottom to the vacant top rung, and the token climbs it. */
+.ladder { display:flex; flex-direction:column; position:relative; border:1px solid var(--border-strong); }
+.rung {
+  display:grid; grid-template-columns:44px 150px 1fr; gap:0 10px; align-items:start;
+  border:0; background:var(--surface); padding:8px 10px 8px 0; text-align:left;
+  cursor:pointer; width:100%; font-family:inherit; position:relative;
+  opacity:.55; transition:opacity 300ms;
+}
+.rung.lit { opacity:1; }
+.rung + .rung { border-top:1px solid var(--border); }
+.rung:focus-visible { outline:2px solid var(--accent); outline-offset:-2px; }
+.rung.vacant { background:transparent; }
+.rung.vacant .pic { border-style:dashed; }
+.rung.vacant.lit .pic { color:var(--warn); border-color:var(--warn); box-shadow:0 0 0 3px color-mix(in srgb, var(--warn) 16%, transparent); }
+
+.rail { position:relative; align-self:stretch; min-height:46px; }
+.rail .spine { position:absolute; left:50%; top:0; bottom:0; width:2px; background:var(--border-strong); transform:translateX(-50%); }
+.rung:first-child .rail .spine { top:50%; }
+.rung:last-child .rail .spine { bottom:50%; }
+.pic {
+  position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+  width:32px; height:32px; display:grid; place-items:center;
+  background:var(--surface-strong); border:1.5px solid var(--border-strong);
+  color:var(--muted); transition:color 300ms, border-color 300ms, box-shadow 300ms;
+}
+.pic svg { width:20px; height:20px; display:block; }
+.pic svg * { stroke:currentColor; }
+.rung.lit .pic { color:var(--accent); border-color:var(--accent); box-shadow:0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent); }
+
+.rname { font:600 0.72rem "Fraunces",serif; color:var(--text-strong); padding-top:4px; }
+.rcontent { display:flex; flex-direction:column; gap:3px; min-width:0; padding-top:4px; }
+.who { font:400 0.78rem "Source Sans 3",sans-serif; color:var(--text); }
+.not { font:400 italic 0.68rem "Source Sans 3",sans-serif; color:var(--muted); }
+.vac { font:600 0.66rem "IBM Plex Mono",monospace; letter-spacing:0.06em; color:var(--warn); text-transform:uppercase; }
+.def { display:none; font:400 0.7rem/1.45 "Source Sans 3",sans-serif; color:var(--muted); border-left:2px solid var(--accent-2); padding-left:8px; margin-top:2px; }
+.rung[aria-expanded="true"] .def { display:block; }
+
+.chip-inline { display:inline-flex; align-items:center; gap:4px; font-family:"IBM Plex Mono",monospace; font-size:0.56rem; letter-spacing:0.06em; text-transform:uppercase; border:1px solid currentColor; border-radius:2px; padding:1px 5px; margin-left:6px; }
+.chip-inline.confirmed { color:var(--confirmed); }
+.chip-inline.proposed { color:var(--proposed); }
+.chip-inline.open { color:var(--open); }
+.chip-inline.vendor { color:var(--vendor); }
+
+/* the climbing token, positioned over the whole ladder */
+.token {
+  position:absolute; left:22px; top:0; width:10px; height:10px; z-index:2;
+  transform:translate(-50%,-50%); background:var(--accent); border-radius:50%;
+  box-shadow:0 0 8px color-mix(in srgb, var(--accent) 70%, transparent);
+  opacity:0; pointer-events:none;
+}
+
+@media (max-width:620px) {
+  .rung { grid-template-columns:44px 1fr; }
+  .rail { grid-row:1 / span 2; }
+  .rcontent { grid-column:2; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .token { display:none; }
+  .rung { transition:none; }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="head">
+    <h1>Every actor in this story, ranked by evidence type</h1>
+    <p>One standard, applied consistently, including to this page's own favorite number.</p>
+  </div>
+
+  <div class="ctl">
+    <div class="toggle" role="group" aria-label="Ladder view">
+      <button id="byType" aria-pressed="true">By evidence type</button>
+      <button id="byTouch" aria-pressed="false">By what the vendor touches</button>
+    </div>
+    <button type="button" class="replay" id="replay">Replay climb</button>
+    <span class="hint">The token climbs from weakest evidence up. Tap a rung for what its grade means.</span>
+  </div>
+
+  <div class="ladder" id="ladder"></div>
+</div>
+<script>
+(() => {
+  const ICON_BASE = '../customs-entry-agent/flow-icons/';
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const AUDIT_DEF = 'An independent audit of before and after numbers at a named facility. No actor in this story reaches it after 14 research passes.';
+
+  const RUNGS_TYPE = [
+    { icon:'scales', name:'Audited facility-level before/after', vacant:true, who:'', not:'', chip:'open', vac:'VACANT · 14 RUNS', def:AUDIT_DEF },
+    { icon:'document', name:'Contracted multi-year revenue', who:'Symbotic: 42 Walmart DCs by 2030', not:'Does not tell you: unit economics per facility', chip:'confirmed', def:'A signed contract with named counterparties and a delivery date. Real commitment, not a press release.' },
+    { icon:'coin', name:'Net dollar retention', who:'HappyRobot: >150% NDR (highest occupied rung)', not:'Does not tell you: the customers\' own ROI', chip:'vendor', def:'Existing customers spending more year over year. A strong signal, but the vendor measures it about itself.' },
+    { icon:'robot', name:'Deployment scale', who:'FedEx / Dexterity; Amazon 750,000+ robots', not:'Does not tell you: throughput or cost per unit', chip:'confirmed', def:'Counted machines in named buildings. Confirms adoption while staying silent on economics.' },
+    { icon:'checklist', name:'Independent survey', who:'Gartner (Aug 5), KPMG Global AI Pulse Q2 2026', not:'Does not tell you: realized dollar return', chip:'confirmed', def:'A third party asks many firms the same question. Sentiment at scale, not measured return.' },
+    { icon:'megaphone', name:'Stated intent', who:'Croud, Stord, Sage', not:'Does not tell you: actual behavior at scale', chip:'open', def:'A company says what it plans to do. Intent is cheap until budget follows.' },
+    { icon:'chart', name:'Projection and award', who:'$1T-by-2030 figures, Exiger trade-press award, data-center truckload projection', not:'Does not tell you: anything measured', chip:'vendor', def:'A forecast or a trophy. The weakest rung: nothing here was measured.' },
+  ];
+  const RUNGS_TOUCH = [
+    { icon:'scales', name:'Audited facility-level before/after', vacant:true, who:'', not:'', chip:'open', vac:'VACANT · 14 RUNS', def:AUDIT_DEF },
+    { icon:'coin', name:'Money movement', who:'HappyRobot shows retention and recovery figures', not:'Does not tell you: the customers\' own ROI', chip:'vendor', def:'The vendor touches invoices and payments, so dollar figures exist, but the vendor reports them.' },
+    { icon:'truck', name:'Physical throughput', who:'FedEx / Dexterity and Amazon show deployment counts', not:'Does not tell you: cost or injury impact', chip:'confirmed', def:'The vendor touches boxes and robots, so counts are visible and independently checkable.' },
+    { icon:'cpu', name:'Decision support', who:'Classification, planning and advisory tools show nothing at all', not:'Does not tell you: anything beyond a demo', chip:'open', def:'The vendor touches only recommendations. Value depends entirely on what humans do next.' },
+    { icon:'checklist', name:'Independent survey layer', who:'Gartner and KPMG: sentiment and budget allocation', not:'Does not tell you: realized dollar return', chip:'confirmed', def:'Third parties measure sentiment and budgets across many firms, not outcomes at any one of them.' },
+    { icon:'megaphone', name:'Stated-intent layer', who:'Croud, Stord and Sage: willingness, not behavior', not:'Does not tell you: actual conversion', chip:'open', def:'Companies describe plans. Willingness precedes behavior, and sometimes replaces it.' },
+    { icon:'chart', name:'Projection layer', who:'Market-size projections, trade-press awards', not:'Does not tell you: anything measured', chip:'vendor', def:'Nobody has touched anything yet. These numbers describe a future that may not arrive.' },
+  ];
+
+  const ladder = document.getElementById('ladder');
+  let played = false;
+
+  /* Icons are shared line-art SVGs, fetched once and inlined with the stroke
+     swapped to currentColor so they follow the rung's theme colour. A failed
+     fetch leaves the slot empty and the text still carries the row. */
+  const iconCache = {};
+  const getIcon = (name) => {
+    if (!iconCache[name]) iconCache[name] = fetch(ICON_BASE + name + '.svg')
+      .then((r) => (r.ok ? r.text() : Promise.reject()))
+      .then((t) => t.replace(/stroke="#232f3e"/g, 'stroke="currentColor"'))
+      .catch(() => '');
+    return iconCache[name];
+  };
+
+  function render(data) {
+    ladder.innerHTML = '<div class="token" id="token" aria-hidden="true"></div>';
+    data.forEach((r) => {
+      const el = document.createElement('button');
+      el.type = 'button';
+      el.className = 'rung' + (r.vacant ? ' vacant' : '') + (played ? ' lit' : '');
+      el.setAttribute('aria-expanded', 'false');
+      el.innerHTML = '<span class="rail"><span class="spine" aria-hidden="true"></span><span class="pic" data-pic aria-hidden="true"></span></span>' +
+        '<span class="rname">' + r.name + '</span>' +
+        '<span class="rcontent">' +
+        (r.vacant ? '<span class="vac">' + r.vac + '</span>' : '<span class="who">' + r.who + ' <span class="chip-inline ' + r.chip + '">' + r.chip + '</span></span><span class="not">' + r.not + '</span>') +
+        '<span class="def">' + r.def + '</span></span>';
+      getIcon(r.icon).then((t) => { el.querySelector('[data-pic]').innerHTML = t; });
+      el.addEventListener('click', () => {
+        el.setAttribute('aria-expanded', String(el.getAttribute('aria-expanded') !== 'true'));
+        post();
+      });
+      ladder.appendChild(el);
+    });
+  }
+  render(RUNGS_TYPE);
+
+  /* The token climbs the rail bottom to top, lighting each rung as it passes,
+     so the weakest evidence lights first and the vacant top rung last. rAF t0
+     comes from the first frame timestamp, never performance.now(): sandboxed
+     iframes can disagree between the two clocks. */
+  const DWELL = 520;
+  let raf = 0;
+  const run = () => {
+    cancelAnimationFrame(raf);
+    const rungs = Array.from(ladder.querySelectorAll('.rung'));
+    const token = ladder.querySelector('.token');
+    rungs.forEach((b) => b.classList.remove('lit'));
+    const finish = () => { played = true; rungs.forEach((b) => b.classList.add('lit')); };
+    if (reduced) { finish(); return; }
+    const box = ladder.getBoundingClientRect();
+    const stops = rungs.map((b) => {
+      const r = b.getBoundingClientRect();
+      return r.top - box.top + r.height / 2;
+    }).reverse(); /* climb order: last rung first */
+    const bandsUp = rungs.slice().reverse();
+    const total = DWELL * stops.length;
+    token.style.opacity = '1';
+    let t0 = null;
+    const step = (ts) => {
+      if (t0 === null) t0 = ts;
+      const t = ts - t0;
+      const i = Math.min(stops.length - 1, Math.floor(t / DWELL));
+      const f = Math.min(1, (t - i * DWELL) / DWELL);
+      const from = i === 0 ? box.height : stops[i - 1];
+      const y = from + (stops[i] - from) * f;
+      token.style.top = y + 'px';
+      for (let k = 0; k < stops.length; k++) bandsUp[k].classList.toggle('lit', y <= stops[k] + 4);
+      if (t < total) { raf = requestAnimationFrame(step); }
+      else { token.style.opacity = '0'; finish(); }
+    };
+    raf = requestAnimationFrame(step);
+  };
+
+  document.getElementById('replay').addEventListener('click', run);
+
+  const bT = document.getElementById('byType');
+  const bH = document.getElementById('byTouch');
+  bT.addEventListener('click', () => { bT.setAttribute('aria-pressed','true'); bH.setAttribute('aria-pressed','false'); render(RUNGS_TYPE); post(); });
+  bH.addEventListener('click', () => { bH.setAttribute('aria-pressed','true'); bT.setAttribute('aria-pressed','false'); render(RUNGS_TOUCH); post(); });
+
+  /* threshold 0, not 0.2: the ladder can exceed a phone viewport, and a
+     fraction of a too-tall element never intersects. */
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting)) { io.disconnect(); run(); }
+    }, { threshold: 0 });
+    io.observe(ladder);
+  } else { run(); }
+
+  let post = () => {};
+  if (document.documentElement.dataset.embedded === 'true') {
+    post = () => window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+    if ('ResizeObserver' in window) new ResizeObserver(post).observe(document.body);
+    window.addEventListener('load', post);
+    setTimeout(post, 60);
+  }
+})();
+</script>
+</body>
+</html>

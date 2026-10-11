@@ -149,6 +149,19 @@ img {
   margin: 0 auto;
 }
 
+/* On wide monitors, article pages break out of the 1560px shell cap so
+   content uses the screen instead of leaving dead side margins. Gated on
+   :has() support; without it the shell simply stays at 1560px.
+
+   This applies to EVERY page. It began as a `:has(.article-shell)` rule for
+   deep-dives only, which left the home page and the bespoke brief pages at
+   1560px while their neighbours sat at 1800px — one click apart, two widths.
+   There is no page on this site that wants dead side margins, so there is no
+   selector to qualify here. */
+@media (min-width: 1640px) {
+  .site-shell { --max-width: 1800px; }
+}
+
 .site-header {
   position: sticky;
   top: 16px;
@@ -350,8 +363,13 @@ main {
   padding: 22px;
 }
 
+/* This row inherits `.content-grid`'s three tracks but holds only the featured
+   brief and featured deep dive, so the third track sat empty and left ~600px
+   of dead space at the right edge. `auto-fit` collapses the empty tracks, so
+   however many panels are rendered, they divide the full width between them. */
 .featured-card-grid {
   align-items: stretch;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr));
 }
 
 .featured-card {
@@ -419,9 +437,13 @@ p {
   line-height: 1.7;
 }
 
+/* Reading text is never given a measure narrower than its column — see the
+   `.article-body` rules below and the shell breakout above. A `ch` cap here
+   left ~1000px unused beside the hero dek on every page. Do not reintroduce
+   one, on this or any other text element. */
 .lead {
   font-size: 1.05rem;
-  max-width: 76ch;
+  max-width: 100%;
 }
 
 .badge-row,
@@ -463,7 +485,7 @@ p {
 
 .section-head p {
   margin: 0;
-  max-width: 72ch;
+  max-width: 100%;
 }
 
 .card-link {
@@ -707,6 +729,20 @@ code:not(pre > code) {
 
 .article-body th {
   background: var(--table-head);
+}
+
+/* A markdown table has no wrapper element to scroll inside, so a wide one
+   (5+ columns) pushes min-content past the viewport and scrolls the whole page
+   sideways — `width: 100%` cannot prevent that. Below 900px the table becomes
+   its own scroll container instead. Gated on the media query because
+   `display: block` makes columns shrink-to-fit, which is the wrong look on
+   desktop where the table already fits. */
+@media (max-width: 900px) {
+  .article-body table {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+  }
 }
 
 .article-body hr {

@@ -4,133 +4,137 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>The Stats That Fail Verification — Audit Wall</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="./_theme-bootstrap.js"></script>
 <link rel="stylesheet" href="./_theme.css">
 <style>
-/* Scene-specific: verification audit wall. Circulating claims get stamped
-   with their verdict. The pollution loop shows why they keep circulating. */
+/* Scene-specific: verification audit wall. Each circulating claim is an
+   icon-led row that gets stamped with its verdict. The pollution loop is a
+   mini spine a token circulates forever, which is the whole point. */
 :root {
   --reject: var(--warn);
   --verify: var(--good);
 }
+:root[data-embedded="true"], :root[data-embedded="true"] body { height: auto; }
 
 .shell { display: flex; flex-direction: column; gap: 10px; }
-:root[data-embedded="true"] .shell {
-  display: flex; flex-direction: column; gap: clamp(6px, 1vh, 10px);
-  padding: clamp(10px, 1.5vh, 16px) clamp(14px, 2vw, 22px);
-}
+:root[data-embedded="true"] .shell { padding: clamp(10px, 1.5vh, 16px) clamp(14px, 2vw, 22px); }
 
 .head h1 {
   font-family: "Space Grotesk", sans-serif; font-weight: 700;
-  font-size: clamp(1.05rem, 2.3vw, 1.45rem); letter-spacing: -0.02em; color: var(--text-strong);
+  font-size: clamp(1.0rem, 2.3vw, 1.4rem); letter-spacing: -0.02em; color: var(--text-strong);
 }
-.head p { color: var(--muted); font-family: "DM Sans", sans-serif; font-size: 0.82rem; margin-top: 3px; }
-:root[data-embedded="true"] .head h1 { font-size: clamp(0.92rem, 2.1vh, 1.2rem); }
-:root[data-embedded="true"] .head p { font-size: clamp(0.72rem, 1.4vh, 0.82rem); }
+.head p { color: var(--muted); font-family: "DM Sans", sans-serif; font-size: 0.8rem; margin-top: 3px; }
 
-.wall { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 10px; flex: 1 1 auto; min-height: 0; }
-:root[data-embedded="true"] .wall { gap: clamp(6px, 0.9vw, 10px); }
+.ctl { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.ctl button {
+  min-height: 34px; padding: 6px 12px; cursor: pointer; border-radius: 8px;
+  font: 600 0.64rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.07em; text-transform: uppercase;
+  color: var(--accent); background: transparent; border: 1px solid var(--accent);
+}
+.ctl button:hover { background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.ctl .hint { font: 500 0.68rem/1.3 "DM Sans", sans-serif; color: var(--muted-soft); }
 
-.claims { display: flex; flex-direction: column; gap: 8px; justify-content: space-between; }
-:root[data-embedded="true"] .claims { gap: clamp(4px, 0.7vh, 8px); }
+.wall { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 10px; align-items: start; }
 
+.claims, .side { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+
+/* Icon-led claim rows: real <button>s, tap for the audit trail */
 .claim {
-  position: relative; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: center;
-  padding: 10px 13px; border-radius: 12px;
-  border: 1px solid color-mix(in srgb, var(--reject) 30%, var(--border));
+  position: relative; display: grid; grid-template-columns: 40px minmax(0, 1fr) auto;
+  gap: 10px; align-items: center; width: 100%; text-align: left; cursor: pointer;
+  padding: 9px 12px 9px 8px; border-radius: 12px; font-family: inherit;
+  border: 1px solid color-mix(in srgb, var(--sc) 32%, var(--border));
   background: var(--surface); overflow: hidden;
-  opacity: 0; animation: file-in .4s ease-out forwards;
 }
-:root[data-embedded="true"] .claim { padding: clamp(6px, 1vh, 10px) clamp(9px, 1.3vw, 13px); }
+.claim.good { background: color-mix(in srgb, var(--verify) 5%, var(--surface)); }
 .claim::before {
   content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
-  background: var(--reject); opacity: .7;
+  background: var(--sc); opacity: .7;
 }
-.claim-quote {
-  font: 500 0.8rem/1.35 "DM Sans", sans-serif; color: var(--text-strong);
+.claim:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.armed .claim:not(.in) { opacity: 0; transform: translateY(6px); }
+.claim.in { animation: file-in .4s ease-out; }
+
+.pic {
+  width: 34px; height: 34px; display: grid; place-items: center; border-radius: 9px;
+  background: var(--surface-strong); border: 1.5px solid color-mix(in srgb, var(--sc) 45%, var(--border-strong));
+  color: var(--sc); justify-self: center;
 }
-.claim-quote::before { content: "“"; color: var(--reject); font-weight: 700; }
-.claim-quote::after { content: "”"; color: var(--reject); font-weight: 700; }
-.claim-verdict { font: 400 0.72rem/1.35 "DM Sans", sans-serif; color: var(--muted); margin-top: 4px; }
-:root[data-embedded="true"] .claim-quote { font-size: clamp(0.72rem, 1.4vh, 0.8rem); }
-:root[data-embedded="true"] .claim-verdict { font-size: clamp(0.69rem, 1.2vh, 0.72rem); }
+.pic svg { width: 22px; height: 22px; display: block; }
+.pic svg * { stroke: currentColor; }
+
+.claim-quote { font: 500 0.8rem/1.35 "DM Sans", sans-serif; color: var(--text-strong); display: block; }
+.claim-quote::before { content: "\201C"; color: var(--sc); font-weight: 700; }
+.claim-quote::after { content: "\201D"; color: var(--sc); font-weight: 700; }
+.claim.good .claim-quote::before, .claim.good .claim-quote::after { content: ""; }
+.claim.good .claim-quote { font: 700 0.78rem/1.25 "Space Grotesk", sans-serif; }
+.claim-verdict {
+  display: none; font: 400 0.72rem/1.4 "DM Sans", sans-serif; color: var(--muted);
+  margin-top: 5px; padding-left: 8px; border-left: 2px solid var(--sc);
+}
+.claim[aria-expanded="true"] .claim-verdict { display: block; }
 
 .stamp {
-  font: 700 0.69rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.14em; text-transform: uppercase;
+  font: 700 0.68rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.13em; text-transform: uppercase;
   color: var(--sc); border: 2px solid var(--sc); border-radius: 6px;
-  padding: 6px 9px; transform: rotate(-8deg) scale(2.2); opacity: 0;
-  animation: thump .35s cubic-bezier(.2,1.6,.4,1) forwards;
-  white-space: nowrap; text-align: center;
+  padding: 5px 8px; white-space: nowrap; text-align: center;
+  opacity: 0; transform: rotate(-8deg) scale(2.2);
 }
-:root[data-embedded="true"] .stamp { font-size: clamp(0.69rem, 1.1vh, 0.7rem); padding: clamp(4px, 0.7vh, 6px) clamp(6px, 0.9vw, 9px); }
+.claim .stamp.on { animation: thump .35s cubic-bezier(.2,1.6,.4,1) forwards; }
+.shell:not(.armed) .stamp { opacity: 1; transform: rotate(-8deg) scale(1); }
 
-.side { display: flex; flex-direction: column; gap: 8px; min-height: 0; }
-:root[data-embedded="true"] .side { gap: clamp(4px, 0.7vh, 8px); }
+.col-title {
+  font: 700 0.68rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--ct, var(--reject)); margin-top: 2px;
+}
 
-/* Pollution loop */
+/* Pollution loop: a mini spine the token never stops riding */
 .loop {
-  flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column;
-  padding: 12px 14px; border-radius: 14px;
+  padding: 11px 13px; border-radius: 14px;
   border: 1px dashed color-mix(in srgb, var(--reject) 45%, transparent);
   background: color-mix(in srgb, var(--reject) 4%, transparent);
 }
-:root[data-embedded="true"] .loop { padding: clamp(7px, 1.1vh, 12px) clamp(9px, 1.3vw, 14px); }
-.loop-title {
-  font: 700 0.7rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.12em;
-  text-transform: uppercase; color: var(--reject);
+.loop-chain { position: relative; margin-top: 8px; }
+.loop-chain::before {
+  content: ""; position: absolute; left: 15px; top: 14px; bottom: 14px; width: 2px;
+  background: color-mix(in srgb, var(--reject) 40%, var(--border-strong));
 }
-.loop-svg { flex: 1 1 auto; min-height: 0; width: 100%; margin-top: 6px; }
-.loop-node-box { fill: var(--surface-strong); stroke: color-mix(in srgb, var(--reject) 40%, var(--border)); rx: 10; }
-.loop-node-text { fill: var(--text-strong); font: 700 13px "Space Grotesk", sans-serif; }
-.loop-node-sub { fill: var(--muted); font: 11.5px "DM Sans", sans-serif; }
-.loop-arrow {
-  fill: none; stroke: color-mix(in srgb, var(--reject) 65%, transparent);
-  stroke-width: 1.8; stroke-dasharray: 6 5; marker-end: url(#arr);
-  animation: cycle 2.6s linear infinite;
+.lnode { position: relative; display: grid; grid-template-columns: 32px minmax(0, 1fr); gap: 9px; align-items: center; min-height: 44px; }
+.lnode .pic { width: 28px; height: 28px; border-radius: 8px; --sc: var(--reject); transition: color 250ms, border-color 250ms, box-shadow 250ms; }
+.lnode .pic svg { width: 18px; height: 18px; }
+.lnode.lit .pic { box-shadow: 0 0 0 3px color-mix(in srgb, var(--reject) 18%, transparent); border-color: var(--reject); }
+.lnode b { display: block; font: 700 0.74rem/1.2 "Space Grotesk", sans-serif; color: var(--text-strong); }
+.lnode i { display: block; font: 400 0.68rem/1.3 "DM Sans", sans-serif; font-style: normal; color: var(--muted); }
+.loop-token {
+  position: absolute; left: 16px; top: 0; width: 9px; height: 9px; border-radius: 50%;
+  transform: translate(-50%,-50%); background: var(--reject);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--reject) 70%, transparent);
+  opacity: 0; pointer-events: none;
 }
-.loop-caption { font: 400 0.72rem/1.35 "DM Sans", sans-serif; color: var(--muted); margin-top: 6px; }
-:root[data-embedded="true"] .loop-caption { font-size: clamp(0.69rem, 1.2vh, 0.72rem); }
+.loop-back { font: 600 0.68rem/1.3 "DM Sans", sans-serif; color: var(--reject); margin: 4px 0 0 41px; }
+.loop-caption { font: 400 0.71rem/1.4 "DM Sans", sans-serif; color: var(--muted); margin-top: 7px; }
 
-/* Verified survivors */
-.survivors-title {
-  font: 700 0.7rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.12em;
-  text-transform: uppercase; color: var(--verify);
-}
-.survivor {
-  position: relative; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: center;
-  padding: 9px 12px; border-radius: 12px;
-  border: 1px solid color-mix(in srgb, var(--verify) 40%, var(--border));
-  background: color-mix(in srgb, var(--verify) 5%, var(--surface));
-  opacity: 0; animation: file-in .4s ease-out forwards;
-}
-:root[data-embedded="true"] .survivor { padding: clamp(5px, 0.9vh, 9px) clamp(8px, 1.2vw, 12px); }
-.survivor-name { font: 700 0.78rem/1.2 "Space Grotesk", sans-serif; color: var(--text-strong); }
-.survivor-desc { font: 400 0.7rem/1.35 "DM Sans", sans-serif; color: var(--muted); margin-top: 3px; }
-:root[data-embedded="true"] .survivor-name { font-size: clamp(0.7rem, 1.35vh, 0.78rem); }
-:root[data-embedded="true"] .survivor-desc { font-size: clamp(0.69rem, 1.15vh, 0.7rem); }
-
-@keyframes file-in { to { opacity: 1; } }
+@keyframes file-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 @keyframes thump { to { opacity: 1; transform: rotate(-8deg) scale(1); } }
-@keyframes cycle { to { stroke-dashoffset: -44; } }
-@media (prefers-reduced-motion: reduce) {
-  .claim, .survivor { animation: none; opacity: 1; }
-  .stamp { animation: none; opacity: 1; transform: rotate(-8deg) scale(1); }
-  .loop-arrow { animation: none; }
-}
+
 @media (max-width: 860px) {
   .wall { grid-template-columns: 1fr; }
-  .loop { display: none; }
 }
-/* True phones: the stamp verdict carries the message, the fine print
-   lives in the page's data table. */
 @media (max-width: 560px) {
-  .claim-verdict, .survivor-desc, .head p { display: none; }
+  .claim { grid-template-columns: 34px minmax(0, 1fr); padding: 8px 10px 8px 6px; }
+  .pic { width: 30px; height: 30px; }
+  .stamp { grid-column: 2; justify-self: start; margin-top: 2px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .armed .claim:not(.in) { opacity: 1; transform: none; }
+  .claim.in { animation: none; }
+  .claim .stamp, .claim .stamp.on { animation: none; opacity: 1; transform: rotate(-8deg) scale(1); }
+  .loop-token { display: none; }
 }
 </style>
 </head>
 <body>
-<div class="shell">
+<div class="shell" id="shell">
 
   <header class="head">
     <div class="eyebrow">Two research passes · Primary sources only</div>
@@ -138,103 +142,214 @@
     <p>If one of these is in your deck, remove it before someone checks.</p>
   </header>
 
+  <div class="ctl">
+    <button type="button" id="replay">Replay audit</button>
+    <span class="hint">Tap a claim for the audit trail behind its stamp.</span>
+  </div>
+
   <div class="wall">
 
-    <div class="claims">
-      <div class="claim" style="animation-delay:.05s">
-        <div>
-          <div class="claim-quote">CNCF survey: 42% of microservices adopters are consolidating</div>
-          <div class="claim-verdict">Appears in no CNCF document checked. Traces only to SEO blogs citing each other. Probably fabricated or AI-laundered.</div>
-        </div>
-        <div class="stamp" style="--sc:var(--reject); animation-delay:.5s">Fabricated</div>
-      </div>
-      <div class="claim" style="animation-delay:.15s">
-        <div>
-          <div class="claim-quote">Service mesh adoption fell from 18% to 8%</div>
-          <div class="claim-verdict">Same provenance problem. No primary source found.</div>
-        </div>
-        <div class="stamp" style="--sc:var(--reject); animation-delay:.7s">Unverified</div>
-      </div>
-      <div class="claim" style="animation-delay:.25s">
-        <div>
-          <div class="claim-quote">Gartner: 60% of teams regret microservices</div>
-          <div class="claim-verdict">The real Gartner 60% (Jun 2023) is about technology purchase regret in general.</div>
-        </div>
-        <div class="stamp" style="--sc:var(--reject); animation-delay:.9s">Misattributed</div>
-      </div>
-      <div class="claim" style="animation-delay:.35s">
-        <div>
-          <div class="claim-quote">Amazon abandoned microservices</div>
-          <div class="claim-verdict">One team's video pipeline left Step Functions and Lambda for one ECS process. Ex-AWS engineers dispute the "monolith" label.</div>
-        </div>
-        <div class="stamp" style="--sc:var(--reject); animation-delay:1.1s">Misread</div>
-      </div>
-      <div class="claim" style="animation-delay:.45s">
-        <div>
-          <div class="claim-quote">Microservices market worth $7.45B, growing 18.8%</div>
-          <div class="claim-verdict">Vendor SEO content. No named methodology.</div>
-        </div>
-        <div class="stamp" style="--sc:var(--reject); animation-delay:1.3s">No methodology</div>
-      </div>
+    <div class="claims" id="claims">
+      <button type="button" class="claim" style="--sc:var(--reject)" data-icon="chart" aria-expanded="false">
+        <span class="pic" data-pic aria-hidden="true"></span>
+        <span>
+          <span class="claim-quote">CNCF survey: <span class="cnt" data-v="42">42</span>% of microservices adopters are consolidating</span>
+          <span class="claim-verdict">Appears in no CNCF document checked. Traces only to SEO blogs citing each other. Probably fabricated or AI-laundered.</span>
+        </span>
+        <span class="stamp">Fabricated</span>
+      </button>
+      <button type="button" class="claim" style="--sc:var(--reject)" data-icon="trenddown" aria-expanded="false">
+        <span class="pic" data-pic aria-hidden="true"></span>
+        <span>
+          <span class="claim-quote">Service mesh adoption fell from <span class="cnt" data-v="18">18</span>% to <span class="cnt" data-v="8">8</span>%</span>
+          <span class="claim-verdict">Same provenance problem. No primary source found.</span>
+        </span>
+        <span class="stamp">Unverified</span>
+      </button>
+      <button type="button" class="claim" style="--sc:var(--reject)" data-icon="scales" aria-expanded="false">
+        <span class="pic" data-pic aria-hidden="true"></span>
+        <span>
+          <span class="claim-quote">Gartner: <span class="cnt" data-v="60">60</span>% of teams regret microservices</span>
+          <span class="claim-verdict">The real Gartner 60% (Jun 2023) is about technology purchase regret in general.</span>
+        </span>
+        <span class="stamp">Misattributed</span>
+      </button>
+      <button type="button" class="claim" style="--sc:var(--reject)" data-icon="warehouse" aria-expanded="false">
+        <span class="pic" data-pic aria-hidden="true"></span>
+        <span>
+          <span class="claim-quote">Amazon abandoned microservices</span>
+          <span class="claim-verdict">One team's video pipeline left Step Functions and Lambda for one ECS process. Ex-AWS engineers dispute the "monolith" label.</span>
+        </span>
+        <span class="stamp">Misread</span>
+      </button>
+      <button type="button" class="claim" style="--sc:var(--reject)" data-icon="coin" aria-expanded="false">
+        <span class="pic" data-pic aria-hidden="true"></span>
+        <span>
+          <span class="claim-quote">Microservices market worth $<span class="cnt" data-v="7.45" data-d="2">7.45</span>B, growing <span class="cnt" data-v="18.8" data-d="1">18.8</span>%</span>
+          <span class="claim-verdict">Vendor SEO content. No named methodology.</span>
+        </span>
+        <span class="stamp">No methodology</span>
+      </button>
     </div>
 
     <div class="side">
       <div class="loop">
-        <div class="loop-title">Why they keep circulating</div>
-        <svg class="loop-svg" viewBox="0 0 300 190" preserveAspectRatio="xMidYMid meet" role="img"
+        <div class="col-title">Why they keep circulating</div>
+        <div class="loop-chain" id="loopChain"
              aria-label="A circular pollution loop: an SEO blog invents a number, AI content ingests it, more blogs cite the AI content, and decks quote the blogs, feeding back to the start.">
-          <defs>
-            <marker id="arr" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto">
-              <path d="M 0 0 L 8 4 L 0 8 z" fill="color-mix(in srgb, var(--reject) 65%, transparent)"/>
-            </marker>
-          </defs>
-          <g>
-            <rect class="loop-node-box" x="88" y="8" width="124" height="36" rx="10"/>
-            <text class="loop-node-text" x="150" y="24" text-anchor="middle">A blog invents it</text>
-            <text class="loop-node-sub" x="150" y="37" text-anchor="middle">no primary source</text>
-          </g>
-          <g>
-            <rect class="loop-node-box" x="182" y="77" width="112" height="36" rx="10"/>
-            <text class="loop-node-text" x="238" y="93" text-anchor="middle">AI ingests it</text>
-            <text class="loop-node-sub" x="238" y="106" text-anchor="middle">now it is "known"</text>
-          </g>
-          <g>
-            <rect class="loop-node-box" x="88" y="146" width="124" height="36" rx="10"/>
-            <text class="loop-node-text" x="150" y="162" text-anchor="middle">Blogs cite the AI</text>
-            <text class="loop-node-sub" x="150" y="175" text-anchor="middle">cross-citation ring</text>
-          </g>
-          <g>
-            <rect class="loop-node-box" x="6" y="77" width="112" height="36" rx="10"/>
-            <text class="loop-node-text" x="62" y="93" text-anchor="middle">Decks quote it</text>
-            <text class="loop-node-sub" x="62" y="106" text-anchor="middle">authority laundering</text>
-          </g>
-          <path class="loop-arrow" d="M 214 40 Q 240 50 242 73"/>
-          <path class="loop-arrow" d="M 240 117 Q 236 138 216 150"/>
-          <path class="loop-arrow" d="M 86 152 Q 60 140 60 117"/>
-          <path class="loop-arrow" d="M 60 73 Q 62 50 86 38"/>
-        </svg>
+          <div class="loop-token" id="loopToken" aria-hidden="true"></div>
+          <div class="lnode" data-icon="flask">
+            <span class="pic" data-pic aria-hidden="true"></span>
+            <span><b>A blog invents it</b><i>no primary source</i></span>
+          </div>
+          <div class="lnode" data-icon="robot">
+            <span class="pic" data-pic aria-hidden="true"></span>
+            <span><b>AI ingests it</b><i>now it is "known"</i></span>
+          </div>
+          <div class="lnode" data-icon="exchange">
+            <span class="pic" data-pic aria-hidden="true"></span>
+            <span><b>Blogs cite the AI</b><i>cross-citation ring</i></span>
+          </div>
+          <div class="lnode" data-icon="monitor">
+            <span class="pic" data-pic aria-hidden="true"></span>
+            <span><b>Decks quote it</b><i>authority laundering</i></span>
+          </div>
+        </div>
+        <div class="loop-back">&#8635; and back to the start</div>
         <div class="loop-caption">The pattern matters more than any single number: the debate's statistics are polluted by SEO and AI content cross-citing itself.</div>
       </div>
 
-      <div class="survivors-title">What actually survives verification</div>
-      <div class="survivor" style="animation-delay:.6s">
-        <div>
-          <div class="survivor-name">Segment, 2018–2020</div>
-          <div class="survivor-desc">100+ services folded into one. First-party, well documented.</div>
-        </div>
-        <div class="stamp" style="--sc:var(--verify); animation-delay:1.5s">Verified</div>
-      </div>
-      <div class="survivor" style="animation-delay:.7s">
-        <div>
-          <div class="survivor-name">Istio istiod, 2020</div>
-          <div class="survivor-desc">The service mesh consolidated its own control plane.</div>
-        </div>
-        <div class="stamp" style="--sc:var(--verify); animation-delay:1.7s">Verified</div>
-      </div>
+      <div class="col-title" style="--ct:var(--verify)">What actually survives verification</div>
+      <button type="button" class="claim good" style="--sc:var(--verify)" data-icon="merge" aria-expanded="false">
+        <span class="pic" data-pic aria-hidden="true"></span>
+        <span>
+          <span class="claim-quote">Segment, 2018&ndash;2020</span>
+          <span class="claim-verdict">100+ services folded into one. First-party, well documented.</span>
+        </span>
+        <span class="stamp">Verified</span>
+      </button>
+      <button type="button" class="claim good" style="--sc:var(--verify)" data-icon="network" aria-expanded="false">
+        <span class="pic" data-pic aria-hidden="true"></span>
+        <span>
+          <span class="claim-quote">Istio istiod, 2020</span>
+          <span class="claim-verdict">The service mesh consolidated its own control plane.</span>
+        </span>
+        <span class="stamp">Verified</span>
+      </button>
     </div>
 
   </div>
 
 </div>
+<script>
+(() => {
+  const ICON_BASE = '../customs-entry-agent/flow-icons/';
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const shell = document.getElementById('shell');
+  const claims = Array.from(document.querySelectorAll('.claim'));
+
+  /* Shared line-art icons, fetched and inlined with the stroke swapped to
+     currentColor so each slot follows its verdict colour. A failed fetch
+     leaves the slot empty and the text still carries the row. */
+  document.querySelectorAll('[data-icon]').forEach((el) => {
+    const slot = el.querySelector('[data-pic]');
+    fetch(ICON_BASE + el.dataset.icon + '.svg')
+      .then((r) => (r.ok ? r.text() : Promise.reject()))
+      .then((t) => { slot.innerHTML = t.replace(/stroke="#232f3e"/g, 'stroke="currentColor"'); })
+      .catch(() => {});
+  });
+
+  /* Tap or Enter opens the audit trail behind a stamp */
+  claims.forEach((c) => {
+    c.addEventListener('click', () => {
+      const open = c.getAttribute('aria-expanded') === 'true';
+      c.setAttribute('aria-expanded', String(!open));
+    });
+  });
+
+  /* Staged audit: each row files in, its number counts up, then the stamp
+     thumps down. rAF t0 comes from the first frame timestamp, never
+     performance.now(): sandboxed iframes can disagree between the two clocks. */
+  const STEP = 340, STAMP_LAG = 420, COUNT_MS = 600;
+  let raf = 0;
+  const plan = claims.map((c, i) => ({
+    el: c,
+    stamp: c.querySelector('.stamp'),
+    counts: Array.from(c.querySelectorAll('.cnt')).map((n) => ({
+      n, v: parseFloat(n.dataset.v), d: parseInt(n.dataset.d || '0', 10)
+    })),
+    at: i * STEP
+  }));
+  const total = (claims.length - 1) * STEP + STAMP_LAG + 400;
+
+  const finish = () => plan.forEach((p) => {
+    p.el.classList.add('in');
+    p.stamp.classList.add('on');
+    p.counts.forEach((k) => { k.n.textContent = k.v.toFixed(k.d); });
+  });
+
+  const run = () => {
+    cancelAnimationFrame(raf);
+    if (reduced) { finish(); return; }
+    shell.classList.add('armed');
+    plan.forEach((p) => { p.el.classList.remove('in'); p.stamp.classList.remove('on'); });
+    void shell.offsetWidth; /* restart the CSS animations on replay */
+    let t0 = null;
+    const step = (ts) => {
+      if (t0 === null) t0 = ts;
+      const t = ts - t0;
+      plan.forEach((p) => {
+        if (t >= p.at) p.el.classList.add('in');
+        if (t >= p.at + STAMP_LAG) p.stamp.classList.add('on');
+        p.counts.forEach((k) => {
+          const f = Math.max(0, Math.min(1, (t - p.at) / COUNT_MS));
+          const e = 1 - Math.pow(1 - f, 3);
+          if (f > 0) k.n.textContent = (k.v * e).toFixed(k.d);
+        });
+      });
+      if (t < total) raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+  };
+  document.getElementById('replay').addEventListener('click', run);
+
+  /* The pollution token rides the loop spine forever: that IS the claim */
+  const chain = document.getElementById('loopChain');
+  const token = document.getElementById('loopToken');
+  const nodes = Array.from(chain.querySelectorAll('.lnode'));
+  const CYCLE = 3600;
+  let loopRaf = 0, loopT0 = null;
+  const cycle = (ts) => {
+    if (loopT0 === null) loopT0 = ts;
+    const f = ((ts - loopT0) % CYCLE) / CYCLE;
+    const cr = chain.getBoundingClientRect();
+    const stops = nodes.map((n) => {
+      const r = n.getBoundingClientRect();
+      return r.top - cr.top + r.height / 2;
+    });
+    const y = stops[0] + (stops[stops.length - 1] - stops[0]) * f;
+    token.style.top = y + 'px';
+    token.style.opacity = String(Math.min(1, 8 * Math.min(f, 1 - f)));
+    nodes.forEach((n, i) => n.classList.toggle('lit', Math.abs(y - stops[i]) < 14));
+    loopRaf = requestAnimationFrame(cycle);
+  };
+  const startLoop = () => { if (!reduced) loopRaf = requestAnimationFrame(cycle); };
+
+  /* threshold 0, not 0.2: this figure can exceed a phone viewport, and a
+     fraction of a too-tall element never intersects. */
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting)) { io.disconnect(); run(); startLoop(); }
+    }, { threshold: 0 });
+    io.observe(shell);
+  } else { run(); startLoop(); }
+
+  if (document.documentElement.dataset.embedded === 'true') {
+    const postSize = () => window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+    if ('ResizeObserver' in window) new ResizeObserver(postSize).observe(document.body);
+    window.addEventListener('load', postSize);
+  }
+})();
+</script>
 </body>
 </html>

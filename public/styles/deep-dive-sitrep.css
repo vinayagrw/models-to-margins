@@ -1,0 +1,1112 @@
+/* ============================================================================
+   Sitrep — bespoke "sitrep" template for after-action-review deep-dives.
+   Every rule is scoped under .dd-sitrep so nothing leaks to other pages.
+
+   Identity: an after-action review binder. Light is a clean photocopied
+   report page (warm off-white, olive structural accent). Dark is the same
+   document rendered on an ops console. Utilitarian, dense, evidentially
+   serious. Not a war room.
+
+   Theming mechanism is copied from deep-dive-atlas.css exactly: the light
+   token set is declared on `.dd-sitrep.article-shell`, and the dark set is
+   re-declared under `[data-theme="dark"] .dd-sitrep.article-shell`. No
+   colour has its only definition inside a media query, and no !important
+   appears anywhere in this sheet.
+
+   Restraint rules (binding, from the design spec):
+     - no animation beyond 120ms hover/chip transitions, all reduced-motion
+       guarded. No tickers, counters, blinking, scanlines, typewriter reveals.
+     - --sr-signal red is capped to the sourcing banner, the CONTESTED chip
+       and the `gap` callout.
+     - zero border-radius everywhere except chips (2px).
+     - no classification markings, seals, crests, barcodes or "declassified"
+       stamps. The header carries a literal NOT AN OFFICIAL RECORD cell.
+   ========================================================================== */
+
+.dd-sitrep.article-shell {
+  /* --- light: "photocopied report" ------------------------------------- */
+  --sr-paper: #f4f2ec;
+  --sr-paper-2: #ebe8df;
+  --sr-paper-3: #e1ddd1;
+  --sr-ink: #1e211c;
+  --sr-ink-2: #43483f;
+  --sr-ink-3: #6e7468;
+  --sr-rule: #c9c6b8;
+  --sr-rule-strong: #a7a493;
+  --sr-olive: #4e5a3a;
+  --sr-olive-soft: #dde2cd;
+  --sr-slate: #3c4a55;
+  --sr-slate-soft: #d8e0e5;
+  --sr-signal: #a32219;
+  --sr-signal-soft: #f3dad6;
+  --sr-amber: #8a5a11;
+  --sr-amber-soft: #f3e4c6;
+  --sr-teal: #1f5a52;
+  --sr-teal-soft: #d3e7e1;
+  --sr-focus: #1b4fa0;
+
+  /* case-tab and chapter-plate pairing. In light the plate is a solid
+     olive bar with paper-coloured numerals (a real >=4.5:1 pairing, never
+     an opacity accident); dark flips to olive text on the soft ground. */
+  --sr-tab-bg: var(--sr-olive);
+  --sr-tab-fg: var(--sr-paper);
+  --sr-tab-border: var(--sr-olive);
+  /* decorative redaction bars: ink at low alpha, only ever used where
+     nothing sits on top of them. */
+  --sr-bar: rgba(30, 33, 28, 0.12);
+
+  --sr-display: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --sr-body-font: "IBM Plex Sans", -apple-system, "Segoe UI", system-ui, sans-serif;
+  --sr-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+
+  /* layout scale */
+  --sr-wide: clamp(1180px, 92vw, 1600px);
+  /* sticky site header allowance, mirrored from the atlas template */
+  --sr-header-h: 92px;
+  --sr-strip-h: 40px;
+
+  position: relative;
+  color: var(--sr-ink);
+  font-family: var(--sr-body-font);
+  background: var(--sr-paper);
+  border: 1px solid var(--sr-rule-strong);
+  border-radius: 0;
+  box-shadow: none;
+  padding: clamp(18px, 3.2vw, 40px);
+  margin-top: 8px;
+  /* clip, not hidden: clips decoration without creating a scroll container,
+     so the sticky spine keeps pinning. */
+  overflow: clip;
+}
+
+/* ============================================================
+   Ops console (dark).
+   ============================================================ */
+[data-theme="dark"] .dd-sitrep.article-shell {
+  --sr-paper: #14171a;
+  --sr-paper-2: #1b1f23;
+  --sr-paper-3: #23282d;
+  --sr-ink: #e6e9e3;
+  --sr-ink-2: #b6bdb4;
+  --sr-ink-3: #869088;
+  --sr-rule: #333a40;
+  --sr-rule-strong: #4a535a;
+  --sr-olive: #a8bc84;
+  --sr-olive-soft: #232b1e;
+  --sr-slate: #8fb0c4;
+  --sr-slate-soft: #1b252c;
+  --sr-signal: #f2695c;
+  --sr-signal-soft: #33191a;
+  --sr-amber: #e7b45c;
+  --sr-amber-soft: #2e2415;
+  --sr-teal: #6fcbb8;
+  --sr-teal-soft: #142c29;
+  --sr-focus: #7fb2ff;
+
+  /* light olive as a solid fill would be far too hot on the console, so the
+     tab inverts: olive text on the soft ground with an olive hairline. */
+  --sr-tab-bg: var(--sr-olive-soft);
+  --sr-tab-fg: var(--sr-olive);
+  --sr-tab-border: var(--sr-olive);
+  --sr-bar: rgba(230, 233, 227, 0.10);
+}
+
+/* ------------------------------------------------------------- Header ----- */
+/* The cover sheet: a bordered sheet on --sr-paper-2, zero radius. */
+.dd-sitrep .sr-header {
+  max-width: var(--sr-wide);
+  margin: 0 auto;
+  border: 2px solid var(--sr-rule-strong);
+  background: var(--sr-paper-2);
+  padding: 0 clamp(16px, 2.6vw, 26px) clamp(18px, 3vw, 26px);
+  position: relative;
+}
+
+/* decorative bar run in the cover sheet's lower-right dead space. Nothing
+   ever sits on top of these, so the low-alpha treatment is contrast-safe. */
+.dd-sitrep .sr-header::after {
+  content: "";
+  position: absolute;
+  right: clamp(16px, 2.6vw, 26px);
+  bottom: 14px;
+  width: 116px;
+  height: 26px;
+  pointer-events: none;
+  background:
+    linear-gradient(var(--sr-bar), var(--sr-bar)) 0 0 / 116px 6px no-repeat,
+    linear-gradient(var(--sr-bar), var(--sr-bar)) 0 10px / 72px 6px no-repeat,
+    linear-gradient(var(--sr-bar), var(--sr-bar)) 0 20px / 94px 6px no-repeat;
+}
+
+/* --- top meta rail (cover sheet) --- */
+.dd-sitrep .sr-coversheet {
+  display: grid;
+  grid-template-columns: auto auto auto 1fr;
+  align-items: center;
+  gap: 0 10px;
+  margin: 0 calc(-1 * clamp(16px, 2.6vw, 26px));
+  padding: 9px clamp(16px, 2.6vw, 26px);
+  border-bottom: 1px solid var(--sr-rule);
+  font-family: var(--sr-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--sr-ink-3);
+}
+.dd-sitrep .sr-cover-tag { color: var(--sr-olive); }
+.dd-sitrep .sr-cover-sep { color: var(--sr-rule-strong); }
+.dd-sitrep .sr-cover-no { color: var(--sr-ink-2); }
+
+/* Truthfulness affordance, not decoration. It is real text, it is never
+   dimmed to --sr-ink-3, and it carries a border so it reads as a cell of
+   the record rather than a caption. Both themes clear 4.5:1. */
+.dd-sitrep .sr-cover-notice {
+  justify-self: end;
+  color: var(--sr-ink);
+  font-weight: 600;
+  background: var(--sr-paper);
+  border: 1px solid var(--sr-rule-strong);
+  border-radius: 0;
+  padding: 3px 9px;
+  white-space: nowrap;
+}
+
+.dd-sitrep .sr-title {
+  font-family: var(--sr-display);
+  font-weight: 700;
+  font-size: clamp(2.1rem, 5.2vw, 3.4rem);
+  line-height: 1.04;
+  letter-spacing: -0.01em;
+  overflow-wrap: break-word;
+  color: var(--sr-ink);
+  margin: clamp(18px, 3vw, 28px) 0 0;
+}
+/* the 96px olive rule under the title */
+.dd-sitrep .sr-title::after {
+  content: "";
+  display: block;
+  width: 96px;
+  height: 4px;
+  background: var(--sr-olive);
+  margin-top: 0.5rem;
+}
+
+.dd-sitrep .sr-subtitle {
+  font-family: var(--sr-body-font);
+  font-weight: 400;
+  font-size: clamp(1.05rem, 2.2vw, 1.35rem);
+  line-height: 1.4;
+  color: var(--sr-ink-2);
+  margin: 0.9rem 0 0;
+  max-width: 100%;
+}
+
+.dd-sitrep .sr-lead {
+  font-family: var(--sr-body-font);
+  font-size: 1.16rem;
+  line-height: 1.6;
+  color: var(--sr-ink-2);
+  margin: 1rem 0 0;
+  max-width: 100%;
+}
+
+/* right-aligned mono coordinate stack */
+.dd-sitrep .sr-coords {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 1.3rem 0 0;
+}
+.dd-sitrep .sr-coords span {
+  font-family: var(--sr-mono);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--sr-ink-2);
+  padding: 5px 10px;
+  border: 1px solid var(--sr-rule);
+  border-radius: 0;
+  background: var(--sr-paper);
+}
+
+.dd-sitrep .sr-header-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 20px;
+  margin-top: 1.4rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--sr-rule);
+}
+.dd-sitrep .back-link,
+.dd-sitrep .meta-row,
+.dd-sitrep .meta-pill,
+.dd-sitrep .entry-meta { color: var(--sr-ink-2); }
+
+.dd-sitrep .tag-row { margin-top: 1rem; }
+.dd-sitrep .tag {
+  background: transparent;
+  border: 1px solid var(--sr-rule);
+  border-radius: 0;
+  color: var(--sr-ink-2);
+  font-family: var(--sr-mono);
+  font-size: 0.69rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 4px 9px;
+}
+
+/* ------------------------------------------------------------- Layout ----- */
+.dd-sitrep .sr-layout {
+  max-width: var(--sr-wide);
+  margin: 0 auto;
+}
+
+/* ------------------------------------------------- Spine — phase timeline -- */
+/* Narrow default: a horizontal scroll-snap strip of phase codes pinned under
+   the sticky site header. It stands up into a vertical rail at >=1180px. */
+.dd-sitrep .sr-spine-index {
+  position: sticky;
+  top: var(--sr-header-h);
+  z-index: 5;
+  height: var(--sr-strip-h);
+  display: flex;
+  align-items: stretch;
+  gap: 2px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+  margin: 0 calc(-1 * clamp(18px, 3.2vw, 40px));
+  padding: 0 clamp(18px, 3.2vw, 40px);
+  background: var(--sr-paper);
+  border-bottom: 1px solid var(--sr-rule);
+  /* the one permitted gradient on the page: a 24px fade mask on both ends */
+  mask-image: linear-gradient(90deg, transparent 0, #000 24px, #000 calc(100% - 24px), transparent 100%);
+}
+.dd-sitrep .sr-spine-index::-webkit-scrollbar { display: none; }
+
+.dd-sitrep .sr-phase {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  scroll-snap-align: center;
+  padding: 0 11px;
+  text-decoration: none;
+  color: var(--sr-ink-3);
+  border: 1px solid transparent;
+  border-radius: 0;
+  white-space: nowrap;
+}
+.dd-sitrep .sr-phase-no {
+  font-family: var(--sr-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  font-variant-numeric: tabular-nums;
+}
+.dd-sitrep .sr-phase-label {
+  font-family: var(--sr-body-font);
+  font-size: 0.86rem;
+  font-weight: 500;
+}
+/* the square node — squares, not circles: this is a ledger, not a timeline toy */
+.dd-sitrep .sr-phase-node {
+  flex: 0 0 auto;
+  width: 9px;
+  height: 9px;
+  border: 2px solid var(--sr-rule-strong);
+  background: var(--sr-paper);
+}
+.dd-sitrep .sr-phase:hover { color: var(--sr-ink); }
+.dd-sitrep .sr-phase.is-visited .sr-phase-node { background: var(--sr-rule-strong); }
+.dd-sitrep .sr-phase[aria-current="true"] {
+  color: var(--sr-tab-fg);
+  background: var(--sr-tab-bg);
+  border-color: var(--sr-tab-border);
+}
+.dd-sitrep .sr-phase[aria-current="true"] .sr-phase-node {
+  border-color: currentColor;
+  background: currentColor;
+}
+.dd-sitrep .sr-phase:focus-visible {
+  outline: 2px solid var(--sr-focus);
+  outline-offset: -2px;
+}
+/* figure links belong to the wide rail only */
+.dd-sitrep .sr-phase-fig { display: none; }
+.dd-sitrep .sr-phase-group { display: contents; }
+
+/* ============================================================
+   Typography reset — neutralize the global terminal aesthetic.
+   :where() keeps this at (0,2,0): above the global reset at (0,1,2),
+   below this sheet's own element rules at (0,2,1). Any custom class used
+   INSIDE the body must be styled at (0,3,0) via
+   .dd-sitrep .article-body .the-class — see the chip block below.
+   ============================================================ */
+.dd-sitrep .article-body :where(:not(pre > code)) {
+  display: revert;
+  padding: revert;
+  border: revert;
+  border-radius: 0;
+  background: none;
+  font-family: var(--sr-body-font);
+  font-size: revert;
+  color: revert;
+}
+
+.dd-sitrep .article-body {
+  position: relative;
+  margin-top: 0;
+  padding-top: clamp(18px, 3vw, 30px);
+  color: var(--sr-ink-2);
+  font-size: 1.02rem;
+  line-height: 1.68;
+}
+
+/* Prose and instruments/figures both fill the full content column. */
+.dd-sitrep .article-body > p,
+.dd-sitrep .article-body > ul,
+.dd-sitrep .article-body > ol,
+.dd-sitrep .article-body > h3,
+.dd-sitrep .article-body > h4,
+.dd-sitrep .article-body > blockquote,
+.dd-sitrep .article-body > .note-panel,
+.dd-sitrep .article-body > .callout {
+  max-width: 100%;
+  margin-left: 0;
+  margin-right: auto;
+}
+.dd-sitrep .article-body > .stat-strip,
+.dd-sitrep .article-body > .visual-frame,
+.dd-sitrep .article-body > details,
+.dd-sitrep .article-body > table,
+.dd-sitrep .article-body > .table-scroll {
+  max-width: 100%;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.dd-sitrep .article-body p,
+.dd-sitrep .article-body li { color: var(--sr-ink-2); }
+.dd-sitrep .article-body strong { color: var(--sr-ink); font-weight: 600; }
+.dd-sitrep .article-body em { color: var(--sr-ink); font-style: italic; }
+.dd-sitrep .article-body a {
+  color: var(--sr-slate);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-thickness: 1px;
+}
+.dd-sitrep .article-body a:focus-visible,
+.dd-sitrep a:focus-visible {
+  outline: 2px solid var(--sr-focus);
+  outline-offset: 2px;
+}
+
+/* --- chapter headings --- */
+.dd-sitrep .sr-body { counter-reset: figure chapter; }
+.dd-sitrep .sr-body h2 {
+  position: relative;
+  counter-increment: chapter;
+  font-family: var(--sr-display);
+  font-weight: 700;
+  font-size: clamp(1.5rem, 3.2vw, 2.05rem);
+  line-height: 1.12;
+  letter-spacing: -0.01em;
+  color: var(--sr-ink);
+  margin: 3rem 0 1.1rem;
+  padding: 20px 0 0 0;
+  border-top: 2px solid var(--sr-rule-strong);
+  /* the sticky site header plus the phase strip both eat into the viewport */
+  scroll-margin-top: calc(var(--sr-header-h) + var(--sr-strip-h) + 16px);
+}
+.dd-sitrep .sr-body h2:first-of-type {
+  margin-top: 1rem;
+  border-top: 0;
+  padding-top: 0;
+}
+/* chapter-number plate: a solid bar with a real fg/bg pairing, never an
+   opacity accident, so the numeral stays >=4.5:1 in both themes. */
+.dd-sitrep .sr-body h2::before {
+  content: counter(chapter, decimal-leading-zero);
+  display: inline-block;
+  margin-right: 12px;
+  padding: 2px 9px;
+  vertical-align: 0.16em;
+  font-family: var(--sr-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--sr-tab-fg);
+  background: var(--sr-tab-bg);
+  border: 1px solid var(--sr-tab-border);
+}
+
+.dd-sitrep .sr-body h3 {
+  font-family: var(--sr-body-font);
+  font-weight: 600;
+  font-size: 1.12rem;
+  line-height: 1.35;
+  color: var(--sr-ink);
+  margin: 1.9rem 0 0.5rem;
+  scroll-margin-top: calc(var(--sr-header-h) + var(--sr-strip-h) + 16px);
+}
+.dd-sitrep .sr-body h4 {
+  font-family: var(--sr-mono);
+  font-weight: 600;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--sr-ink-2);
+  margin: 1.5rem 0 0.4rem;
+}
+
+/* section terminator — the redaction bar used strictly as a divider */
+.dd-sitrep .article-body hr {
+  border: 0;
+  height: 6px;
+  width: 96px;
+  background: var(--sr-bar);
+  margin: 2.4rem 0;
+}
+
+/* inline code + pre */
+.dd-sitrep .article-body :not(pre) > code {
+  font-family: var(--sr-mono);
+  font-size: 0.86em;
+  color: var(--sr-ink);
+  background: var(--sr-paper-2);
+  border: 1px solid var(--sr-rule);
+  border-radius: 0;
+  padding: 0.08em 0.34em;
+}
+.dd-sitrep .article-body pre {
+  border-radius: 0;
+  border: 1px solid var(--sr-rule);
+  background: var(--sr-paper-2);
+  overflow-x: auto;
+}
+.dd-sitrep .article-body pre code {
+  font-family: var(--sr-mono);
+  color: var(--sr-ink);
+}
+
+/* -------------------------------------------------------- Evidence chips -- */
+/* Five states. Colour is never the only channel: each chip carries a leading
+   glyph via ::before AND the state word itself, so the chip survives
+   greyscale printing and every form of colour vision deficiency. The border
+   style is a third channel (solid / dashed / dotted / double). */
+.dd-sitrep .sr-chip,
+.dd-sitrep .article-body .sr-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--sr-mono);
+  font-size: 0.68rem;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: 1px solid var(--sr-rule-strong);
+  border-radius: 2px;
+  padding: 2px 7px;
+  color: var(--sr-ink-2);
+  background: transparent;
+  white-space: nowrap;
+  vertical-align: baseline;
+}
+.dd-sitrep .sr-chip::before,
+.dd-sitrep .article-body .sr-chip::before {
+  content: "";
+  font-size: 0.8em;
+  line-height: 1;
+}
+
+/* REPORTED — single originating investigation. Treat as claim. */
+.dd-sitrep .sr-chip--reported,
+.dd-sitrep .article-body .sr-chip--reported {
+  color: var(--sr-amber);
+  background: var(--sr-amber-soft);
+  border-color: var(--sr-amber);
+  border-style: solid;
+}
+.dd-sitrep .sr-chip--reported::before,
+.dd-sitrep .article-body .sr-chip--reported::before { content: "\25A3"; } /* ▣ */
+
+/* CORROBORATED — two or more independent origins. */
+.dd-sitrep .sr-chip--corroborated,
+.dd-sitrep .article-body .sr-chip--corroborated {
+  color: var(--sr-teal);
+  background: var(--sr-teal-soft);
+  border-color: var(--sr-teal);
+  border-style: double;
+  border-width: 3px;
+  padding: 1px 6px;
+}
+.dd-sitrep .sr-chip--corroborated::before,
+.dd-sitrep .article-body .sr-chip--corroborated::before { content: "\25C6"; } /* ◆ */
+
+/* DISPUTED — the two accounts of the same events do not line up. Capped
+   usage: this is one of the four places --sr-signal is allowed to appear. */
+.dd-sitrep .sr-chip--disputed,
+.dd-sitrep .article-body .sr-chip--disputed {
+  color: var(--sr-signal);
+  background: var(--sr-signal-soft);
+  border-color: var(--sr-signal);
+  border-style: solid;
+  border-width: 2px;
+  padding: 1px 6px;
+}
+.dd-sitrep .sr-chip--disputed::before,
+.dd-sitrep .article-body .sr-chip--disputed::before { content: "\2715"; } /* ✕ */
+
+/* INFERENCE — this page's own analysis over cited facts. */
+.dd-sitrep .sr-chip--inference,
+.dd-sitrep .article-body .sr-chip--inference {
+  color: var(--sr-slate);
+  background: var(--sr-slate-soft);
+  border-color: var(--sr-slate);
+  border-style: dashed;
+}
+.dd-sitrep .sr-chip--inference::before,
+.dd-sitrep .article-body .sr-chip--inference::before { content: "\25C7"; } /* ◇ */
+
+/* PROPOSED — a recommendation, not an observation. */
+.dd-sitrep .sr-chip--proposed,
+.dd-sitrep .article-body .sr-chip--proposed {
+  color: var(--sr-olive);
+  background: var(--sr-olive-soft);
+  border-color: var(--sr-olive);
+  border-style: dotted;
+  border-width: 2px;
+  padding: 1px 6px;
+}
+.dd-sitrep .sr-chip--proposed::before,
+.dd-sitrep .article-body .sr-chip--proposed::before { content: "\25C8"; } /* ◈ */
+
+/* ------------------------------------------------------------ Stat strip -- */
+/* True ledger grid: gap:1px over a rule-strong ground makes the gutters
+   read as ruled lines rather than whitespace. */
+.dd-sitrep .article-body .stat-strip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1px;
+  background: var(--sr-rule-strong);
+  border: 1px solid var(--sr-rule-strong);
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+.dd-sitrep .article-body .sr-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  background: var(--sr-paper-2);
+  border-radius: 0;
+  padding: 0.9rem 1rem 1rem;
+  min-width: 0;
+}
+.dd-sitrep .article-body .sr-stat > i {
+  font-family: var(--sr-mono);
+  font-style: normal;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--sr-ink-3);
+}
+.dd-sitrep .article-body .sr-stat > b {
+  display: block;
+  font-family: var(--sr-display);
+  font-weight: 700;
+  font-size: clamp(1.6rem, 2.8vw, 2.2rem);
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  color: var(--sr-ink);
+  font-variant-numeric: tabular-nums;
+}
+.dd-sitrep .article-body .sr-stat.warn > b { color: var(--sr-amber); }
+.dd-sitrep .article-body .sr-stat.alert > b { color: var(--sr-signal); }
+.dd-sitrep .article-body .sr-stat > span {
+  display: block;
+  font-size: 0.85rem;
+  line-height: 1.45;
+  color: var(--sr-ink-2);
+}
+.dd-sitrep .article-body .sr-stat .sr-chip { align-self: flex-start; margin-top: auto; }
+
+/* -------------------------------------------------------- Sourcing panel -- */
+/* The note-panel is the opening "what is claimed / what is confirmed" split.
+   Author two child <div>s and they sit side by side; one child fills. */
+.dd-sitrep .article-body .note-panel {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1px;
+  background: var(--sr-rule);
+  border: 1px solid var(--sr-rule-strong);
+  border-left: 3px solid var(--sr-olive);
+  border-radius: 0;
+  margin-top: 1.4rem;
+  margin-bottom: 1.6rem;
+  padding: 0;
+  overflow: hidden;
+}
+.dd-sitrep .article-body .note-panel > * {
+  background: var(--sr-paper-2);
+  padding: 0.95rem 1.1rem;
+  margin: 0;
+}
+.dd-sitrep .article-body .note-panel strong {
+  display: block;
+  font-family: var(--sr-mono);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--sr-olive);
+  margin-bottom: 0.5rem;
+}
+.dd-sitrep .article-body .note-panel p { margin: 0.5rem 0 0; font-size: 0.96rem; }
+.dd-sitrep .article-body .note-panel p:first-of-type { margin-top: 0; }
+
+/* -------------------------------------------------------------- Callouts -- */
+/* Three variants only: note (olive), caution (amber), gap (signal). No icons. */
+.dd-sitrep .article-body .callout {
+  display: block;
+  padding: 0.95rem 1.1rem;
+  border: 1px solid var(--sr-rule);
+  border-left: 3px solid var(--sr-olive);
+  border-radius: 0;
+  background: var(--sr-paper-2);
+  color: var(--sr-ink-2);
+  margin-top: 1.4rem;
+  margin-bottom: 1.4rem;
+}
+.dd-sitrep .article-body .callout > strong {
+  display: block;
+  font-family: var(--sr-mono);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--sr-olive);
+  margin: 0 0 0.4rem;
+}
+.dd-sitrep .article-body .callout p { margin: 0; font-size: 0.96rem; }
+.dd-sitrep .article-body .callout p + p { margin-top: 0.5rem; }
+.dd-sitrep .article-body .callout.caution,
+.dd-sitrep .article-body .callout.warm {
+  border-left-color: var(--sr-amber);
+  background: var(--sr-amber-soft);
+}
+.dd-sitrep .article-body .callout.caution > strong,
+.dd-sitrep .article-body .callout.warm > strong { color: var(--sr-amber); }
+.dd-sitrep .article-body .callout.gap,
+.dd-sitrep .article-body .callout.alert {
+  border-left-color: var(--sr-signal);
+  background: var(--sr-signal-soft);
+}
+.dd-sitrep .article-body .callout.gap > strong,
+.dd-sitrep .article-body .callout.alert > strong { color: var(--sr-signal); }
+
+/* ------------------------------------------------------------ Blockquote -- */
+/* No quotation-mark decoration, no italic. A slate rule and a mono
+   attribution line beneath (author the attribution as the last <p>). */
+.dd-sitrep .article-body blockquote {
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+  padding: 0.3rem 0 0.3rem 1.1rem;
+  border-left: 3px solid var(--sr-slate);
+  background: none;
+  border-radius: 0;
+}
+.dd-sitrep .article-body blockquote p {
+  font-family: var(--sr-body-font);
+  font-style: normal;
+  font-weight: 400;
+  font-size: 1.02rem;
+  line-height: 1.6;
+  color: var(--sr-ink-2);
+  margin: 0;
+}
+.dd-sitrep .article-body blockquote p + p { margin-top: 0.5rem; }
+.dd-sitrep .article-body blockquote p:last-child:not(:only-child) {
+  font-family: var(--sr-mono);
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--sr-ink-3);
+  margin-top: 0.7rem;
+}
+
+/* ---------------------------------------------------------------- Tables -- */
+/* Wide tables scroll inside their own wrapper so the page body never scrolls
+   sideways. Author the wrapper as <div class="table-scroll">, and a bare
+   table gets the same treatment via the block-level fallback below. */
+.dd-sitrep .article-body .table-scroll {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  border: 1px solid var(--sr-rule-strong);
+  margin-top: 1.5rem;
+  margin-bottom: 1.7rem;
+}
+.dd-sitrep .article-body .table-scroll > table {
+  margin: 0;
+  border: 0;
+  min-width: 34rem;
+}
+.dd-sitrep .article-body table {
+  width: 100%;
+  border-collapse: collapse;
+  border-radius: 0;
+  border: 1px solid var(--sr-rule-strong);
+  margin-top: 1.5rem;
+  margin-bottom: 1.7rem;
+  font-size: 0.92rem;
+}
+.dd-sitrep .article-body th,
+.dd-sitrep .article-body td {
+  display: table-cell;
+  padding: 8px 12px;
+  border: 0;
+  border-bottom: 1px solid var(--sr-rule);
+  text-align: left;
+  vertical-align: top;
+  color: var(--sr-ink-2);
+}
+.dd-sitrep .article-body td { font-variant-numeric: tabular-nums; }
+.dd-sitrep .article-body th {
+  font-family: var(--sr-mono);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--sr-ink);
+  background: var(--sr-paper-3);
+  border-bottom: 1px solid var(--sr-rule-strong);
+}
+.dd-sitrep .article-body caption {
+  caption-side: top;
+  text-align: left;
+  font-family: var(--sr-mono);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--sr-ink-3);
+  padding: 0 0 6px;
+}
+.dd-sitrep .article-body tbody tr:last-child td { border-bottom: 0; }
+.dd-sitrep .article-body tbody tr:nth-child(even) td { background: var(--sr-paper-2); }
+.dd-sitrep .article-body td strong { color: var(--sr-ink); }
+
+/* -------------------------------------------- Data appendix (details) ----- */
+.dd-sitrep .article-body details {
+  margin-top: 1.4rem;
+  margin-bottom: 1.9rem;
+  border: 1px solid var(--sr-rule-strong);
+  border-radius: 0;
+  background: var(--sr-paper-2);
+  overflow: hidden;
+}
+.dd-sitrep .article-body summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 13px;
+  font-family: var(--sr-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--sr-ink);
+  background: var(--sr-paper-3);
+}
+.dd-sitrep .article-body summary::-webkit-details-marker { display: none; }
+/* +/- affordance drawn in CSS, no icon font */
+.dd-sitrep .article-body summary::after {
+  content: "+";
+  flex: 0 0 auto;
+  margin-left: auto;
+  font-size: 0.95rem;
+  line-height: 1;
+  color: var(--sr-olive);
+}
+.dd-sitrep .article-body details[open] summary::after { content: "\2212"; }
+.dd-sitrep .article-body details[open] summary {
+  border-bottom: 1px solid var(--sr-rule-strong);
+}
+.dd-sitrep .article-body details[open] { background: var(--sr-paper-3); }
+.dd-sitrep .article-body summary:focus-visible {
+  outline: 2px solid var(--sr-focus);
+  outline-offset: -2px;
+}
+.dd-sitrep .article-body details > div,
+.dd-sitrep .article-body details > p { padding: 0.9rem 1rem; }
+.dd-sitrep .article-body details table { margin: 0; border: 0; }
+.dd-sitrep .article-body details > .table-scroll { border: 0; margin: 0; }
+
+/* ------------------------------------------------------- Exhibit chrome --- */
+/* The head strip is exactly 26px tall, matching the repo-wide convention:
+   authors add 26 to --vf-h and --vf-h-m to account for it. Autosizing
+   visuals self-correct via postMessage, so the +26 only matters for the
+   fixed-height ones. */
+.dd-sitrep .article-body .visual-frame {
+  position: relative;
+  counter-increment: figure;
+  border: 1px solid var(--sr-rule-strong);
+  border-radius: 0;
+  background: var(--sr-paper-2);
+  margin-top: 1.7rem;
+  margin-bottom: 2.1rem;
+  padding-top: 26px;
+  overflow: hidden;
+  scroll-margin-top: calc(var(--sr-header-h) + var(--sr-strip-h) + 16px);
+}
+/* case tab: a mono label flush on the top-left edge of the exhibit, reading
+   EXHIBIT A, EXHIBIT B, ... off the figure counter. */
+.dd-sitrep .article-body .visual-frame::before {
+  content: "Exhibit " counter(figure, upper-alpha);
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  font-family: var(--sr-mono);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--sr-tab-fg);
+  background: var(--sr-tab-bg);
+  border-right: 1px solid var(--sr-tab-border);
+  border-bottom: 1px solid var(--sr-tab-border);
+  z-index: 2;
+}
+/* the rest of the head strip, so the tab reads as a tab on a ruled edge */
+.dd-sitrep .article-body .visual-frame::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 26px;
+  background: var(--sr-paper-3);
+  border-bottom: 1px solid var(--sr-rule);
+  z-index: 1;
+}
+.dd-sitrep .article-body .visual-frame iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: var(--sr-paper-3);
+}
+/* caption bar under the exhibit: figure name plus its evidence chip */
+.dd-sitrep .article-body .vf-caption,
+.dd-sitrep .article-body .visual-frame + p em {
+  font-style: normal;
+  color: var(--sr-ink-3);
+}
+.dd-sitrep .article-body .vf-caption {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--sr-rule);
+  font-family: var(--sr-body-font);
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--sr-ink);
+}
+/* optional footer rail: two mono cells, left source, right read-time hint */
+.dd-sitrep .article-body .vf-foot {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 6px 14px;
+  padding: 6px 12px;
+  border-top: 1px solid var(--sr-rule);
+  font-family: var(--sr-mono);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--sr-ink-3);
+}
+
+/* -------------------------------------------------------------- Motion ---- */
+/* The restraint rules ban animation. The only motion on the page is a 120ms
+   colour transition on chips and nav items, and it is opt-in. */
+@media (prefers-reduced-motion: no-preference) {
+  .dd-sitrep .sr-phase,
+  .dd-sitrep .sr-phase-node,
+  .dd-sitrep .sr-chip,
+  .dd-sitrep .article-body .sr-chip {
+    transition: color 120ms ease, background-color 120ms ease, border-color 120ms ease;
+  }
+}
+
+/* =================================================================
+   Wide screens: the phase strip stands up into a vertical rail.
+   Gated on :has() only where the layout genuinely needs it — the
+   two-column grid alone is safe, so it is a plain media query.
+   ================================================================= */
+@media (min-width: 1180px) {
+  .dd-sitrep .sr-layout {
+    display: grid;
+    grid-template-columns: 214px minmax(0, 1fr);
+    column-gap: 36px;
+    align-items: start;
+  }
+  .dd-sitrep .sr-body { min-width: 0; }
+  .dd-sitrep .sr-body h2,
+  .dd-sitrep .sr-body h3,
+  .dd-sitrep .article-body .visual-frame {
+    scroll-margin-top: calc(var(--sr-header-h) + 24px);
+  }
+
+  .dd-sitrep .sr-spine-index {
+    position: sticky;
+    top: calc(var(--sr-header-h) + 24px);
+    height: auto;
+    max-height: calc(100vh - var(--sr-header-h) - 48px);
+    display: block;
+    overflow-x: hidden;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    margin: 0;
+    padding: 0 0 0 13px;
+    background: none;
+    border-bottom: 0;
+    /* the vertical spine line running the full rail */
+    border-left: 2px solid var(--sr-rule);
+    mask-image: none;
+    scroll-snap-type: none;
+  }
+  .dd-sitrep .sr-spine-index::-webkit-scrollbar { width: 6px; }
+
+  .dd-sitrep .sr-phase-group { display: block; }
+  .dd-sitrep .sr-phase-group + .sr-phase-group { margin-top: 2px; }
+
+  .dd-sitrep .sr-phase {
+    display: grid;
+    grid-template-columns: 9px minmax(0, 1fr);
+    align-items: start;
+    column-gap: 10px;
+    row-gap: 2px;
+    padding: 8px 9px;
+    border: 0;
+    border-left: 2px solid transparent;
+    margin-left: -14px;
+    padding-left: 12px;
+    white-space: normal;
+  }
+  .dd-sitrep .sr-phase-node { margin-top: 6px; }
+  .dd-sitrep .sr-phase-no {
+    grid-column: 2;
+    font-size: 0.68rem;
+    color: var(--sr-ink-3);
+  }
+  .dd-sitrep .sr-phase-label {
+    grid-column: 2;
+    font-size: 0.86rem;
+    line-height: 1.35;
+    color: var(--sr-ink-2);
+  }
+  .dd-sitrep .sr-phase[aria-current="true"] {
+    background: none;
+    border-left-color: var(--sr-olive);
+    color: var(--sr-ink);
+  }
+  .dd-sitrep .sr-phase[aria-current="true"] .sr-phase-no { color: var(--sr-olive); }
+  .dd-sitrep .sr-phase[aria-current="true"] .sr-phase-label {
+    color: var(--sr-ink);
+    font-weight: 600;
+  }
+  .dd-sitrep .sr-phase[aria-current="true"] .sr-phase-node {
+    background: var(--sr-olive);
+    border-color: var(--sr-olive);
+  }
+  .dd-sitrep .sr-phase.is-visited .sr-phase-node {
+    background: var(--sr-rule-strong);
+    border-color: var(--sr-rule-strong);
+  }
+
+  .dd-sitrep .sr-phase-fig {
+    display: none;
+    padding: 4px 8px 4px 31px;
+    font-family: var(--sr-body-font);
+    font-size: 0.76rem;
+    line-height: 1.35;
+    color: var(--sr-ink-3);
+    text-decoration: none;
+  }
+  .dd-sitrep .sr-phase-fig::before {
+    content: "";
+    display: inline-block;
+    width: 5px;
+    height: 5px;
+    margin: 0 8px 2px -13px;
+    border: 1px solid var(--sr-rule-strong);
+  }
+  .dd-sitrep .sr-phase-fig:hover { color: var(--sr-ink); }
+  .dd-sitrep .sr-phase-fig:focus-visible {
+    outline: 2px solid var(--sr-focus);
+    outline-offset: -2px;
+  }
+  /* only the chapter being read expands its exhibits, so the index stays
+     scannable rather than becoming a wall of links */
+  .dd-sitrep .sr-phase-group.is-open .sr-phase-fig { display: block; }
+}
+
+/* ----------------------------------------------------------- Responsive --- */
+@media (max-width: 960px) {
+  .dd-sitrep .article-body .stat-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 760px) {
+  .dd-sitrep .sr-coversheet {
+    grid-template-columns: repeat(2, minmax(0, auto));
+    justify-content: start;
+    row-gap: 6px;
+  }
+  .dd-sitrep .sr-cover-sep { display: none; }
+  .dd-sitrep .sr-cover-notice {
+    grid-column: 1 / -1;
+    justify-self: start;
+    white-space: normal;
+  }
+  .dd-sitrep .sr-header::after { display: none; }
+  .dd-sitrep .sr-lead { font-size: 1.06rem; }
+}
+@media (max-width: 720px) {
+  /* the site header goes static at this width, so the phase strip owns the top */
+  /* must match the (0,2,0) selector the tokens are declared on, or the
+     default 92px wins on specificity */
+  .dd-sitrep.article-shell { --sr-header-h: 0px; }
+  .dd-sitrep .sr-spine-index { top: 0; }
+}
+@media (max-width: 560px) {
+  .dd-sitrep .article-body .stat-strip { grid-template-columns: minmax(0, 1fr); }
+  .dd-sitrep .sr-coords span { font-size: 0.68rem; }
+}
+
+/* ------------------------------------------------- Wide-screen breakout -- */
+/* global.css lifts the .site-shell cap to 1800px for article pages at
+   >=1640px; here the template's own wide cap follows suit so content fills
+   the larger shell instead of stopping at 1600px. */
+@supports selector(:has(*)) {
+  @media (min-width: 1640px) {
+    .dd-sitrep.article-shell { --sr-wide: 100%; }
+  }
+}

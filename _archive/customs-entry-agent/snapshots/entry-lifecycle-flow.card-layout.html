@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>End to end · one entry travels the system</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+/* Entry lifecycle flow. Node cards laid out in bands; an SVG layer beneath
+   draws the connectors from measured node rects, and animated packets travel
+   the active scenario's path. Reduced motion lights the path statically. */
+
+.shell { display: flex; flex-direction: column; gap: 12px; }
+:root[data-embedded="true"] .shell { padding: 14px clamp(14px, 2vw, 22px) 18px; }
+
+.head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.head h1 {
+  font-family: "Space Grotesk", sans-serif; font-weight: 700;
+  font-size: clamp(1.02rem, 2.2vw, 1.3rem); letter-spacing: -0.02em; color: var(--text-strong);
+}
+:root[data-embedded="true"] .head h1 { font-size: 1.02rem; }
+.head p { font: 500 0.72rem/1.4 "DM Sans", sans-serif; color: var(--muted); margin-top: 2px; }
+
+/* ---------- scenario picker + transport ---------- */
+.controls { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.scenario {
+  cursor: pointer; font: 700 0.64rem/1.2 "Space Grotesk", sans-serif; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--muted); background: var(--surface);
+  border: 1px solid var(--border-strong); border-radius: 999px; padding: 7px 12px;
+  transition: color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.scenario[aria-pressed="true"] {
+  color: var(--sc); border-color: var(--sc);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--sc) 18%, transparent);
+}
+.transport { display: flex; gap: 6px; margin-left: auto; }
+.tbtn {
+  cursor: pointer; font: 700 0.64rem/1 "IBM Plex Mono", monospace; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--accent-3); background: var(--surface);
+  border: 1px solid var(--accent-3); border-radius: 6px; padding: 8px 12px;
+  transition: filter 0.15s ease;
+}
+.tbtn:hover { filter: brightness(1.12); }
+.tbtn.secondary { color: var(--muted); border-color: var(--border-strong); }
+
+/* ---------- status readout ---------- */
+.readout {
+  min-height: 34px; display: flex; align-items: center; gap: 9px;
+  border: 1px solid var(--border); border-left: 3px solid var(--rc, var(--accent-2));
+  border-radius: 8px; background: var(--surface); padding: 7px 11px;
+}
+.readout .k {
+  font: 700 0.58rem/1 "IBM Plex Mono", monospace; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--rc, var(--accent-2)); white-space: nowrap;
+}
+.readout .v { font: 500 0.74rem/1.4 "DM Sans", sans-serif; color: var(--text); }
+
+/* ---------- board ---------- */
+.board { position: relative; }
+.wires { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+.bands { position: relative; z-index: 1; display: flex; flex-direction: column; gap: 26px; }
+.band { display: grid; gap: 12px; align-items: stretch; }
+.band.b1 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.band.b2 { grid-template-columns: minmax(0, 2fr) minmax(0, 1.2fr); }
+.band.b3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.band.b4 { grid-template-columns: minmax(0, 1fr); }
+.band.b5 { grid-template-columns: minmax(0, 1fr); }
+.band.b6 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.band.b7 { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); }
+
+.node {
+  position: relative; min-width: 0;
+  border: 1px solid var(--border-strong); border-top: 3px solid var(--nc, var(--accent-2));
+  border-radius: 10px; background: var(--surface); box-shadow: var(--shadow-soft);
+  padding: 9px 11px 10px; opacity: 0.5; filter: saturate(0.55);
+  transition: opacity 0.3s ease, filter 0.3s ease, box-shadow 0.3s ease;
+}
+.node .tag {
+  font: 700 0.55rem/1 "IBM Plex Mono", monospace; letter-spacing: 0.13em; text-transform: uppercase;
+  color: var(--nc, var(--accent-2));
+}
+.node b { display: block; font: 700 0.76rem/1.25 "Space Grotesk", sans-serif; color: var(--text-strong); margin-top: 3px; }
+.node span { display: block; font: 500 0.64rem/1.4 "DM Sans", sans-serif; color: var(--muted); margin-top: 3px; }
+.node.on { opacity: 1; filter: none; }
+.node.lit {
+  opacity: 1; filter: none;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--nc, var(--accent-2)) 26%, transparent), var(--shadow-soft);
+}
+.node.watcher { border-style: dashed; }
+.node .stamp { position: absolute; top: 8px; right: 9px; }
+
+/* wire styling */
+.wire { fill: none; stroke: var(--border-strong); stroke-width: 1.5; opacity: 0.5; }
+.wire.on { stroke: var(--wc); stroke-width: 2.2; opacity: 1; }
+.packet { r: 5; fill: var(--wc, var(--accent-3)); filter: drop-shadow(0 0 4px var(--wc, var(--accent-3))); }
+.arrowhead { fill: var(--border-strong); opacity: 0.6; }
+.arrowhead.on { fill: var(--wc); opacity: 1; }
+
+/* legend */
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; }
+.legend i {
+  display: inline-flex; align-items: center; gap: 6px; font: 500 0.62rem/1 "DM Sans", sans-serif;
+  font-style: normal; color: var(--muted);
+}
+.legend i::before { content: ""; width: 14px; height: 3px; border-radius: 2px; background: var(--lc); }
+
+@media (max-width: 760px) {
+  .head h1 { font-size: 1rem; }
+  .band.b1, .band.b3, .band.b6 { grid-template-columns: minmax(0, 1fr); }
+  .band.b2, .band.b7 { grid-template-columns: minmax(0, 1fr); }
+  .bands { gap: 18px; }
+  .transport { margin-left: 0; }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="head">
+    <div>
+      <h1>One entry travels the system</h1>
+      <p>Pick a scenario, press play. The packet follows the exact path that line item takes.</p>
+    </div>
+    <span class="stamp stamp--illustrative">Illustrative walkthrough</span>
+  </div>
+
+  <div class="controls" role="group" aria-label="Scenario picker">
+    <button class="scenario" data-s="0" style="--sc: var(--T0)" aria-pressed="true">Repeat SKU</button>
+    <button class="scenario" data-s="1" style="--sc: var(--T1)" aria-pressed="false">Near neighbour</button>
+    <button class="scenario" data-s="2" style="--sc: var(--T2)" aria-pressed="false">Genuinely novel</button>
+    <button class="scenario" data-s="3" style="--sc: var(--accent-2)" aria-pressed="false">Rulebook change</button>
+    <div class="transport">
+      <button class="tbtn" id="play">Play</button>
+      <button class="tbtn secondary" id="step">Step</button>
+      <button class="tbtn secondary" id="reset">Reset</button>
+    </div>
+  </div>
+
+  <div class="readout" aria-live="polite">
+    <span class="k" id="ro-k">Ready</span>
+    <span class="v" id="ro-v">A repeat SKU line is waiting at intake. Press play.</span>
+  </div>
+
+  <div class="board" id="board">
+    <svg class="wires" id="wires" aria-hidden="true"></svg>
+    <div class="bands">
+      <div class="band b1">
+        <div class="node" id="n-intake" style="--nc: var(--S-lodged)"><span class="tag">Intake</span><b>Documents arrive</b><span>Invoice, packing list, bill of lading over SES, portal, or SFTP</span></div>
+        <div class="node" id="n-parse" style="--nc: var(--S-hold)"><span class="tag">Quarantine</span><b>Sandboxed parse</b><span>One microVM per document, no route out, prompt-injection dies here</span></div>
+        <div class="node" id="n-normalise" style="--nc: var(--S-lodged)"><span class="tag">Normalise</span><b>Entity resolution</b><span>Supplier, part number, and lane resolved against the product master</span></div>
+      </div>
+      <div class="band b2">
+        <div class="node" id="n-router" style="--nc: var(--accent)"><span class="tag">The split</span><b>Novelty router</b><span>Deterministic code, readable in ten lines. Have we decided this exact SKU before, something near it, or nothing like it</span></div>
+        <div class="node watcher" id="n-watcher" style="--nc: var(--accent-2)"><span class="tag">Always on</span><b>Rulebook watcher</b><span>Monitors HTS, proclamations, and rulings. Fires the invalidation join on change</span></div>
+      </div>
+      <div class="band b3">
+        <div class="node" id="n-t0" style="--nc: var(--T0)"><span class="tag">Tier 0 · 70–85%</span><b>Recall</b><span>Replay the human-approved decision. Zero model calls</span></div>
+        <div class="node" id="n-t1" style="--nc: var(--T1)"><span class="tag">Tier 1 · 10–20%</span><b>Deduce</b><span>Bounded reasoning from the nearest approved neighbour</span></div>
+        <div class="node" id="n-t2" style="--nc: var(--T2)"><span class="tag">Tier 2 · 5–15%</span><b>Reason</b><span>Four specialist workers, retrieval-grounded, human mandatory</span></div>
+      </div>
+      <div class="band b4">
+        <div class="node" id="n-validate" style="--nc: var(--S-review)"><span class="tag">Free and deterministic</span><b>Validator gauntlet</b><span>Citation check, HTS existence, arithmetic reconciliation, cross-field consistency, schema conformance</span></div>
+      </div>
+      <div class="band b5">
+        <div class="node" id="n-gate" style="--nc: var(--accent)"><span class="tag">The product</span><b>Confidence gate</b><span>Six fused signals, calibrated per field, thresholds move with materiality</span></div>
+      </div>
+      <div class="band b6">
+        <div class="node" id="n-accept" style="--nc: var(--S-cleared)"><span class="tag">High confidence</span><b>Auto-accept</b><span>Only after four clean weeks in shadow</span></div>
+        <div class="node" id="n-review" style="--nc: var(--S-review)"><span class="tag">Queue</span><b>Broker review</b><span>Ranked by expected value of review, one keystroke to accept</span></div>
+        <div class="node" id="n-signoff" style="--nc: var(--S-hold)"><span class="tag">Mandatory</span><b>Licensed sign-off</b><span>Every Tier 2 first decision, no exceptions</span></div>
+      </div>
+      <div class="band b7">
+        <div class="node" id="n-file" style="--nc: var(--S-cleared)"><span class="tag">No model inside</span><b>Assemble and file</b><span>3461 / 7501 / PGA records, hard schema gate, transmitted over ABI to CBP ACE</span></div>
+        <div class="node" id="n-ledger" style="--nc: var(--accent-2)"><span class="tag">Append only</span><b>Audit ledger</b><span>New row, versions pinned, six year Object Lock retention</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="legend" aria-hidden="true">
+    <i style="--lc: var(--T0)">Tier 0 recall path</i>
+    <i style="--lc: var(--T1)">Tier 1 deduction path</i>
+    <i style="--lc: var(--T2)">Tier 2 reasoning path</i>
+    <i style="--lc: var(--accent-2)">Rulebook invalidation path</i>
+  </div>
+</div>
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const board = $('board');
+  const svg = $('wires');
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* Scenario definitions: ordered node ids + per-arrival readout lines. */
+  const SCEN = [
+    { name: 'Repeat SKU', color: 'var(--T0)',
+      path: ['n-intake', 'n-parse', 'n-normalise', 'n-router', 'n-t0', 'n-validate', 'n-gate', 'n-accept', 'n-file', 'n-ledger'],
+      notes: [
+        'A weekly shipment lands. Same supplier, same part number, same lane.',
+        'Each document parses alone in a quarantine microVM with no route out.',
+        'Entity resolution matches supplier and part number to the product master.',
+        'Exact match found. The router sends the line down the recall lane.',
+        'Tier 0 replays the human-approved decision. Zero model calls, near zero cost.',
+        'The free validators still run. Arithmetic, HTS existence, schema.',
+        'Recall plus clean validators scores high. Materiality is routine.',
+        'Auto-accepted. This lane only opened after four clean weeks in shadow.',
+        'The filing service assembles the 7501 and transmits over ABI. It contains no model.',
+        'A new ledger row lands, versions pinned. This is the whole fast path.'
+      ] },
+    { name: 'Near neighbour', color: 'var(--T1)',
+      path: ['n-intake', 'n-parse', 'n-normalise', 'n-router', 'n-t1', 'n-validate', 'n-gate', 'n-review', 'n-file', 'n-ledger'],
+      notes: [
+        'A known supplier ships a new variant of a known product.',
+        'Quarantine parse, one microVM per document.',
+        'No exact match, but the product master holds close neighbours.',
+        'The router picks Tier 1: bounded deduction, not open-ended reasoning.',
+        'The model reasons from the nearest approved decision and must cite it.',
+        'Validators pass. The deduction chain is checked line by line.',
+        'Confidence is decent but not recall-grade. The gate routes to a human.',
+        'A broker sees the proposed decision, its neighbour, and the diff. One keystroke.',
+        'Approved. The filing service transmits over ABI.',
+        'The approved decision becomes a permanent Tier 0 recall for next week.'
+      ] },
+    { name: 'Genuinely novel', color: 'var(--T2)',
+      path: ['n-intake', 'n-parse', 'n-normalise', 'n-router', 'n-t2', 'n-validate', 'n-gate', 'n-signoff', 'n-file', 'n-ledger'],
+      notes: [
+        'A brand new product from a new supplier. Nothing like it on record.',
+        'Quarantine parse. Novel suppliers are exactly where hostile documents appear.',
+        'Entity resolution creates a new product master candidate.',
+        'No match, no neighbour. The router sends it to full reasoning.',
+        'Four workers decide classification, valuation, origin, and duty stacking independently.',
+        'Validators check every citation against the hash-pinned rulebook.',
+        'Whatever the score says, Tier 2 first decisions never auto-accept.',
+        'A licensed broker signs the first decision. This is the reasonable care record.',
+        'Filed over ABI with the signed decision attached.',
+        'The ledger row seeds the product master. The next shipment is Tier 0.'
+      ] },
+    { name: 'Rulebook change', color: 'var(--accent-2)',
+      path: ['n-watcher', 'n-ledger', 'n-review', 'n-t2', 'n-validate', 'n-gate', 'n-signoff', 'n-ledger'],
+      notes: [
+        'July 20. Three Section 338 proclamations land on Canadian goods.',
+        'The watcher joins the change scope against every decision and the authorities it recorded. Four decisions match, including one whose only reason was USMCA-qualifying therefore exempt.',
+        'The affected decisions drop out of Tier 0 and into the review queue, flagged with the proclamation that broke them.',
+        'Re-derivation runs as Tier 2 against the new rulebook version.',
+        'Validators re-check every citation against the new corpus hash.',
+        'The gate treats a re-derived decision like a first decision.',
+        'A licensed broker signs the corrected decision.',
+        'A superseding row lands. The old row stays forever, marked superseded. Nothing is ever edited.'
+      ] }
+  ];
+
+  const nodes = () => Array.from(board.querySelectorAll('.node'));
+  let scen = 0, cursor = -1, playing = false, raf = 0;
+
+  /* ---------- wire drawing ---------- */
+  let wireEls = [];
+  const anchor = (el, other) => {
+    const b = board.getBoundingClientRect();
+    const r = el.getBoundingClientRect();
+    const o = other.getBoundingClientRect();
+    const cx = r.left + r.width / 2 - b.left;
+    const cy = r.top + r.height / 2 - b.top;
+    // choose the side facing the other node
+    if (Math.abs(o.top - r.top) < r.height * 0.6) {
+      // same band: connect horizontally
+      const x = o.left > r.left ? r.right - b.left : r.left - b.left;
+      return { x, y: cy };
+    }
+    const y = o.top > r.top ? r.bottom - b.top : r.top - b.top;
+    return { x: cx, y };
+  };
+  const drawWires = () => {
+    const b = board.getBoundingClientRect();
+    svg.setAttribute('viewBox', `0 0 ${b.width} ${b.height}`);
+    svg.innerHTML = '';
+    wireEls = [];
+    const path = SCEN[scen].path;
+    for (let i = 0; i < path.length - 1; i++) {
+      const a = $(path[i]), c = $(path[i + 1]);
+      const p1 = anchor(a, c), p2 = anchor(c, a);
+      const dx = p2.x - p1.x, dy = p2.y - p1.y;
+      let d;
+      if (Math.abs(dy) < 8) {
+        d = `M ${p1.x} ${p1.y} L ${p2.x} ${p2.y}`;
+      } else {
+        const bend = Math.sign(dy) * Math.min(40, Math.abs(dy) / 2);
+        d = `M ${p1.x} ${p1.y} C ${p1.x + dx * 0.1} ${p1.y + bend}, ${p2.x - dx * 0.1} ${p2.y - bend}, ${p2.x} ${p2.y}`;
+      }
+      const el = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      el.setAttribute('d', d);
+      el.setAttribute('class', 'wire');
+      el.style.setProperty('--wc', SCEN[scen].color);
+      svg.appendChild(el);
+      // arrowhead at the end
+      const ang = Math.atan2(p2.y - (p2.y - dy * 0.1), p2.x - (p2.x - dx * 0.1)) || (dy > 0 ? Math.PI / 2 : -Math.PI / 2);
+      const ah = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      const s = 5.5;
+      ah.setAttribute('d', `M ${p2.x} ${p2.y} L ${p2.x - s * Math.cos(ang - 0.45)} ${p2.y - s * Math.sin(ang - 0.45)} L ${p2.x - s * Math.cos(ang + 0.45)} ${p2.y - s * Math.sin(ang + 0.45)} Z`);
+      ah.setAttribute('class', 'arrowhead');
+      ah.style.setProperty('--wc', SCEN[scen].color);
+      svg.appendChild(ah);
+      wireEls.push({ line: el, head: ah });
+    }
+  };
+
+  /* ---------- state rendering ---------- */
+  const readout = (k, v, color) => {
+    $('ro-k').textContent = k;
+    $('ro-v').textContent = v;
+    document.querySelector('.readout').style.setProperty('--rc', color || SCEN[scen].color);
+  };
+  const render = () => {
+    const s = SCEN[scen];
+    nodes().forEach((n) => { n.classList.remove('on', 'lit'); });
+    wireEls.forEach((w, i) => {
+      w.line.classList.toggle('on', i < cursor);
+      w.head.classList.toggle('on', i < cursor);
+    });
+    s.path.forEach((id, i) => {
+      const n = $(id);
+      if (i < cursor) n.classList.add('on');
+      if (i === cursor) n.classList.add('lit');
+    });
+    if (cursor < 0) {
+      readout('Ready', `${s.name} scenario loaded. Press play.`);
+    } else {
+      readout(`Step ${cursor + 1}/${s.path.length}`, s.notes[cursor]);
+    }
+  };
+
+  /* ---------- packet animation ---------- */
+  let packet = null;
+  const animateEdge = (i, done) => {
+    const w = wireEls[i];
+    if (!w || reduced) { done(); return; }
+    if (!packet) {
+      packet = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      packet.setAttribute('class', 'packet');
+      svg.appendChild(packet);
+    }
+    packet.style.setProperty('--wc', SCEN[scen].color);
+    packet.style.display = '';
+    const len = w.line.getTotalLength();
+    const dur = Math.max(260, Math.min(700, len * 2.2));
+    let t0 = null;
+    const tick = (ts) => {
+      if (t0 === null) t0 = ts;
+      const k = Math.min(1, (ts - t0) / dur);
+      const p = w.line.getPointAtLength(len * k);
+      packet.setAttribute('cx', p.x);
+      packet.setAttribute('cy', p.y);
+      if (k < 1) { raf = requestAnimationFrame(tick); }
+      else { packet.style.display = 'none'; done(); }
+    };
+    raf = requestAnimationFrame(tick);
+  };
+
+  const advance = (auto) => {
+    const s = SCEN[scen];
+    if (cursor >= s.path.length - 1) { playing = false; setPlayLabel(); return; }
+    const edge = cursor; // edge from current node to the next
+    cursor += 1;
+    if (edge >= 0) {
+      animateEdge(edge, () => {
+        render();
+        if (auto && playing) { setTimeout(() => advance(true), reduced ? 650 : 420); }
+      });
+      // light the wire as the packet departs
+      wireEls[edge].line.classList.add('on');
+      wireEls[edge].head.classList.add('on');
+      readout('In transit', '…', s.color);
+    } else {
+      render();
+      if (auto && playing) { setTimeout(() => advance(true), reduced ? 650 : 500); }
+    }
+  };
+
+  const setPlayLabel = () => { $('play').textContent = playing ? 'Pause' : 'Play'; };
+
+  const stop = () => { playing = false; cancelAnimationFrame(raf); if (packet) packet.style.display = 'none'; setPlayLabel(); };
+  const reset = () => { stop(); cursor = -1; render(); };
+  const setScenario = (i) => {
+    stop();
+    scen = i;
+    document.querySelectorAll('.scenario').forEach((b) => b.setAttribute('aria-pressed', String(Number(b.dataset.s) === i)));
+    cursor = -1;
+    drawWires();
+    render();
+  };
+
+  $('play').addEventListener('click', () => {
+    if (playing) { stop(); return; }
+    if (cursor >= SCEN[scen].path.length - 1) cursor = -1;
+    playing = true; setPlayLabel();
+    advance(true);
+  });
+  $('step').addEventListener('click', () => { stop(); advance(false); });
+  $('reset').addEventListener('click', reset);
+  document.querySelectorAll('.scenario').forEach((b) =>
+    b.addEventListener('click', () => setScenario(Number(b.dataset.s))));
+
+  /* redraw wires when layout changes (resize, font load, band wrap) */
+  let rt = 0;
+  const relayout = () => {
+    clearTimeout(rt);
+    rt = setTimeout(() => { drawWires(); render(); }, 60);
+  };
+  if ('ResizeObserver' in window) new ResizeObserver(relayout).observe(board);
+  window.addEventListener('load', relayout);
+
+  setScenario(0);
+
+  /* Report content height so the parent frame hugs the content. */
+  if (document.documentElement.dataset.embedded === 'true') {
+    const postSize = () => window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+    if ('ResizeObserver' in window) new ResizeObserver(postSize).observe(document.body);
+    window.addEventListener('load', postSize);
+  }
+})();
+</script>
+</body>
+</html>

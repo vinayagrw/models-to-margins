@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Five planes, no vendor gate</title>
+<script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+.shell { display: flex; flex-direction: column; gap: 12px; }
+:root[data-embedded="true"] .shell { padding: 14px clamp(14px, 2vw, 22px); }
+.head h1 { font-family: "Archivo", sans-serif; font-weight: 700; font-size: clamp(1.0rem, 2.2vw, 1.26rem); color: var(--text-strong); }
+.head p { font: 500 0.76rem/1.4 "IBM Plex Sans", sans-serif; color: var(--muted); margin-top: 3px; }
+
+.ctl { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.ctl button {
+  min-height: 34px; padding: 6px 12px; cursor: pointer;
+  font: 600 0.64rem/1 "IBM Plex Mono", monospace; letter-spacing: 0.07em; text-transform: uppercase;
+  color: var(--accent); background: transparent; border: 1px solid var(--accent);
+}
+.ctl button:hover { background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.ctl .hint { font: 500 0.68rem/1.3 "IBM Plex Sans", sans-serif; color: var(--muted-soft); }
+
+/* The stack: an icon rail carries the agentic activity path (the spine), and
+   the packet travels it. The spine IS the argument, so it renders at every
+   width instead of being hidden on phones. */
+.stack { display: flex; flex-direction: column; border: 1px solid var(--border-strong); position: relative; }
+.band {
+  display: grid; grid-template-columns: 52px 1fr auto; align-items: center;
+  min-height: 58px; position: relative; cursor: pointer; text-align: left;
+  background: transparent; border: 0; width: 100%;
+  font-family: inherit; padding: 0;
+}
+.band + .band { border-top: 1px solid var(--border); }
+.band:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+
+/* icon rail cell: the spine runs through it, the plane icon sits on it */
+.rail { position: relative; height: 100%; min-height: 58px; }
+.rail .spine {
+  position: absolute; left: 50%; top: 0; bottom: 0; width: 2px;
+  background: var(--border-strong); transform: translateX(-50%);
+}
+.band:first-child .rail .spine { top: 50%; }
+.band:last-child .rail .spine { bottom: 50%; }
+.pic {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%);
+  width: 34px; height: 34px; display: grid; place-items: center;
+  background: var(--surface); border: 1.5px solid var(--border-strong);
+  color: var(--muted); transition: color 300ms, border-color 300ms, box-shadow 300ms;
+}
+.pic svg { width: 22px; height: 22px; display: block; }
+.pic svg * { stroke: currentColor; }
+.band.lit .pic { color: var(--accent); border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent); }
+.band.gate .pic { border-style: dashed; color: var(--muted-soft); }
+.band.gate.lit .pic { color: var(--warn); border-color: var(--warn); box-shadow: 0 0 0 3px color-mix(in srgb, var(--warn) 16%, transparent); }
+
+.band-info { padding: 8px 12px 8px 4px; min-width: 0; }
+.band-info b { display: block; font: 600 0.78rem/1.3 "IBM Plex Sans", sans-serif; color: var(--text-strong); }
+.band-info .verb {
+  font: 600 0.58rem/1.2 "IBM Plex Mono", monospace; letter-spacing: 0.07em; text-transform: uppercase;
+  color: var(--accent); opacity: 0; transition: opacity 300ms; margin-right: 6px;
+}
+.band.lit .band-info .verb { opacity: 1; }
+.band-info span.sub { font: 500 0.68rem/1.4 "IBM Plex Sans", sans-serif; color: var(--muted); }
+.band-info .more {
+  display: none; margin-top: 5px; font: 500 0.7rem/1.45 "IBM Plex Sans", sans-serif; color: var(--muted);
+  border-left: 2px solid var(--accent); padding-left: 8px;
+}
+.band[aria-expanded="true"] .band-info .more { display: block; }
+.band-chip { justify-self: end; margin-right: 12px; }
+
+.band.gate { background: color-mix(in srgb, var(--muted) 8%, transparent); }
+.band.gate .band-info b { color: var(--muted); }
+.band.gate .band-info span.sub { color: var(--muted-soft); }
+
+/* the packet riding the spine (positioned over the whole stack) */
+.packet {
+  position: absolute; left: 26px; top: 0; width: 10px; height: 10px;
+  transform: translate(-50%,-50%); background: var(--accent);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--accent) 70%, transparent);
+  opacity: 0; pointer-events: none; z-index: 2;
+}
+
+.chip { font: 600 0.6rem/1.1 "IBM Plex Mono", monospace; letter-spacing: 0.05em; text-transform: uppercase; border: 1px solid currentColor; padding: 2px 6px; }
+.chip.corroborated { color: var(--T0); }
+.chip.reported { color: var(--T1); }
+
+.caption { font: 500 0.72rem/1.5 "IBM Plex Sans", sans-serif; color: var(--muted); }
+.caption b { color: var(--text-strong); font-weight: 600; }
+
+@media (max-width: 620px) {
+  .band { grid-template-columns: 44px 1fr; }
+  .rail { min-height: 64px; }
+  .band-chip { grid-column: 2; justify-self: start; margin: 0 0 8px 4px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .packet { display: none; }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="head">
+    <h1>Five control planes an agentic activity path must cross</h1>
+    <p>Enforceable inside the defender's own estate. No vendor gate required.</p>
+  </div>
+
+  <div class="ctl">
+    <button type="button" id="replay">Replay path</button>
+    <span class="hint">The packet is the intrusion's activity. Tap a plane for what it does.</span>
+  </div>
+
+  <div class="stack" id="stack">
+    <div class="packet" id="packet" aria-hidden="true"></div>
+
+    <button type="button" class="band gate" data-icon="barrier" aria-expanded="false">
+      <span class="rail"><span class="spine" aria-hidden="true"></span><span class="pic" data-pic aria-hidden="true"></span></span>
+      <span class="band-info"><b>Vendor gate</b><span class="sub">Not available for this class</span>
+        <span class="more">The activity ran on infrastructure the defender does not control, so no vendor-side gate ever saw it. Every plane below exists precisely because this one is absent.</span>
+      </span>
+      <span class="band-chip"><span class="chip reported">Absent</span></span>
+    </button>
+
+    <button type="button" class="band" data-icon="personcheck" data-verb="Constrain" aria-expanded="false">
+      <span class="rail"><span class="spine" aria-hidden="true"></span><span class="pic" data-pic aria-hidden="true"></span></span>
+      <span class="band-info"><b><span class="verb">Constrain</span>Identity</b><span class="sub">Auth, least privilege, credential lifecycle</span>
+        <span class="more">Compromised credentials were the entry. Least privilege and short credential lifecycles shrink what any one identity can reach before detection has to succeed.</span>
+      </span>
+      <span class="band-chip"><span class="chip corroborated">Corroborated</span></span>
+    </button>
+
+    <button type="button" class="band" data-icon="radar" data-verb="Observe" aria-expanded="false">
+      <span class="rail"><span class="spine" aria-hidden="true"></span><span class="pic" data-pic aria-hidden="true"></span></span>
+      <span class="band-info"><b><span class="verb">Observe</span>Behavioural detection</b><span class="sub">Cadence, breadth, tactic-switching</span>
+        <span class="more">Machine-speed cadence, unusual breadth and rapid tactic-switching are the observable signature of this class, and they are visible in the defender's own logs.</span>
+      </span>
+      <span class="band-chip"><span class="chip corroborated">Corroborated</span></span>
+    </button>
+
+    <button type="button" class="band" data-icon="transmit" data-verb="Observe" aria-expanded="false">
+      <span class="rail"><span class="spine" aria-hidden="true"></span><span class="pic" data-pic aria-hidden="true"></span></span>
+      <span class="band-info"><b><span class="verb">Observe</span>Agent telemetry</b><span class="sub">Prompts, traces, tool calls, permissions</span>
+        <span class="more">Where the defender's own estate runs agents, their prompts, traces and tool calls are first-party telemetry. Capturing them is a logging decision, not a vendor negotiation.</span>
+      </span>
+      <span class="band-chip"><span class="chip corroborated">Corroborated</span></span>
+    </button>
+
+    <button type="button" class="band" data-icon="cpu" data-verb="Revoke" aria-expanded="false">
+      <span class="rail"><span class="spine" aria-hidden="true"></span><span class="pic" data-pic aria-hidden="true"></span></span>
+      <span class="band-info"><b><span class="verb">Revoke</span>Runtime &amp; framework containment</b><span class="sub">Egress control, tool allow-listing, isolation</span>
+        <span class="more">Egress control and tool allow-listing turn a compromised agent from an open-ended operator into a process that can only do what its runtime permits.</span>
+      </span>
+      <span class="band-chip"><span class="chip corroborated">Corroborated</span></span>
+    </button>
+
+    <button type="button" class="band" data-icon="eye" aria-expanded="false">
+      <span class="rail"><span class="spine" aria-hidden="true"></span><span class="pic" data-pic aria-hidden="true"></span></span>
+      <span class="band-info"><b>Exposure reduction</b><span class="sub">Public portal &amp; metadata audit</span>
+        <span class="more">The reconnaissance phase fed on public portals and metadata. Auditing what the estate exposes shrinks the map an automated intrusion can build before it starts.</span>
+      </span>
+      <span class="band-chip"><span class="chip reported">Reported</span></span>
+    </button>
+  </div>
+
+  <p class="caption">The agentic activity path (the vertical line) never touches a vendor gate for this class, so the argument for these five planes is not that they are better than gating. It is that they are <b>the only things still there</b>.</p>
+</div>
+<script>
+(() => {
+  const ICON_BASE = '../customs-entry-agent/flow-icons/';
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const stack = document.getElementById('stack');
+  const packet = document.getElementById('packet');
+  const bands = Array.from(stack.querySelectorAll('.band'));
+
+  /* Icons are shared line-art SVGs; fetched and inlined with the stroke
+     swapped to currentColor so they follow the band's theme colour. A failed
+     fetch leaves the slot empty and the text still carries the row. */
+  bands.forEach((band) => {
+    const slot = band.querySelector('[data-pic]');
+    fetch(ICON_BASE + band.dataset.icon + '.svg')
+      .then((r) => (r.ok ? r.text() : Promise.reject()))
+      .then((t) => { slot.innerHTML = t.replace(/stroke="#232f3e"/g, 'stroke="currentColor"'); })
+      .catch(() => {});
+  });
+
+  /* expand/collapse detail on tap or Enter */
+  bands.forEach((band) => {
+    band.addEventListener('click', () => {
+      const open = band.getAttribute('aria-expanded') === 'true';
+      band.setAttribute('aria-expanded', String(!open));
+    });
+  });
+
+  /* The packet rides the spine top to bottom, lighting each plane as it
+     passes. rAF t0 comes from the first frame timestamp, never
+     performance.now(): sandboxed iframes can disagree between the two clocks. */
+  const DWELL = 650;
+  let raf = 0;
+  const run = () => {
+    cancelAnimationFrame(raf);
+    bands.forEach((b) => b.classList.remove('lit'));
+    if (reduced) { bands.forEach((b) => b.classList.add('lit')); return; }
+    const stackRect = stack.getBoundingClientRect();
+    const stops = bands.map((b) => {
+      const r = b.getBoundingClientRect();
+      return r.top - stackRect.top + r.height / 2;
+    });
+    const total = DWELL * stops.length;
+    packet.style.opacity = '1';
+    let t0 = null;
+    const step = (ts) => {
+      if (t0 === null) t0 = ts;
+      const t = ts - t0;
+      const i = Math.min(stops.length - 1, Math.floor(t / DWELL));
+      const f = Math.min(1, (t - i * DWELL) / DWELL);
+      const from = i === 0 ? 0 : stops[i - 1];
+      const y = i === 0 ? stops[0] * f : from + (stops[i] - from) * f;
+      packet.style.top = y + 'px';
+      for (let k = 0; k < stops.length; k++) bands[k].classList.toggle('lit', y >= stops[k] - 4);
+      if (t < total) { raf = requestAnimationFrame(step); }
+      else { packet.style.opacity = '0'; }
+    };
+    raf = requestAnimationFrame(step);
+  };
+
+  document.getElementById('replay').addEventListener('click', run);
+
+  /* threshold 0, not 0.2: the stack can exceed a phone viewport, and a
+     fraction of a too-tall element never intersects. */
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting)) { io.disconnect(); run(); }
+    }, { threshold: 0 });
+    io.observe(stack);
+  } else { run(); }
+
+  if (document.documentElement.dataset.embedded === 'true') {
+    const postSize = () => window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+    if ('ResizeObserver' in window) new ResizeObserver(postSize).observe(document.body);
+    window.addEventListener('load', postSize);
+    window.addEventListener('resize', postSize);
+  }
+})();
+</script>
+</body>
+</html>

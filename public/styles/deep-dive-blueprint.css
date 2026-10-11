@@ -140,7 +140,7 @@
   font-size: clamp(0.82rem, 1.6vw, 0.96rem);
   color: var(--bp-ink-2);
   margin: 0.85rem 0 0;
-  max-width: 60ch;
+  max-width: 100%;
 }
 
 .dd-blueprint .bp-lead {

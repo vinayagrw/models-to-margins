@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Institutional Signals — Release Trains and Conference Arcs</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="./_theme-bootstrap.js"></script>
 <link rel="stylesheet" href="./_theme.css">
 <style>
@@ -13,117 +12,122 @@
 :root {
   --train: var(--accent-3);
   --conf: var(--accent);
-  --ms: #a56cff;
-  --radar: var(--L5);
 }
+/* Autosize: embedded frames report their own height, never clip. */
+:root[data-embedded="true"], :root[data-embedded="true"] body { height: auto; }
 
 .shell { display: flex; flex-direction: column; gap: 10px; }
-:root[data-embedded="true"] .shell {
-  display: flex; flex-direction: column; gap: clamp(6px, 1vh, 10px);
-  padding: clamp(10px, 1.5vh, 16px) clamp(14px, 2vw, 22px);
-}
+:root[data-embedded="true"] .shell { padding: clamp(10px, 1.5vh, 16px) clamp(14px, 2vw, 22px); }
 
 .head h1 {
-  font-family: "Space Grotesk", sans-serif; font-weight: 700;
-  font-size: clamp(1.05rem, 2.3vw, 1.45rem); letter-spacing: -0.02em; color: var(--text-strong);
+  font-family: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif; font-weight: 700;
+  font-size: clamp(1.0rem, 2.3vw, 1.3rem); letter-spacing: -0.02em; color: var(--text-strong);
 }
-:root[data-embedded="true"] .head h1 { font-size: clamp(0.92rem, 2.1vh, 1.2rem); }
+
+.ctl { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.ctl button {
+  min-height: 34px; padding: 6px 12px; cursor: pointer; border-radius: 8px;
+  font: 700 0.64rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.09em; text-transform: uppercase;
+  color: var(--accent); background: transparent; border: 1px solid var(--accent);
+}
+.ctl button:hover { background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.ctl .hint { font: 500 0.68rem/1.3 "DM Sans", "Segoe UI", sans-serif; color: var(--muted-soft); }
 
 .panel {
   border: 1px solid var(--border); border-radius: 16px;
   background: var(--surface); box-shadow: var(--shadow-soft);
   padding: 12px 16px;
 }
-:root[data-embedded="true"] .panel { padding: clamp(7px, 1.1vh, 12px) clamp(10px, 1.5vw, 16px); }
 .panel-label {
   display: flex; align-items: center; gap: 8px;
-  font: 700 0.7rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.13em;
+  font: 700 0.7rem/1.2 "Space Grotesk", sans-serif; letter-spacing: 0.13em;
   text-transform: uppercase; color: var(--pc);
 }
-.panel-label i { width: 9px; height: 9px; border-radius: 50%; background: var(--pc); }
-:root[data-embedded="true"] .panel-label { font-size: clamp(0.69rem, 1.15vh, 0.72rem); }
+.panel-label .pic { width: 26px; height: 26px; border: 1.5px solid color-mix(in srgb, var(--pc) 55%, var(--border)); }
+.panel-label .pic svg { width: 17px; height: 17px; }
 
-/* Release train */
-.train-panel { flex: 1.2 1 0; min-height: 0; display: flex; flex-direction: column; }
-.track-zone { position: relative; flex: 1 1 auto; min-height: 118px; margin-top: 8px; }
-.track {
-  position: absolute; left: 2%; right: 2%; top: 34px; height: 4px; border-radius: 99px;
-  background: color-mix(in srgb, var(--train) 25%, transparent);
-  overflow: hidden;
+/* shared inline icon slot */
+.pic {
+  display: inline-grid; place-items: center; flex: 0 0 auto;
+  background: var(--surface-strong); border-radius: 9px;
+  color: var(--muted); transition: color 300ms, border-color 300ms, box-shadow 300ms;
 }
-.track::after {
-  content: ""; position: absolute; inset: 0;
-  background: linear-gradient(90deg, transparent, var(--train) 45%, var(--train) 55%, transparent);
-  width: 30%; animation: travel 4.5s linear infinite;
+.pic svg { display: block; }
+.pic svg * { stroke: currentColor; }
+
+/* Release train: four station pictograms on a measured track, a token
+   rides the track once and lights each station as it passes. */
+.rail { position: relative; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-top: 10px; }
+.track { position: absolute; border-radius: 99px; background: color-mix(in srgb, var(--train) 30%, transparent); z-index: 0; }
+.packet {
+  position: absolute; width: 10px; height: 10px; border-radius: 50%;
+  transform: translate(-50%, -50%); background: var(--train);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--train) 70%, transparent);
+  opacity: 0; pointer-events: none; z-index: 2;
 }
-.station { position: absolute; top: 0; transform: translateX(-50%); text-align: center; width: 22%; }
-.station-dot {
-  width: 15px; height: 15px; border-radius: 50%; margin: 27px auto 0;
-  background: var(--train); border: 3px solid var(--surface-strong);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--train) 30%, transparent);
+.station {
+  position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center;
+  gap: 4px; text-align: center; min-width: 0;
+  background: transparent; border: 0; padding: 0; cursor: pointer; font-family: inherit;
 }
-.station-version { font: 700 0.82rem/1 "Space Grotesk", sans-serif; color: var(--text-strong); }
-.station-date { font: 700 0.69rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.1em; text-transform: uppercase; color: var(--train); margin-top: 3px; }
-.station-note { font: 400 0.7rem/1.3 "DM Sans", sans-serif; color: var(--muted); margin-top: 8px; }
-:root[data-embedded="true"] .station-version { font-size: clamp(0.72rem, 1.45vh, 0.82rem); }
-:root[data-embedded="true"] .station-note { font-size: clamp(0.69rem, 1.15vh, 0.7rem); }
-.train-verdict { font: 500 0.72rem/1.35 "DM Sans", sans-serif; color: var(--text); margin-top: 4px; }
+.station:focus-visible, .card:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 10px; }
+.station .pic { width: 34px; height: 34px; border: 1.5px solid var(--border-strong); }
+.station .pic svg { width: 22px; height: 22px; }
+.station.lit .pic { color: var(--train); border-color: var(--train); box-shadow: 0 0 0 3px color-mix(in srgb, var(--train) 22%, transparent); }
+.st-version { font: 700 0.8rem/1.2 "Space Grotesk", sans-serif; color: var(--text-strong); }
+.st-date { font: 700 0.66rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.1em; text-transform: uppercase; color: var(--train); }
+.st-note {
+  display: none; font: 400 0.7rem/1.35 "DM Sans", "Segoe UI", sans-serif; color: var(--muted);
+  border-top: 2px solid var(--train); padding-top: 4px; max-width: 180px;
+}
+.station[aria-expanded="true"] .st-note { display: block; }
+.train-verdict { font: 500 0.72rem/1.35 "DM Sans", "Segoe UI", sans-serif; color: var(--text); margin-top: 10px; }
 .train-verdict strong { font-family: "Space Grotesk", sans-serif; color: var(--text-strong); }
-:root[data-embedded="true"] .train-verdict { font-size: clamp(0.69rem, 1.3vh, 0.72rem); }
 
-/* Conference arc */
-.conf-panel { flex: 1 1 0; min-height: 0; }
-.conf-row { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 10px; margin-top: 8px; align-items: stretch; }
-:root[data-embedded="true"] .conf-row { gap: clamp(6px, 0.9vw, 10px); }
-.conf-card {
-  position: relative; padding: 9px 11px; border-radius: 12px;
-  border: 1px solid color-mix(in srgb, var(--conf) 30%, var(--border));
-  background: color-mix(in srgb, var(--conf) 4%, transparent);
-  opacity: 0; transform: translateY(6px); animation: rise .5s ease-out forwards;
+/* Conference arc and adoption chips: cards led by a pictogram, revealed in
+   sequence after the train pass. */
+.conf-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 10px; }
+.card {
+  position: relative; display: flex; gap: 9px; align-items: flex-start;
+  padding: 9px 11px; border-radius: 12px; text-align: left;
+  border: 1px solid color-mix(in srgb, var(--cc) 30%, var(--border));
+  background: color-mix(in srgb, var(--cc) 4%, transparent);
 }
-:root[data-embedded="true"] .conf-card { padding: clamp(5px, 0.9vh, 9px) clamp(7px, 1.1vw, 11px); }
-.conf-year { font: 700 0.69rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.12em; text-transform: uppercase; color: var(--conf); }
-.conf-title { font: 700 0.78rem/1.2 "Space Grotesk", sans-serif; color: var(--text-strong); margin-top: 4px; }
-.conf-note { font: 400 0.7rem/1.35 "DM Sans", sans-serif; color: var(--muted); margin-top: 4px; }
-:root[data-embedded="true"] .conf-title { font-size: clamp(0.7rem, 1.35vh, 0.78rem); }
-:root[data-embedded="true"] .conf-note { font-size: clamp(0.69rem, 1.15vh, 0.7rem); }
-.conf-card:not(:first-child)::before {
-  content: "→"; position: absolute; left: -11px; top: 50%; transform: translateY(-50%);
-  color: var(--muted-soft); font-size: 0.85rem;
-}
-
-/* Bottom chips */
-.chips { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-:root[data-embedded="true"] .chips { gap: clamp(6px, 0.9vw, 10px); }
-.chip {
-  display: flex; flex-direction: column; gap: 4px; padding: 10px 13px; border-radius: 14px;
-  border: 1px solid color-mix(in srgb, var(--cc) 35%, var(--border));
-  background: color-mix(in srgb, var(--cc) 5%, var(--surface));
-}
-:root[data-embedded="true"] .chip { padding: clamp(6px, 1vh, 10px) clamp(9px, 1.3vw, 13px); }
-.chip-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.chip-name { font: 700 0.8rem/1.2 "Space Grotesk", sans-serif; color: var(--text-strong); }
-.chip-badge {
-  font: 700 0.69rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.1em; text-transform: uppercase;
+.card .pic { width: 30px; height: 30px; border: 1.5px solid color-mix(in srgb, var(--cc) 45%, var(--border)); }
+.card .pic svg { width: 19px; height: 19px; }
+.card.on .pic { color: var(--cc); }
+.card-year { font: 700 0.67rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.12em; text-transform: uppercase; color: var(--cc); }
+.card-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.card-title { font: 700 0.78rem/1.25 "Space Grotesk", sans-serif; color: var(--text-strong); margin-top: 3px; }
+.card-note { font: 400 0.7rem/1.35 "DM Sans", "Segoe UI", sans-serif; color: var(--muted); margin-top: 4px; }
+.card-badge {
+  font: 700 0.64rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.08em; text-transform: uppercase;
   color: var(--cc); border: 1px solid color-mix(in srgb, var(--cc) 50%, transparent);
   border-radius: 99px; padding: 3px 8px;
   background: color-mix(in srgb, var(--cc) 9%, transparent);
 }
-.chip-note { font: 400 0.72rem/1.35 "DM Sans", sans-serif; color: var(--muted); }
-:root[data-embedded="true"] .chip-name { font-size: clamp(0.72rem, 1.4vh, 0.8rem); }
-:root[data-embedded="true"] .chip-note { font-size: clamp(0.69rem, 1.2vh, 0.72rem); }
-
-@keyframes travel { from { transform: translateX(-100%); } to { transform: translateX(430%); } }
-@keyframes rise { to { opacity: 1; transform: translateY(0); } }
-@media (prefers-reduced-motion: reduce) {
-  .track::after { animation: none; opacity: 0; }
-  .conf-card { animation: none; opacity: 1; transform: none; }
+.conf-row .card:not(:first-child)::before {
+  content: "→"; position: absolute; left: -11px; top: 50%; transform: translateY(-50%);
+  color: var(--muted-soft); font-size: 0.85rem;
 }
-@media (max-width: 760px) {
+.chips { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+/* staged reveal */
+.rev { opacity: 0; transform: translateY(6px); transition: opacity 400ms ease-out, transform 400ms ease-out; }
+.rev.on { opacity: 1; transform: none; }
+
+@media (max-width: 620px) {
+  .rail { grid-template-columns: 1fr; gap: 12px; }
+  .station { flex-direction: row; text-align: left; align-items: center; gap: 10px; }
+  .station .st-note { border-top: 0; border-left: 2px solid var(--train); padding: 0 0 0 8px; }
+  .st-text { display: flex; flex-direction: column; gap: 3px; align-items: flex-start; min-width: 0; }
   .conf-row { grid-template-columns: 1fr; }
-  .conf-card:not(:first-child)::before { content: "↓"; left: 50%; top: -13px; transform: translateX(-50%); }
+  .conf-row .card:not(:first-child)::before { content: "↓"; left: 22px; top: -14px; transform: none; }
   .chips { grid-template-columns: 1fr; }
-  .station-note { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .packet { display: none; }
+  .rev { transition: none; }
 }
 </style>
 </head>
@@ -135,70 +139,191 @@
     <h1>Institutional signals all point the same direction</h1>
   </header>
 
+  <div class="ctl">
+    <button type="button" id="replay">Replay signals</button>
+    <span class="hint">Tap a station for what it means.</span>
+  </div>
+
   <div class="panel train-panel">
-    <div class="panel-label" style="--pc:var(--train)"><i></i>Spring Modulith release train · a three-year unbroken cadence</div>
-    <div class="track-zone" role="img" aria-label="Spring Modulith release train: experimental October 2022, 1.0 GA August 2023, 2.0 GA November 2025, 2.1 GA June 2026.">
-      <div class="track"></div>
-      <div class="station" style="left:11%">
-        <div class="station-version">Experimental</div>
-        <div class="station-dot"></div>
-        <div class="station-date">Oct 2022</div>
-        <div class="station-note">The bet is placed</div>
-      </div>
-      <div class="station" style="left:37%">
-        <div class="station-version">1.0 GA</div>
-        <div class="station-dot"></div>
-        <div class="station-date">Aug 2023</div>
-        <div class="station-note">Production-ready module boundaries</div>
-      </div>
-      <div class="station" style="left:63%">
-        <div class="station-version">2.0 GA</div>
-        <div class="station-dot"></div>
-        <div class="station-date">Nov 2025</div>
-        <div class="station-note">Major-version commitment</div>
-      </div>
-      <div class="station" style="left:89%">
-        <div class="station-version">2.1 GA</div>
-        <div class="station-dot"></div>
-        <div class="station-date">Jun 2026</div>
-        <div class="station-note">Module-scoped slice testing, transactional-outbox integrations</div>
-      </div>
+    <div class="panel-label" style="--pc:var(--train)"><span class="pic" data-icon="calendar" aria-hidden="true"></span>Spring Modulith release train · a three-year unbroken cadence</div>
+    <div class="rail" id="rail" role="group" aria-label="Spring Modulith release train: experimental October 2022, 1.0 GA August 2023, 2.0 GA November 2025, 2.1 GA June 2026.">
+      <div class="track" id="track" aria-hidden="true"></div>
+      <div class="packet" id="packet" aria-hidden="true"></div>
+      <button type="button" class="station" data-icon="flask" aria-expanded="false">
+        <span class="pic" aria-hidden="true"></span>
+        <span class="st-text"><span class="st-version">Experimental</span>
+        <span class="st-date">Oct 2022</span>
+        <span class="st-note">The bet is placed</span></span>
+      </button>
+      <button type="button" class="station" data-icon="check" aria-expanded="false">
+        <span class="pic" aria-hidden="true"></span>
+        <span class="st-text"><span class="st-version">1.0 GA</span>
+        <span class="st-date">Aug 2023</span>
+        <span class="st-note">Production-ready module boundaries</span></span>
+      </button>
+      <button type="button" class="station" data-icon="stamp" aria-expanded="false">
+        <span class="pic" aria-hidden="true"></span>
+        <span class="st-text"><span class="st-version">2.0 GA</span>
+        <span class="st-date">Nov 2025</span>
+        <span class="st-note">Major-version commitment</span></span>
+      </button>
+      <button type="button" class="station" data-icon="checklist" aria-expanded="false">
+        <span class="pic" aria-hidden="true"></span>
+        <span class="st-text"><span class="st-version">2.1 GA</span>
+        <span class="st-date">Jun 2026</span>
+        <span class="st-note">Module-scoped slice testing, transactional-outbox integrations</span></span>
+      </button>
     </div>
     <div class="train-verdict"><strong>Read:</strong> institutional commitment, not a hobby.</div>
   </div>
 
   <div class="panel conf-panel">
-    <div class="panel-label" style="--pc:var(--conf)"><i></i>The conference arc · what QCon put on stage</div>
+    <div class="panel-label" style="--pc:var(--conf)"><span class="pic" data-icon="megaphone" aria-hidden="true"></span>The conference arc · what QCon put on stage</div>
     <div class="conf-row">
-      <div class="conf-card" style="animation-delay:.15s">
-        <div class="conf-year">QCon 2020</div>
-        <div class="conf-title">"To Microservices and Back Again"</div>
-        <div class="conf-note">The reversals get a stage.</div>
+      <div class="card rev" style="--cc:var(--conf)" data-icon="merge">
+        <span class="pic" aria-hidden="true"></span>
+        <span><span class="card-year">QCon 2020</span>
+        <div class="card-title">"To Microservices and Back Again"</div>
+        <div class="card-note">The reversals get a stage.</div></span>
       </div>
-      <div class="conf-card" style="animation-delay:.35s">
-        <div class="conf-year">QCon 2024</div>
-        <div class="conf-title">Meta ships Threads in 5 months</div>
-        <div class="conf-note">On Instagram's monolithic substrate.</div>
+      <div class="card rev" style="--cc:var(--conf)" data-icon="building">
+        <span class="pic" aria-hidden="true"></span>
+        <span><span class="card-year">QCon 2024</span>
+        <div class="card-title">Meta ships Threads in 5 months</div>
+        <div class="card-note">On Instagram's monolithic substrate.</div></span>
       </div>
-      <div class="conf-card" style="animation-delay:.55s">
-        <div class="conf-year">QCon 2025</div>
-        <div class="conf-title">Newman: "not the default"</div>
-        <div class="conf-note">The author of <em>Building Microservices</em>, on his own subject.</div>
+      <div class="card rev" style="--cc:var(--conf)" data-icon="book">
+        <span class="pic" aria-hidden="true"></span>
+        <span><span class="card-year">QCon 2025</span>
+        <div class="card-title">Newman: "not the default"</div>
+        <div class="card-note">The author of <em>Building Microservices</em>, on his own subject.</div></span>
       </div>
     </div>
   </div>
 
   <div class="chips">
-    <div class="chip" style="--cc:var(--ms)">
-      <div class="chip-head"><span class="chip-name">Microsoft · .NET Aspire</span><span class="chip-badge">GA May 2024</span></div>
-      <div class="chip-note">Makes single-process vs distributed a deployment-time detail. Microsoft's own Copilot team started as a modular monolith and split only when needed.</div>
+    <div class="card rev" style="--cc:var(--accent-2)" data-icon="gears">
+      <span class="pic" aria-hidden="true"></span>
+      <span><span class="card-head"><span class="card-title">Microsoft · .NET Aspire</span><span class="card-badge">GA May 2024</span></span>
+      <div class="card-note">Makes single-process vs distributed a deployment-time detail. Microsoft's own Copilot team started as a modular monolith and split only when needed.</div></span>
     </div>
-    <div class="chip" style="--cc:var(--radar)">
-      <div class="chip-head"><span class="chip-name">Thoughtworks Radar</span><span class="chip-badge">Assess only · never promoted</span></div>
-      <div class="chip-note">Named "a resurgence of interest in the well-factored monolith" (Sep 2023). Honest caveat: Assess is the second-lowest ring. Enthusiasm, not endorsement.</div>
+    <div class="card rev" style="--cc:var(--heat-partial)" data-icon="radar">
+      <span class="pic" aria-hidden="true"></span>
+      <span><span class="card-head"><span class="card-title">Thoughtworks Radar</span><span class="card-badge">Assess only · never promoted</span></span>
+      <div class="card-note">Named "a resurgence of interest in the well-factored monolith" (Sep 2023). Honest caveat: Assess is the second-lowest ring. Enthusiasm, not endorsement.</div></span>
     </div>
   </div>
 
 </div>
+<script>
+(() => {
+  const ICON_BASE = '../customs-entry-agent/flow-icons/';
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const rail = document.getElementById('rail');
+  const track = document.getElementById('track');
+  const packet = document.getElementById('packet');
+  const stations = Array.from(rail.querySelectorAll('.station'));
+  const revs = Array.from(document.querySelectorAll('.rev'));
+
+  /* Icons are shared line-art SVGs; fetched and inlined with the stroke
+     swapped to currentColor so they follow their slot's theme colour. A
+     failed fetch leaves the slot empty and the text still carries the row. */
+  document.querySelectorAll('[data-icon]').forEach((el) => {
+    const slot = el.classList.contains('pic') ? el : el.querySelector('.pic');
+    fetch(ICON_BASE + el.dataset.icon + '.svg')
+      .then((r) => (r.ok ? r.text() : Promise.reject()))
+      .then((t) => { slot.innerHTML = t.replace(/stroke="#232f3e"/g, 'stroke="currentColor"'); })
+      .catch(() => {});
+  });
+
+  /* expand or collapse a station's note on tap or Enter */
+  stations.forEach((st) => {
+    st.addEventListener('click', () => {
+      const open = st.getAttribute('aria-expanded') === 'true';
+      st.setAttribute('aria-expanded', String(!open));
+    });
+  });
+
+  /* The track is measured from the station pictogram centres, so it follows
+     both the horizontal desktop rail and the stacked phone rail. */
+  const centers = () => {
+    const rr = rail.getBoundingClientRect();
+    return stations.map((s) => {
+      const r = s.querySelector('.pic').getBoundingClientRect();
+      return { x: r.left - rr.left + r.width / 2, y: r.top - rr.top + r.height / 2 };
+    });
+  };
+  const layoutTrack = () => {
+    const c = centers();
+    const xs = c.map((p) => p.x), ys = c.map((p) => p.y);
+    const w = Math.max(...xs) - Math.min(...xs), h = Math.max(...ys) - Math.min(...ys);
+    track.style.left = (Math.min(...xs) - (w >= h ? 0 : 2)) + 'px';
+    track.style.top = (Math.min(...ys) - (w >= h ? 2 : 0)) + 'px';
+    track.style.width = (w >= h ? w : 4) + 'px';
+    track.style.height = (w >= h ? 4 : h) + 'px';
+  };
+
+  /* One meaningful pass: the token rides the track, lighting each release as
+     it arrives, then the conference cards and adoption chips rise in turn.
+     rAF t0 comes from the first frame timestamp, never performance.now():
+     sandboxed iframes can disagree between the two clocks. */
+  const DWELL = 700;
+  const REVEAL_GAP = 220;
+  let raf = 0;
+  const timers = [];
+  const run = () => {
+    cancelAnimationFrame(raf);
+    while (timers.length) clearTimeout(timers.pop());
+    stations.forEach((s) => s.classList.remove('lit'));
+    revs.forEach((r) => r.classList.remove('on'));
+    layoutTrack();
+    if (reduced) {
+      stations.forEach((s) => s.classList.add('lit'));
+      revs.forEach((r) => r.classList.add('on'));
+      return;
+    }
+    const c = centers();
+    const total = DWELL * c.length;
+    packet.style.opacity = '1';
+    let t0 = null;
+    const step = (ts) => {
+      if (t0 === null) t0 = ts;
+      const t = ts - t0;
+      const i = Math.min(c.length - 1, Math.floor(t / DWELL));
+      const f = Math.min(1, (t - i * DWELL) / DWELL);
+      const from = i === 0 ? c[0] : c[i - 1];
+      const p = i === 0 ? c[0] : { x: from.x + (c[i].x - from.x) * f, y: from.y + (c[i].y - from.y) * f };
+      packet.style.left = p.x + 'px';
+      packet.style.top = p.y + 'px';
+      for (let k = 0; k <= i; k++) if (k < i || f > 0.92 || k === 0) stations[k].classList.add('lit');
+      if (t < total) { raf = requestAnimationFrame(step); }
+      else {
+        packet.style.opacity = '0';
+        stations.forEach((s) => s.classList.add('lit'));
+        revs.forEach((r, n) => timers.push(setTimeout(() => r.classList.add('on'), n * REVEAL_GAP)));
+      }
+    };
+    raf = requestAnimationFrame(step);
+  };
+
+  document.getElementById('replay').addEventListener('click', run);
+  window.addEventListener('resize', layoutTrack);
+
+  /* threshold 0, not 0.2: this figure can exceed a phone viewport, and a
+     fraction of a too-tall element never intersects. */
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting)) { io.disconnect(); run(); }
+    }, { threshold: 0 });
+    io.observe(rail);
+  } else { run(); }
+
+  if (document.documentElement.dataset.embedded === 'true') {
+    const postSize = () => window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+    if ('ResizeObserver' in window) new ResizeObserver(postSize).observe(document.body);
+    window.addEventListener('load', postSize);
+  }
+})();
+</script>
 </body>
 </html>

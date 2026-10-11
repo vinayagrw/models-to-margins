@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Run-replay: one request, four altitudes</title>
+<script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+/* ============================================================
+   Archetype C — RUN-REPLAY TIMELINE
+   The architecture assembles itself as one request walks it.
+   All colour comes from tokens in _theme.css. No literal colours here.
+   ============================================================ */
+
+:root {
+  --rc-gap: clamp(10px, 1.8vw, 18px);
+  --rc-radius: 14px;
+  --rc-hair: 1px;
+}
+
+.shell { display: flex; flex-direction: column; gap: var(--rc-gap); }
+
+.head h1 {
+  font-size: clamp(1.12rem, 3.4vw, 1.9rem);
+  font-weight: 700;
+  color: var(--text-strong);
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+  margin: 6px 0 8px;
+}
+.head p {
+  font-family: "DM Sans", "Segoe UI", sans-serif;
+  font-size: clamp(0.8rem, 2.2vw, 0.97rem);
+  color: var(--muted);
+  line-height: 1.55;
+}
+.head p b { color: var(--text-strong); font-weight: 600; }
+
+/* ---------- control bars ---------- */
+.bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  padding: 8px;
+  border: var(--rc-hair) solid var(--border);
+  border-radius: var(--rc-radius);
+  background: var(--surface);
+  box-shadow: var(--shadow-soft);
+  min-width: 0;
+}
+.bar .lbl {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted-soft);
+  padding: 0 4px;
+  flex: 0 0 100%;
+}
+@media (min-width: 760px) { .bar .lbl { flex: 0 0 auto; } }
+
+button {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: clamp(0.7rem, 1.8vw, 0.8rem);
+  font-weight: 600;
+  color: var(--text);
+  background: transparent;
+  border: var(--rc-hair) solid var(--border);
+  border-radius: 10px;
+  padding: 7px clamp(8px, 1.6vw, 12px);
+  cursor: pointer;
+  line-height: 1.2;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  transition: background 160ms ease, border-color 160ms ease, color 160ms ease;
+}
+button:hover { background: color-mix(in srgb, var(--accent) 12%, transparent); }
+button[aria-pressed="true"] {
+  --c: var(--accent);
+  background: color-mix(in srgb, var(--c) 16%, transparent);
+  border-color: color-mix(in srgb, var(--c) 60%, transparent);
+  color: var(--text-strong);
+}
+button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.pic { display: inline-flex; width: 1.05em; height: 1.05em; flex: 0 0 auto; }
+.pic svg { width: 100%; height: 100%; display: block; }
+
+/* transport */
+.transport { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; width: 100%; }
+.scrub-wrap { display: flex; align-items: center; gap: 10px; flex: 1 1 200px; min-width: 0; }
+.scrub-wrap label {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 0.6rem; font-weight: 700; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--muted-soft);
+  white-space: nowrap;
+}
+input[type="range"] {
+  flex: 1 1 80px; min-width: 60px; accent-color: var(--accent);
+  height: 22px; cursor: pointer;
+}
+input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.tick {
+  font-family: "DM Sans", sans-serif; font-size: 0.74rem;
+  color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums;
+}
+
+/* ---------- custody strip ---------- */
+.custody {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  padding: 10px;
+  border: var(--rc-hair) solid var(--border);
+  border-radius: var(--rc-radius);
+  background: var(--surface);
+  box-shadow: var(--shadow-soft);
+}
+@media (min-width: 760px) { .custody { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.link {
+  display: flex; gap: 8px; align-items: flex-start; min-width: 0;
+  padding: 8px; border-radius: 10px;
+  border: var(--rc-hair) solid transparent;
+  background: color-mix(in srgb, var(--pc, var(--accent)) 8%, transparent);
+}
+.link.hot { border-color: color-mix(in srgb, var(--pc, var(--accent)) 55%, transparent); }
+.link .pic { color: var(--pc, var(--accent)); width: 1.2em; height: 1.2em; margin-top: 2px; }
+.link .k {
+  font-family: "Space Grotesk", sans-serif; font-size: 0.64rem; font-weight: 700;
+  letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted-soft);
+  display: block;
+}
+.link .v {
+  font-family: "DM Sans", sans-serif; font-size: 0.78rem; color: var(--text);
+  line-height: 1.4; display: block; overflow-wrap: anywhere;
+}
+.link .who {
+  font-family: "Space Grotesk", sans-serif; font-size: 0.6rem; font-weight: 700;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--pc, var(--accent));
+}
+
+/* ---------- main split ---------- */
+.stage {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--rc-gap);
+  align-items: start;
+}
+@media (min-width: 760px) {
+  .stage { grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); }
+  .aside { position: sticky; top: 10px; }
+}
+
+/* ---------- the assembling run ---------- */
+.run { list-style: none; display: flex; flex-direction: column; min-width: 0; }
+.step { min-width: 0; }
+
+.wire {
+  display: flex; align-items: center; gap: 8px;
+  padding-left: 18px; min-height: 34px;
+  position: relative;
+  opacity: 0;
+  transition: opacity 420ms ease;
+}
+.step.on .wire { opacity: 1; }
+.wire::before {
+  content: ""; position: absolute; left: 18px; top: 0; bottom: 0;
+  width: 2px; background: var(--border-strong);
+  transform: scaleY(0); transform-origin: top;
+  transition: transform 380ms cubic-bezier(.22,.61,.36,1);
+}
+.step.on .wire::before { transform: scaleY(1); }
+.wire.warn::before { background: color-mix(in srgb, var(--warn) 70%, transparent); }
+.wire.good::before { background: color-mix(in srgb, var(--good) 70%, transparent); }
+.wirelab {
+  margin-left: 14px;
+  font-family: "DM Sans", sans-serif;
+  font-size: clamp(0.66rem, 1.7vw, 0.75rem);
+  color: var(--muted);
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+  border-left: 2px solid transparent;
+  padding: 2px 0;
+}
+.wirelab b { color: var(--text-strong); font-weight: 600; }
+.step:first-child .wire { display: none; }
+
+.stepcard {
+  width: 100%;
+  text-align: left;
+  align-items: flex-start;
+  padding: clamp(9px, 1.5vw, 13px);
+  border-radius: var(--rc-radius);
+  border: var(--rc-hair) solid var(--border);
+  background: var(--surface);
+  box-shadow: var(--shadow-soft);
+  gap: 10px;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 420ms ease, transform 420ms cubic-bezier(.22,.61,.36,1),
+              border-color 180ms ease, background 180ms ease;
+}
+.step.on .stepcard { opacity: 1; transform: none; }
+.step.cur .stepcard {
+  border-color: color-mix(in srgb, var(--sc, var(--accent)) 62%, transparent);
+  background: color-mix(in srgb, var(--sc, var(--accent)) 10%, var(--surface-strong));
+}
+.step.past .stepcard { opacity: 0.82; }
+.stepcard .pic { width: 1.5em; height: 1.5em; color: var(--sc, var(--accent)); margin-top: 2px; }
+.stepcard .tx { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1 1 auto; }
+.kicker {
+  font-family: "Space Grotesk", sans-serif; font-size: 0.58rem; font-weight: 700;
+  letter-spacing: 0.12em; text-transform: uppercase; color: var(--sc, var(--accent));
+}
+.nm {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: clamp(0.84rem, 2.2vw, 0.98rem);
+  font-weight: 700; color: var(--text-strong); line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+.sub {
+  font-family: "DM Sans", sans-serif; font-size: 0.74rem; color: var(--muted);
+  line-height: 1.35; overflow-wrap: anywhere;
+}
+.chev {
+  font-family: "Space Grotesk", sans-serif; font-size: 0.62rem; font-weight: 700;
+  color: var(--muted-soft); letter-spacing: 0.08em; text-transform: uppercase;
+  flex: 0 0 auto; align-self: center;
+}
+.stepcard[aria-expanded="true"] .chev { color: var(--text-strong); }
+
+.step[data-kind="dec"] .stepcard { border-style: dashed; }
+.step[data-tone="warn"] { --sc: var(--warn); }
+.step[data-tone="good"] { --sc: var(--good); }
+
+/* ---------- altitude drawer ---------- */
+.alt {
+  margin: 8px 0 0 clamp(0px, 2vw, 18px);
+  padding: 10px;
+  border: var(--rc-hair) solid var(--border);
+  border-left: 3px solid color-mix(in srgb, var(--sc, var(--accent)) 60%, transparent);
+  border-radius: 12px;
+  background: var(--surface-strong);
+  min-width: 0;
+}
+.alt[hidden] { display: none; }
+.alttabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 9px; }
+.alttabs button { font-size: 0.68rem; padding: 5px 9px; }
+.altbody {
+  font-family: "DM Sans", sans-serif;
+  font-size: clamp(0.76rem, 1.9vw, 0.85rem);
+  color: var(--text); line-height: 1.55; overflow-wrap: anywhere;
+}
+.altbody b { color: var(--text-strong); font-weight: 600; }
+.altbody ul { margin: 6px 0 0 16px; }
+.altbody li { margin-bottom: 4px; }
+.altbody .tag {
+  display: inline-block; margin-top: 8px; padding: 3px 8px; border-radius: 999px;
+  font-family: "Space Grotesk", sans-serif; font-size: 0.6rem; font-weight: 700;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--pc, var(--accent));
+  background: color-mix(in srgb, var(--pc, var(--accent)) 14%, transparent);
+}
+
+/* ---------- readout ---------- */
+.aside {
+  display: flex; flex-direction: column; gap: 10px; min-width: 0;
+}
+.card {
+  padding: clamp(10px, 1.8vw, 15px);
+  border: var(--rc-hair) solid var(--border);
+  border-radius: var(--rc-radius);
+  background: var(--surface);
+  box-shadow: var(--shadow-soft);
+  min-width: 0;
+}
+.card h2 {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: clamp(0.9rem, 2.3vw, 1.05rem);
+  color: var(--text-strong); line-height: 1.25; margin-bottom: 2px;
+  overflow-wrap: anywhere;
+}
+.card .where {
+  font-family: "Space Grotesk", sans-serif; font-size: 0.6rem; font-weight: 700;
+  letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent);
+  display: block; margin-bottom: 6px;
+}
+.rowset { display: flex; flex-direction: column; gap: 9px; margin-top: 10px; }
+.row { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.row dt, .row .dt {
+  font-family: "Space Grotesk", sans-serif; font-size: 0.6rem; font-weight: 700;
+  letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted-soft);
+}
+.row dd, .row .dd {
+  font-family: "DM Sans", sans-serif; font-size: clamp(0.76rem, 1.9vw, 0.85rem);
+  color: var(--text); line-height: 1.5; overflow-wrap: anywhere;
+}
+.row.brk .dd { color: var(--warn); }
+
+.legend {
+  display: flex; flex-wrap: wrap; gap: 8px 14px;
+  font-family: "DM Sans", sans-serif; font-size: 0.7rem; color: var(--muted-soft);
+}
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i {
+  width: 16px; height: 2px; background: var(--border-strong); border-radius: 2px;
+}
+.legend i.w { background: color-mix(in srgb, var(--warn) 70%, transparent); }
+.legend i.g { background: color-mix(in srgb, var(--good) 70%, transparent); }
+.legend i.d { background: transparent; border-top: 2px dashed var(--border-strong); height: 0; }
+
+.static-note {
+  font-family: "DM Sans", sans-serif; font-size: 0.75rem; color: var(--muted);
+  line-height: 1.5;
+}
+
+/* ---------- reduced motion: fully assembled, static ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .stepcard, .wire, .wire::before { transition: none !important; }
+}
+:root[data-static="true"] .step .stepcard { opacity: 1 !important; transform: none !important; }
+:root[data-static="true"] .step .wire { opacity: 1 !important; }
+:root[data-static="true"] .step .wire::before { transform: scaleY(1) !important; }
+:root[data-static="true"] .transport { display: none; }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <header class="head">
+    <span class="eyebrow">Archetype C · run-replay</span>
+    <h1>Follow one request. The architecture appears as it is touched.</h1>
+    <p>Nothing here is a map you have to decode. A single call walks the estate and every component
+      shows up at the moment it first does work &mdash; so what you end up looking at is
+      <b>the architecture that this request actually required</b>. Change the deployment position and
+      watch custody of weights, prompts, logs and the legal boundary move underneath the same flow.</p>
+  </header>
+
+  <div class="bar" role="group" aria-label="Deployment position">
+    <span class="lbl">Running against</span>
+    <div id="posBar" style="display:flex;flex-wrap:wrap;gap:8px;min-width:0;"></div>
+  </div>
+
+  <div class="bar" role="group" aria-label="Scenario">
+    <span class="lbl">Scenario</span>
+    <div id="scnBar" style="display:flex;flex-wrap:wrap;gap:8px;min-width:0;"></div>
+  </div>
+
+  <div class="bar transport" id="transport" role="group" aria-label="Replay transport">
+    <button type="button" id="btnPlay" aria-pressed="false"><span class="pic" data-ic="transmit" aria-hidden="true"></span><span id="playTx">Play</span></button>
+    <button type="button" id="btnBack" aria-pressed="false">&larr; Step</button>
+    <button type="button" id="btnFwd" aria-pressed="false">Step &rarr;</button>
+    <button type="button" id="btnReset" aria-pressed="false">Reset</button>
+    <button type="button" id="btnAll" aria-pressed="false">Show whole path</button>
+    <div class="scrub-wrap">
+      <label for="scrub">Progress</label>
+      <input type="range" id="scrub" min="0" max="1" step="1" value="0">
+      <span class="tick" id="tick">1 / 1</span>
+    </div>
+  </div>
+
+  <div class="custody" id="custody" aria-label="Custody chain at this moment"></div>
+
+  <div class="stage">
+    <ol class="run" id="run"></ol>
+
+    <aside class="aside">
+      <div class="card" id="readout" role="status" aria-live="polite">
+        <span class="where" id="rWhere"></span>
+        <h2 id="rTitle"></h2>
+        <div class="rowset">
+          <div class="row"><span class="dt">What happens here</span><span class="dd" id="rWhat"></span></div>
+          <div class="row"><span class="dt">What data crosses</span><span class="dd" id="rData"></span></div>
+          <div class="row"><span class="dt">Who holds it, right now</span><span class="dd" id="rHold"></span></div>
+          <div class="row"><span class="dt">What gets recorded</span><span class="dd" id="rRec"></span></div>
+          <div class="row brk"><span class="dt">What breaks without this</span><span class="dd" id="rBrk"></span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <p class="legend">
+          <span><i></i> Data plane</span>
+          <span><i class="d"></i> Decision gate</span>
+          <span><i class="w"></i> Fail-closed exit</span>
+          <span><i class="g"></i> Completed</span>
+        </p>
+        <p class="static-note" style="margin-top:8px;">
+          Every card opens in place: <b>L1</b> internals, <b>L2</b> the decision it makes,
+          <b>L3</b> the topology and payload underneath. Altitude is a second axis on the same run.
+        </p>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var root = document.documentElement;
+  var REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- icon loader (inline + recolour) ---------- */
+  var ICON_BASE = '../customs-entry-agent/flow-icons/';
+  var iconCache = {};
+  function loadIcon(n) {
+    if (!iconCache[n]) {
+      iconCache[n] = fetch(ICON_BASE + n + '.svg')
+        .then(function (r) { return r.ok ? r.text() : Promise.reject(new Error('missing')); })
+        .then(function (t) { return t.replace(/stroke="#232f3e"/g, 'stroke="currentColor"'); })
+        .catch(function () { return ''; });
+    }
+    return iconCache[n];
+  }
+  function hydrateIcons(scope) {
+    (scope || document).querySelectorAll('[data-ic]').forEach(function (slot) {
+      if (slot.firstChild) return;
+      loadIcon(slot.getAttribute('data-ic')).then(function (svg) {
+        if (!slot.firstChild) { slot.innerHTML = svg; slot.setAttribute('aria-hidden', 'true'); }
+        postSize();
+      });
+    });
+  }
+
+  /* ---------- deployment positions (L0) ---------- */
+  var POSITIONS = [
+    { id: 'P1', icon: 'cpu', name: 'Managed frontier API', c: 'var(--P1)',
+      eg: 'Claude, GPT or Gemini on the public API.',
+      chain: {
+        weights:  { who: 'vendor', val: 'Vendor. You never see them.' },
+        prompts:  { who: 'vendor', val: 'Vendor processes them, in the region their terms allow.' },
+        logs:     { who: 'vendor', val: 'Vendor retains them; retention is per contract.' },
+        boundary: { who: 'vendor', val: 'Vendor terms, plus their region choice.' }
+      },
+      serving: 'You do not see the serving topology at all. Prefill and decode, batching, KV cache: all vendor-side and unobservable. Your only levers are the model id and the request parameters.',
+      exit: 'Leaving means renegotiating, not reconfiguring.' },
+    { id: 'P2', icon: 'network', name: 'Managed open weights', c: 'var(--P2)',
+      eg: 'Bedrock or Vertex open-weight catalogue.',
+      chain: {
+        weights:  { who: 'shared', val: 'Open weights, served by the vendor.' },
+        prompts:  { who: 'vendor', val: 'Vendor processes them, in the region you chose.' },
+        logs:     { who: 'vendor', val: 'Vendor retains them under cloud-provider terms.' },
+        boundary: { who: 'vendor', val: 'Cloud provider terms, your chosen region.' }
+      },
+      serving: 'Still vendor-operated serving, but the weights are open, so the same model can be lifted onto your own hardware later. Topology is opaque today; the exit is real.',
+      exit: 'The weights are portable even though the runtime is not.' },
+    { id: 'P3', icon: 'gov', name: 'Sovereign-region managed', c: 'var(--P3)',
+      eg: 'A separate sovereign partition with in-region-resident operations.',
+      chain: {
+        weights:  { who: 'vendor', val: 'Vendor.' },
+        prompts:  { who: 'vendor', val: 'Vendor, processed in-region.' },
+        logs:     { who: 'vendor', val: 'Vendor, retained in-region.' },
+        boundary: { who: 'shared', val: 'Sovereign partition, in-region-resident operations.' }
+      },
+      serving: 'Operationally identical to managed: the vendor still runs the servers and holds the data. What changed is the jurisdiction and who may lawfully reach it.',
+      exit: 'You bought a legal answer, not an operational one.' },
+    { id: 'P4', icon: 'building', name: 'Vendor appliance on your metal', c: 'var(--P4)',
+      eg: 'A vendor model image running air-gapped on your own server.',
+      chain: {
+        weights:  { who: 'shared', val: 'Vendor weights, licensed onto your hardware.' },
+        prompts:  { who: 'you',    val: 'You. They never leave the building.' },
+        logs:     { who: 'you',    val: 'You retain them.' },
+        boundary: { who: 'you',    val: 'Your premises; air-gapped, no vendor link.' }
+      },
+      serving: 'A fixed appliance image on your hardware. You see the box and the utilisation, but not the internals — you cannot re-shard it, and the model only moves forward when the vendor ships a new image.',
+      exit: 'Capability arrives on the vendor image cadence, not yours.' },
+    { id: 'P5', icon: 'shield', name: 'Self-hosted open weights', c: 'var(--P5)',
+      eg: 'Your GPUs, open weights, vLLM or SGLang.',
+      chain: {
+        weights:  { who: 'you', val: 'You. Downloaded, licensed, yours to keep.' },
+        prompts:  { who: 'you', val: 'You.' },
+        logs:     { who: 'you', val: 'You.' },
+        boundary: { who: 'you', val: 'Entirely yours.' }
+      },
+      serving: 'The whole serving topology is yours and is the thing you now operate — see L3 on the invoke step for the aggregated versus disaggregated prefill/decode choice.',
+      exit: 'Nothing leaves, and nobody can change the terms on you. You own serving, scaling, evaluation and upgrades.' }
+  ];
+
+  var LINKS = [
+    { key: 'weights',  label: 'Weights',          icon: 'key' },
+    { key: 'prompts',  label: 'Prompts',          icon: 'exchange' },
+    { key: 'logs',     label: 'Logs / telemetry', icon: 'archive' },
+    { key: 'boundary', label: 'Legal boundary',   icon: 'gavel' }
+  ];
+  var WHO_COLOR = { vendor: 'var(--P1)', shared: 'var(--P3)', you: 'var(--P5)' };
+
+  /* ---------- the request spine (L2 lifecycle nodes) ---------- */
+  /* hold: which custody link is live at this step. */
+  var S = {
+    n1: {
+      icon: 'monitor', lane: 'Application', step: 1, kind: 'proc', hold: 'prompts', inside: true,
+      title: 'Submit request', sub: 'prompt + tenant identity',
+      inLab: '',
+      what: 'The calling application posts a prompt together with the tenant identity it is acting for. No routing decision has been made yet.',
+      data: 'Raw prompt, unredacted — still inside your perimeter.',
+      rec: 'Request id, tenant, caller service, arrival timestamp.',
+      brk: 'Without an identity on the request, every later policy decision is a guess and every cost line is unattributable.',
+      l1: 'Four client classes share this entry point: <b>internal copilot</b> (SSO identity), <b>customer-facing assistant</b> (hostile input), <b>batch / document pipeline</b> (throughput SLA) and the <b>agent runtime</b> (one user action becomes dozens of calls). They differ in trust and in blast radius, not in the path they take.',
+      l2: 'No decision is made here. The only thing that matters is that identity is attached at the source rather than reconstructed later.',
+      l3: 'Payload on the wire: <code>{ prompt, tenant_id, caller_service, request_id, arrival_ts }</code>. The prompt body is still cleartext and still inside your process.'
+    },
+    n2: {
+      icon: 'radar', lane: 'Gateway', step: 2, kind: 'proc', hold: 'prompts', inside: true,
+      title: 'Classify sensitivity', sub: 'public / internal / restricted',
+      inLab: '<b>prompt + tenant identity</b> — raw, in-perimeter',
+      what: 'The gateway inspects the payload and assigns a sensitivity class. This is the input to every downstream policy question.',
+      data: 'Raw prompt, unredacted, plus a derived sensitivity label.',
+      rec: 'Sensitivity class, classifier version, confidence.',
+      brk: 'With no class, residency and redaction have nothing to key off, so the model choice silently becomes the data-handling decision.',
+      l1: 'The gateway is the single choke point, and it carries six functions: <b>routing &amp; model selection</b>, <b>authN/authZ &amp; tenant identity</b>, <b>quota, rate limit &amp; budget</b>, <b>PII detection &amp; redaction</b>, <b>semantic cache</b>, <b>audit log &amp; cost meter</b>. Classification is the front door to all six.',
+      l2: 'Classification runs <b>before</b> model selection. That ordering is the whole argument: select the model first and you have made the residency decision by accident, dressed as a routing optimisation.',
+      l3: 'Adds <code>sensitivity: public | internal | restricted</code> and <code>classifier_version</code> to the request envelope. The prompt body is unchanged and has not moved.'
+    },
+    d1: {
+      icon: 'gov', lane: 'Policy &amp; residency', step: 3, kind: 'dec', hold: 'boundary', inside: true,
+      title: 'Residency constraint applies?', sub: 'sensitivity class × tenant jurisdiction',
+      inLab: '<b>sensitivity class + tenant jurisdiction</b> — control plane, no prompt body',
+      what: 'Given the sensitivity class and the tenant jurisdiction, does this request carry a data-residency obligation?',
+      data: 'Sensitivity class and tenant jurisdiction — the prompt itself is not needed to answer this.',
+      rec: 'Rule set version and the branch taken.',
+      brk: 'Skip this and residency becomes an after-the-fact audit finding instead of a runtime constraint.',
+      l1: 'Answered by the <b>policy &amp; residency controller</b>, one per estate rather than one per application. It hands the gateway a constraint, not a recommendation.',
+      l2: '<b>Yes</b> → narrow the allowed backend set before anything else runs. <b>No</b> → the full catalogue stays eligible and the request falls straight through to the cache probe. Residency is a constraint evaluated first; cost and capability are optimisations that apply only to whatever survives it.',
+      l3: 'Control-plane call only: <code>{ sensitivity, tenant_jurisdiction } → { residency_required, rule_set_version }</code>. Deliberately no prompt body, so the policy service never becomes a second copy of your data.'
+    },
+    n3: {
+      icon: 'barrier', lane: 'Policy &amp; residency', step: 3, kind: 'proc', hold: 'boundary', inside: true,
+      title: 'Narrow allowed set', sub: 'in-boundary backends only',
+      inLab: '<b>Yes</b> — residency obligation confirmed',
+      what: 'The candidate backend list is filtered down to those physically inside the required boundary. Everything else is removed from consideration.',
+      data: 'Backend metadata only — region, operator, contractual boundary.',
+      rec: 'Backends admitted and backends excluded, with the reason.',
+      brk: 'An unfiltered candidate list means a cheap out-of-boundary model can win on price and export the data as a side effect.',
+      l1: 'Filters the three backend classes: <b>frontier managed API</b> (outside perimeter), <b>managed open weights</b> (outside perimeter), <b>self-hosted cluster</b> (inside perimeter). Which survive depends entirely on the deployment position you selected above.',
+      l2: 'Set arithmetic, not scoring: eligible = catalogue ∩ in-boundary. Nothing about latency or price enters here.',
+      l3: 'Each backend carries <code>{ id, region, operator, boundary_instrument }</code>. The filter compares the instrument, not the marketing region label — those are not the same thing.'
+    },
+    d2: {
+      icon: 'scales', lane: 'Policy &amp; residency', step: 3, kind: 'dec', hold: 'boundary', inside: true,
+      title: 'Any allowed backend remains?', sub: 'the surviving set',
+      inLab: '<b>filtered candidate set</b> — metadata only',
+      what: 'After filtering, is there at least one compliant backend left that can serve this class of data?',
+      data: 'The surviving allowed set.',
+      rec: 'Size of the surviving set and the constraint that produced it.',
+      brk: 'Without this check an empty set is discovered at invoke time, and the natural recovery is to relax the constraint — exactly the wrong reflex.',
+      l1: 'A cardinality check on the surviving set, evaluated in the policy plane rather than inside the routing code that has an incentive to find an answer.',
+      l2: '<b>Yes</b> → continue to the cache probe. <b>No</b> → terminal exit A, fail closed. The check exists specifically so that the empty-set case is handled where relaxing the rule is not an available move.',
+      l3: 'Emits <code>{ allowed_count, constraint_id }</code>. The count, not just the boolean, goes into the audit record — an allowed set of exactly one is a fragility signal worth alerting on.'
+    },
+    xa: {
+      icon: 'warning', lane: 'Policy &amp; residency', step: 3, kind: 'term', tone: 'warn', hold: 'boundary', inside: true,
+      title: 'Blocked by residency', sub: 'terminal exit A · fail closed',
+      inLab: '<b>No</b> — empty allowed set',
+      what: 'No compliant backend exists, so the request is refused. It is refused loudly, as a policy event, not degraded quietly to a permitted-but-non-compliant model.',
+      data: 'Nothing leaves the perimeter. The prompt is discarded after logging its hash.',
+      rec: 'Policy event: rule that blocked, empty allowed set, tenant, request hash. No prompt body.',
+      brk: 'Without a hard exit here the system falls open — it answers, the caller sees success, and the breach is invisible until an audit.',
+      l1: 'The caller receives a typed policy error carrying the rule id, not a generic 500. That distinction is what lets the calling team fix it without a support ticket.',
+      l2: 'Fail closed. Never silently downgrade to a permitted model — that is a policy breach wearing a success response.',
+      l3: 'Response: <code>{ error: "residency_blocked", rule_id, allowed_count: 0, request_hash }</code>. The prompt body is hashed and dropped; it is never written anywhere it could be recovered.'
+    },
+    d3: {
+      icon: 'archive', lane: 'Gateway', step: 4, kind: 'dec', hold: 'prompts', inside: true,
+      title: 'Semantic cache hit?', sub: 'tenant-scoped, class-scoped',
+      inLab: '<b>Yes · surviving allowed set</b> — back into the gateway',
+      what: 'Is there a semantically equivalent prior completion, cached within the same tenant and the same sensitivity class?',
+      data: 'Prompt embedding, scoped to this tenant. Cross-tenant lookup is not permitted.',
+      rec: 'Cache probe result, similarity score, cache partition.',
+      brk: 'No cache means you pay full model price for the questions your organisation asks over and over — and latency stays at model speed.',
+      l1: 'Backed by the shared <b>retrieval / vector store</b> plane, partitioned per tenant and per sensitivity class. One store for the estate, access control inherited from the source systems.',
+      l2: '<b>Hit</b> → serve the stored completion, no backend invoked, no new data movement, no token cost. <b>Miss</b> → carry on to the quota gate. This run follows the miss so you see the full path; the hit branch simply short-circuits to the return leg.',
+      l3: 'Probe: <code>{ embedding, tenant_id, sensitivity, threshold }</code> against the tenant partition only. A cross-tenant hit would be a data leak that looks like a cost saving, which is why the partition key is not optional.'
+    },
+    d4: {
+      icon: 'gauge', lane: 'Gateway', step: 5, kind: 'dec', hold: 'prompts', inside: true,
+      title: 'Within quota / budget?', sub: 'spend and rate envelope',
+      inLab: '<b>Miss</b> — no cached completion for this tenant',
+      what: 'Does this tenant have headroom against its spend and rate envelope for the current window?',
+      data: 'Counters only — spend to date, token rate, request rate.',
+      rec: 'Quota window, consumption at decision time, headroom left.',
+      brk: 'Without a budget gate a single runaway loop can spend a quarter of budget before anyone opens a dashboard.',
+      l1: 'The gateway quota function, fed by the shared <b>cost meter</b> plane. It reads counters, never the payload.',
+      l2: '<b>Within</b> → select a tier. <b>Over</b> → terminal exit B, and the behaviour it takes was pre-agreed rather than improvised.',
+      l3: 'Economics here is a <b>structure with your variables</b>, not a constant: spend_window = Σ(prompt_tokens × in_rate + completion_tokens × out_rate) per tenant per window, compared against a ceiling you set. We publish no rate.'
+    },
+    xb: {
+      icon: 'coin', lane: 'Gateway', step: 5, kind: 'term', tone: 'warn', hold: 'prompts', inside: true,
+      title: 'Over quota', sub: 'terminal exit B · pre-agreed',
+      inLab: '<b>Over</b> — envelope exhausted',
+      what: 'The envelope is exhausted, so the pre-agreed behaviour fires — degrade to a cheaper tier or reject outright. Which one it is was decided before the incident, not during it.',
+      data: 'Nothing leaves. The caller gets a typed quota error or a declared lower-tier answer.',
+      rec: 'Quota breach event, tenant, window, chosen behaviour.',
+      brk: 'Without a defined behaviour, the runtime improvises under pressure and every team gets a different answer to "what happens when we run out".',
+      l1: 'Two legitimate configured behaviours: hard reject, or declared degrade to a cheaper tier <b>that is still inside the allowed set</b>. Degrading out of the boundary is not one of them.',
+      l2: 'The choice is configuration, agreed with the owning team in advance. The runtime never decides this under load.',
+      l3: 'Response: <code>{ error: "quota_exhausted", window, consumed, ceiling, behaviour }</code> — or a completion tagged <code>degraded_tier: true</code> so the caller can tell.'
+    },
+    n5: {
+      icon: 'split', lane: 'Gateway', step: 6, kind: 'proc', hold: 'prompts', inside: true,
+      title: 'Model tier selection', sub: 'from the surviving set only',
+      inLab: '<b>Within envelope</b> — headroom confirmed',
+      what: 'Capability and cost policy pick a tier — but only among backends residency already approved. Cost optimisation operates inside the compliance boundary, never across it.',
+      data: 'Prompt shape and size estimates; the prompt body is not yet redacted.',
+      rec: 'Chosen tier, the policy that chose it, the runners-up.',
+      brk: 'Select first and filter later and you have made the residency decision by accident, dressed as a routing optimisation.',
+      l1: 'The routing function, informed by the shared <b>evaluation harness</b> plane: fixed task sets score candidate models, and those scores feed the choice instead of intuition.',
+      l2: 'Three routing policies compose in order: residency has already run as a hard filter; then <b>capability</b> (send hard work to the strongest eligible model) and <b>cost</b> (send each request to the cheapest adequate one) rank whatever survived. The cost trap: a cheaper model that fails and retries is not cheaper — measure cost per <b>successful</b> completion.',
+      l3: 'Emits <code>{ chosen_backend, policy_id, runners_up[] }</code>. Recording the runners-up is what makes a routing regression debuggable months later.'
+    },
+    n6: {
+      icon: 'shield', lane: 'Gateway', step: 7, kind: 'proc', hold: 'prompts', inside: true,
+      title: 'Redact PII', sub: 'before the call leaves',
+      inLab: '<b>chosen tier + prompt</b> — last hop before the boundary',
+      what: 'Identifiers are masked or tokenised at the last hop inside your perimeter, so what crosses the boundary is the question without the person.',
+      data: 'Prompt with identifiers masked — this is the last point at which the raw text exists.',
+      rec: 'Redaction policy version, count and classes of entities masked. Never the masked values.',
+      brk: 'Without redaction your provider logs, and anyone with access to them, hold customer identifiers you never intended to send.',
+      l1: 'The PII detection and redaction function. Reversible tokenisation keeps a local map so the completion can be re-hydrated on the way back; irreversible masking does not.',
+      l2: 'Placement is the decision, not the algorithm. Redaction sits at the <b>last</b> hop inside the perimeter, after routing, so it applies to whichever backend won — including a fallback chosen later.',
+      l3: 'Token map <code>{ token → original }</code> stays in gateway memory and never crosses. What leaves is the prompt with <code>&lt;PERSON_1&gt;</code>-style placeholders plus counts by entity class in the audit line.'
+    },
+    n7: {
+      icon: 'cpu', lane: 'Model backend', step: 8, kind: 'proc', hold: 'prompts', inside: false,
+      title: 'Invoke backend', sub: 'chosen tier · boundary crossing',
+      inLab: '<b>redacted prompt + routing decision</b> — crosses the boundary here',
+      what: 'The redacted request is dispatched to the selected in-boundary backend. This is the moment custody depends entirely on the deployment position.',
+      data: 'Redacted prompt, now outside your process but inside the approved boundary.',
+      rec: 'Backend id, region, attempt number, latency.',
+      brk: 'Without a single choke point for invocation, teams call providers directly and none of the preceding steps apply to them.',
+      l1: 'POSITION_SERVING',
+      l2: 'The only edge in the whole diagram where the prompt leaves your process. Everything before it exists to make this edge defensible; everything after it exists to make it provable.',
+      l3: 'L3_TOPOLOGY'
+    },
+    d5: {
+      icon: 'network', lane: 'Model backend', step: 8, kind: 'dec', hold: 'prompts', inside: false,
+      title: 'Backend healthy?', sub: 'error and latency budget',
+      inLab: '<b>redacted prompt in flight</b>',
+      what: 'Did the chosen backend answer inside its error and latency budget?',
+      data: 'Response or error signal; the redacted prompt is in flight.',
+      rec: 'Health verdict, error class, time to failure.',
+      brk: 'Without health detection a degraded provider turns into your outage, one timeout at a time.',
+      l1: 'Circuit-breaker state per backend, driven by error class and latency percentile rather than a single timeout.',
+      l2: '<b>Healthy</b> → the completion returns. <b>Unhealthy</b> → nominate a fallback — but a nomination is not an approval.',
+      l3: 'Signals: <code>{ status, error_class, ttfb_ms, total_ms, attempt }</code>. Time-to-failure matters as much as the verdict: a slow failure has already cost you the latency budget.'
+    },
+    n8: {
+      icon: 'exchange', lane: 'Model backend', step: 8, kind: 'proc', hold: 'prompts', inside: false,
+      title: 'Fallback tier', sub: 'candidate, not yet approved',
+      inLab: '<b>Unhealthy</b> — primary outside its budget',
+      what: 'A standby backend is nominated. It is a candidate only — being available is not the same as being allowed.',
+      data: 'Redacted prompt, held pending the boundary re-check.',
+      rec: 'Fallback candidate, why the primary was abandoned.',
+      brk: 'Without a named fallback, failover is whatever the retry library happens to do next.',
+      l1: 'The standby list is authored, ordered and reviewed — it is not the retry library’s default ordering of whatever endpoints it can reach.',
+      l2: 'The prompt is <b>held</b>, not sent, until the boundary re-check clears it. That hold is the entire point of this step existing separately.',
+      l3: 'State: <code>{ fallback_candidate, primary_failure_reason, prompt_held: true }</code>. Nothing is on the wire during the hold.'
+    },
+    d6: {
+      icon: 'gov', lane: 'Policy &amp; residency', step: 8, kind: 'dec', hold: 'boundary', inside: true,
+      title: 'Fallback inside the same boundary?', sub: 'the residency test, re-run',
+      inLab: '<b>fallback metadata</b> — prompt held, not sent',
+      what: 'The same residency test is re-run against the fallback. Failover does not inherit the primary approval.',
+      data: 'Fallback backend metadata; the prompt is held, not sent.',
+      rec: 'Boundary verdict for the fallback, rule version.',
+      brk: 'Without this re-check, your outage procedure quietly becomes a data-export procedure.',
+      l1: 'Same policy &amp; residency controller, same rule set version, invoked a second time. Re-use, not a parallel implementation — two copies of a residency rule drift.',
+      l2: '<b>In boundary</b> → retry against the fallback. <b>Out of boundary</b> → terminal exit C. Availability loses to residency, on purpose.',
+      l3: 'Call: <code>{ fallback_backend_meta, tenant_jurisdiction, rule_set_version } → { permitted }</code>. Identical shape to the first residency call, which is how you know it is the same rule.'
+    },
+    xc: {
+      icon: 'warning', lane: 'Policy &amp; residency', step: 8, kind: 'term', tone: 'warn', hold: 'boundary', inside: true,
+      title: 'Fallback blocked', sub: 'terminal exit C · fail closed',
+      inLab: '<b>Out of boundary</b> — only healthy standby is elsewhere',
+      what: 'The only healthy standby sits in another jurisdiction, so the request is refused rather than exported. Availability loses to residency, on purpose.',
+      data: 'Nothing crosses the boundary. The held prompt is dropped.',
+      rec: 'Policy event tied to the outage incident: primary failure, rejected fallback, boundary rule.',
+      brk: 'Without this exit, the one moment your system is under stress is the one moment it ignores its own rules.',
+      l1: 'The policy event is tied to the outage incident id, so the refusal reads as a consequence of the outage rather than an unrelated spike of errors.',
+      l2: 'This is the hardest of the three exits to hold in practice, and the one that matters most: it fires exactly when the pressure to relax it is highest.',
+      l3: 'Response: <code>{ error: "fallback_blocked", primary_failure, rejected_backend, rule_id, incident_id }</code>. The held prompt is dropped, not queued — a queue is just a delayed export.'
+    },
+    n9: {
+      icon: 'document', lane: 'Gateway', step: 9, kind: 'proc', hold: 'prompts', inside: true,
+      title: 'Receive completion', sub: 'write to cache if cacheable',
+      inLab: '<b>completion + usage</b> — back inside the perimeter',
+      what: 'The completion returns to the gateway, is un-tokenised where the redaction was reversible, and is written to the tenant-scoped cache when policy allows.',
+      data: 'Completion text, re-associated with the original identifiers inside your perimeter.',
+      rec: 'Cacheability verdict, cache key, response hash.',
+      brk: 'Without a controlled return path, un-redaction and cache writes happen ad hoc in application code, outside policy.',
+      l1: 'Re-hydration uses the token map held in gateway memory from the redaction step. The map dies with the request.',
+      l2: 'Cacheability is a policy verdict, not a property of the response: restricted-class answers may be non-cacheable even when they are identical to a cacheable one.',
+      l3: 'Cache write: <code>{ key: hash(embedding, tenant, sensitivity), completion, ttl }</code> into the tenant partition. Wrong partition key here is the same leak as at the probe, in the opposite direction.'
+    },
+    n10: {
+      icon: 'ledger', lane: 'Audit &amp; cost', step: 10, kind: 'proc', hold: 'logs', inside: true,
+      title: 'Record', sub: 'audit + cost line',
+      inLab: '<b>request record</b> — hash, model, policy decisions, tokens',
+      what: 'One immutable record: request hash, model used, the policy decision at every gate, token counts and cost.',
+      data: 'Metadata and hashes. The prompt body is deliberately not stored here.',
+      rec: 'Request hash, backend, region, policy decisions, prompt and completion tokens, cost, latency.',
+      brk: 'Without the record you cannot attribute spend, cannot prove where data went, and cannot answer a regulator with anything but a shrug.',
+      l1: 'Two shared planes consume this: the <b>audit store</b> (write-once) and the <b>cost meter</b>. Same event, two readers — risk and finance ask the same question in different vocabularies.',
+      l2: 'Storing hashes rather than bodies is the decision. It keeps the audit store from becoming the largest uncontrolled copy of your prompt corpus.',
+      l3: 'Unit economics as a structure you populate: cost_per_successful_completion = total_spend ÷ completions_that_did_not_need_rework. Both terms come from your own meter; we publish no rate and no break-even.'
+    },
+    n11: {
+      icon: 'check', lane: 'Application', step: 11, kind: 'term', tone: 'good', hold: 'prompts', inside: true,
+      title: 'Completed', sub: 'response returned',
+      inLab: '<b>completion + decision trail id</b>',
+      what: 'The application receives the completion, carrying the metadata that says which model answered and under which policy.',
+      data: 'Completion, back inside the calling application.',
+      rec: 'Delivery timestamp, end-to-end latency, the decision trail id.',
+      brk: 'Without returning the decision trail, the caller cannot tell a compliant answer from a lucky one.',
+      l1: 'The trail id is the join key between the caller’s own logs and the estate-wide audit store.',
+      l2: 'Returning provenance is a design choice: a completion without it is indistinguishable from a completion that got lucky.',
+      l3: 'Response envelope: <code>{ completion, model, region, policy_trail_id, degraded_tier, cached }</code>.'
+    }
+  };
+
+  var SCENARIOS = [
+    { id: 'success',   label: 'Success path',        icon: 'check',
+      seq: ['n1','n2','d1','n3','d2','d3','d4','n5','n6','n7','d5','n9','n10','n11'],
+      note: 'A restricted request that finds a compliant backend and completes.' },
+    { id: 'residency', label: 'Blocked by residency', icon: 'barrier',
+      seq: ['n1','n2','d1','n3','d2','xa'],
+      note: 'The filter empties the allowed set. Exit A, fail closed.' },
+    { id: 'quota',     label: 'Over quota',           icon: 'coin',
+      seq: ['n1','n2','d1','n3','d2','d3','d4','xb'],
+      note: 'Compliant, cache-miss, but the spend envelope is exhausted. Exit B.' },
+    { id: 'outage',    label: 'Backend down → fallback', icon: 'warning',
+      seq: ['n1','n2','d1','n3','d2','d3','d4','n5','n6','n7','d5','n8','d6','xc'],
+      note: 'The primary fails, the only healthy standby is out of boundary. Exit C.' }
+  ];
+
+  /* ---------- state ---------- */
+  var posIdx = 0;
+  var scnIdx = 0;
+  var cursor = 0;
+  var altOpen = null;   /* step id whose drawer is open */
+  var altTab = 'l1';
+  var playing = false;
+  var timer = 0;
+  var staticMode = REDUCED;
+
+  root.dataset.static = staticMode ? 'true' : 'false';
+
+  function pos() { return POSITIONS[posIdx]; }
+  function scn() { return SCENARIOS[scnIdx]; }
+  function seq() { return scn().seq; }
+
+  /* ---------- position-dependent copy for the invoke step ---------- */
+  function servingCopy() { return pos().serving; }
+  function topologyCopy() {
+    var p = pos();
+    if (p.id === 'P5') {
+      return 'Your own serving stack, and the one place the topology is yours to choose. ' +
+        '<b>Aggregated</b>: one homogeneous pool of inference servers (vLLM / SGLang) handles both phases of every request — the compute-bound <b>prefill</b> of the prompt and the memory-bandwidth-bound <b>decode</b> of each token. One autoscaling signal, one failure domain, and two phases competing for the same GPUs. ' +
+        '<b>Disaggregated</b>: prefill and decode split into separate tiers that scale on different signals — queued prompt tokens versus live concurrent sequences — with the <b>KV cache handed off</b> between them. For agentic traffic (long prompts, short outputs) the prefill tier dominates and sizing it separately is where the throughput is. ' +
+        'Around it: weights store (versioned, checksummed), ingress / load balancer, the gateway itself, the GPU pool, and an observability + cost meter reading all three. ' +
+        'Cost is a structure you populate — gpu_hourly_rate × gpu_count × hours ÷ utilisation, against your own token volume. We publish no rate and no break-even.';
+    }
+    if (p.id === 'P4') {
+      return 'A sealed vendor image on hardware you rack. You can see the appliance, its utilisation and its logs; you cannot re-shard it, cannot split prefill from decode, and cannot advance the model without a new image from the vendor. ' +
+        'Payload on the wire never leaves your building. Cost is a structure you populate — appliance_lease + power + floor space + the staff hours to run it — against your own token volume.';
+    }
+    return 'The serving topology is vendor-side and unobservable: batching, KV cache reuse, prefill/decode placement, hardware generation. Your entire surface is <code>{ model_id, params, redacted_prompt }</code> over TLS, and a metered response. ' +
+      'Cost is a structure you populate — published per-token rates × your own token volume × your retry rate. The retry rate is the term teams forget, and it is the one that moves.';
+  }
+
+  /* ---------- render: control bars ---------- */
+  var posBar = document.getElementById('posBar');
+  var scnBar = document.getElementById('scnBar');
+
+  POSITIONS.forEach(function (p, i) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.setAttribute('aria-pressed', String(i === posIdx));
+    b.style.setProperty('--c', p.c);
+    b.innerHTML = '<span class="pic" data-ic="' + p.icon + '" aria-hidden="true"></span><span>' + p.name + '</span>';
+    b.addEventListener('click', function () {
+      posIdx = i;
+      POSITIONS.forEach(function (_, j) { posBar.children[j].setAttribute('aria-pressed', String(j === i)); });
+      renderCustody(); renderRun(); renderReadout(); postSize();
+    });
+    posBar.appendChild(b);
+  });
+
+  SCENARIOS.forEach(function (s, i) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.setAttribute('aria-pressed', String(i === scnIdx));
+    b.innerHTML = '<span class="pic" data-ic="' + s.icon + '" aria-hidden="true"></span><span>' + s.label + '</span>';
+    b.addEventListener('click', function () {
+      scnIdx = i;
+      SCENARIOS.forEach(function (_, j) { scnBar.children[j].setAttribute('aria-pressed', String(j === i)); });
+      altOpen = null;
+      cursor = staticMode ? seq().length - 1 : 0;
+      stop();
+      renderRun(); renderScrub(); renderCustody(); renderReadout(); postSize();
+    });
+    scnBar.appendChild(b);
+  });
+
+  /* ---------- render: custody strip ---------- */
+  var custody = document.getElementById('custody');
+  function renderCustody() {
+    var p = pos();
+    var live = S[seq()[cursor]] ? S[seq()[cursor]].hold : null;
+    custody.innerHTML = '';
+    LINKS.forEach(function (l) {
+      var c = p.chain[l.key];
+      var d = document.createElement('div');
+      d.className = 'link' + (l.key === live ? ' hot' : '');
+      d.style.setProperty('--pc', WHO_COLOR[c.who]);
+      d.innerHTML =
+        '<span class="pic" data-ic="' + l.icon + '" aria-hidden="true"></span>' +
+        '<span style="min-width:0;"><span class="k">' + l.label + '</span>' +
+        '<span class="who">' + c.who + '</span>' +
+        '<span class="v">' + c.val + '</span></span>';
+      custody.appendChild(d);
+    });
+    hydrateIcons(custody);
+  }
+
+  /* ---------- render: the run ---------- */
+  var run = document.getElementById('run');
+
+  function altHTML(id) {
+    var n = S[id];
+    var body = altTab === 'l1' ? n.l1 : (altTab === 'l2' ? n.l2 : n.l3);
+    if (body === 'POSITION_SERVING') body = servingCopy();
+    if (body === 'L3_TOPOLOGY') body = topologyCopy();
+    var tabs = [['l1', 'L1 · Internals'], ['l2', 'L2 · Decision logic'], ['l3', 'L3 · Topology &amp; payload']];
+    var t = tabs.map(function (x) {
+      return '<button type="button" data-tab="' + x[0] + '" aria-pressed="' + (altTab === x[0]) + '">' + x[1] + '</button>';
+    }).join('');
+    var tag = (id === 'n7') ? '<span class="tag">' + pos().name + '</span>' : '';
+    return '<div class="alttabs" role="group" aria-label="Altitude">' + t + '</div>' +
+           '<div class="altbody">' + body + tag + '</div>';
+  }
+
+  function renderRun() {
+    var s = seq();
+    run.innerHTML = '';
+    s.forEach(function (id, i) {
+      var n = S[id];
+      var li = document.createElement('li');
+      li.className = 'step' + (staticMode || i <= cursor ? ' on' : '') +
+                     (!staticMode && i === cursor ? ' cur' : '') +
+                     (!staticMode && i < cursor ? ' past' : '');
+      li.dataset.kind = n.kind;
+      if (n.tone) li.dataset.tone = n.tone;
+      li.dataset.id = id;
+
+      var tone = n.tone === 'warn' ? ' warn' : (n.tone === 'good' ? ' good' : '');
+      var wire = '<div class="wire' + tone + '"><span class="wirelab">' + (n.inLab || '') + '</span></div>';
+
+      var open = altOpen === id;
+      var card =
+        '<button type="button" class="stepcard" aria-expanded="' + open + '">' +
+          '<span class="pic" data-ic="' + n.icon + '" aria-hidden="true"></span>' +
+          '<span class="tx">' +
+            '<span class="kicker">Step ' + n.step + ' · ' + n.lane + '</span>' +
+            '<span class="nm">' + n.title + '</span>' +
+            '<span class="sub">' + n.sub + '</span>' +
+          '</span>' +
+          '<span class="chev">' + (open ? 'Close' : 'Altitude') + '</span>' +
+        '</button>';
+
+      li.innerHTML = wire + card + '<div class="alt"' + (open ? '' : ' hidden') + '>' + (open ? altHTML(id) : '') + '</div>';
+
+      li.querySelector('.stepcard').addEventListener('click', function () {
+        if (altOpen === id) { altOpen = null; }
+        else { altOpen = id; altTab = 'l1'; if (!staticMode) { cursor = i; stop(); } }
+        renderRun(); renderScrub(); renderCustody(); renderReadout(); postSize();
+      });
+
+      if (open) {
+        li.querySelectorAll('.alttabs button').forEach(function (b) {
+          b.addEventListener('click', function () {
+            altTab = b.dataset.tab;
+            renderRun(); postSize();
+          });
+        });
+      }
+      run.appendChild(li);
+    });
+    hydrateIcons(run);
+  }
+
+  /* ---------- render: readout ---------- */
+  var rWhere = document.getElementById('rWhere');
+  var rTitle = document.getElementById('rTitle');
+  var rWhat = document.getElementById('rWhat');
+  var rData = document.getElementById('rData');
+  var rHold = document.getElementById('rHold');
+  var rRec = document.getElementById('rRec');
+  var rBrk = document.getElementById('rBrk');
+
+  function renderReadout() {
+    var n = S[seq()[cursor]];
+    var p = pos();
+    rWhere.innerHTML = n.lane + ' · step ' + n.step + ' · ' + p.name;
+    rTitle.textContent = n.title;
+    rWhat.innerHTML = n.what;
+    rData.innerHTML = n.data;
+    var c = p.chain[n.hold];
+    var linkName = LINKS.filter(function (l) { return l.key === n.hold; })[0].label;
+    rHold.innerHTML = '<b>' + linkName + ':</b> ' + c.val +
+      (n.inside ? ' At this step the payload is still inside your perimeter.'
+                : ' At this step the payload has crossed the boundary.');
+    rRec.innerHTML = n.rec;
+    rBrk.innerHTML = n.brk;
+  }
+
+  /* ---------- transport ---------- */
+  var scrub = document.getElementById('scrub');
+  var tick = document.getElementById('tick');
+  var btnPlay = document.getElementById('btnPlay');
+  var playTx = document.getElementById('playTx');
+
+  function renderScrub() {
+    scrub.max = String(seq().length - 1);
+    scrub.value = String(cursor);
+    scrub.setAttribute('aria-valuetext', S[seq()[cursor]].title);
+    tick.textContent = (cursor + 1) + ' / ' + seq().length;
+  }
+
+  function setCursor(i) {
+    var s = seq();
+    cursor = Math.max(0, Math.min(s.length - 1, i));
+    renderRun(); renderScrub(); renderCustody(); renderReadout(); postSize();
+  }
+
+  function stop() {
+    playing = false;
+    if (timer) { clearInterval(timer); timer = 0; }
+    btnPlay.setAttribute('aria-pressed', 'false');
+    playTx.textContent = 'Play';
+  }
+  function start() {
+    if (cursor >= seq().length - 1) cursor = 0;
+    playing = true;
+    btnPlay.setAttribute('aria-pressed', 'true');
+    playTx.textContent = 'Pause';
+    timer = setInterval(function () {
+      if (cursor >= seq().length - 1) { stop(); return; }
+      setCursor(cursor + 1);
+    }, 1500);
+    setCursor(cursor);
+  }
+
+  btnPlay.addEventListener('click', function () { playing ? stop() : start(); });
+  document.getElementById('btnBack').addEventListener('click', function () { stop(); setCursor(cursor - 1); });
+  document.getElementById('btnFwd').addEventListener('click', function () { stop(); setCursor(cursor + 1); });
+  document.getElementById('btnReset').addEventListener('click', function () { stop(); altOpen = null; setCursor(0); });
+  document.getElementById('btnAll').addEventListener('click', function () { stop(); setCursor(seq().length - 1); });
+  scrub.addEventListener('input', function () { stop(); setCursor(parseInt(scrub.value, 10) || 0); });
+
+  /* ---------- autosize sender ---------- */
+  function postSize() {
+    if (root.dataset.embedded !== 'true') return;
+    try {
+      window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+    } catch (e) { /* no parent */ }
+  }
+  if ('ResizeObserver' in window) new ResizeObserver(postSize).observe(document.body);
+  window.addEventListener('load', postSize);
+  window.addEventListener('resize', postSize);
+  setTimeout(postSize, 400);
+
+  /* ---------- boot ---------- */
+  if (staticMode) cursor = seq().length - 1;
+  renderCustody();
+  renderRun();
+  renderScrub();
+  renderReadout();
+  hydrateIcons(document);
+
+  /* Entry animation gated by IntersectionObserver.
+     Reduced motion short-circuits: the whole path is already assembled and
+     static, the transport is hidden, and nothing depends on the scrubber. */
+  if (!staticMode && 'IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (en.isIntersecting) {
+          io.disconnect();
+          start();
+        }
+      });
+    }, { threshold: 0.15 });
+    io.observe(run);
+  }
+})();
+</script>
+</body>
+</html>

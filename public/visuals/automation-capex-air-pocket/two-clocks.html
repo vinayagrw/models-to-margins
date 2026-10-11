@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Two clocks on one retail print</title>
+<script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+.shell { display: flex; flex-direction: column; gap: 12px; }
+:root[data-embedded="true"] .shell { padding: 14px clamp(14px, 2vw, 22px); }
+h1 { font-family: var(--gy-display, "Saira Condensed"), sans-serif; font-weight: 700; font-size: clamp(1rem, 2.2vw, 1.25rem); text-transform: uppercase; letter-spacing: 0.02em; color: var(--g-ink); }
+.sub { font: 500 0.76rem/1.4 "Inter", sans-serif; color: var(--g-ink-3); margin-top: 2px; }
+
+.ctl { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.ctl button {
+  font: 600 0.66rem/1 "IBM Plex Mono", monospace; letter-spacing: 0.1em; text-transform: uppercase;
+  border: 1px solid var(--g-rule-strong); background: var(--g-surface); color: var(--g-ink-2);
+  padding: 7px 12px; border-radius: 2px; cursor: pointer; min-height: 32px;
+}
+.ctl button:focus-visible { outline: 2px solid var(--g-accent-ink); outline-offset: 1px; }
+.toggle button[aria-pressed="true"] { border-color: var(--g-accent-ink); color: var(--g-accent-ink); background: var(--g-surface-2); }
+#replay { border-color: var(--g-accent-ink); color: var(--g-accent-ink); }
+.toggle { display: flex; gap: 6px; flex-wrap: wrap; }
+
+.panels { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.panel { border: 1px solid var(--g-rule); border-radius: 2px; background: var(--g-surface); min-width: 0; transition: opacity 160ms ease-out; }
+.dim { opacity: 0.45; }
+
+/* clock header is a real button: tap for the exact figure and source line */
+.phead {
+  display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: center;
+  width: 100%; padding: 10px 12px 4px; cursor: pointer; text-align: left;
+  background: transparent; border: 0; font-family: inherit;
+}
+.phead:focus-visible { outline: 2px solid var(--g-accent-ink); outline-offset: -2px; }
+.pics { display: flex; gap: 5px; }
+.pic {
+  width: 32px; height: 32px; display: grid; place-items: center; border-radius: 2px;
+  background: var(--g-surface-2); border: 1.5px solid var(--g-rule-strong); color: var(--g-ink-2);
+}
+.pic svg { width: 20px; height: 20px; display: block; }
+.pic svg * { stroke: currentColor; }
+.panel-mm .pic.tone { color: var(--g-neg); border-color: var(--g-neg); }
+.panel-yy .pic.tone { color: var(--g-pos); border-color: var(--g-pos); }
+.phead h2 { font: 600 0.7rem/1.2 "IBM Plex Mono", monospace; letter-spacing: 0.12em; text-transform: uppercase; color: var(--g-ink-2); }
+.phead .tap { display: block; font: 500 0.62rem/1.3 "Inter", sans-serif; color: var(--g-ink-3); letter-spacing: 0; text-transform: none; margin-top: 2px; }
+
+.readout { font: 700 clamp(1.5rem, 5vw, 1.9rem)/1 "IBM Plex Mono", monospace; padding: 6px 12px 0; font-variant-numeric: tabular-nums; }
+.panel-mm .readout { color: var(--g-neg); }
+.panel-yy .readout { color: var(--g-pos); }
+
+.panel svg.chart { width: 100%; height: auto; display: block; padding: 4px 8px 0; box-sizing: border-box; }
+.bar-label, .axis-label { font: 500 0.6rem "IBM Plex Mono", monospace; fill: var(--g-ink-3); }
+.value-label { font: 600 0.66rem "IBM Plex Mono", monospace; }
+.note { font: 500 0.64rem/1.4 "Inter", sans-serif; color: var(--g-ink-3); padding: 6px 12px 10px; }
+
+.detail { display: none; margin: 0 12px 10px; padding: 6px 0 6px 8px; font: 500 0.7rem/1.5 "Inter", sans-serif; color: var(--g-ink-2); }
+.panel-mm .detail { border-left: 2px solid var(--g-neg); }
+.panel-yy .detail { border-left: 2px solid var(--g-pos); }
+.panel[data-open="true"] .detail { display: block; }
+.detail b { color: var(--g-ink); }
+.detail .src { display: block; margin-top: 3px; font: 500 0.62rem/1.4 "IBM Plex Mono", monospace; color: var(--g-ink-3); }
+
+.caption { font: 500 0.78rem/1.5 "Inter", sans-serif; color: var(--g-ink-2); border-top: 1px solid var(--g-rule); padding-top: 10px; }
+.caption b { color: var(--g-ink); }
+@media (max-width: 620px) { .panels { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="shell">
+  <div>
+    <h1>Two clocks, one retail print</h1>
+    <p class="sub">July 2026 US retail and food services. Both instruments are correct. They measure different things.</p>
+  </div>
+  <div class="ctl">
+    <button type="button" id="replay">Replay</button>
+    <div class="toggle" role="group" aria-label="Foreground a clock">
+      <button id="btn-both" aria-pressed="true">Both</button>
+      <button id="btn-mm" aria-pressed="false">Sequential (m/m)</button>
+      <button id="btn-yy" aria-pressed="false">Annual (y/y)</button>
+    </div>
+  </div>
+  <div class="panels" id="panels">
+    <div class="panel panel-mm" id="panel-mm" data-open="false">
+      <button type="button" class="phead" data-detail="panel-mm" aria-expanded="false" aria-controls="detail-mm">
+        <span class="pics">
+          <span class="pic" data-icon="clock" aria-hidden="true"></span>
+          <span class="pic tone" data-icon="trenddown" aria-hidden="true"></span>
+        </span>
+        <span><h2>Sequential clock &middot; m/m</h2><span class="tap">Tap for the exact figure and source line</span></span>
+      </button>
+      <div class="readout" id="ro-mm" aria-label="July month over month reading, minus 0.6 percent">&minus;0.0%</div>
+      <svg class="chart" viewBox="0 0 360 110" role="img" aria-label="Bar chart, July 2026 month over month retail change at negative 0.6 percent, the only month over month figure reported in this release">
+        <line x1="10" y1="18" x2="350" y2="18" stroke="var(--g-rule-strong)" stroke-width="1"></line>
+        <g id="bars-mm"></g>
+      </svg>
+      <div class="detail" id="detail-mm">July: <b>$763.6B</b>, <b>&minus;0.6% m/m</b>, the sharpest monthly fall since May 2025. This is the stall.
+        <span class="src">Source line &middot; US Census Bureau, July 2026 advance retail and food services release &middot; only July is m/m-reported here</span>
+      </div>
+      <p class="note">Only July is Census-reported m/m. Prior months are outside this release and not shown.</p>
+    </div>
+    <div class="panel panel-yy" id="panel-yy" data-open="false">
+      <button type="button" class="phead" data-detail="panel-yy" aria-expanded="false" aria-controls="detail-yy">
+        <span class="pics">
+          <span class="pic" data-icon="clock" aria-hidden="true"></span>
+          <span class="pic tone" data-icon="chart" aria-hidden="true"></span>
+        </span>
+        <span><h2>Annual clock &middot; y/y</h2><span class="tap">Tap for the exact figure and source line</span></span>
+      </button>
+      <div class="readout" id="ro-yy" aria-label="July year over year reading, plus 5.0 percent">+0.0%</div>
+      <svg class="chart" viewBox="0 0 360 170" role="img" aria-label="Line chart of year over year retail growth, May 7.3 percent, June 6.7 percent, July 5.0 percent, decelerating">
+        <g id="axis-yy"></g>
+        <polyline id="line-yy" fill="none" stroke="var(--g-pos)" stroke-width="2.5"></polyline>
+        <g id="pts-yy"></g>
+      </svg>
+      <div class="detail" id="detail-yy">July: <b>+5.0% y/y</b>, trailing three months +6.3%, decelerating from +7.3% (May) and +6.7% (June). Deceleration, not contraction.
+        <span class="src">Source line &middot; US Census Bureau, July 2026 advance retail and food services release &middot; y/y computed against July 2025</span>
+      </div>
+    </div>
+  </div>
+  <p class="caption" id="caption"><b>Active reading: both.</b> July fell 0.6% m/m (largest monthly drop in more than a year) and rose 5.0% y/y (May&ndash;Jul trailing +6.3%, decelerating from +7.3% in May). A sequential stall inside a positive annual trend.</p>
+</div>
+<script>
+(() => {
+  const ICON_BASE = '../customs-entry-agent/flow-icons/';
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* Shared line-art icons, fetched and inlined with the stroke swapped to
+     currentColor so each clock's icon carries its panel colour. A failed
+     fetch leaves the slot empty and the text still carries the panel. */
+  document.querySelectorAll('[data-icon]').forEach((slot) => {
+    fetch(ICON_BASE + slot.dataset.icon + '.svg')
+      .then((r) => (r.ok ? r.text() : Promise.reject()))
+      .then((t) => { slot.innerHTML = t.replace(/stroke="#232f3e"/g, 'stroke="currentColor"'); })
+      .catch(() => {});
+  });
+
+  const mmData = [{ m: 'Jul', v: -0.6 }];
+  const yyData = [{ m: 'May', v: 7.3 }, { m: 'Jun', v: 6.7 }, { m: 'Jul', v: 5.0 }];
+  const svgNS = 'http://www.w3.org/2000/svg';
+  const el = (tag, attrs) => {
+    const n = document.createElementNS(svgNS, tag);
+    for (const k in attrs) n.setAttribute(k, attrs[k]);
+    return n;
+  };
+
+  /* Sequential bar: builds at full geometry, height driven by the shared clock */
+  const barsG = document.getElementById('bars-mm');
+  const bw = 34, maxAbs = 0.7, base = 18;
+  const mmBars = mmData.map((d, i) => {
+    const x = 20 + i * (bw + 14);
+    const h = Math.abs(d.v) / maxAbs * 55;
+    const bar = el('rect', { x, y: base, width: bw, height: 0, fill: 'var(--g-neg)', rx: 1 });
+    barsG.appendChild(bar);
+    barsG.appendChild(el('text', { x: x + bw / 2, y: base + 47.2 + 30, class: 'bar-label', 'text-anchor': 'middle' })).textContent = d.m;
+    const vt = el('text', { x: x + bw / 2, y: base + h + 14, class: 'value-label', 'text-anchor': 'middle', fill: 'var(--g-neg)', opacity: 0 });
+    vt.textContent = '−' + Math.abs(d.v).toFixed(1) + '%';
+    barsG.appendChild(vt);
+    return { bar, vt, h };
+  });
+
+  /* Annual line: full points set once, then drawn on via stroke-dashoffset */
+  const yyG = document.getElementById('axis-yy');
+  const line = document.getElementById('line-yy');
+  const ptsG = document.getElementById('pts-yy');
+  const yMin = 4, yMax = 8;
+  const px = (i) => 30 + i * (300 / (yyData.length - 1));
+  const py = (v) => 140 - ((v - yMin) / (yMax - yMin)) * 100;
+  [4, 5, 6, 7, 8].forEach((g) => {
+    yyG.appendChild(el('line', { x1: 20, x2: 350, y1: py(g), y2: py(g), stroke: 'var(--g-rule)', 'stroke-width': 0.6 }));
+    yyG.appendChild(el('text', { x: 8, y: py(g) + 3, class: 'axis-label' })).textContent = g;
+  });
+  line.setAttribute('points', yyData.map((d, i) => `${px(i)},${py(d.v)}`).join(' '));
+  const lineLen = line.getTotalLength();
+  line.setAttribute('stroke-dasharray', lineLen);
+  line.setAttribute('stroke-dashoffset', lineLen);
+  const yyPts = yyData.map((d, i) => {
+    const dot = el('circle', { cx: px(i), cy: py(d.v), r: 3.5, fill: d.m === 'Jul' ? 'var(--g-pos)' : 'var(--g-accent-ink)', opacity: 0 });
+    ptsG.appendChild(dot);
+    const vt = el('text', { x: px(i), y: py(d.v) - 10, class: 'value-label', 'text-anchor': 'middle', fill: 'var(--g-ink)', opacity: 0 });
+    vt.textContent = '+' + d.v.toFixed(1) + '%';
+    ptsG.appendChild(vt);
+    ptsG.appendChild(el('text', { x: px(i), y: 158, class: 'bar-label', 'text-anchor': 'middle' })).textContent = d.m;
+    return { dot, vt, at: yyData.length === 1 ? 1 : i / (yyData.length - 1) };
+  });
+
+  /* One clock drives both readings so the divergence is what the eye gets:
+     the sequential readout falls to −0.6 while the annual one climbs to +5.0. */
+  const roMM = document.getElementById('ro-mm');
+  const roYY = document.getElementById('ro-yy');
+  const DUR = 1600;
+  const ease = (x) => 1 - Math.pow(1 - x, 3);
+  let raf = 0;
+  const render = (e) => {
+    roMM.textContent = '−' + (0.6 * e).toFixed(1) + '%';
+    roYY.textContent = '+' + (5.0 * e).toFixed(1) + '%';
+    mmBars.forEach((b) => {
+      b.bar.setAttribute('height', b.h * e);
+      b.vt.setAttribute('opacity', e > 0.9 ? 1 : 0);
+    });
+    line.setAttribute('stroke-dashoffset', lineLen * (1 - e));
+    yyPts.forEach((p) => {
+      const on = e >= Math.max(0.05, p.at);
+      p.dot.setAttribute('opacity', on ? 1 : 0);
+      p.vt.setAttribute('opacity', on ? 1 : 0);
+    });
+  };
+  const run = () => {
+    cancelAnimationFrame(raf);
+    if (reduced) { render(1); return; }
+    render(0);
+    let t0 = null;
+    const step = (ts) => {
+      if (t0 === null) t0 = ts; /* t0 from the first rAF timestamp, never performance.now() */
+      const e = ease(Math.min(1, (ts - t0) / DUR));
+      render(e);
+      if (e < 1) raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+  };
+  document.getElementById('replay').addEventListener('click', run);
+
+  /* threshold 0, not 0.2: the stacked panels can exceed a phone viewport,
+     and a fraction of a too-tall element never intersects. */
+  const panels = document.getElementById('panels');
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting)) { io.disconnect(); run(); }
+    }, { threshold: 0 });
+    io.observe(panels);
+  } else { run(); }
+
+  /* per-clock detail: tap the clock head for its exact figure and source line */
+  document.querySelectorAll('.phead').forEach((head) => {
+    head.addEventListener('click', () => {
+      const panel = document.getElementById(head.dataset.detail);
+      const open = panel.dataset.open === 'true';
+      panel.dataset.open = String(!open);
+      head.setAttribute('aria-expanded', String(!open));
+    });
+  });
+
+  /* foreground toggle keeps the two-instrument caption in sync */
+  const panelMM = document.getElementById('panel-mm');
+  const panelYY = document.getElementById('panel-yy');
+  const caption = document.getElementById('caption');
+  const buttons = { both: document.getElementById('btn-both'), mm: document.getElementById('btn-mm'), yy: document.getElementById('btn-yy') };
+  const texts = {
+    both: '<b>Active reading: both.</b> July fell 0.6% m/m (largest monthly drop in more than a year) and rose 5.0% y/y (May&ndash;Jul trailing +6.3%, decelerating from +7.3% in May). A sequential stall inside a positive annual trend.',
+    mm: '<b>Sequential clock foregrounded.</b> July: $763.6B, &minus;0.6% m/m, the sharpest monthly fall since May 2025. This is the stall.',
+    yy: '<b>Annual clock foregrounded.</b> July: +5.0% y/y, trailing three months +6.3%, decelerating from +7.3% (May) and +6.7% (June). This is deceleration, not contraction.'
+  };
+  const setMode = (mode) => {
+    Object.values(buttons).forEach((b) => b.setAttribute('aria-pressed', 'false'));
+    buttons[mode].setAttribute('aria-pressed', 'true');
+    panelMM.classList.toggle('dim', mode === 'yy');
+    panelYY.classList.toggle('dim', mode === 'mm');
+    caption.innerHTML = texts[mode];
+  };
+  buttons.both.addEventListener('click', () => setMode('both'));
+  buttons.mm.addEventListener('click', () => setMode('mm'));
+  buttons.yy.addEventListener('click', () => setMode('yy'));
+
+  if (document.documentElement.dataset.embedded === 'true') {
+    const postSize = () => window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+    if ('ResizeObserver' in window) new ResizeObserver(postSize).observe(document.body);
+    window.addEventListener('load', postSize);
+    window.addEventListener('resize', postSize);
+  }
+})();
+</script>
+</body>
+</html>

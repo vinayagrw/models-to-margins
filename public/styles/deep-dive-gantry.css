@@ -1,0 +1,1021 @@
+/* ============================================================================
+   Gantry — bespoke "gantry" template for dock-board deep-dives.
+   Every rule is scoped under .dd-gantry so nothing leaks to other pages.
+
+   Identity: a dock-door control board rendered as a document. The page reads
+   like the paperwork clipped to a gantry — a stencilled crate title block,
+   numbered dock doors down the left rail, instrument panels where the figures
+   sit. Light is a daylight concrete dock; dark is the same dock on night
+   shift under sodium lamps (authored, not an inversion).
+
+   Theming mechanism is identical to deep-dive-atlas.css: light tokens live on
+   .dd-gantry.article-shell, dark overrides on
+   [data-theme="dark"] .dd-gantry.article-shell. No !important anywhere.
+
+   ACCESSIBILITY CONTRACT (binding):
+     --gy-accent      safety yellow. FILL ONLY. Never a text colour.
+     --gy-accent-ink  text-safe amber, >= 4.5:1 on --gy-surface in both themes.
+                      Every accent-coloured glyph on this page uses it.
+     --gy-on-accent   the ink that sits ON TOP of a yellow fill.
+   Hazard chevrons are capped at two forms (8px band, 12px corner tick) and
+   two instances per viewport. All textures are CSS-only and aria-hidden.
+   ========================================================================== */
+
+.dd-gantry.article-shell {
+  /* day shift, concrete (light) */
+  --gy-bg: #eae8e3;
+  --gy-bg-2: #e2dfd8;
+  --gy-surface: #f6f5f2;
+  --gy-surface-2: #dfdcd5;
+  --gy-ink: #16181a;
+  --gy-ink-2: #3d4247;
+  --gy-ink-3: #6b7178;
+  --gy-rule: #c6c2b9;
+  --gy-rule-strong: #9a958a;
+  --gy-rule-faint: rgba(22, 24, 26, 0.07);
+  --gy-accent: #f2b705;          /* FILL ONLY */
+  --gy-accent-ink: #7a5b00;      /* 5.6:1 on --gy-surface */
+  --gy-on-accent: #16181a;       /* 11.4:1 on --gy-accent */
+  --gy-neg: #b3261e;
+  --gy-neg-dim: rgba(179, 38, 30, 0.10);
+  --gy-pos: #1f6b4a;
+  --gy-pos-dim: rgba(31, 107, 74, 0.11);
+  --gy-info: #2a5d9f;
+  --gy-info-dim: rgba(42, 93, 159, 0.10);
+  --gy-caution: #a9500a;
+  --gy-caution-dim: rgba(169, 80, 10, 0.10);
+  --gy-shadow: rgba(22, 24, 26, 0.20);
+  --gy-grain-a: rgba(22, 24, 26, 0.030);
+  --gy-grain-b: rgba(22, 24, 26, 0.022);
+
+  --gy-display: "Saira Condensed", "Oswald", "Arial Narrow", sans-serif;
+  --gy-body-font: "Inter", "Segoe UI", system-ui, sans-serif;
+  --gy-mono: "IBM Plex Mono", "Cascadia Code", ui-monospace, monospace;
+
+  /* layout scale */
+  --gy-wide: clamp(1240px, 92vw, 1600px);
+  --gy-rail: 208px;
+  /* pins below the sticky site header (16px offset + ~76px pill) */
+  --gy-stick: 92px;
+
+  position: relative;
+  color: var(--gy-ink);
+  font-family: var(--gy-body-font);
+  font-feature-settings: "tnum" 1;
+  /* concrete grain: two speckle passes over a 32px slab grid */
+  background:
+    radial-gradient(circle at 18% 24%, var(--gy-grain-a) 0 1px, transparent 1.4px),
+    radial-gradient(circle at 71% 63%, var(--gy-grain-b) 0 1px, transparent 1.6px),
+    repeating-linear-gradient(0deg, transparent 0 31px, var(--gy-rule-faint) 31px 32px),
+    repeating-linear-gradient(90deg, transparent 0 31px, var(--gy-rule-faint) 31px 32px),
+    linear-gradient(180deg, var(--gy-bg), var(--gy-bg-2));
+  background-size: 26px 26px, 37px 37px, auto, auto, auto;
+  border: 1px solid var(--gy-rule);
+  border-radius: 3px;
+  box-shadow: 0 16px 44px -30px var(--gy-shadow);
+  padding: clamp(20px, 3.5vw, 44px);
+  margin-top: 8px;
+  /* clip, not hidden: clips decoration without making a scroll container, so
+     the sticky dock rail keeps pinning. */
+  overflow: clip;
+}
+
+/* ============================================================
+   Night shift, sodium (dark).
+   ============================================================ */
+[data-theme="dark"] .dd-gantry.article-shell {
+  --gy-bg: #101215;
+  --gy-bg-2: #0c0e11;
+  --gy-surface: #191c20;
+  --gy-surface-2: #22262b;
+  --gy-ink: #eceae4;
+  --gy-ink-2: #b8bcc2;
+  --gy-ink-3: #8a9098;
+  --gy-rule: #2e333a;
+  --gy-rule-strong: #454c55;
+  --gy-rule-faint: rgba(200, 210, 224, 0.05);
+  --gy-accent: #ffb020;
+  --gy-accent-ink: #ffc761;      /* 9.1:1 on --gy-surface */
+  --gy-on-accent: #14161a;
+  --gy-neg: #ff6b5e;
+  --gy-neg-dim: rgba(255, 107, 94, 0.13);
+  --gy-pos: #4fcf97;
+  --gy-pos-dim: rgba(79, 207, 151, 0.13);
+  --gy-info: #7fb2ff;
+  --gy-info-dim: rgba(127, 178, 255, 0.13);
+  --gy-caution: #ff9247;
+  --gy-caution-dim: rgba(255, 146, 71, 0.13);
+  --gy-shadow: rgba(0, 0, 0, 0.8);
+  /* grain alphas halve on night shift */
+  --gy-grain-a: rgba(255, 255, 255, 0.016);
+  --gy-grain-b: rgba(255, 255, 255, 0.011);
+
+  box-shadow: 0 0 0 1px rgba(46, 51, 58, 0.5), 0 28px 70px -40px rgba(0, 0, 0, 0.9);
+}
+
+/* ------------------------------------------------------- Header (crate) --- */
+.dd-gantry .gy-header {
+  position: relative;
+  max-width: var(--gy-wide);
+  margin: 0 auto clamp(18px, 3vw, 28px);
+  padding: clamp(16px, 2.4vw, 24px) clamp(16px, 2.4vw, 26px) clamp(20px, 3vw, 28px);
+  background: var(--gy-surface);
+  border: 1px solid var(--gy-rule-strong);
+  /* the 1px double rule box — stencil feel without fake broken letters */
+  outline: 1px solid var(--gy-rule);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+/* HAZARD BAND — chevron form 1 of 2, instance 1 of 2 per viewport.
+   Flush against the title block's bottom edge. Never behind text. */
+.dd-gantry .gy-header::after {
+  content: "";
+  position: absolute;
+  left: -1px;
+  right: -1px;
+  bottom: -1px;
+  height: 8px;
+  background: repeating-linear-gradient(
+    135deg,
+    var(--gy-accent) 0 14px,
+    var(--gy-ink) 14px 28px
+  );
+  pointer-events: none;
+}
+
+.dd-gantry .gy-routing {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 9px;
+  font-family: var(--gy-mono);
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--gy-ink-2);
+  padding: 6px 12px;
+  border: 1px solid var(--gy-rule-strong);
+  border-radius: 2px;
+  background: var(--gy-surface-2);
+}
+.dd-gantry .gy-routing-tag { color: var(--gy-ink); font-weight: 600; }
+.dd-gantry .gy-routing-sep { color: var(--gy-rule-strong); }
+.dd-gantry .gy-routing-no { color: var(--gy-accent-ink); font-weight: 600; }
+.dd-gantry .gy-routing-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--gy-pos);
+  font-weight: 600;
+}
+.dd-gantry .gy-routing-status::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--gy-pos);
+}
+
+.dd-gantry .gy-title {
+  font-family: var(--gy-display);
+  font-weight: 700;
+  font-size: clamp(2.4rem, 6vw, 4.4rem);
+  line-height: 0.95;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  overflow-wrap: break-word;
+  color: var(--gy-ink);
+  margin: 0.42em 0 0;
+}
+
+.dd-gantry .gy-subtitle {
+  font-family: var(--gy-body-font);
+  font-size: clamp(0.92rem, 1.7vw, 1.04rem);
+  line-height: 1.55;
+  color: var(--gy-ink-2);
+  margin: 0.9rem 0 0;
+  max-width: 100%;
+}
+
+.dd-gantry .gy-lead {
+  font-family: var(--gy-body-font);
+  font-weight: 400;
+  font-size: clamp(1.02rem, 1.8vw, 1.12rem);
+  line-height: 1.62;
+  color: var(--gy-ink);
+  margin: 1rem 0 0;
+  max-width: 100%;
+}
+
+/* coords row — hairline-separated mono cells */
+.dd-gantry .gy-coords {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 1.3rem 0 0;
+}
+.dd-gantry .gy-coords span {
+  font-family: var(--gy-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+  color: var(--gy-ink-2);
+  padding: 7px 12px;
+  border: 1px solid var(--gy-rule);
+  border-radius: 2px;
+  background: var(--gy-bg);
+}
+
+.dd-gantry .gy-header-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px 22px;
+  margin-top: 1.4rem;
+}
+.dd-gantry .back-link,
+.dd-gantry .meta-row,
+.dd-gantry .meta-pill,
+.dd-gantry .entry-meta { color: var(--gy-ink-2); }
+.dd-gantry .tag-row { margin-top: 1.1rem; }
+.dd-gantry .tag {
+  background: transparent;
+  border: 1px solid var(--gy-rule-strong);
+  border-radius: 2px;
+  color: var(--gy-ink-2);
+  font-family: var(--gy-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 5px 10px;
+}
+
+/* -------------------------------------------------------------- Layout ---- */
+.dd-gantry .gy-layout {
+  display: grid;
+  grid-template-columns: var(--gy-rail) minmax(0, 1fr);
+  column-gap: clamp(24px, 3vw, 40px);
+  max-width: var(--gy-wide);
+  margin: 0 auto;
+  align-items: start;
+}
+.dd-gantry .gy-body { grid-column: 2; min-width: 0; }
+
+/* --------------------------------------------------- Dock index (spine) --- */
+.dd-gantry .gy-spine-index {
+  grid-column: 1;
+  position: sticky;
+  top: var(--gy-stick);
+  max-height: calc(100vh - var(--gy-stick) - 24px);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 4px 12px 12px 0;
+  border-right: 1px solid var(--gy-rule);
+  overflow: hidden;
+}
+
+/* fill gauge — the bar is decorative, the mono label is the accessible value */
+.dd-gantry .gy-gauge {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex: 0 0 auto;
+  padding-bottom: 9px;
+  border-bottom: 1px solid var(--gy-rule);
+}
+.dd-gantry .gy-gauge-label {
+  font-family: var(--gy-mono);
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+  color: var(--gy-accent-ink);
+  white-space: nowrap;
+}
+.dd-gantry .gy-gauge-track {
+  flex: 1 1 auto;
+  height: 4px;
+  min-width: 0;
+  background: var(--gy-surface-2);
+  border: 1px solid var(--gy-rule);
+  border-radius: 1px;
+  overflow: hidden;
+}
+.dd-gantry .gy-gauge-fill {
+  display: block;
+  height: 100%;
+  width: 0%;
+  background: var(--gy-accent);
+  transition: width 160ms ease-out;
+}
+
+.dd-gantry .gy-dock-list {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  scrollbar-width: thin;
+}
+.dd-gantry .gy-dock-list::-webkit-scrollbar { width: 6px; }
+
+.dd-gantry .gy-dock-group + .gy-dock-group { margin-top: 3px; }
+
+.dd-gantry .gy-dock {
+  display: block;
+  padding: 8px 10px 9px 11px;
+  border-left: 3px solid transparent;
+  border-radius: 0 2px 2px 0;
+  text-decoration: none;
+  transition: background 160ms ease-out, border-color 160ms ease-out;
+}
+.dd-gantry .gy-dock-no {
+  display: block;
+  font-family: var(--gy-mono);
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  color: var(--gy-accent-ink);
+}
+.dd-gantry .gy-dock-title {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-family: var(--gy-body-font);
+  font-size: 0.86rem;
+  font-weight: 500;
+  line-height: 1.32;
+  color: var(--gy-ink-3);
+  margin-top: 2px;
+}
+.dd-gantry .gy-dock:hover .gy-dock-title { color: var(--gy-ink); }
+.dd-gantry .gy-dock.is-active {
+  background: var(--gy-surface);
+  border-left-color: var(--gy-accent);
+}
+.dd-gantry .gy-dock.is-active .gy-dock-title { color: var(--gy-ink); font-weight: 600; }
+.dd-gantry .gy-dock:focus-visible,
+.dd-gantry .gy-dock-fig:focus-visible {
+  outline: 2px solid var(--gy-accent-ink);
+  outline-offset: 2px;
+}
+
+/* figure sub-links: only the chapter being read expands its figures */
+.dd-gantry .gy-dock-fig {
+  display: none;
+  padding: 4px 10px 4px 30px;
+  border-left: 3px solid transparent;
+  font-family: var(--gy-mono);
+  font-size: 0.7rem;
+  line-height: 1.35;
+  color: var(--gy-ink-3);
+  text-decoration: none;
+}
+.dd-gantry .gy-dock-fig:hover { color: var(--gy-accent-ink); }
+.dd-gantry .gy-dock-group.is-open .gy-dock-fig { display: block; }
+
+/* ============================================================
+   Typography reset — neutralize the global terminal aesthetic.
+   :where() keeps this at (0,2,0): above the global reset at (0,1,2),
+   below this sheet's own element rules at (0,2,1). Any custom class used
+   INSIDE the body must be styled at (0,3,0) via
+   .dd-gantry .article-body .the-class — see the chip block below.
+   ============================================================ */
+.dd-gantry .article-body :where(:not(pre > code)) {
+  display: revert;
+  padding: revert;
+  border: revert;
+  border-radius: 0;
+  background: none;
+  font-family: var(--gy-body-font);
+  font-size: revert;
+  color: revert;
+}
+
+.dd-gantry .article-body {
+  position: relative;
+  margin-top: 0;
+  padding-top: clamp(14px, 2vw, 22px);
+  color: var(--gy-ink-2);
+  font-size: 1.05rem;
+  line-height: 1.68;
+}
+
+/* Prose and instruments/figures both fill the full content column. */
+.dd-gantry .article-body > p,
+.dd-gantry .article-body > ul,
+.dd-gantry .article-body > ol,
+.dd-gantry .article-body > h3,
+.dd-gantry .article-body > h4,
+.dd-gantry .article-body > blockquote,
+.dd-gantry .article-body > .note-panel,
+.dd-gantry .article-body > .callout,
+.dd-gantry .article-body > .stat-strip,
+.dd-gantry .article-body > .visual-frame,
+.dd-gantry .article-body > details,
+.dd-gantry .article-body > table { max-width: 100%; }
+
+.dd-gantry .article-body p,
+.dd-gantry .article-body li { color: var(--gy-ink-2); }
+.dd-gantry .article-body strong { color: var(--gy-ink); font-weight: 600; }
+.dd-gantry .article-body em { color: var(--gy-ink); font-style: italic; }
+.dd-gantry .article-body a {
+  color: var(--gy-accent-ink);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-thickness: 1px;
+}
+.dd-gantry .article-body a:focus-visible,
+.dd-gantry .gy-header a:focus-visible {
+  outline: 2px solid var(--gy-accent-ink);
+  outline-offset: 2px;
+}
+
+/* stencilled chapter bands */
+.dd-gantry .gy-body h2 {
+  position: relative;
+  font-family: var(--gy-display);
+  font-weight: 600;
+  font-size: clamp(1.7rem, 3.4vw, 2.5rem);
+  line-height: 1.08;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--gy-ink);
+  margin: 3.2rem 0 1.1rem;
+  padding: 20px 0 0;
+  border-top: 1px solid var(--gy-rule-strong);
+  scroll-margin-top: calc(var(--gy-stick) + 24px);
+}
+.dd-gantry .gy-body h2:first-of-type { margin-top: 0.6rem; }
+/* the chapter's own dock bar — lights when current. 3px yellow, fill only. */
+.dd-gantry .gy-body h2::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: 0;
+  width: 56px;
+  height: 3px;
+  background: var(--gy-rule-strong);
+  transition: width 160ms ease-out, background 160ms ease-out;
+}
+.dd-gantry .gy-body h2.is-current::before {
+  width: 116px;
+  background: var(--gy-accent);
+}
+
+.dd-gantry .gy-body h3,
+.dd-gantry .gy-body h4 {
+  font-family: var(--gy-display);
+  font-weight: 600;
+  font-size: 1.24rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--gy-ink);
+  margin: 1.9rem 0 0.55rem;
+}
+.dd-gantry .gy-body h4 { font-size: 1.06rem; }
+
+/* inline code + pre */
+.dd-gantry .article-body :not(pre) > code {
+  font-family: var(--gy-mono);
+  font-size: 0.86em;
+  color: var(--gy-ink);
+  background: var(--gy-surface-2);
+  border: 1px solid var(--gy-rule);
+  border-radius: 2px;
+  padding: 0.08em 0.36em;
+}
+.dd-gantry .article-body pre {
+  border: 1px solid var(--gy-rule);
+  border-radius: 2px;
+  background: var(--gy-surface-2);
+}
+.dd-gantry .article-body pre code {
+  font-family: var(--gy-mono);
+  color: var(--gy-ink);
+}
+
+/* ----------------------------------------------------- Evidence chips ----- */
+/* Border style is a second, non-colour channel: solid / plain / dashed. */
+.dd-gantry .gy-chip,
+.dd-gantry .article-body .gy-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--gy-mono);
+  font-size: 0.68rem;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border: 1px solid currentColor;
+  border-radius: 2px;
+  padding: 4px 8px;
+  color: var(--gy-ink-2);
+  background: transparent;
+  white-space: nowrap;
+}
+.dd-gantry .gy-chip--confirmed,
+.dd-gantry .article-body .gy-chip--confirmed {
+  color: var(--gy-ink);
+  background: var(--gy-surface-2);
+}
+.dd-gantry .gy-chip--estimate,
+.dd-gantry .article-body .gy-chip--estimate {
+  color: var(--gy-caution);
+  background: var(--gy-caution-dim);
+  border-style: dashed;
+  text-decoration: underline dashed;
+  text-underline-offset: 3px;
+}
+.dd-gantry .gy-chip--open,
+.dd-gantry .article-body .gy-chip--open {
+  color: var(--gy-accent-ink);
+  background: transparent;
+}
+.dd-gantry .gy-chip--inference,
+.dd-gantry .article-body .gy-chip--inference {
+  color: var(--gy-accent-ink);
+  background: transparent;
+}
+.dd-gantry .gy-chip--vendor-claim,
+.dd-gantry .article-body .gy-chip--vendor-claim {
+  color: var(--gy-info);
+  background: var(--gy-info-dim);
+  font-style: italic;
+}
+
+/* ------------------------------------------------------------ Stat tiles -- */
+.dd-gantry .article-body .stat-strip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+.dd-gantry .article-body .gy-stat {
+  border: 1px solid var(--gy-rule);
+  border-left: 3px solid var(--gy-accent);
+  border-radius: 2px;
+  background: var(--gy-surface);
+  padding: 0.9rem 1rem 1rem;
+  min-width: 0;
+}
+.dd-gantry .article-body .gy-stat > b {
+  display: block;
+  font-family: var(--gy-mono);
+  font-weight: 600;
+  font-size: clamp(1.6rem, 4vw, 2.4rem);
+  line-height: 1.08;
+  letter-spacing: -0.01em;
+  color: var(--gy-ink);
+  font-variant-numeric: tabular-nums;
+}
+/* Sign is carried by a glyph in the authored text as well as by colour. */
+.dd-gantry .article-body .gy-stat.alert > b { color: var(--gy-neg); }
+.dd-gantry .article-body .gy-stat.alert { border-left-color: var(--gy-neg); }
+.dd-gantry .article-body .gy-stat.warn > b { color: var(--gy-caution); }
+.dd-gantry .article-body .gy-stat.warn { border-left-color: var(--gy-caution); }
+.dd-gantry .article-body .gy-stat.good > b { color: var(--gy-pos); }
+.dd-gantry .article-body .gy-stat.good { border-left-color: var(--gy-pos); }
+.dd-gantry .article-body .gy-stat > span {
+  display: block;
+  font-size: 0.85rem;
+  line-height: 1.45;
+  color: var(--gy-ink-2);
+  margin-top: 0.45rem;
+}
+
+/* ------------------------------------------------------------ Note panel -- */
+.dd-gantry .article-body .note-panel {
+  display: block;
+  border: 1px solid var(--gy-rule);
+  border-left: 3px solid var(--gy-accent);
+  border-radius: 2px;
+  background: var(--gy-surface);
+  padding: 0 1.1rem 1rem;
+  margin-top: 0;
+  margin-bottom: 1.6rem;
+  overflow: hidden;
+}
+.dd-gantry .article-body .note-panel::before {
+  content: "Dock notice";
+  display: block;
+  margin: 0 -1.1rem 0.9rem;
+  padding: 9px 14px;
+  font-family: var(--gy-mono);
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gy-accent-ink);
+  background: var(--gy-surface-2);
+  border-bottom: 1px solid var(--gy-rule);
+}
+.dd-gantry .article-body .note-panel p { margin: 0.5rem 0 0; font-size: 0.98rem; }
+.dd-gantry .article-body .note-panel p:first-of-type { margin-top: 0; }
+
+/* -------------------------------------------------------------- Callouts -- */
+.dd-gantry .article-body .callout {
+  display: block;
+  padding: 0.95rem 1.05rem;
+  border: 1px solid var(--gy-rule);
+  border-left: 3px solid var(--gy-accent);
+  border-radius: 2px;
+  background: var(--gy-surface);
+  color: var(--gy-ink-2);
+  margin-top: 1.4rem;
+  margin-bottom: 1.4rem;
+}
+.dd-gantry .article-body .callout > strong {
+  display: block;
+  font-family: var(--gy-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gy-accent-ink);
+  margin: 0 0 0.4rem;
+}
+.dd-gantry .article-body .callout p { margin: 0; font-size: 0.96rem; }
+.dd-gantry .article-body .callout.warm { border-left-color: var(--gy-caution); }
+.dd-gantry .article-body .callout.warm > strong { color: var(--gy-caution); }
+.dd-gantry .article-body .callout.alert { border-left-color: var(--gy-neg); }
+.dd-gantry .article-body .callout.alert > strong { color: var(--gy-neg); }
+.dd-gantry .article-body .callout.green,
+.dd-gantry .article-body .callout.neutral { border-left-color: var(--gy-pos); }
+.dd-gantry .article-body .callout.green > strong,
+.dd-gantry .article-body .callout.neutral > strong { color: var(--gy-pos); }
+
+/* ------------------------------------------------------------ Blockquote -- */
+.dd-gantry .article-body blockquote {
+  margin-top: 1.7rem;
+  margin-bottom: 1.7rem;
+  padding: 1rem 0;
+  border: 0;
+  border-top: 1px solid var(--gy-rule-strong);
+  border-bottom: 1px solid var(--gy-rule-strong);
+  background: none;
+}
+.dd-gantry .article-body blockquote p {
+  font-family: var(--gy-display);
+  font-style: normal;
+  font-weight: 500;
+  font-size: 1.3rem;
+  line-height: 1.42;
+  letter-spacing: 0.01em;
+  color: var(--gy-ink);
+  margin: 0;
+}
+.dd-gantry .article-body blockquote p + p { margin-top: 0.55rem; }
+.dd-gantry .article-body blockquote cite,
+.dd-gantry .article-body blockquote em {
+  display: block;
+  font-family: var(--gy-mono);
+  font-style: normal;
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gy-ink-3);
+  margin-top: 0.7rem;
+}
+
+/* ---------------------------------------------------------------- Tables -- */
+/* Wide tables scroll inside their own container. Authors wrap a table in
+   <div class="gy-table-scroll" tabindex="0"> …; a bare table still scrolls
+   because the body cell is a min-width:0 grid column. */
+.dd-gantry .article-body .gy-table-scroll {
+  display: block;
+  overflow-x: auto;
+  max-width: 100%;
+  margin-top: 1.6rem;
+  margin-bottom: 1.6rem;
+  border: 1px solid var(--gy-rule);
+  border-radius: 2px;
+}
+.dd-gantry .article-body .gy-table-scroll:focus-visible {
+  outline: 2px solid var(--gy-accent-ink);
+  outline-offset: 2px;
+}
+.dd-gantry .article-body .gy-table-scroll > table {
+  margin: 0;
+  border: 0;
+  min-width: 42rem;
+}
+.dd-gantry .article-body table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1.6rem;
+  margin-bottom: 1.6rem;
+  border: 1px solid var(--gy-rule);
+  border-radius: 2px;
+  font-size: 0.92rem;
+}
+.dd-gantry .article-body caption {
+  caption-side: top;
+  text-align: left;
+  font-family: var(--gy-mono);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gy-ink-3);
+  padding: 0 0 0.5rem;
+}
+.dd-gantry .article-body th,
+.dd-gantry .article-body td {
+  display: table-cell;
+  padding: 9px 13px;
+  border: 0;
+  border-bottom: 1px solid var(--gy-rule-faint);
+  text-align: left;
+  vertical-align: top;
+  color: var(--gy-ink-2);
+}
+.dd-gantry .article-body td {
+  font-family: var(--gy-mono);
+  font-size: 0.86rem;
+  font-variant-numeric: tabular-nums;
+}
+.dd-gantry .article-body th {
+  font-family: var(--gy-mono);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gy-ink);
+  background: var(--gy-surface-2);
+  border-bottom: 1px solid var(--gy-rule);
+}
+.dd-gantry .article-body th[scope="row"] {
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  text-transform: none;
+  background: none;
+  border-bottom: 1px solid var(--gy-rule-faint);
+}
+.dd-gantry .article-body td.num,
+.dd-gantry .article-body th.num { text-align: right; }
+.dd-gantry .article-body tbody tr:last-child td { border-bottom: 0; }
+.dd-gantry .article-body tbody tr:nth-child(even) td { background: var(--gy-surface-2); }
+.dd-gantry .article-body td strong { color: var(--gy-ink); }
+
+/* --------------------------------------------- Details / appendix plates -- */
+.dd-gantry .article-body details {
+  margin-top: 1.4rem;
+  margin-bottom: 2rem;
+  border: 1px solid var(--gy-rule);
+  border-radius: 2px;
+  background: var(--gy-surface);
+  overflow: hidden;
+}
+.dd-gantry .article-body summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  font-family: var(--gy-mono);
+  font-size: 0.73rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gy-ink);
+  background: var(--gy-surface-2);
+  border-left: 3px solid var(--gy-accent);
+}
+.dd-gantry .article-body summary::before {
+  content: "Appendix";
+  flex: 0 0 auto;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--gy-accent-ink);
+  border: 1px solid currentColor;
+  border-radius: 2px;
+  padding: 3px 8px;
+}
+.dd-gantry .article-body summary::after {
+  content: "+";
+  flex: 0 0 auto;
+  margin-left: auto;
+  font-size: 0.95rem;
+  color: var(--gy-accent-ink);
+}
+.dd-gantry .article-body summary::-webkit-details-marker { display: none; }
+.dd-gantry .article-body details[open] summary::after { content: "\2212"; }
+.dd-gantry .article-body details[open] summary { border-bottom: 1px solid var(--gy-rule); }
+.dd-gantry .article-body summary:focus-visible {
+  outline: 2px solid var(--gy-accent-ink);
+  outline-offset: -2px;
+}
+.dd-gantry .article-body details > table,
+.dd-gantry .article-body details > div > table { margin: 0; border: 0; }
+.dd-gantry .article-body details .gy-table-scroll { margin: 0; border: 0; }
+.dd-gantry .article-body details table + table { margin-top: 1rem; }
+
+/* section separator */
+.dd-gantry .article-body hr {
+  border: 0;
+  border-top: 1px dashed var(--gy-rule-strong);
+  margin: 2.4rem 0;
+}
+
+/* -------------------------------------------------- Figure frames (gauge) - */
+/* The head strip is exactly 26px tall — the site-wide authoring rule applies:
+   authors add 26px to --vf-h and --vf-h-m to account for this chrome.
+   Autosizing visuals self-correct via postMessage regardless. */
+.dd-gantry .article-body { counter-reset: figure; }
+.dd-gantry .article-body .visual-frame {
+  position: relative;
+  counter-increment: figure;
+  border: 1px solid var(--gy-rule);
+  border-left: 3px solid var(--gy-accent);
+  border-radius: 2px;
+  background: var(--gy-surface);
+  margin-top: 1.7rem;
+  margin-bottom: 2.2rem;
+  padding-top: 26px;
+  overflow: hidden;
+  scroll-margin-top: calc(var(--gy-stick) + 24px);
+}
+.dd-gantry .article-body .visual-frame::before {
+  content: "Dock " counter(figure, decimal-leading-zero) " · Manifest";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  font-family: var(--gy-mono);
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gy-ink-2);
+  background: var(--gy-surface-2);
+  border-bottom: 1px solid var(--gy-rule);
+  z-index: 1;
+}
+/* CHEVRON CORNER TICK — chevron form 2 of 2, instance 2 of 2 per viewport.
+   A 12px clipped triangle in safety yellow at the frame's top-left. */
+.dd-gantry .article-body .visual-frame::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 12px;
+  height: 12px;
+  background: var(--gy-accent);
+  clip-path: polygon(0 0, 100% 0, 0 100%);
+  pointer-events: none;
+  z-index: 2;
+}
+.dd-gantry .article-body .visual-frame iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: var(--gy-surface);
+}
+/* bottom rail: units / source note */
+.dd-gantry .article-body .visual-frame .vf-note,
+.dd-gantry .article-body .vf-note {
+  display: block;
+  padding: 7px 12px;
+  font-family: var(--gy-mono);
+  font-size: 0.7rem;
+  line-height: 1.4;
+  color: var(--gy-ink-3);
+  background: var(--gy-surface-2);
+  border-top: 1px solid var(--gy-rule);
+}
+
+/* -------------------------------------------------------------- Motion ---- */
+@media (prefers-reduced-motion: no-preference) {
+  .dd-gantry .gy-title,
+  .dd-gantry .gy-subtitle,
+  .dd-gantry .gy-lead,
+  .dd-gantry .gy-coords {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  .dd-gantry.gy-loaded .gy-title,
+  .dd-gantry.gy-loaded .gy-subtitle,
+  .dd-gantry.gy-loaded .gy-lead,
+  .dd-gantry.gy-loaded .gy-coords {
+    animation: gy-rise 0.5s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+  }
+  .dd-gantry.gy-loaded .gy-subtitle { animation-delay: 0.07s; }
+  .dd-gantry.gy-loaded .gy-lead { animation-delay: 0.14s; }
+  .dd-gantry.gy-loaded .gy-coords { animation-delay: 0.21s; }
+}
+@keyframes gy-rise { to { opacity: 1; transform: translateY(0); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .dd-gantry .gy-gauge-fill,
+  .dd-gantry .gy-dock,
+  .dd-gantry .gy-body h2::before { transition: none; }
+  .dd-gantry .gy-title,
+  .dd-gantry .gy-subtitle,
+  .dd-gantry .gy-lead,
+  .dd-gantry .gy-coords { opacity: 1; transform: none; animation: none; }
+}
+
+/* ----------------------------------------------------------- Responsive --- */
+/* Mirrors the atlas breakpoint ladder: 960 / 860 / 720 / 560. The rail stands
+   down at 960 and becomes a sticky horizontal dock-chip strip. */
+@media (max-width: 960px) {
+  .dd-gantry .gy-layout { display: block; }
+
+  .dd-gantry .gy-spine-index {
+    position: sticky;
+    top: var(--gy-stick);
+    z-index: 5;
+    display: block;
+    max-height: none;
+    margin: 0 calc(-1 * clamp(20px, 3.5vw, 44px)) 1rem;
+    padding: 6px clamp(20px, 3.5vw, 44px) 0;
+    border-right: 0;
+    border-bottom: 1px solid var(--gy-rule);
+    background: var(--gy-bg);
+    overflow: visible;
+  }
+  /* gauge collapses to a 3px line under the strip; label rides above it */
+  .dd-gantry .gy-gauge {
+    display: flex;
+    order: 2;
+    padding: 0;
+    border-bottom: 0;
+  }
+  .dd-gantry .gy-gauge-track { height: 3px; border-left: 0; border-right: 0; }
+  .dd-gantry .gy-dock-list {
+    display: flex;
+    gap: 4px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    padding-bottom: 6px;
+  }
+  .dd-gantry .gy-dock-list::-webkit-scrollbar { display: none; }
+  .dd-gantry .gy-dock-group { flex: 0 0 auto; }
+  .dd-gantry .gy-dock-group + .gy-dock-group { margin-top: 0; }
+  .dd-gantry .gy-dock {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 12px;
+    border-left: 0;
+    border-bottom: 3px solid transparent;
+    border-radius: 2px 2px 0 0;
+    white-space: nowrap;
+  }
+  .dd-gantry .gy-dock.is-active { border-bottom-color: var(--gy-accent); }
+  /* chapter titles drop on the chip rail; the link's aria-label keeps them */
+  .dd-gantry .gy-dock-title { display: none; }
+  .dd-gantry .gy-dock-group.is-open .gy-dock-fig { display: none; }
+
+  .dd-gantry .article-body .stat-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .dd-gantry .gy-body h2 { scroll-margin-top: calc(var(--gy-stick) + 62px); }
+  .dd-gantry .article-body .visual-frame { scroll-margin-top: calc(var(--gy-stick) + 62px); }
+}
+
+@media (max-width: 860px) {
+  .dd-gantry .gy-header { outline: 0; }
+  .dd-gantry .article-body > p,
+  .dd-gantry .article-body > ul,
+  .dd-gantry .article-body > ol,
+  .dd-gantry .article-body > blockquote,
+  .dd-gantry .article-body > .note-panel,
+  .dd-gantry .article-body > .callout { max-width: 100%; }
+}
+
+@media (max-width: 720px) {
+  /* the site header goes static at this width, so the dock strip owns the top */
+  .dd-gantry.article-shell { --gy-stick: 0px; }
+  .dd-gantry .gy-body h2 { scroll-margin-top: 62px; }
+  .dd-gantry .article-body .visual-frame { scroll-margin-top: 62px; }
+}
+
+@media (max-width: 560px) {
+  .dd-gantry .article-body .stat-strip { grid-template-columns: minmax(0, 1fr); }
+  .dd-gantry .gy-routing { letter-spacing: 0.14em; }
+  .dd-gantry .gy-header::after { height: 6px; }
+}
+
+/* ------------------------------------------------- Wide-screen breakout -- */
+/* global.css lifts the .site-shell cap to 1800px for article pages at
+   >=1640px; here the template's own wide cap follows suit so content fills
+   the larger shell instead of stopping at 1600px. */
+@supports selector(:has(*)) {
+  @media (min-width: 1640px) {
+    .dd-gantry.article-shell { --gy-wide: 100%; }
+  }
+}

@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The evidence docket</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="./_theme-bootstrap.js"></script>
+<script src="./_glossary.js" defer></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+/* Evidence docket. ATLAS benchmark bars with animated fills and count-ups,
+   five approach-family cards driving a shared detail panel, and a market
+   strip with a vendor-claim stamp. Reduced motion: bars full, all visible. */
+
+.shell { display: flex; flex-direction: column; gap: 10px; }
+:root[data-embedded="true"] .shell { padding: 14px clamp(14px, 2vw, 22px); }
+
+.head h1 {
+  font-family: "Space Grotesk", sans-serif; font-weight: 700;
+  font-size: clamp(1.02rem, 2.2vw, 1.3rem); letter-spacing: -0.02em; color: var(--text-strong);
+}
+:root[data-embedded="true"] .head h1 { font-size: 1.02rem; }
+.head p { font: 500 0.72rem/1.4 "DM Sans", sans-serif; color: var(--muted); margin-top: 2px; }
+
+/* ---------- benchmark board ---------- */
+.bench {
+  border: 1px solid var(--border-strong); border-radius: 12px;
+  background: var(--surface-strong); box-shadow: var(--shadow-soft);
+  padding: 11px 13px; display: flex; flex-direction: column; gap: 8px;
+}
+.bench .b-title { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.bench .b-title b { font: 700 0.62rem/1.25 "Space Grotesk", sans-serif; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent-2); }
+.bench .b-title span { font: 500 0.62rem/1.4 "DM Sans", sans-serif; color: var(--muted-soft); }
+.row { display: grid; grid-template-columns: minmax(150px, 240px) 1fr 52px; gap: 8px; align-items: center; min-width: 0; }
+.row .lbl { font: 600 0.66rem/1.3 "IBM Plex Mono", monospace; color: var(--text); }
+.row .lbl small { display: block; font: 500 0.6rem/1.3 "DM Sans", sans-serif; color: var(--muted-soft); }
+.track { height: 10px; border-radius: 5px; background: color-mix(in srgb, var(--border-strong) 55%, transparent); overflow: hidden; }
+.fill { height: 100%; width: 0; border-radius: 5px; background: var(--fc); }
+.row .num { font: 700 0.72rem/1 "IBM Plex Mono", monospace; color: var(--fc); text-align: right; }
+/* grouped two-column bar board: 10-digit and 6-digit never share a scale */
+.bcols { display: grid; grid-template-columns: minmax(132px, 208px) 1fr 1fr; gap: 5px 12px; align-items: end; }
+.bcols .ch {
+  font: 700 0.56rem/1.25 "Space Grotesk", sans-serif; letter-spacing: 0.09em;
+  text-transform: uppercase; color: var(--fc); display: flex; align-items: center; gap: 5px;
+}
+.bcols .ch svg { width: 13px; height: 13px; flex: none; }
+.bcols .ch em { font-style: normal; font-weight: 500; letter-spacing: 0; text-transform: none; color: var(--muted-soft); }
+.brow { display: grid; grid-template-columns: minmax(132px, 208px) 1fr 1fr; gap: 6px 12px; align-items: center; min-width: 0; }
+.brow .lbl { display: flex; align-items: center; gap: 7px; min-width: 0; font: 600 0.65rem/1.25 "IBM Plex Mono", monospace; color: var(--text); }
+.brow .lbl i {
+  flex: none; width: 26px; height: 26px; border-radius: 7px; display: grid; place-items: center;
+  color: var(--ic); border: 1px solid color-mix(in srgb, var(--ic) 36%, transparent);
+  background: color-mix(in srgb, var(--ic) 11%, transparent);
+}
+.brow .lbl i svg { width: 15px; height: 15px; }
+.brow .lbl u { text-decoration: none; min-width: 0; }
+.brow .lbl small { display: block; font: 500 0.57rem/1.3 "DM Sans", sans-serif; color: var(--muted-soft); }
+.brow.hero .lbl { color: var(--text-strong); }
+.cell { display: grid; grid-template-columns: 1fr 46px; gap: 8px; align-items: center; }
+.cell.c10 { --fc: var(--T2); }
+.cell.c6 { --fc: var(--T1); }
+.cell.mark .track { box-shadow: 0 0 0 2px color-mix(in srgb, var(--fc) 30%, transparent); }
+.cell.cH { --fc: var(--T0); }
+.bench.solo .brow { grid-template-columns: minmax(132px, 208px) 1fr; }
+.band {
+  display: flex; align-items: baseline; gap: 7px; flex-wrap: wrap;
+  margin-top: 2px; padding-top: 6px; border-top: 1px solid var(--border);
+}
+.band b { font: 700 0.58rem/1.3 "Space Grotesk", sans-serif; letter-spacing: 0.1em; text-transform: uppercase; color: var(--bc, var(--muted)); }
+.band span { font: 500 0.6rem/1.4 "DM Sans", sans-serif; color: var(--muted-soft); }
+.grp { font: 500 0.59rem/1.45 "DM Sans", sans-serif; color: var(--muted-soft); padding-left: 30px; }
+.brow.human .lbl { color: var(--T0); }
+.brow.human .lbl u { font-weight: 700; }
+.notcov {
+  display: flex; gap: 9px; align-items: flex-start;
+  border: 1px dashed var(--border-strong); border-radius: 9px; padding: 7px 10px;
+  background: color-mix(in srgb, var(--muted) 6%, transparent);
+}
+.notcov i { flex: none; width: 26px; height: 26px; border-radius: 7px; display: grid; place-items: center; color: var(--muted); border: 1px solid var(--border-strong); }
+.notcov i svg { width: 15px; height: 15px; }
+.notcov b { display: block; font: 700 0.6rem/1.3 "Space Grotesk", sans-serif; letter-spacing: 0.09em; text-transform: uppercase; color: var(--text-strong); }
+.notcov span { font: 500 0.64rem/1.45 "DM Sans", sans-serif; color: var(--muted); }
+.callout {
+  border-left: 3px solid var(--accent); padding: 5px 10px;
+  font: 700 0.76rem/1.5 "DM Sans", sans-serif; color: var(--text-strong);
+  background: color-mix(in srgb, var(--accent) 8%, transparent); border-radius: 0 8px 8px 0;
+}
+.caveat { display: flex; align-items: flex-start; gap: 9px; flex-wrap: wrap; }
+.caveat p { font: 500 0.66rem/1.45 "DM Sans", sans-serif; color: var(--muted); flex: 1 1 240px; }
+.play .bench { animation: rise-in 0.5s ease-out backwards 0.05s; }
+
+/* ---------- family cards ---------- */
+.fams { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
+.fam {
+  cursor: pointer; text-align: left; min-width: 0;
+  border: 1px solid var(--border-strong); border-top: 3px solid var(--bc);
+  border-radius: 10px; background: var(--surface); box-shadow: var(--shadow-soft);
+  padding: 9px 9px 8px; display: flex; flex-direction: column; gap: 6px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.fam b { font: 700 0.72rem/1.2 "Space Grotesk", sans-serif; color: var(--text-strong); }
+.fam .stamp { font-size: 0.58rem; align-self: flex-start; }
+.fam span { font: 500 0.6rem/1.35 "DM Sans", sans-serif; color: var(--muted); }
+.fam:hover { border-color: var(--bc); }
+.fam[aria-pressed="true"] {
+  border-color: var(--bc);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--bc) 22%, transparent), var(--shadow-soft);
+}
+.play .fam { animation: rise-in 0.45s ease-out backwards; }
+.play .fam:nth-child(1) { animation-delay: 0.15s; }
+.play .fam:nth-child(2) { animation-delay: 0.25s; }
+.play .fam:nth-child(3) { animation-delay: 0.35s; }
+.play .fam:nth-child(4) { animation-delay: 0.45s; }
+.play .fam:nth-child(5) { animation-delay: 0.55s; }
+@keyframes rise-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+
+/* ---------- detail panel ---------- */
+.detail {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+  box-shadow: var(--shadow-soft); padding: 11px 13px;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.d-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.d-name {
+  font: 700 0.6rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--dc, var(--accent-2)); border: 1px solid color-mix(in srgb, var(--dc, var(--accent-2)) 45%, transparent);
+  border-radius: 999px; padding: 4px 10px;
+}
+.d-line { font: 500 0.74rem/1.55 "DM Sans", sans-serif; color: var(--text); }
+.d-line b { font: 700 0.6rem/1 "IBM Plex Mono", monospace; letter-spacing: 0.1em; text-transform: uppercase; color: var(--dc, var(--accent-2)); margin-right: 6px; }
+.d-line.breaks b { color: var(--accent); }
+.d-mat { font: 500 0.7rem/1.5 "DM Sans", sans-serif; color: var(--muted); }
+.play .detail { animation: rise-in 0.45s ease-out backwards 0.6s; }
+
+/* ---------- market strip ---------- */
+.market { display: grid; grid-template-columns: 1.1fr 0.8fr 1.1fr; gap: 8px; }
+.mcard {
+  border: 1px solid var(--border); border-left: 3px solid var(--mc);
+  border-radius: 10px; background: var(--surface); padding: 8px 11px; min-width: 0;
+  display: flex; flex-direction: column; gap: 5px; align-items: flex-start;
+}
+.mcard b { font: 700 0.62rem/1.25 "Space Grotesk", sans-serif; letter-spacing: 0.1em; text-transform: uppercase; color: var(--mc); }
+.mcard span { font: 500 0.66rem/1.45 "DM Sans", sans-serif; color: var(--muted); }
+.mcard span i { font-style: normal; color: var(--text-strong); font-weight: 700; }
+.mcard q { font: 600 0.72rem/1.45 "DM Sans", sans-serif; color: var(--text); }
+.play .mcard { animation: rise-in 0.45s ease-out backwards 0.7s; }
+
+@media (max-width: 760px) {
+  .head h1 { font-size: 1rem; }
+  .fams { grid-template-columns: 1fr 1fr; }
+  .fam:nth-child(5) { grid-column: 1 / -1; }
+  .market { grid-template-columns: minmax(0, 1fr); }
+  .row { grid-template-columns: minmax(0, 1fr) 44px; }
+  .row .lbl { grid-column: 1 / -1; }
+  .bcols { display: none; }
+  .brow { grid-template-columns: minmax(0, 1fr); gap: 5px; }
+  .cell { grid-template-columns: 52px 1fr 42px; }
+  .bench.solo .brow { grid-template-columns: minmax(0, 1fr); }
+  .grp { padding-left: 0; }
+  .cell::before {
+    content: attr(data-cap); font: 700 0.54rem/1 "Space Grotesk", sans-serif;
+    letter-spacing: 0.07em; text-transform: uppercase; color: var(--fc);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .play .bench, .play .fam, .play .detail, .play .mcard { animation: none !important; }
+  .fill { transition: none !important; }
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute">
+  <symbol id="i-tune" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M4 6h8M17 6h3M4 12h4M13 12h7M4 18h8M17 18h3"/><circle cx="14.5" cy="6" r="2.1"/><circle cx="10.5" cy="12" r="2.1"/><circle cx="14.5" cy="18" r="2.1"/>
+  </symbol>
+  <symbol id="i-cloud" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M7 18h10.5a3.5 3.5 0 0 0 .4-6.98A5.5 5.5 0 0 0 7.3 9.6 4.2 4.2 0 0 0 7 18Z"/><path d="M12 9.5v4"/>
+  </symbol>
+  <symbol id="i-cube" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <path d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Z"/><path d="m4 7.5 8 4.5 8-4.5M12 12v9"/>
+  </symbol>
+  <symbol id="i-noeye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M3 3l18 18"/><path d="M10.6 6.3A9.6 9.6 0 0 1 12 6.2c5 0 9 5.8 9 5.8a17 17 0 0 1-3 3.5"/><path d="M6.2 8.3A17.6 17.6 0 0 0 3 12s4 5.8 9 5.8a8.9 8.9 0 0 0 3.4-.68"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/>
+  </symbol>
+  <symbol id="i-scales" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 4v16M7 20h10M5 8h14M5 8l-2.6 5.4a3 3 0 0 0 5.2 0Zm14 0-2.6 5.4a3 3 0 0 0 5.2 0Z"/><circle cx="12" cy="4.6" r="1.4"/>
+  </symbol>
+  <symbol id="i-dice" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="4" y="4" width="16" height="16" rx="3"/><circle cx="9" cy="9" r="1.1"/><circle cx="15" cy="15" r="1.1"/><circle cx="15" cy="9" r="1.1"/><circle cx="9" cy="15" r="1.1"/>
+  </symbol>
+  <symbol id="i-agent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="3.1"/><circle cx="12" cy="3.6" r="1.7"/><circle cx="19.3" cy="16.2" r="1.7"/><circle cx="4.7" cy="16.2" r="1.7"/>
+    <path d="M12 5.3v3.6M14.6 13.8l3.2 1.6M9.4 13.8l-3.2 1.6"/>
+  </symbol>
+  <symbol id="i-person" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="8" r="3.4"/><path d="M4.8 20a7.2 7.2 0 0 1 14.4 0"/>
+  </symbol>
+  <symbol id="i-gavel" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">
+    <path d="m4 20h9M6.5 12.5 12 7M9.5 4.5 15 10M8 3l4 4M13 8l4 4M12.8 10.2 19 16.4a1.9 1.9 0 0 1-2.7 2.7l-6.2-6.2Z"/>
+  </symbol>
+</svg>
+<div class="shell">
+  <div class="head">
+    <h1>The evidence docket</h1>
+    <p>Three benchmarks, five approach families, one consolidating market. Click a family card.</p>
+  </div>
+
+  <div class="bench" aria-label="ATLAS benchmark accuracy for autonomous HTS classification">
+    <div class="b-title">
+      <b>ATLAS benchmark &middot; autonomous HTS classification</b>
+      <span>&middot; 200-item test set drawn from 18,731 CROSS rulings across 2,992 codes</span>
+    </div>
+    <div class="bcols" aria-hidden="true">
+      <span></span>
+      <span class="ch" style="--fc: var(--T2)"><svg><use href="#i-gavel"/></svg>10-digit<em>&nbsp;sets the duty and the penalty</em></span>
+      <span class="ch" style="--fc: var(--T1)"><svg><use href="#i-scales"/></svg>6-digit<em>&nbsp;the line an unlicensed tool may not cross</em></span>
+    </div>
+    <div class="brow hero" style="--ic: var(--accent-2)">
+      <span class="lbl"><i><svg><use href="#i-tune"/></svg></i><u>Atlas fine-tune<small>LLaMA-3.3-70B tuned on 18,731 CROSS rulings</small></u></span>
+      <div class="cell c10 mark" data-cap="10-dig"><div class="track"><div class="fill" data-v="40"></div></div><span class="num" data-v="40">0%</span></div>
+      <div class="cell c6" data-cap="6-dig"><div class="track"><div class="fill" data-v="57.5"></div></div><span class="num" data-v="57.5">0%</span></div>
+    </div>
+    <div class="brow" style="--ic: var(--T2)">
+      <span class="lbl"><i><svg><use href="#i-cloud"/></svg></i><u>GPT-5-Thinking<small>frontier, proprietary</small></u></span>
+      <div class="cell c10" data-cap="10-dig"><div class="track"><div class="fill" data-v="25"></div></div><span class="num" data-v="25">0%</span></div>
+      <div class="cell c6 mark" data-cap="6-dig"><div class="track"><div class="fill" data-v="55.5"></div></div><span class="num" data-v="55.5">0%</span></div>
+    </div>
+    <div class="brow" style="--ic: var(--T2)">
+      <span class="lbl"><i><svg><use href="#i-cloud"/></svg></i><u>Gemini-2.5-Pro-Thinking<small>frontier, proprietary</small></u></span>
+      <div class="cell c10" data-cap="10-dig"><div class="track"><div class="fill" data-v="13.5"></div></div><span class="num" data-v="13.5">0%</span></div>
+      <div class="cell c6" data-cap="6-dig"><div class="track"><div class="fill" data-v="31"></div></div><span class="num" data-v="31">0%</span></div>
+    </div>
+    <div class="brow" style="--ic: var(--S-lodged)">
+      <span class="lbl"><i><svg><use href="#i-cube"/></svg></i><u>DeepSeek-R1 (05/28)<small>open weight, reasoning</small></u></span>
+      <div class="cell c10" data-cap="10-dig"><div class="track"><div class="fill" data-v="2.5"></div></div><span class="num" data-v="2.5">0%</span></div>
+      <div class="cell c6" data-cap="6-dig"><div class="track"><div class="fill" data-v="26.5"></div></div><span class="num" data-v="26.5">0%</span></div>
+    </div>
+    <div class="brow" style="--ic: var(--S-lodged)">
+      <span class="lbl"><i><svg><use href="#i-cube"/></svg></i><u>LLaMA-3.3-70B base<small>open weight, untuned</small></u></span>
+      <div class="cell c10" data-cap="10-dig"><div class="track"><div class="fill" data-v="2.1"></div></div><span class="num" data-v="2.1">0%</span></div>
+      <div class="cell c6" data-cap="6-dig"><div class="track"><div class="fill" data-v="20.7"></div></div><span class="num" data-v="20.7">0%</span></div>
+    </div>
+    <div class="brow" style="--ic: var(--S-lodged)">
+      <span class="lbl"><i><svg><use href="#i-cube"/></svg></i><u>GPT-OSS-120B<small>open weight</small></u></span>
+      <div class="cell c10" data-cap="10-dig"><div class="track"><div class="fill" data-v="1.5"></div></div><span class="num" data-v="1.5">0%</span></div>
+      <div class="cell c6" data-cap="6-dig"><div class="track"><div class="fill" data-v="8"></div></div><span class="num" data-v="8">0%</span></div>
+    </div>
+    <p class="callout">At six digits the best frontier model lands within two points of the fine-tune. At ten digits, where the duty and the penalty sit, it is fifteen points behind.</p>
+    <div class="notcov">
+      <i><svg><use href="#i-noeye"/></svg></i>
+      <div>
+        <b>What this benchmark does not cover</b>
+        <span>ATLAS is a one-off paper, not a refreshed leaderboard. It entered six models and no Claude, Grok or Qwen. Nothing released after September 2025 appears, so read every bar here as a snapshot of that month. The third board below fills that gap with 23 systems.</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="bench solo" aria-label="Independent benchmark of four commercial classification products on randomly drawn rulings">
+    <div class="b-title">
+      <b>Independent product benchmark &middot; randomly drawn rulings</b>
+      <span> &middot; 103 classifications from 100 randomly selected CROSS rulings, products unnamed here</span>
+    </div>
+    <div class="brow" style="--ic: var(--T0)">
+      <span class="lbl"><i><svg><use href="#i-dice"/></svg></i><u>Commercial tool A<small>full 10-digit output</small></u></span>
+      <div class="cell c10" data-cap="correct"><div class="track"><div class="fill" data-v="89.2"></div></div><span class="num" data-v="89.2">0%</span></div>
+    </div>
+    <div class="brow" style="--ic: var(--T0)">
+      <span class="lbl"><i><svg><use href="#i-dice"/></svg></i><u>Commercial tool B<small>manual-assisted, days to weeks</small></u></span>
+      <div class="cell c10" data-cap="correct"><div class="track"><div class="fill" data-v="80"></div></div><span class="num" data-v="80">0%</span></div>
+    </div>
+    <div class="brow" style="--ic: var(--T1)">
+      <span class="lbl"><i><svg><use href="#i-dice"/></svg></i><u>Commercial tool C<small>instant, no rationale shown</small></u></span>
+      <div class="cell c10" data-cap="correct"><div class="track"><div class="fill" data-v="44.1"></div></div><span class="num" data-v="44.1">0%</span></div>
+    </div>
+    <div class="brow" style="--ic: var(--T2)">
+      <span class="lbl"><i><svg><use href="#i-dice"/></svg></i><u>Public model D<small>6-digit only, no 10-digit answer</small></u></span>
+      <div class="cell c10" data-cap="correct"><div class="track"><div class="fill" data-v="12.8"></div></div><span class="num" data-v="12.8">0%</span></div>
+    </div>
+    <p class="callout">Sampled at random rather than from contested cases, the same task looks very different. The spread between the two benchmarks is a sampling difference, not a contradiction.</p>
+    <div class="caveat">
+      <span class="stamp stamp--sourced">Sourced</span>
+      <p>ATLAS draws contested rulings, where the code was already in dispute. The product benchmark draws rulings at random. Treat 40% as a contested-case floor, not a market-wide accuracy rate.</p>
+    </div>
+  </div>
+
+  <div class="bench solo" aria-label="HSCodeComp benchmark, twenty three systems scored on the same six hundred and thirty two products">
+    <div class="b-title">
+      <b>HSCodeComp &middot; every major model, scored on the same goods</b>
+      <span>&middot; October 2025 &middot; 632 products, 32 categories, graded by 26 tariff experts &middot; 23 systems entered &middot; share given the full 10-digit code correctly</span>
+    </div>
+    <div class="band" style="--bc: var(--accent-2)">
+      <b>Agents</b><span>a model wrapped in tools, so it can search and look things up before answering</span>
+    </div>
+    <div class="brow hero" style="--ic: var(--accent-2)">
+      <span class="lbl"><i><svg><use href="#i-agent"/></svg></i><u>SmolAgents with GPT-5<small>reads the product photo as well as the words</small></u></span>
+      <div class="cell c10 mark" data-cap="correct"><div class="track"><div class="fill" data-v="46.8"></div></div><span class="num" data-v="46.8">0%</span></div>
+    </div>
+    <div class="brow " style="--ic: var(--accent-2)">
+      <span class="lbl"><i><svg><use href="#i-agent"/></svg></i><u>Aworld and AgentOrchestra<small>two open agent frameworks, same score</small></u></span>
+      <div class="cell c10" data-cap="correct"><div class="track"><div class="fill" data-v="41.3"></div></div><span class="num" data-v="41.3">0%</span></div>
+    </div>
+    <div class="brow " style="--ic: var(--accent-2)">
+      <span class="lbl"><i><svg><use href="#i-agent"/></svg></i><u>Gemini Deep Researcher<small>Google&rsquo;s own research agent</small></u></span>
+      <div class="cell c10" data-cap="correct"><div class="track"><div class="fill" data-v="40.8"></div></div><span class="num" data-v="40.8">0%</span></div>
+    </div>
+    <div class="brow " style="--ic: var(--accent-2)">
+      <span class="lbl"><i><svg><use href="#i-agent"/></svg></i><u>Manus<small>a commercial general-purpose agent</small></u></span>
+      <div class="cell c10" data-cap="correct"><div class="track"><div class="fill" data-v="30.6"></div></div><span class="num" data-v="30.6">0%</span></div>
+    </div>
+    <div class="brow " style="--ic: var(--accent-2)">
+      <span class="lbl"><i><svg><use href="#i-agent"/></svg></i><u>Grok DeepSearch<small>xAI&rsquo;s search agent</small></u></span>
+      <div class="cell c10" data-cap="correct"><div class="track"><div class="fill" data-v="26.5"></div></div><span class="num" data-v="26.5">0%</span></div>
+    </div>
+    <p class="grp">Not drawn, to keep the board readable: the same SmolAgents without the photo at 42.7%, OWL at 37.3%, WebSailor at 35.4% and Cognitive Kernel at 26.4%.</p>
+    <div class="band" style="--bc: var(--T2)">
+      <b>Models on their own</b><span>asked the question directly, with no tools and nothing to look up</span>
+    </div>
+    <div class="brow " style="--ic: var(--T2)">
+      <span class="lbl"><i><svg><use href="#i-cloud"/></svg></i><u>GPT-5<small>the best any model managed unaided</small></u></span>
+      <div class="cell c10 mark" data-cap="correct"><div class="track"><div class="fill" data-v="29.3"></div></div><span class="num" data-v="29.3">0%</span></div>
+    </div>
+    <div class="brow " style="--ic: var(--T2)">
+      <span class="lbl"><i><svg><use href="#i-cloud"/></svg></i><u>Gemini-2.5-Pro<small></small></u></span>
+      <div class="cell c10" data-cap="correct"><div class="track"><div class="fill" data-v="24.2"></div></div><span class="num" data-v="24.2">0%</span></div>
+    </div>
+    <div class="brow " style="--ic: var(--T2)">
+      <span class="lbl"><i><svg><use href="#i-cloud"/></svg></i><u>GPT-4o<small></small></u></span>
+      <div class="cell c10" data-cap="correct"><div class="track"><div class="fill" data-v="18.5"></div></div><span class="num" data-v="18.5">0%</span></div>
+    </div>
+    <div class="brow " style="--ic: var(--S-lodged)">
+      <span class="lbl"><i><svg><use href="#i-cube"/></svg></i><u>Kimi-K2<small></small></u></span>
+      <div class="cell c10" data-cap="correct"><div class="track"><div class="fill" data-v="12.2"></div></div><span class="num" data-v="12.2">0%</span></div>
+    </div>
+    <div class="brow " style="--ic: var(--T2)">
+      <span class="lbl"><i><svg><use href="#i-cloud"/></svg></i><u>Claude Sonnet 4<small></small></u></span>
+      <div class="cell c10" data-cap="correct"><div class="track"><div class="fill" data-v="11.9"></div></div><span class="num" data-v="11.9">0%</span></div>
+    </div>
+    <div class="brow " style="--ic: var(--S-lodged)">
+      <span class="lbl"><i><svg><use href="#i-cube"/></svg></i><u>DeepSeek-R1<small></small></u></span>
+      <div class="cell c10" data-cap="correct"><div class="track"><div class="fill" data-v="6.7"></div></div><span class="num" data-v="6.7">0%</span></div>
+    </div>
+    <div class="brow " style="--ic: var(--S-lodged)">
+      <span class="lbl"><i><svg><use href="#i-cube"/></svg></i><u>Qwen-MAX<small></small></u></span>
+      <div class="cell c10" data-cap="correct"><div class="track"><div class="fill" data-v="3.8"></div></div><span class="num" data-v="3.8">0%</span></div>
+    </div>
+    <p class="grp">Not drawn: DeepSeek-V3 at 6.5%, Qwen3-235B at 1.7%, o3-mini at 1.3%, Qwen3-32B at 0.3%, QwQ-32B and Qwen2.5-72B at 0.2%, and Nemotron-32B at 0%.</p>
+    <div class="band" style="--bc: var(--T0)">
+      <b>People</b><span>the same 632 products, worked by hand</span>
+    </div>
+    <div class="brow human" style="--ic: var(--T0)">
+      <span class="lbl"><i><svg><use href="#i-person"/></svg></i><u>Licensed tariff experts<small>the benchmark&rsquo;s own human baseline</small></u></span>
+      <div class="cell cH mark" data-cap="correct"><div class="track"><div class="fill" data-v="95.0"></div></div><span class="num" data-v="95.0">0%</span></div>
+    </div>
+    <p class="callout">Wrapping GPT-5 in tools lifts it from 29.3% to 46.8% on the same goods. The harness is worth more than the model. A person is still worth more than both.</p>
+    <div class="notcov">
+      <i><svg><use href="#i-noeye"/></svg></i>
+      <div>
+        <b>What this benchmark does not cover</b>
+        <span>These are 632 shop-shelf products, not the contested rulings ATLAS uses, so the two boards must not be read bar against bar. Scoring closed in October 2025, so nothing from the 2026 model generation appears. Neither board is a leaderboard anyone keeps up to date.</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="fams" role="group" aria-label="Five approach families for automated customs classification">
+    <button class="fam" style="--bc: var(--T0)" data-i="0" aria-pressed="false">
+      <b>Rules and templates</b><span class="stamp stamp--confirmed">Confirmed</span><span>the industry today</span>
+    </button>
+    <button class="fam" style="--bc: var(--S-lodged)" data-i="1" aria-pressed="false">
+      <b>IDP / OCR extraction</b><span class="stamp stamp--confirmed">Confirmed</span><span>extraction, not decision</span>
+    </button>
+    <button class="fam" style="--bc: var(--T1)" data-i="2" aria-pressed="false">
+      <b>Retrieval-grounded LLM</b><span class="stamp stamp--proposed">Proposed</span><span>only behind a human gate</span>
+    </button>
+    <button class="fam" style="--bc: var(--T2)" data-i="3" aria-pressed="false">
+      <b>Agentic multi-agent</b><span class="stamp stamp--confirmed">Confirmed</span><span>shipping in 2026</span>
+    </button>
+    <button class="fam" style="--bc: var(--accent-2)" data-i="4" aria-pressed="false">
+      <b>Fine-tuned domain models</b><span class="stamp stamp--open">Open</span><span>research to early production</span>
+    </button>
+  </div>
+
+  <div class="detail" aria-live="polite">
+    <div class="d-top"><span class="d-name" id="d-name"></span></div>
+    <p class="d-line"><b>Wins</b><span id="d-wins"></span></p>
+    <p class="d-line breaks"><b>Breaks</b><span id="d-breaks"></span></p>
+    <p class="d-mat" id="d-mat"></p>
+  </div>
+
+  <div class="market" aria-label="Market consolidation signals">
+    <div class="mcard" style="--mc: var(--accent-2)">
+      <b>Altana acquires Cervo AI</b>
+      <span>Jul 21 2026, an agentic customs entry writer including PGA filings, reportedly <i>over $100M with milestones</i>, claiming <i>8 of the 10 largest</i> global logistics providers as customers.</span>
+    </div>
+    <div class="mcard" style="--mc: var(--S-lodged)">
+      <b>Amari AI</b>
+      <span>Emerged from stealth in the same space. Two funded entrants in one niche is a market signal in itself.</span>
+    </div>
+    <div class="mcard" style="--mc: var(--accent)">
+      <b>The 5x claim</b>
+      <q>process up to 5x more customs entries</q>
+      <span class="stamp stamp--vendor">Vendor claim · Excluded</span>
+      <span>self-reported, no methodology, excluded from all ROI reasoning</span>
+    </div>
+  </div>
+</div>
+<script>
+(() => {
+  const DATA = [
+    { name: 'Rules and templates', color: 'var(--T0)',
+      wins: 'high-volume repeat lanes, fully auditable, near-free per transaction.',
+      breaks: 'every new document format is an engineering ticket, novel SKUs fall to humans.',
+      mat: 'Maturity: the incumbent baseline every broker platform already runs.' },
+    { name: 'IDP / OCR extraction', color: 'var(--S-lodged)',
+      wins: 'robust field capture at scale with mature confidence tooling.',
+      breaks: 'it tells you the invoice says aluminium bracket, not whether that is 7616.99.51 and whether s232 applies.',
+      mat: 'Maturity: production-grade for capture, silent on the legal decision.' },
+    { name: 'Retrieval-grounded LLM', color: 'var(--T1)',
+      wins: 'handles novelty and produces the rationale reasonable care demands.',
+      breaks: 'accuracy far below what practitioners assume, hallucinated citations are catastrophic in a legal filing.',
+      mat: 'Maturity: viable only behind a human gate, never as the filer of record.' },
+    { name: 'Agentic multi-agent', color: 'var(--T2)',
+      wins: 'matches the domain decomposition, each sub-decision observable.',
+      breaks: 'cost and latency explode without bounds, failure attribution is painful.',
+      mat: 'Maturity: shipping commercially in 2026. A May 2026 paper (arXiv 2605.14857) reaches 64.2% at six digits with a fixed control flow and cited notes, which is the shape this design uses.' },
+    { name: 'Fine-tuned domain models', color: 'var(--accent-2)',
+      wins: 'best measured accuracy in the literature at 5 to 8 times cheaper than frontier models.',
+      breaks: 'still nowhere near straight-through at ten digits, and retraining as the HTS evolves.',
+      mat: 'Maturity: research to early production. The ATLAS fine-tune is the high-water mark as of September 2025, on a 200-item test set.' }
+  ];
+  const fams = document.querySelectorAll('.fam');
+  const el = (id) => document.getElementById(id);
+  const select = (i) => {
+    const d = DATA[i];
+    fams.forEach((b) => b.setAttribute('aria-pressed', String(Number(b.dataset.i) === i)));
+    el('d-name').textContent = d.name;
+    el('d-name').style.setProperty('--dc', d.color);
+    el('d-wins').textContent = d.wins;
+    el('d-breaks').textContent = d.breaks;
+    el('d-mat').textContent = d.mat;
+  };
+  fams.forEach((btn) => btn.addEventListener('click', () => select(Number(btn.dataset.i))));
+  select(2);
+
+  /* bar fills + count-ups, started on reveal */
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const fmt = (v) => (Number.isInteger(v) ? String(v) : v.toFixed(1)) + '%';
+  const runBars = () => {
+    document.querySelectorAll('.fill').forEach((f) => { f.style.transition = 'width 0.9s ease-out'; f.style.width = f.dataset.v + '%'; });
+    document.querySelectorAll('.num').forEach((n) => {
+      const target = parseFloat(n.dataset.v), dur = 900;
+      if (reduced) { n.textContent = fmt(target); return; }
+      let t0 = null, done = false;
+      const step = (ts) => {
+        if (t0 === null) t0 = ts;
+        const p = Math.min((ts - t0) / dur, 1);
+        n.textContent = fmt(Math.round(target * (1 - Math.pow(1 - p, 3)) * 10) / 10);
+        if (p < 1 && !done) requestAnimationFrame(step); else done = true;
+      };
+      requestAnimationFrame(step);
+      setTimeout(() => { done = true; n.textContent = fmt(target); }, dur + 300);
+    });
+  };
+  if (reduced) {
+    document.querySelectorAll('.fill').forEach((f) => { f.style.width = f.dataset.v + '%'; });
+    document.querySelectorAll('.num').forEach((n) => { n.textContent = fmt(parseFloat(n.dataset.v)); });
+  }
+
+  const shell = document.querySelector('.shell');
+  let played = false;
+  const start = () => { if (played) return; played = true; shell.classList.add('play'); runBars(); };
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((en) => { if (en.isIntersecting) { start(); io.disconnect(); } });
+      /* Threshold 0, not the house 0.2: this figure is taller than a phone
+         viewport, so a fifth of it is never on screen at once and 0.2 would
+         never fire. Any pixel entering the viewport starts the reveal. */
+    }, { threshold: 0 });
+    io.observe(shell);
+  } else { start(); }
+  /* Report content height so the parent frame hugs the content. */
+  if (document.documentElement.dataset.embedded === 'true') {
+    const postSize = () => window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+    if ('ResizeObserver' in window) new ResizeObserver(postSize).observe(document.body);
+    window.addEventListener('load', postSize);
+  }
+})();
+</script>
+</body>
+</html>

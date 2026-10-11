@@ -4,39 +4,115 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>The Platform — Four Planes on One Trace Spine</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
 <script src="./_theme-bootstrap.js"></script>
 <link rel="stylesheet" href="./_theme.css">
 <style>
-.shell { display: flex; flex-direction: column; gap: clamp(8px,1.4vh,14px); justify-content: center; }
-.head h1 { font-size: clamp(1.12rem,2.1vw,1.6rem); font-weight: 700; letter-spacing: -0.02em; color: var(--text-strong); }
-.head p { color: var(--muted); font-size: 0.82rem; margin-top: 2px; }
-.diagram { display: grid; grid-template-columns: 0.8fr 1.7fr 0.9fr; gap: 10px; align-items: stretch; }
-.col { display: flex; flex-direction: column; gap: 8px; }
+/* Autosize: the embedded shell must grow with content, the parent resizes the iframe */
+:root[data-embedded="true"], :root[data-embedded="true"] body { height: auto; }
+
+.shell { display: flex; flex-direction: column; gap: clamp(8px, 1.4vh, 14px); }
+.head h1 { font-size: clamp(1.05rem, 2.1vw, 1.5rem); font-weight: 700; letter-spacing: -0.02em; color: var(--text-strong); }
+.head p { color: var(--muted); font-size: 0.8rem; margin-top: 2px; line-height: 1.4; }
+
+.ctl { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.ctl button {
+  min-height: 34px; padding: 6px 14px; cursor: pointer; border-radius: 999px;
+  font: 600 0.66rem/1 inherit; font-family: inherit; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--accent); background: transparent; border: 1px solid var(--accent);
+}
+.ctl button:hover { background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.ctl .hint { font-size: 0.7rem; color: var(--muted-soft); line-height: 1.35; }
+
+.diagram { display: grid; grid-template-columns: 0.9fr 1.5fr 1fr; gap: 10px; align-items: stretch; }
+.col { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
 .colcap { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted-soft); text-align: center; }
-.box { border-radius: 11px; border: 1px solid var(--border); background: var(--surface); padding: 9px 11px; box-shadow: var(--shadow-soft); }
-.box .t { font-weight: 700; font-size: 0.8rem; color: var(--text-strong); }
-.box .d { font-size: 0.7rem; color: var(--muted); margin-top: 2px; line-height: 1.32; }
-.planes { display: flex; flex-direction: column; gap: 7px; }
-.plane { cursor: pointer; border-radius: 11px; padding: 9px 11px; color: #fff; position: relative;
-  background: linear-gradient(135deg, var(--c), color-mix(in srgb, var(--c) 68%, #000 18%)); box-shadow: var(--shadow-soft);
-  transition: transform .18s ease, filter .18s ease; }
-.plane:hover { filter: brightness(1.06); transform: translateX(2px); }
-.plane[aria-selected="true"] { outline: 2px solid #fff; outline-offset: 2px; filter: brightness(1.1); }
-.plane .pt { font-weight: 700; font-size: 0.82rem; }
-.plane .pl { font-size: 0.64rem; opacity: 0.86; text-transform: uppercase; letter-spacing: 0.06em; }
-.spine { border: 1px dashed color-mix(in srgb, var(--accent) 60%, transparent); border-radius: 11px; padding: 7px; background: color-mix(in srgb, var(--accent) 8%, var(--surface)); }
-.spine .scap { font-size: 0.6rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color: var(--accent); text-align:center; margin-bottom: 6px; }
-.anchor { border-radius: 11px; padding: 11px; text-align: center; color: #fff; position: relative; overflow: hidden;
-  background: linear-gradient(140deg, var(--accent-2), #b45309); box-shadow: var(--shadow); }
-.anchor::after { content:''; position:absolute; inset:-40%; background: radial-gradient(circle, rgba(255,255,255,.35), transparent 60%); animation: pulse 3.4s ease-in-out infinite; }
-@keyframes pulse { 0%,100%{ opacity:.25; transform:scale(.9);} 50%{ opacity:.6; transform:scale(1.05);} }
-.anchor .at { font-weight: 800; font-size: 0.86rem; position: relative; }
-.anchor .ad { font-size: 0.68rem; opacity: 0.92; margin-top: 3px; position: relative; line-height: 1.35; }
-.anchor .star { font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase; position: relative; display:block; margin-bottom:3px; }
-.readout { border-radius: 12px; border: 1px solid var(--border); background: var(--surface); padding: 10px 14px; box-shadow: var(--shadow-soft); font-size: 0.85rem; line-height: 1.45; color: var(--text); min-height: 56px; }
+
+/* small icon-led cards (runtime inputs, consumption) */
+.box {
+  border-radius: 11px; border: 1px solid var(--border); background: var(--surface);
+  padding: 9px 10px; box-shadow: var(--shadow-soft);
+  display: grid; grid-template-columns: 30px 1fr; gap: 9px; align-items: center;
+  transition: border-color 300ms, box-shadow 300ms;
+}
+.box .t { font-weight: 700; font-size: 0.78rem; color: var(--text-strong); }
+.box .d { font-size: 0.68rem; color: var(--muted); margin-top: 1px; line-height: 1.32; }
+.box.lit { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 14%, transparent); }
+
+/* pictogram tile: line-art icon inlined by script, follows currentColor */
+.pic {
+  width: 30px; height: 30px; display: grid; place-items: center; border-radius: 8px;
+  background: var(--surface-strong); border: 1.5px solid var(--border-strong);
+  color: var(--muted); transition: color 300ms, border-color 300ms;
+}
+.pic svg { width: 19px; height: 19px; display: block; }
+.pic svg * { stroke: currentColor; }
+.box.lit .pic { color: var(--accent); border-color: var(--accent); }
+
+/* the spine container: an icon rail carries the four planes, the packet rides it */
+.spinebox {
+  border: 1px dashed color-mix(in srgb, var(--accent) 60%, transparent); border-radius: 11px;
+  padding: 7px; background: color-mix(in srgb, var(--accent) 8%, var(--surface));
+}
+.spinebox .scap {
+  font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--accent); text-align: center; margin-bottom: 6px;
+}
+.stack { position: relative; display: flex; flex-direction: column; gap: 0; }
+.plane {
+  display: grid; grid-template-columns: 44px 1fr; align-items: center; min-height: 56px;
+  cursor: pointer; text-align: left; width: 100%; padding: 0;
+  background: transparent; border: 0; font-family: inherit; border-radius: 9px;
+  transition: background 200ms;
+}
+.plane:hover { background: color-mix(in srgb, var(--c) 10%, transparent); }
+.plane[aria-selected="true"] { background: color-mix(in srgb, var(--c) 14%, transparent); box-shadow: inset 0 0 0 1.5px var(--c); }
+
+.rail { position: relative; height: 100%; min-height: 56px; }
+.rail .wire {
+  position: absolute; left: 50%; top: 0; bottom: 0; width: 2px;
+  background: color-mix(in srgb, var(--accent) 45%, var(--border-strong)); transform: translateX(-50%);
+}
+.plane:first-child .rail .wire { top: 50%; }
+.plane:last-child .rail .wire { bottom: 50%; }
+.rail .pic { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); color: var(--c); border-color: color-mix(in srgb, var(--c) 55%, var(--border-strong)); }
+.plane.lit .rail .pic { border-color: var(--c); box-shadow: 0 0 0 3px color-mix(in srgb, var(--c) 20%, transparent); }
+
+.pinfo { padding: 7px 8px 7px 2px; min-width: 0; }
+.pinfo .pt { font-weight: 700; font-size: 0.8rem; color: var(--text-strong); }
+.pinfo .pl { font-size: 0.62rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--c); margin-top: 1px; }
+
+/* the packet: one interaction riding the trace spine */
+.packet {
+  position: absolute; left: 22px; top: 0; width: 10px; height: 10px; border-radius: 50%;
+  transform: translate(-50%, -50%); background: var(--accent);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--accent) 70%, transparent);
+  opacity: 0; pointer-events: none; z-index: 2;
+}
+
+/* the load-bearing asset */
+.anchor {
+  border-radius: 11px; padding: 10px 11px; position: relative;
+  border: 1.5px solid var(--accent-2);
+  background: color-mix(in srgb, var(--accent-2) 12%, var(--surface));
+  box-shadow: var(--shadow-soft);
+  display: grid; grid-template-columns: 30px 1fr; gap: 9px; align-items: start;
+  transition: box-shadow 300ms;
+}
+.anchor .pic { color: var(--accent-2); border-color: var(--accent-2); }
+.anchor .star { font-size: 0.58rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent-2); display: block; margin-bottom: 2px; }
+.anchor .at { font-weight: 800; font-size: 0.84rem; color: var(--text-strong); }
+.anchor .ad { font-size: 0.68rem; color: var(--muted); margin-top: 3px; line-height: 1.35; }
+.anchor.lit { box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-2) 25%, transparent); }
+
+.readout {
+  border-radius: 12px; border: 1px solid var(--border); background: var(--surface);
+  padding: 10px 14px; box-shadow: var(--shadow-soft);
+  font-size: 0.84rem; line-height: 1.45; color: var(--text); min-height: 56px;
+}
 .readout b { color: var(--text-strong); }
-@media (max-width: 760px){ .diagram { grid-template-columns: 1fr; } }
+
+@media (max-width: 760px) { .diagram { grid-template-columns: 1fr; } }
+@media (prefers-reduced-motion: reduce) { .packet { display: none; } }
 </style>
 </head>
 <body>
@@ -45,51 +121,155 @@
     <h1>Four planes. One trace spine. One anchor.</h1>
     <p>Everything hangs off the same per-interaction trace. Click a plane to see its job — and what it owns in the pyramid.</p>
   </div>
+
+  <div class="ctl">
+    <button type="button" id="replay">Replay</button>
+    <span class="hint">The packet is one interaction riding the spine. Runtime feeds it in, the anchor scores what comes out.</span>
+  </div>
+
   <div class="diagram">
     <div class="col">
       <div class="colcap">Runtime</div>
-      <div class="box"><div class="t">Instrumentation SDK</div><div class="d">OTel GenAI auto-instrument</div></div>
-      <div class="box"><div class="t">Confidence gate</div><div class="d">autonomous vs human review</div></div>
-      <div class="box"><div class="t">Ingest + redaction</div><div class="d">PII stripped before storage</div></div>
+      <div class="box rt" data-icon="transmit"><span class="pic" data-pic aria-hidden="true"></span><span><span class="t">Instrumentation SDK</span><span class="d">OTel GenAI auto-instrument</span></span></div>
+      <div class="box rt" data-icon="split"><span class="pic" data-pic aria-hidden="true"></span><span><span class="t">Confidence gate</span><span class="d">autonomous vs human review</span></span></div>
+      <div class="box rt" data-icon="lock"><span class="pic" data-pic aria-hidden="true"></span><span><span class="t">Ingest + redaction</span><span class="d">PII stripped before storage</span></span></div>
     </div>
+
     <div class="col">
       <div class="colcap">Four planes on the spine</div>
-      <div class="spine">
-        <div class="scap">◇ Trace spine · one substrate</div>
-        <div class="planes" id="planes"></div>
+      <div class="spinebox">
+        <div class="scap">Trace spine · one substrate</div>
+        <div class="stack" id="stack" role="listbox" aria-label="The four planes of the platform">
+          <div class="packet" id="packet" aria-hidden="true"></div>
+        </div>
       </div>
     </div>
+
     <div class="col">
       <div class="colcap">The load-bearing asset</div>
-      <div class="anchor">
-        <span class="star">★ build this well</span>
-        <div class="at">Ground-Truth Anchor</div>
-        <div class="ad">A refreshed human-labeled holdout. Every proxy — judge, surrogate, drift detector — is scored against it.</div>
+      <div class="anchor" id="anchor" data-icon="personcheck">
+        <span class="pic" data-pic aria-hidden="true"></span>
+        <span>
+          <span class="star">build this well</span>
+          <span class="at">Ground-Truth Anchor</span>
+          <span class="ad">A refreshed human-labeled holdout. Every proxy — judge, surrogate, drift detector — is scored against it.</span>
+        </span>
       </div>
-      <div class="box"><div class="t">Consumption</div><div class="d">dashboards-as-hypotheses · chain-break alerts · review queue</div></div>
+      <div class="box end" data-icon="monitor"><span class="pic" data-pic aria-hidden="true"></span><span><span class="t">Consumption</span><span class="d">dashboards-as-hypotheses · chain-break alerts · review queue</span></span></div>
     </div>
   </div>
-  <div class="readout" id="readout"></div>
+
+  <div class="readout" id="readout" aria-live="polite"></div>
 </main>
 <script>
-const PLANES = [
-  { t:'1 · Trace spine', l:'System + Model', c:'--sys', d:'<b>Captures every interaction</b> — prompt, model/version, tokens (in/out/cached), latency, tool steps, cost. Stores <b>mergeable histograms</b> so percentiles are merged, never averaged.' },
-  { t:'2 · Eval harness', l:'Model Output + Model', c:'--out', d:'<b>Scores traces</b> — code assertions + a validated judge — in CI and on sampled production traffic. L1 code gate → L2 offline judge → canary → L3 online.' },
-  { t:'3 · Experiment / OEC', l:'Business + UX (causal)', c:'--biz', d:'<b>Causal ship / no-ship</b> with a pre-registered OEC + non-inferiority guardrails. SRM check <b>blocks</b> before any metric is read; CUPED tames variance.' },
-  { t:'4 · Metric-tree overlay', l:'The whole chain', c:'--accent', d:'<b>Certified metric definitions</b> + a chain validator that watches each arrow’s proxy-to-outcome correlation and alerts when it decays or flips sign.' },
-];
-const wrap = document.getElementById('planes');
-PLANES.forEach((p,i)=>{
-  const el = document.createElement('div'); el.className='plane'; el.style.setProperty('--c',`var(${p.c})`); el.dataset.i=i; el.setAttribute('role','option');
-  el.innerHTML = `<div class="pt">${p.t}</div><div class="pl">owns ${p.l}</div>`;
-  el.addEventListener('click', ()=>sel(i));
-  wrap.appendChild(el);
-});
-function sel(i){
-  document.querySelectorAll('.plane').forEach(p=>p.setAttribute('aria-selected', p.dataset.i==i?'true':'false'));
-  document.getElementById('readout').innerHTML = PLANES[i].d;
-}
-sel(0);
+(() => {
+  const ICON_BASE = '../customs-entry-agent/flow-icons/';
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* Content preserved from the original figure: same titles, ownership labels,
+     colour mapping (--sys/--out/--biz/--accent) and readout details. */
+  const PLANES = [
+    { t: '1 · Trace spine', l: 'System + Model', c: '--sys', icon: 'ledger', d: '<b>Captures every interaction</b> — prompt, model/version, tokens (in/out/cached), latency, tool steps, cost. Stores <b>mergeable histograms</b> so percentiles are merged, never averaged.' },
+    { t: '2 · Eval harness', l: 'Model Output + Model', c: '--out', icon: 'flask', d: '<b>Scores traces</b> — code assertions + a validated judge — in CI and on sampled production traffic. L1 code gate → L2 offline judge → canary → L3 online.' },
+    { t: '3 · Experiment / OEC', l: 'Business + UX (causal)', c: '--biz', icon: 'scales', d: '<b>Causal ship / no-ship</b> with a pre-registered OEC + non-inferiority guardrails. SRM check <b>blocks</b> before any metric is read; CUPED tames variance.' },
+    { t: '4 · Metric-tree overlay', l: 'The whole chain', c: '--accent', icon: 'network', d: '<b>Certified metric definitions</b> + a chain validator that watches each arrow’s proxy-to-outcome correlation and alerts when it decays or flips sign.' },
+  ];
+
+  const stack = document.getElementById('stack');
+  const packet = document.getElementById('packet');
+  const readout = document.getElementById('readout');
+
+  PLANES.forEach((p, i) => {
+    const el = document.createElement('button');
+    el.type = 'button'; el.className = 'plane'; el.dataset.i = i; el.dataset.icon = p.icon;
+    el.style.setProperty('--c', `var(${p.c})`);
+    el.setAttribute('role', 'option'); el.setAttribute('aria-selected', 'false');
+    el.innerHTML = `<span class="rail"><span class="wire" aria-hidden="true"></span><span class="pic" data-pic aria-hidden="true"></span></span>` +
+      `<span class="pinfo"><span class="pt">${p.t}</span><span class="pl">owns ${p.l}</span></span>`;
+    el.addEventListener('click', () => sel(i));
+    stack.appendChild(el);
+  });
+  const planes = Array.from(stack.querySelectorAll('.plane'));
+  const runtimes = Array.from(document.querySelectorAll('.box.rt'));
+  const finals = [document.getElementById('anchor'), document.querySelector('.box.end')];
+
+  function sel(i) {
+    planes.forEach((p) => p.setAttribute('aria-selected', p.dataset.i == i ? 'true' : 'false'));
+    readout.innerHTML = PLANES[i].d;
+  }
+  sel(0);
+
+  /* Icons are shared line-art SVGs, fetched and inlined with the stroke swapped
+     to currentColor so each tile follows its category colour. A failed fetch
+     leaves the slot empty and the text still carries the card. */
+  document.querySelectorAll('[data-icon]').forEach((el) => {
+    const slot = el.querySelector('[data-pic]');
+    fetch(ICON_BASE + el.dataset.icon + '.svg')
+      .then((r) => (r.ok ? r.text() : Promise.reject()))
+      .then((t) => { slot.innerHTML = t.replace(/stroke="#232f3e"/g, 'stroke="currentColor"'); })
+      .catch(() => {});
+  });
+
+  /* Staged run: runtime cards light in feed order, then the packet rides the
+     spine top to bottom lighting each plane, then the anchor side lights.
+     rAF t0 comes from the first frame timestamp, never performance.now():
+     sandboxed iframes can disagree between the two clocks. */
+  const RT_STEP = 260, GAP = 200, DWELL = 600, TAIL = 300;
+  let raf = 0;
+  const allLit = () => { [...runtimes, ...planes, ...finals].forEach((el) => el.classList.add('lit')); };
+  const run = () => {
+    cancelAnimationFrame(raf);
+    [...runtimes, ...planes, ...finals].forEach((el) => el.classList.remove('lit'));
+    if (reduced) { allLit(); return; }
+    const stackRect = stack.getBoundingClientRect();
+    const stops = planes.map((p) => {
+      const r = p.getBoundingClientRect();
+      return r.top - stackRect.top + r.height / 2;
+    });
+    const packetStart = runtimes.length * RT_STEP + GAP;
+    const packetEnd = packetStart + DWELL * stops.length;
+    const total = packetEnd + TAIL;
+    let t0 = null;
+    const step = (ts) => {
+      if (t0 === null) t0 = ts;
+      const t = ts - t0;
+      runtimes.forEach((b, i) => b.classList.toggle('lit', t > i * RT_STEP));
+      if (t >= packetStart && t < packetEnd) {
+        packet.style.opacity = '1';
+        const pt = t - packetStart;
+        const i = Math.min(stops.length - 1, Math.floor(pt / DWELL));
+        const f = Math.min(1, (pt - i * DWELL) / DWELL);
+        const from = i === 0 ? 0 : stops[i - 1];
+        const y = i === 0 ? stops[0] * f : from + (stops[i] - from) * f;
+        packet.style.top = y + 'px';
+        for (let k = 0; k < stops.length; k++) planes[k].classList.toggle('lit', y >= stops[k] - 4);
+      } else if (t >= packetEnd) {
+        packet.style.opacity = '0';
+        planes.forEach((p) => p.classList.add('lit'));
+        finals.forEach((el) => el.classList.add('lit'));
+      }
+      if (t < total) raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+  };
+
+  document.getElementById('replay').addEventListener('click', run);
+
+  /* threshold 0, not 0.2: this figure can be taller than a phone viewport, and
+     a too-tall element never reaches a 0.2 visible fraction, so it would never fire. */
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting)) { io.disconnect(); run(); }
+    }, { threshold: 0 });
+    io.observe(stack);
+  } else { run(); }
+
+  if (document.documentElement.dataset.embedded === 'true') {
+    const postSize = () => window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+    if ('ResizeObserver' in window) new ResizeObserver(postSize).observe(document.body);
+    window.addEventListener('load', postSize);
+  }
+})();
 </script>
 </body>
 </html>

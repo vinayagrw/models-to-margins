@@ -4,32 +4,63 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>The metric lifecycle — a checklist you can tick</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
 <script src="./_theme-bootstrap.js"></script>
 <link rel="stylesheet" href="./_theme.css">
 <style>
+:root[data-embedded="true"], :root[data-embedded="true"] body { height: auto; }
 .shell { display: flex; flex-direction: column; gap: clamp(9px,1.6vh,15px); justify-content: center; }
 .head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; }
 .head h1 { font-size: clamp(1.05rem,2vw,1.5rem); font-weight: 700; letter-spacing: -0.02em; color: var(--text-strong); }
 .head p { color: var(--muted); font-size: 0.8rem; }
 
+.ctl { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.ctl button {
+  min-height: 32px; padding: 5px 12px; cursor: pointer; border-radius: 8px;
+  font: 700 0.66rem/1 inherit; font-family: inherit; letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--accent); background: transparent; border: 1px solid var(--accent);
+}
+.ctl button:hover { background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.ctl .hint { font-size: 0.7rem; color: var(--muted-soft); }
+
 .cols { display: grid; grid-template-columns: repeat(3,1fr); gap: clamp(8px,1.4vw,14px); }
-.stage { border-radius: 14px; border: 1px solid var(--border); background: var(--surface); box-shadow: var(--shadow-soft); padding: 12px 13px; display: flex; flex-direction: column; gap: 9px; }
-.stage .when { display: flex; align-items: center; gap: 7px; }
-.stage .when .mk { width: 9px; height: 9px; border-radius: 50%; flex: none; background: var(--c); box-shadow: 0 0 0 3px color-mix(in srgb, var(--c) 22%, transparent); }
-.stage .when h2 { font-size: 0.82rem; font-weight: 700; color: var(--text-strong); letter-spacing: -0.01em; }
+.stage { border-radius: 14px; border: 1px solid var(--border); background: var(--surface); box-shadow: var(--shadow-soft); padding: 12px 13px; display: flex; flex-direction: column; gap: 9px; min-width: 0; }
+.stage .when { display: flex; align-items: center; gap: 8px; }
+.stage .when .mk {
+  flex: none; width: 26px; height: 26px; border-radius: 8px; display: grid; place-items: center;
+  color: var(--c); border: 1.5px solid color-mix(in srgb, var(--c) 55%, transparent);
+  background: color-mix(in srgb, var(--c) 12%, transparent);
+}
+.stage .when .mk svg { width: 17px; height: 17px; display: block; }
+.stage .when .mk svg * { stroke: currentColor; }
 .stage .when .ph { font-size: 0.58rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--c); }
+
 .items { display: flex; flex-direction: column; gap: 7px; }
-.item { display: flex; gap: 9px; align-items: flex-start; font: inherit; text-align: left; cursor: pointer; background: none; border: none; padding: 2px 0; color: var(--text); }
-.box { flex: none; width: 17px; height: 17px; border-radius: 5px; border: 2px solid var(--border-strong); display: grid; place-items: center; margin-top: 1px; transition: all .16s ease; }
-.box svg { width: 10px; height: 10px; opacity: 0; transform: scale(.5); transition: all .18s cubic-bezier(.3,1.4,.5,1); }
+.item { display: grid; grid-template-columns: 17px 26px 1fr; gap: 8px; align-items: flex-start; font: inherit; font-family: inherit; text-align: left; cursor: pointer; background: none; border: none; padding: 2px 0; color: var(--text); }
+.box { width: 17px; height: 17px; border-radius: 5px; border: 2px solid var(--border-strong); display: grid; place-items: center; margin-top: 5px; transition: all .16s ease; }
+.box svg { width: 10px; height: 10px; opacity: 0; transform: scale(.5) rotate(-14deg); transition: all .18s cubic-bezier(.3,1.4,.5,1); }
 .item[aria-checked="true"] .box { background: var(--c); border-color: var(--c); }
-.item[aria-checked="true"] .box svg { opacity: 1; transform: scale(1); }
-.item .txt { font-size: 0.79rem; line-height: 1.36; transition: color .16s ease, opacity .16s ease; }
-.item[aria-checked="true"] .txt { color: var(--muted); }
+.item[aria-checked="true"] .box svg { opacity: 1; transform: scale(1) rotate(0deg); }
+/* per-item pictogram carries the row: it reads even with the text blurred */
+.pic {
+  width: 26px; height: 26px; border-radius: 8px; display: grid; place-items: center; margin-top: 1px;
+  color: var(--muted); border: 1.5px solid var(--border); background: transparent;
+  transition: color .2s ease, border-color .2s ease, box-shadow .2s ease;
+}
+.pic svg { width: 17px; height: 17px; display: block; }
+.pic svg * { stroke: currentColor; }
+.item[aria-checked="true"] .pic, .item.lit .pic {
+  color: var(--c); border-color: var(--c);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--c) 18%, transparent);
+}
+.item .txt { font-size: 0.79rem; line-height: 1.36; padding-top: 3px; transition: color .16s ease; min-width: 0; }
 .item .txt b { color: var(--text-strong); font-weight: 600; }
-.item[aria-checked="true"] .txt b { color: var(--muted); }
-.item:hover .box { border-color: var(--c); }
+.item[aria-checked="true"] .txt, .item[aria-checked="true"] .txt b { color: var(--muted); }
+.item .more {
+  display: none; margin-top: 4px; font-size: 0.72rem; line-height: 1.42; color: var(--muted);
+  border-left: 2px solid var(--c); padding-left: 7px; font-weight: 400;
+}
+.item.open .more { display: block; }
+.item:hover .box, .item:hover .pic { border-color: var(--c); }
 .item:focus-visible { outline: none; }
 .item:focus-visible .box { box-shadow: 0 0 0 3px color-mix(in srgb, var(--c) 35%, transparent); }
 
@@ -38,8 +69,9 @@
 .fill { height: 100%; border-radius: 5px; width: 0; background: linear-gradient(90deg, var(--accent), var(--accent-3)); transition: width .3s cubic-bezier(.4,.1,.2,1); }
 .count { font-size: 0.76rem; font-weight: 700; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
 .count.done { color: var(--good); }
-@media (max-width: 600px){ .cols { grid-template-columns: 1fr; } }
-@media (prefers-reduced-motion: reduce){ .box, .box svg, .fill { transition: none !important; } }
+
+@media (max-width: 620px){ .cols { grid-template-columns: 1fr; } }
+@media (prefers-reduced-motion: reduce){ .box, .box svg, .fill, .pic { transition: none !important; } }
 </style>
 </head>
 <body>
@@ -47,6 +79,11 @@
   <div class="head">
     <h1>The metric lifecycle — a checklist you can tick.</h1>
     <p>Three moments in a metric's life. Tick each as you clear it; the bar fills.</p>
+  </div>
+
+  <div class="ctl">
+    <button type="button" id="replay">Replay sweep</button>
+    <span class="hint">Watch the sweep, then tap each item to clear it and see why it matters.</span>
   </div>
 
   <div class="cols" id="cols"></div>
@@ -58,48 +95,128 @@
 </main>
 
 <script>
+(() => {
 const STAGES = [
-  { ph:'Before tracking', cv:'var(--sys)', items:[
-    'Map the metric to the <b>layer above</b> it.',
-    'Validate it against <b>real user behavior</b> — not its own definition.' ]},
-  { ph:'Before shipping', cv:'var(--out)', items:[
-    'Name the trade — <b>which goes up, which goes down</b>.',
-    'Set the <b>threshold</b> before you see the result.',
-    'List the <b>second-order effects</b>.' ]},
-  { ph:'After shipping', cv:'var(--biz)', items:[
-    'Business metric flat? <b>Trace the broken link</b> in the chain — don’t guess.' ]},
+  { ph:'Before tracking', cv:'var(--sys)', icon:'chart', items:[
+    { icon:'network', txt:'Map the metric to the <b>layer above</b> it.',
+      more:'A metric that maps to nothing above it can improve forever without moving the business.' },
+    { icon:'personcheck', txt:'Validate it against <b>real user behavior</b> — not its own definition.',
+      more:'If users behave the same whether it rises or falls, the metric is measuring itself.' } ]},
+  { ph:'Before shipping', cv:'var(--out)', icon:'checklist', items:[
+    { icon:'exchange', txt:'Name the trade — <b>which goes up, which goes down</b>.',
+      more:'Every metric push borrows from somewhere. Name the lender before you optimise.' },
+    { icon:'gauge', txt:'Set the <b>threshold</b> before you see the result.',
+      more:'A threshold chosen after the result is a rationalisation, not a test.' },
+    { icon:'split', txt:'List the <b>second-order effects</b>.',
+      more:'The first-order win shows up on the dashboard. The second-order cost rarely does.' } ]},
+  { ph:'After shipping', cv:'var(--biz)', icon:'monitor', items:[
+    { icon:'trenddown', txt:'Business metric flat? <b>Trace the broken link</b> in the chain — don’t guess.',
+      more:'The chain breaks at a specific link. Find it, or the next metric inherits the same blind spot.' } ]},
 ];
+const ICON_BASE = '../customs-entry-agent/flow-icons/';
+const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const TOTAL = STAGES.reduce((n,s)=>n+s.items.length,0);
 const cols = document.getElementById('cols');
 const fill = document.getElementById('fill');
 const count = document.getElementById('count');
-let checked = 0;
 
 STAGES.forEach((s,si)=>{
   const st=document.createElement('div'); st.className='stage'; st.style.setProperty('--c', s.cv);
-  const items = s.items.map((t,ii)=>`
-    <button class="item" role="checkbox" aria-checked="false" id="it-${si}-${ii}">
-      <span class="box"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 6.3 L5 9 L10 3" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-      <span class="txt">${t}</span>
+  const items = s.items.map((it,ii)=>`
+    <button class="item" type="button" role="checkbox" aria-checked="false" id="it-${si}-${ii}">
+      <span class="box" aria-hidden="true"><svg viewBox="0 0 12 12"><path d="M2 6.3 L5 9 L10 3" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      <span class="pic" data-pic="${it.icon}" aria-hidden="true"></span>
+      <span class="txt">${it.txt}<span class="more">${it.more}</span></span>
     </button>`).join('');
-  st.innerHTML = `<div class="when"><span class="mk"></span><span class="ph">${s.ph}</span></div><div class="items">${items}</div>`;
+  st.innerHTML = `<div class="when"><span class="mk" data-pic="${s.icon}" aria-hidden="true"></span><span class="ph">${s.ph}</span></div><div class="items">${items}</div>`;
   cols.appendChild(st);
 });
 
-cols.querySelectorAll('.item').forEach(btn=>{
-  btn.addEventListener('click', ()=>{
-    const on = btn.getAttribute('aria-checked')==='true';
-    btn.setAttribute('aria-checked', on?'false':'true');
-    checked += on? -1 : 1;
-    update();
-  });
+/* Shared line-art pictograms, fetched and inlined with the stroke swapped to
+   currentColor so each follows its stage colour. A failed fetch leaves the
+   slot empty and the text still carries the row. */
+document.querySelectorAll('[data-pic]').forEach((slot)=>{
+  fetch(ICON_BASE + slot.dataset.pic + '.svg')
+    .then((r)=>(r.ok ? r.text() : Promise.reject()))
+    .then((t)=>{ slot.innerHTML = t.replace(/stroke="#232f3e"/g, 'stroke="currentColor"'); })
+    .catch(()=>{});
 });
+
+const items = Array.from(cols.querySelectorAll('.item'));
+let checked = 0;
 function update(){
   fill.style.width = (checked/TOTAL*100)+'%';
   if (checked===TOTAL){ count.textContent='✓ Chain defended — all 6 cleared'; count.classList.add('done'); }
   else { count.textContent = `${checked} / ${TOTAL} cleared`; count.classList.remove('done'); }
 }
+function resetAll(){
+  items.forEach((b)=>{ b.setAttribute('aria-checked','false'); b.classList.remove('open','lit'); });
+  checked = 0; update();
+}
+
+/* The demo sweep stamps a check on each item in sequence so the bar fills and
+   the chain lights top to bottom, holds the cleared state, then resets so the
+   reader can tick for real. rAF t0 comes from the first frame timestamp, never
+   performance.now(): sandboxed iframes can disagree between the two clocks. */
+const DWELL = 520, HOLD = 1500;
+let raf = 0, demoRunning = false;
+function sweep(){
+  cancelAnimationFrame(raf);
+  resetAll();
+  if (reduced) return; /* no motion: jump straight to the ready, fully revealed state */
+  demoRunning = true;
+  let t0 = null, done = 0;
+  const step = (ts)=>{
+    if (!demoRunning) return;
+    if (t0 === null) t0 = ts;
+    const t = ts - t0;
+    const n = Math.min(TOTAL, Math.floor(t / DWELL) + 1);
+    while (done < n){
+      items[done].setAttribute('aria-checked','true');
+      items[done].classList.add('lit');
+      done++; checked = done; update();
+    }
+    if (t < DWELL * TOTAL + HOLD) { raf = requestAnimationFrame(step); }
+    else { demoRunning = false; resetAll(); }
+  };
+  raf = requestAnimationFrame(step);
+}
+function stopDemo(){
+  if (!demoRunning) return;
+  demoRunning = false; cancelAnimationFrame(raf); resetAll();
+}
+
+items.forEach((btn)=>{
+  btn.addEventListener('click', ()=>{
+    stopDemo();
+    const on = btn.getAttribute('aria-checked')==='true';
+    btn.setAttribute('aria-checked', on?'false':'true');
+    btn.classList.toggle('open', !on);
+    btn.classList.remove('lit');
+    checked += on? -1 : 1;
+    update();
+  });
+});
+
+document.getElementById('replay').addEventListener('click', ()=>{ stopDemo(); sweep(); });
+
+/* threshold 0, not 0.2: the stacked single-column layout can exceed a phone
+   viewport, and a fraction of a too-tall element never intersects. */
+if ('IntersectionObserver' in window) {
+  const io = new IntersectionObserver((entries)=>{
+    if (entries.some((e)=>e.isIntersecting)) { io.disconnect(); sweep(); }
+  }, { threshold: 0 });
+  io.observe(cols);
+} else { sweep(); }
+
 update();
+
+if (document.documentElement.dataset.embedded === 'true') {
+  const postSize = () => window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+  if ('ResizeObserver' in window) new ResizeObserver(postSize).observe(document.body);
+  window.addEventListener('load', postSize);
+}
+})();
 </script>
 </body>
 </html>

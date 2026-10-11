@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Integration map · every external system, with its contract</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+/* The §19 integration architecture: inbound commercial, inbound authority
+   (read only) and outbound systems around the core. Every external node is
+   clickable and shows its integration contract — transport, cadence,
+   idempotency key, failure semantics — in the contract card. */
+
+.shell { display: flex; flex-direction: column; gap: 12px; }
+:root[data-embedded="true"] .shell { padding: 14px clamp(14px, 2vw, 22px) 18px; }
+
+.head h1 {
+  font-family: "Space Grotesk", sans-serif; font-weight: 700;
+  font-size: clamp(1.02rem, 2.2vw, 1.3rem); letter-spacing: -0.02em; color: var(--text-strong);
+}
+:root[data-embedded="true"] .head h1 { font-size: 1.02rem; }
+.head p { font: 500 0.72rem/1.4 "DM Sans", sans-serif; color: var(--muted); margin-top: 2px; }
+
+.board { position: relative; }
+.wires { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+.cols { position: relative; z-index: 1; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr) minmax(0, 1fr); gap: 16px; }
+.col { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+
+.zone {
+  border: 1px dashed var(--border-strong); border-radius: 10px;
+  background: color-mix(in srgb, var(--surface) 30%, transparent);
+  padding: 8px 9px 10px; display: flex; flex-direction: column; gap: 8px;
+}
+.zone-label {
+  font: 700 0.56rem/1 "IBM Plex Mono", monospace; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--zc, var(--muted-soft));
+}
+
+.node {
+  cursor: pointer; text-align: left; width: 100%; min-width: 0;
+  border: 1px solid var(--border-strong); border-top: 3px solid var(--nc, var(--accent-2));
+  border-radius: 9px; background: var(--surface); box-shadow: var(--shadow-soft);
+  padding: 7px 9px 8px; font-family: inherit;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.node b { display: block; font: 700 0.66rem/1.25 "Space Grotesk", sans-serif; color: var(--text-strong); }
+.node span { display: block; font: 500 0.59rem/1.35 "DM Sans", sans-serif; color: var(--muted); margin-top: 2px; }
+.node .svc {
+  display: inline-block; font: 600 0.53rem/1 "IBM Plex Mono", monospace; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--nc, var(--accent-2)); margin-bottom: 3px;
+}
+.node:hover { border-color: var(--nc, var(--accent-2)); }
+.node[aria-pressed="true"] {
+  border-color: var(--nc, var(--accent-2));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--nc, var(--accent-2)) 26%, transparent), var(--shadow-soft);
+}
+.node.static { cursor: default; }
+
+.core {
+  border: 1.5px dashed var(--accent-2); border-radius: 12px;
+  background: color-mix(in srgb, var(--surface) 45%, transparent);
+  padding: 9px 10px 11px; display: flex; flex-direction: column; gap: 8px;
+}
+.core > .zone-label { color: var(--accent-2); }
+
+.wire { fill: none; stroke: var(--wc, var(--accent-2)); stroke-width: 1.8; opacity: 0.6; }
+.wire.dim { opacity: 0.08; }
+.wire.hot { opacity: 1; stroke-width: 2.4; }
+.arrowhead { fill: var(--wc, var(--accent-2)); opacity: 0.7; }
+.arrowhead.dim { opacity: 0.08; }
+.arrowhead.hot { opacity: 1; }
+@media (prefers-reduced-motion: no-preference) {
+  .wire.hot { stroke-dasharray: 5 9; animation: march 1.1s linear infinite; }
+  @keyframes march { to { stroke-dashoffset: -14; } }
+}
+
+/* contract card */
+.contract {
+  border: 1px solid var(--border); border-left: 3px solid var(--cc, var(--accent-2));
+  border-radius: 10px; background: var(--surface); padding: 10px 12px 12px;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.contract .title { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.contract .title b { font: 700 0.8rem/1.2 "Space Grotesk", sans-serif; color: var(--text-strong); }
+.contract .title i { font: 600 0.56rem/1 "IBM Plex Mono", monospace; font-style: normal; letter-spacing: 0.1em; text-transform: uppercase; color: var(--cc, var(--accent-2)); }
+.cgrid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.cell { border: 1px solid var(--border); border-radius: 7px; padding: 6px 8px; min-width: 0; }
+.cell i { display: block; font: 700 0.52rem/1 "IBM Plex Mono", monospace; font-style: normal; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted-soft); margin-bottom: 3px; }
+.cell span { font: 500 0.64rem/1.4 "DM Sans", sans-serif; color: var(--text); overflow-wrap: break-word; }
+.contract .fail { font: 500 0.66rem/1.45 "DM Sans", sans-serif; color: var(--text); }
+.contract .fail b { color: var(--cc, var(--accent-2)); }
+
+/* staleness callout */
+.callout {
+  border: 1px solid color-mix(in srgb, var(--warn) 55%, transparent); border-left: 3px solid var(--warn);
+  border-radius: 8px; background: color-mix(in srgb, var(--warn) 7%, transparent);
+  padding: 8px 12px; font: 500 0.68rem/1.5 "DM Sans", sans-serif; color: var(--text);
+}
+.callout b { color: var(--warn); font-family: "Space Grotesk", sans-serif; }
+
+.stampline { display: flex; justify-content: flex-end; }
+
+@media (max-width: 760px) {
+  .head h1 { font-size: 1rem; }
+  .cols { grid-template-columns: minmax(0, 1fr); }
+  .cgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="head">
+    <div>
+      <h1>Every external system, with its contract</h1>
+      <p>Click any integration. The contract card shows transport, cadence, the idempotency key and what happens when it fails, because the failure semantics are the design.</p>
+    </div>
+  </div>
+
+  <div class="board" id="board">
+    <svg class="wires" id="wires" aria-hidden="true"></svg>
+    <div class="cols">
+
+      <div class="col">
+        <div class="zone" style="--zc: var(--S-review)">
+          <div class="zone-label">Inbound · commercial</div>
+          <button class="node" id="i-erp" style="--nc: var(--S-review)" aria-pressed="false"><span class="svc">In · S3 drop / SFTP / REST</span><b>Importer ERP / TMS</b><span>Product master, parties, orders</span></button>
+          <button class="node" id="i-email" style="--nc: var(--S-review)" aria-pressed="false"><span class="svc">In · SES</span><b>Supplier email</b><span>Invoices, packing lists, certs</span></button>
+          <button class="node" id="i-edi" style="--nc: var(--S-review)" aria-pressed="false"><span class="svc">In · B2B Data Interchange</span><b>EDI / AS2 partners</b><span>X12 from forwarders and carriers</span></button>
+        </div>
+        <div class="zone" style="--zc: var(--good)">
+          <div class="zone-label">Inbound · authority, read only</div>
+          <button class="node" id="i-fr" style="--nc: var(--good)" aria-pressed="false"><span class="svc">In · public JSON API</span><b>Federal Register</b><span>Proclamations and notices</span></button>
+          <button class="node" id="i-csms" style="--nc: var(--good)" aria-pressed="false"><span class="svc">In · bulletin subscription</span><b>CBP CSMS</b><span>Operational guidance</span></button>
+          <button class="node" id="i-hts" style="--nc: var(--good)" aria-pressed="false"><span class="svc">In · revision export</span><b>USITC HTS</b><span>The tariff schedule itself</span></button>
+          <button class="node" id="i-cross" style="--nc: var(--good)" aria-pressed="false"><span class="svc">In · bulk fetch</span><b>CBP CROSS</b><span>Rulings corpus</span></button>
+        </div>
+      </div>
+
+      <div class="col">
+        <div class="core">
+          <div class="zone-label">The system</div>
+          <div class="node static" id="c-intake" style="--nc: var(--S-review)"><span class="svc">Boundary</span><b>Intake + normalisation</b><span>Quarantine parse, entity resolution</span></div>
+          <div class="node static" id="c-core" style="--nc: var(--S-lodged)"><span class="svc">Core</span><b>Decisioning + gate</b><span>Router, workers, validators, calibrated confidence, review queue</span></div>
+          <div class="node static" id="c-watch" style="--nc: var(--good)"><span class="svc">Watcher</span><b>Rulebook watcher</b><span>One Lambda per feed, staleness-alarmed</span></div>
+          <div class="node static" id="c-corpus" style="--nc: var(--good)"><span class="svc">Pinned corpus</span><b>Rulebook versions</b><span>Hashed, promoted like code, cited by every decision</span></div>
+          <div class="node static" id="c-abi" style="--nc: var(--S-cleared)"><span class="svc">Filing</span><b>ABI adapter</b><span>Deterministic, no model, broker's certified filer code</span></div>
+        </div>
+      </div>
+
+      <div class="col">
+        <div class="zone" style="--zc: var(--accent)">
+          <div class="zone-label">Outbound · government</div>
+          <button class="node" id="i-cbp" style="--nc: var(--accent)" aria-pressed="false"><span class="svc">Out + async responses</span><b>CBP ACE via ABI</b><span>The filing itself, and everything CBP sends back</span></button>
+          <button class="node" id="i-pga" style="--nc: var(--accent)" aria-pressed="false"><span class="svc">Out · within the transmission</span><b>PGA message sets</b><span>FDA, USDA, EPA and friends, one epic per agency</span></button>
+        </div>
+        <div class="zone" style="--zc: var(--S-lodged)">
+          <div class="zone-label">Outbound · customer</div>
+          <button class="node" id="i-bi" style="--nc: var(--S-lodged)" aria-pressed="false"><span class="svc">Out · S3 Parquet + Athena</span><b>Customer BI / exposure reports</b><span>What changed, what it costs, per change event</span></button>
+        </div>
+        <div class="callout"><b>The failure mode nobody alarms on.</b> A rulebook feed that stops returning results looks exactly like a quiet week. Every feed carries a staleness alarm, no successful poll in 24 hours, because the dangerous state produces no errors at all.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="contract" id="contract" aria-live="polite">
+    <div class="title"><i id="c-dir">Contract</i><b id="c-name">Pick an integration</b></div>
+    <div class="cgrid">
+      <div class="cell"><i>Transport</i><span id="c-transport">—</span></div>
+      <div class="cell"><i>Cadence</i><span id="c-cadence">—</span></div>
+      <div class="cell"><i>Idempotency</i><span id="c-idem">—</span></div>
+      <div class="cell"><i>Direction</i><span id="c-dirv">—</span></div>
+    </div>
+    <div class="fail" id="c-fail">Ten external systems, ten contracts. Click one to see why its failure semantics matter more than its happy path.</div>
+  </div>
+
+  <div class="stampline"><span class="stamp stamp--confirmed">Contracts from the design doc, §19</span></div>
+</div>
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const board = $('board');
+  const svg = $('wires');
+
+  const CONTRACTS = {
+    'i-erp': { name: 'Importer ERP / TMS', color: 'var(--S-review)', target: 'c-intake', dir: 'Inbound',
+      transport: 'S3 drop, SFTP, or REST', cadence: 'Nightly full + event-driven delta', idem: 'Upsert on tenant, supplier, part number, source version',
+      fail: 'Stale is acceptable. Silently stale is not, a missed sync raises an alarm, because a product master quietly six weeks old poisons every Tier 0 recall.' },
+    'i-email': { name: 'Supplier email', color: 'var(--S-review)', target: 'c-intake', dir: 'Inbound',
+      transport: 'SES receipt rules → S3 → EventBridge', cadence: 'Continuous', idem: 'Content hash of the attachment set',
+      fail: 'An unparseable document goes to an intake exception queue, human-visible within minutes. Never silently dropped, a dropped document is an invisible missed deadline.' },
+    'i-edi': { name: 'EDI / AS2 partners', color: 'var(--S-review)', target: 'c-intake', dir: 'Inbound',
+      transport: 'AWS B2B Data Interchange, AS2 / X12', cadence: 'Continuous', idem: 'Interchange control number',
+      fail: 'MDN handling per partner agreement. Managed AS2 avoids running a VAN, and a partner who requires a certified interconnect flips the decision.' },
+    'i-fr': { name: 'Federal Register', color: 'var(--good)', target: 'c-watch', dir: 'Inbound · read only',
+      transport: 'Public JSON API, polled', cadence: 'Daily', idem: 'Document number',
+      fail: 'A miss is staleness, not an error. Alarm at 24 hours without a successful poll, because the July 2026 §338 proclamations arrived through this feed with a month of notice, and that is the generous case.' },
+    'i-csms': { name: 'CBP CSMS', color: 'var(--good)', target: 'c-watch', dir: 'Inbound · read only',
+      transport: 'Bulletin subscription, parsed', cadence: 'Daily', idem: 'Message number',
+      fail: 'Same staleness contract. CSMS is where operational guidance lands first, often before the legal text is easy to act on.' },
+    'i-hts': { name: 'USITC HTS', color: 'var(--good)', target: 'c-watch', dir: 'Inbound · read only',
+      transport: 'Published revision export', cadence: 'Per revision + weekly check', idem: 'Revision id + file hash',
+      fail: 'A new revision creates a new pinned rulebook version, never an in-place edit. Decisions record exactly which revision they used.' },
+    'i-cross': { name: 'CBP CROSS rulings', color: 'var(--good)', target: 'c-corpus', dir: 'Inbound · read only',
+      transport: 'Bulk fetch, embedded to pgvector', cadence: 'Weekly', idem: 'Ruling number',
+      fail: 'Corpus version bumps on each refresh. A classification that cites HQ H123456 records the corpus version the ruling came from.' },
+    'i-cbp': { name: 'CBP ACE via ABI', color: 'var(--accent)', target: 'c-abi', dir: 'Outbound + async responses',
+      transport: "ABI record formats through the broker's existing certified filer path", cadence: 'Per entry', idem: 'Entry number + filer code',
+      fail: 'Never auto-resubmit. A reject returns to the review queue with the CBP reason rendered, because a rejected filing is a compliance event, not a retryable HTTP call. CF-28 and CF-29 arrive out of band through the ACE portal, so they are ingested as their own feed with their own staleness contract.' },
+    'i-pga': { name: 'PGA message sets', color: 'var(--accent)', target: 'c-abi', dir: 'Outbound, within the ABI transmission',
+      transport: 'Per-agency record sets', cadence: 'Per entry, when applicable', idem: 'Same as the entry',
+      fail: 'MAY PROCEED, NOTICE and HOLD are reconciled. A HOLD is an operational event, not an error. Each agency is effectively a separate integration, one epic per agency, prioritised by the customer’s commodity mix.' },
+    'i-bi': { name: 'Customer BI / exposure reports', color: 'var(--S-lodged)', target: 'c-core', dir: 'Outbound',
+      transport: 'S3 Parquet + Athena, or API', cadence: 'Per change event', idem: '—',
+      fail: 'The Wave 1 deliverable. When a rulebook change lands, the customer sees which SKUs are exposed and what it costs before anything refiles.' }
+  };
+  /* wires: external node → core target (or reverse for outbound) */
+  const WIRES = Object.entries(CONTRACTS).map(([id, c]) => ({
+    id, f: c.dir.startsWith('Outbound') ? c.target : id, t: c.dir.startsWith('Outbound') ? id : c.target, color: c.color
+  }));
+
+  let selected = null, wires = [];
+
+  const anchor = (el, other) => {
+    const b = board.getBoundingClientRect();
+    const r = el.getBoundingClientRect();
+    const o = other.getBoundingClientRect();
+    const vGap = o.top > r.bottom ? o.top - r.bottom : (r.top > o.bottom ? r.top - o.bottom : 0);
+    const hGap = o.left > r.right ? o.left - r.right : (r.left > o.right ? r.left - o.right : 0);
+    if (hGap > vGap) {
+      const x = o.left > r.left ? r.right - b.left : r.left - b.left;
+      return { x, y: r.top + r.height / 2 - b.top };
+    }
+    const y = o.top > r.top ? r.bottom - b.top : r.top - b.top;
+    return { x: r.left + r.width / 2 - b.left, y };
+  };
+
+  const draw = () => {
+    const b = board.getBoundingClientRect();
+    svg.setAttribute('viewBox', `0 0 ${b.width} ${b.height}`);
+    svg.innerHTML = '';
+    wires = [];
+    WIRES.forEach((w) => {
+      const p1 = anchor($(w.f), $(w.t));
+      const p2 = anchor($(w.t), $(w.f));
+      const dx = p2.x - p1.x, dy = p2.y - p1.y;
+      let d;
+      if (Math.abs(dy) < 8 || Math.abs(dx) < 8) {
+        d = `M ${p1.x} ${p1.y} L ${p2.x} ${p2.y}`;
+      } else {
+        const kx = Math.sign(dx) * Math.min(46, Math.abs(dx) / 2);
+        const ky = Math.sign(dy) * Math.min(46, Math.abs(dy) / 2);
+        d = Math.abs(dy) >= Math.abs(dx)
+          ? `M ${p1.x} ${p1.y} C ${p1.x} ${p1.y + ky}, ${p2.x} ${p2.y - ky}, ${p2.x} ${p2.y}`
+          : `M ${p1.x} ${p1.y} C ${p1.x + kx} ${p1.y}, ${p2.x - kx} ${p2.y}, ${p2.x} ${p2.y}`;
+      }
+      const el = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      el.setAttribute('d', d);
+      el.setAttribute('class', 'wire');
+      el.style.setProperty('--wc', w.color);
+      svg.appendChild(el);
+      const len = el.getTotalLength();
+      const pe = el.getPointAtLength(len);
+      const pn = el.getPointAtLength(Math.max(0, len - 8));
+      const ang = Math.atan2(pe.y - pn.y, pe.x - pn.x);
+      const head = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      const s = 6;
+      head.setAttribute('d', `M ${pe.x} ${pe.y} L ${pe.x - s * Math.cos(ang - 0.45)} ${pe.y - s * Math.sin(ang - 0.45)} L ${pe.x - s * Math.cos(ang + 0.45)} ${pe.y - s * Math.sin(ang + 0.45)} Z`);
+      head.setAttribute('class', 'arrowhead');
+      head.style.setProperty('--wc', w.color);
+      svg.appendChild(head);
+      wires.push({ id: w.id, line: el, head });
+    });
+    apply();
+  };
+
+  const apply = () => {
+    wires.forEach((w) => {
+      w.line.classList.toggle('hot', selected === w.id);
+      w.head.classList.toggle('hot', selected === w.id);
+      w.line.classList.toggle('dim', selected !== null && selected !== w.id);
+      w.head.classList.toggle('dim', selected !== null && selected !== w.id);
+    });
+    Object.keys(CONTRACTS).forEach((id) => $(id).setAttribute('aria-pressed', String(id === selected)));
+    const card = $('contract');
+    if (selected) {
+      const c = CONTRACTS[selected];
+      card.style.setProperty('--cc', c.color);
+      $('c-dir').textContent = 'Contract';
+      $('c-name').textContent = c.name;
+      $('c-transport').textContent = c.transport;
+      $('c-cadence').textContent = c.cadence;
+      $('c-idem').textContent = c.idem;
+      $('c-dirv').textContent = c.dir;
+      $('c-fail').innerHTML = '<b>On failure:</b> ' + c.fail;
+    } else {
+      card.style.setProperty('--cc', 'var(--accent-2)');
+      $('c-dir').textContent = 'Contract';
+      $('c-name').textContent = 'Pick an integration';
+      ['c-transport', 'c-cadence', 'c-idem', 'c-dirv'].forEach((id) => { $(id).textContent = '—'; });
+      $('c-fail').textContent = 'Ten external systems, ten contracts. Click one to see why its failure semantics matter more than its happy path.';
+    }
+  };
+
+  Object.keys(CONTRACTS).forEach((id) =>
+    $(id).addEventListener('click', () => { selected = selected === id ? null : id; apply(); }));
+
+  let rt = 0;
+  const relayout = () => { clearTimeout(rt); rt = setTimeout(draw, 60); };
+  if ('ResizeObserver' in window) new ResizeObserver(relayout).observe(board);
+  window.addEventListener('load', relayout);
+  draw();
+
+  if (document.documentElement.dataset.embedded === 'true') {
+    const postSize = () => window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+    if ('ResizeObserver' in window) new ResizeObserver(postSize).observe(document.body);
+    window.addEventListener('load', postSize);
+  }
+})();
+</script>
+</body>
+</html>

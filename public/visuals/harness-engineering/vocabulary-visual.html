@@ -8,17 +8,18 @@
 <script src="./_theme-bootstrap.js"></script>
 <link rel="stylesheet" href="./_theme.css">
 <style>
-/* Closing slide: Agentic Principle quote + flippable vocab cards + sources strip. Fluid sizing.
+/* Closing slide: Agentic Principle quote + filterable, flippable vocab cards + sources strip.
    Note: the .hashimoto-* CSS class names are kept for git-history continuity; visible text says "Agentic". */
-html, body { height: 100%; overflow: hidden; }
 .shell {
-  width: 100%; height: 100%;
-  margin: 0;
-  padding: clamp(10px, 1.6vh, 18px) clamp(14px, 2vw, 22px);
-  display: grid; grid-template-rows: auto 1fr auto;
-  gap: clamp(8px, 1.2vh, 14px);
-  max-width: none;
+  width: min(calc(100% - 32px), 1280px);
+  margin: 0 auto;
+  padding: clamp(14px, 2vh, 24px) clamp(14px, 2vw, 22px) clamp(20px, 3vh, 32px);
+  display: grid; gap: clamp(10px, 1.4vh, 16px);
 }
+
+/* Embed mode: the family theme viewport-locks embeds, which clips this content. */
+:root[data-embedded="true"], :root[data-embedded="true"] body { height: auto; overflow: visible; }
+:root[data-embedded="true"] .shell { width: 100%; height: auto; padding: 14px 18px; }
 
 /* Agentic Principle hero quote (class names kept for stability) */
 .hashimoto {
@@ -38,9 +39,7 @@ html, body { height: 100%; overflow: hidden; }
   -webkit-background-clip: text; -webkit-text-fill-color: transparent;
   background-clip: text;
 }
-.hashimoto-body {
-  display: grid; gap: 4px;
-}
+.hashimoto-body { display: grid; gap: 4px; }
 .hashimoto-eyebrow {
   font-size: clamp(0.62rem, 1vh, 0.72rem); letter-spacing: 0.18em; text-transform: uppercase;
   color: var(--accent); font-weight: 700;
@@ -61,29 +60,50 @@ html, body { height: 100%; overflow: hidden; }
   color: var(--muted); text-align: right; align-self: end;
 }
 
-/* Vocabulary grid (flip cards) — sized to fit available height */
-.vocab-section { min-height: 0; display: grid; grid-template-rows: auto 1fr; gap: clamp(6px, 1vh, 10px); }
-.vocab-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+/* Vocabulary grid (flip cards) */
+.vocab-section { display: grid; gap: clamp(8px, 1.2vh, 12px); }
+.vocab-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
 .vocab-head h2 {
   font-family: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif; font-weight: 700;
   font-size: clamp(0.95rem, 1.7vh, 1.15rem); color: var(--text-strong); letter-spacing: -0.005em;
 }
 .vocab-hint { font-size: clamp(0.7rem, 1.1vh, 0.78rem); color: var(--muted); }
+
+.filters { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.filter {
+  display: inline-flex; align-items: center; gap: 8px;
+  font: inherit; font-size: 0.78rem; font-weight: 600; cursor: pointer;
+  padding: 7px 13px; border-radius: 999px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface-strong); color: var(--text);
+}
+.filter .pic { width: 16px; height: 16px; flex: none; color: var(--f, var(--accent)); }
+.filter[aria-pressed="true"] {
+  border-color: color-mix(in srgb, var(--f, var(--accent)) 60%, var(--border));
+  background: color-mix(in srgb, var(--f, var(--accent)) 14%, var(--surface-strong));
+  color: var(--text-strong);
+}
+
 .vocab-grid {
-  min-height: 0;
-  display: grid; gap: clamp(6px, 0.9vh, 10px);
-  grid-template-columns: repeat(auto-fill, minmax(clamp(150px, 13vw, 190px), 1fr));
-  /* 13 terms, target ~3 rows fit. Each row scales to available space. */
-  grid-auto-rows: minmax(clamp(64px, 9vh, 96px), 1fr);
+  display: grid; gap: clamp(8px, 1vh, 12px);
+  grid-template-columns: repeat(auto-fill, minmax(clamp(170px, 15vw, 220px), 1fr));
+  grid-auto-rows: minmax(clamp(112px, 15vh, 148px), auto);
   padding: 2px;
 }
 .vocab-card {
   perspective: 800px; cursor: pointer;
   background: transparent; border: 0; padding: 0;
   font: inherit; color: inherit;
+  opacity: 0; transform: translateY(10px);
+  transition: opacity 420ms ease, transform 420ms ease;
+}
+.vocab-card.is-in { opacity: 1; transform: none; }
+.vocab-card[hidden] { display: none; }
+@media (prefers-reduced-motion: reduce) {
+  .vocab-card { opacity: 1; transform: none; transition: none; }
 }
 .vocab-inner {
-  position: relative; width: 100%; height: 100%;
+  position: relative; width: 100%; height: 100%; min-height: 100%;
   transform-style: preserve-3d; transition: transform 360ms cubic-bezier(0.2, 0.7, 0.2, 1);
   border-radius: 12px;
 }
@@ -91,33 +111,53 @@ html, body { height: 100%; overflow: hidden; }
 @media (prefers-reduced-motion: reduce) { .vocab-inner { transition: none; } }
 .vocab-face {
   position: absolute; inset: 0;
-  padding: clamp(8px, 1.2vh, 12px) clamp(10px, 1vw, 14px);
+  padding: clamp(9px, 1.2vh, 13px) clamp(10px, 1vw, 14px);
   border: 1px solid var(--border); border-radius: 12px;
   background: var(--surface-strong); backface-visibility: hidden;
-  display: flex; flex-direction: column; justify-content: center;
-  text-align: left;
+  display: flex; flex-direction: column; justify-content: center; gap: 4px;
+  text-align: left; overflow: hidden;
 }
+.vocab-icon { width: 20px; height: 20px; color: var(--c, var(--accent)); flex: none; }
 .vocab-front .vocab-term {
   font-family: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif; font-weight: 700;
   font-size: clamp(0.84rem, 1.45vh, 1rem);
   color: var(--text-strong); letter-spacing: -0.005em; line-height: 1.2;
 }
 .vocab-front .vocab-tip {
-  margin-top: 4px;
   font-size: clamp(0.66rem, 1vh, 0.74rem); color: var(--muted);
   letter-spacing: 0.04em;
 }
+.badge {
+  align-self: flex-start;
+  font-size: 0.6rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase;
+  padding: 2px 8px; border-radius: 999px;
+}
+.badge-new {
+  color: var(--accent-3);
+  border: 1px solid color-mix(in srgb, var(--accent-3) 55%, transparent);
+  background: color-mix(in srgb, var(--accent-3) 14%, transparent);
+}
+.badge-dep {
+  color: var(--warn);
+  border: 1px solid color-mix(in srgb, var(--warn) 60%, transparent);
+  background: color-mix(in srgb, var(--warn) 16%, transparent);
+}
+.vocab-card.dep .vocab-front {
+  border-color: color-mix(in srgb, var(--warn) 45%, var(--border));
+  background: color-mix(in srgb, var(--warn) 8%, var(--surface-strong));
+}
+.vocab-card.dep .vocab-term { text-decoration: line-through; text-decoration-thickness: 1px; }
 .vocab-back {
   transform: rotateY(180deg);
   background: color-mix(in srgb, var(--c, var(--accent)) 10%, var(--surface-strong));
   border-color: color-mix(in srgb, var(--c, var(--accent)) 40%, var(--border));
+  justify-content: flex-start;
 }
 .vocab-back .vocab-def {
-  font-size: clamp(0.74rem, 1.2vh, 0.84rem); line-height: 1.4; color: var(--text);
+  font-size: clamp(0.7rem, 1.15vh, 0.8rem); line-height: 1.36; color: var(--text);
 }
 .vocab-back .vocab-source {
-  margin-top: 4px;
-  font-size: clamp(0.6rem, 0.95vh, 0.68rem); letter-spacing: 0.1em; text-transform: uppercase;
+  font-size: clamp(0.58rem, 0.9vh, 0.66rem); letter-spacing: 0.1em; text-transform: uppercase;
   color: var(--c, var(--accent)); font-weight: 700;
 }
 
@@ -143,15 +183,15 @@ html, body { height: 100%; overflow: hidden; }
 }
 .sources-list a:hover { color: var(--accent); border-bottom-color: var(--accent); }
 
+.pic svg { width: 100%; height: 100%; }
+.pic svg * { stroke: currentColor; }
+
 @media (max-width: 720px) {
   .hashimoto { grid-template-columns: 1fr; gap: 8px; padding: 12px 14px; }
   .hashimoto-mark { font-size: 2rem; }
-  .vocab-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+  .vocab-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+  .sources { grid-template-columns: 1fr; }
 }
-
-/* Embed: size to content and report it, the parent autosizes the frame. */
-:root[data-embedded="true"], :root[data-embedded="true"] body { height: auto; }
-:root[data-embedded="true"] .shell { height: auto; }
 </style>
 </head>
 <body>
@@ -163,7 +203,7 @@ html, body { height: 100%; overflow: hidden; }
       <p class="hashimoto-quote">Anytime you find an agent makes a mistake, you take the time to engineer a solution such that the agent <em>never makes that mistake again</em>.</p>
       <span class="hashimoto-attr">— Mitchell Hashimoto, February 5 2026, the post that seeded harness engineering</span>
     </div>
-    <div style="font-family: 'DM Sans', sans-serif; font-size: 0.78rem; color: var(--muted); text-align: right; align-self: end;">
+    <div class="hashimoto-coda">
       Every other rule in this deck<br>is downstream of that one.
     </div>
   </section>
@@ -171,78 +211,152 @@ html, body { height: 100%; overflow: hidden; }
   <section class="vocab-section" aria-label="Vocabulary cheat sheet">
     <div class="vocab-head">
       <h2>Vocabulary cheat sheet</h2>
-      <span class="vocab-hint">Tap a card to flip · 13 terms</span>
+      <span class="vocab-hint">Tap a card to flip · <span id="vocabCount">0</span> terms shown</span>
+    </div>
+    <div class="filters" role="group" aria-label="Filter vocabulary cards">
+      <button type="button" class="filter" data-filter="all" aria-pressed="true" style="--f: var(--accent)">
+        <span class="pic" data-ic="book" aria-hidden="true"></span><span>All</span>
+      </button>
+      <button type="button" class="filter" data-filter="new" aria-pressed="false" style="--f: var(--accent-3)">
+        <span class="pic" data-ic="badge" aria-hidden="true"></span><span>New in 2026</span>
+      </button>
+      <button type="button" class="filter" data-filter="deprecated" aria-pressed="false" style="--f: var(--warn)">
+        <span class="pic" data-ic="warning" aria-hidden="true"></span><span>Deprecated</span>
+      </button>
     </div>
     <div class="vocab-grid" id="vocabGrid" role="group" aria-label="Vocabulary cards, tap a card to flip it"></div>
   </section>
 
-  <section class="sources" aria-label="Sources">
-    <span class="sources-label">Sources</span>
-    <div class="sources-list">
-      <a href="https://ai.gopubby.com/harness-engineering-what-every-ai-engineer-needs-to-know-in-2026-0ab649e5686a" target="_blank" rel="noreferrer">2026 primer (gopubby)</a>
-      <a href="https://pub.towardsai.net/openais-harness-engineering-experiment-zero-manually-written-code-100a24ad04cf" target="_blank" rel="noreferrer">OpenAI experiment writeup (towards AI)</a>
-      <a href="https://medium.com/data-science-collective/anthropic-just-shipped-three-of-the-five-harness-layers-for-managed-agent-and-the-other-two-are-on-14979cb4cf00" target="_blank" rel="noreferrer">Anthropic 3 of 5 layers (data-sci collective)</a>
-      <a href="https://openai.com/index/harness-engineering/" target="_blank" rel="noreferrer">OpenAI: Harness engineering</a>
-      <a href="https://www.anthropic.com/engineering/building-effective-agents" target="_blank" rel="noreferrer">Anthropic: Building effective agents</a>
-      <a href="https://www.anthropic.com/engineering/building-c-compiler" target="_blank" rel="noreferrer">Anthropic: C compiler with parallel Claudes</a>
-      <a href="https://mitchellh.com/writing/my-ai-adoption-journey" target="_blank" rel="noreferrer">Hashimoto: My AI Adoption Journey</a>
-    </div>
-  </section>
 </main>
 
 <script>
 (() => {
+  const DEP = 'Deprecated in the MCP 2026-07-28 specification on a twelve-month window — if it is in your architecture documents, you have a migration.';
   const vocab = [
-    { term: 'Agent = Model + Harness', tip: 'Equation', def: 'The foundational equation. The agent is not the model — it\'s the model plus everything around it.', source: 'Anthropic, OpenAI, LangChain', color: 'var(--accent)' },
-    { term: 'Harness engineering', tip: 'The discipline', def: 'Designing the load-bearing system around the model. The 2026 inflection.', source: 'Anthropic', color: 'var(--accent-2)' },
-    { term: 'Meta-harness', tip: 'Platform pattern', def: 'A platform that virtualizes parts of the harness so you don\'t build them. Anthropic Managed Agents is one.', source: 'Anthropic', color: 'var(--L3)' },
-    { term: 'The dumb zone', tip: 'Failure mode', def: 'When the model spends more tokens reasoning about tools than doing the work. Caused by exposing too many tools.', source: 'Shorthand, after Vercel d0', color: 'var(--L3)' },
-    { term: 'Context rot', tip: 'Failure mode', def: 'Gradual goal-drift in long-running sessions as the original task gets buried under tool output.', source: 'LangChain', color: 'var(--L2)' },
-    { term: 'Doom loop', tip: 'Failure mode', def: 'An infinite retry pattern that burns thousands of dollars overnight. Prevented by L5 loop detection.', source: 'LangChain', color: 'var(--L5)' },
-    { term: 'Success silent, failure loud', tip: 'Design principle', def: 'Verification design rule: pre-stop hooks should exit 0 silently and exit non-zero with detail. Exit code, not narration.', source: 'HumanLayer', color: 'var(--L4)' },
-    { term: 'Repository-as-truth', tip: 'OpenAI pattern', def: 'The repo is the agent\'s only source of ground truth. If it\'s not in the repo, it doesn\'t exist.', source: 'OpenAI Codex', color: 'var(--L1)' },
-    { term: 'Progressive disclosure', tip: 'OpenAI pattern', def: 'A short brief map points at module-level docs; nothing is loaded unless the agent navigates there.', source: 'OpenAI Codex', color: 'var(--L2)' },
-    { term: 'Application legibility', tip: 'OpenAI pattern', def: 'The running system is observable enough that the agent (and a human) can inspect real behavior, not just code.', source: 'OpenAI Codex', color: 'var(--L4)' },
-    { term: 'Mechanical enforcement', tip: 'OpenAI pattern', def: 'Architecture and coding "taste" turned into rules a linter or structural test can enforce — no human in the loop.', source: 'OpenAI Codex', color: 'var(--L1)' },
-    { term: 'Merge fast, fix fast', tip: 'OpenAI pattern', def: 'The merge philosophy that follows from high-throughput agent output. Quality is recaptured post-merge, not pre-merge.', source: 'OpenAI Codex', color: 'var(--L4)' },
-    { term: 'The Agentic Principle', tip: 'The compounding rule', def: 'Every agent mistake gets engineered out so it never happens again.', source: '', color: 'var(--accent)' }
+    { term: 'Agent = Model + Harness', tip: 'Equation', icon: 'exchange', def: 'The foundational equation. The agent is not the model — it\'s the model plus everything around it.', source: 'Anthropic, OpenAI, LangChain', color: 'var(--accent)' },
+    { term: 'Harness engineering', tip: 'The discipline', icon: 'gears', def: 'Designing the load-bearing system around the model. The 2026 inflection.', source: 'Anthropic', color: 'var(--accent-2)' },
+    { term: 'Meta-harness', tip: 'Platform pattern', icon: 'network', def: 'A platform that virtualizes parts of the harness so you don\'t build them. Anthropic Managed Agents is one.', source: 'Anthropic', color: 'var(--L3)' },
+    { term: 'The dumb zone', tip: 'Failure mode', icon: 'trenddown', def: 'When the model spends more tokens reasoning about tools than doing the work. Caused by exposing too many tools.', source: 'Shorthand, after Vercel d0', color: 'var(--L3)' },
+    { term: 'Context rot', tip: 'Failure mode', icon: 'clock', def: 'Gradual goal-drift in long-running sessions as the original task gets buried under tool output.', source: 'LangChain', color: 'var(--L2)' },
+    { term: 'Doom loop', tip: 'Failure mode', icon: 'bug', def: 'An infinite retry pattern that burns thousands of dollars overnight. Prevented by L5 loop detection.', source: 'LangChain', color: 'var(--L5)' },
+    { term: 'Success silent, failure loud', tip: 'Design principle', icon: 'check', def: 'Verification design rule: pre-stop hooks should exit 0 silently and exit non-zero with detail. Exit code, not narration.', source: 'HumanLayer', color: 'var(--L4)' },
+    { term: 'Repository-as-truth', tip: 'OpenAI pattern', icon: 'archive', def: 'The repo is the agent\'s only source of ground truth. If it\'s not in the repo, it doesn\'t exist.', source: 'OpenAI Codex', color: 'var(--L1)' },
+    { term: 'Progressive disclosure', tip: 'OpenAI pattern', icon: 'split', def: 'A short brief map points at module-level docs; nothing is loaded unless the agent navigates there.', source: 'OpenAI Codex', color: 'var(--L2)' },
+    { term: 'Application legibility', tip: 'OpenAI pattern', icon: 'eye', def: 'The running system is observable enough that the agent (and a human) can inspect real behavior, not just code.', source: 'OpenAI Codex', color: 'var(--L4)' },
+    { term: 'Mechanical enforcement', tip: 'OpenAI pattern', icon: 'gavel', def: 'Architecture and coding "taste" turned into rules a linter or structural test can enforce — no human in the loop.', source: 'OpenAI Codex', color: 'var(--L1)' },
+    { term: 'Merge fast, fix fast', tip: 'OpenAI pattern', icon: 'exchange', def: 'The merge philosophy that follows from high-throughput agent output. Quality is recaptured post-merge, not pre-merge.', source: 'OpenAI Codex', color: 'var(--L4)' },
+    { term: 'The Agentic Principle', tip: 'The compounding rule', icon: 'stamp', def: 'Every agent mistake gets engineered out so it never happens again.', source: 'Hashimoto', color: 'var(--accent)' },
+
+    /* New in 2026 */
+    { term: 'Stateless MCP core', tip: 'MCP 2026-07-28', icon: 'cpu', tag: 'new', def: 'Since the 2026-07-28 spec, MCP has no initialize handshake and no Mcp-Session-Id; every request carries its own protocol version, client identity and capabilities, so servers sit behind ordinary load balancers.', source: 'MCP spec, 28 Jul 2026', color: 'var(--L2)' },
+    { term: 'Header routing', tip: 'MCP 2026-07-28', icon: 'network', tag: 'new', def: 'Mcp-Method and Mcp-Name travel as HTTP headers, so a gateway can route and authorize without parsing the JSON body.', source: 'MCP spec, 28 Jul 2026', color: 'var(--L2)' },
+    { term: 'cacheScope / ttlMs', tip: 'MCP 2026-07-28', icon: 'archive', tag: 'new', def: 'Fields on tools/list results that let a client legitimately cache a tool manifest instead of re-paying its token cost every session.', source: 'MCP spec, 28 Jul 2026', color: 'var(--L1)' },
+    { term: 'MRTR / input_required', tip: 'MCP 2026-07-28', icon: 'person', tag: 'new', def: 'Multi Round-Trip Requests: a server returns resultType: "input_required" mid-call to ask a human, and the same call resumes rather than restarting. Human-in-the-loop as a protocol primitive.', source: 'MCP spec, 28 Jul 2026', color: 'var(--L4)' },
+    { term: 'Compaction', tip: 'Platform feature', icon: 'table', tag: 'new', def: 'Runtime summarisation of conversation history to stay inside a context budget. Now a platform feature rather than developer code.', source: 'Claude Code / MAF Harness', color: 'var(--L2)' },
+    { term: 'Background subagent', tip: 'Runtime pattern', icon: 'robot', tag: 'new', def: 'A child agent run concurrently with the main loop. Default behaviour in Claude Code since 29 June 2026; explicitly not GA in the Microsoft Agent Framework Harness.', source: 'Claude Code, 29 Jun 2026', color: 'var(--L3)' },
+    { term: 'Environmental controls', tip: 'Containment', icon: 'barrier', tag: 'new', def: 'Constraints enforced by the execution environment (sandbox profile, filesystem scope, egress allow-list) rather than by asking the user. Measured to cut permission prompts by 84%.', source: 'Anthropic, 25 May 2026', color: 'var(--L4)' },
+    { term: 'Prompt-approval rate', tip: 'Consent fatigue', icon: 'gauge', tag: 'new', def: 'The share of permission prompts a user approves — about 93% in Anthropic\'s data. A high rate means prompting is not functioning as a control.', source: 'Anthropic, 25 May 2026', color: 'var(--L5)' },
+    { term: 'Harness-induced belief divergence', tip: 'Measurement trap', icon: 'flask', tag: 'new', def: 'Harness choices shift what the agent believes while leaving success rates intact, so harness configuration is an experimental variable and scores are not comparable across harnesses (arXiv:2607.04528).', source: 'Yi & Song, 5 Jul 2026', color: 'var(--warn)' },
+
+    /* Deprecated */
+    { term: 'Roots', tip: 'MCP capability', icon: 'archive', tag: 'deprecated', def: DEP + ' Logging is deprecated on the same window — treat both as migrations, not as options.', source: 'MCP spec, 28 Jul 2026', color: 'var(--warn)' },
+    { term: 'Sampling', tip: 'MCP capability', icon: 'flask', tag: 'deprecated', def: DEP, source: 'MCP spec, 28 Jul 2026', color: 'var(--warn)' },
+    { term: 'HTTP+SSE transport', tip: 'MCP transport', icon: 'transmit', tag: 'deprecated', def: DEP, source: 'MCP spec, 28 Jul 2026', color: 'var(--warn)' },
+    { term: 'Logging', tip: 'MCP capability', icon: 'document', tag: 'deprecated', def: DEP, source: 'MCP spec, 28 Jul 2026', color: 'var(--warn)' }
   ];
 
+  /* House icon loader */
+  const ICON_BASE = '../customs-entry-agent/flow-icons/';
+  const cache = {};
+  const load = (n) => cache[n] || (cache[n] = fetch(ICON_BASE + n + '.svg')
+    .then((r) => (r.ok ? r.text() : Promise.reject()))
+    .then((t) => t.replace(/stroke="#232f3e"/g, 'stroke="currentColor"')).catch(() => ''));
+
   const grid = document.getElementById('vocabGrid');
+  const countEl = document.getElementById('vocabCount');
+  const esc = (s) => s.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+
   vocab.forEach((v) => {
     const card = document.createElement('button');
     card.type = 'button';
-    card.className = 'vocab-card';
+    card.className = 'vocab-card' + (v.tag === 'deprecated' ? ' dep' : '');
+    card.dataset.tag = v.tag || 'core';
     card.setAttribute('aria-pressed', 'false');
-    card.setAttribute('aria-label', `${v.term}: ${v.def}`);
+    card.setAttribute('aria-label', `${v.term}${v.tag === 'deprecated' ? ' (deprecated)' : ''}: ${v.def}`);
     card.style.setProperty('--c', v.color);
+    const badge = v.tag === 'deprecated'
+      ? '<span class="badge badge-dep">Deprecated</span>'
+      : (v.tag === 'new' ? '<span class="badge badge-new">New 2026</span>' : '');
     card.innerHTML = `
       <div class="vocab-inner">
         <div class="vocab-face vocab-front">
-          <div class="vocab-term">${v.term}</div>
-          <div class="vocab-tip">${v.tip} — tap to flip</div>
+          <span class="pic vocab-icon" data-ic="${v.icon}" aria-hidden="true"></span>
+          ${badge}
+          <div class="vocab-term">${esc(v.term)}</div>
+          <div class="vocab-tip">${esc(v.tip)} — tap to flip</div>
         </div>
         <div class="vocab-face vocab-back">
-          <div class="vocab-def">${v.def}</div>
-          <div class="vocab-source">${v.source}</div>
+          <div class="vocab-def">${esc(v.def)}</div>
+          <div class="vocab-source">${esc(v.source)}</div>
         </div>
       </div>
     `;
     card.addEventListener('click', () => {
-      const next = card.getAttribute('aria-pressed') === 'true' ? 'false' : 'true';
-      card.setAttribute('aria-pressed', next);
+      card.setAttribute('aria-pressed', card.getAttribute('aria-pressed') === 'true' ? 'false' : 'true');
     });
     grid.appendChild(card);
   });
-})();
-</script>
-<script>
-(() => {
-  /* Report content height so the parent frame hugs the content. */
+
+  document.querySelectorAll('[data-ic]').forEach((slot) => {
+    load(slot.dataset.ic).then((svg) => { if (!slot.firstChild) slot.innerHTML = svg; });
+  });
+
+  /* Frame-size reporting */
+  function postSize() {
+    if (document.documentElement.dataset.embedded !== 'true') return;
+    window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+  }
+
+  /* Filters */
+  const cards = Array.from(grid.children);
+  const applyFilter = (mode) => {
+    let shown = 0;
+    cards.forEach((c) => {
+      const match = mode === 'all' || c.dataset.tag === mode;
+      c.hidden = !match;
+      if (match) shown += 1;
+    });
+    countEl.textContent = String(shown);
+    postSize();
+  };
+  const filters = Array.from(document.querySelectorAll('.filter'));
+  filters.forEach((f) => f.addEventListener('click', () => {
+    filters.forEach((o) => o.setAttribute('aria-pressed', String(o === f)));
+    applyFilter(f.dataset.filter);
+  }));
+  applyFilter('all');
+
+  /* IntersectionObserver-gated entry animation */
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduced || !('IntersectionObserver' in window)) {
+    cards.forEach((c) => c.classList.add('is-in'));
+  } else {
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (!e.isIntersecting) return;
+        const i = cards.indexOf(e.target);
+        setTimeout(() => e.target.classList.add('is-in'), Math.min(i, 12) * 35);
+        io.unobserve(e.target);
+      });
+    }, { threshold: 0.15 });
+    cards.forEach((c) => io.observe(c));
+    setTimeout(() => cards.forEach((c) => c.classList.add('is-in')), 2500);
+  }
+
   if (document.documentElement.dataset.embedded === 'true') {
-    const postSize = () => window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
     if ('ResizeObserver' in window) new ResizeObserver(postSize).observe(document.body);
     window.addEventListener('load', postSize);
+    setTimeout(postSize, 400);
   }
 })();
 </script>

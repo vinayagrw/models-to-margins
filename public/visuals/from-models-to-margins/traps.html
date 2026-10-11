@@ -4,37 +4,63 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>The Vanity-Metric Traps</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
 <script src="./_theme-bootstrap.js"></script>
 <link rel="stylesheet" href="./_theme.css">
 <style>
-.shell { display: flex; flex-direction: column; gap: clamp(8px,1.4vh,14px); justify-content: center; }
-.head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; }
+:root[data-embedded="true"], :root[data-embedded="true"] body { height: auto; }
+.shell { display: flex; flex-direction: column; gap: clamp(8px,1.4vh,14px); }
+:root[data-embedded="true"] .shell { padding: 14px clamp(14px, 2vw, 22px); }
 .head h1 { font-size: clamp(1.08rem,2vw,1.55rem); font-weight: 700; letter-spacing: -0.02em; color: var(--text-strong); }
-.head p { color: var(--muted); font-size: 0.8rem; }
-.tabs { display: flex; flex-wrap: wrap; gap: 6px; }
-.tab { font: inherit; cursor: pointer; border-radius: 999px; padding: 5px 13px; font-size: 0.74rem; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;
-  border: 1px solid var(--border-strong); background: var(--surface); color: var(--muted); transition: all .18s ease; }
-.tab .n { font-size: 0.62rem; font-weight: 800; opacity: 0.6; }
-.tab:hover { color: var(--text); border-color: var(--accent); }
-.tab[aria-selected="true"] { background: linear-gradient(135deg, var(--warn), #b91c1c); color: #fff; border-color: transparent; box-shadow: var(--shadow-soft); }
-.panel { border-radius: 14px; border: 1px solid var(--border); background: var(--surface); box-shadow: var(--shadow-soft); padding: 14px 16px; min-height: 196px; }
+.head p { color: var(--muted); font-size: 0.8rem; margin-top: 3px; }
 
-/* generic trap panel */
-.lie { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 10px; }
-.lie .num { font-size: 0.84rem; font-weight: 800; color: var(--warn); }
-.lie .name { font-size: 1.02rem; font-weight: 700; color: var(--text-strong); }
-.lie .badge { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--warn); border: 1px solid color-mix(in srgb, var(--warn) 45%, transparent); padding: 2px 7px; border-radius: 999px; }
-.why { margin-top: 7px; font-size: 0.84rem; color: var(--muted); line-height: 1.45; }
-.counter { margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border-strong); font-size: 0.84rem; color: var(--text); line-height: 1.45; }
+.bar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.bar button {
+  min-height: 34px; padding: 6px 12px; cursor: pointer; border-radius: 999px;
+  font: 600 0.66rem/1 monospace; letter-spacing: 0.07em; text-transform: uppercase;
+  color: var(--accent); background: transparent; border: 1px solid var(--accent);
+}
+.bar button:hover { background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.bar .hint { font-size: 0.72rem; color: var(--muted-soft); }
+
+.stack { display: flex; flex-direction: column; gap: 10px; }
+.trap {
+  border: 1px solid var(--border); border-radius: 14px; background: var(--surface);
+  box-shadow: var(--shadow-soft); overflow: hidden;
+  opacity: 0.18; transform: translateY(6px); transition: opacity 380ms ease, transform 380ms ease;
+}
+.trap.shown { opacity: 1; transform: none; }
+.thead {
+  display: grid; grid-template-columns: 46px minmax(0,1fr) auto; align-items: start; gap: 8px;
+  width: 100%; padding: 12px 12px 12px 10px; cursor: pointer; text-align: left;
+  background: transparent; border: 0; font-family: inherit; color: inherit;
+}
+.thead:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.pic {
+  width: 38px; height: 38px; display: grid; place-items: center; border-radius: 10px;
+  background: var(--surface-strong); border: 1.5px solid var(--border-strong);
+  color: var(--muted-soft); transition: color 300ms, border-color 300ms, box-shadow 300ms;
+}
+.pic svg { width: 24px; height: 24px; display: block; }
+.pic svg * { stroke: currentColor; }
+.trap.shown .pic { color: var(--warn); border-color: var(--warn); box-shadow: 0 0 0 3px color-mix(in srgb, var(--warn) 16%, transparent); }
+.tinfo { min-width: 0; }
+.lie { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; }
+.lie .num { font-size: 0.8rem; font-weight: 800; color: var(--warn); font-variant-numeric: tabular-nums; }
+.lie .name { font-size: 0.98rem; font-weight: 700; color: var(--text-strong); }
+.lie .badge { font-size: 0.58rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--warn); border: 1px solid color-mix(in srgb, var(--warn) 45%, transparent); padding: 2px 7px; border-radius: 999px; }
+.why { margin-top: 5px; font-size: 0.82rem; color: var(--muted); line-height: 1.45; }
+.chev { font-size: 1rem; font-weight: 700; color: var(--muted-soft); line-height: 1; padding-top: 4px; transition: transform 200ms; }
+.thead[aria-expanded="true"] .chev { transform: rotate(45deg); color: var(--accent); }
+
+.detail { padding: 0 14px 13px 14px; }
+.detail[hidden] { display: none; }
+.counter { padding-top: 10px; border-top: 1px dashed var(--border-strong); font-size: 0.84rem; color: var(--text); line-height: 1.45; }
 .counter .clab { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--good); display: block; margin-bottom: 3px; }
 .counter b { color: var(--text-strong); }
-.counter ul { margin: 4px 0 0 0; padding-left: 16px; display: grid; gap: 2px; }
-.counter li { font-size: 0.8rem; }
 
 /* acceptance scrubber */
-.scrub { display: grid; grid-template-columns: minmax(0,1fr) minmax(150px,0.72fr); gap: 16px; align-items: center; }
-.controls { display: flex; flex-direction: column; gap: 9px; }
+.scrub { display: grid; grid-template-columns: minmax(0,1fr) minmax(150px,0.72fr); gap: 16px; align-items: center; padding-top: 10px; border-top: 1px dashed var(--border-strong); }
+.controls { display: flex; flex-direction: column; gap: 9px; min-width: 0; }
 .headline-acc { font-size: 0.82rem; color: var(--text); }
 .headline-acc b { color: var(--text-strong); font-size: 1.05rem; font-variant-numeric: tabular-nums; }
 .ctl { display: flex; flex-direction: column; gap: 2px; }
@@ -43,117 +69,202 @@
 .ctl input { width: 100%; cursor: pointer; }
 .ctl.bad input { accent-color: var(--warn); }
 .ctl.good input { accent-color: var(--good); }
-.gauge { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.gauge { display: flex; flex-direction: column; align-items: center; gap: 8px; min-width: 0; }
 .dial { width: 100%; max-width: 150px; }
 .verdict { font-size: 1.02rem; font-weight: 800; letter-spacing: 0.01em; text-align: center; }
 .vsub { font-size: 0.72rem; color: var(--muted); text-align: center; line-height: 1.4; }
-@media (max-width: 620px){ .scrub { grid-template-columns: 1fr; } }
-@media (prefers-reduced-motion: reduce){ .needle { transition: none !important; } }
 .needle { transition: transform .4s cubic-bezier(.4,.1,.2,1); }
+
+@media (max-width: 620px) {
+  .scrub { grid-template-columns: 1fr; }
+  .thead { grid-template-columns: 40px minmax(0,1fr) auto; }
+  .pic { width: 34px; height: 34px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .trap { transition: none; }
+  .needle { transition: none !important; }
+}
 </style>
 </head>
 <body>
 <main class="shell">
   <div class="head">
     <h1>Four ways the numbers lie.</h1>
-    <p>Pick a trap. The richest one — acceptance — you can drag.</p>
+    <p>Each trap looks like progress. Tap one for the counter-metric.</p>
   </div>
-  <div class="tabs" id="tabs" role="tablist" aria-label="Vanity-metric traps"></div>
-  <div class="panel" id="panel" role="tabpanel" tabindex="0" aria-live="polite"></div>
+
+  <div class="bar">
+    <button type="button" id="replay">Replay</button>
+    <span class="hint">The richest trap, acceptance, you can drag.</span>
+  </div>
+
+  <div class="stack" id="stack">
+
+    <div class="trap" data-icon="flask">
+      <button type="button" class="thead" aria-expanded="false" aria-controls="d1">
+        <span class="pic" data-pic aria-hidden="true"></span>
+        <span class="tinfo">
+          <span class="lie"><span class="num">01</span><span class="name">Eval-set accuracy</span><span class="badge">feels precise</span></span>
+          <span class="why">A high score on a frozen set that no longer looks like production traffic. Necessary, never sufficient.</span>
+        </span>
+        <span class="chev" aria-hidden="true">+</span>
+      </button>
+      <div class="detail" id="d1" hidden>
+        <div class="counter"><span class="clab">Track instead</span>Refresh the eval set from <b>sampled production traffic</b>, continuously. Offline accuracy that never meets the live distribution is a museum piece.</div>
+      </div>
+    </div>
+
+    <div class="trap" data-icon="gavel">
+      <button type="button" class="thead" aria-expanded="false" aria-controls="d2">
+        <span class="pic" data-pic aria-hidden="true"></span>
+        <span class="tinfo">
+          <span class="lie"><span class="num">02</span><span class="name">The judge score</span><span class="badge">reliable &ne; valid</span></span>
+          <span class="why">An LLM judge agreeing with itself across runs — high reliability, low validity, and quietly position-biased.</span>
+        </span>
+        <span class="chev" aria-hidden="true">+</span>
+      </button>
+      <div class="detail" id="d2" hidden>
+        <div class="counter"><span class="clab">Track instead</span>Align the judge to a human-labeled holdout; report <b>chance-corrected &kappa; &ge; 0.6</b>, not raw agreement; audit position &amp; verbosity bias every model release.</div>
+      </div>
+    </div>
+
+    <div class="trap" data-icon="personcheck">
+      <button type="button" class="thead" aria-expanded="true" aria-controls="d3">
+        <span class="pic" data-pic aria-hidden="true"></span>
+        <span class="tinfo">
+          <span class="lie"><span class="num">03</span><span class="name">Acceptance rate</span><span class="badge">value or surrender?</span></span>
+          <span class="why">Measured at the moment of <i>lowest</i> user information — before the cost of accepting is known. The same 72% can be genuine value or quiet surrender.</span>
+        </span>
+        <span class="chev" aria-hidden="true">+</span>
+      </button>
+      <div class="detail" id="d3">
+        <div class="scrub">
+          <div class="controls">
+            <div class="headline-acc">Headline reads <b>72% accepted</b> — drag the downstream signals to see what it really is:</div>
+            <div class="ctl bad"><div class="lab"><span>Post-accept edit distance</span><b id="vEdit">15%</b></div><input id="edit" type="range" min="0" max="100" step="5" value="15" aria-label="Post-accept edit distance, percent"></div>
+            <div class="ctl bad"><div class="lab"><span>Regeneration / abandonment</span><b id="vRegen">10%</b></div><input id="regen" type="range" min="0" max="100" step="5" value="10" aria-label="Regeneration or abandonment rate, percent"></div>
+            <div class="ctl good"><div class="lab"><span>Retention trend</span><b id="vRet">+40</b></div><input id="ret" type="range" min="-100" max="100" step="10" value="40" aria-label="Retention trend, negative falling to positive rising"></div>
+          </div>
+          <div class="gauge">
+            <svg class="dial" viewBox="0 0 100 60" aria-hidden="true">
+              <path d="M8 56 A42 42 0 0 1 92 56" fill="none" stroke="var(--warn)" stroke-width="8" stroke-linecap="round"/>
+              <path d="M8 56 A42 42 0 0 1 92 56" fill="none" stroke="var(--good)" stroke-width="8" stroke-linecap="round" stroke-dasharray="132" id="arcGood"/>
+              <g class="needle" id="needle" style="transform-origin:50px 56px"><line x1="50" y1="56" x2="50" y2="20" stroke="var(--text-strong)" stroke-width="2.5" stroke-linecap="round"/><circle cx="50" cy="56" r="3.5" fill="var(--text-strong)"/></g>
+            </svg>
+            <div class="verdict" id="verdict" aria-live="polite">&mdash;</div>
+            <div class="vsub" id="vsub" aria-live="polite"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="trap" data-icon="gauge">
+      <button type="button" class="thead" aria-expanded="false" aria-controls="d4">
+        <span class="pic" data-pic aria-hidden="true"></span>
+        <span class="tinfo">
+          <span class="lie"><span class="num">04</span><span class="name">A P95 latency win</span><span class="badge">wrong math</span></span>
+          <span class="why">Averaged over the wrong traffic mix, or bought by silently degrading quality on the tail.</span>
+        </span>
+        <span class="chev" aria-hidden="true">+</span>
+      </button>
+      <div class="detail" id="d4" hidden>
+        <div class="counter"><span class="clab">Track instead</span>You <b>cannot average percentiles</b>. Keep a mergeable sketch, merge the distributions, then read P95 — and pair every latency win with a quality guardrail.</div>
+      </div>
+    </div>
+
+  </div>
 </main>
 
 <script>
-const TRAPS = [
-  { n:1, name:'Eval-set accuracy', badge:'feels precise',
-    why:'A high score on a frozen set that no longer looks like production traffic. Necessary, never sufficient.',
-    clab:'Track instead', counter:'Refresh the eval set from <b>sampled production traffic</b>, continuously. Offline accuracy that never meets the live distribution is a museum piece.' },
-  { n:2, name:'The judge score', badge:'reliable ≠ valid',
-    why:'An LLM judge agreeing with itself across runs — high reliability, low validity, and quietly position-biased.',
-    clab:'Track instead', counter:'Align the judge to a human-labeled holdout; report <b>chance-corrected κ ≥ 0.6</b>, not raw agreement; audit position &amp; verbosity bias every model release.' },
-  { n:3, name:'Acceptance rate', badge:'value or surrender?', scrub:true,
-    why:'Measured at the moment of <i>lowest</i> user information — before the cost of accepting is known. The same 72% can be genuine value or quiet surrender.' },
-  { n:4, name:'A P95 latency win', badge:'wrong math',
-    why:'Averaged over the wrong traffic mix, or bought by silently degrading quality on the tail.',
-    clab:'Track instead', counter:'You <b>cannot average percentiles</b>. Keep a mergeable sketch, merge the distributions, then read P95 — and pair every latency win with a quality guardrail.' },
-];
-const tabsEl = document.getElementById('tabs');
-const panel = document.getElementById('panel');
-let active = 2; // default to the acceptance scrubber
-TRAPS.forEach((t,i)=>{
-  const b=document.createElement('button'); b.className='tab'; b.dataset.i=i; b.setAttribute('role','tab'); b.id='tab'+i; b.setAttribute('aria-controls','panel'); b.tabIndex = i===active?0:-1;
-  b.innerHTML = `<span class="n">0${t.n}</span>${t.name}`;
-  b.addEventListener('click', ()=>{ active=i; render(); });
-  tabsEl.appendChild(b);
-});
-// arrow-key navigation per the ARIA tabs pattern (WCAG 2.1.1)
-tabsEl.addEventListener('keydown', e=>{
-  if(e.key!=='ArrowRight' && e.key!=='ArrowLeft') return;
-  e.preventDefault();
-  active = (active + (e.key==='ArrowRight'?1:-1) + TRAPS.length) % TRAPS.length;
-  render(); tabsEl.children[active].focus();
-});
+(() => {
+  const ICON_BASE = '../customs-entry-agent/flow-icons/';
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const stack = document.getElementById('stack');
+  const traps = Array.from(stack.querySelectorAll('.trap'));
 
-function render(){
-  [...tabsEl.children].forEach((b,i)=>{ b.setAttribute('aria-selected', i===active?'true':'false'); b.tabIndex = i===active?0:-1; });
-  panel.setAttribute('aria-labelledby','tab'+active);
-  const t = TRAPS[active];
-  if (t.scrub){ panel.innerHTML = scrubMarkup(t); wireScrub(); }
-  else {
-    panel.innerHTML = `
-      <div class="lie"><span class="num">0${t.n}</span><span class="name">${t.name}</span><span class="badge">${t.badge}</span></div>
-      <div class="why">${t.why}</div>
-      <div class="counter"><span class="clab">${t.clab}</span>${t.counter}</div>`;
-  }
-}
-function scrubMarkup(t){
-  return `
-    <div class="lie"><span class="num">0${t.n}</span><span class="name">${t.name}</span><span class="badge">${t.badge}</span></div>
-    <div class="why">${t.why}</div>
-    <div class="scrub" style="margin-top:11px">
-      <div class="controls">
-        <div class="headline-acc">Headline reads <b>72% accepted</b> — drag the downstream signals to see what it really is:</div>
-        <div class="ctl bad"><div class="lab"><span>Post-accept edit distance</span><b id="vEdit">15%</b></div><input id="edit" type="range" min="0" max="100" step="5" value="15" aria-label="Post-accept edit distance, percent"></div>
-        <div class="ctl bad"><div class="lab"><span>Regeneration / abandonment</span><b id="vRegen">10%</b></div><input id="regen" type="range" min="0" max="100" step="5" value="10" aria-label="Regeneration or abandonment rate, percent"></div>
-        <div class="ctl good"><div class="lab"><span>Retention trend</span><b id="vRet">+40</b></div><input id="ret" type="range" min="-100" max="100" step="10" value="40" aria-label="Retention trend, negative falling to positive rising"></div>
-      </div>
-      <div class="gauge">
-        <svg class="dial" viewBox="0 0 100 60" aria-hidden="true">
-          <path d="M8 56 A42 42 0 0 1 92 56" fill="none" stroke="var(--warn)" stroke-width="8" stroke-linecap="round"/>
-          <path d="M8 56 A42 42 0 0 1 92 56" fill="none" stroke="var(--good)" stroke-width="8" stroke-linecap="round" stroke-dasharray="132" id="arcGood"/>
-          <g class="needle" id="needle" style="transform-origin:50px 56px"><line x1="50" y1="56" x2="50" y2="20" stroke="var(--text-strong)" stroke-width="2.5" stroke-linecap="round"/><circle cx="50" cy="56" r="3.5" fill="var(--text-strong)"/></g>
-        </svg>
-        <div class="verdict" id="verdict" aria-live="polite">—</div>
-        <div class="vsub" id="vsub" aria-live="polite"></div>
-      </div>
-    </div>`;
-}
-function wireScrub(){
-  const edit=document.getElementById('edit'), regen=document.getElementById('regen'), ret=document.getElementById('ret');
-  const upd=()=>{
-    const e=+edit.value, g=+regen.value, r=+ret.value;
-    document.getElementById('vEdit').textContent=e+'%';
-    document.getElementById('vRegen').textContent=g+'%';
-    document.getElementById('vRet').textContent=(r>0?'+':'')+r;
-    edit.setAttribute('aria-valuetext', e+'% edited after accept');
-    regen.setAttribute('aria-valuetext', g+'% regenerated or abandoned');
-    ret.setAttribute('aria-valuetext', (r>0?'rising +':r<0?'falling ':'flat ')+r);
+  /* Icons are shared line-art SVGs; fetched and inlined with the stroke
+     swapped to currentColor so they follow the card's theme colour. A failed
+     fetch leaves the slot empty and the text still carries the row. */
+  traps.forEach((card) => {
+    const slot = card.querySelector('[data-pic]');
+    fetch(ICON_BASE + card.dataset.icon + '.svg')
+      .then((r) => (r.ok ? r.text() : Promise.reject()))
+      .then((t) => { slot.innerHTML = t.replace(/stroke="#232f3e"/g, 'stroke="currentColor"'); })
+      .catch(() => {});
+  });
+
+  /* expand/collapse detail on tap or Enter */
+  traps.forEach((card) => {
+    const head = card.querySelector('.thead');
+    const detail = card.querySelector('.detail');
+    head.addEventListener('click', () => {
+      const open = head.getAttribute('aria-expanded') === 'true';
+      head.setAttribute('aria-expanded', String(!open));
+      detail.hidden = open;
+    });
+  });
+
+  /* Staged reveal: each trap card lights in sequence, its icon flaring to the
+     warning colour as it lands. rAF t0 comes from the first frame timestamp,
+     never performance.now(): sandboxed iframes can disagree between clocks. */
+  const DWELL = 480;
+  let raf = 0;
+  const run = () => {
+    cancelAnimationFrame(raf);
+    traps.forEach((c) => c.classList.remove('shown'));
+    if (reduced) { traps.forEach((c) => c.classList.add('shown')); return; }
+    let t0 = null;
+    const step = (ts) => {
+      if (t0 === null) t0 = ts;
+      const i = Math.min(traps.length - 1, Math.floor((ts - t0) / DWELL));
+      for (let k = 0; k <= i; k++) traps[k].classList.add('shown');
+      if (i < traps.length - 1) raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+  };
+
+  document.getElementById('replay').addEventListener('click', run);
+
+  /* threshold 0, not 0.2: the stack can exceed a phone viewport, and a
+     fraction of a too-tall element never intersects. */
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting)) { io.disconnect(); run(); }
+    }, { threshold: 0 });
+    io.observe(stack);
+  } else { run(); }
+
+  /* acceptance scrubber: genuine-value score from the three downstream signals */
+  const edit = document.getElementById('edit'), regen = document.getElementById('regen'), ret = document.getElementById('ret');
+  const upd = () => {
+    const e = +edit.value, g = +regen.value, r = +ret.value;
+    document.getElementById('vEdit').textContent = e + '%';
+    document.getElementById('vRegen').textContent = g + '%';
+    document.getElementById('vRet').textContent = (r > 0 ? '+' : '') + r;
+    edit.setAttribute('aria-valuetext', e + '% edited after accept');
+    regen.setAttribute('aria-valuetext', g + '% regenerated or abandoned');
+    ret.setAttribute('aria-valuetext', (r > 0 ? 'rising +' : r < 0 ? 'falling ' : 'flat ') + r);
     // genuine-value score 0..100
-    const val = 0.40*(100-e) + 0.35*(100-g) + 0.25*((r+100)/2);
-    const v=Math.round(val);
+    const val = 0.40 * (100 - e) + 0.35 * (100 - g) + 0.25 * ((r + 100) / 2);
     // needle: -90deg (left/surrender) .. +90deg (right/value)
-    const deg = (val/100)*180 - 90;
+    const deg = (val / 100) * 180 - 90;
     document.getElementById('needle').style.transform = `rotate(${deg}deg)`;
     // good arc reveals proportionally
-    document.getElementById('arcGood').setAttribute('stroke-dashoffset', (132*(1-val/100)).toFixed(1));
-    const verdict=document.getElementById('verdict'), vsub=document.getElementById('vsub');
-    if (val>=65){ verdict.textContent='✓ Genuine value'; verdict.style.color='var(--good)'; vsub.innerHTML='Low edits, low regen, rising retention. The 72% is <b>earned</b>.'; }
-    else if (val>=42){ verdict.textContent='~ Mixed'; verdict.style.color='var(--warn)'; vsub.innerHTML='Adoption without conviction. Watch the trend — this drifts either way.'; }
-    else { verdict.textContent='✕ Surrender'; verdict.style.color='var(--warn)'; vsub.innerHTML='High edits + high regen + flat/falling retention. They accept because <b>fighting it costs more</b>.'; }
+    document.getElementById('arcGood').setAttribute('stroke-dashoffset', (132 * (1 - val / 100)).toFixed(1));
+    const verdict = document.getElementById('verdict'), vsub = document.getElementById('vsub');
+    if (val >= 65) { verdict.textContent = '✓ Genuine value'; verdict.style.color = 'var(--good)'; vsub.innerHTML = 'Low edits, low regen, rising retention. The 72% is <b>earned</b>.'; }
+    else if (val >= 42) { verdict.textContent = '~ Mixed'; verdict.style.color = 'var(--warn)'; vsub.innerHTML = 'Adoption without conviction. Watch the trend — this drifts either way.'; }
+    else { verdict.textContent = '✕ Surrender'; verdict.style.color = 'var(--warn)'; vsub.innerHTML = 'High edits + high regen + flat/falling retention. They accept because <b>fighting it costs more</b>.'; }
   };
-  [edit,regen,ret].forEach(s=>s.addEventListener('input',upd));
+  [edit, regen, ret].forEach((s) => s.addEventListener('input', upd));
   upd();
-}
-render();
+
+  if (document.documentElement.dataset.embedded === 'true') {
+    const postSize = () => window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+    if ('ResizeObserver' in window) new ResizeObserver(postSize).observe(document.body);
+    window.addEventListener('load', postSize);
+  }
+})();
 </script>
 </body>
 </html>

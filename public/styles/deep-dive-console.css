@@ -154,7 +154,7 @@
   font-size: clamp(0.88rem, 1.7vw, 1.02rem);
   color: var(--cr-ink-2);
   margin: 0.85rem 0 0;
-  max-width: 62ch;
+  max-width: 100%;
 }
 
 .dd-console .cr-lead {

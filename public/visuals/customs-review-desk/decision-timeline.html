@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sixty seconds is a design brief</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+/* Decision timeline. A seconds-scale bar of one median review (orient, compare,
+   check citation, keystroke) against a minutes-scale document-hunting baseline,
+   with the capacity consequence stated at the end. Reduced motion: static bars. */
+
+.shell { display: flex; flex-direction: column; gap: 10px; }
+:root[data-embedded="true"] .shell { padding: 14px clamp(14px, 2vw, 22px); }
+
+.head h1 {
+  font-family: "Space Grotesk", sans-serif; font-weight: 700;
+  font-size: clamp(1.02rem, 2.2vw, 1.3rem); letter-spacing: -0.02em; color: var(--text-strong);
+}
+:root[data-embedded="true"] .head h1 { font-size: 1.02rem; }
+.head p { font: 500 0.72rem/1.4 "DM Sans", sans-serif; color: var(--muted); margin-top: 2px; }
+
+.row { display: flex; flex-direction: column; gap: 4px; }
+.row-label { display: flex; align-items: baseline; justify-content: space-between; }
+.row-label b { font: 700 0.72rem/1.2 "Space Grotesk", sans-serif; color: var(--text-strong); }
+.row-label span { font: 600 0.68rem/1.2 "IBM Plex Mono", monospace; color: var(--muted); }
+
+.bar { position: relative; height: 34px; border-radius: 8px; overflow: hidden; display: flex; border: 1px solid var(--border-strong); background: var(--surface); }
+.seg { height: 100%; display: flex; align-items: center; justify-content: center; min-width: 0; position: relative; }
+.seg span { font: 600 0.6rem/1.15 "DM Sans", sans-serif; color: #fff; padding: 0 4px; text-align: center; text-shadow: 0 1px 2px rgba(0,0,0,0.35); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.seg + .seg { border-left: 1px solid rgba(255,255,255,0.35); }
+
+.play .bar-fast .seg { animation: grow 0.6s ease-out backwards; transform-origin: left; }
+.play .bar-fast .seg:nth-child(1) { animation-delay: 0.05s; }
+.play .bar-fast .seg:nth-child(2) { animation-delay: 0.15s; }
+.play .bar-fast .seg:nth-child(3) { animation-delay: 0.25s; }
+.play .bar-fast .seg:nth-child(4) { animation-delay: 0.35s; }
+.play .bar-slow .seg { animation: grow 0.6s ease-out backwards; transform-origin: left; }
+.play .bar-slow .seg:nth-child(1) { animation-delay: 0.5s; }
+.play .bar-slow .seg:nth-child(2) { animation-delay: 0.6s; }
+.play .bar-slow .seg:nth-child(3) { animation-delay: 0.7s; }
+@keyframes grow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+.legend { display: flex; flex-wrap: wrap; gap: 8px 14px; }
+.legend .item { display: flex; align-items: center; gap: 5px; font: 500 0.66rem/1.3 "DM Sans", sans-serif; color: var(--muted); }
+.legend .sw { width: 9px; height: 9px; border-radius: 2px; flex: none; }
+
+.consequence {
+  border: 1px solid var(--border); border-left: 3px solid var(--accent-2); border-radius: 10px;
+  background: color-mix(in srgb, var(--accent-2) 7%, var(--surface)); padding: 10px 13px;
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+}
+.consequence .num { font: 700 1.2rem/1 "IBM Plex Mono", monospace; color: var(--accent-2); flex: none; }
+.consequence p { font: 500 0.74rem/1.5 "DM Sans", sans-serif; color: var(--text); flex: 1; min-width: 200px; }
+.consequence p b { color: var(--text-strong); }
+
+.ev-label { display: flex; align-items: center; gap: 8px; }
+
+@media (max-width: 760px) {
+  .head h1 { font-size: 1rem; }
+  .seg span { font-size: 0.55rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .play .bar-fast .seg, .play .bar-slow .seg { animation: none !important; transform: none !important; }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="head">
+    <h1>Sixty seconds is a design brief</h1>
+    <p>One median review, seconds-scale, against the document-hunting baseline it replaces.</p>
+  </div>
+
+  <div class="row">
+    <div class="row-label"><b>Screen-designed review</b><span>~48s</span></div>
+    <div class="bar bar-fast" role="img" aria-label="Orient 8 seconds, compare candidates 14 seconds, check citation 16 seconds, keystroke 10 seconds">
+      <div class="seg" style="width:17%; background:var(--S-lodged)"><span>Orient · 8s</span></div>
+      <div class="seg" style="width:29%; background:var(--accent-2)"><span>Compare candidates · 14s</span></div>
+      <div class="seg" style="width:33%; background:var(--T1)"><span>Check citation · 16s</span></div>
+      <div class="seg" style="width:21%; background:var(--S-cleared)"><span>Keystroke · 10s</span></div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="row-label"><b>Document-hunting baseline</b><span>~180s</span></div>
+    <div class="bar bar-slow" role="img" aria-label="Locate source documents 70 seconds, re-derive the candidates 65 seconds, decide 45 seconds">
+      <div class="seg" style="width:39%; background:var(--muted-soft)"><span>Locate source documents · 70s</span></div>
+      <div class="seg" style="width:36%; background:var(--muted-soft)"><span>Re-derive candidates · 65s</span></div>
+      <div class="seg" style="width:25%; background:var(--muted-soft)"><span>Decide · 45s</span></div>
+    </div>
+  </div>
+
+  <div class="legend" aria-hidden="true">
+    <div class="item"><span class="sw" style="background:var(--S-lodged)"></span>Orient</div>
+    <div class="item"><span class="sw" style="background:var(--accent-2)"></span>Compare candidates</div>
+    <div class="item"><span class="sw" style="background:var(--T1)"></span>Check citation</div>
+    <div class="item"><span class="sw" style="background:var(--S-cleared)"></span>Keystroke</div>
+    <div class="item"><span class="sw" style="background:var(--muted-soft)"></span>Undesigned baseline steps</div>
+  </div>
+
+  <div class="ev-label"><span class="stamp stamp--proposed">Proposed</span></div>
+  <div class="consequence">
+    <span class="num">3.3x</span>
+    <p>At the 60-second target, roughly <b>6,700 reviewed lines per reviewer per month</b>. At the 3.4-minute kill criterion of the undesigned baseline, roughly <b>2,000</b>. Screen design is a headcount multiplier, not a UX nicety, illustrative arithmetic from the stated targets.</p>
+  </div>
+</div>
+<script>
+(() => {
+  const shell = document.querySelector('.shell');
+  const start = () => shell.classList.add('play');
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((en) => { if (en.isIntersecting) { start(); io.disconnect(); } });
+    }, { threshold: 0.2 });
+    io.observe(shell);
+  } else { start(); }
+  if (document.documentElement.dataset.embedded === 'true') {
+    const postSize = () => window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+    if ('ResizeObserver' in window) new ResizeObserver(postSize).observe(document.body);
+    window.addEventListener('load', postSize);
+  }
+})();
+</script>
+</body>
+</html>

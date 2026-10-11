@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AI Ops Execution Layer — Architecture Console</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="./_theme-bootstrap.js"></script>
 <link rel="stylesheet" href="./_theme.css">
 <style>
@@ -41,8 +40,16 @@ section[role="tabpanel"][hidden] { display: none; }
   --c-human: var(--good);       /* human oversight */
   --c-reason: var(--warn);      /* LLM reasoning, risk */
   --c-gate: var(--accent-2);    /* decision gates */
-  --c-data: var(--L5);          /* data and state */
+  --c-data: var(--heat-partial); /* data and state */
 }
+
+/* Autosize when embedded: the parent iframe is told our real height. */
+:root[data-embedded="true"], :root[data-embedded="true"] body { height: auto; }
+
+/* ---------- Shared line-art icon slots ---------- */
+.ic { display: inline-flex; width: 18px; height: 18px; flex: 0 0 auto; color: var(--nc, var(--pc, var(--accent))); }
+.ic svg { width: 100%; height: 100%; display: block; }
+.ic svg * { stroke: currentColor; }
 
 #tab-arch .shell { display: flex; flex-direction: column; gap: 10px; height: 100%; }
 :root[data-embedded="true"] #tab-arch .shell {
@@ -135,6 +142,7 @@ section[role="tabpanel"][hidden] { display: none; }
 #tab-arch .nodes { display: flex; gap: 6px; flex-wrap: wrap; }
 #tab-arch .node {
   flex: 1 1 0; min-width: 0; text-align: left; cursor: pointer;
+  display: flex; align-items: flex-start; gap: 7px;
   padding: 7px 9px; border-radius: 10px;
   border: 1.4px solid color-mix(in srgb, var(--nc, var(--pc)) 60%, transparent);
   background: color-mix(in srgb, var(--nc, var(--pc)) 7%, var(--surface-strong));
@@ -155,6 +163,8 @@ section[role="tabpanel"][hidden] { display: none; }
   animation: litpulse 0.9s ease;
 }
 @keyframes litpulse { 0% { transform: scale(1); } 30% { transform: scale(1.04); } 100% { transform: scale(1); } }
+#tab-arch .node .ic { margin-top: 1px; }
+#tab-arch .node .n-txt { min-width: 0; }
 #tab-arch .node .n-name { display: block; font: 700 0.76rem/1.25 "Space Grotesk", sans-serif; color: var(--text-strong); letter-spacing: -0.01em; }
 #tab-arch .node .n-sub { display: block; font-size: 0.69rem; line-height: 1.3; color: var(--muted); margin-top: 2px; }
 :root[data-embedded="true"] #tab-arch .node .n-name { font-size: clamp(0.7rem, 1.25vh, 0.76rem); }
@@ -265,7 +275,9 @@ section[role="tabpanel"][hidden] { display: none; }
 #tab-patterns .f-num {
   font: 700 0.69rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.12em;
   text-transform: uppercase; color: var(--accent);
+  display: flex; align-items: center; gap: 6px;
 }
+#tab-patterns .f-num .ic { width: 16px; height: 16px; color: var(--accent); }
 #tab-patterns .f-q { font: 600 0.8rem/1.35 "DM Sans", sans-serif; color: var(--text-strong); margin-top: 3px; }
 #tab-patterns .f-why { font: 400 0.72rem/1.3 "DM Sans", sans-serif; color: var(--muted); margin-top: 2px; }
 :root[data-embedded="true"] #tab-patterns .f-q { font-size: clamp(0.72rem, 1.4vh, 0.8rem); }
@@ -304,6 +316,7 @@ section[role="tabpanel"][hidden] { display: none; }
   border: 1px solid color-mix(in srgb, var(--sc) 40%, transparent);
   background: color-mix(in srgb, var(--sc) 7%, transparent);
 }
+#tab-patterns .v-step .ic { width: 15px; height: 15px; color: var(--sc); align-self: center; }
 #tab-patterns .v-step b {
   font: 700 0.69rem/1.2 "Space Grotesk", sans-serif; letter-spacing: 0.06em;
   text-transform: uppercase; color: var(--sc); white-space: nowrap;
@@ -340,10 +353,10 @@ section[role="tabpanel"][hidden] { display: none; }
 #tab-patterns .matrix th { font: 700 0.69rem/1.2 "Space Grotesk", sans-serif; letter-spacing: 0.05em; color: var(--text-strong); border-top: 0; }
 #tab-patterns .matrix td:first-child, #tab-patterns .matrix th:first-child { text-align: left; color: var(--muted); white-space: nowrap; }
 #tab-patterns .matrix td:first-child { font-weight: 700; color: var(--text); }
-#tab-patterns .dot { display: inline-block; width: 11px; height: 11px; border-radius: 50%; vertical-align: middle; }
-#tab-patterns .dot.g { background: var(--good); }
-#tab-patterns .dot.m { background: var(--accent-2); }
-#tab-patterns .dot.r { background: var(--warn); }
+#tab-patterns .mdot { width: 15px; height: 15px; vertical-align: middle; }
+#tab-patterns .mdot.g { color: var(--good); }
+#tab-patterns .mdot.m { color: var(--accent-2); }
+#tab-patterns .mdot.r { color: var(--warn); }
 #tab-patterns .d-note { display: block; font: 400 0.69rem/1.2 "DM Sans", sans-serif; color: var(--muted); margin-top: 1px; }
 #tab-patterns .role-row td { font: 600 0.69rem/1.25 "DM Sans", sans-serif; color: var(--accent); }
 #tab-patterns .m-key { display: flex; gap: 14px; padding: 8px 15px 0; flex-wrap: wrap; }
@@ -408,9 +421,9 @@ section[role="tabpanel"][hidden] { display: none; }
         <div class="plane" data-plane="edge" tabindex="0" role="button">
           <div class="plane-label">Edge &amp; signals</div>
           <div class="nodes">
-            <button class="node" data-c="data" data-node="pos"><span class="n-name">POS / ERP / WMS / TMS</span><span class="n-sub">systems of record</span></button>
-            <button class="node" data-c="data" data-node="sensors"><span class="n-name">Sensors, photos, voice</span><span class="n-sub">frontline evidence</span></button>
-            <button class="node" data-c="data" data-node="tasks"><span class="n-name">Tasks &amp; checklists</span><span class="n-sub">claimed completions</span></button>
+            <button class="node" data-c="data" data-node="pos"><i class="ic" data-ic="ledger" aria-hidden="true"></i><span class="n-txt"><span class="n-name">POS / ERP / WMS / TMS</span><span class="n-sub">systems of record</span></span></button>
+            <button class="node" data-c="data" data-node="sensors"><i class="ic" data-ic="eye" aria-hidden="true"></i><span class="n-txt"><span class="n-name">Sensors, photos, voice</span><span class="n-sub">frontline evidence</span></span></button>
+            <button class="node" data-c="data" data-node="tasks"><i class="ic" data-ic="checklist" aria-hidden="true"></i><span class="n-txt"><span class="n-name">Tasks &amp; checklists</span><span class="n-sub">claimed completions</span></span></button>
           </div>
         </div>
 
@@ -419,8 +432,8 @@ section[role="tabpanel"][hidden] { display: none; }
         <div class="plane" data-plane="state" tabindex="0" role="button">
           <div class="plane-label">State plane</div>
           <div class="nodes">
-            <button class="node" data-c="data" data-node="graph"><span class="n-name">Operational graph</span><span class="n-sub">conformed store, item, vendor IDs</span></button>
-            <button class="node" data-c="data" data-node="trust"><span class="n-name">Evidence trust scores</span><span class="n-sub">claims weighted, not believed</span></button>
+            <button class="node" data-c="data" data-node="graph"><i class="ic" data-ic="network" aria-hidden="true"></i><span class="n-txt"><span class="n-name">Operational graph</span><span class="n-sub">conformed store, item, vendor IDs</span></span></button>
+            <button class="node" data-c="data" data-node="trust"><i class="ic" data-ic="scales" aria-hidden="true"></i><span class="n-txt"><span class="n-name">Evidence trust scores</span><span class="n-sub">claims weighted, not believed</span></span></button>
           </div>
         </div>
 
@@ -429,9 +442,9 @@ section[role="tabpanel"][hidden] { display: none; }
         <div class="plane" data-plane="decide" tabindex="0" role="button">
           <div class="plane-label">Decision plane</div>
           <div class="nodes">
-            <button class="node" data-c="control" data-node="fast"><span class="n-name">Fast path</span><span class="n-sub">forecasts, rules, thresholds</span></button>
-            <button class="node" data-c="gate" data-node="triage"><span class="n-name">Ambiguity gate</span><span class="n-sub">routine or residue?</span></button>
-            <button class="node" data-c="reason" data-node="slow"><span class="n-name">Slow path</span><span class="n-sub">LLM reasoning, governed context</span></button>
+            <button class="node" data-c="control" data-node="fast"><i class="ic" data-ic="gears" aria-hidden="true"></i><span class="n-txt"><span class="n-name">Fast path</span><span class="n-sub">forecasts, rules, thresholds</span></span></button>
+            <button class="node" data-c="gate" data-node="triage"><i class="ic" data-ic="split" aria-hidden="true"></i><span class="n-txt"><span class="n-name">Ambiguity gate</span><span class="n-sub">routine or residue?</span></span></button>
+            <button class="node" data-c="reason" data-node="slow"><i class="ic" data-ic="robot" aria-hidden="true"></i><span class="n-txt"><span class="n-name">Slow path</span><span class="n-sub">LLM reasoning, governed context</span></span></button>
           </div>
         </div>
 
@@ -440,8 +453,8 @@ section[role="tabpanel"][hidden] { display: none; }
         <div class="plane" data-plane="act" tabindex="0" role="button">
           <div class="plane-label">Actuation gateway</div>
           <div class="nodes">
-            <button class="node" data-c="gate" data-node="risk"><span class="n-name">Risk tier + autonomy status</span><span class="n-sub">shadow / suggest / auto, per category</span></button>
-            <button class="node" data-c="control" data-node="writer"><span class="n-name">Idempotent write adapters</span><span class="n-sub">OBO identity, staged posting</span></button>
+            <button class="node" data-c="gate" data-node="risk"><i class="ic" data-ic="shield" aria-hidden="true"></i><span class="n-txt"><span class="n-name">Risk tier + autonomy status</span><span class="n-sub">shadow / suggest / auto, per category</span></span></button>
+            <button class="node" data-c="control" data-node="writer"><i class="ic" data-ic="stamp" aria-hidden="true"></i><span class="n-txt"><span class="n-name">Idempotent write adapters</span><span class="n-sub">OBO identity, staged posting</span></span></button>
           </div>
         </div>
 
@@ -450,9 +463,9 @@ section[role="tabpanel"][hidden] { display: none; }
         <div class="plane" data-plane="oversee" tabindex="0" role="button">
           <div class="plane-label">Oversight plane</div>
           <div class="nodes">
-            <button class="node" data-c="human" data-node="queue"><span class="n-name">Budgeted review queue</span><span class="n-sub">capped per reviewer per day</span></button>
-            <button class="node" data-c="data" data-node="audit"><span class="n-name">Dual-identity audit</span><span class="n-sub">user → agent → resource</span></button>
-            <button class="node" data-c="control" data-node="evals"><span class="n-name">Eval harness</span><span class="n-sub">traces become regression tests</span></button>
+            <button class="node" data-c="human" data-node="queue"><i class="ic" data-ic="personcheck" aria-hidden="true"></i><span class="n-txt"><span class="n-name">Budgeted review queue</span><span class="n-sub">capped per reviewer per day</span></span></button>
+            <button class="node" data-c="data" data-node="audit"><i class="ic" data-ic="archive" aria-hidden="true"></i><span class="n-txt"><span class="n-name">Dual-identity audit</span><span class="n-sub">user → agent → resource</span></span></button>
+            <button class="node" data-c="control" data-node="evals"><i class="ic" data-ic="flask" aria-hidden="true"></i><span class="n-txt"><span class="n-name">Eval harness</span><span class="n-sub">traces become regression tests</span></span></button>
           </div>
         </div>
 
@@ -487,7 +500,7 @@ section[role="tabpanel"][hidden] { display: none; }
 
         <div class="force" id="rowQ1">
           <div>
-            <div class="f-num">Gate 1 · Routine</div>
+            <div class="f-num"><i class="ic" data-ic="gears" aria-hidden="true"></i>Gate 1 · Routine</div>
             <div class="f-q" id="q1">Is the signal routine and rule-decidable, no judgment needed?</div>
             <div class="f-why">If a rule can decide it, a rule should. LLM tokens on the easy majority is the first anti-pattern.</div>
           </div>
@@ -499,7 +512,7 @@ section[role="tabpanel"][hidden] { display: none; }
 
         <div class="force" id="rowQ2">
           <div>
-            <div class="f-num">Gate 2 · Variety</div>
+            <div class="f-num"><i class="ic" data-ic="split" aria-hidden="true"></i>Gate 2 · Variety</div>
             <div class="f-q" id="q2">Do multiple distinct signal classes arrive at the same front door?</div>
             <div class="f-why">Routing is cheap, observable, and essential at ops event volumes. One handler per class beats one prompt for all.</div>
           </div>
@@ -511,7 +524,7 @@ section[role="tabpanel"][hidden] { display: none; }
 
         <div class="force" id="rowQ3">
           <div>
-            <div class="f-num">Gate 3 · Diagnosis</div>
+            <div class="f-num"><i class="ic" data-ic="network" aria-hidden="true"></i>Gate 3 · Diagnosis</div>
             <div class="f-q" id="q3">Does resolving it require cross-system diagnosis, inventory plus carrier plus labor?</div>
             <div class="f-why">Yes means an orchestrator decomposing checks to parallel workers. No means a linear document-style chain.</div>
           </div>
@@ -523,7 +536,7 @@ section[role="tabpanel"][hidden] { display: none; }
 
         <div class="force" id="rowQ4">
           <div>
-            <div class="f-num">Gate 4 · Stakes</div>
+            <div class="f-num"><i class="ic" data-ic="gavel" aria-hidden="true"></i>Gate 4 · Stakes</div>
             <div class="f-q" id="q4">Is this contested or high-value residue, a claim someone will dispute?</div>
             <div class="f-why">A generate → verify loop earns its cost only here. Everywhere else it is expensive theater.</div>
           </div>
@@ -535,7 +548,7 @@ section[role="tabpanel"][hidden] { display: none; }
 
         <div class="force" id="rowQ5">
           <div>
-            <div class="f-num">Gate 5 · Action risk</div>
+            <div class="f-num"><i class="ic" data-ic="shield" aria-hidden="true"></i>Gate 5 · Action risk</div>
             <div class="f-q" id="q5">Is the resulting action high-risk or unproven for this category?</div>
             <div class="f-why">Autonomy is earned per category with shadow evidence, never assumed. Money and physical ops start gated.</div>
           </div>
@@ -560,9 +573,9 @@ section[role="tabpanel"][hidden] { display: none; }
     <details class="matrix">
       <summary>Comparison matrix · patterns B–G across seven dimensions <em>(tap to expand)</em></summary>
       <div class="m-key">
-        <span><i class="dot g"></i> favorable</span>
-        <span><i class="dot m"></i> middling</span>
-        <span><i class="dot r"></i> costly</span>
+        <span><i class="ic mdot g" data-ic="check" aria-hidden="true"></i> favorable</span>
+        <span><i class="ic mdot m" data-ic="gauge" aria-hidden="true"></i> middling</span>
+        <span><i class="ic mdot r" data-ic="warning" aria-hidden="true"></i> costly</span>
       </div>
       <div class="matrix-scroll">
         <table>
@@ -583,6 +596,28 @@ section[role="tabpanel"][hidden] { display: none; }
   </section>
 
 </div>
+
+<script>
+/* Shared line-art icons: fetched once per name from the site's flow-icon set,
+   stroke swapped to currentColor so each slot follows its host's theme colour.
+   A failed fetch leaves the slot empty and the text still carries the row. */
+(() => {
+  const ICON_BASE = '../customs-entry-agent/flow-icons/';
+  const cache = {};
+  const load = (name) => cache[name] || (cache[name] =
+    fetch(ICON_BASE + name + '.svg')
+      .then((r) => (r.ok ? r.text() : Promise.reject()))
+      .then((t) => t.replace(/stroke="#232f3e"/g, 'stroke="currentColor"'))
+      .catch(() => ''));
+  window.m2mIconify = (scope) => {
+    scope.querySelectorAll('[data-ic]').forEach((slot) => {
+      if (slot.firstChild) return;
+      load(slot.dataset.ic).then((svg) => { if (!slot.firstChild) slot.innerHTML = svg; });
+    });
+  };
+  window.m2mIconify(document);
+})();
+</script>
 
 <script>
 /* Tab bar: two panels, keyboard accessible, ?tab=patterns opens the second tab. */
@@ -698,17 +733,32 @@ section[role="tabpanel"][hidden] { display: none; }
   let playing = false;
   playBtn.addEventListener('click', async () => {
     if (playing) return;
+    if (reduced) {
+      /* Reduced motion: skip the trace and jump straight to the conclusion. */
+      note.textContent = 'Same gateway, different exits. Autonomy is a property of the action category, not the model.';
+      return;
+    }
     playing = true;
     playBtn.disabled = true;
     note.innerHTML = '<strong>Routine signal:</strong> sales feed → graph → fast path → not ambiguous → gateway → auto write → audit.';
     await runPath(ROUTINE);
-    await sleep(reduced ? 60 : 400);
+    await sleep(400);
     note.innerHTML = '<strong>Ambiguous signal:</strong> odd photo evidence → graph → fast path flags it → slow path reasons → gateway routes to the suggest queue → approved → write → audit.';
     await runPath(AMBIG);
     note.innerHTML = 'Same gateway, different exits. Autonomy is a property of the action category, not the model.';
     playBtn.disabled = false;
     playing = false;
   });
+
+  /* Autoplay the trace once when the stage first becomes visible.
+     threshold 0, not 0.2: the stage can be taller than a phone viewport,
+     and a fraction of a too-tall element never reaches 0.2 visibility. */
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting)) { io.disconnect(); playBtn.click(); }
+    }, { threshold: 0 });
+    io.observe(stage);
+  }
 })();
 </script>
 
@@ -723,8 +773,13 @@ section[role="tabpanel"][hidden] { display: none; }
     fast: 'var(--good)', C: 'var(--accent)', B: 'var(--accent-3)',
     D: 'var(--accent-3)', E: 'var(--accent-2)', G: 'var(--good)', auto: 'var(--accent)'
   };
+  /* Each stack step carries a pictogram so the verdict reads icon-first. */
+  const STEP_ICONS = {
+    fast: 'gears', C: 'split', B: 'document', D: 'network',
+    E: 'flask', G: 'personcheck', auto: 'check'
+  };
   const step = (key, code, text) =>
-    '<div class="v-step" style="--sc:' + STEP_COLORS[key] + '"><b>' + code + '</b><span>' + text + '</span></div>';
+    '<div class="v-step" style="--sc:' + STEP_COLORS[key] + '"><i class="ic" data-ic="' + STEP_ICONS[key] + '" aria-hidden="true"></i><b>' + code + '</b><span>' + text + '</span></div>';
 
   const verdict = () => {
     const { f1, f2, f3, f4, f5 } = state;
@@ -760,6 +815,7 @@ section[role="tabpanel"][hidden] { display: none; }
     el('vDesc').textContent = desc;
     el('vStack').innerHTML = steps.join('');
     el('vTell').textContent = tell;
+    window.m2mIconify(patternsRoot);
   };
 
   patternsRoot.querySelectorAll('.f-toggle button').forEach((btn) => {
@@ -790,8 +846,11 @@ section[role="tabpanel"][hidden] { display: none; }
   };
   const ROLES = ['Best role', 'doc flows', 'front door', 'exception diagnosis', 'contested long tail', 'bounded exploration', 'risk gate'];
 
+  /* Matrix verdicts read icon plus colour, never colour alone:
+     check = favorable, gauge = middling, warning = costly. */
+  const CELL_ICONS = { g: 'check', m: 'gauge', r: 'warning' };
   const cell = (v, note) =>
-    '<td><i class="dot ' + v + '"></i>' + (note ? '<span class="d-note">' + note + '</span>' : '') + '</td>';
+    '<td><i class="ic mdot ' + v + '" data-ic="' + CELL_ICONS[v] + '" aria-hidden="true"></i>' + (note ? '<span class="d-note">' + note + '</span>' : '') + '</td>';
   el('mBody').innerHTML =
     MATRIX.map((row, ri) =>
       '<tr><td>' + row[0] + '</td>' +
@@ -800,7 +859,14 @@ section[role="tabpanel"][hidden] { display: none; }
     '<tr class="role-row">' + ROLES.map((r) => '<td>' + r + '</td>').join('') + '</tr>';
 
   verdict();
+  window.m2mIconify(patternsRoot);
 })();
+
+if (document.documentElement.dataset.embedded === 'true') {
+  const postSize = () => window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+  if ('ResizeObserver' in window) new ResizeObserver(postSize).observe(document.body);
+  window.addEventListener('load', postSize);
+}
 </script>
 </body>
 </html>

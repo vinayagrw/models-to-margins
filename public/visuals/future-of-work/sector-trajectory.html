@@ -148,6 +148,17 @@
       background: var(--convergence-bg); color: var(--muted);
     }
 
+    /* Embedded autosize: the iframe parent sizes to scrollHeight, so no forced viewport height */
+    :root[data-embedded="true"], :root[data-embedded="true"] body { height: auto; }
+    :root[data-embedded="true"] body { min-height: 0; }
+
+    .legend-ic { display: inline-flex; flex-shrink: 0; }
+    .legend-ic svg { width: 14px; height: 14px; display: block; }
+    .legend-ic svg * { stroke: currentColor; }
+    .card-ic { display: inline-flex; vertical-align: -3px; margin-right: 6px; }
+    .card-ic svg { width: 18px; height: 18px; display: block; }
+    .card-ic svg * { stroke: currentColor; }
+
     .tooltip {
       position: absolute; pointer-events: none;
       padding: 10px 14px; border-radius: 12px;
@@ -163,6 +174,12 @@
       margin-top: 5px; padding-top: 5px;
       border-top: 1px solid var(--tooltip-border);
       font-style: italic; color: var(--muted); font-size: 0.7rem;
+    }
+
+    @media (max-width: 620px) {
+      .autoplay-bar { flex-wrap: wrap; }
+      .autoplay-pips { flex-wrap: wrap; justify-content: center; }
+      .autoplay-pip { width: 8px; }
     }
 
     .convergence-label {
@@ -197,6 +214,7 @@
     <div class="legend" role="group" aria-label="Chart legend"></div>
     <div class="autoplay-bar">
       <button class="autoplay-btn" id="autoplay-btn" title="Auto-play sector tour">&#9654; Tour</button>
+      <button class="autoplay-btn" id="replay-btn" title="Replay the trajectory draw-on">&#8635; Replay</button>
       <div class="autoplay-pips" id="autoplay-pips"></div>
     </div>
     <div class="tooltip" aria-live="polite"></div>
@@ -204,6 +222,25 @@
 
   <script>
     const SVG_NS = 'http://www.w3.org/2000/svg';
+
+    /* Shared line-art icons, fetched once and inlined with the stroke swapped to
+       currentColor so they follow whatever colour their container sets. A failed
+       fetch leaves the slot empty and the text still carries the sector. */
+    const ICON_BASE = '../customs-entry-agent/flow-icons/';
+    const ICON_FOR = {
+      'healthcare': 'personcheck',
+      'ai-infra': 'cpu',
+      'cybersecurity': 'shield',
+      'electrification': 'network',
+      'manufacturing': 'factory'
+    };
+    const ICONS = {};
+    Object.values(ICON_FOR).forEach((name) => {
+      fetch(ICON_BASE + name + '.svg')
+        .then((r) => (r.ok ? r.text() : Promise.reject()))
+        .then((t) => { ICONS[name] = t.replace(/stroke="#232f3e"/g, 'stroke="currentColor"'); render(); startAnimation(); })
+        .catch(() => {});
+    });
 
     const SECTORS = [
       {
@@ -268,6 +305,7 @@
 
     let hidden = new Set();
     let highlighted = null;
+    let isolated = null;
     let particles = [];
     let animId = null;
     let lastTime = 0;
@@ -344,6 +382,16 @@
           // Rank number
           staticHTML += `<text x="${cx}" y="${cy + 4.5}" text-anchor="middle" fill="${dotTextFill}" font-size="11" font-weight="700" font-family="'Space Grotesk',system-ui,sans-serif" pointer-events="none" opacity="${op}">${rank}</text>`;
         });
+
+        // Icon badge at each line's end so a trajectory stays identifiable with the text blurred
+        const endIcon = ICONS[ICON_FOR[sector.id]];
+        if (endIcon) {
+          const ey = rankY(sector.ranks[2]);
+          staticHTML += `<g style="color:${c}" opacity="${op}" pointer-events="none">
+            <circle cx="${W - 21}" cy="${ey}" r="14" fill="var(--bg)" stroke="${c}" stroke-width="1.5" />
+            ${endIcon.replace('<svg ', `<svg x="${W - 31}" y="${ey - 10}" width="20" height="20" `)}
+          </g>`;
+        }
       });
 
       // Convergence zone markers
@@ -363,11 +411,17 @@
 
       svg.innerHTML = staticHTML;
 
-      // Bind events
+      // Bind events. Click isolates a sector until clicked again or the background is clicked.
       svg.querySelectorAll('.sector-dot, .sector-path').forEach(el => {
-        el.addEventListener('mouseenter', (e) => { highlighted = el.dataset.sector; render(); showTooltip(e, el.dataset.sector, el.dataset.horizon ? +el.dataset.horizon : null); });
-        el.addEventListener('mouseleave', () => { highlighted = null; render(); tooltipEl.classList.remove('visible'); });
-        el.addEventListener('click', (e) => { e.stopPropagation(); });
+        el.addEventListener('mouseenter', (e) => { if (!isolated) { highlighted = el.dataset.sector; render(); } showTooltip(e, el.dataset.sector, el.dataset.horizon ? +el.dataset.horizon : null); });
+        el.addEventListener('mouseleave', () => { if (!isolated) { highlighted = null; render(); } tooltipEl.classList.remove('visible'); });
+        el.addEventListener('click', (e) => {
+          e.stopPropagation();
+          isolated = isolated === el.dataset.sector ? null : el.dataset.sector;
+          highlighted = isolated;
+          render();
+          startAnimation();
+        });
       });
 
       buildLegend();
@@ -433,17 +487,22 @@
     }
 
     function buildLegend() {
-      legendEl.innerHTML = SECTORS.map(s =>
-        `<button class="legend-item" data-sector="${s.id}" aria-pressed="${!hidden.has(s.id)}" title="Toggle ${s.label}">
-          <span class="legend-dot" style="background:${col(s)}"></span>${s.label}
-        </button>`
-      ).join('');
+      legendEl.innerHTML = SECTORS.map(s => {
+        const ic = ICONS[ICON_FOR[s.id]];
+        const marker = ic
+          ? `<span class="legend-ic" style="color:${col(s)}">${ic}</span>`
+          : `<span class="legend-dot" style="background:${col(s)}"></span>`;
+        return `<button class="legend-item" data-sector="${s.id}" aria-pressed="${!hidden.has(s.id)}" title="Toggle ${s.label}">
+          ${marker}${s.label}
+        </button>`;
+      }).join('');
 
       legendEl.querySelectorAll('.legend-item').forEach(btn => {
         btn.addEventListener('click', () => {
           const id = btn.dataset.sector;
           hidden.has(id) ? hidden.delete(id) : hidden.add(id);
           highlighted = null;
+          isolated = null;
           render();
           startAnimation();
         });
@@ -454,7 +513,7 @@
       const sector = SECTORS.find(s => s.id === sectorId);
       if (!sector) return;
       const c = col(sector);
-      let html = `<div class="tooltip-title" style="color:${c}">${sector.label}</div>`;
+      let html = `<div class="tooltip-title" style="color:${c}"><span class="card-ic">${ICONS[ICON_FOR[sector.id]] || ''}</span>${sector.label}</div>`;
       if (horizonIdx !== null && horizonIdx >= 0) {
         html += `<div><strong>Horizon:</strong> ${HORIZONS[horizonIdx]}</div>`;
         html += `<div><strong>Rank:</strong> #${sector.ranks[horizonIdx]}</div>`;
@@ -476,7 +535,7 @@
       tooltipEl.style.top = top + 'px';
     }
 
-    document.addEventListener('click', () => { highlighted = null; tooltipEl.classList.remove('visible'); render(); startAnimation(); });
+    document.addEventListener('click', () => { highlighted = null; isolated = null; tooltipEl.classList.remove('visible'); render(); startAnimation(); });
 
     window.__rebuildChart = () => { render(); startAnimation(); };
     render();
@@ -532,7 +591,7 @@
       autoCard.innerHTML = `
         <div class="auto-card-horizon">${HORIZON_LABELS[hi]} Outlook</div>
         <div class="auto-card-rank" style="color:${c}">#${sector.ranks[hi]}</div>
-        <div class="auto-card-name" style="color:${c}">${sector.label}</div>
+        <div class="auto-card-name" style="color:${c}"><span class="card-ic">${ICONS[ICON_FOR[sector.id]] || ''}</span>${sector.label}</div>
         <div class="auto-card-score">
           Score ${sector.scores[hi]}/5 &nbsp;&middot;&nbsp; Grade ${sector.grades[hi]} &nbsp;&middot;&nbsp; ${sector.confidence[hi]}
         </div>
@@ -568,6 +627,7 @@
     function startTour() {
       if (tourActive) { stopTour(); return; }
       tourActive = true;
+      isolated = null;
       autoBtn.textContent = '\u23F8 Pause';
       autoBtn.classList.add('active');
       tourStep_i = -1;
@@ -615,6 +675,51 @@
     setTimeout(() => {
       if (!userInteracted && !reducedMotion.matches) startTour();
     }, 2500);
+
+    // ── Draw-on reveal ──
+    // Trajectories draw themselves left to right via stroke-dashoffset. Under
+    // prefers-reduced-motion the chart simply stays in its finished state.
+    function drawOn() {
+      if (reducedMotion.matches) return;
+      const paths = svg.querySelectorAll('path');
+      paths.forEach(p => {
+        const len = p.getTotalLength();
+        p.style.transition = 'none';
+        p.style.strokeDasharray = len;
+        p.style.strokeDashoffset = len;
+      });
+      svg.getBoundingClientRect(); // flush styles so the transition actually runs
+      paths.forEach(p => {
+        p.style.transition = 'stroke-dashoffset 1300ms ease';
+        p.style.strokeDashoffset = '0';
+      });
+    }
+
+    /* Autoplay the draw-on once when the chart first scrolls into view.
+       threshold 0, not 0.2: the figure can be taller than a phone viewport,
+       so a 0.2 visible fraction may never be reached and 0.2 would never fire. */
+    if ('IntersectionObserver' in window) {
+      const io = new IntersectionObserver((entries) => {
+        if (entries.some((e) => e.isIntersecting)) { io.disconnect(); drawOn(); }
+      }, { threshold: 0 });
+      io.observe(svg);
+    } else { drawOn(); }
+
+    document.getElementById('replay-btn').addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (tourActive) stopTour();
+      isolated = null;
+      highlighted = null;
+      render();
+      startAnimation();
+      drawOn();
+    });
+
+    if (document.documentElement.dataset.embedded === 'true') {
+      const postSize = () => window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+      if ('ResizeObserver' in window) new ResizeObserver(postSize).observe(document.body);
+      window.addEventListener('load', postSize);
+    }
   </script>
 </body>
 </html>

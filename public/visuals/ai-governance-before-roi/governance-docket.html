@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Governance docket, July 2 to August 24, 2026</title>
+<script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+.shell { display:flex; flex-direction:column; gap:14px; }
+:root[data-embedded="true"] .shell { padding: 14px clamp(14px, 2vw, 22px); }
+.head h1 { font-family:"Fraunces",serif; font-weight:700; font-size:clamp(1rem,2.1vw,1.2rem); color:var(--text-strong); }
+.head p { font:400 0.78rem/1.5 "Source Sans 3",sans-serif; color:var(--muted); margin-top:3px; }
+
+.ctl { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.ctl button {
+  min-height:34px; padding:6px 12px; cursor:pointer;
+  font:600 0.62rem/1 "IBM Plex Mono",monospace; letter-spacing:0.07em; text-transform:uppercase;
+  color:var(--accent); background:transparent; border:1px solid var(--accent); border-radius:2px;
+}
+.ctl button:hover { background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.tally { font-family:"IBM Plex Mono",monospace; font-size:0.62rem; letter-spacing:0.06em; text-transform:uppercase; color:var(--muted); }
+.tally b { font-weight:700; color:var(--accent); }
+.tally b.some { color:var(--good); }
+.ctl .hint { font:400 0.7rem/1.4 "Source Sans 3",sans-serif; color:var(--muted-soft); }
+
+/* Icon rail: each governance event is a stamped docket entry on the timeline. */
+.rail-wrap { position:relative; padding:22px 6px 12px; overflow-x:auto; }
+.rail { position:relative; height:3px; background:var(--border-strong); border-radius:2px; min-width:640px; }
+.tick { position:absolute; top:-9px; transform:translateX(-50%); display:flex; flex-direction:column; align-items:center; cursor:pointer; background:none; border:0; font-family:inherit; padding:0; }
+.tick .lbl { font-family:"IBM Plex Mono",monospace; font-size:0.58rem; letter-spacing:0.05em; color:var(--muted); white-space:nowrap; margin-bottom:3px; }
+.tick .ic {
+  width:24px; height:24px; display:grid; place-items:center; margin-top:4px;
+  background:var(--surface-strong); border:2px solid var(--accent-2); border-radius:4px;
+  color:var(--muted); opacity:0.35; transition: opacity 260ms, color 260ms;
+}
+.tick .ic svg { width:15px; height:15px; display:block; }
+.tick .ic svg * { stroke: currentColor; }
+.tick.emphasis .ic { border-color:var(--accent); width:27px; height:27px; margin-top:2.5px; }
+.tick.future .ic { background:transparent; border-style:dashed; }
+.tick.open .ic { border-color:var(--warn); border-style:dashed; }
+.tick.stamped .ic { opacity:1; color:var(--accent-2); }
+.tick.stamped.emphasis .ic { color:var(--accent); }
+.tick.stamped.open .ic { color:var(--warn); }
+.tick[aria-pressed="true"] .ic { background:var(--accent-2); color:var(--surface); }
+.tick[aria-pressed="true"].emphasis .ic { background:var(--accent); }
+.tick:focus-visible .ic { outline:2px solid var(--accent); outline-offset:2px; }
+
+.ledger { border:1px solid var(--border-strong); border-radius:0; background:var(--surface); overflow-x:auto; }
+.ledger table { width:100%; min-width:560px; border-collapse:collapse; font-size:0.78rem; }
+.ledger th { font:500 0.62rem/1.2 "IBM Plex Mono",monospace; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-strong); background:var(--surface-sunk); text-align:left; padding:7px 10px; border-bottom:1px solid var(--border-strong); }
+.ledger td { padding:7px 10px; border-bottom:1px solid var(--border); font-family:"Source Sans 3",sans-serif; color:var(--text); vertical-align:top; }
+.ledger tbody tr { cursor:pointer; }
+.ledger tbody tr:focus-visible { outline:2px solid var(--accent); outline-offset:-2px; }
+.ledger tbody tr:nth-child(even) td { background: color-mix(in srgb, var(--surface-sunk) 55%, transparent); }
+.ledger tbody tr.active td { background: color-mix(in srgb, var(--accent-2) 12%, transparent); }
+td.piccell { width:34px; padding-right:0; }
+.pic { width:24px; height:24px; display:grid; place-items:center; color:var(--muted-soft); transition: color 260ms; }
+.pic svg { width:20px; height:20px; display:block; }
+.pic svg * { stroke: currentColor; }
+tr.stamped .pic { color:var(--accent-2); }
+tr.stamped.is-open .pic { color:var(--warn); }
+tr.stamped.is-emphasis .pic { color:var(--accent); }
+.econ { font-family:"IBM Plex Mono",monospace; font-size:0.68rem; letter-spacing:0.06em; text-transform:uppercase; opacity:0; transition: opacity 300ms 120ms; }
+.econ.none { color:var(--accent); }
+.econ.some { color:var(--good); }
+tr.stamped .econ { opacity:1; }
+.chip-inline { display:inline-flex; align-items:center; gap:5px; font-family:"IBM Plex Mono",monospace; font-size:0.58rem; letter-spacing:0.08em; text-transform:uppercase; border:1px solid currentColor; border-radius:2px; padding:1px 5px; }
+.chip-inline.confirmed { color:var(--confirmed); }
+.chip-inline.open { color:var(--open); }
+/* the stamp thunks in: oversized and tilted, then snaps flat */
+td .chip-inline { opacity:0; transform:scale(1.9) rotate(-11deg); transition: transform 340ms cubic-bezier(0.2,1.35,0.4,1), opacity 180ms; }
+tr.stamped td .chip-inline { opacity:1; transform:scale(1) rotate(-2deg); }
+.finding { font:400 italic 0.82rem/1.5 "Fraunces",serif; color:var(--text-strong); border-top:2px solid var(--accent); border-bottom:2px solid var(--accent); padding:10px 0; margin:2px 0; }
+
+@media (max-width:760px) {
+  .rail-wrap { display:none; }
+  .head h1 { font-size:1rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { transition:none !important; }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="head">
+    <h1>Eighteen governance events, one empty column</h1>
+    <p>Jul 2 to Aug 24, 2026. Every disclosed-economics cell reads NONE except Gartner's budget-allocation figure.</p>
+  </div>
+
+  <div class="ctl">
+    <button type="button" id="replay">Replay stamps</button>
+    <span class="tally" id="tally" aria-live="polite">Economics column · NONE <b id="cNone">0</b> · budget share <b class="some" id="cSome">0</b></span>
+    <span class="hint">Tap a date or a row to pin its docket entry.</span>
+  </div>
+
+  <div class="rail-wrap">
+    <div class="rail" id="rail" role="group" aria-label="Timeline of governance events"></div>
+  </div>
+
+  <p class="finding">The emptiness of the right-hand column is the finding, not a footnote.</p>
+
+  <div class="ledger">
+    <table>
+      <thead><tr><th></th><th>Date</th><th>Event</th><th>Disclosed economics</th><th>Verdict</th></tr></thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+</div>
+<script>
+(() => {
+  const EVENTS = [
+    { d:'Jul 2', full:'2026-07-02', name:'NACD publishes board AI governance guidance, 62%+ full-board agenda time', econ:'none', chip:'confirmed', icon:'gov' },
+    { d:'Jul 14', full:'2026-07-14', name:'6sense MCP server opens beta', econ:'none', chip:'confirmed', icon:'transmit' },
+    { d:'Jul 23', full:'2026-07-23', name:'GitHub MCP Server adds support for the new spec', econ:'none', chip:'confirmed', icon:'merge' },
+    { d:'Jul 27', full:'~2026-07-27', name:'Digital Omnibus enters into force (date unverified against Official Journal)', econ:'none', chip:'open', open:true, icon:'gavel' },
+    { d:'Jul 28', full:'2026-07-28', name:'MCP specification 2026-07-28 ships, OAuth 2.1 alignment', econ:'none', chip:'confirmed', icon:'lock' },
+    { d:'Aug 2', full:'2026-08-02', name:'EU AI Act milestone: Annex III high-risk obligations, deferred by Omnibus', econ:'none', chip:'confirmed', emphasis:true, icon:'scales' },
+    { d:'Aug 5', full:'2026-08-05', name:'Gartner: 55% of CSCOs unclear on AI ROI, 67% of digital spend to AI', econ:'some', chip:'confirmed', icon:'chart' },
+    { d:'Aug 10', full:'2026-08-10', name:'Exiger named 2026 Great Supply Chain Partner (trade-press award)', econ:'none', chip:'confirmed', icon:'badge' },
+    { d:'Aug 11', full:'2026-08-11', name:'Target names Chandhu Nair first chief AI officer', econ:'none', chip:'confirmed', icon:'personcheck' },
+    { d:'Aug 12', full:'2026-08-12', name:'Deloitte and Ivalua announce agentic source-to-pay alliance', econ:'none', chip:'confirmed', icon:'exchange' },
+    { d:'Aug 13', full:'2026-08-13', name:'Lululemon’s Ranju Das departs after under a year. USPS AI routing evaluation disclosed', econ:'none', chip:'confirmed', icon:'truck' },
+    { d:'Aug 24', full:'2026-08-24', name:'Nair’s start date (future at publication)', econ:'none', chip:'confirmed', future:true, icon:'calendar' },
+  ];
+
+  const ICON_BASE = '../customs-entry-agent/flow-icons/';
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const rail = document.getElementById('rail');
+  const tbody = document.getElementById('tbody');
+  const cNone = document.getElementById('cNone');
+  const cSome = document.getElementById('cSome');
+  const n = EVENTS.length;
+  const ticks = [], rows = [];
+
+  /* Icons are the shared line-art SVGs, fetched once per name and inlined with
+     the stroke swapped to currentColor. A failed fetch leaves the slot empty
+     and the date plus event text still carry the entry. */
+  const iconCache = {};
+  const loadIcon = (name, slot) => {
+    iconCache[name] = iconCache[name] || fetch(ICON_BASE + name + '.svg')
+      .then((r) => (r.ok ? r.text() : Promise.reject()))
+      .then((t) => t.replace(/stroke="#232f3e"/g, 'stroke="currentColor"'));
+    iconCache[name].then((t) => { slot.innerHTML = t; }).catch(() => {});
+  };
+
+  EVENTS.forEach((e, i) => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'tick' + (e.emphasis ? ' emphasis' : '') + (e.future ? ' future' : '') + (e.open ? ' open' : '');
+    btn.style.left = (4 + (i / (n - 1)) * 92) + '%';
+    btn.setAttribute('aria-pressed', 'false');
+    btn.dataset.i = i;
+    btn.innerHTML = '<span class="lbl">' + e.d + '</span><span class="ic" aria-hidden="true"></span>';
+    loadIcon(e.icon, btn.querySelector('.ic'));
+    btn.addEventListener('click', () => select(i));
+    btn.addEventListener('focus', () => select(i));
+    rail.appendChild(btn);
+    ticks.push(btn);
+
+    const tr = document.createElement('tr');
+    tr.dataset.i = i;
+    tr.tabIndex = 0;
+    tr.className = (e.open ? 'is-open ' : '') + (e.emphasis ? 'is-emphasis' : '');
+    const econClass = e.econ === 'some' ? 'some' : 'none';
+    const econLabel = e.econ === 'some' ? 'BUDGET SHARE, NOT ROI' : 'NONE';
+    tr.innerHTML = '<td class="piccell"><span class="pic" aria-hidden="true"></span></td>' +
+      '<td>' + e.full + '</td><td>' + e.name + '</td>' +
+      '<td class="econ ' + econClass + '">' + econLabel + '</td>' +
+      '<td><span class="chip-inline ' + e.chip + '">' + e.chip + '</span></td>';
+    loadIcon(e.icon, tr.querySelector('.pic'));
+    tr.addEventListener('click', () => select(i));
+    tr.addEventListener('keydown', (ev) => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); select(i); } });
+    tbody.appendChild(tr);
+    rows.push(tr);
+  });
+
+  function select(i) {
+    ticks.forEach((t) => t.setAttribute('aria-pressed', String(Number(t.dataset.i) === i)));
+    rows.forEach((r) => r.classList.toggle('active', Number(r.dataset.i) === i));
+  }
+
+  /* Stamping: each verdict thunks in down the docket in sequence, and the
+     economics tally counts up as stamps land. rAF t0 comes from the first
+     frame timestamp, never performance.now(): sandboxed iframes can disagree
+     between the two clocks. */
+  const STEP = 230;
+  let raf = 0;
+  const updateTally = () => {
+    let none = 0, some = 0;
+    rows.forEach((r, i) => { if (r.classList.contains('stamped')) (EVENTS[i].econ === 'some' ? some++ : none++); });
+    cNone.textContent = none;
+    cSome.textContent = some;
+  };
+  const finish = () => {
+    rows.forEach((r) => r.classList.add('stamped'));
+    ticks.forEach((t) => t.classList.add('stamped'));
+    updateTally();
+  };
+  const run = () => {
+    cancelAnimationFrame(raf);
+    rows.forEach((r) => r.classList.remove('stamped'));
+    ticks.forEach((t) => t.classList.remove('stamped'));
+    updateTally();
+    if (reduced) { finish(); return; }
+    let t0 = null;
+    const step = (ts) => {
+      if (t0 === null) t0 = ts;
+      const t = ts - t0;
+      const landed = Math.min(n, Math.floor(t / STEP) + 1);
+      for (let k = 0; k < landed; k++) { rows[k].classList.add('stamped'); ticks[k].classList.add('stamped'); }
+      updateTally();
+      if (landed < n) raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+  };
+
+  document.getElementById('replay').addEventListener('click', run);
+
+  /* threshold 0, not 0.2: the ledger can exceed a phone viewport, and a
+     fraction of a too-tall element never intersects. */
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting)) { io.disconnect(); run(); }
+    }, { threshold: 0 });
+    io.observe(tbody);
+  } else { run(); }
+
+  if (document.documentElement.dataset.embedded === 'true') {
+    const postSize = () => window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+    if ('ResizeObserver' in window) new ResizeObserver(postSize).observe(document.body);
+    window.addEventListener('load', postSize);
+    setTimeout(postSize, 60);
+  }
+})();
+</script>
+</body>
+</html>

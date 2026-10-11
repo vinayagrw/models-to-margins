@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Workflow scorecard</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="./_theme-bootstrap.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:wght@600;700&family=Public+Sans:wght@400;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./_theme.css">
+<style>
+.grid { display:grid; grid-template-columns:minmax(0,1.5fr) minmax(0,1fr); gap:14px; align-items:start; }
+.list { display:flex; flex-direction:column; gap:6px; }
+.row { display:grid; grid-template-columns:28px 1fr; gap:10px; align-items:start; border:1.5px solid var(--border-strong); border-radius:3px; background:var(--surface-strong); padding:9px 12px; cursor:pointer; }
+.row input { width:22px; height:22px; margin-top:1px; accent-color:var(--clear); cursor:pointer; }
+.row b { font-size:0.92rem; font-weight:700; }
+.row span { display:block; font-size:0.8rem; color:var(--muted); line-height:1.4; }
+.row em { font-style:normal; margin-left:6px; }
+.row:has(input:checked) { border-color:var(--clear); background:var(--clear-dim); }
+.verdict { border:1.5px solid var(--border-strong); border-radius:3px; background:var(--surface); padding:14px; display:flex; flex-direction:column; align-items:flex-start; gap:8px; position:sticky; top:8px; }
+.verdict .icon { color:var(--hold); }
+.verdict[data-v="go"] .icon { color:var(--clear); }
+.verdict[data-v="stop"] .icon { color:#c62828; }
+.verdict b { font-family:"Public Sans","Segoe UI",system-ui,sans-serif; font-size:1.3rem; line-height:1.2; }
+.verdict p { font-size:0.86rem; line-height:1.5; color:var(--muted); }
+.verdict .count { font-family:"IBM Plex Mono",monospace; font-size:0.8rem; color:var(--muted-soft); }
+@media (max-width:760px) { .grid { grid-template-columns:1fr; } .verdict { position:static; } }
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="head">
+    <h1>Does this workflow qualify?</h1>
+    <p>Tick what is true for a workflow you have in mind. Three items are gates: without them the work stops. The thresholds are judgment, not findings. <span class="stamp stamp--proposed">Proposed</span></p>
+  </div>
+  <div class="grid">
+    <div class="list" id="list"></div>
+    <div class="verdict" id="verdict" aria-live="polite" data-v="fix">
+      <svg class="icon" viewBox="0 0 80 80" aria-hidden="true"><path d="M40 12v56M22 68h36M14 26h52"/><path d="M14 26 6 46c0 5 4 8 8 8s8-3 8-8zM66 26l-8 20c0 5 4 8 8 8s8-3 8-8z"/></svg>
+      <b id="vTitle"></b>
+      <p id="vText"></p>
+      <span class="count" id="vCount"></span>
+    </div>
+  </div>
+</div>
+<script src="./_frame.js"></script>
+<script>
+(() => {
+  const ITEMS = [
+    { t:'A stable case ID in a system of record', d:'The decision and its outcome can be joined by key.', gate:true },
+    { t:'Six months of baseline data', d:'Cost, cycle time and reversals before the build.', gate:true },
+    { t:'Adverse outcomes are decided by a person', d:'The automated path may approve or route. It does not deny.', gate:true },
+    { t:'A countable unit, tens of thousands a year', d:'A claim, a request, a shipment update.' },
+    { t:'The outcome is known within 30 days', d:'Slow outcomes cannot be judged in a quarter.' },
+    { t:'No dominant vendor-embedded agent', d:'Decisions inside another vendor\'s agent may not be exportable.' },
+    { t:'A named operations owner and finance owner', d:'Finance signs the metric definitions before the build.' },
+    { t:'A record-keeping rule gives the record a reader', d:'Someone outside the team will ask to see it.' }
+  ];
+  const list = document.getElementById('list');
+  ITEMS.forEach((it, i) => {
+    const l = document.createElement('label');
+    l.className = 'row';
+    l.innerHTML = '<input type="checkbox" data-i="' + i + '"><div><b>' + it.t + '</b>' +
+      (it.gate ? '<em class="stamp stamp--open">Gate</em>' : '') + '<span>' + it.d + '</span></div>';
+    list.appendChild(l);
+  });
+  const boxes = Array.from(list.querySelectorAll('input'));
+  const v = document.getElementById('verdict');
+  const update = () => {
+    const on = boxes.map((b) => b.checked);
+    const n = on.filter(Boolean).length;
+    const gatesOpen = ITEMS.filter((it, i) => it.gate && !on[i]).length;
+    let state, title, text;
+    if (n === ITEMS.length) { state = 'go'; title = 'Qualifies'; text = 'Agree the unit, the baseline and the comparison group, then build.'; }
+    else if (gatesOpen) { state = 'stop'; title = 'Stop'; text = gatesOpen + ' of 3 gates open. Without a join key, a baseline and a human on adverse calls, the result cannot be measured or defended.'; }
+    else { state = 'fix'; title = 'Fix first'; text = 'The gates are met. Close the remaining items or pick another workflow.'; }
+    v.dataset.v = state;
+    document.getElementById('vTitle').textContent = title;
+    document.getElementById('vText').textContent = text;
+    document.getElementById('vCount').textContent = n + ' of ' + ITEMS.length + ' true';
+    if (window.m2mPost) window.m2mPost();
+  };
+  boxes.forEach((b) => b.addEventListener('change', update));
+  update();
+})();
+</script>
+</body>
+</html>

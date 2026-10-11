@@ -8,55 +8,19 @@
 <script src="./_theme-bootstrap.js"></script>
 <link rel="stylesheet" href="./_theme.css">
 <style>
-/* Scene-specific: hard evidence bar chart */
-:root, :root[data-theme="light"] { --bar-bg: rgba(16, 42, 67, 0.08); }
-:root[data-theme="dark"] { --bar-bg: rgba(166, 212, 255, 0.08); }
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) { --bar-bg: rgba(166, 212, 255, 0.08); }
-}
+/* Scene-specific: hard evidence, grouped by unit so no two scales share a bar axis. */
 body {
   background:
-    radial-gradient(circle at 80% 10%, rgba(34, 211, 238, 0.10), transparent 32%),
-    radial-gradient(circle at 10% 90%, rgba(249, 115, 22, 0.10), transparent 32%),
+    radial-gradient(circle at 80% 10%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 32%),
+    radial-gradient(circle at 10% 90%, color-mix(in srgb, var(--accent-2) 12%, transparent), transparent 32%),
     linear-gradient(180deg, var(--bg-start) 0%, var(--bg-mid) 48%, var(--bg-end) 100%);
 }
-/* Embed mode: shell flex column, card fills, rows scale fluidly with iframe height */
-:root[data-embedded="true"] .shell {
-  display: flex; flex-direction: column;
-  gap: clamp(6px, 1vh, 12px); min-height: 0;
-  padding: clamp(10px, 1.6vh, 18px) clamp(14px, 2vw, 22px);
-}
-:root[data-embedded="true"] .head { margin-bottom: 0; }
-:root[data-embedded="true"] .head h1 { font-size: clamp(1rem, 2.2vh, 1.5rem); }
-:root[data-embedded="true"] .head p { font-size: clamp(0.78rem, 1.4vh, 0.92rem); max-width: none; }
-:root[data-embedded="true"] .card {
-  flex: 1; min-height: 0;
-  padding: clamp(12px, 2vh, 22px) clamp(14px, 1.6vw, 22px);
-  display: grid;
-  grid-template-rows: 1fr auto;
-  gap: clamp(8px, 1.4vh, 16px);
-}
-:root[data-embedded="true"] .rows {
-  min-height: 0;
-  gap: clamp(8px, 1.4vh, 18px);
-  /* Each row stretches to equal share of card height — no blank between */
-  grid-template-rows: repeat(4, 1fr);
-  align-content: stretch;
-}
-:root[data-embedded="true"] .row { gap: clamp(10px, 1.6vw, 18px); align-items: center; min-height: 0; }
-:root[data-embedded="true"] .row-claim { font-size: clamp(0.94rem, 1.8vh, 1.15rem); }
-:root[data-embedded="true"] .row-detail { font-size: clamp(0.76rem, 1.3vh, 0.88rem); }
-:root[data-embedded="true"] .bar-frame {
-  /* Bar fills row height; clamps prevent extreme stretch */
-  height: 100%; min-height: 44px; max-height: 96px;
-}
-:root[data-embedded="true"] .bar-stat { font-size: clamp(1.05rem, 2.2vh, 1.55rem); }
-:root[data-embedded="true"] .foot {
-  margin-top: 0; padding: clamp(8px, 1.2vh, 14px) clamp(12px, 1.4vw, 18px);
-  font-size: clamp(0.78rem, 1.3vh, 0.9rem);
-}
 
-.head { margin-bottom: 18px; }
+/* Embed mode: the family theme viewport-locks embeds, which clips this content. */
+:root[data-embedded="true"], :root[data-embedded="true"] body { height: auto; overflow: visible; }
+:root[data-embedded="true"] .shell { width: 100%; height: auto; padding: 14px 18px; }
+
+.head { margin-bottom: 16px; }
 .head h1 {
   font-family: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif; font-weight: 800;
   font-size: clamp(1.4rem, 2.4vw, 1.95rem);
@@ -67,167 +31,462 @@ body {
   background: linear-gradient(135deg, var(--accent), var(--L1));
   -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
 }
-.head p { margin-top: 8px; color: var(--muted); font-size: 0.95rem; max-width: 60ch; }
-.card {
-  border: 1px solid var(--border); background: var(--surface);
-  border-radius: 22px; padding: 22px; box-shadow: var(--shadow);
+.head p { margin-top: 8px; color: var(--muted); font-size: 0.95rem; }
+
+.controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 14px 0 4px; }
+.toggle {
+  display: inline-flex; align-items: center; gap: 10px;
+  font: inherit; font-size: 0.82rem; font-weight: 600;
+  padding: 9px 14px; border-radius: 999px; cursor: pointer;
+  border: 1px solid var(--border-strong);
+  background: var(--surface-strong); color: var(--text);
 }
-.rows { display: grid; gap: 18px; margin-top: 8px; }
-.row { display: grid; grid-template-columns: minmax(220px, 1.05fr) minmax(0, 2.4fr); gap: 18px; align-items: center; }
-.row-meta { display: flex; flex-direction: column; gap: 4px; }
+.toggle .pic { width: 18px; height: 18px; color: var(--warn); flex: none; }
+.toggle .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--muted-soft); }
+.toggle[aria-pressed="true"] {
+  border-color: color-mix(in srgb, var(--warn) 60%, var(--border));
+  background: color-mix(in srgb, var(--warn) 12%, var(--surface-strong));
+  color: var(--text-strong);
+}
+.toggle[aria-pressed="true"] .dot { background: var(--warn); }
+
+.group {
+  border: 1px solid var(--border); background: var(--surface);
+  border-radius: 22px; padding: 18px 20px; box-shadow: var(--shadow);
+  margin-top: 16px;
+}
+.group-head { display: flex; gap: 12px; align-items: flex-start; }
+.group-head .pic { width: 26px; height: 26px; flex: none; color: var(--g, var(--accent)); }
+.group-title {
+  font-family: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif; font-weight: 700;
+  font-size: 1.05rem; color: var(--text-strong); line-height: 1.25;
+}
+.group-unit {
+  display: inline-block; margin-top: 4px;
+  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--g, var(--accent));
+}
+.group-scale {
+  margin-top: 3px; font-size: 0.78rem; color: var(--muted); line-height: 1.4;
+}
+
+.rows { display: grid; gap: 14px; margin-top: 16px; }
+.row { display: grid; grid-template-columns: minmax(230px, 1.05fr) minmax(0, 2fr); gap: 16px; align-items: center; }
+.row-meta { display: flex; gap: 10px; align-items: flex-start; }
+.row-meta .pic { width: 22px; height: 22px; flex: none; color: var(--src); margin-top: 2px; }
+.row-text { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
 .row-source {
   display: inline-flex; align-items: center; gap: 8px;
-  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.12em;
+  font-size: 0.68rem; font-weight: 700; letter-spacing: 0.12em;
   text-transform: uppercase; color: var(--src);
 }
-.row-source::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--src); }
+.row-source::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--src); flex: none; }
 .row-claim {
   font-family: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif; font-weight: 700;
-  font-size: 1.08rem; line-height: 1.25;
+  font-size: 1rem; line-height: 1.25;
   color: var(--text-strong); letter-spacing: -0.005em;
 }
-.row-detail { font-size: 0.84rem; color: var(--muted); line-height: 1.4; }
+.row-detail { font-size: 0.82rem; color: var(--muted); line-height: 1.4; }
+.row-date {
+  font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--muted-soft); font-weight: 600;
+}
+
+.plot { display: grid; gap: 6px; }
 .bar-frame {
-  position: relative;
-  height: 56px; border-radius: 14px;
-  background: var(--bar-bg);
+  position: relative; height: 46px; border-radius: 14px;
+  background: color-mix(in srgb, var(--text) 8%, transparent);
   overflow: hidden;
-  display: flex; align-items: center;
 }
 .bar {
-  height: 100%;
-  background: linear-gradient(90deg, var(--src), color-mix(in srgb, var(--src) 50%, var(--accent)));
+  position: absolute; inset: 0 auto 0 0; width: 100%; height: 100%;
+  background: linear-gradient(90deg, var(--src), color-mix(in srgb, var(--src) 45%, var(--accent)));
   border-radius: 14px 0 0 14px;
-  transform-origin: left center;
-  transform: scaleX(0);
-  animation: grow 1.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
-  box-shadow: inset 0 -6px 20px rgba(255, 255, 255, 0.08);
+  transform-origin: left center; transform: scaleX(0);
 }
-.bar.delay-1 { animation-delay: 0.12s; }
-.bar.delay-2 { animation-delay: 0.24s; }
-.bar.delay-3 { animation-delay: 0.36s; }
-.bar.delay-4 { animation-delay: 0.48s; }
+.is-live .bar { animation: grow 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+.is-live .bar.delay-1 { animation-delay: 0.08s; }
+.is-live .bar.delay-2 { animation-delay: 0.18s; }
+.is-live .bar.delay-3 { animation-delay: 0.28s; }
+.is-live .bar.delay-4 { animation-delay: 0.38s; }
 @keyframes grow { to { transform: scaleX(var(--w, 0.5)); } }
+.is-static .bar { animation: none; transform: scaleX(var(--w, 0.5)); }
 @media (prefers-reduced-motion: reduce) {
-  .bar { animation: none; transform: scaleX(var(--w, 0.5)); }
+  .bar { animation: none !important; transform: scaleX(var(--w, 0.5)); }
 }
-.bar-numbers {
-  position: absolute; left: 18px; right: 18px; top: 50%;
-  transform: translateY(-50%);
-  display: flex; align-items: center; justify-content: space-between;
-  pointer-events: none;
+.bar-label {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: space-between;
+  padding: 0 16px; pointer-events: none;
 }
 .bar-stat {
   font-family: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif; font-weight: 800;
-  font-size: clamp(1.25rem, 2vw, 1.55rem);
-  color: #ffffff; letter-spacing: -0.01em;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  font-size: clamp(1rem, 1.7vw, 1.3rem); letter-spacing: -0.01em;
+  color: var(--text-strong);
+  text-shadow: 0 1px 2px color-mix(in srgb, var(--surface-strong) 80%, transparent);
 }
-.bar-arrow {
-  font-family: "DM Sans", sans-serif; font-weight: 600;
-  font-size: 0.84rem; letter-spacing: 0.04em;
-  color: rgba(255, 255, 255, 0.92);
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+.bar-stat .unit { font-size: 0.72em; font-weight: 700; color: var(--text); margin-left: 4px; }
+.bar-note {
+  font-family: "DM Sans", sans-serif; font-weight: 600; font-size: 0.78rem;
+  color: var(--muted); letter-spacing: 0.03em;
 }
-.foot {
-  margin-top: 18px;
+.axis {
+  display: flex; justify-content: space-between;
+  font-size: 0.66rem; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--muted-soft); font-weight: 600;
+}
+
+.star {
+  display: none; margin-left: 8px;
+  font-size: 0.7rem; font-weight: 800; letter-spacing: 0.06em;
+  padding: 2px 8px; border-radius: 999px;
+  color: var(--warn);
+  border: 1px solid color-mix(in srgb, var(--warn) 55%, transparent);
+  background: color-mix(in srgb, var(--warn) 14%, transparent);
+  vertical-align: middle;
+}
+body.confound-on .star { display: inline-block; }
+
+.confound {
+  margin-top: 16px; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 14px;
   padding: 14px 16px; border-radius: 16px;
+  border: 1px solid color-mix(in srgb, var(--warn) 45%, var(--border));
+  background: color-mix(in srgb, var(--warn) 10%, var(--surface-strong));
+}
+.confound .pic { width: 26px; height: 26px; color: var(--warn); }
+.confound h3 {
+  font-family: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif;
+  font-size: 0.88rem; color: var(--text-strong); letter-spacing: 0.02em;
+}
+.confound p { margin-top: 5px; font-size: 0.84rem; color: var(--muted); line-height: 1.5; }
+.confound strong { color: var(--text-strong); }
+.confound a { color: var(--warn); text-decoration: none; border-bottom: 1px dashed currentColor; }
+body:not(.confound-on) .confound { opacity: 0.45; }
+
+.foot {
+  margin-top: 18px; padding: 14px 16px; border-radius: 16px;
   border: 1px dashed var(--border);
   font-size: 0.88rem; color: var(--muted); line-height: 1.5;
 }
 .foot strong { color: var(--text-strong); }
-@media (max-width: 720px) {
-  .row { grid-template-columns: 1fr; gap: 8px; }
-  .bar-frame { height: 50px; }
-  .bar-stat { font-size: 1.15rem; }
+
+.pic svg { width: 100%; height: 100%; }
+.pic svg * { stroke: currentColor; }
+
+/* Entry animation, IntersectionObserver-gated */
+.group { opacity: 0; transform: translateY(14px); transition: opacity 520ms ease, transform 520ms ease; }
+.group.is-static, .group.is-live { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  .group { opacity: 1; transform: none; transition: none; }
 }
 
-/* Embed: size to content and report it, the parent autosizes the frame. */
-:root[data-embedded="true"], :root[data-embedded="true"] body { height: auto; }
-:root[data-embedded="true"] .shell { height: auto; }
+@media (max-width: 720px) {
+  .row { grid-template-columns: 1fr; gap: 8px; }
+  .bar-frame { height: 44px; }
+}
 </style>
 </head>
 <body>
 <main class="shell">
   <header class="head">
     <span class="eyebrow">Why now — same model, different harness</span>
-    <h1>Four independent teams, four setups, <em>same conclusion</em>.</h1>
-    <p>The harness moves the needle far more than the next model upgrade. The bars below show what changed when teams re-engineered the system around the model.</p>
+    <h1>Independent teams, different setups, <em>same conclusion</em>.</h1>
+    <p>Each group below has its own unit and its own scale. A percentage-point capability gain, a percentage reduction and an operational share are three different quantities — they never share a bar axis here.</p>
+    <div class="controls">
+      <button type="button" class="toggle" id="confoundBtn" aria-pressed="true">
+        <span class="dot" aria-hidden="true"></span>
+        <span class="pic" data-ic="warning" aria-hidden="true"></span>
+        <span>Show the confound</span>
+      </button>
+    </div>
   </header>
-  <section class="card">
+
+  <!-- GROUP A — capability gains, percentage points -->
+  <section class="group" style="--g: var(--L2)" data-anim>
+    <div class="group-head">
+      <span class="pic" data-ic="chart" aria-hidden="true"></span>
+      <div>
+        <div class="group-title">Group A · Harness-only capability gains</div>
+        <span class="group-unit">Unit: percentage points (pp) on a benchmark</span>
+        <div class="group-scale">Scale: 0 – 20 pp. Same model, harness changes only.</div>
+      </div>
+    </div>
     <div class="rows">
       <div class="row" style="--src: var(--L2)">
         <div class="row-meta">
-          <span class="row-source">LangChain · 2026</span>
-          <div class="row-claim">+13.7 points on Terminal Bench 2.0</div>
-          <div class="row-detail">Same model. Harness-only tweaks. 52.8% → 66.5% pass rate.</div>
-        </div>
-        <div class="bar-frame" aria-label="Bar showing 66.5% with prior 52.8%">
-          <div class="bar delay-1" style="--w: 0.82"></div>
-          <div class="bar-numbers">
-            <span class="bar-stat">52.8% → 66.5%</span>
-            <span class="bar-arrow">harness only</span>
+          <span class="pic" data-ic="gauge" aria-hidden="true"></span>
+          <div class="row-text">
+            <span class="row-source">LangChain</span>
+            <div class="row-claim">Terminal Bench 2.0<span class="star" title="Harness-induced belief divergence">*</span></div>
+            <div class="row-detail">52.8% → 66.5% pass rate on harness-only tweaks.</div>
+            <span class="row-date">2026</span>
           </div>
+        </div>
+        <div class="plot">
+          <div class="bar-frame" aria-label="Gain of 13.7 percentage points on a 0 to 20 percentage-point scale">
+            <div class="bar delay-1" style="--w: 0.685"></div>
+            <div class="bar-label">
+              <span class="bar-stat"><span data-count="13.7" data-dec="1">0.0</span><span class="unit">pp</span></span>
+              <span class="bar-note">harness only</span>
+            </div>
+          </div>
+          <div class="axis"><span>0 pp</span><span>20 pp</span></div>
         </div>
       </div>
 
       <div class="row" style="--src: var(--L1)">
         <div class="row-meta">
-          <span class="row-source">Vercel d0 · 2025</span>
-          <div class="row-claim">−80% available tools, success 80% → 100%</div>
-          <div class="row-detail">Trim the toolbelt: the data agent got 3.5× faster with 37% fewer tokens once the model stopped reasoning about unused tools.</div>
-        </div>
-        <div class="bar-frame" aria-label="Bar showing 80% tool reduction">
-          <div class="bar delay-2" style="--w: 0.94"></div>
-          <div class="bar-numbers">
-            <span class="bar-stat">−80%</span>
-            <span class="bar-arrow">tools removed</span>
+          <span class="pic" data-ic="check" aria-hidden="true"></span>
+          <div class="row-text">
+            <span class="row-source">Vercel d0</span>
+            <div class="row-claim">Task success rate<span class="star" title="Harness-induced belief divergence">*</span></div>
+            <div class="row-detail">80% → 100% success after trimming the toolbelt.</div>
+            <span class="row-date">2025</span>
           </div>
+        </div>
+        <div class="plot">
+          <div class="bar-frame" aria-label="Gain of 20 percentage points on a 0 to 20 percentage-point scale">
+            <div class="bar delay-2" style="--w: 1"></div>
+            <div class="bar-label">
+              <span class="bar-stat"><span data-count="20" data-dec="0">0</span><span class="unit">pp</span></span>
+              <span class="bar-note">harness only</span>
+            </div>
+          </div>
+          <div class="axis"><span>0 pp</span><span>20 pp</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="confound" id="confoundPanel">
+      <span class="pic" data-ic="flask" aria-hidden="true"></span>
+      <div>
+        <h3>* The confound attached to this group</h3>
+        <p><em>Harness-induced belief divergence</em>, July 2026.
+          Harness configuration changes what the agent <em>believes</em> mid-run while leaving terminal success rates intact.
+          <strong>A harness-only delta is therefore a claim about a system, not a clean measurement of a model — and scores must never be compared across harnesses.</strong>
+          Treat the harness as an experimental variable and report it alongside the number.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- GROUP B — reductions achieved, percent removed -->
+  <section class="group" style="--g: var(--L1)" data-anim>
+    <div class="group-head">
+      <span class="pic" data-ic="trenddown" aria-hidden="true"></span>
+      <div>
+        <div class="group-title">Group B · Reductions achieved</div>
+        <span class="group-unit">Unit: % removed relative to the prior baseline</span>
+        <div class="group-scale">Scale: 0 – 100% removed. Lower baseline is better here.</div>
+      </div>
+    </div>
+    <div class="rows">
+      <div class="row" style="--src: var(--L1)">
+        <div class="row-meta">
+          <span class="pic" data-ic="gears" aria-hidden="true"></span>
+          <div class="row-text">
+            <span class="row-source">Vercel d0</span>
+            <div class="row-claim">Tools exposed to the model</div>
+            <div class="row-detail">3.5× faster with 37% fewer tokens once the model stopped reasoning about unused tools.</div>
+            <span class="row-date">2025</span>
+          </div>
+        </div>
+        <div class="plot">
+          <div class="bar-frame" aria-label="80 percent of tools removed, on a 0 to 100 percent scale">
+            <div class="bar delay-1" style="--w: 0.80"></div>
+            <div class="bar-label">
+              <span class="bar-stat"><span data-count="80" data-dec="0">0</span><span class="unit">% removed</span></span>
+              <span class="bar-note">tools</span>
+            </div>
+          </div>
+          <div class="axis"><span>0%</span><span>100%</span></div>
         </div>
       </div>
 
       <div class="row" style="--src: var(--L4)">
         <div class="row-meta">
-          <span class="row-source">Boris Cherny · Claude Code</span>
-          <div class="row-claim">2 to 3× output quality from verification</div>
-          <div class="row-detail">Effective verification methods (pre-stop hooks, golden tests) multiply final output quality.</div>
-        </div>
-        <div class="bar-frame" aria-label="Bar showing 2x to 3x quality gain">
-          <div class="bar delay-3" style="--w: 0.66"></div>
-          <div class="bar-numbers">
-            <span class="bar-stat">2× — 3×</span>
-            <span class="bar-arrow">quality multiplier</span>
+          <span class="pic" data-ic="barrier" aria-hidden="true"></span>
+          <div class="row-text">
+            <span class="row-source">Anthropic</span>
+            <div class="row-claim">Permission prompt volume</div>
+            <div class="row-detail">Cut by adding environmental controls (sandbox scope, egress allow-lists) instead of asking the user.</div>
+            <span class="row-date">25 May 2026</span>
           </div>
+        </div>
+        <div class="plot">
+          <div class="bar-frame" aria-label="84 percent reduction in prompt volume, on a 0 to 100 percent scale">
+            <div class="bar delay-2" style="--w: 0.84"></div>
+            <div class="bar-label">
+              <span class="bar-stat"><span data-count="84" data-dec="0">0</span><span class="unit">% fewer prompts</span></span>
+              <span class="bar-note">environmental controls</span>
+            </div>
+          </div>
+          <div class="axis"><span>0%</span><span>100%</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- GROUP C — operational measurements, percent of events -->
+  <section class="group" style="--g: var(--L4)" data-anim>
+    <div class="group-head">
+      <span class="pic" data-ic="radar" aria-hidden="true"></span>
+      <div>
+        <div class="group-title">Group C · Operational measurements in production</div>
+        <span class="group-unit">Unit: % share of events</span>
+        <div class="group-scale">Scale: 0 – 100% of the relevant event population.</div>
+      </div>
+    </div>
+    <div class="rows">
+      <div class="row" style="--src: var(--L5)">
+        <div class="row-meta">
+          <span class="pic" data-ic="person" aria-hidden="true"></span>
+          <div class="row-text">
+            <span class="row-source">Anthropic · consent fatigue, measured</span>
+            <div class="row-claim">Claude Code permission prompts approved</div>
+            <div class="row-detail">If users approve almost everything, the prompt is not functioning as a control.</div>
+            <span class="row-date">25 May 2026</span>
+          </div>
+        </div>
+        <div class="plot">
+          <div class="bar-frame" aria-label="About 93 percent of permission prompts approved, on a 0 to 100 percent scale">
+            <div class="bar delay-1" style="--w: 0.93"></div>
+            <div class="bar-label">
+              <span class="bar-stat">~<span data-count="93" data-dec="0">0</span><span class="unit">% of prompts</span></span>
+              <span class="bar-note">approved by users</span>
+            </div>
+          </div>
+          <div class="axis"><span>0%</span><span>100%</span></div>
         </div>
       </div>
 
-      <div class="row" style="--src: var(--L3)">
+      <div class="row" style="--src: var(--L4)">
         <div class="row-meta">
-          <span class="row-source">OpenAI Codex · Feb 2026</span>
-          <div class="row-claim">~1M lines, ~1,500 PRs, 0 hand-written</div>
-          <div class="row-detail">Five months. Real product. Humans built the harness; agents wrote the code.</div>
-        </div>
-        <div class="bar-frame" aria-label="Bar showing one million lines with zero hand written">
-          <div class="bar delay-4" style="--w: 1"></div>
-          <div class="bar-numbers">
-            <span class="bar-stat">1,000,000 lines · 0 hand-written</span>
-            <span class="bar-arrow">harness shipped it</span>
+          <span class="pic" data-ic="shield" aria-hidden="true"></span>
+          <div class="row-text">
+            <span class="row-source">Anthropic · auto mode</span>
+            <div class="row-claim">Overeager behaviour caught pre-execution</div>
+            <div class="row-detail">Caught before the command ran, at ~0.4% false blocks on benign commands.</div>
+            <span class="row-date">25 May 2026</span>
           </div>
+        </div>
+        <div class="plot">
+          <div class="bar-frame" aria-label="About 83 percent of overeager behaviour caught before execution, on a 0 to 100 percent scale">
+            <div class="bar delay-2" style="--w: 0.83"></div>
+            <div class="bar-label">
+              <span class="bar-stat">~<span data-count="83" data-dec="0">0</span><span class="unit">% caught</span></span>
+              <span class="bar-note">pre-execution</span>
+            </div>
+          </div>
+          <div class="axis"><span>0%</span><span>100%</span></div>
+        </div>
+      </div>
+
+      <div class="row" style="--src: var(--warn)">
+        <div class="row-meta">
+          <span class="pic" data-ic="warning" aria-hidden="true"></span>
+          <div class="row-text">
+            <span class="row-source">Anthropic · cost of that catch</span>
+            <div class="row-claim">False blocks on benign commands</div>
+            <div class="row-detail">The friction the catch rate above is paid for with.</div>
+            <span class="row-date">25 May 2026</span>
+          </div>
+        </div>
+        <div class="plot">
+          <div class="bar-frame" aria-label="About 0.4 percent false blocks on benign commands, on a 0 to 100 percent scale">
+            <div class="bar delay-3" style="--w: 0.004"></div>
+            <div class="bar-label">
+              <span class="bar-stat">~<span data-count="0.4" data-dec="1">0.0</span><span class="unit">% false blocks</span></span>
+              <span class="bar-note">benign commands</span>
+            </div>
+          </div>
+          <div class="axis"><span>0%</span><span>100%</span></div>
         </div>
       </div>
     </div>
-    <div class="foot">
-      <strong>The pattern.</strong> None of these teams beat the next model. They beat the previous version of <em>themselves</em> by re-engineering the system around the model — fewer tools, tighter verification, durable session state, hand-written context. The harness is the leverage.
-    </div>
   </section>
+
+  <div class="foot">
+    <strong>The pattern.</strong> None of these teams beat the next model. They beat the previous version of <em>themselves</em> by re-engineering the system around the model — fewer tools, tighter verification, environmental controls instead of prompts. Read each group on its own scale, and read Group A with the asterisk attached.
+  </div>
 </main>
+
 <script>
 (() => {
+  /* House icon loader */
+  const ICON_BASE = '../customs-entry-agent/flow-icons/';
+  const cache = {};
+  const load = (n) => cache[n] || (cache[n] = fetch(ICON_BASE + n + '.svg')
+    .then((r) => (r.ok ? r.text() : Promise.reject()))
+    .then((t) => t.replace(/stroke="#232f3e"/g, 'stroke="currentColor"')).catch(() => ''));
+  document.querySelectorAll('[data-ic]').forEach((slot) => {
+    load(slot.dataset.ic).then((svg) => { if (!slot.firstChild) slot.innerHTML = svg; });
+  });
+
+  /* Confound toggle — default ON */
+  const btn = document.getElementById('confoundBtn');
+  const sync = () => document.body.classList.toggle('confound-on', btn.getAttribute('aria-pressed') === 'true');
+  btn.addEventListener('click', () => {
+    btn.setAttribute('aria-pressed', btn.getAttribute('aria-pressed') === 'true' ? 'false' : 'true');
+    sync();
+    postSize();
+  });
+  sync();
+
+  /* Count-up on the numbers */
+  const fmt = (v, d) => v.toFixed(d).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  const countUp = (root) => {
+    root.querySelectorAll('[data-count]').forEach((el) => {
+      if (el.dataset.done) return;
+      el.dataset.done = '1';
+      const target = parseFloat(el.dataset.count);
+      const dec = parseInt(el.dataset.dec || '0', 10);
+      const start = performance.now();
+      const dur = 1200;
+      const step = (now) => {
+        const p = Math.min(1, (now - start) / dur);
+        el.textContent = fmt(target * (1 - Math.pow(1 - p, 3)), dec);
+        if (p < 1) requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+      /* settle fallback — snap the final value regardless */
+      setTimeout(() => { el.textContent = fmt(target, dec); }, dur + 400);
+    });
+  };
+  const snap = (root) => {
+    root.querySelectorAll('[data-count]').forEach((el) => {
+      el.dataset.done = '1';
+      el.textContent = fmt(parseFloat(el.dataset.count), parseInt(el.dataset.dec || '0', 10));
+    });
+  };
+
+  const groups = Array.from(document.querySelectorAll('[data-anim]'));
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduced || !('IntersectionObserver' in window)) {
+    groups.forEach((g) => { g.classList.add('is-static'); snap(g); });
+  } else {
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (!e.isIntersecting) return;
+        e.target.classList.add('is-live');
+        countUp(e.target);
+        io.unobserve(e.target);
+      });
+    }, { threshold: 0.2 });
+    groups.forEach((g) => io.observe(g));
+    /* safety: anything still unplayed after 3s is shown complete */
+    setTimeout(() => groups.forEach((g) => {
+      if (!g.classList.contains('is-live')) { g.classList.add('is-static'); snap(g); }
+    }), 3000);
+  }
+
   /* Report content height so the parent frame hugs the content. */
+  function postSize() {
+    if (document.documentElement.dataset.embedded !== 'true') return;
+    window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+  }
   if (document.documentElement.dataset.embedded === 'true') {
-    const postSize = () => window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
     if ('ResizeObserver' in window) new ResizeObserver(postSize).observe(document.body);
     window.addEventListener('load', postSize);
+    setTimeout(postSize, 400);
   }
 })();
 </script>

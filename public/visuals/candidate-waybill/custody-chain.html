@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The custody chain &middot; what each handoff knows and what it drops</title>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600&family=Work+Sans:wght@400;500;600&family=Roboto+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+  /* A vertical chain, not a horizontal flow. The whole point of this figure is
+     that it works identically at 375px and 1440px: a phone gets the same
+     drawing, just narrower, so there is no mobile fallback to maintain. */
+  .chain { display: flex; flex-direction: column; gap: 0; }
+
+  .leg {
+    position: relative;
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1fr);
+    gap: 12px;
+    padding: 0 0 4px;
+    text-align: left;
+    background: none;
+    border: 0;
+    border-radius: 0;
+    width: 100%;
+    cursor: pointer;
+  }
+  .leg:hover .leg-name { color: var(--carbon); }
+
+  /* The spine and its custody dot. */
+  .rail { position: relative; }
+  .rail::before {
+    content: "";
+    position: absolute;
+    left: 16px; top: 0; bottom: 0;
+    width: 2px;
+    background: var(--rule);
+  }
+  .leg:first-child .rail::before { top: 18px; }
+  .leg:last-child .rail::before { bottom: auto; height: 18px; }
+
+  .dot {
+    position: relative;
+    display: block;
+    width: 14px; height: 14px;
+    margin: 11px 0 0 10px;
+    border-radius: 50%;
+    background: var(--panel);
+    border: 2px solid var(--rule-strong);
+    z-index: 1;
+  }
+  .leg[aria-pressed="true"] .dot { background: var(--carbon); border-color: var(--carbon); }
+
+  .leg-in { padding: 8px 0 12px; min-width: 0; }
+  .leg-hold {
+    font-family: var(--mono);
+    font-size: 0.62rem; font-weight: 600;
+    letter-spacing: 0.11em; text-transform: uppercase;
+    color: var(--ink-3);
+  }
+  .leg-name {
+    display: block;
+    font-family: var(--display);
+    font-size: clamp(0.94rem, 2.2vw, 1.06rem);
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    color: var(--ink);
+    transition: color 0.15s ease;
+  }
+  .leg-drop {
+    display: block;
+    margin-top: 4px;
+    padding-left: 9px;
+    border-left: 2px solid var(--carbon);
+    font-size: 0.83rem;
+    line-height: 1.5;
+    color: var(--ink-2);
+  }
+
+  /* The detail plate. One at a time, below the chain, so the chain never
+     reflows and the reader never loses their place. */
+  .plate {
+    padding: 13px 15px;
+    background: var(--panel);
+    border: 1px solid var(--rule);
+    border-left: 3px solid var(--carbon);
+    border-radius: 2px;
+  }
+  .plate h2 {
+    font-family: var(--display);
+    font-size: 0.98rem; font-weight: 600;
+    letter-spacing: 0.01em; text-transform: uppercase;
+    color: var(--ink);
+    margin-bottom: 8px;
+  }
+  .plate dl { display: grid; gap: 9px; }
+  .plate dt {
+    font-family: var(--mono);
+    font-size: 0.61rem; font-weight: 600;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--ink-3);
+    margin-bottom: 2px;
+  }
+  .plate dd { font-size: 0.86rem; line-height: 1.55; color: var(--ink-2); }
+  .plate .cost { color: var(--carbon); font-weight: 600; }
+
+  .foot {
+    font-family: var(--mono);
+    font-size: 0.63rem;
+    letter-spacing: 0.05em;
+    color: var(--ink-3);
+    line-height: 1.5;
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="head">
+    <span class="eyebrow">Fig. A &middot; one consignment, five changes of hands</span>
+    <h1>Every handoff drops something, and the drop shows up later as cost</h1>
+    <p>One shipment of powered hand tools, Guadalajara to Chicago. Tap any leg to see what that party knew, what it could not pass on, and where the loss reappears.</p>
+    <div class="stampline"><span class="stamp stamp--illustrative">Illustrative walkthrough</span></div>
+  </div>
+
+  <div class="chain" id="chain" role="group" aria-label="Five custody legs"></div>
+
+  <div class="plate" id="plate" aria-live="polite"></div>
+
+  <p class="foot">The shipment is composed for this walkthrough. The failure at each leg is not &mdash; each one is drawn from the documented failure modes listed beside this figure.</p>
+</div>
+
+<script>
+const LEGS = [
+  {
+    hold: 'Leg 1 · Shipper, Guadalajara',
+    name: 'The commercial invoice is written',
+    drop: 'The line reads "power tool kit". Nobody records which motor, what wattage, or where the motor was made.',
+    knew: 'The supplier knows exactly what is in the box. The parts list sits in their ERP with the motor origin on it.',
+    lost: 'The invoice carries a marketing description, not a classifiable one. Country of origin is recorded for the kit, not for the component that actually determines it.',
+    cost: 'A classification that cannot be defended, decided six days later by someone who never saw the goods.'
+  },
+  {
+    hold: 'Leg 2 · Origin carrier',
+    name: 'The freight is picked up and consolidated',
+    drop: 'Weights and piece counts are re-keyed from the pickup sheet. The packing list stays in the shipper’s email.',
+    knew: 'The carrier knows the actual gross weight, the pallet count and the trailer it went on.',
+    lost: 'The link between the physical pallet and the invoice line. From here on, two systems describe the same goods and neither can prove they match.',
+    cost: 'A quantity mismatch that surfaces at the border as a discrepancy, not as a typo.'
+  },
+  {
+    hold: 'Leg 3 · Customs broker',
+    name: 'The entry is prepared and filed',
+    drop: 'The broker classifies from the invoice text alone, because that is the only document they were sent.',
+    knew: 'The broker knows the tariff schedule, the current duty regimes and what a defensible classification looks like.',
+    lost: 'Any way to check the description against the physical goods, or to see the certificate of origin that was never forwarded.',
+    cost: 'Misclassification is the single largest category of customs penalty assessment.'
+  },
+  {
+    hold: 'Leg 4 · The border',
+    name: 'The entry is transmitted, and the shipment is held',
+    drop: 'The hold reason arrives as a code. The reason behind the code sits with an officer nobody upstream can reach.',
+    knew: 'Customs knows precisely why it stopped this shipment.',
+    lost: 'Everything upstream. The shipper still believes the goods are moving, because their last tracking event was the pickup four days ago.',
+    cost: 'Storage and container charges accrue from the moment of the hold, and the importer of record pays them whether or not the goods were compliant.'
+  },
+  {
+    hold: 'Leg 5 · Destination carrier and consignee',
+    name: 'The goods arrive, late, and the invoice does not match',
+    drop: 'The delay is recorded against the destination carrier, because that is the only party with a tracking event near the failure.',
+    knew: 'The consignee knows the goods were late and the landed cost was higher than quoted.',
+    lost: 'The cause. The failure was written on Leg 1 and only became visible on Leg 4, and no system holds both ends.',
+    cost: 'The correction is filed against the wrong party, so the same shipment fails the same way next quarter.'
+  }
+];
+
+const chain = document.getElementById('chain');
+const plate = document.getElementById('plate');
+let current = 0;
+
+LEGS.forEach((leg, i) => {
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'leg';
+  b.setAttribute('aria-pressed', String(i === 0));
+  b.innerHTML =
+    '<span class="rail"><span class="dot"></span></span>' +
+    '<span class="leg-in">' +
+      '<span class="leg-hold">' + leg.hold + '</span>' +
+      '<span class="leg-name">' + leg.name + '</span>' +
+      '<span class="leg-drop">' + leg.drop + '</span>' +
+    '</span>';
+  b.addEventListener('click', () => select(i));
+  chain.appendChild(b);
+});
+
+const buttons = Array.from(chain.querySelectorAll('.leg'));
+
+function select(i) {
+  current = i;
+  buttons.forEach((b, j) => b.setAttribute('aria-pressed', String(j === i)));
+  const leg = LEGS[i];
+  plate.innerHTML =
+    '<h2>' + leg.hold + '</h2>' +
+    '<dl>' +
+      '<div><dt>What this party knew</dt><dd>' + leg.knew + '</dd></div>' +
+      '<div><dt>What it could not pass on</dt><dd>' + leg.lost + '</dd></div>' +
+      '<div><dt>Where the loss reappears</dt><dd class="cost">' + leg.cost + '</dd></div>' +
+    '</dl>';
+  report();
+}
+
+select(0);
+
+/* Report height so the host frame collapses to the content instead of leaving
+   a band of empty frame. Autosize is opt-in and this is the opt-in. */
+function report() {
+  if (document.documentElement.dataset.embedded !== 'true') return;
+  window.parent.postMessage(
+    { type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+}
+if (document.documentElement.dataset.embedded === 'true') {
+  if ('ResizeObserver' in window) new ResizeObserver(report).observe(document.body);
+  window.addEventListener('load', report);
+  report();
+}
+</script>
+</body>
+</html>

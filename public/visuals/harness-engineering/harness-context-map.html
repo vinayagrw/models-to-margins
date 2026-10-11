@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Where the Model Actually Sits — Context Map</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+/* ---- Embed override: family theme locks embed mode to viewport height,
+       which breaks autosize. Restore natural document flow. ---- */
+:root[data-embedded="true"],
+:root[data-embedded="true"] body { height: auto; overflow: visible; }
+:root[data-embedded="true"] .shell { width: 100%; height: auto; padding: 14px 18px; }
+
+/* ---- Head ---- */
+.head { margin-bottom: clamp(12px, 2vw, 18px); }
+.head h1 {
+  font-size: clamp(1.15rem, 3.4vw, 1.85rem);
+  font-weight: 700;
+  color: var(--text-strong);
+  letter-spacing: -0.01em;
+  margin-top: 6px;
+}
+.head p {
+  font-family: "DM Sans", "Segoe UI", sans-serif;
+  font-size: clamp(0.82rem, 2.4vw, 0.98rem);
+  color: var(--muted);
+  margin-top: 6px;
+}
+
+/* ---- Controls ---- */
+.controls {
+  display: flex; flex-wrap: wrap; gap: 8px;
+  margin-bottom: clamp(10px, 1.6vw, 16px);
+}
+.toggle {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: clamp(0.68rem, 2vw, 0.78rem);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 7px 13px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+  cursor: pointer;
+  transition: background 180ms ease, color 180ms ease, border-color 180ms ease;
+}
+.toggle .dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: currentColor; opacity: 0.35;
+  transition: opacity 180ms ease;
+}
+.toggle[aria-pressed="true"] {
+  color: var(--text-strong);
+  border-color: var(--border-strong);
+  background: var(--surface-strong);
+}
+.toggle[aria-pressed="true"] .dot { opacity: 1; }
+.toggle[data-plane="data"][aria-pressed="true"] .dot { background: var(--accent); }
+.toggle[data-plane="control"][aria-pressed="true"] .dot { background: var(--accent-2); }
+.toggle[data-plane="trust"][aria-pressed="true"] .dot { background: var(--L3); }
+
+/* ---- Stage ---- */
+.stage {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1200 / 820;
+  container-type: inline-size;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--surface) 70%, transparent);
+  box-shadow: var(--shadow-soft);
+  overflow: hidden;
+}
+.wires { position: absolute; inset: 0; width: 100%; height: auto; display: block; }
+
+/* ---- Wires ---- */
+.edge path.wire {
+  fill: none;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.e-data path.wire { stroke: var(--accent); }
+.e-ctrl path.wire { stroke: var(--accent-2); stroke-dasharray: 9 7; }
+.edge text {
+  font-family: "DM Sans", "Segoe UI", sans-serif;
+  font-size: 15px;
+  fill: var(--text);
+  paint-order: stroke fill;
+  stroke: var(--bg-mid);
+  stroke-width: 5px;
+  stroke-linejoin: round;
+}
+.e-ctrl text { fill: var(--accent-2); }
+.edge { transition: opacity 260ms ease, filter 260ms ease; }
+.stage[data-data="off"] .e-data { opacity: 0.1; filter: grayscale(1); }
+.stage[data-control="off"] .e-ctrl { opacity: 0.1; filter: grayscale(1); }
+
+.frame rect {
+  fill: none;
+  stroke-width: 1.8;
+  stroke-dasharray: 7 8;
+  rx: 22;
+}
+.frame text {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  paint-order: stroke fill;
+  stroke: var(--bg-mid);
+  stroke-width: 5px;
+  stroke-linejoin: round;
+}
+.f-net rect { stroke: var(--accent-3); }
+.f-net text { fill: var(--accent-3); }
+.f-box rect { stroke: var(--L3); }
+.f-box text { fill: var(--L3); }
+.f-out rect { stroke: var(--warn); }
+.f-out text { fill: var(--warn); }
+.frames { transition: opacity 260ms ease, filter 260ms ease; }
+.stage[data-trust="off"] .frames { opacity: 0.08; filter: grayscale(1); }
+
+.packet circle { fill: var(--accent); }
+
+/* ---- Node cards ---- */
+.node {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 17.5%;
+  height: 11.95%;
+  display: flex; align-items: center; gap: 0.7cqw;
+  padding: 0.7cqw 0.9cqw;
+  text-align: left;
+  border-radius: 12px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface-strong);
+  box-shadow: var(--shadow-soft);
+  color: var(--text);
+  font-family: "Space Grotesk", sans-serif;
+  cursor: pointer;
+  overflow: hidden;
+  transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+.node:hover { border-color: var(--accent); }
+.node[aria-expanded="true"] {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 45%, transparent), var(--shadow-soft);
+}
+.node .pic {
+  flex: 0 0 auto;
+  width: 2.2cqw; height: 2.2cqw;
+  min-width: 14px; min-height: 14px;
+  color: var(--accent);
+  display: block;
+}
+.pic svg { width: 100%; height: 100%; }
+.pic svg * { stroke: currentColor; }
+.node .txt { min-width: 0; }
+.node .nm {
+  display: block;
+  font-size: clamp(7px, 1.35cqw, 15px);
+  font-weight: 700;
+  color: var(--text-strong);
+  line-height: 1.15;
+}
+.node .rl {
+  display: block;
+  font-family: "DM Sans", "Segoe UI", sans-serif;
+  font-size: clamp(6px, 1.05cqw, 12px);
+  color: var(--muted-soft);
+  line-height: 1.2;
+  margin-top: 0.25cqw;
+}
+.node.core {
+  width: 25%; height: 16.1%;
+  border-width: 2px;
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 10%, var(--surface-strong));
+}
+.node.core .pic { width: 3.2cqw; height: 3.2cqw; }
+.node.core .nm { font-size: clamp(9px, 1.85cqw, 21px); }
+.node.core .rl { font-size: clamp(6px, 1.15cqw, 13px); }
+
+.n-human { left: 10.42%; top: 10.24%; }
+.n-trigger { left: 50%; top: 10.24%; }
+.n-model { left: 89.58%; top: 10.24%; }
+.n-policy { left: 10.42%; top: 48.78%; }
+.n-harness { left: 50%; top: 48.78%; }
+.n-mcp { left: 89.58%; top: 48.78%; }
+.n-evidence { left: 10.42%; top: 85.37%; }
+.n-sandbox { left: 50%; top: 84.15%; }
+.n-systems { left: 89.58%; top: 85.37%; }
+
+/* ---- Detail strip ---- */
+.detail {
+  margin-top: clamp(10px, 1.6vw, 16px);
+  border: 1px solid var(--border-strong);
+  border-radius: 14px;
+  background: var(--surface-strong);
+  padding: clamp(12px, 2vw, 18px);
+  box-shadow: var(--shadow-soft);
+}
+.detail[hidden] { display: none; }
+.detail h2 {
+  font-size: clamp(0.95rem, 2.8vw, 1.15rem);
+  color: var(--text-strong);
+  margin-bottom: 10px;
+}
+.detail dl {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+}
+.detail dt {
+  font-size: clamp(0.62rem, 1.9vw, 0.7rem);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+.detail dd {
+  font-family: "DM Sans", "Segoe UI", sans-serif;
+  font-size: clamp(0.8rem, 2.3vw, 0.92rem);
+  color: var(--muted);
+  line-height: 1.45;
+}
+.detail .close {
+  margin-top: 12px;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: clamp(0.68rem, 2vw, 0.76rem);
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+.detail .close:hover { color: var(--text-strong); border-color: var(--border-strong); }
+
+/* ---- Legend ---- */
+.legend {
+  margin-top: clamp(10px, 1.6vw, 16px);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 10px;
+}
+.legend div {
+  display: flex; align-items: flex-start; gap: 9px;
+  font-family: "DM Sans", "Segoe UI", sans-serif;
+  font-size: clamp(0.74rem, 2.1vw, 0.85rem);
+  color: var(--muted);
+  line-height: 1.4;
+}
+.legend .key {
+  flex: 0 0 auto; width: 26px; height: 0; margin-top: 8px;
+  border-top: 3px solid var(--accent);
+  border-radius: 2px;
+}
+.legend .key.ctrl { border-top-style: dashed; border-top-color: var(--accent-2); }
+.legend .key.trust { border-top-style: dashed; border-top-color: var(--L3); }
+
+@media (max-width: 760px) {
+  .node .rl { display: none; }
+  .legend { grid-template-columns: 1fr; }
+  .controls .toggle { flex: 1 1 auto; justify-content: center; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .edge path.wire { stroke-dashoffset: 0 !important; }
+  .edge, .frames, .node, .toggle { transition: none !important; }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <header class="head">
+    <div class="eyebrow">Scene 1 · Context map · Altitude L0</div>
+    <h1>Where the model actually sits</h1>
+    <p>The model is one dependency of nine. The harness runtime is the system of interest — it holds the run, brokers every tool call, and is the only thing that writes to the evidence record.</p>
+  </header>
+
+  <div class="controls">
+    <button type="button" class="toggle" data-plane="data" aria-pressed="true"><span class="dot"></span>Data plane</button>
+    <button type="button" class="toggle" data-plane="control" aria-pressed="true"><span class="dot"></span>Control plane</button>
+    <button type="button" class="toggle" data-plane="trust" aria-pressed="true"><span class="dot"></span>Trust boundaries</button>
+  </div>
+
+  <div class="stage" id="stage" data-data="on" data-control="on" data-trust="on">
+    <svg class="wires" viewBox="0 0 1200 820" role="img" aria-label="Context diagram: the harness runtime at the centre, connected to the human owner, trigger surface, model inference API, MCP tool servers, per-run sandbox, enterprise systems of record, policy and identity, and the evidence store. Three nested trust boundaries enclose untrusted model output inside sandboxed execution inside the enterprise network.">
+      <defs>
+        <marker id="ad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="var(--accent)"></path>
+        </marker>
+        <marker id="ac" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="var(--accent-2)"></path>
+        </marker>
+        <path id="packetPath" d="M600,133 L600,400 L1000,133 L600,400 L1075,400 L600,400 L600,690 L600,400 L160,660" fill="none"></path>
+      </defs>
+
+      <!-- Nested trust frames -->
+      <g class="frames">
+        <g class="frame f-net">
+          <rect x="14" y="300" width="1172" height="480"></rect>
+          <text x="26" y="291">Enterprise network</text>
+        </g>
+        <g class="frame f-box">
+          <rect x="455" y="590" width="290" height="180"></rect>
+          <text x="462" y="581">Sandboxed execution</text>
+        </g>
+        <g class="frame f-out">
+          <rect x="478" y="606" width="244" height="146"></rect>
+          <text x="488" y="632">Untrusted model output</text>
+        </g>
+      </g>
+
+      <!-- Edge 1: human -> trigger -->
+      <g class="edge e-data" data-order="1">
+        <path class="wire" d="M230,84 L489,84" marker-end="url(#ad)"></path>
+        <text x="362" y="66" text-anchor="middle">task intent</text>
+        <text x="362" y="106" text-anchor="middle">(NL + repo ref)</text>
+      </g>
+
+      <!-- Edge 2: trigger -> harness -->
+      <g class="edge e-data" data-order="2">
+        <path class="wire" d="M600,133 L600,328" marker-end="url(#ad)"></path>
+        <text x="614" y="212">run request {goal, policyId,</text>
+        <text x="614" y="232">budget, approvalTier}</text>
+      </g>
+
+      <!-- Edge 3: harness <-> model API -->
+      <g class="edge e-data" data-order="3">
+        <path class="wire" d="M742,336 L994,139" marker-start="url(#ad)" marker-end="url(#ad)"></path>
+        <text x="724" y="252">messages + tool schemas &#8594;</text>
+        <text x="724" y="272">&#8592; assistant turn + tool_use</text>
+        <text x="724" y="292">HTTPS · streaming</text>
+      </g>
+
+      <!-- Edge 4: harness <-> MCP servers -->
+      <g class="edge e-data" data-order="4">
+        <path class="wire" d="M756,400 L964,400" marker-start="url(#ad)" marker-end="url(#ad)"></path>
+        <text x="860" y="336" text-anchor="middle">tools/call &#8594;</text>
+        <text x="860" y="356" text-anchor="middle">headers Mcp-Method / Mcp-Name</text>
+        <text x="860" y="376" text-anchor="middle">&#8592; tool_result | input_required</text>
+      </g>
+
+      <!-- Edge 5: harness <-> sandbox -->
+      <g class="edge e-data" data-order="5">
+        <path class="wire" d="M600,472 L600,635" marker-start="url(#ad)" marker-end="url(#ad)"></path>
+        <text x="614" y="518">exec across the isolation boundary</text>
+        <text x="614" y="538">vsock / gVisor / Seatbelt</text>
+      </g>
+
+      <!-- Edge 6: sandbox -> enterprise systems -->
+      <g class="edge e-data" data-order="6">
+        <path class="wire" d="M711,690 L964,700" marker-end="url(#ad)"></path>
+        <text x="840" y="662" text-anchor="middle">brokered allow-listed egress only</text>
+        <text x="840" y="756" text-anchor="middle">no direct internet</text>
+      </g>
+
+      <!-- Edge 7: policy -> harness (control) -->
+      <g class="edge e-ctrl" data-order="7">
+        <path class="wire" d="M230,400 L444,400" marker-end="url(#ac)"></path>
+        <text x="337" y="356" text-anchor="middle">scoped short-lived creds</text>
+        <text x="337" y="376" text-anchor="middle">tool allow-list · approval tiers</text>
+      </g>
+
+      <!-- Edge 8: harness -> evidence store (control) -->
+      <g class="edge e-ctrl" data-order="8">
+        <path class="wire" d="M462,472 L196,645" marker-end="url(#ac)"></path>
+        <text x="252" y="530">append-only:</text>
+        <text x="252" y="550">every turn, tool call,</text>
+        <text x="252" y="570">approval, diff hash</text>
+      </g>
+
+      <!-- Edge 9: harness <-> human (control) -->
+      <g class="edge e-ctrl" data-order="9">
+        <path class="wire" d="M458,332 L221,139" marker-start="url(#ac)" marker-end="url(#ac)"></path>
+        <text x="256" y="196">approval prompt only when</text>
+        <text x="256" y="216">environmental controls did</text>
+        <text x="256" y="236">not already authorise</text>
+        <text x="256" y="256">&#8592; approve / deny</text>
+      </g>
+
+      <g class="packet" id="packet">
+        <circle r="7">
+          <animateMotion id="packetMotion" dur="9s" repeatCount="indefinite" begin="indefinite" rotate="auto">
+            <mpath href="#packetPath"></mpath>
+          </animateMotion>
+        </circle>
+      </g>
+    </svg>
+
+    <button type="button" class="node n-human" data-node="human" aria-expanded="false">
+      <span class="pic" data-ic="person" aria-hidden="true"></span>
+      <span class="txt"><span class="nm">Human owner</span><span class="rl">accepts or denies; final authority</span></span>
+    </button>
+    <button type="button" class="node n-trigger" data-node="trigger" aria-expanded="false">
+      <span class="pic" data-ic="monitor" aria-hidden="true"></span>
+      <span class="txt"><span class="nm">Trigger surface</span><span class="rl">IDE / CI / chat / cron — where a run is born</span></span>
+    </button>
+    <button type="button" class="node n-model" data-node="model" aria-expanded="false">
+      <span class="pic" data-ic="cpu" aria-hidden="true"></span>
+      <span class="txt"><span class="nm">Model inference API</span><span class="rl">turns tokens into proposed actions</span></span>
+    </button>
+    <button type="button" class="node n-policy" data-node="policy" aria-expanded="false">
+      <span class="pic" data-ic="key" aria-hidden="true"></span>
+      <span class="txt"><span class="nm">Policy &amp; identity</span><span class="rl">OIDC, secrets, allow-list</span></span>
+    </button>
+    <button type="button" class="node core n-harness" data-node="harness" aria-expanded="false">
+      <span class="pic" data-ic="gears" aria-hidden="true"></span>
+      <span class="txt"><span class="nm">Harness runtime</span><span class="rl">system of interest — holds the run, brokers every call</span></span>
+    </button>
+    <button type="button" class="node n-mcp" data-node="mcp" aria-expanded="false">
+      <span class="pic" data-ic="network" aria-hidden="true"></span>
+      <span class="txt"><span class="nm">MCP tool servers</span><span class="rl">typed capabilities over HTTP</span></span>
+    </button>
+    <button type="button" class="node n-evidence" data-node="evidence" aria-expanded="false">
+      <span class="pic" data-ic="archive" aria-hidden="true"></span>
+      <span class="txt"><span class="nm">Evidence store</span><span class="rl">append-only run record</span></span>
+    </button>
+    <button type="button" class="node n-sandbox" data-node="sandbox" aria-expanded="false">
+      <span class="pic" data-ic="shield" aria-hidden="true"></span>
+      <span class="txt"><span class="nm">Per-run sandbox</span><span class="rl">where model output is allowed to execute</span></span>
+    </button>
+    <button type="button" class="node n-systems" data-node="systems" aria-expanded="false">
+      <span class="pic" data-ic="warehouse" aria-hidden="true"></span>
+      <span class="txt"><span class="nm">Systems of record</span><span class="rl">repo, tracker, database</span></span>
+    </button>
+  </div>
+
+  <div class="detail" id="detail" hidden>
+    <h2 id="detail-title">—</h2>
+    <dl>
+      <div><dt>What it is</dt><dd id="d-what">—</dd></div>
+      <div><dt>Who owns it</dt><dd id="d-who">—</dd></div>
+      <div><dt>What fails without it</dt><dd id="d-fail">—</dd></div>
+    </dl>
+    <button type="button" class="close" id="detail-close">Close</button>
+  </div>
+
+  <div class="legend">
+    <div><span class="key"></span><span><strong>Data plane</strong> — the payloads of the run: intent, messages, tool calls, results, writes.</span></div>
+    <div><span class="key ctrl"></span><span><strong>Control plane</strong> — credentials, allow-lists, approvals and the evidence trail. Dashed because it governs rather than carries.</span></div>
+    <div><span class="key trust"></span><span><strong>Trust boundaries</strong> — untrusted model output sits inside sandboxed execution, which sits inside the enterprise network.</span></div>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ---- Icons ---- */
+  var ICON_BASE = '../customs-entry-agent/flow-icons/';
+  var cache = {};
+  var load = function (n) {
+    return cache[n] || (cache[n] = fetch(ICON_BASE + n + '.svg')
+      .then(function (r) { return r.ok ? r.text() : Promise.reject(); })
+      .then(function (t) { return t.replace(/stroke="#232f3e"/g, 'stroke="currentColor"'); })
+      .catch(function () { return ''; }));
+  };
+  document.querySelectorAll('[data-ic]').forEach(function (slot) {
+    load(slot.dataset.ic).then(function (svg) { if (!slot.firstChild) { slot.innerHTML = svg; } });
+  });
+
+  /* ---- Elements ---- */
+  var stage = document.getElementById('stage');
+  var detail = document.getElementById('detail');
+  var dTitle = document.getElementById('detail-title');
+  var dWhat = document.getElementById('d-what');
+  var dWho = document.getElementById('d-who');
+  var dFail = document.getElementById('d-fail');
+  var dClose = document.getElementById('detail-close');
+  var nodes = Array.prototype.slice.call(stage.querySelectorAll('.node'));
+  var edges = Array.prototype.slice.call(stage.querySelectorAll('.edge'));
+  var packet = document.getElementById('packet');
+  var motion = document.getElementById('packetMotion');
+
+  var DATA = {
+    human: {
+      title: 'Human owner',
+      what: 'The person accountable for the outcome of the run. Reads the proposed diff and the evidence, then accepts or denies.',
+      who: 'The requesting team — the engineer, reviewer or on-call owner named on the policy.',
+      fail: 'Nothing is accountable. The system either blocks forever waiting for a decision nobody owns, or auto-merges work no human ever agreed to.'
+    },
+    trigger: {
+      title: 'Trigger surface (IDE / CI / chat / cron)',
+      what: 'Where a run is born. Turns a human intent into a structured run request carrying a goal, a policy id, a budget and an approval tier.',
+      who: 'Platform engineering — the same team that owns CI and developer tooling.',
+      fail: 'Runs start ad hoc with no policy attached, so budget, approval tier and provenance are unknowable after the fact.'
+    },
+    model: {
+      title: 'Model inference API',
+      what: 'A stateless HTTPS endpoint. It receives messages plus tool schemas and streams back an assistant turn, sometimes containing tool_use blocks.',
+      who: 'The model vendor, or your inference platform team if self-hosted.',
+      fail: 'No proposals. Everything else still stands — this is the one box that is genuinely swappable, which is exactly the point of the diagram.'
+    },
+    harness: {
+      title: 'Harness runtime — system of interest',
+      what: 'The loop that holds the run: assembles context, calls the model, validates and brokers every tool call, enforces budgets, requests approvals, and writes the evidence record.',
+      who: 'The harness / agent platform team. This is the code you actually own and version.',
+      fail: 'There is no system, only a chat window. Nothing enforces policy, nothing records what happened, nothing bounds the blast radius.'
+    },
+    mcp: {
+      title: 'MCP tool servers',
+      what: 'Typed capabilities exposed over stateless HTTP. The harness issues tools/call and receives tool_result, or input_required when the server needs more from the caller.',
+      who: 'Whichever team owns the underlying capability — each server is a product with its own contract.',
+      fail: 'Tools get re-implemented inside the harness as bespoke shell-outs, losing schemas, versioning and per-tool authorisation.'
+    },
+    sandbox: {
+      title: 'Per-run sandbox',
+      what: 'A disposable isolated execution environment — vsock, gVisor or Seatbelt — created per run and destroyed after. The only place model-proposed commands are allowed to run.',
+      who: 'Platform / infrastructure security.',
+      fail: 'Untrusted model output executes with the harness identity on a shared host. A single prompt injection becomes a production incident.'
+    },
+    systems: {
+      title: 'Enterprise systems of record',
+      what: 'Repository, issue tracker, databases. Reached only through brokered allow-listed egress — never by the sandbox opening arbitrary connections.',
+      who: 'The owning application and data teams; egress rules owned by network security.',
+      fail: 'Either the run cannot do useful work, or the sandbox is given open internet access and the isolation boundary becomes decorative.'
+    },
+    policy: {
+      title: 'Policy &amp; identity',
+      what: 'OIDC-issued short-lived scoped credentials, the tool allow-list, and the approval tiers that decide which actions need a human.',
+      who: 'Security and identity engineering.',
+      fail: 'Long-lived secrets leak into the sandbox and every run has the same unbounded permissions regardless of what it was asked to do.'
+    },
+    evidence: {
+      title: 'Evidence store',
+      what: 'An append-only run record: every turn, every tool call and result, every approval decision, and the hash of every diff produced.',
+      who: 'The harness platform team, with retention set by compliance.',
+      fail: 'You cannot answer why the agent did that. No audit, no regression analysis, no way to prove a change was authorised.'
+    }
+  };
+
+  /* ---- Detail strip ---- */
+  var openNode = null;
+  function closeDetail() {
+    if (openNode) { openNode.setAttribute('aria-expanded', 'false'); }
+    openNode = null;
+    detail.hidden = true;
+  }
+  function showDetail(btn) {
+    var d = DATA[btn.dataset.node];
+    if (!d) { return; }
+    if (openNode === btn) { closeDetail(); return; }
+    nodes.forEach(function (n) { n.setAttribute('aria-expanded', 'false'); });
+    btn.setAttribute('aria-expanded', 'true');
+    openNode = btn;
+    dTitle.innerHTML = d.title;
+    dWhat.innerHTML = d.what;
+    dWho.innerHTML = d.who;
+    dFail.innerHTML = d.fail;
+    detail.hidden = false;
+  }
+  nodes.forEach(function (btn) {
+    btn.addEventListener('click', function () { showDetail(btn); });
+  });
+  dClose.addEventListener('click', function () {
+    var was = openNode;
+    closeDetail();
+    if (was) { was.focus(); }
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && openNode) {
+      var was = openNode;
+      closeDetail();
+      was.focus();
+    }
+  });
+
+  /* ---- Plane toggles ---- */
+  var ATTR = { data: 'data-data', control: 'data-control', trust: 'data-trust' };
+  document.querySelectorAll('.toggle').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var on = btn.getAttribute('aria-pressed') === 'true';
+      btn.setAttribute('aria-pressed', on ? 'false' : 'true');
+      stage.setAttribute(ATTR[btn.dataset.plane], on ? 'off' : 'on');
+    });
+  });
+
+  /* ---- Animation ---- */
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var wires = edges.map(function (g) {
+    return { g: g, p: g.querySelector('path.wire'), order: parseInt(g.dataset.order, 10) || 0 };
+  }).sort(function (a, b) { return a.order - b.order; });
+
+  function prime() {
+    wires.forEach(function (w) {
+      var len = w.p.getTotalLength();
+      w.p.style.strokeDasharray = w.g.classList.contains('e-ctrl') ? '9 7' : len + ' ' + len;
+      if (!w.g.classList.contains('e-ctrl')) { w.p.style.strokeDashoffset = String(len); }
+      else { w.p.style.opacity = '0'; }
+      w.g.style.opacity = '0';
+    });
+  }
+
+  function draw() {
+    wires.forEach(function (w, i) {
+      window.setTimeout(function () {
+        w.g.style.transition = 'opacity 320ms ease';
+        w.g.style.opacity = '1';
+        w.p.style.transition = 'stroke-dashoffset 620ms ease, opacity 500ms ease';
+        w.p.style.strokeDashoffset = '0';
+        w.p.style.opacity = '1';
+        if (w.g.classList.contains('e-ctrl')) { w.g.style.animation = 'none'; }
+      }, i * 140);
+    });
+    window.setTimeout(function () {
+      stage.querySelectorAll('.e-ctrl').forEach(function (g) {
+        g.animate(
+          [{ opacity: 1 }, { opacity: 0.42 }, { opacity: 1 }],
+          { duration: 3600, iterations: Infinity, easing: 'ease-in-out' }
+        );
+      });
+      if (motion && typeof motion.beginElement === 'function') {
+        try { motion.beginElement(); } catch (err) { /* no-op */ }
+      }
+    }, wires.length * 140 + 500);
+  }
+
+  if (reduced) {
+    if (packet && packet.parentNode) { packet.parentNode.removeChild(packet); }
+    wires.forEach(function (w) {
+      w.p.style.strokeDashoffset = '0';
+      w.g.style.opacity = '1';
+    });
+  } else {
+    prime();
+    var started = false;
+    var kick = function () { if (!started) { started = true; draw(); } };
+    if ('IntersectionObserver' in window) {
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (en) {
+          if (en.isIntersecting) { kick(); io.disconnect(); }
+        });
+      }, { threshold: 0.15 });
+      io.observe(stage);
+    } else {
+      kick();
+    }
+    window.setTimeout(kick, 2600);
+  }
+
+  /* ---- Autosize ---- */
+  if (document.documentElement.dataset.embedded === 'true') {
+    var postSize = function () {
+      window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+    };
+    if ('ResizeObserver' in window) { new ResizeObserver(postSize).observe(document.body); }
+    window.addEventListener('load', postSize);
+    setTimeout(postSize, 400);
+  }
+})();
+</script>
+</body>
+</html>

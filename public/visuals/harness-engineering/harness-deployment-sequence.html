@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What You Actually Stand Up</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+/* ---- Embed override: the family theme locks embed mode to viewport height,
+       which breaks autosize. Restore content-height flow. ---- */
+:root[data-embedded="true"], :root[data-embedded="true"] body { height: auto; overflow: visible; }
+:root[data-embedded="true"] .shell { width: 100%; height: auto; padding: 14px 18px; }
+
+body { font-family: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif; }
+
+.head { margin-bottom: clamp(12px, 2vw, 18px); }
+.head h1 {
+  font-weight: 700; font-size: clamp(1.3rem, 2.4vw, 1.95rem);
+  letter-spacing: -0.01em; color: var(--text-strong); margin-top: 6px; line-height: 1.16;
+}
+.head h1 em { font-style: normal;
+  background: linear-gradient(135deg, var(--accent), var(--L3));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.head p { margin-top: 8px; color: var(--muted); font-size: clamp(0.84rem, 1.1vw, 0.95rem); line-height: 1.5; }
+
+/* ---- Controls ---- */
+.bar {
+  display: flex; flex-wrap: wrap; gap: clamp(8px, 1vw, 12px);
+  align-items: center; margin-bottom: clamp(10px, 1.6vw, 16px);
+}
+.toggle {
+  display: inline-flex; flex-wrap: wrap; gap: 4px; padding: 4px;
+  border: 1px solid var(--border); border-radius: 999px; background: var(--surface);
+}
+button {
+  font-family: inherit; cursor: pointer; color: var(--text);
+  background: transparent; border: 1px solid transparent; border-radius: 999px;
+}
+.toggle button {
+  padding: clamp(6px, 0.9vw, 9px) clamp(10px, 1.4vw, 16px);
+  font-size: clamp(0.72rem, 0.95vw, 0.84rem); font-weight: 600; letter-spacing: 0.01em;
+}
+.toggle button[aria-pressed="true"] {
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  color: var(--text-strong);
+}
+.reset {
+  padding: clamp(6px, 0.9vw, 9px) clamp(10px, 1.4vw, 15px);
+  font-size: clamp(0.7rem, 0.9vw, 0.8rem); font-weight: 600;
+  border-color: var(--border); color: var(--muted);
+}
+.reset[aria-pressed="true"] { color: var(--text-strong); border-color: var(--border-strong); }
+
+/* ---- Layout: two halves ---- */
+.grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: clamp(12px, 1.6vw, 20px); }
+@media (min-width: 981px) { .grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1.02fr); } }
+
+.card {
+  border: 1px solid var(--border); background: var(--surface);
+  border-radius: 20px; padding: clamp(12px, 1.6vw, 20px); box-shadow: var(--shadow-soft);
+  min-width: 0;
+}
+.card > h2 {
+  font-size: clamp(0.66rem, 0.9vw, 0.74rem); font-weight: 700;
+  letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent);
+  margin-bottom: clamp(8px, 1.2vw, 14px);
+}
+
+/* ---- Topology ---- */
+.zone {
+  border: 1px solid var(--border-strong); border-radius: 16px;
+  padding: clamp(9px, 1.2vw, 14px);
+  background: color-mix(in srgb, var(--zc) 7%, transparent);
+  margin-bottom: 10px; position: relative;
+}
+.zone-title {
+  display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap;
+  font-size: clamp(0.66rem, 0.9vw, 0.74rem); font-weight: 700;
+  letter-spacing: 0.1em; text-transform: uppercase; color: var(--zc);
+  margin-bottom: 8px;
+}
+.zone-sub {
+  text-transform: none; letter-spacing: 0; font-weight: 500;
+  font-size: clamp(0.63rem, 0.82vw, 0.72rem); color: var(--muted-soft);
+}
+.nodes { display: flex; flex-wrap: wrap; gap: clamp(6px, 0.9vw, 10px); }
+.node {
+  display: flex; align-items: center; gap: 8px; text-align: left;
+  padding: clamp(6px, 0.9vw, 9px) clamp(8px, 1vw, 11px);
+  border: 1px solid var(--border); border-radius: 12px;
+  background: var(--surface-strong); color: var(--text);
+  flex: 1 1 clamp(128px, 30%, 190px); min-width: 0;
+  transition: border-color .2s, box-shadow .2s, opacity .2s, transform .2s;
+}
+.node .pic { width: clamp(18px, 2.2vw, 24px); height: clamp(18px, 2.2vw, 24px); flex: none; color: var(--zc); }
+.pic svg { width: 100%; height: 100%; display: block; }
+.pic svg * { stroke: currentColor; }
+.node-txt { min-width: 0; }
+.node-name {
+  font-size: clamp(0.72rem, 0.95vw, 0.83rem); font-weight: 600;
+  color: var(--text-strong); line-height: 1.2; overflow-wrap: anywhere;
+}
+.node-sub {
+  font-size: clamp(0.6rem, 0.78vw, 0.69rem); color: var(--muted-soft);
+  line-height: 1.3; margin-top: 2px; overflow-wrap: anywhere;
+}
+.node[data-p] { cursor: pointer; }
+.node[data-p]:hover { border-color: var(--border-strong); transform: translateY(-1px); }
+.node.on {
+  border-color: var(--zc);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--zc) 40%, transparent);
+  background: color-mix(in srgb, var(--zc) 12%, var(--surface-strong));
+}
+.node.off { opacity: 0.32; }
+
+.sandbox-inner {
+  margin-top: 9px; padding: clamp(7px, 1vw, 10px);
+  border: 1px dashed color-mix(in srgb, var(--zc) 55%, transparent);
+  border-radius: 12px;
+}
+.sandbox-inner .lbl {
+  font-size: clamp(0.6rem, 0.78vw, 0.68rem); color: var(--muted-soft);
+  margin-bottom: 6px; letter-spacing: 0.06em; text-transform: uppercase;
+}
+.workers { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.worker {
+  display: flex; align-items: center; gap: 6px;
+  padding: 5px 9px; border-radius: 10px;
+  border: 1px solid var(--border); background: var(--surface);
+  font-size: clamp(0.62rem, 0.8vw, 0.71rem); color: var(--muted);
+}
+.worker .pic { width: 15px; height: 15px; color: var(--L3); }
+
+/* Egress rule — the loudest edge on the board */
+.egress {
+  margin: 10px 0; padding: clamp(9px, 1.2vw, 13px);
+  border: 2px solid var(--warn); border-radius: 14px;
+  background: color-mix(in srgb, var(--warn) 12%, transparent);
+  display: flex; gap: 10px; align-items: flex-start;
+}
+.egress .pic { width: clamp(20px, 2.4vw, 26px); height: clamp(20px, 2.4vw, 26px); color: var(--warn); flex: none; }
+.egress-txt { min-width: 0; }
+.egress-rule {
+  font-size: clamp(0.74rem, 1vw, 0.88rem); font-weight: 700; color: var(--text-strong);
+  line-height: 1.25;
+}
+.egress-rule b { color: var(--warn); }
+.egress-path {
+  margin-top: 5px; font-size: clamp(0.62rem, 0.82vw, 0.72rem);
+  color: var(--muted); line-height: 1.4; overflow-wrap: anywhere;
+}
+.egress-path code {
+  font-family: "DM Sans", ui-monospace, monospace;
+  padding: 1px 5px; border-radius: 5px;
+  background: color-mix(in srgb, var(--warn) 16%, transparent);
+  color: var(--text-strong);
+}
+.pulse { animation: zpulse 1.1s ease-out 2; }
+@keyframes zpulse {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--zc) 0%, transparent); }
+  40% { box-shadow: 0 0 0 7px color-mix(in srgb, var(--zc) 32%, transparent); }
+}
+
+/* ---- Sequence ---- */
+.seqwrap { position: relative; }
+svg.seq { width: 100%; height: auto; display: block; overflow: visible; }
+.ll-line { stroke: var(--border-strong); stroke-width: 1; stroke-dasharray: 3 4; }
+.ll-head rect {
+  fill: var(--surface-strong); stroke: var(--border-strong); stroke-width: 1;
+  transition: opacity .2s, stroke .2s;
+}
+.ll-head text { fill: var(--text-strong); font-size: 9.5px; font-weight: 600; }
+.ll-head { cursor: pointer; }
+.ll-head.on rect { stroke: var(--accent); stroke-width: 2; fill: color-mix(in srgb, var(--accent) 14%, var(--surface-strong)); }
+.ll.off { opacity: 0.24; }
+.act { fill: color-mix(in srgb, var(--accent) 30%, transparent); stroke: var(--accent); stroke-width: 0.6; }
+.msg { cursor: pointer; }
+.msg .wire { stroke: var(--text); stroke-width: 1.4; }
+.msg .lab { fill: var(--muted); font-size: 8.6px; font-family: "DM Sans", sans-serif; }
+.msg .num { fill: var(--muted-soft); font-size: 7.6px; font-weight: 700; }
+.msg .hit { fill: transparent; }
+.msg.on .wire { stroke: var(--accent); stroke-width: 2.2; }
+.msg.on .lab { fill: var(--text-strong); font-weight: 600; }
+.msg.off { opacity: 0.2; }
+.msg.opt .wire { stroke: var(--L5); stroke-dasharray: 5 3; }
+.msg.opt .lab { fill: var(--L5); }
+.msg.loop .wire { stroke: var(--L3); }
+.msg.loop .lab { fill: var(--L3); }
+.msg.newmsg .wire { stroke: var(--warn); }
+.msg.newmsg .lab { fill: var(--warn); }
+.optbox { fill: color-mix(in srgb, var(--L5) 8%, transparent); stroke: var(--L5); stroke-width: 1; stroke-dasharray: 4 3; }
+.optlab { fill: var(--L5); font-size: 8px; font-weight: 700; letter-spacing: 0.08em; }
+.travel { fill: var(--accent); }
+/* reveal */
+.msg { opacity: 0; }
+.msg.shown { opacity: 1; transition: opacity .28s ease; }
+:root.static .msg { opacity: 1; transition: none; }
+.msg.shown.off { opacity: 0.2; }
+
+.legend {
+  display: flex; flex-wrap: wrap; gap: 10px 16px; margin-top: 10px;
+  font-size: clamp(0.62rem, 0.8vw, 0.7rem); color: var(--muted-soft);
+}
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { width: 16px; height: 0; border-top: 2px solid currentColor; display: inline-block; }
+
+.readout {
+  margin-top: clamp(10px, 1.4vw, 16px); padding: clamp(10px, 1.3vw, 14px);
+  border: 1px dashed var(--border-strong); border-radius: 14px;
+  font-size: clamp(0.72rem, 0.95vw, 0.85rem); color: var(--muted); line-height: 1.5;
+}
+.readout strong { color: var(--text-strong); }
+.readout code {
+  font-family: "DM Sans", ui-monospace, monospace; font-size: 0.92em;
+  padding: 1px 5px; border-radius: 5px; overflow-wrap: anywhere;
+  background: color-mix(in srgb, var(--accent) 14%, transparent); color: var(--text-strong);
+}
+.readout.legacy code { background: color-mix(in srgb, var(--warn) 14%, transparent); }
+.readout .tag {
+  display: inline-block; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--accent); margin-bottom: 5px;
+}
+.readout.legacy .tag { color: var(--warn); }
+.selnote { margin-top: 8px; font-size: clamp(0.66rem, 0.85vw, 0.74rem); color: var(--muted-soft); }
+
+@media (max-width: 420px) {
+  .node { flex: 1 1 100%; }
+}
+</style>
+</head>
+<body>
+<main class="shell">
+  <header class="head">
+    <span class="eyebrow">Scene 6 · Deployment and the wire · Altitude L3</span>
+    <h1>What you actually <em>stand up</em>.</h1>
+    <p>Three trust zones on the left, the same seven participants on the wire at the right. Click any node, lifeline, or message — the other half follows the selection.</p>
+  </header>
+
+  <div class="bar">
+    <div class="toggle" role="group" aria-label="Transport model">
+      <button type="button" id="btnStateless" aria-pressed="true">Stateless MCP (2026-07-28)</button>
+      <button type="button" id="btnLegacy" aria-pressed="false">Legacy HTTP+SSE session</button>
+    </div>
+    <button type="button" class="reset" id="btnReset" aria-pressed="false">Clear selection</button>
+  </div>
+
+  <div class="grid">
+    <!-- ============ LEFT: deployment topology ============ -->
+    <section class="card" aria-label="Deployment topology">
+      <h2>Deployment topology · three trust zones</h2>
+
+      <div class="zone" style="--zc: var(--L2)">
+        <div class="zone-title">Zone A · Developer / CI plane</div>
+        <div class="nodes">
+          <button type="button" class="node" data-p="ide" aria-pressed="false">
+            <span class="pic" data-ic="monitor" aria-hidden="true"></span>
+            <span class="node-txt"><span class="node-name">IDE or CI runner</span><span class="node-sub">where the run is requested</span></span>
+          </button>
+          <button type="button" class="node" data-p="orch" aria-pressed="false">
+            <span class="pic" data-ic="gears" aria-hidden="true"></span>
+            <span class="node-txt"><span class="node-name">Harness orchestrator</span><span class="node-sub">long-lived process, owns the loop</span></span>
+          </button>
+          <button type="button" class="node" data-p="policy" aria-pressed="false">
+            <span class="pic" data-ic="key" aria-hidden="true"></span>
+            <span class="node-txt"><span class="node-name">OIDC workload identity</span><span class="node-sub">no static keys on the runner</span></span>
+          </button>
+          <button type="button" class="node" data-p="policy" aria-pressed="false">
+            <span class="pic" data-ic="lock" aria-hidden="true"></span>
+            <span class="node-txt"><span class="node-name">Secrets broker</span><span class="node-sub">short-lived, per-run leases</span></span>
+          </button>
+        </div>
+      </div>
+
+      <div class="zone" id="zoneB" style="--zc: var(--L3)">
+        <div class="zone-title">Zone B · Isolation plane
+          <span class="zone-sub">gVisor on Linux / Seatbelt on macOS / microVM + vsock control channel</span>
+        </div>
+        <div class="nodes">
+          <button type="button" class="node" data-p="sandbox" aria-pressed="false">
+            <span class="pic" data-ic="shield" aria-hidden="true"></span>
+            <span class="node-txt"><span class="node-name">Per-run sandbox</span><span class="node-sub">workspace clone · tool executor</span></span>
+          </button>
+        </div>
+        <div class="sandbox-inner">
+          <div class="lbl">Inside the sandbox</div>
+          <div class="workers">
+            <span class="worker"><span class="pic" data-ic="robot" aria-hidden="true"></span>subagent worker 1</span>
+            <span class="worker"><span class="pic" data-ic="robot" aria-hidden="true"></span>subagent worker 2</span>
+            <span class="worker"><span class="pic" data-ic="robot" aria-hidden="true"></span>subagent worker 3</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="egress">
+        <span class="pic" data-ic="barrier" aria-hidden="true"></span>
+        <span class="egress-txt">
+          <span class="egress-rule">The sandbox has <b>NO direct internet.</b></span>
+          <span class="egress-path">Every byte leaving Zone B crosses the <code>egress broker</code> and lands only on the Zone C allow-list. <code>Zone B</code> → <code>egress broker</code> → <code>Zone C allow-list</code>. Nothing else routes.</span>
+        </span>
+      </div>
+
+      <div class="zone" id="zoneC" style="--zc: var(--accent-3)">
+        <div class="zone-title">Zone C · Service plane <span class="zone-sub">allow-listed destinations only</span></div>
+        <div class="nodes" id="zoneCNodes">
+          <button type="button" class="node" data-p="model" aria-pressed="false">
+            <span class="pic" data-ic="cpu" aria-hidden="true"></span>
+            <span class="node-txt"><span class="node-name">Model inference endpoint</span><span class="node-sub">messages.create with tool defs</span></span>
+          </button>
+          <button type="button" class="node" data-p="router" aria-pressed="false">
+            <span class="pic" data-ic="network" aria-hidden="true"></span>
+            <span class="node-txt"><span class="node-name">MCP servers · header router</span><span class="node-sub" id="routerSub">stateless, horizontally scaled, tools/list with ttlMs</span></span>
+          </button>
+          <button type="button" class="node" data-p="evidence" aria-pressed="false">
+            <span class="pic" data-ic="archive" aria-hidden="true"></span>
+            <span class="node-txt"><span class="node-name">Evidence / object store</span><span class="node-sub">append-only run manifest</span></span>
+          </button>
+          <button type="button" class="node" aria-pressed="false" disabled style="cursor: default">
+            <span class="pic" data-ic="gauge" aria-hidden="true"></span>
+            <span class="node-txt"><span class="node-name">Metrics + cost meter</span><span class="node-sub">tokens, latency, spend per run</span></span>
+          </button>
+          <button type="button" class="node" data-p="router" id="stickyNode" aria-pressed="false" hidden style="border-color: var(--warn)">
+            <span class="pic" data-ic="transmit" aria-hidden="true"></span>
+            <span class="node-txt"><span class="node-name">Sticky router · session affinity</span><span class="node-sub">shared session store — every request must land on the node that holds the session</span></span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ RIGHT: sequence over the same participants ============ -->
+    <section class="card" aria-label="Wire sequence">
+      <h2>The wire · one run, top to bottom</h2>
+      <div class="seqwrap">
+        <svg class="seq" id="seq" role="img" aria-label="Sequence diagram of one harness run across IDE, orchestrator, policy, model, MCP router, sandbox and evidence store"></svg>
+      </div>
+      <div class="legend">
+        <span style="color: var(--L5)"><i></i>optional branch (input_required)</span>
+        <span style="color: var(--L3)"><i></i>the loop</span>
+        <span style="color: var(--warn)"><i></i>session-only traffic</span>
+      </div>
+      <div class="readout" id="readout"></div>
+      <p class="selnote" id="selnote">No participant selected — everything is live.</p>
+    </section>
+  </div>
+</main>
+
+<script>
+(() => {
+  'use strict';
+
+  /* ---------- icons: house loader ---------- */
+  const ICON_BASE = '../customs-entry-agent/flow-icons/';
+  const cache = {};
+  const load = (n) => cache[n] || (cache[n] = fetch(ICON_BASE + n + '.svg')
+    .then((r) => (r.ok ? r.text() : Promise.reject()))
+    .then((t) => t.replace(/stroke="#232f3e"/g, 'stroke="currentColor"')).catch(() => ''));
+  document.querySelectorAll('[data-ic]').forEach((slot) => {
+    load(slot.dataset.ic).then((svg) => { if (!slot.firstChild) slot.innerHTML = svg; });
+  });
+
+  /* ---------- model ---------- */
+  const SVGNS = 'http://www.w3.org/2000/svg';
+  const P = [
+    { id: 'ide', label: 'IDE' },
+    { id: 'orch', label: 'Orchestrator' },
+    { id: 'policy', label: 'Policy' },
+    { id: 'model', label: 'Model' },
+    { id: 'router', label: 'MCP router' },
+    { id: 'sandbox', label: 'Sandbox' },
+    { id: 'evidence', label: 'Evidence' }
+  ];
+  const IX = {}; P.forEach((p, i) => { IX[p.id] = i; });
+
+  const SID = 'Mcp-Session-Id: s-7f2a';
+
+  function build(legacy) {
+    const m = [];
+    const add = (from, to, lines, kind) => m.push({ from, to, lines: [].concat(lines), kind: kind || '' });
+    add('ide', 'orch', 'POST /runs {goal, policyId, budget}');
+    add('orch', 'evidence', 'run.created');
+    if (legacy) {
+      add('orch', 'router', 'initialize', 'newmsg');
+      add('router', 'orch', ['initialized', 'issues ' + SID], 'newmsg');
+    }
+    add('orch', 'router', legacy ? ['Mcp-Method: tools/list', SID] : 'Mcp-Method: tools/list');
+    add('router', 'orch', legacy
+      ? ['{tools} — no ttlMs, no cacheScope', 'refetched per session']
+      : '{tools, ttlMs, cacheScope}', legacy ? 'newmsg' : '');
+    add('orch', 'model', 'messages.create(tools)');
+    add('model', 'orch', 'tool_use{name, input}');
+    add('orch', 'policy', 'check(name, args)');
+    add('policy', 'orch', 'allow');
+    add('orch', 'router', legacy
+      ? ['POST /mcp · Mcp-Method: tools/call', 'Mcp-Name: <tool> · ' + SID]
+      : ['POST /mcp · Mcp-Method: tools/call', 'Mcp-Name: <tool> · (no session id)']);
+    add('router', 'sandbox', 'exec  (over vsock)');
+    add('sandbox', 'router', 'result');
+    /* optional branch */
+    const o = m.length;
+    add('router', 'orch', 'input_required', 'opt');
+    add('orch', 'ide', 'prompt', 'opt');
+    add('ide', 'orch', 'answer', 'opt');
+    add('orch', 'router', legacy ? ['resume (same call) · ' + SID] : 'resume  (the same call, not a new one)', 'opt');
+    const optRange = [o, m.length - 1];
+    add('router', 'orch', 'tool_result');
+    add('orch', 'evidence', 'tool.completed{hash}');
+    add('orch', 'model', 'next turn  ↻ the loop', 'loop');
+    add('orch', 'sandbox', 'run tests  (verification)');
+    add('sandbox', 'orch', 'exit code');
+    add('orch', 'evidence', 'run.completed{manifest}');
+    return { msgs: m, optRange: optRange, execIdx: m.findIndex((x) => x.lines[0].indexOf('exec') === 0) };
+  }
+
+  /* ---------- geometry ---------- */
+  const W = 780, LEFT = 56, RIGHT = 724, HEAD_Y = 6, HEAD_H = 30, TOP = 62, STEP = 46, BOT = 26;
+  const xs = P.map((_, i) => LEFT + (RIGHT - LEFT) * i / (P.length - 1));
+
+  const svg = document.getElementById('seq');
+  const state = { legacy: false, sel: null, data: null };
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduce) document.documentElement.classList.add('static');
+
+  function el(name, attrs, text) {
+    const n = document.createElementNS(SVGNS, name);
+    for (const k in attrs) n.setAttribute(k, attrs[k]);
+    if (text != null) n.textContent = text;
+    return n;
+  }
+
+  function render() {
+    const d = state.data = build(state.legacy);
+    const n = d.msgs.length;
+    const H = TOP + n * STEP + BOT;
+    svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+    svg.setAttribute('preserveAspectRatio', 'xMidYMin meet');
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+
+    const defs = el('defs');
+    ['a-def', 'a-on', 'a-opt', 'a-loop', 'a-new'].forEach((id, i) => {
+      const fill = ['var(--text)', 'var(--accent)', 'var(--L5)', 'var(--L3)', 'var(--warn)'][i];
+      const mk = el('marker', { id: id, viewBox: '0 0 10 10', refX: '9', refY: '5',
+        markerWidth: '6', markerHeight: '6', orient: 'auto-start-reverse' });
+      mk.appendChild(el('path', { d: 'M 0 0 L 10 5 L 0 10 z', fill: fill }));
+      defs.appendChild(mk);
+    });
+    svg.appendChild(defs);
+
+    /* optional-branch frame */
+    if (d.optRange) {
+      const y0 = TOP + d.optRange[0] * STEP - 26, y1 = TOP + d.optRange[1] * STEP + 12;
+      svg.appendChild(el('rect', { class: 'optbox', x: 14, y: y0, width: W - 28, height: y1 - y0, rx: 10 }));
+      svg.appendChild(el('text', { class: 'optlab', x: 22, y: y0 + 13 }, 'OPT · HUMAN IN THE LOOP'));
+    }
+
+    /* lifelines */
+    P.forEach((p, i) => {
+      const g = el('g', { class: 'll', 'data-p': p.id });
+      g.appendChild(el('line', { class: 'll-line', x1: xs[i], y1: HEAD_Y + HEAD_H, x2: xs[i], y2: H - 8 }));
+      const head = el('g', { class: 'll-head', 'data-p': p.id, tabindex: '0', role: 'button',
+        'aria-label': 'Highlight ' + p.label });
+      head.appendChild(el('rect', { x: xs[i] - 48, y: HEAD_Y, width: 96, height: HEAD_H, rx: 9 }));
+      head.appendChild(el('text', { x: xs[i], y: HEAD_Y + 19, 'text-anchor': 'middle' }, p.label));
+      head.addEventListener('click', () => select(state.sel === p.id ? null : p.id));
+      head.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); select(state.sel === p.id ? null : p.id); }
+      });
+      g.appendChild(head);
+      svg.appendChild(g);
+    });
+
+    /* activation boxes + messages */
+    d.msgs.forEach((msg, i) => {
+      const y = TOP + i * STEP;
+      const a = IX[msg.from], b = IX[msg.to];
+      const g = el('g', { class: 'msg ' + msg.kind, 'data-a': msg.from, 'data-b': msg.to, tabindex: '0',
+        role: 'button', 'aria-label': (i + 1) + '. ' + msg.from + ' to ' + msg.to + ': ' + msg.lines.join(' ') });
+
+      /* activation: the receiver is busy from this message until the next one */
+      g.appendChild(el('rect', { class: 'act', x: xs[b] - 4, y: y, width: 8, height: STEP * 0.78, rx: 2 }));
+
+      const dir = b > a ? 1 : -1;
+      const x1 = xs[a] + dir * 4, x2 = xs[b] - dir * 5;
+      const mk = msg.kind === 'opt' ? 'a-opt' : msg.kind === 'loop' ? 'a-loop' : msg.kind === 'newmsg' ? 'a-new' : 'a-def';
+      const wire = el('line', { class: 'wire', x1: x1, y1: y, x2: x2, y2: y, 'marker-end': 'url(#' + mk + ')' });
+      g.appendChild(wire);
+
+      const mid = Math.min(W - 10, Math.max(10, (xs[a] + xs[b]) / 2));
+      msg.lines.forEach((ln, k) => {
+        g.appendChild(el('text', { class: 'lab', x: mid, y: y - 6 - (msg.lines.length - 1 - k) * 9.5,
+          'text-anchor': 'middle' }, ln));
+      });
+      g.appendChild(el('text', { class: 'num', x: 8, y: y + 3 }, String(i + 1)));
+      g.appendChild(el('rect', { class: 'hit', x: Math.min(x1, x2) - 6, y: y - 24,
+        width: Math.abs(x2 - x1) + 12, height: 32 }));
+
+      const pick = () => select(state.sel === msg.from ? msg.to : msg.from);
+      g.addEventListener('click', pick);
+      g.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(); }
+      });
+      g.__geom = { y: y, x1: x1, x2: x2 };
+      svg.appendChild(g);
+    });
+
+    applySel();
+    animate();
+  }
+
+  /* ---------- animation ---------- */
+  let timers = [];
+  function clearTimers() { timers.forEach(clearTimeout); timers = []; }
+
+  function playAll() {
+    const groups = Array.from(svg.querySelectorAll('.msg'));
+    if (reduce) { groups.forEach((g) => g.classList.add('shown')); return; }
+    groups.forEach((g, i) => {
+      timers.push(setTimeout(() => {
+        g.classList.add('shown');
+        travel(g);
+        if (state.data && i === state.data.execIdx) pulseSandbox();
+      }, i * 190));
+    });
+  }
+
+  function travel(g) {
+    const q = g.__geom;
+    if (!q) return;
+    const dot = el('circle', { class: 'travel', cx: q.x1, cy: q.y, r: 3.4 });
+    g.appendChild(dot);
+    const t0 = performance.now(), dur = 340;
+    const step = (t) => {
+      const k = Math.min(1, (t - t0) / dur);
+      dot.setAttribute('cx', q.x1 + (q.x2 - q.x1) * k);
+      if (k < 1) requestAnimationFrame(step); else dot.remove();
+    };
+    requestAnimationFrame(step);
+  }
+
+  function pulseSandbox() {
+    const z = document.getElementById('zoneB');
+    z.classList.remove('pulse');
+    void z.offsetWidth;
+    z.classList.add('pulse');
+  }
+
+  function animate() {
+    clearTimers();
+    if (reduce || !('IntersectionObserver' in window)) {
+      svg.querySelectorAll('.msg').forEach((g) => g.classList.add('shown'));
+      if (!reduce) playAll();
+      return;
+    }
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => { if (e.isIntersecting) { io.disconnect(); playAll(); } });
+    }, { threshold: 0.02 });
+    io.observe(svg);
+  }
+
+  /* ---------- selection (shared by both halves) ---------- */
+  function select(p) { state.sel = p || null; applySel(); }
+
+  function applySel() {
+    const s = state.sel;
+    document.querySelectorAll('.node[data-p]').forEach((b) => {
+      const hit = !!s && b.dataset.p === s;
+      b.classList.toggle('on', hit);
+      b.classList.toggle('off', !!s && !hit);
+      b.setAttribute('aria-pressed', hit ? 'true' : 'false');
+    });
+    svg.querySelectorAll('.ll').forEach((g) => {
+      const hit = !!s && g.dataset.p === s;
+      g.classList.toggle('off', !!s && !hit);
+      g.querySelector('.ll-head').classList.toggle('on', hit);
+    });
+    svg.querySelectorAll('.msg').forEach((g) => {
+      const hit = !!s && (g.dataset.a === s || g.dataset.b === s);
+      g.classList.toggle('on', hit);
+      g.classList.toggle('off', !!s && !hit);
+    });
+    const btn = document.getElementById('btnReset');
+    btn.setAttribute('aria-pressed', s ? 'true' : 'false');
+    const lbl = s ? (P.find((x) => x.id === s) || {}).label : null;
+    const cnt = s ? svg.querySelectorAll('.msg.on').length : 0;
+    document.getElementById('selnote').textContent = s
+      ? lbl + ' selected — ' + cnt + ' message' + (cnt === 1 ? '' : 's') + ' on its lifeline. Click again to clear.'
+      : 'No participant selected — everything is live.';
+  }
+
+  document.querySelectorAll('.node[data-p]').forEach((b) => {
+    b.addEventListener('click', () => select(state.sel === b.dataset.p ? null : b.dataset.p));
+  });
+  document.getElementById('btnReset').addEventListener('click', () => select(null));
+
+  /* ---------- transport toggle ---------- */
+  const READ = {
+    stateless: '<span class="tag">What the stateless core bought you</span>' +
+      '<strong>No sticky sessions.</strong> Any router replica can serve any request, so you scale horizontally on plain round-robin. ' +
+      '<strong>No shared session store</strong> to run, replicate, or lose. Routing happens at the <strong>header level</strong> ' +
+      '(<code>Mcp-Method</code>, <code>Mcp-Name</code>) — an edge proxy can shard tool calls without parsing bodies. And the tool manifest is ' +
+      '<strong>cacheable</strong>: <code>ttlMs</code> plus <code>cacheScope</code> mean one <code>tools/list</code> serves every run until it expires. ' +
+      'Human-in-the-loop still works — <code>input_required</code> resumes the <em>same</em> call, no session needed.',
+    legacy: '<span class="tag">What the session model costs you</span>' +
+      '<strong>An extra round trip before any work</strong> (<code>initialize</code> / <code>initialized</code>) on every run. ' +
+      'Every later request must carry <code>Mcp-Session-Id</code>, which forces a <strong>sticky router</strong> and a ' +
+      '<strong>shared session store</strong> into Zone C — one more stateful thing to replicate, expire, and page someone about. ' +
+      'The tool manifest loses <code>ttlMs</code> and <code>cacheScope</code>, so each session refetches <code>tools/list</code> from scratch. ' +
+      'Scale-in now drops live sessions instead of idle connections.'
+  };
+
+  function setMode(legacy) {
+    state.legacy = legacy;
+    document.getElementById('btnStateless').setAttribute('aria-pressed', String(!legacy));
+    document.getElementById('btnLegacy').setAttribute('aria-pressed', String(legacy));
+    document.getElementById('stickyNode').hidden = !legacy;
+    document.getElementById('routerSub').textContent = legacy
+      ? 'session-affine — every request pinned to the node holding Mcp-Session-Id'
+      : 'stateless, horizontally scaled, tools/list with ttlMs';
+    const r = document.getElementById('readout');
+    r.classList.toggle('legacy', legacy);
+    r.innerHTML = legacy ? READ.legacy : READ.stateless;
+    render();
+  }
+
+  document.getElementById('btnStateless').addEventListener('click', () => setMode(false));
+  document.getElementById('btnLegacy').addEventListener('click', () => setMode(true));
+
+  setMode(false);
+
+  /* ---------- autosize ---------- */
+  if (document.documentElement.dataset.embedded === 'true') {
+    const postSize = () => window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+    if ('ResizeObserver' in window) new ResizeObserver(postSize).observe(document.body);
+    window.addEventListener('load', postSize);
+    setTimeout(postSize, 400);
+  }
+})();
+</script>
+</body>
+</html>

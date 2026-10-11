@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The AWS build · trust boundaries made physical</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+/* AWS topology. Tab 1 draws the VPC as nested bordered boxes with three
+   clickable trust-boundary buttons driving a detail panel. Tab 2 lists the
+   per-entry Step Functions runtime plus a failure-rules strip. */
+
+.shell { display: flex; flex-direction: column; gap: 10px; }
+:root[data-embedded="true"] .shell { padding: 14px clamp(14px, 2vw, 22px); }
+
+.head h1 {
+  font-family: "Space Grotesk", sans-serif; font-weight: 700;
+  font-size: clamp(1.02rem, 2.2vw, 1.3rem); letter-spacing: -0.02em; color: var(--text-strong);
+}
+:root[data-embedded="true"] .head h1 { font-size: 1.02rem; }
+.head p { font: 500 0.72rem/1.4 "DM Sans", sans-serif; color: var(--muted); margin-top: 2px; }
+
+/* ---------- tabs ---------- */
+.tabs { display: flex; gap: 6px; }
+.tab {
+  cursor: pointer; font: 700 0.66rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--muted); background: var(--surface);
+  border: 1px solid var(--border-strong); border-radius: 999px; padding: 7px 14px;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+.tab[aria-selected="true"] {
+  color: var(--accent-2); border-color: var(--accent-2);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-2) 18%, transparent);
+}
+[role="tabpanel"][hidden] { display: none; }
+.panel { display: flex; flex-direction: column; gap: 8px; }
+
+/* ---------- topology boxes ---------- */
+.row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.row.r4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.node {
+  border: 1px solid var(--border-strong); border-radius: 9px; background: var(--surface);
+  box-shadow: var(--shadow-soft); padding: 7px 9px; min-width: 0;
+}
+.node b { display: block; font: 700 0.68rem/1.25 "Space Grotesk", sans-serif; color: var(--text-strong); }
+.node span { display: block; font: 500 0.62rem/1.35 "DM Sans", sans-serif; color: var(--muted); margin-top: 2px; }
+.zone-label {
+  font: 700 0.58rem/1 "IBM Plex Mono", monospace; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--muted-soft);
+}
+.vpc {
+  border: 1.5px dashed var(--border-strong); border-radius: 12px;
+  background: color-mix(in srgb, var(--surface) 55%, transparent);
+  padding: 9px 10px; display: flex; flex-direction: column; gap: 8px;
+}
+.vpc > .zone-label { color: var(--accent-2); }
+.subnet {
+  border: 1px solid var(--border-strong); border-left: 4px solid var(--sc, var(--accent-2));
+  border-radius: 10px; background: var(--surface-strong); padding: 8px 10px;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.sub-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.sub-head b {
+  font: 700 0.64rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--sc, var(--text-strong));
+}
+.badge {
+  font: 700 0.58rem/1 "IBM Plex Mono", monospace; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--sc, var(--muted)); border: 1px solid color-mix(in srgb, var(--sc, var(--muted)) 55%, transparent);
+  border-radius: 3px; padding: 3px 6px;
+}
+.svc { display: flex; flex-wrap: wrap; gap: 5px; }
+.svc i {
+  font: 500 0.64rem/1.3 "IBM Plex Mono", monospace; font-style: normal; color: var(--text);
+  border: 1px solid var(--border); border-radius: 6px; background: var(--surface);
+  padding: 4px 7px;
+}
+.play .panel > * { animation: rise 0.45s ease-out backwards; }
+.play .panel > *:nth-child(2) { animation-delay: 0.08s; }
+.play .panel > *:nth-child(3) { animation-delay: 0.16s; }
+.play .panel > *:nth-child(4) { animation-delay: 0.24s; }
+.play .panel > *:nth-child(5) { animation-delay: 0.32s; }
+.play .panel > *:nth-child(6) { animation-delay: 0.40s; }
+@keyframes rise { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+
+/* ---------- boundary buttons + detail ---------- */
+.bounds { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.bound {
+  cursor: pointer; text-align: left; min-width: 0;
+  border: 1px solid var(--border-strong); border-top: 3px solid var(--bc);
+  border-radius: 10px; background: var(--surface); box-shadow: var(--shadow-soft);
+  padding: 8px 10px; display: flex; flex-direction: column; gap: 3px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.bound b { font: 700 0.7rem/1.2 "Space Grotesk", sans-serif; color: var(--text-strong); }
+.bound span { font: 500 0.62rem/1.35 "DM Sans", sans-serif; color: var(--muted); }
+.bound:hover { border-color: var(--bc); }
+.bound[aria-pressed="true"] {
+  border-color: var(--bc);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--bc) 22%, transparent), var(--shadow-soft);
+}
+.detail {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+  box-shadow: var(--shadow-soft); padding: 11px 13px; display: flex; flex-direction: column; gap: 6px;
+}
+.d-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.d-name {
+  font: 700 0.6rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--dc, var(--accent)); border: 1px solid color-mix(in srgb, var(--dc, var(--accent)) 45%, transparent);
+  border-radius: 999px; padding: 4px 10px;
+}
+.d-text { font: 500 0.76rem/1.55 "DM Sans", sans-serif; color: var(--text); }
+.d-note { font: 500 0.72rem/1.5 "DM Sans", sans-serif; color: var(--muted); }
+.d-note b { color: var(--dc, var(--accent)); font-weight: 700; }
+
+/* ---------- runtime steps ---------- */
+.steps { display: flex; flex-direction: column; gap: 6px; }
+.step {
+  display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 9px; align-items: start;
+  border: 1px solid var(--border); border-radius: 10px; background: var(--surface);
+  padding: 8px 11px;
+}
+.step .n {
+  font: 700 0.72rem/1 "IBM Plex Mono", monospace; color: var(--accent-2);
+  border: 1.5px solid var(--accent-2); border-radius: 50%; width: 24px; height: 24px;
+  display: grid; place-items: center;
+}
+.step b { display: block; font: 700 0.72rem/1.3 "Space Grotesk", sans-serif; color: var(--text-strong); }
+.step span { display: block; font: 500 0.68rem/1.45 "DM Sans", sans-serif; color: var(--muted); margin-top: 2px; }
+.step code { font: 600 0.62rem/1.4 "IBM Plex Mono", monospace; color: var(--accent-2); }
+.step q { quotes: none; color: var(--text); font-weight: 700; }
+.fails { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.fail {
+  border: 1px solid var(--border); border-left: 3px solid var(--fc); border-radius: 10px;
+  background: var(--surface); padding: 8px 10px; min-width: 0;
+}
+.fail b { display: block; font: 700 0.62rem/1.25 "Space Grotesk", sans-serif; letter-spacing: 0.08em; text-transform: uppercase; color: var(--fc); }
+.fail span { display: block; font: 500 0.66rem/1.45 "DM Sans", sans-serif; color: var(--muted); margin-top: 3px; }
+
+@media (max-width: 760px) {
+  .head h1 { font-size: 1rem; }
+  .row, .row.r4 { grid-template-columns: 1fr 1fr; }
+  .bounds, .fails { grid-template-columns: minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .play .panel > * { animation: none !important; }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="head">
+    <h1>The AWS build</h1>
+    <p>The reference deployment, with the three trust boundaries made physical. Click a boundary.</p>
+  </div>
+
+  <div class="tabs" role="tablist" aria-label="Topology or runtime view">
+    <button class="tab" id="tab-topo" role="tab" aria-selected="true" aria-controls="pane-topo">Topology</button>
+    <button class="tab" id="tab-run" role="tab" aria-selected="false" aria-controls="pane-run" tabindex="-1">Runtime</button>
+  </div>
+
+  <div class="panel" id="pane-topo" role="tabpanel" aria-labelledby="tab-topo" tabindex="0">
+    <div>
+      <div class="zone-label">Ingress · outside the VPC</div>
+      <div class="row" style="margin-top:5px">
+        <div class="node"><b>SES email intake</b><span>broker inboxes, forwarded docs</span></div>
+        <div class="node"><b>API Gateway + WAF</b><span>portal and partner API</span></div>
+        <div class="node"><b>Transfer Family</b><span>SFTP and AS2 feeds</span></div>
+      </div>
+    </div>
+
+    <div class="vpc">
+      <div class="zone-label">VPC · workload-prod · 3 AZs</div>
+      <div class="subnet" style="--sc: var(--S-hold)">
+        <div class="sub-head"><b>Quarantine subnet</b><span class="badge">NO NAT · NO IGW</span></div>
+        <div class="svc"><i>parser Lambda · one microVM per document</i><i>Textract</i><i>page-image render</i></div>
+      </div>
+      <div class="subnet" style="--sc: var(--S-lodged)">
+        <div class="sub-head"><b>Private app subnets</b></div>
+        <div class="svc"><i>Step Functions · one execution per entry</i><i>novelty router Lambda + ElastiCache</i><i>decision workers · ECS Fargate</i><i>confidence + calibration service</i><i>review queue app · ALB + Cognito</i></div>
+      </div>
+      <div class="subnet" style="--sc: var(--S-review)">
+        <div class="sub-head"><b>Private data subnets</b><span class="badge">NO EGRESS</span></div>
+        <div class="svc"><i>Aurora PostgreSQL + pgvector</i><i>ElastiCache hot path</i></div>
+      </div>
+      <div class="subnet" style="--sc: var(--S-cleared)">
+        <div class="sub-head"><b>Filing subnet</b><span class="badge">NO AI · ALLOWLISTED EGRESS</span></div>
+        <div class="svc"><i>ABI/ACE adapter</i></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="zone-label">Outside · endpoints and stores</div>
+      <div class="row r4" style="margin-top:5px">
+        <div class="node"><b>Bedrock</b><span>via VPC endpoint</span></div>
+        <div class="node"><b>S3 documents</b><span>per-tenant KMS keys</span></div>
+        <div class="node"><b>S3 audit ledger</b><span>Object Lock, WORM</span></div>
+        <div class="node"><b>CBP ACE</b><span>the government endpoint</span></div>
+      </div>
+    </div>
+
+    <div class="bounds" role="group" aria-label="The three trust boundaries">
+      <button class="bound" style="--bc: var(--S-hold)" data-i="0" aria-pressed="false">
+        <b>Untrusted input boundary</b><span>hostile documents die in the quarantine subnet</span>
+      </button>
+      <button class="bound" style="--bc: var(--accent-2)" data-i="1" aria-pressed="false">
+        <b>Authority boundary</b><span>the rulebook lives in another account</span>
+      </button>
+      <button class="bound" style="--bc: var(--S-cleared)" data-i="2" aria-pressed="false">
+        <b>Filing boundary</b><span>the only path to CBP contains no model</span>
+      </button>
+    </div>
+
+    <div class="detail" aria-live="polite">
+      <div class="d-top"><span class="d-name" id="d-name"></span></div>
+      <p class="d-text" id="d-text"></p>
+      <p class="d-note" id="d-note"></p>
+    </div>
+  </div>
+
+  <div class="panel" id="pane-run" role="tabpanel" aria-labelledby="tab-run" tabindex="0" hidden>
+    <div class="steps" aria-label="The per-entry Step Functions execution">
+      <div class="step"><span class="n">1</span><div><b>Start the execution</b><span><code>name = sha256(tenant | entry reference | document-set hash)</code>, which makes redelivery a no-op, idempotent for Standard workflows.</span></div></div>
+      <div class="step"><span class="n">2</span><div><b>Parse in quarantine</b><span>Each document is parsed in its own quarantine microVM, then normalised and entity-resolved.</span></div></div>
+      <div class="step"><span class="n">3</span><div><b>Map fan-out per line item</b><span>Route tier, decide, validate, gate.</span></div></div>
+      <div class="step"><span class="n">4</span><div><b>Human review via task tokens</b><span>A reviewer may take four hours or four days, the execution simply resumes. <code>.waitForTaskToken</code>, nothing held in memory.</span></div></div>
+      <div class="step"><span class="n">5</span><div><b>Parallel statutory-clock branch</b><span>Holds a timer to release date + 10 working days minus buffer. Working days are a calendar lookup, not arithmetic. At the buffer it pages a human and force-routes unresolved lines. <q>The timer escalates. It never files.</q></span></div></div>
+      <div class="step"><span class="n">6</span><div><b>Assemble and transmit</b><span>Assemble 3461 / 7501 / PGA records, hard schema gate, transmit over ABI.</span></div></div>
+    </div>
+    <div class="fails" aria-label="Failure rules">
+      <div class="fail" style="--fc: var(--warn)"><b>Calibration service down</b><span>Circuit-break to human, an ungated decision must never auto-accept.</span></div>
+      <div class="fail" style="--fc: var(--S-hold)"><b>CBP rejects</b><span>Back to the review queue, never auto-resubmit.</span></div>
+      <div class="fail" style="--fc: var(--S-cleared)"><b>Whole system down</b><span>Documents stay in S3, the customer files manually. Degradation is to slow, never to blocked.</span></div>
+    </div>
+  </div>
+</div>
+<script>
+(() => {
+  const DATA = [
+    { name: 'Untrusted input boundary', color: 'var(--S-hold)',
+      text: 'The quarantine subnet has no route to NAT or IGW, a gateway VPC endpoint to exactly one S3 prefix, and a Lambda role with no bedrock or secretsmanager access. What an attacker gains: a dead microVM and a CloudWatch alarm. No egress path exists and no credential exists to steal.',
+      note: 'Alarm: <b>a parser microVM attempted a network connection</b> is the highest-signal detection in the system.' },
+    { name: 'Authority boundary', color: 'var(--accent-2)',
+      text: 'The rulebook corpus lives in a versioned, Object-Locked S3 bucket in a separate shared-services account, hash-pinned into every decision record. Workload roles can only read.',
+      note: 'Tampering requires <b>compromising a different AWS account</b>.' },
+    { name: 'Filing boundary', color: 'var(--S-cleared)',
+      text: 'The ABI adapter is the only principal that can assume the credential-proxy role, its egress is restricted to CBP endpoints, and it contains no model.',
+      note: 'CI asserts the filing service’s dependency graph <b>does not include the inference client</b>.' }
+  ];
+  const el = (id) => document.getElementById(id);
+  const bounds = document.querySelectorAll('.bound');
+  const select = (i) => {
+    bounds.forEach((b) => b.setAttribute('aria-pressed', String(Number(b.dataset.i) === i)));
+    const d = DATA[i];
+    el('d-name').textContent = d.name;
+    el('d-name').style.setProperty('--dc', d.color);
+    el('d-text').textContent = d.text;
+    const note = el('d-note');
+    note.innerHTML = d.note;
+    note.style.setProperty('--dc', d.color);
+  };
+  bounds.forEach((b) => b.addEventListener('click', () => select(Number(b.dataset.i))));
+  select(0);
+
+  const tabs = [el('tab-topo'), el('tab-run')];
+  const panes = [el('pane-topo'), el('pane-run')];
+  const show = (i) => {
+    tabs.forEach((t, j) => { t.setAttribute('aria-selected', String(j === i)); t.tabIndex = j === i ? 0 : -1; });
+    panes.forEach((p, j) => { p.hidden = j !== i; });
+  };
+  tabs.forEach((t, i) => {
+    t.addEventListener('click', () => show(i));
+    t.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+        const n = (i + 1) % 2;
+        show(n); tabs[n].focus(); e.preventDefault();
+      }
+    });
+  });
+
+  const shell = document.querySelector('.shell');
+  const start = () => shell.classList.add('play');
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((en) => { if (en.isIntersecting) { start(); io.disconnect(); } });
+    }, { threshold: 0.2 });
+    io.observe(shell);
+  } else { start(); }
+  /* Report content height so the parent frame hugs the content. */
+  if (document.documentElement.dataset.embedded === 'true') {
+    const postSize = () => window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+    if ('ResizeObserver' in window) new ResizeObserver(postSize).observe(document.body);
+    window.addEventListener('load', postSize);
+  }
+})();
+</script>
+</body>
+</html>

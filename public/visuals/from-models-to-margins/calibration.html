@@ -4,13 +4,38 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Calibration — bend the overconfident curve onto the diagonal</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
 <script src="./_theme-bootstrap.js"></script>
 <link rel="stylesheet" href="./_theme.css">
 <style>
+:root[data-embedded="true"], :root[data-embedded="true"] body { height: auto; }
+:root[data-embedded="true"] body { overflow: visible; }
 .shell { display: flex; flex-direction: column; gap: clamp(8px,1.4vh,14px); justify-content: center; }
 .head h1 { font-size: clamp(1.05rem,2vw,1.5rem); font-weight: 700; letter-spacing: -0.02em; color: var(--text-strong); }
 .head p { color: var(--muted); font-size: 0.8rem; margin-top: 2px; }
+
+/* Icon-led stage rail: the calibration story reads from the pictograms alone.
+   warning (raw, overconfident) -> scales (calibrated) -> exchange (overcorrected). */
+.rail { display: flex; align-items: flex-start; gap: 0; }
+.stage {
+  flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 5px;
+  background: transparent; border: 0; padding: 0; cursor: pointer; font: inherit; color: var(--muted);
+}
+.stage .pic {
+  width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--surface); border: 1.5px solid var(--border-strong); color: var(--muted-soft);
+  transition: color 300ms, border-color 300ms, box-shadow 300ms;
+}
+.stage .pic svg { width: 22px; height: 22px; display: block; }
+.stage .pic svg * { stroke: currentColor; }
+.stage small { font-size: 0.62rem; line-height: 1.25; text-align: center; font-weight: 600; letter-spacing: 0.03em; }
+.stage small b { display: block; color: var(--text-strong); font-variant-numeric: tabular-nums; }
+.stage[aria-pressed="true"] .pic { color: var(--c); border-color: var(--c); box-shadow: 0 0 0 3px color-mix(in srgb, var(--c) 18%, transparent); }
+.stage[aria-pressed="true"] small { color: var(--c); }
+.wire { flex: 0 1 56px; min-width: 14px; height: 2px; margin-top: 18px; background: var(--border); position: relative; overflow: hidden; }
+.wire::after { content: ""; position: absolute; inset: 0; background: var(--accent); transform: scaleX(0); transform-origin: left; transition: transform 600ms ease; }
+.wire.on::after { transform: scaleX(1); }
+@media (prefers-reduced-motion: reduce) { .wire::after { transition: none; } }
+
 .body { display: grid; grid-template-columns: minmax(0,1fr) minmax(220px,0.82fr); gap: clamp(12px,2vw,26px); align-items: center; }
 .plot { width: 100%; aspect-ratio: 1 / 1; max-height: clamp(180px,30vh,260px); margin: 0 auto; }
 svg { width: 100%; height: 100%; overflow: visible; }
@@ -30,18 +55,27 @@ svg { width: 100%; height: 100%; overflow: visible; }
 .ece { font-size: clamp(1.6rem,4vh,2.4rem); font-weight: 800; font-variant-numeric: tabular-nums; color: var(--text-strong); line-height: 1; }
 .ece.good { color: var(--good); } .ece.bad { color: var(--warn); }
 .ecelbl { font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
-.slab { display: flex; justify-content: space-between; align-items: baseline; font-size: 0.74rem; color: var(--muted); }
+.slab { display: flex; justify-content: space-between; align-items: center; font-size: 0.74rem; color: var(--muted); }
+.slab .tlab { display: inline-flex; align-items: center; gap: 6px; }
+.slab .tpic { width: 18px; height: 18px; color: var(--accent); }
+.slab .tpic svg { width: 18px; height: 18px; display: block; }
+.slab .tpic svg * { stroke: currentColor; }
 .slab b { color: var(--text-strong); font-variant-numeric: tabular-nums; font-size: 0.92rem; }
 .tslider { width: 100%; accent-color: var(--accent); cursor: pointer; }
 .verdict { border-radius: 11px; border: 1px solid var(--border); background: var(--surface); padding: 9px 12px; box-shadow: var(--shadow-soft);
-  font-size: 0.8rem; line-height: 1.42; color: var(--text); border-left: 3px solid var(--c, var(--accent)); }
+  font-size: 0.8rem; line-height: 1.42; color: var(--text); border-left: 3px solid var(--c, var(--accent));
+  display: flex; gap: 9px; align-items: flex-start; }
 .verdict b { color: var(--text-strong); }
-.snap { font: inherit; cursor: pointer; align-self: flex-start; border-radius: 999px; padding: 5px 12px; font-size: 0.72rem; font-weight: 600;
+.vpic { flex: 0 0 20px; width: 20px; height: 20px; margin-top: 1px; color: var(--c, var(--accent)); }
+.vpic svg { width: 20px; height: 20px; display: block; }
+.vpic svg * { stroke: currentColor; }
+.btnrow { display: flex; gap: 8px; flex-wrap: wrap; }
+.snap { font: inherit; cursor: pointer; border-radius: 999px; padding: 5px 12px; font-size: 0.72rem; font-weight: 600;
   border: 1px solid var(--accent); background: transparent; color: var(--accent); transition: all .18s ease; }
 .snap:hover { background: var(--accent); color: #fff; }
 .legend { display: flex; gap: 12px; font-size: 0.66rem; color: var(--muted); flex-wrap: wrap; }
 .sw { display: inline-block; width: 9px; height: 9px; border-radius: 2px; vertical-align: 0; margin-right: 4px; }
-@media (max-width: 640px){ .body { grid-template-columns: 1fr; } .plot { max-height: 200px; } }
+@media (max-width: 640px){ .body { grid-template-columns: 1fr; } .plot { max-height: 200px; } .wire { flex-basis: 22px; } }
 </style>
 </head>
 <body>
@@ -50,6 +84,24 @@ svg { width: 100%; height: 100%; overflow: visible; }
     <h1>A confidence score is worthless until it's calibrated.</h1>
     <p>An RLHF'd model is systematically <em>over</em>confident. Drag the temperature to scale the logits and pull the curve onto the diagonal.</p>
   </div>
+
+  <div class="rail" id="rail">
+    <button type="button" class="stage" data-icon="warning" data-t="1.0" style="--c: var(--warn)" aria-pressed="false">
+      <span class="pic" data-pic aria-hidden="true"></span>
+      <small>Overconfident<b>T 1.0</b></small>
+    </button>
+    <span class="wire" id="wire1" aria-hidden="true"></span>
+    <button type="button" class="stage" data-icon="scales" data-t="1.8" style="--c: var(--good)" aria-pressed="false">
+      <span class="pic" data-pic aria-hidden="true"></span>
+      <small>Calibrated<b>T 1.8</b></small>
+    </button>
+    <span class="wire" id="wire2" aria-hidden="true"></span>
+    <button type="button" class="stage" data-icon="exchange" data-t="2.6" style="--c: var(--biz)" aria-pressed="false">
+      <span class="pic" data-pic aria-hidden="true"></span>
+      <small>Overcorrected<b>T 2.6</b></small>
+    </button>
+  </div>
+
   <div class="body">
     <div class="plot">
       <svg viewBox="0 0 60 60" id="svg" role="img" aria-label="Reliability diagram: predicted confidence vs actual accuracy">
@@ -70,10 +122,13 @@ svg { width: 100%; height: 100%; overflow: visible; }
     </div>
     <div class="controls">
       <div class="eceline" aria-live="polite"><span class="ece" id="ece">—</span><span class="ecelbl">ECE<br>mean gap</span></div>
-      <div class="slab"><span>Temperature <span style="font-size:0.66rem">T</span></span><b id="tval">1.0</b></div>
+      <div class="slab"><span class="tlab"><span class="tpic" data-gauge aria-hidden="true"></span>Temperature <span style="font-size:0.66rem">T</span></span><b id="tval">1.0</b></div>
       <input class="tslider" id="t" type="range" min="1.0" max="3.0" step="0.1" value="1.0" aria-label="Temperature scaling factor">
-      <button class="snap" id="snap">▸ Snap to best-fit temperature</button>
-      <div class="verdict" id="verdict" aria-live="polite"></div>
+      <div class="btnrow">
+        <button class="snap" id="snap">▸ Snap to best-fit temperature</button>
+        <button class="snap" id="replay">Replay</button>
+      </div>
+      <div class="verdict" id="verdict" aria-live="polite"><span class="vpic" id="vpic" aria-hidden="true"></span><span id="vtext"></span></div>
       <div class="legend">
         <span><span class="sw" style="background:var(--warn)"></span>▲ overconfident (below line)</span>
         <span><span class="sw" style="background:var(--biz)"></span>▼ underconfident (above line)</span>
@@ -90,6 +145,23 @@ const sig   = z => 1/(1+Math.exp(-z));
 // plot maps confidence/accuracy in [0.5,1] to svg [10..55] (x) and [55..10] (y)
 const PX = v => 10 + (v-0.5)/0.5*45;
 const PY = v => 55 - (v-0.5)/0.5*45;
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+const ICON_BASE = '../customs-entry-agent/flow-icons/';
+const ICONS = {};
+/* Shared line-art SVGs, fetched and inlined with the stroke swapped to
+   currentColor so they follow each slot's state colour. A failed fetch
+   leaves the slot empty and the text still carries the element. */
+const loadIcon = name => ICONS[name] || (ICONS[name] =
+  fetch(ICON_BASE + name + '.svg')
+    .then(r => (r.ok ? r.text() : Promise.reject()))
+    .then(t => t.replace(/stroke="#232f3e"/g, 'stroke="currentColor"'))
+    .catch(() => ''));
+const putIcon = (slot, name) => loadIcon(name).then(t => { slot.innerHTML = t; });
+
+const stages = Array.from(document.querySelectorAll('.stage'));
+stages.forEach(s => putIcon(s.querySelector('[data-pic]'), s.dataset.icon));
+putIcon(document.querySelector('[data-gauge]'), 'gauge');
 
 const t = document.getElementById('t');
 function render(){
@@ -125,26 +197,78 @@ function render(){
   eceEl.textContent = (ece*100).toFixed(1)+'%';
   eceEl.className = 'ece ' + (ece<0.02?'good':ece>0.06?'bad':'');
   const v = document.getElementById('verdict');
-  if (T < T_TRUE-0.15){
+  const vt = document.getElementById('vtext');
+  const state = T < T_TRUE-0.15 ? 'over' : T > T_TRUE+0.15 ? 'under' : 'ok';
+  if (state === 'over'){
     v.style.setProperty('--c','var(--warn)');
-    v.innerHTML = '<b>Overconfident.</b> Points sit <i>below</i> the diagonal — at 90% confidence the model is right far less than 90% of the time. Raw scores cannot gate a human-review threshold safely.';
-  } else if (T > T_TRUE+0.15){
+    putIcon(document.getElementById('vpic'), 'warning');
+    vt.innerHTML = '<b>Overconfident.</b> Points sit <i>below</i> the diagonal — at 90% confidence the model is right far less than 90% of the time. Raw scores cannot gate a human-review threshold safely.';
+  } else if (state === 'under'){
     v.style.setProperty('--c','var(--biz)');
-    v.innerHTML = '<b>Now underconfident.</b> You overcorrected — points rose <i>above</i> the diagonal. Temperature scaling is accuracy-preserving, but past the best fit it just trades one bias for the other.';
+    putIcon(document.getElementById('vpic'), 'exchange');
+    vt.innerHTML = '<b>Now underconfident.</b> You overcorrected — points rose <i>above</i> the diagonal. Temperature scaling is accuracy-preserving, but past the best fit it just trades one bias for the other.';
   } else {
     v.style.setProperty('--c','var(--good)');
-    v.innerHTML = '<b>Calibrated.</b> Points lie on the diagonal: among predictions at 80% confidence, ~80% are correct. <i>Now</i> the score can gate automation vs. human review.';
+    putIcon(document.getElementById('vpic'), 'check');
+    vt.innerHTML = '<b>Calibrated.</b> Points lie on the diagonal: among predictions at 80% confidence, ~80% are correct. <i>Now</i> the score can gate automation vs. human review.';
   }
+  // stage rail mirrors the regime: the lit pictogram is the story state
+  stages[0].setAttribute('aria-pressed', String(state === 'over'));
+  stages[1].setAttribute('aria-pressed', String(state === 'ok'));
+  stages[2].setAttribute('aria-pressed', String(state === 'under'));
+  document.getElementById('wire1').classList.toggle('on', T >= T_TRUE-0.15);
+  document.getElementById('wire2').classList.toggle('on', T > T_TRUE+0.15);
   document.getElementById('svg').setAttribute('aria-label',
     `Reliability diagram. Temperature ${T.toFixed(1)}. Expected calibration error ${(ece*100).toFixed(1)} percent. ${ece<0.02?'Calibrated — points on the diagonal.':T<T_TRUE?'Overconfident — points below the diagonal.':'Underconfident — points above the diagonal.'}`);
 }
 t.addEventListener('input', render);
-document.getElementById('snap').addEventListener('click', ()=>{
-  if (matchMedia('(prefers-reduced-motion: reduce)').matches){ t.value=T_TRUE; render(); return; }
-  // animate toward T_TRUE
-  let cur=+t.value; const step=()=>{ cur += (T_TRUE-cur)*0.25; if(Math.abs(T_TRUE-cur)<0.02) cur=T_TRUE; t.value=cur.toFixed(2); render(); if(cur!==T_TRUE) requestAnimationFrame(step); }; step();
-});
+
+/* Animated glide of T toward a target. rAF t0 comes from the first frame
+   timestamp, never performance.now(): sandboxed iframes can disagree
+   between the two clocks. Reduced motion jumps straight to the target. */
+let raf = 0;
+function glideTo(target, hold){
+  cancelAnimationFrame(raf);
+  if (reduced){ t.value = target; render(); return; }
+  const from = +t.value, HOLD = hold || 0, DUR = 1400;
+  const ease = x => 1 - Math.pow(1-x, 3);
+  let t0 = null;
+  const step = (ts) => {
+    if (t0 === null) t0 = ts;
+    const el = ts - t0;
+    if (el < HOLD){ raf = requestAnimationFrame(step); return; }
+    const f = Math.min(1, (el-HOLD)/DUR);
+    t.value = (from + (target-from)*ease(f)).toFixed(2);
+    render();
+    if (f < 1) raf = requestAnimationFrame(step);
+    else { t.value = target; render(); }
+  };
+  raf = requestAnimationFrame(step);
+}
+
+document.getElementById('snap').addEventListener('click', ()=> glideTo(T_TRUE));
+/* Replay restarts the story: raw overconfident scores, then the sweep
+   pulls the curve onto the diagonal. */
+const play = () => { cancelAnimationFrame(raf); t.value = 1.0; render(); glideTo(T_TRUE, 700); };
+document.getElementById('replay').addEventListener('click', play);
+stages.forEach(s => s.addEventListener('click', ()=> glideTo(+s.dataset.t)));
+
 render();
+/* Autoplay once when the figure scrolls into view. threshold 0, not 0.2:
+   tall figures can exceed a phone viewport, and a fraction of a too-tall
+   element never intersects. Reduced motion shows the finished state. */
+if ('IntersectionObserver' in window) {
+  const io = new IntersectionObserver((entries) => {
+    if (entries.some(e => e.isIntersecting)){ io.disconnect(); reduced ? glideTo(T_TRUE) : play(); }
+  }, { threshold: 0 });
+  io.observe(document.getElementById('svg'));
+} else { reduced ? glideTo(T_TRUE) : play(); }
+
+if (document.documentElement.dataset.embedded === 'true') {
+  const postSize = () => window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+  if ('ResizeObserver' in window) new ResizeObserver(postSize).observe(document.body);
+  window.addEventListener('load', postSize);
+}
 </script>
 </body>
 </html>

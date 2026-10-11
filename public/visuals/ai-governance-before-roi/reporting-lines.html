@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reporting lines: Target vs Lululemon</title>
+<script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+.shell { display:flex; flex-direction:column; gap:14px; }
+:root[data-embedded="true"] .shell { padding: 14px clamp(14px, 2vw, 22px); }
+.head h1 { font-family:"Fraunces",serif; font-weight:700; font-size:clamp(1rem,2.1vw,1.2rem); color:var(--text-strong); }
+.head p { font:400 0.78rem/1.5 "Source Sans 3",sans-serif; color:var(--muted); margin-top:3px; }
+
+.ctl { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.ctl button {
+  min-height:34px; padding:6px 12px; cursor:pointer;
+  font:600 0.64rem/1 "IBM Plex Mono",monospace; letter-spacing:0.07em; text-transform:uppercase;
+  color:var(--accent); background:transparent; border:1px solid var(--accent);
+}
+.ctl button:hover { background:color-mix(in srgb, var(--accent) 12%, transparent); }
+.ctl .hint { font:400 0.68rem/1.3 "Source Sans 3",sans-serif; color:var(--muted-soft); }
+
+.panels { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+.panel { border:1px solid var(--border-strong); background:var(--surface); padding:14px; display:flex; flex-direction:column; gap:10px; min-width:0; }
+.panel h2 { font:600 0.68rem/1.2 "IBM Plex Mono",monospace; letter-spacing:0.1em; text-transform:uppercase; color:var(--accent-2); display:flex; align-items:center; gap:7px; }
+.panel h2 .hpic { width:16px; height:16px; color:var(--accent-2); flex:none; }
+.panel h2 .hpic svg { width:16px; height:16px; display:block; }
+.panel h2 .hpic svg * { stroke:currentColor; }
+
+/* the chart area: seat buttons in flow, an SVG wire layer measured over them */
+.chart { position:relative; display:flex; flex-direction:column; align-items:center; gap:22px; }
+.wires { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; overflow:visible; }
+.wires path.wire { fill:none; stroke:var(--border-strong); stroke-width:2; }
+.wires path.wire.warnwire { stroke:var(--warn); opacity:0.85; }
+.wires circle.packet { fill:var(--accent); opacity:0; }
+.wires circle.packet.warnpkt { fill:var(--warn); }
+
+.seat {
+  position:relative; z-index:1; width:100%; text-align:left; cursor:pointer;
+  display:grid; grid-template-columns:32px 1fr; gap:9px; align-items:center;
+  border:1px solid var(--border-strong); border-radius:8px; padding:8px 10px;
+  background:var(--surface-strong); font-family:inherit; color:inherit;
+  transition:border-color 300ms, box-shadow 300ms;
+}
+.seat:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+.seat.lit { border-color:var(--accent); box-shadow:0 0 0 3px color-mix(in srgb, var(--accent) 16%, transparent); }
+.seat .pic { width:32px; height:32px; display:grid; place-items:center; color:var(--muted); border:1.5px solid var(--border-strong); border-radius:6px; background:var(--surface); transition:color 300ms, border-color 300ms; }
+.seat .pic svg { width:20px; height:20px; display:block; }
+.seat .pic svg * { stroke:currentColor; }
+.seat.lit .pic { color:var(--accent); border-color:var(--accent); }
+.seat b { display:block; font:700 0.76rem "Fraunces",serif; color:var(--text-strong); }
+.seat span.sub { display:block; font:400 0.65rem/1.35 "Source Sans 3",sans-serif; color:var(--muted); margin-top:1px; }
+.seat .mandate { display:none; grid-column:1 / -1; margin-top:5px; font:400 0.68rem/1.45 "Source Sans 3",sans-serif; color:var(--muted); border-left:2px solid var(--accent); padding-left:8px; }
+.seat[aria-expanded="true"] .mandate { display:block; }
+
+.seat.vacant { border-style:dashed; border-color:var(--warn); background:transparent; }
+.seat.vacant b { color:var(--warn); }
+.seat.vacant .pic { color:var(--warn); border-color:var(--warn); border-style:dashed; }
+.seat.vacant.lit { box-shadow:0 0 0 3px color-mix(in srgb, var(--warn) 16%, transparent); }
+.seat.vacant .mandate { border-left-color:var(--warn); }
+
+.row2 { display:flex; gap:10px; width:100%; }
+.row2 .seat { flex:1; min-width:0; }
+.tenure { width:100%; font-family:"IBM Plex Mono",monospace; font-size:0.62rem; color:var(--muted); text-align:center; border-top:1px solid var(--border); padding-top:6px; }
+.tenure b { color:var(--accent); }
+
+.strip { border:1px solid var(--border); background:var(--surface); padding:10px 14px; font:400 italic 0.82rem/1.5 "Source Sans 3",sans-serif; color:var(--muted); text-align:center; }
+.strip .chip-inline { font-family:"IBM Plex Mono",monospace; font-style:normal; font-size:0.58rem; letter-spacing:0.08em; text-transform:uppercase; border:1px solid var(--open); color:var(--open); border-radius:2px; padding:1px 5px; margin-right:6px; }
+
+@media (max-width:700px) { .panels { grid-template-columns:1fr; } }
+@media (max-width:400px) { .row2 { flex-direction:column; } }
+@media (prefers-reduced-motion: reduce) { .wires circle.packet { display:none; } }
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="head">
+    <h1>One seat under the CIO, one seat vacant</h1>
+    <p>Two org fragments, drawn from named appointments, not a sector-wide survey.</p>
+  </div>
+
+  <div class="ctl">
+    <button type="button" id="replay">Replay</button>
+    <span class="hint">The dot is a status report riding the line up. Tap a seat for its mandate.</span>
+  </div>
+
+  <div class="panels" id="panels">
+    <div class="panel" aria-label="Target org fragment">
+      <h2><span class="hpic" data-hicon="building" aria-hidden="true"></span>Target: constructed</h2>
+      <div class="chart" data-chart="t">
+        <svg class="wires" aria-hidden="true"></svg>
+        <button type="button" class="seat" data-id="ceo-t" data-icon="person" aria-expanded="false">
+          <span class="pic" data-pic aria-hidden="true"></span>
+          <span><b>CEO</b></span>
+          <span class="mandate">Top of the fragment. The AI seat sits one level down, so AI status reaches the CEO through the information and product portfolio.</span>
+        </button>
+        <button type="button" class="seat" data-id="cio-t" data-icon="personcheck" aria-expanded="false">
+          <span class="pic" data-pic aria-hidden="true"></span>
+          <span><b>Prat Vemana</b><span class="sub">Chief Information &amp; Product Officer</span></span>
+          <span class="mandate">Holds the reporting line for both the new AI seat and user experience. AI governance rolls up here before it reaches the CEO.</span>
+        </button>
+        <div class="row2">
+          <button type="button" class="seat" data-id="caio-t" data-icon="robot" aria-expanded="false">
+            <span class="pic" data-pic aria-hidden="true"></span>
+            <span><b>Chandhu Nair</b><span class="sub">SVP, Chief AI Officer · starts Aug 24</span></span>
+            <span class="mandate">The new AI seat. An SVP reporting to the CIO, not a direct line to the CEO. This is where the report the dot carries begins.</span>
+          </button>
+          <button type="button" class="seat" data-id="ux-t" data-icon="person" aria-expanded="false">
+            <span class="pic" data-pic aria-hidden="true"></span>
+            <span><b>Purvi Shah</b><span class="sub">SVP, User Experience</span></span>
+            <span class="mandate">Peer seat beside the Chief AI Officer, under the same CIO. AI sits alongside UX, not above it.</span>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="panel" aria-label="Lululemon org fragment">
+      <h2><span class="hpic" data-hicon="building" aria-hidden="true"></span>Lululemon: vacated</h2>
+      <div class="chart" data-chart="l">
+        <svg class="wires" aria-hidden="true"></svg>
+        <button type="button" class="seat" data-id="ceo-l" data-icon="person" aria-expanded="false">
+          <span class="pic" data-pic aria-hidden="true"></span>
+          <span><b>CEO</b><span class="sub">Heidi O'Neill, from September</span></span>
+          <span class="mandate">Incoming CEO. The AI and technology line below is unstaffed, so no AI report arrives up this wire today.</span>
+        </button>
+        <button type="button" class="seat vacant" data-id="vac-l" data-icon="warning" aria-expanded="false">
+          <span class="pic" data-pic aria-hidden="true"></span>
+          <span><b>Chief AI &amp; Technology Officer</b><span class="sub">VACANT</span></span>
+          <span class="mandate">A C-level line to the CEO exists on paper, but the seat is empty. The dot starting here fades before it reaches the top.</span>
+        </button>
+        <div class="tenure">Ranju Das, departed <b>Sept 2025 to Aug 2026, under 12 months</b></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="strip"><span class="chip-inline">Open</span>No rigorous in-window survey establishes the CEO-versus-CIO reporting split. Advisory sources assert a CEO majority. Not cited as a number here.</div>
+</div>
+<script>
+(() => {
+  const ICON_BASE = '../customs-entry-agent/flow-icons/';
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const seats = Array.from(document.querySelectorAll('.seat'));
+  const byId = (id) => document.querySelector('[data-id="' + id + '"]');
+
+  /* Shared line-art icons, fetched and inlined with stroke swapped to
+     currentColor. A failed fetch leaves the slot empty, the text still
+     carries the seat. */
+  const inline = (el, name) => {
+    fetch(ICON_BASE + name + '.svg')
+      .then((r) => (r.ok ? r.text() : Promise.reject()))
+      .then((t) => { el.innerHTML = t.replace(/stroke="#232f3e"/g, 'stroke="currentColor"'); })
+      .catch(() => {});
+  };
+  seats.forEach((s) => inline(s.querySelector('[data-pic]'), s.dataset.icon));
+  document.querySelectorAll('[data-hicon]').forEach((h) => inline(h, h.dataset.hicon));
+
+  /* tap or Enter: toggle the seat's mandate line, then re-measure the wires
+     because the expanded text moves every seat below it */
+  let animating = false;
+  seats.forEach((s) => s.addEventListener('click', () => {
+    s.setAttribute('aria-expanded', String(s.getAttribute('aria-expanded') !== 'true'));
+    if (!animating) build();
+  }));
+
+  /* Wire geometry is measured from the seat rects, so it survives any wrap
+     or stack. Each panel gets parent-to-child elbow wires plus one report
+     route running bottom seat to top seat for the packet. */
+  const NS = 'http://www.w3.org/2000/svg';
+  const panels = [
+    { chart: 't', wires: [['cio-t', 'caio-t'], ['cio-t', 'ux-t'], ['ceo-t', 'cio-t']],
+      route: ['caio-t', 'cio-t', 'ceo-t'], warn: false },
+    { chart: 'l', wires: [['ceo-l', 'vac-l']],
+      route: ['vac-l', 'ceo-l'], warn: true }
+  ];
+  const geom = [];
+  const rel = (el, box) => { const r = el.getBoundingClientRect(); return { x: r.left - box.left + r.width / 2, top: r.top - box.top, bot: r.bottom - box.top }; };
+  const build = () => {
+    geom.length = 0;
+    panels.forEach((p) => {
+      const chart = document.querySelector('[data-chart="' + p.chart + '"]');
+      const svg = chart.querySelector('.wires');
+      svg.innerHTML = '';
+      const box = chart.getBoundingClientRect();
+      const wires = p.wires.map(([a, b]) => {
+        const A = rel(byId(a), box), B = rel(byId(b), box);
+        const mid = (A.bot + B.top) / 2;
+        const path = document.createElementNS(NS, 'path');
+        path.setAttribute('d', 'M' + A.x + ' ' + A.bot + ' V' + mid + ' H' + B.x + ' V' + B.top);
+        path.setAttribute('class', 'wire' + (p.warn ? ' warnwire' : ''));
+        svg.appendChild(path);
+        return path;
+      });
+      /* route: bottom seat up to top seat, passing through mid seats */
+      let d = '';
+      for (let i = 0; i < p.route.length - 1; i++) {
+        const C = rel(byId(p.route[i]), box), P = rel(byId(p.route[i + 1]), box);
+        const mid = (P.bot + C.top) / 2;
+        if (i === 0) d = 'M' + C.x + ' ' + C.top;
+        d += ' V' + mid + ' H' + P.x + ' V' + P.bot;
+        if (i < p.route.length - 2) d += ' V' + P.top;
+      }
+      const route = document.createElementNS(NS, 'path');
+      route.setAttribute('d', d);
+      route.setAttribute('fill', 'none');
+      route.setAttribute('stroke', 'none');
+      svg.appendChild(route);
+      const pkt = document.createElementNS(NS, 'circle');
+      pkt.setAttribute('r', '5');
+      pkt.setAttribute('class', 'packet' + (p.warn ? ' warnpkt' : ''));
+      svg.appendChild(pkt);
+      geom.push({ p, wires, route, pkt });
+    });
+  };
+
+  /* Sequence: wires draw on via stroke-dashoffset, then the report packet
+     rides each route bottom to top. On the vacated panel the packet fades
+     out mid-climb, the report never arrives. rAF t0 comes from the first
+     frame timestamp, never performance.now(). */
+  const DRAW = 700, RIDE = 1400;
+  let raf = 0;
+  const run = () => {
+    cancelAnimationFrame(raf);
+    build();
+    seats.forEach((s) => s.classList.remove('lit'));
+    if (reduced) {
+      panels.forEach((p) => p.route.forEach((id) => byId(id).classList.add('lit')));
+      return;
+    }
+    animating = true;
+    geom.forEach((g) => g.wires.forEach((w) => {
+      const len = w.getTotalLength();
+      w.style.strokeDasharray = len;
+      w.style.strokeDashoffset = len;
+    }));
+    let t0 = null;
+    const step = (ts) => {
+      if (t0 === null) t0 = ts;
+      const t = ts - t0;
+      const fd = Math.min(1, t / DRAW);
+      geom.forEach((g) => g.wires.forEach((w) => {
+        const da = parseFloat(w.style.strokeDasharray);
+        if (!isNaN(da)) w.style.strokeDashoffset = da * (1 - fd);
+      }));
+      if (t > DRAW) {
+        const fr = Math.min(1, (t - DRAW) / RIDE);
+        geom.forEach((g) => {
+          const len = g.route.getTotalLength();
+          const pt = g.route.getPointAtLength(len * fr);
+          g.pkt.setAttribute('cx', pt.x);
+          g.pkt.setAttribute('cy', pt.y);
+          g.pkt.style.opacity = g.p.warn
+            ? String(Math.max(0, 1 - fr / 0.6))
+            : (fr < 1 ? '1' : '0');
+          g.p.route.forEach((id, i) => {
+            const at = i / (g.p.route.length - 1);
+            if (fr >= at && (!g.p.warn || at < 0.6)) byId(id).classList.add('lit');
+          });
+        });
+      }
+      if (t < DRAW + RIDE) { raf = requestAnimationFrame(step); }
+      else { animating = false; }
+    };
+    raf = requestAnimationFrame(step);
+  };
+
+  document.getElementById('replay').addEventListener('click', run);
+  window.addEventListener('resize', () => { cancelAnimationFrame(raf); animating = false; build(); });
+
+  /* threshold 0, not 0.2: the stacked charts exceed a phone viewport, and a
+     0.2 visible fraction of a too-tall element is never reached. */
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting)) { io.disconnect(); run(); }
+    }, { threshold: 0 });
+    io.observe(document.getElementById('panels'));
+  } else { run(); }
+
+  if (document.documentElement.dataset.embedded === 'true') {
+    const postSize = () => window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+    if ('ResizeObserver' in window) new ResizeObserver(postSize).observe(document.body);
+    window.addEventListener('load', postSize);
+    setTimeout(postSize, 60);
+  }
+})();
+</script>
+</body>
+</html>

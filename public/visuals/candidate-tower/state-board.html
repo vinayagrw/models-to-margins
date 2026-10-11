@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The state board &middot; five failures, and who owns each one</title>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+  /* A board, not a diagram. It reads as rows at every width — at 375px the
+     clock column drops under the label instead of shrinking, so nothing ever
+     becomes unreadable and there is no mobile fallback to maintain. */
+  .board {
+    border: 1px solid var(--rule);
+    border-radius: 5px;
+    overflow: hidden;
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: 14px minmax(0, 1fr) auto;
+    gap: 12px;
+    align-items: start;
+    width: 100%;
+    padding: 12px 14px;
+    text-align: left;
+    background: var(--panel);
+    border: 0;
+    border-bottom: 1px solid var(--rule-faint);
+    border-radius: 0;
+    cursor: pointer;
+  }
+  .row:last-of-type { border-bottom: 0; }
+  .row:nth-of-type(even) { background: var(--panel-2); }
+  .row:hover .row-what { color: var(--live); }
+  .row[aria-pressed="true"] { background: var(--live-dim); }
+
+  .row .lamp { margin-top: 6px; }
+
+  .row-in { min-width: 0; }
+  .row-what {
+    display: block;
+    font-family: var(--display);
+    font-size: clamp(0.94rem, 2.2vw, 1.04rem);
+    font-weight: 600;
+    color: var(--ink);
+    transition: color 0.15s ease;
+  }
+  .row-note {
+    display: block;
+    margin-top: 3px;
+    font-size: 0.84rem;
+    line-height: 1.5;
+    color: var(--ink-2);
+  }
+  .row-owner {
+    display: block;
+    margin-top: 5px;
+    font-family: var(--mono);
+    font-size: 0.62rem; font-weight: 600;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--ink-3);
+  }
+  .row-clock {
+    font-family: var(--mono);
+    font-size: 0.7rem; font-weight: 600;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+    color: var(--ink-3);
+    text-align: right;
+  }
+  .row-clock b { display: block; font-size: 0.94rem; color: var(--ink); }
+  .row.is-alarm .row-clock b { color: var(--alarm); }
+  .row.is-warn .row-clock b { color: var(--warn); }
+
+  .plate {
+    padding: 13px 15px;
+    background: var(--panel);
+    border: 1px solid var(--rule);
+    border-left: 3px solid var(--live);
+    border-radius: 4px;
+  }
+  .plate h2 {
+    font-family: var(--display);
+    font-size: 0.98rem; font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 8px;
+  }
+  .plate dl { display: grid; gap: 9px; }
+  .plate dt {
+    font-family: var(--mono);
+    font-size: 0.61rem; font-weight: 600;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--ink-3);
+    margin-bottom: 2px;
+  }
+  .plate dd { font-size: 0.86rem; line-height: 1.55; color: var(--ink-2); }
+  .plate .miss { color: var(--alarm); font-weight: 600; }
+
+  .legend {
+    display: flex; flex-wrap: wrap; gap: 6px 16px;
+    font-family: var(--mono);
+    font-size: 0.63rem; letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+
+  .foot {
+    font-family: var(--mono);
+    font-size: 0.63rem;
+    letter-spacing: 0.05em;
+    color: var(--ink-3);
+    line-height: 1.5;
+  }
+
+  @media (max-width: 560px) {
+    .row { grid-template-columns: 14px minmax(0, 1fr); }
+    .row-clock { grid-column: 2; text-align: left; margin-top: 6px; }
+    .row-clock b { display: inline; margin-right: 6px; }
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="head">
+    <span class="eyebrow">Instrument A &middot; the five states nobody is watching</span>
+    <h1>Every failure is a place where nobody owns the state</h1>
+    <p>Five well-documented cross-border failures, read as control problems. Each one has a thing that should be known, a party who should own it, and a clock that is already running. Tap a row for what is actually missing.</p>
+    <div class="stampline"><span class="stamp stamp--illustrative">Clocks are illustrative</span></div>
+  </div>
+
+  <div class="legend">
+    <span><i class="lamp lamp--ok"></i> Owned and watched</span>
+    <span><i class="lamp lamp--warn"></i> Owned, not watched</span>
+    <span><i class="lamp lamp--alarm"></i> Nobody owns it</span>
+  </div>
+
+  <div class="board" id="board" role="group" aria-label="Five control rows"></div>
+
+  <div class="plate" id="plate" aria-live="polite"></div>
+
+  <p class="foot">Clock values are illustrative and show the order of magnitude, not a measurement. The ownership gaps are the claim.</p>
+</div>
+
+<script>
+const ROWS = [
+  {
+    state: 'alarm',
+    what: 'Whether the goods description can actually be classified',
+    note: 'A marketing description on a commercial invoice is not a classifiable one, and nothing checks before it is relied on.',
+    owner: 'Owner: nobody',
+    clock: 'Detected', clockV: '+6 days',
+    should: 'The shipper, at the moment the invoice line is written, because that is the only point where the goods and the description are in the same room.',
+    missing: 'No control exists at write time. The first party who could detect the problem is the broker, six days downstream, and by then the goods have moved.',
+    fix: 'A classifiability check at invoice creation, refusing to accept a line that cannot resolve to a code.'
+  },
+  {
+    state: 'alarm',
+    what: 'Whether the pallet on the trailer matches the invoice line',
+    note: 'Two systems describe the same goods after pickup, and neither can prove they agree.',
+    owner: 'Owner: nobody',
+    clock: 'Detected', clockV: 'at border',
+    should: 'The origin carrier at pickup, which is the last moment both the physical goods and the paperwork are together.',
+    missing: 'Piece counts are re-keyed rather than reconciled. Nothing compares the two records until customs does it, and customs calls it a discrepancy rather than a typo.',
+    fix: 'A reconciliation at pickup that fails loudly, rather than a re-key that fails silently.'
+  },
+  {
+    state: 'warn',
+    what: 'The current duty exposure on this product and origin',
+    note: 'Rates move with trade policy. The number used at quoting time is not the number that will be owed.',
+    owner: 'Owner: finance, quarterly',
+    clock: 'Refreshed', clockV: 'quarterly',
+    should: 'A watcher on every authority feed, refreshing continuously, with every quote recording the rulebook version it used.',
+    missing: 'Exposure is recalculated on a human cadence against a rulebook that changes on its own. The gap between the two is where margin goes.',
+    fix: 'Version the rulebook, pin every quote to a version, and re-derive exposure when the version moves.'
+  },
+  {
+    state: 'alarm',
+    what: 'Where the shipment physically is, right now',
+    note: 'Tracking stops when freight changes carrier or enters a customs yard. Each portal only shows what that carrier knows.',
+    owner: 'Owner: nobody, between carriers',
+    clock: 'Blind for', clockV: '4 days',
+    should: 'One layer holding position across every leg, so a handoff is an event rather than a blackout.',
+    missing: 'Visibility is stitched from carrier portals, and the handoff is exactly the moment no portal has the shipment. The gap is structural, not a data-quality problem.',
+    fix: 'Treat custody transfer as a first-class event with a required acknowledgement on both sides.'
+  },
+  {
+    state: 'warn',
+    what: 'Whether an exception has an owner and a deadline',
+    note: 'A hold, a discrepancy or a rejected filing arrives as a code, and codes do not escalate themselves.',
+    owner: 'Owner: whoever notices',
+    clock: 'Charges accrue', clockV: 'from hour 0',
+    should: 'Every exception opened as an object with an assignee, a clock and an escalation rule, the way an incident is.',
+    missing: 'Exceptions are handled in inboxes. Cost accrues from the moment of the hold while the message is still being forwarded.',
+    fix: 'An exception queue with ownership and a clock, not a mailbox.'
+  }
+];
+
+const board = document.getElementById('board');
+const plate = document.getElementById('plate');
+
+ROWS.forEach((r, i) => {
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'row is-' + r.state;
+  b.setAttribute('aria-pressed', String(i === 0));
+  b.innerHTML =
+    '<i class="lamp lamp--' + r.state + '"></i>' +
+    '<span class="row-in">' +
+      '<span class="row-what">' + r.what + '</span>' +
+      '<span class="row-note">' + r.note + '</span>' +
+      '<span class="row-owner">' + r.owner + '</span>' +
+    '</span>' +
+    '<span class="row-clock"><b>' + r.clockV + '</b>' + r.clock + '</span>';
+  b.addEventListener('click', () => select(i));
+  board.appendChild(b);
+});
+
+const buttons = Array.from(board.querySelectorAll('.row'));
+
+function select(i) {
+  buttons.forEach((b, j) => b.setAttribute('aria-pressed', String(j === i)));
+  const r = ROWS[i];
+  plate.innerHTML =
+    '<h2>' + r.what + '</h2>' +
+    '<dl>' +
+      '<div><dt>Who should own it</dt><dd>' + r.should + '</dd></div>' +
+      '<div><dt>What is missing</dt><dd class="miss">' + r.missing + '</dd></div>' +
+      '<div><dt>The control that would close it</dt><dd>' + r.fix + '</dd></div>' +
+    '</dl>';
+  report();
+}
+
+select(0);
+
+/* Report height so the host frame collapses to the content instead of leaving
+   a band of empty frame. Autosize is opt-in and this is the opt-in. */
+function report() {
+  if (document.documentElement.dataset.embedded !== 'true') return;
+  window.parent.postMessage(
+    { type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+}
+if (document.documentElement.dataset.embedded === 'true') {
+  if ('ResizeObserver' in window) new ResizeObserver(report).observe(document.body);
+  window.addEventListener('load', report);
+  report();
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The threat class, defined</title>
+<script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+.shell { display: flex; flex-direction: column; gap: 12px; }
+:root[data-embedded="true"] .shell { padding: 14px clamp(14px, 2vw, 22px); }
+.head h1 { font-family: "Archivo", sans-serif; font-weight: 700; font-size: clamp(1.0rem, 2.2vw, 1.26rem); color: var(--text-strong); }
+.head p { font: 500 0.76rem/1.4 "IBM Plex Sans", sans-serif; color: var(--muted); margin-top: 3px; }
+
+.ctl { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.ctl button {
+  min-height: 34px; padding: 6px 12px; cursor: pointer;
+  font: 600 0.64rem/1 "IBM Plex Mono", monospace; letter-spacing: 0.07em; text-transform: uppercase;
+  color: var(--accent); background: transparent; border: 1px solid var(--accent);
+}
+.ctl button:hover { background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.ctl button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.ctl .hint { font: 500 0.68rem/1.3 "IBM Plex Sans", sans-serif; color: var(--muted-soft); }
+
+.card { border: 2px solid var(--border-strong); background: var(--surface); }
+.name-bar { padding: 10px 14px; border-bottom: 1px solid var(--border-strong); background: var(--surface-strong); }
+.name-bar b { font: 700 0.94rem/1.3 "Archivo", sans-serif; color: var(--text-strong); }
+.name-bar span { display: block; font: 500 0.7rem/1.4 "IBM Plex Mono", monospace; letter-spacing: 0.04em; color: var(--muted); margin-top: 2px; }
+
+/* spec rows: icon leads, the phase number rides the icon box as a badge */
+.prow {
+  display: grid; grid-template-columns: 54px 1fr 1fr; gap: 0; align-items: start;
+  width: 100%; padding: 0; text-align: left; cursor: pointer;
+  background: transparent; border: 0; font-family: inherit; position: relative;
+  transition: opacity 400ms, transform 400ms;
+}
+.prow + .prow { border-top: 1px solid var(--border); }
+.prow:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.prow.dim { opacity: 0.14; transform: translateY(5px); }
+.picwrap { position: relative; display: grid; place-items: center; padding: 12px 0 10px; }
+.pic {
+  width: 36px; height: 36px; display: grid; place-items: center;
+  background: var(--surface); border: 1.5px solid var(--border-strong);
+  color: var(--muted); transition: color 300ms, border-color 300ms, box-shadow 300ms;
+}
+.pic svg { width: 22px; height: 22px; display: block; }
+.pic svg * { stroke: currentColor; }
+.prow:not(.dim) .pic { color: var(--accent); border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 16%, transparent); }
+.pnum {
+  position: absolute; right: 2px; top: 6px; width: 15px; height: 15px;
+  display: grid; place-items: center; background: var(--surface-strong);
+  border: 1px solid var(--border-strong);
+  font: 700 0.58rem/1 "IBM Plex Mono", monospace; color: var(--accent);
+}
+.pcell { padding: 10px 12px 10px 4px; min-width: 0; }
+.pcell b { display: block; font: 600 0.72rem/1.3 "IBM Plex Sans", sans-serif; color: var(--text-strong); margin-bottom: 3px; }
+.pcell span { font: 500 0.72rem/1.45 "IBM Plex Sans", sans-serif; color: var(--muted); }
+.invalid { border-left: 2px solid var(--signal); background: color-mix(in srgb, var(--signal) 8%, transparent); padding-left: 12px; transition: opacity 400ms 180ms; }
+.invalid b { color: var(--signal); }
+.prow.dim .invalid { opacity: 0; }
+.more {
+  grid-column: 1 / -1; display: none; margin: 0 12px 10px 12px;
+  font: 500 0.7rem/1.45 "IBM Plex Sans", sans-serif; color: var(--muted);
+  border-left: 2px solid var(--accent); padding-left: 8px;
+}
+.prow[aria-expanded="true"] .more { display: block; }
+
+/* instance rail: each observed instance gets its own pictogram and pops in as it is counted */
+.rail-head {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 8px; flex-wrap: wrap;
+  padding: 10px 14px 0; border-top: 1px solid var(--border-strong); background: var(--surface-strong);
+}
+.rail-head b { font: 600 0.66rem/1.2 "IBM Plex Mono", monospace; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.rail-head .count { font: 600 0.66rem/1.2 "IBM Plex Mono", monospace; color: var(--accent); }
+.rail { display: flex; gap: 8px; flex-wrap: wrap; padding: 9px 14px 11px; background: var(--surface-strong); }
+.inst {
+  display: flex; align-items: center; gap: 8px; border: 1px solid var(--border);
+  padding: 6px 9px; min-width: 130px; transition: opacity 350ms, transform 350ms;
+}
+.inst.dim { opacity: 0.14; transform: translateY(4px); }
+.inst .pic { width: 26px; height: 26px; flex: 0 0 auto; }
+.inst .pic svg { width: 17px; height: 17px; }
+.inst:not(.dim) .pic { color: var(--accent-2); border-color: var(--accent-2); box-shadow: none; }
+.inst div b { display: block; font: 600 0.7rem/1.3 "IBM Plex Sans", sans-serif; color: var(--text-strong); }
+.inst div span { font: 500 0.64rem/1.3 "IBM Plex Mono", monospace; color: var(--muted); }
+
+.caption { font: 500 0.72rem/1.5 "IBM Plex Sans", sans-serif; color: var(--muted); }
+.caption b { color: var(--text-strong); font-weight: 600; }
+
+@media (max-width: 620px) {
+  .prow { grid-template-columns: 48px 1fr; }
+  .prow .invalid { grid-column: 2; border-top: 1px dashed var(--border); }
+  .inst { min-width: 120px; }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="head">
+    <h1>Spec card: ungated, open-weight, autonomous offensive agents</h1>
+    <p>Three defining properties, each invalidating a specific control assumption.</p>
+  </div>
+
+  <div class="ctl">
+    <button type="button" id="replay">Replay reveal</button>
+    <span class="hint">Tap a property row for its basis on this card.</span>
+  </div>
+
+  <div class="card" id="card">
+    <div class="name-bar">
+      <b>Threat class</b>
+      <span>Observed across at least 2 independent origins, Jul-Aug 2026</span>
+    </div>
+
+    <button type="button" class="prow" data-icon="robot" aria-expanded="false">
+      <span class="picwrap"><span class="pic" data-pic aria-hidden="true"></span><span class="pnum" aria-hidden="true">1</span></span>
+      <span class="pcell"><b>Autonomy</b><span>Reconnaissance, chaining, and tactic-switching run machine-paced. Humans set objectives, not steps.</span></span>
+      <span class="pcell invalid"><b>Invalidates</b><span>The assumption of a human-speed kill chain with human-length dwell decisions.</span></span>
+      <span class="more">Basis on this card: machine pace is the shared signature of every entry in the instance rail below, from GTG-1002 (Nov 2025) through Taiwan (Aug 12, 2026, reported).</span>
+    </button>
+    <button type="button" class="prow" data-icon="cpu" aria-expanded="false">
+      <span class="picwrap"><span class="pic" data-pic aria-hidden="true"></span><span class="pnum" aria-hidden="true">2</span></span>
+      <span class="pcell"><b>Open weights</b><span>No vendor API, no account, no rate limit, no usage policy to enforce.</span></span>
+      <span class="pcell invalid"><b>Invalidates</b><span>Any control that assumes a gatekeeping provider sits between attacker and model.</span></span>
+      <span class="more">Basis on this card: the Unit 42 / DeepSeek-Hermes entry names the model family. An open-weight model answers to no API gate, so the vendor-side control point never exists.</span>
+    </button>
+    <button type="button" class="prow" data-icon="person" aria-expanded="false">
+      <span class="picwrap"><span class="pic" data-pic aria-hidden="true"></span><span class="pnum" aria-hidden="true">3</span></span>
+      <span class="pcell"><b>Social guardrail failure</b><span>A prompt reframing intent as authorized testing defeats a guardrail that reasons about stated intent.</span></span>
+      <span class="pcell invalid"><b>Invalidates</b><span>Refusal training and prompt-level guardrails as a sufficient defensive layer.</span></span>
+      <span class="more">Basis on this card: the OpenAI sandbox escape entry shows the pattern. Intent reframed as authorized testing walks past a guardrail that reasons about stated intent.</span>
+    </button>
+
+    <div class="rail-head" aria-hidden="true"><b>Observed instances</b><span class="count"><span id="icount">0</span> of 4 on the card</span></div>
+    <div class="rail" role="list" aria-label="Observed instances of the class">
+      <div class="inst" role="listitem" data-icon="radar"><span class="pic" data-pic aria-hidden="true"></span><div><b>GTG-1002</b><span>Nov 2025 &middot; 1 origin</span></div></div>
+      <div class="inst" role="listitem" data-icon="flask"><span class="pic" data-pic aria-hidden="true"></span><div><b>OpenAI sandbox escape</b><span>Jul 21, 2026 &middot; 1 origin</span></div></div>
+      <div class="inst" role="listitem" data-icon="bug"><span class="pic" data-pic aria-hidden="true"></span><div><b>Unit 42 / DeepSeek-Hermes</b><span>Jul 30, 2026 &middot; 1 origin</span></div></div>
+      <div class="inst" role="listitem" data-icon="megaphone"><span class="pic" data-pic aria-hidden="true"></span><div><b>Taiwan (reported)</b><span>Aug 12, 2026 &middot; 1 origin</span></div></div>
+    </div>
+  </div>
+
+  <p class="caption">Four instances, four separate origins. The class does not depend on any single one of them, including Taiwan, being verified in full.</p>
+</div>
+<script>
+(() => {
+  const ICON_BASE = '../customs-entry-agent/flow-icons/';
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const card = document.getElementById('card');
+  const rows = Array.from(card.querySelectorAll('.prow'));
+  const insts = Array.from(card.querySelectorAll('.inst'));
+  const icount = document.getElementById('icount');
+
+  /* Icons are shared line-art SVGs; fetched and inlined with the stroke
+     swapped to currentColor so they follow the theme. A failed fetch leaves
+     the slot empty and the text still carries the row. */
+  [...rows, ...insts].forEach((el) => {
+    const slot = el.querySelector('[data-pic]');
+    fetch(ICON_BASE + el.dataset.icon + '.svg')
+      .then((r) => (r.ok ? r.text() : Promise.reject()))
+      .then((t) => { slot.innerHTML = t.replace(/stroke="#232f3e"/g, 'stroke="currentColor"'); })
+      .catch(() => {});
+  });
+
+  /* tap or Enter on a row shows the sourced basis of that spec */
+  rows.forEach((row) => {
+    row.addEventListener('click', () => {
+      const open = row.getAttribute('aria-expanded') === 'true';
+      row.setAttribute('aria-expanded', String(!open));
+    });
+  });
+
+  /* Staged reveal: spec rows light 1-2-3, then the instance rail pops in
+     one entry at a time while the counter counts up. rAF t0 comes from the
+     first frame timestamp, never performance.now(): sandboxed iframes can
+     disagree between the two clocks. */
+  const stages = [
+    ...rows.map((r, i) => ({ t: i * 480, fn: () => r.classList.remove('dim') })),
+    ...insts.map((n, i) => ({ t: 1650 + i * 330, fn: () => { n.classList.remove('dim'); icount.textContent = String(i + 1); } })),
+  ];
+  let raf = 0;
+  const finish = () => {
+    rows.forEach((r) => r.classList.remove('dim'));
+    insts.forEach((n) => n.classList.remove('dim'));
+    icount.textContent = '4';
+  };
+  const run = () => {
+    cancelAnimationFrame(raf);
+    if (reduced) { finish(); return; }
+    rows.forEach((r) => r.classList.add('dim'));
+    insts.forEach((n) => n.classList.add('dim'));
+    icount.textContent = '0';
+    let t0 = null, next = 0;
+    const step = (ts) => {
+      if (t0 === null) t0 = ts;
+      const t = ts - t0;
+      while (next < stages.length && t >= stages[next].t) stages[next++].fn();
+      if (next < stages.length) raf = requestAnimationFrame(step);
+    };
+    /* one settled frame in the dimmed state before the timeline starts */
+    raf = requestAnimationFrame(() => { raf = requestAnimationFrame(step); });
+  };
+
+  document.getElementById('replay').addEventListener('click', run);
+
+  /* threshold 0, not 0.2: the card can exceed a phone viewport, and a
+     fraction of a too-tall element never intersects. */
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting)) { io.disconnect(); run(); }
+    }, { threshold: 0 });
+    io.observe(card);
+  } else { finish(); }
+
+  if (document.documentElement.dataset.embedded === 'true') {
+    const postSize = () => window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+    if ('ResizeObserver' in window) new ResizeObserver(postSize).observe(document.body);
+    window.addEventListener('load', postSize);
+    window.addEventListener('resize', postSize);
+  }
+})();
+</script>
+</body>
+</html>

@@ -76,6 +76,7 @@
 | Microservices vs Modular Monolith | `/deep-dives/microservices-vs-modular-monolith` | premium deep dive (bespoke Blueprint template) | Nine scenes of date-stamped evidence plus a statistics audit that replaces the maturity-ladder story with a forces-based decision framework |
 | The AI Ops Execution Layer | `/deep-dives/ai-ops-execution-layer` | premium deep dive (bespoke Console template) | Eight-scene capability atlas on AI that acts instead of reports, with a governed write path, an autonomy ladder, and a graded evidence refresh |
 | Loop Engineering | `/deep-dives/loop-engineering` | premium deep dive (bespoke Console template) | Sequel to Harness Engineering: ten visual-led scenes with 12 interactive instruments — era timeline, evidence board with a dated four-week self-evolving-harness ledger, failure lamps, and an adoption playbook |
+| The Customs Entry Agent | `/deep-dives/customs-entry-agent` | premium deep dive (bespoke Atlas template) | Visual-first solution architecture for agentic US customs filing: five chapters (problem, solution, end-to-end architecture, ROI, challenges) with 15 interactive figures. Three of them are stencils built from the shared `aws-stencil-diagram` engine — computed frame boxes, orthogonal connectors auto-routed through the corridors between boxes and collision-tested against every service box, packets riding the elbows in flow order, a step scrubber, per-node detail cards, pan, zoom and fullscreen: an entry-lifecycle stencil carrying four selectable journeys over one topology (repeat SKU, near neighbour, genuinely novel, and the rulebook-change loop that runs backwards), the full AWS reference architecture with official icons and nested Cloud/Region/VPC/subnet/account frames plus 18 numbered badges and two routes that do not exist by construction, and an integration map of ten external systems where every node's card carries transport, cadence, idempotency key and failure semantics. Alongside them: a persona user-flow swimlane, a playable rulebook-invalidation sweep, an append-only audit ledger, and an illustrative cost model with kill-criteria lamps |
 
 ## How It Works
 
@@ -120,6 +121,10 @@ flowchart LR
 | Premium deep dive | `/deep-dives/microservices-vs-modular-monolith` | `src/content/deep-dives/microservices-vs-modular-monolith.md` (bespoke `template: blueprint`) |
 | Premium deep dive | `/deep-dives/ai-ops-execution-layer` | `src/content/deep-dives/ai-ops-execution-layer.md` (bespoke `template: console`) |
 | Premium deep dive | `/deep-dives/loop-engineering` | `src/content/deep-dives/loop-engineering.md` (bespoke `template: console`) |
+| Premium deep dive | `/deep-dives/customs-entry-agent` | `src/content/deep-dives/customs-entry-agent.md` (bespoke `template: atlas`) |
+| Premium deep dive | `/deep-dives/ai-governance-before-roi` | `src/content/deep-dives/ai-governance-before-roi.md` (bespoke `template: boardroom`) |
+| Premium deep dive | `/deep-dives/automation-capex-air-pocket` | `src/content/deep-dives/automation-capex-air-pocket.md` (bespoke `template: gantry`) |
+| Premium deep dive | `/deep-dives/taiwan-incident-generalized` | `src/content/deep-dives/taiwan-incident-generalized.md` (bespoke `template: sitrep`) |
 | Hidden visitor analytics | `/admin/insights?key=…` | `src/pages/admin/insights.astro` + `public/scripts/insights*.js` (secret-gated, not linked from any public surface) |
 
 ### Content model
@@ -145,8 +150,8 @@ models-to-margins/
     styles/            Shared design system
   public/
     visuals/           Standalone HTML/SVG interactive experiences
-    scripts/           Client beacon, dashboard, spine scripts (blueprint, console)
-    styles/            Bespoke deep-dive stylesheets (blueprint, console)
+    scripts/           Client beacon, dashboard, spine scripts (blueprint, console, ledger, atlas)
+    styles/            Bespoke deep-dive stylesheets (blueprint, console, ledger, atlas)
   functions/           Analytics API handlers (imported by worker.js)
   test/                Node test suite for enrichment + storage
   docs/
@@ -207,6 +212,10 @@ Current references:
 - `src/content/deep-dives/microservices-vs-modular-monolith.md` — second `template: blueprint` reference, nine evidence scenes
 - `src/content/deep-dives/ai-ops-execution-layer.md` — `template: console` shell, eight scenes with a governed write path and autonomy ladder
 - `src/content/deep-dives/loop-engineering.md` — `template: console`, ten visual-led scenes embedding 12 interactive instruments from `public/visuals/loop-engineering/` (every visual autosizes into its frame and theme-syncs over a postMessage relay)
+- `src/content/deep-dives/customs-entry-agent.md` — bespoke `template: atlas` shell, five chapters embedding 15 interactive figures from `public/visuals/customs-entry-agent/` (all autosizing, theme-synced, with signal-LED verdict chips carrying the evidence discipline)
+- `src/content/deep-dives/ai-governance-before-roi.md` — bespoke `template: boardroom` shell, six chapters embedding 6 interactive exhibits from `public/visuals/ai-governance-before-roi/`, an annual-report/filing identity carrying the confirmed/proposed/open/vendor-claim evidence discipline over the six-way AI ROI measurement gap
+- `src/content/deep-dives/automation-capex-air-pocket.md` — bespoke `template: gantry` shell, six chapters embedding 6 interactive figures from `public/visuals/automation-capex-air-pocket/`, a loading-dock identity holding the m/m-vs-y/y demand reconciliation and the zero-published-unit-economics thesis at equal prominence
+- `src/content/deep-dives/taiwan-incident-generalized.md` — bespoke `template: sitrep` shell, six chapters embedding 7 interactive exhibits from `public/visuals/taiwan-incident-generalized/`, an after-action-report identity that generalizes the Taiwan near-autonomous AI attack into a threat class plus a 7/30/90-day defender playbook, single-source and MODA-divergence caveats surfaced in the first screen
 
 #### Optional bespoke templates
 
@@ -216,6 +225,13 @@ For a deep dive that needs its own visual identity, opt in with a frontmatter `t
 |---|---|---|---|
 | `template: blueprint` | Paper-light drawing board with a sticky scene spine | `.dd-blueprint` + `public/styles/deep-dive-blueprint.css` + `public/scripts/spine-blueprint.js` | metric-chain, microservices-vs-modular-monolith |
 | `template: console` | Dark instrument panel with thesis lamps, master tiles, and a mission-brief block | `.dd-console` + `public/styles/deep-dive-console.css` + `public/scripts/spine-console.js` | loop-engineering, ai-ops-execution-layer |
+| `template: ledger` | Customs paper-of-record: manila bond paper with ruled ledger lines, an entry-form header, rubber-stamp verdict chips, and EXHIBIT bars (night-audit navy in dark) | `.dd-ledger` + `public/styles/deep-dive-ledger.css` + `public/scripts/spine-ledger.js` | none currently (built for customs-entry-agent, which moved to atlas) |
+| `template: atlas` | Systems atlas / mission control: dark grid ground, no sidebar, a chapter rail that is a horizontal band up to 1640px and a vertical figure index beyond it, full-width FIG. frames, stat tiles, and signal-LED verdict chips (pale blueprint grey in light) | `.dd-atlas` + `public/styles/deep-dive-atlas.css` + `public/scripts/spine-atlas.js` | customs-entry-agent |
+| `template: boardroom` | Annual-report / proxy-statement filing: ivory stock with an oxblood rule and Fraunces display, a sticky agenda spine with dot leaders, Exhibit-plated figures (brass-on-graphite in dark) | `.dd-boardroom` + `public/styles/deep-dive-boardroom.css` + `public/scripts/spine-boardroom.js` | ai-governance-before-roi |
+| `template: gantry` | Loading-dock control board: concrete daylight surfaces with fill-only safety yellow and a numbered dock-door spine (D-01…) with a read-progress gauge, sodium-amber night shift in dark | `.dd-gantry` + `public/styles/deep-dive-gantry.css` + `public/scripts/spine-gantry.js` | automation-capex-air-pocket |
+| `template: sitrep` | After-action review binder: photocopied-report paper with an olive structural accent and a literal "Not an official record" cover cell, a phase-timeline spine, exhibit case-tab figures (ops-console dark), signal-red reserved for disputed/gap states only | `.dd-sitrep` + `public/styles/deep-dive-sitrep.css` + `public/scripts/spine-sitrep.js` | taiwan-incident-generalized |
+| `template: waybill` | Carbonless consignment note: pale green-white NCR stock with a perforated tear strip, condensed uppercase headings and red carbon impressions, dock-office slate in dark. Signature element is the custody chain, one row per handoff | `.dd-waybill` + `public/styles/deep-dive-waybill.css` + `public/scripts/spine-waybill.js` | candidate-waybill *(prototype)* |
+| `template: tower` | Operations control room: instrument grid on cool paper-grey, cyan live accent, status lamps with owner and clock columns, near-black night tower in dark. Signature element is the control row, lamp plus owner plus clock | `.dd-tower` + `public/styles/deep-dive-tower.css` + `public/scripts/spine-tower.js` | candidate-tower *(prototype)* |
 
 New bespoke looks add a `template:` value, a branch in `[slug].astro`, and scoped CSS/JS under a fresh `.dd-<name>` namespace. House-style note: prose in these templates uses no semicolons or em-dashes (scene headings keep their em-dash because the reading-map anchors depend on the slug).
 

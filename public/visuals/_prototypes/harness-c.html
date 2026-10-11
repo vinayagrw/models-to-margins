@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Harness Architecture — Run Replay (Archetype C)</title>
+<script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+/* ---- Embed override: family theme locks embed to viewport height; autosize needs auto ---- */
+:root[data-embedded="true"], :root[data-embedded="true"] body { height: auto; overflow: visible; }
+:root[data-embedded="true"] .shell { width: 100%; height: auto; padding: 14px 16px; }
+
+:root {
+  /* zone + layer aliases — no raw colour values, only theme tokens */
+  --z-ops: var(--P1);
+  --z-ctl: var(--P2);
+  --z-exec: var(--P3);
+  --lay1: var(--P1);
+  --lay2: var(--P2);
+  --lay3: var(--P3);
+  --lay4: var(--P4);
+  --lay5: var(--P5);
+}
+
+* { box-sizing: border-box; }
+body { font-family: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif; color: var(--text); }
+
+.shell {
+  display: flex; flex-direction: column; gap: clamp(12px, 1.6vw, 18px);
+  padding: clamp(12px, 2vw, 26px); max-width: 1500px; margin: 0 auto; width: 100%;
+}
+
+/* ---- head ---- */
+.eyebrow {
+  font-size: clamp(0.6rem, 0.56rem + 0.12vw, 0.7rem); font-weight: 700; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--accent);
+}
+h1 {
+  font-size: clamp(1.15rem, 1rem + 1.1vw, 1.75rem); font-weight: 700;
+  letter-spacing: -0.01em; color: var(--text-strong); line-height: 1.15; margin: 4px 0 6px;
+}
+.dek { font-size: clamp(0.84rem, 0.8rem + 0.25vw, 0.98rem); color: var(--muted); line-height: 1.5; }
+
+/* ---- controls ---- */
+.bar { display: flex; flex-wrap: wrap; gap: clamp(7px, 0.9vw, 12px); align-items: center; }
+.grp {
+  display: flex; flex-wrap: wrap; gap: 5px; padding: 5px; min-width: 0;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+}
+.grp > .lbl {
+  font-size: 0.62rem; font-weight: 700; letter-spacing: 0.13em; text-transform: uppercase;
+  color: var(--muted-soft); align-self: center; padding: 0 6px 0 8px;
+}
+button {
+  font: inherit; cursor: pointer; border-radius: 999px; border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--surface-strong) 92%, transparent);
+  color: var(--text); padding: 6px 12px;
+  font-size: clamp(0.72rem, 0.69rem + 0.15vw, 0.84rem); font-weight: 600;
+  transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+}
+button:hover { border-color: var(--border-strong); transform: translateY(-1px); }
+button[aria-pressed="true"] {
+  background: var(--accent); border-color: var(--accent); color: var(--bg-start);
+  box-shadow: var(--shadow-soft);
+}
+button:focus-visible, .cbtn:focus-visible, .tape li:focus-visible, input[type="range"]:focus-visible {
+  outline: 3px solid var(--accent-2); outline-offset: 2px;
+}
+
+.scrub { display: flex; align-items: center; gap: 9px; flex: 1 1 260px; min-width: 0; }
+.scrub label {
+  font-size: 0.62rem; font-weight: 700; letter-spacing: 0.13em; text-transform: uppercase;
+  color: var(--muted-soft); white-space: nowrap;
+}
+input[type="range"] {
+  flex: 1 1 auto; min-width: 0; accent-color: var(--accent); height: 22px; cursor: pointer;
+}
+.count {
+  font-size: 0.76rem; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+
+/* ---- layout ---- */
+.body { display: grid; grid-template-columns: 1fr; gap: clamp(12px, 1.4vw, 18px); align-items: start; }
+@media (min-width: 1080px) { .body { grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); } }
+
+.stage {
+  position: relative; background: var(--surface); border: 1px solid var(--border);
+  border-radius: 18px; box-shadow: var(--shadow-soft); padding: clamp(9px, 1.1vw, 15px);
+  min-width: 0; overflow: hidden;
+}
+.zones { position: relative; display: grid; grid-template-columns: 1fr; gap: 10px; min-width: 0; }
+@media (min-width: 760px) { .zones { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(10px, 2.4vw, 34px); } }
+
+.zone {
+  position: relative; min-width: 0; display: flex; flex-direction: column; gap: 8px;
+  border: 1px dashed color-mix(in srgb, var(--zt) 42%, transparent);
+  border-radius: 14px; padding: 26px 8px 10px;
+  background: color-mix(in srgb, var(--zt) 6%, transparent);
+  transition: opacity 0.3s ease, background 0.3s ease;
+}
+.zone[data-z="ops"] { --zt: var(--z-ops); }
+.zone[data-z="ctl"] { --zt: var(--z-ctl); }
+.zone[data-z="exec"] { --zt: var(--z-exec); }
+.zone > .zh {
+  position: absolute; top: 7px; left: 10px; font-size: 0.58rem; font-weight: 700;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--zt);
+}
+.zones.no-l0 .zone { border-color: transparent; background: transparent; }
+.zones.no-l0 .zone > .zh { opacity: 0.4; }
+
+/* ---- component cards ---- */
+.card {
+  position: relative; z-index: 2; min-width: 0;
+  border: 1px solid var(--border-strong); border-radius: 12px;
+  background: var(--surface-strong); box-shadow: var(--shadow-soft);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+.card[hidden] { display: none; }
+.card.fresh { animation: pop 0.42s cubic-bezier(0.2, 0.9, 0.3, 1.2) both; }
+@keyframes pop { from { opacity: 0; transform: translateY(9px) scale(0.94); } to { opacity: 1; transform: none; } }
+.card.live { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 24%, transparent); }
+.card.prev { border-color: color-mix(in srgb, var(--accent) 55%, var(--border-strong)); }
+.card.pick { border-color: var(--accent-2); }
+
+.cbtn {
+  display: flex; align-items: center; gap: 8px; width: 100%; text-align: left;
+  background: none; border: 0; border-radius: 12px; padding: 8px 9px; min-width: 0;
+  color: var(--text); box-shadow: none;
+}
+.cbtn:hover { transform: none; background: color-mix(in srgb, var(--accent) 8%, transparent); }
+.cbtn[aria-pressed="true"] { background: color-mix(in srgb, var(--accent-2) 12%, transparent); color: var(--text); }
+.pic { flex: 0 0 auto; width: 21px; height: 21px; color: var(--accent); display: block; }
+.pic svg { width: 100%; height: 100%; display: block; }
+.pic svg * { stroke: currentColor; }
+.ct { display: flex; flex-direction: column; gap: 1px; min-width: 0; flex: 1 1 auto; }
+.cn { font-size: 0.79rem; font-weight: 700; line-height: 1.2; color: var(--text-strong); overflow-wrap: anywhere; }
+.ck {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.62rem;
+  line-height: 1.25; color: var(--muted-soft); overflow-wrap: anywhere;
+}
+.lay {
+  flex: 0 0 auto; font-size: 0.56rem; font-weight: 700; letter-spacing: 0.08em;
+  border-radius: 999px; padding: 2px 6px; color: var(--lc);
+  border: 1px solid color-mix(in srgb, var(--lc) 50%, transparent);
+  background: color-mix(in srgb, var(--lc) 12%, transparent);
+}
+.lay[data-lay="L1"] { --lc: var(--lay1); } .lay[data-lay="L2"] { --lc: var(--lay2); }
+.lay[data-lay="L3"] { --lc: var(--lay3); } .lay[data-lay="L4"] { --lc: var(--lay4); }
+.lay[data-lay="L5"] { --lc: var(--lay5); } .lay[data-lay="EXT"] { --lc: var(--muted-soft); }
+
+.cdet {
+  border-top: 1px dashed var(--border); padding: 7px 9px 8px; font-size: 0.68rem;
+  line-height: 1.4; color: var(--muted); display: flex; flex-direction: column; gap: 3px;
+}
+.cdet[hidden] { display: none; }
+.cdet b {
+  font-size: 0.55rem; letter-spacing: 0.13em; text-transform: uppercase; color: var(--accent); font-weight: 700;
+}
+.cdet ul { list-style: none; display: flex; flex-direction: column; gap: 2px; }
+.cdet li { padding-left: 10px; position: relative; overflow-wrap: anywhere; }
+.cdet li::before { content: "·"; position: absolute; left: 2px; color: var(--accent); }
+.cdet.l2 code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.64rem; color: var(--text); }
+
+/* ---- wires ---- */
+.wires { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; overflow: visible; }
+.hop { fill: none; stroke: var(--border-strong); stroke-width: 1.6; opacity: 0.5; }
+.hop.now { stroke: var(--accent); stroke-width: 2.6; opacity: 1; }
+.hop.hot { stroke: var(--accent-2); stroke-width: 2.4; opacity: 1; }
+.hop.fail { stroke: var(--warn); }
+.pill { fill: var(--surface-strong); stroke: var(--border-strong); stroke-width: 1; }
+.pill.now { stroke: var(--accent); }
+.pnum {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 8px; font-weight: 700;
+  fill: var(--muted); text-anchor: middle; dominant-baseline: central;
+}
+.pnum.now { fill: var(--text-strong); }
+.wlab {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 8.5px;
+  fill: var(--text-strong); text-anchor: middle; dominant-baseline: middle;
+  paint-order: stroke; stroke: var(--bg-mid); stroke-width: 4px; stroke-linejoin: round;
+}
+#tok { fill: var(--accent); stroke: var(--bg-start); stroke-width: 2; }
+
+/* ---- readout ---- */
+.side { display: flex; flex-direction: column; gap: clamp(10px, 1.2vw, 14px); min-width: 0; }
+.panel {
+  background: var(--surface-strong); border: 1px solid var(--border); border-radius: 18px;
+  box-shadow: var(--shadow-soft); padding: clamp(12px, 1.4vw, 18px);
+  display: flex; flex-direction: column; gap: 10px; min-width: 0;
+}
+.p-top { display: flex; align-items: center; gap: 9px; min-width: 0; }
+.p-ic { width: 26px; height: 26px; flex: 0 0 auto; color: var(--accent); }
+.p-ic svg { width: 100%; height: 100%; }
+.p-ic svg * { stroke: currentColor; }
+.p-hop {
+  font-size: 0.58rem; font-weight: 700; letter-spacing: 0.13em; text-transform: uppercase;
+  color: var(--muted-soft); display: block; overflow-wrap: anywhere;
+}
+.p-title { font-size: clamp(0.95rem, 0.9rem + 0.24vw, 1.1rem); font-weight: 700; color: var(--text-strong); line-height: 1.2; }
+.p-row { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.p-row[hidden] { display: none; }
+.p-k { font-size: 0.58rem; font-weight: 700; letter-spacing: 0.13em; text-transform: uppercase; color: var(--accent); }
+.p-v { font-size: clamp(0.78rem, 0.75rem + 0.16vw, 0.88rem); line-height: 1.45; color: var(--text); overflow-wrap: anywhere; }
+.p-v.mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.74rem; line-height: 1.5;
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 26%, transparent);
+  border-radius: 8px; padding: 6px 8px; white-space: pre-wrap; word-break: break-word;
+}
+.p-v.breaks { color: var(--muted); }
+.p-v.breaks b { color: var(--warn); font-weight: 600; }
+
+/* ---- run tape ---- */
+.tapewrap { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: clamp(10px, 1.2vw, 15px); min-width: 0; }
+.tapehead { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 7px; }
+.tapehead h2 { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.13em; text-transform: uppercase; color: var(--muted-soft); }
+.tapehead span { font-size: 0.66rem; color: var(--muted-soft); }
+.tape { list-style: none; display: flex; flex-direction: column; gap: 3px; max-height: 380px; overflow-y: auto; padding-right: 4px; }
+.tape li {
+  display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 7px; align-items: start;
+  padding: 5px 6px; border-radius: 8px; cursor: pointer; border: 1px solid transparent;
+  transition: background 0.18s ease, opacity 0.25s ease, border-color 0.18s ease;
+}
+.tape li:hover { background: color-mix(in srgb, var(--accent) 9%, transparent); }
+.tape li.future { opacity: 0.28; }
+.tape li.now { background: color-mix(in srgb, var(--accent) 14%, transparent); border-color: var(--accent); opacity: 1; }
+.tn { font-family: ui-monospace, monospace; font-size: 0.62rem; color: var(--muted-soft); padding-top: 2px; text-align: right; }
+.tb { min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.tr { font-size: 0.66rem; font-weight: 700; color: var(--text-strong); overflow-wrap: anywhere; }
+.tw { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.63rem; line-height: 1.35; color: var(--muted); overflow-wrap: anywhere; white-space: pre-wrap; }
+.tape li.now .tw { color: var(--text); }
+
+.legend { display: flex; flex-wrap: wrap; gap: 6px 13px; align-items: center; }
+.lg { display: flex; align-items: center; gap: 5px; font-size: 0.68rem; color: var(--muted); }
+.sw { width: 12px; height: 12px; border-radius: 4px; flex: 0 0 auto; border: 1px solid var(--border-strong); }
+.sw.ops { background: color-mix(in srgb, var(--z-ops) 38%, transparent); border-color: var(--z-ops); }
+.sw.ctl { background: color-mix(in srgb, var(--z-ctl) 38%, transparent); border-color: var(--z-ctl); }
+.sw.exec { background: color-mix(in srgb, var(--z-exec) 38%, transparent); border-color: var(--z-exec); }
+
+.foot {
+  font-size: clamp(0.72rem, 0.69rem + 0.14vw, 0.82rem); color: var(--muted-soft); line-height: 1.5;
+  border-top: 1px solid var(--border); padding-top: 10px;
+}
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+  .tape { max-height: none; }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <header>
+    <span class="eyebrow">Archetype C · Run-replay timeline · L0 → L3 in one frame</span>
+    <h1>Follow one governed run and the architecture builds itself</h1>
+    <p class="dek">Nothing is on screen until the run touches it. Scrub the run and each component appears the moment it is first used, wired to the one before it by the actual protocol artifact on that hop. Raise the altitude to open every revealed component in place: its trust zone (L0), its internals (L1), its control-flow role (L2), and the bytes on the wire (L3).</p>
+  </header>
+
+  <div class="bar">
+    <div class="grp" role="group" aria-label="Scenario">
+      <span class="lbl">Run</span>
+      <button type="button" data-sc="happy" aria-pressed="true">Happy path</button>
+      <button type="button" data-sc="denied" aria-pressed="false">Denied tool</button>
+      <button type="button" data-sc="verify" aria-pressed="false">Verification fails</button>
+    </div>
+    <div class="grp" role="group" aria-label="Transport">
+      <button type="button" id="prev" aria-pressed="false">◀ Step</button>
+      <button type="button" id="play" aria-pressed="false">Play ▶</button>
+      <button type="button" id="next" aria-pressed="false">Step ▶</button>
+      <button type="button" id="rest" aria-pressed="false">↺ Restart</button>
+    </div>
+    <div class="grp" role="group" aria-label="Altitude">
+      <span class="lbl">Altitude</span>
+      <button type="button" data-alt="l0" aria-pressed="true">L0 zones</button>
+      <button type="button" data-alt="l1" aria-pressed="false">L1 internals</button>
+      <button type="button" data-alt="l2" aria-pressed="false">L2 control flow</button>
+      <button type="button" data-alt="l3" aria-pressed="true">L3 wire</button>
+    </div>
+  </div>
+
+  <div class="bar">
+    <div class="scrub">
+      <label for="scrubber">Run position</label>
+      <input type="range" id="scrubber" min="0" max="1" step="1" value="0" aria-describedby="count">
+    </div>
+    <span class="count" id="count">Hop 1 / 1</span>
+    <div class="legend" aria-hidden="true">
+      <span class="lg"><span class="sw ops"></span>Operator workspace</span>
+      <span class="lg"><span class="sw ctl"></span>Governed control plane</span>
+      <span class="lg"><span class="sw exec"></span>Isolated execution &amp; external</span>
+    </div>
+  </div>
+
+  <div class="body">
+    <div class="stage" id="stage">
+      <div class="zones" id="zones"></div>
+      <svg class="wires" id="wires" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+
+    <div class="side">
+      <aside class="panel" aria-live="polite">
+        <div class="p-top">
+          <span class="p-ic" id="pic" aria-hidden="true"></span>
+          <span style="min-width:0">
+            <span class="p-hop" id="phop">L0 · operator workspace → governed control plane</span>
+            <span class="p-title" id="ptitle">—</span>
+          </span>
+        </div>
+        <div class="p-row"><span class="p-k">What the harness is doing</span><span class="p-v" id="pact"></span></div>
+        <div class="p-row" id="pwirerow"><span class="p-k">L3 · wire artifact on this hop</span><span class="p-v mono" id="pwire"></span></div>
+        <div class="p-row" id="pl1row" hidden><span class="p-k">L1 · component internals</span><span class="p-v" id="pl1"></span></div>
+        <div class="p-row" id="pl2row" hidden><span class="p-k">L2 · control-flow node</span><span class="p-v" id="pl2"></span></div>
+        <div class="p-row"><span class="p-k">Evidence emitted</span><span class="p-v" id="pev"></span></div>
+        <div class="p-row"><span class="p-k">Without this component</span><span class="p-v breaks" id="pbrk"></span></div>
+      </aside>
+
+      <div class="tapewrap">
+        <div class="tapehead">
+          <h2>Run tape · every hop, every artifact</h2>
+          <span id="tapemeta">—</span>
+        </div>
+        <ol class="tape" id="tape"></ol>
+      </div>
+    </div>
+  </div>
+
+  <p class="foot">Every hop is a real protocol artifact, not a generic arrow. Terminal states — completed and approved, denied, escalated, aborted at a ceiling — all write a run record; the failure exits loop back through the policy store, because a denial is an instruction to author a new L1 constraint rather than a one-off exception.</p>
+  <p class="sr" id="sr" aria-live="polite"></p>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var REDUCED = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+
+  /* ================= components (L0 nodes × L1 layers) ================= */
+  var COMP = [
+    { id: 'human', z: 'ops', ic: 'person', n: 'Human owner', k: 'final authority', lay: 'EXT',
+      comps: ['Reads the diff and the evidence bundle', 'Accepts or denies — the run cannot self-approve'],
+      cf: 'n1 Submit task · n13 Final authority',
+      why: 'Without a named requester and a named approver there is <b>nobody to hold accountable</b> for what the agent did.' },
+    { id: 'trigger', z: 'ops', ic: 'monitor', n: 'Trigger surface', k: 'IDE / CI / chat / cron', lay: 'EXT',
+      comps: ['Turns human intent into a structured run request', 'Carries goal, policy id, budget and approval tier'],
+      cf: 'n1 Submit task · n8b Human answers',
+      why: 'Without a structured trigger a run starts from <b>an unstructured wish</b> with no policy id and no budget.' },
+    { id: 'escal', z: 'ops', ic: 'personcheck', n: 'Named-human escalation', k: 'approval tiers', lay: 'L5',
+      comps: ['Named-human escalation', 'Approval tiers (L1) resolved per action', 'Parked run state while awaiting a decision'],
+      cf: 'n6a Escalate · approval tier',
+      why: 'Without escalation every denial is a dead end and operators <b>route around the harness</b>.' },
+
+    { id: 'policy', z: 'ctl', ic: 'key', n: 'Policy &amp; identity', k: 'OIDC · allow-list · ceilings', lay: 'L1',
+      comps: ['Tool allow-list &amp; scopes', 'Sandbox profile (gVisor / Seatbelt / microVM+vsock)', 'Budget &amp; per-file edit ceilings', 'Approval tiers', 'Custom lint / ArchUnit rules'],
+      cf: 'n2 Resolve policy · n6 Pre-flight · d3 Authorised?',
+      why: 'Without controls outside the prompt, <b>a persuasive turn is an authorisation</b> and the agent’s reach is whatever the credentials allow.' },
+    { id: 'orch', z: 'ctl', ic: 'gears', n: 'Harness runtime', k: 'the control loop · system of interest', lay: 'L3',
+      comps: ['Single model call site (cost and turn accounting)', 'Tool broker and pre-flight', 'Background subagent pool', 'Loop &amp; cost detection', 'Crash / resume'],
+      cf: 'n4 messages.create(tools) — every loop-back returns here',
+      why: 'Without a single call site, <b>cost and turn accounting scatter</b> and no ceiling can be enforced.' },
+    { id: 'ctx', z: 'ctl', ic: 'book', n: 'Context assembler', k: 'window · compaction · progress file', lay: 'L2',
+      comps: ['Hand-written AGENTS.md (&lt;100 lines)', 'Progressive-disclosure module READMEs', 'Skills / retrieval loader', 'Runtime compaction + history persistence', 'Progress file'],
+      cf: 'n3 Assemble context window · d5 Context over budget? · n10a Compaction',
+      why: 'Without a manifest you cannot answer <b>“what did the model actually see”</b>; without a rewritten progress file, compaction <b>silently amnesias the run</b>.' },
+    { id: 'mcpc', z: 'ctl', ic: 'network', n: 'MCP client + tools/list cache', k: '2026-07-28 stateless core', lay: 'L3',
+      comps: ['Mcp-Method / Mcp-Name header routing', 'tools/list cache (ttlMs + cacheScope)', 'Schema version pinning', 'Egress broker'],
+      cf: 'd1 tools/list cache hit? · n3b Fetch tools/list, cache',
+      why: 'Without a cache you pay <b>discovery latency on every loop</b>; without a version record, a tool that changed shape mid-run <b>looks like a model failure</b>.' },
+    { id: 'verify', z: 'ctl', ic: 'flask', n: 'Verification', k: 'pre-stop hook · tests · evals', lay: 'L4',
+      comps: ['Pre-stop hook running the real test command', 'Golden tests / evals', 'Diff review gate', 'MRTR input_required in-tool approval', 'Harness-config manifest pinned per eval run'],
+      cf: 'n11 Verification · d7 Pass? · n11a Failure fed back (retry cap 3)',
+      why: 'Without a pre-stop hook, <b>“done” means the model said so</b> and failing tests ship as a completed run.' },
+    { id: 'ledger', z: 'ctl', ic: 'archive', n: 'Evidence store', k: 'append-only run record', lay: 'L5',
+      comps: ['Durable session log', 'Run-record archive', 'Per-turn hash-chained transcript', 'Evidence bundle: diff · tests · transcript hash · manifest'],
+      cf: 'ev2 Run record appended · ev3 Bundle stored · terminal states',
+      why: 'Without per-turn records you can only audit <b>the final diff, not the reasoning</b>, and a crashed run leaves no trace of how far it got.' },
+    { id: 'princ', z: 'ctl', ic: 'gavel', n: 'Policy store · principle loop', k: 'new L1 rule from a run', lay: 'L1',
+      comps: ['Rule provenance: which run produced which constraint', 'Appends to the L1 constraint set, not to this run'],
+      cf: 'nPr Author a new L1 rule',
+      why: 'Without the loop back to policy, <b>the same failure recurs forever</b> and the harness never learns.' },
+
+    { id: 'model', z: 'exec', ic: 'cpu', n: 'Model inference API', k: 'stateless HTTPS · proposes only', lay: 'EXT',
+      comps: ['Receives messages[] + tools[]', 'Streams back an assistant turn', 'May emit tool_use blocks — it never executes them'],
+      cf: 'n5 Assistant turn · d2 Contains tool_use?',
+      why: 'Without storing the raw turn you lose <b>the only record of what was proposed</b> versus what actually ran.' },
+    { id: 'router', z: 'exec', ic: 'transmit', n: 'MCP tool servers / router', k: 'typed capabilities over HTTP', lay: 'L3',
+      comps: ['Stateless routing on Mcp-Method / Mcp-Name', 'No Mcp-Session-Id — any replica can serve the call', 'Returns tool_result or input_required (MRTR)'],
+      cf: 'n7 tools/call · d4 Needs a human mid-call? · n9 tool_result',
+      why: 'Without statelessness you cannot <b>scale, retry or fail over</b> a call mid-run — a sticky session pins every request to one node.' },
+    { id: 'sandbox', z: 'exec', ic: 'shield', n: 'Per-run sandbox', k: 'gVisor / Seatbelt / microVM+vsock', lay: 'L1',
+      comps: ['Disposable, created per run and destroyed after', 'Resource ceilings and wall-clock limits', 'The only place model-proposed commands may run'],
+      cf: 'n8 Executes in sandbox (the SAME call resumes)',
+      why: 'Without an isolated sandbox, <b>untrusted model output executes on your host</b> with your credentials.' },
+    { id: 'systems', z: 'exec', ic: 'warehouse', n: 'Systems of record', k: 'repo · tracker · database', lay: 'EXT',
+      comps: ['Reached only through brokered allow-listed egress', 'Never by the sandbox opening arbitrary connections'],
+      cf: 'reached from n8 via the egress broker',
+      why: 'Without a broker the sandbox can <b>exfiltrate to any host it likes</b> and isolation is theatre.' }
+  ];
+  var C = {}; COMP.forEach(function (c) { C[c.id] = c; });
+  var ZONE = [
+    { id: 'ops', n: 'Operator workspace' },
+    { id: 'ctl', n: 'Governed control plane' },
+    { id: 'exec', n: 'Isolated execution &amp; external' }
+  ];
+  var ZN = {}; ZONE.forEach(function (z) { ZN[z.id] = z.n.replace('&amp;', '&'); });
+
+  /* ================= steps (the run, from the L2 control flow) ================= */
+  function S(o) { return o; }
+  var K = {
+    intent: S({ a: 'human', b: 'trigger', ic: 'person', s: 'task + intent',
+      w: 'intent: "fix the flaky test on release/4.2"\nsurface: IDE (also CI / chat / cron)',
+      act: 'A person hands the harness a task and an intent. Nothing else in the run is self-authorising.',
+      ev: 'Run opened: requester, task text, timestamp.' }),
+    open: S({ a: 'trigger', b: 'orch', ic: 'transmit', s: 'POST /runs',
+      w: 'POST /runs { goal, policyId, budget: 4.00, approvalTier: "tier2" }',
+      act: 'The trigger surface turns intent into a structured run request. The harness runtime takes ownership of the run from here.',
+      ev: 'run.created — requester, policy id, budget, tier.' }),
+    created: S({ a: 'orch', b: 'ledger', ic: 'ledger', s: 'run.created',
+      w: 'evidence.put({ runId: "r_918", event: "run.created" })',
+      act: 'The evidence store is written before any work happens, not after. A run that crashes in its first second still exists on the record.',
+      ev: 'The run record itself, opened and addressable.' }),
+    resolve: S({ a: 'orch', b: 'policy', ic: 'barrier', s: 'resolvePolicy()',
+      w: 'resolvePolicy(requester, repo) → L1 constraint set',
+      act: 'The harness asks for the L1 constraint set for this requester and repo: which tools exist, what the run may spend, which actions need a human.',
+      ev: 'Policy lookup recorded against the run.' }),
+    policy: S({ a: 'policy', b: 'orch', ic: 'key', s: 'policy resolved',
+      w: 'policy: { allowList: ["search_repo", "run_tests"],\n          budgetUsd: 4.00, approvalTier: "tier2" }\npolicyHash: "sha256:9c1f…"',
+      act: 'Constraints come back pinned and hashed. Everything the run may do is now decided by environmental controls, not by the prompt.',
+      ev: 'Policy snapshot hash pinned to the run record.' }),
+    assemble: S({ a: 'orch', b: 'ctx', ic: 'book', s: 'assemble window',
+      w: 'assembleWindow(system + messages[] + tools[]) → budget 180k tok',
+      act: 'System prompt, task, working state and tool schemas are packed into one window under an explicit token budget.',
+      ev: 'Context manifest: which files, which schemas, how many tokens.' }),
+    cachelook: S({ a: 'ctx', b: 'mcpc', ic: 'split', s: 'cache lookup',
+      w: 'cacheKey: server+scope · ttlMs: 900000 · cacheScope: "session" → MISS',
+      act: 'Tool schemas are expensive and near-static. The harness checks its own cache before paying for a discovery round trip.',
+      ev: 'Cache hit/miss counter on the run.' }),
+    toolslist: S({ a: 'mcpc', b: 'router', ic: 'network', s: 'tools/list',
+      w: 'Mcp-Method: tools/list\n(no Mcp-Session-Id — stateless core)',
+      act: 'On a miss the client asks the server for its tool catalogue. Method travels in a header, so an edge proxy can route it without parsing the body.',
+      ev: 'Discovery request id and target server.' }),
+    toolsback: S({ a: 'router', b: 'mcpc', ic: 'network', s: '{tools, ttlMs, cacheScope}',
+      w: '{ tools, ttlMs: 900000, cacheScope: "session" }\ncache.put(key, tools, ttlMs)',
+      act: 'The server declares its own cache policy. The client writes the catalogue under the declared scope and TTL, and records the schema version.',
+      ev: 'Schema version recorded, so a silently changed tool is detectable.' }),
+    toolspin: S({ a: 'mcpc', b: 'orch', ic: 'checklist', s: 'tools[] pinned',
+      w: 'tools[] pinned to turn · schemaVersion: "2026-07-28"',
+      act: 'The tool schemas enter the window as data with a known version, alongside the allow-list that governs them.',
+      ev: 'Which tools were visible on which turn.' }),
+    call: S({ a: 'orch', b: 'model', ic: 'exchange', s: 'messages.create',
+      w: 'messages.create({ model, messages, tools, max_tokens })',
+      act: 'The single model call site. Every loop-back in this run returns here — this is the only place the model is invoked.',
+      ev: 'Turn index, token counts in and out, cost delta.' }),
+    tooluse: S({ a: 'model', b: 'orch', ic: 'cpu', s: 'tool_use',
+      w: 'stop_reason: "tool_use"\ncontent: [ { type: "tool_use", id: "tu_01",\n             name: "search_repo", input: {…} } ]',
+      act: 'The model returns a turn proposing an action. It proposes; it never executes. The raw turn is stored before anything acts on it.',
+      ev: 'Raw turn appended to the transcript before anything acts on it.' }),
+    preflight: S({ a: 'orch', b: 'policy', ic: 'shield', s: 'preflight()',
+      w: 'preflight({ name: "search_repo", input }) → allow | deny',
+      act: 'The requested tool and its arguments are checked against the resolved allow-list — before any network call leaves the harness.',
+      ev: 'Pre-flight verdict with the rule id that decided it.' }),
+    allow: S({ a: 'policy', b: 'orch', ic: 'check', s: 'allow',
+      w: 'authorised: true, rule: "L1.tools.allow.search_repo"',
+      act: 'Environmental controls decide — allow-list, argument bounds, approval tier. Not the model, and not the prompt.',
+      ev: 'Authorisation decision and rule id on the run record.' }),
+    deny: S({ a: 'policy', b: 'orch', ic: 'warning', s: 'deny', fail: true,
+      w: 'authorised: false, rule: "L1.tools.deny.write_prod"',
+      act: 'The same gate, refusing. The tool is never called; the denial is a first-class outcome, not an error.',
+      ev: 'Denial with the exact rule that refused it.' }),
+    toolscall: S({ a: 'orch', b: 'router', ic: 'transmit', s: 'tools/call',
+      w: 'POST /mcp\nMcp-Method: tools/call\nMcp-Name: search_repo\n(no session id — any replica can serve it)',
+      act: 'The authorised call goes out over stateless HTTP. No session id, so the call can be retried, sharded or failed over mid-run.',
+      ev: 'Request id, headers and argument hash on the run record.' }),
+    exec: S({ a: 'router', b: 'sandbox', ic: 'gears', s: 'exec (over vsock)',
+      w: 'exec (over vsock) · profile: gVisor · cpu/mem/wall ceilings applied',
+      act: 'The command runs inside a disposable per-run sandbox — the only place model-proposed commands are allowed to execute.',
+      ev: 'Sandbox image, resource ceiling, wall-clock duration.' }),
+    egress: S({ a: 'sandbox', b: 'systems', ic: 'exchange', s: 'brokered egress',
+      w: 'egressBroker.allow("git://repo", branch: "release/4.2")',
+      act: 'The sandbox cannot open arbitrary connections. Reads of the repository go through an allow-listed broker.',
+      ev: 'Every egress destination, allowed or refused.' }),
+    egressback: S({ a: 'systems', b: 'sandbox', ic: 'warehouse', s: 'repo bytes',
+      w: 'result: repo bytes (allow-listed host only)',
+      act: 'The system of record answers the brokered read. Nothing else on the network was reachable.',
+      ev: 'Bytes read, source host, allow-list rule.' }),
+    mrtr: S({ a: 'router', b: 'orch', ic: 'bell', s: 'input_required',
+      w: 'resultType: "input_required"\nprompt: "Which branch?"\ncallId: "c_84f2"',
+      act: 'A mid-request tool return (MRTR): the call is suspended, not failed. The server states exactly what it needs.',
+      ev: 'Interrupt recorded against the same callId.' }),
+    mrtrask: S({ a: 'orch', b: 'trigger', ic: 'megaphone', s: 'prompt operator',
+      w: 'prompt → operator surface { callId: "c_84f2", question }',
+      act: 'The harness surfaces the server’s question to a person instead of guessing an answer on its behalf.',
+      ev: 'Who was asked, and what they were shown.' }),
+    mrtrans: S({ a: 'trigger', b: 'orch', ic: 'personcheck', s: 'answer',
+      w: 'POST /calls/c_84f2/input { branch: "release/4.2" }',
+      act: 'The answer is bound to the original callId, not to a new request.',
+      ev: 'Who answered, what they were asked, what they said.' }),
+    resume: S({ a: 'orch', b: 'router', ic: 'merge', s: 'resume',
+      w: 'resume(callId: "c_84f2") — the same call, not a new one',
+      act: 'The suspended call resumes in place. Side effects happen exactly once.',
+      ev: 'Resume event on the same callId.' }),
+    result: S({ a: 'sandbox', b: 'router', ic: 'check', s: 'result',
+      w: 'result: { exitCode: 0, stdout: […] }',
+      act: 'The sandbox returns a bounded result and is on its way to being destroyed.',
+      ev: 'Exit status, duration, output size.' }),
+    toolresult: S({ a: 'router', b: 'orch', ic: 'exchange', s: 'tool_result',
+      w: 'content: [ { type: "tool_result", tool_use_id: "tu_01",\n             content: […], truncated: false } ]',
+      act: 'The result comes back typed and bounded, tagged with the tool_use id the model emitted.',
+      ev: 'Result size, truncation flag, exit status.' }),
+    append: S({ a: 'orch', b: 'ledger', ic: 'ledger', s: 'tool.completed{hash}',
+      w: 'transcript.append(turn, result) → evidence.put({ runId, seq, hash })',
+      act: 'Turn and result are appended to a hash-chained transcript and mirrored into evidence as the run proceeds — not at the end.',
+      ev: 'Ordered, hash-chained transcript entries.' }),
+    budget: S({ a: 'orch', b: 'ctx', ic: 'gauge', s: 'budget check',
+      w: 'usedTokens: 171_400 / budget: 180_000 → compact',
+      act: 'The window is measured against its budget before the next model call, not after an overflow error.',
+      ev: 'Token high-water mark per turn.' }),
+    compact: S({ a: 'ctx', b: 'orch', ic: 'archive', s: 'compaction',
+      w: 'compact(turns[0..n-6]) → summary\npersist(history); write(PROGRESS.md)',
+      act: 'Older turns compact into a summary, full history persists out of band, and the progress file is rewritten so the next turn starts from durable state.',
+      ev: 'Compaction boundary and the pre-compaction history pointer.' }),
+    nextturn: S({ a: 'orch', b: 'model', ic: 'coin', s: 'next turn ↻',
+      w: 'ceilings: turns 24/40 · spentUsd 3.91/4.00 · elapsed 11m/20m\nmessages.create(…)  ↻ the loop',
+      act: 'Hard ceilings on turns, wall clock and spend are checked every loop before the model is called again.',
+      ev: 'Ceiling counters on every turn.' }),
+    endturn: S({ a: 'model', b: 'orch', ic: 'cpu', s: 'end_turn',
+      w: 'stop_reason: "end_turn"  (no tool_use — the working phase is over)',
+      act: 'The model stops proposing actions. That ends the working phase; it does not end the run.',
+      ev: 'Branch taken, recorded per turn.' }),
+    hook: S({ a: 'orch', b: 'verify', ic: 'flask', s: 'pre-stop hook',
+      w: 'hook: "pre-stop" → npm test && npm run lint && evals:run',
+      act: 'Before the run may stop, the project’s own checks run. The model does not get to declare itself finished.',
+      ev: 'Raw test, lint and eval output attached to the run.' }),
+    runtests: S({ a: 'verify', b: 'sandbox', ic: 'gears', s: 'run tests',
+      w: 'exec: npm test (verification, in the sandbox)',
+      act: 'Verification runs in the same isolated environment as the work — not on a trusted host.',
+      ev: 'Which command ran, in which image.' }),
+    pass: S({ a: 'sandbox', b: 'verify', ic: 'check', s: 'exit code 0',
+      w: 'exit code: 0 · tests: pass · lint: pass',
+      act: 'The gate opens on evidence, not on assertion.',
+      ev: 'Verification verdict per attempt.' }),
+    failed: S({ a: 'sandbox', b: 'verify', ic: 'warning', s: 'exit code 1', fail: true,
+      w: 'exit code: 1 · verification: { tests: "fail", failed: 2, lint: "pass" }',
+      act: 'The gate holds. A failure here is the next turn’s input, not a reason to ship.',
+      ev: 'Verification verdict and the raw failure text.' }),
+    verdict: S({ a: 'verify', b: 'orch', ic: 'checklist', s: 'verdict: pass',
+      w: 'verification: { tests: "pass", lint: "pass", evals: "pass" }',
+      act: 'With a passing verdict the run may package itself for review.',
+      ev: 'Verdict attached to the run record.' }),
+    feedback: S({ a: 'verify', b: 'orch', ic: 'warning', s: 'verdict: fail', fail: true,
+      w: 'retry: 2/3 → messages.append({ role: "user", content: testOutput })',
+      act: 'The failure is fed back as a normal turn — real output, not a scolding — bounded by a hard retry cap of three.',
+      ev: 'Attempt counter and the exact failure text fed back.' }),
+    retry: S({ a: 'orch', b: 'model', ic: 'exchange', s: 'retry 2/3', fail: true,
+      w: 'messages.create(…)  attempt 2/3 with the failing test output in the window',
+      act: 'The model gets another bounded attempt with the real failure in context.',
+      ev: 'Retry index and cost delta.' }),
+    retry3: S({ a: 'orch', b: 'verify', ic: 'flask', s: 'attempt 3/3', fail: true,
+      w: 'hook: "pre-stop" → npm test  ·  attempt 3/3',
+      act: 'Third and final attempt. The cap exists so a stuck agent cannot grind the budget away.',
+      ev: 'Attempt counter at the cap.' }),
+    capblown: S({ a: 'verify', b: 'orch', ic: 'trenddown', s: 'retry cap exhausted', fail: true,
+      w: 'verification: { tests: "fail" } · retries: 3/3 exhausted',
+      act: 'The harness stops itself rather than looping. This is the abort branch, taken deliberately.',
+      ev: 'Which ceiling tripped, and how far the run got.' }),
+    abort: S({ a: 'orch', b: 'ledger', ic: 'warning', s: 'terminal: aborted', fail: true, term: true,
+      w: 'terminal: "aborted", reason: "retry_cap"\nspentUsd: 4.00/4.00 · turns: 38/40 · partial diff preserved',
+      act: 'The run closes cleanly at the ceiling, with the partial work and the reason preserved.',
+      ev: 'Run record: aborted, which ceiling, how far it got.' }),
+    escalate: S({ a: 'orch', b: 'escal', ic: 'megaphone', s: 'escalation', fail: true,
+      w: 'escalation: { tool, input, rule: "L1.tools.deny.write_prod",\n               requestedBy, tier: "tier2" }',
+      act: 'A denial that matches an approval tier goes to a person with the tool, the arguments and the rule that blocked it.',
+      ev: 'Escalation record: who was asked, what they saw.' }),
+    parked: S({ a: 'escal', b: 'ledger', ic: 'clock', s: 'terminal: escalated', fail: true, term: true,
+      w: 'terminal: "escalated", awaiting: "tier2 approver"',
+      act: 'The run parks pending a human decision. The harness holds state; it does not guess and it does not proceed.',
+      ev: 'Run record: escalated, with the pending decision and its age.' }),
+    refuse: S({ a: 'escal', b: 'orch', ic: 'gavel', s: 'approver refuses', fail: true,
+      w: 'decision: { by: "…", verdict: "refuse", note }',
+      act: 'A named person refuses. That refusal is the outcome of the run, recorded like any other.',
+      ev: 'Approver, timestamp, and what they were shown.' }),
+    denied: S({ a: 'orch', b: 'ledger', ic: 'warning', s: 'terminal: denied', fail: true, term: true,
+      w: 'terminal: "denied", refusal: { rule, tool, at }',
+      act: 'The deny path terminates at a recorded refusal — a first-class outcome. The run ends with the tool never called.',
+      ev: 'Run record: denied, with the rule that refused and the escalation trail.' }),
+    principle: S({ a: 'ledger', b: 'princ', ic: 'merge', s: 'principle loop', hot: true,
+      w: 'principle: this outcome is an instruction, not an exception',
+      act: 'Every denial, abort and failed verification is routed to the policy store rather than patched around in this run.',
+      ev: 'Which run produced which constraint.' }),
+    newrule: S({ a: 'princ', b: 'policy', ic: 'gavel', s: 'new L1 rule', hot: true,
+      w: 'policy.append({ id: "L1.tools.deny.write_prod", from: "run r_918" })',
+      act: 'The fix is a new L1 constraint in the policy store — so the next run is born already knowing.',
+      ev: 'Rule provenance: which run produced which constraint.' }),
+    bundle: S({ a: 'orch', b: 'ledger', ic: 'archive', s: 'evidence bundle',
+      w: 'bundle: { diff, testOutput, transcriptHash, harnessConfigManifest }\nevidence.put({ runId, bundle, policyHash })',
+      act: 'One bundle a reviewer can actually read: the diff, the test output, a transcript hash and the harness-config manifest that produced it.',
+      ev: 'The bundle, immutable and addressable by run id.' }),
+    handoff: S({ a: 'ledger', b: 'human', ic: 'eye', s: 'hand off for review',
+      w: 'GET /runs/r_918/bundle → diff · tests · transcriptHash · manifest',
+      act: 'The harness has made the decision cheap and fast. It has not taken it.',
+      ev: 'What the approver was shown, and when.' }),
+    approve: S({ a: 'human', b: 'ledger', ic: 'stamp', s: 'terminal: approved', term: true,
+      w: 'POST /runs/r_918/approve { by, note }\nterminal: "completed_approved" · run.completed{ manifest }',
+      act: 'The only terminal state that ships anything — and it is reached through a human, not around one.',
+      ev: 'Run record: completed, approved, bundle attached.' })
+  };
+
+  var CORE = ['intent', 'open', 'created', 'resolve', 'policy', 'assemble', 'cachelook', 'toolslist',
+    'toolsback', 'toolspin', 'call', 'tooluse', 'preflight'];
+  var AFTER_CALL = ['result', 'toolresult', 'append', 'budget', 'compact', 'nextturn', 'endturn'];
+
+  var SC = {
+    happy: CORE.concat(['allow', 'toolscall', 'exec', 'egress', 'egressback'], AFTER_CALL,
+      ['hook', 'runtests', 'pass', 'verdict', 'bundle', 'handoff', 'approve']),
+    denied: CORE.concat(['deny', 'escalate', 'parked', 'refuse', 'denied', 'principle', 'newrule']),
+    verify: CORE.concat(['allow', 'toolscall', 'mrtr', 'mrtrask', 'mrtrans', 'resume', 'exec', 'result'],
+      ['toolresult', 'append', 'budget', 'compact', 'nextturn', 'endturn'],
+      ['hook', 'runtests', 'failed', 'feedback', 'retry', 'retry3', 'capblown', 'abort', 'principle', 'newrule'])
+  };
+  var SC_META = {
+    happy: 'Happy path · terminal: completed_approved',
+    denied: 'Denied tool · terminals: escalated, then denied',
+    verify: 'Verification fails · MRTR interrupt, retry cap, terminal: aborted'
+  };
+
+  /* ================= icons ================= */
+  var ICON_BASE = '../customs-entry-agent/flow-icons/';
+  var cache = {};
+  function load(n) {
+    return cache[n] || (cache[n] = fetch(ICON_BASE + n + '.svg')
+      .then(function (r) { return r.ok ? r.text() : Promise.reject(); })
+      .then(function (t) { return t.replace(/stroke="#232f3e"/g, 'stroke="currentColor"'); })
+      .catch(function () { return ''; }));
+  }
+  function fillIcons(root) {
+    (root || document).querySelectorAll('[data-ic]').forEach(function (slot) {
+      load(slot.dataset.ic).then(function (svg) { if (!slot.firstChild) slot.innerHTML = svg; });
+    });
+  }
+
+  /* ================= build the static DOM ================= */
+  var zonesEl = document.getElementById('zones');
+  var wires = document.getElementById('wires');
+  var tapeEl = document.getElementById('tape');
+  var scrub = document.getElementById('scrubber');
+
+  function esc(s) { return String(s).replace(/&(?![a-z]+;|#)/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+  zonesEl.innerHTML = ZONE.map(function (z) {
+    var cards = COMP.filter(function (c) { return c.z === z.id; }).map(function (c) {
+      return '<article class="card" id="card-' + c.id + '" data-c="' + c.id + '" hidden>' +
+        '<button type="button" class="cbtn" data-pick="' + c.id + '" aria-pressed="false">' +
+          '<span class="pic" data-ic="' + c.ic + '" aria-hidden="true"></span>' +
+          '<span class="ct"><span class="cn">' + c.n + '</span><span class="ck">' + c.k + '</span></span>' +
+          '<span class="lay" data-lay="' + c.lay + '">' + c.lay + '</span>' +
+        '</button>' +
+        '<div class="cdet l1" hidden><b>L1 internals</b><ul>' +
+          c.comps.map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ul></div>' +
+        '<div class="cdet l2" hidden><b>L2 control flow</b><code>' + esc(c.cf) + '</code></div>' +
+      '</article>';
+    }).join('');
+    return '<section class="zone" data-z="' + z.id + '"><span class="zh">' + z.n + '</span>' + cards + '</section>';
+  }).join('');
+  fillIcons(zonesEl);
+
+  /* ================= state ================= */
+  var scen = 'happy', idx = 0, playing = false, timer = null, rafId = null, guard = null;
+  var picked = null;
+  var alt = { l0: true, l1: false, l2: false, l3: true };
+
+  function steps() { return SC[scen]; }
+  function step(i) { return K[steps()[i]]; }
+
+  /* ================= tape ================= */
+  function buildTape() {
+    var list = steps();
+    tapeEl.innerHTML = list.map(function (k, i) {
+      var s = K[k];
+      return '<li data-i="' + i + '" tabindex="0" role="button" aria-label="Jump to hop ' + (i + 1) + '">' +
+        '<span class="tn">' + (i + 1) + '</span>' +
+        '<span class="tb"><span class="tr">' + C[s.a].n.replace('&amp;', '&') + ' → ' + C[s.b].n.replace('&amp;', '&') + '</span>' +
+        '<span class="tw">' + esc(s.w) + '</span></span></li>';
+    }).join('');
+    document.getElementById('tapemeta').textContent = SC_META[scen] + ' · ' + list.length + ' hops';
+    tapeEl.querySelectorAll('li').forEach(function (li) {
+      var jump = function () { stop(); picked = null; idx = +li.dataset.i; paint(); };
+      li.addEventListener('click', jump);
+      li.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); jump(); }
+      });
+    });
+    scrub.max = String(list.length - 1);
+  }
+
+  /* ================= wires ================= */
+  function rects() {
+    var base = zonesEl.getBoundingClientRect();
+    var stageBox = document.getElementById('stage').getBoundingClientRect();
+    var ox = base.left - stageBox.left, oy = base.top - stageBox.top;
+    var out = {};
+    COMP.forEach(function (c) {
+      var el = document.getElementById('card-' + c.id);
+      if (!el || el.hidden) return;
+      var r = el.getBoundingClientRect();
+      out[c.id] = {
+        l: r.left - stageBox.left, r: r.right - stageBox.left,
+        t: r.top - stageBox.top, b: r.bottom - stageBox.top,
+        cx: r.left - stageBox.left + r.width / 2, cy: r.top - stageBox.top + r.height / 2
+      };
+    });
+    out.__ox = ox; out.__oy = oy;
+    out.__w = stageBox.width; out.__h = stageBox.height;
+    return out;
+  }
+
+  function hopPath(A, B) {
+    if (!A || !B) return '';
+    var sameCol = Math.abs(A.cx - B.cx) < 8;
+    if (sameCol) {
+      var bulge = 26;
+      var x = A.r;
+      return 'M ' + A.r + ' ' + A.cy + ' C ' + (x + bulge) + ' ' + A.cy + ' ' +
+        (x + bulge) + ' ' + B.cy + ' ' + B.r + ' ' + B.cy;
+    }
+    var goRight = B.cx > A.cx;
+    var ax = goRight ? A.r : A.l, bx = goRight ? B.l : B.r;
+    var dx = Math.max(24, Math.abs(bx - ax) * 0.45);
+    var c1 = goRight ? ax + dx : ax - dx;
+    var c2 = goRight ? bx - dx : bx + dx;
+    return 'M ' + ax + ' ' + A.cy + ' C ' + c1 + ' ' + A.cy + ' ' + c2 + ' ' + B.cy + ' ' + bx + ' ' + B.cy;
+  }
+
+  function drawWires() {
+    var R = rects();
+    wires.setAttribute('viewBox', '0 0 ' + Math.max(1, R.__w) + ' ' + Math.max(1, R.__h));
+    var list = steps(), upto = REDUCED_ALL ? list.length - 1 : idx;
+    var s = '<defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" ' +
+      'orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="context-stroke"></path></marker></defs>';
+    var pills = '', labels = '';
+    for (var i = 0; i <= upto && i < list.length; i++) {
+      var st = K[list[i]];
+      var A = R[st.a], B = R[st.b];
+      if (!A || !B) continue;
+      var d = hopPath(A, B);
+      if (!d) continue;
+      var cls = 'hop' + (i === idx && !REDUCED_ALL ? ' now' : '') + (st.hot ? ' hot' : '') + (st.fail ? ' fail' : '');
+      if (REDUCED_ALL && i === idx) cls = 'hop' + (st.hot ? ' hot' : '') + (st.fail ? ' fail' : '');
+      s += '<path class="' + cls + '" id="hop-' + i + '" d="' + d + '" marker-end="url(#ah)"></path>';
+      pills += '<g data-pill="' + i + '"></g>';
+    }
+    s += '<circle id="tok" r="5" cx="-40" cy="-40" opacity="0"></circle>';
+    wires.innerHTML = s + pills + labels;
+
+    /* ordinal pills + the label for the current hop, placed on the measured paths */
+    var extra = '';
+    for (var j = 0; j <= upto && j < list.length; j++) {
+      var p = document.getElementById('hop-' + j);
+      if (!p) continue;
+      var pt;
+      try { pt = p.getPointAtLength(p.getTotalLength() * 0.5); } catch (e) { continue; }
+      var isNow = (j === idx);
+      extra += '<g><circle class="pill' + (isNow ? ' now' : '') + '" cx="' + pt.x.toFixed(1) + '" cy="' + pt.y.toFixed(1) + '" r="8"></circle>' +
+        '<text class="pnum' + (isNow ? ' now' : '') + '" x="' + pt.x.toFixed(1) + '" y="' + pt.y.toFixed(1) + '">' + (j + 1) + '</text></g>';
+      if (isNow && alt.l3 && !REDUCED_ALL) {
+        /* keep the label inside the (overflow-hidden) stage box */
+        var half = Math.max(30, K[list[j]].s.length * 2.6);
+        var lx = Math.min(Math.max(pt.x, half + 6), Math.max(half + 6, R.__w - half - 6));
+        extra += '<text class="wlab" x="' + lx.toFixed(1) + '" y="' + (pt.y - 15).toFixed(1) + '">' + esc(K[list[j]].s) + '</text>';
+      }
+    }
+    wires.insertAdjacentHTML('beforeend', extra);
+  }
+
+  /* ================= paint ================= */
+  var REDUCED_ALL = REDUCED;
+
+  function reveal() {
+    var list = steps(), on = {};
+    var upto = REDUCED_ALL ? list.length - 1 : idx;
+    for (var i = 0; i <= upto && i < list.length; i++) { on[K[list[i]].a] = true; on[K[list[i]].b] = true; }
+    COMP.forEach(function (c) {
+      var el = document.getElementById('card-' + c.id);
+      var want = !!on[c.id];
+      if (want && el.hidden) {
+        el.hidden = false;
+        if (!REDUCED_ALL) { el.classList.add('fresh'); setTimeout(function () { el.classList.remove('fresh'); }, 460); }
+      } else if (!want && !el.hidden) { el.hidden = true; }
+    });
+  }
+
+  function detail(c, kind) {
+    if (kind === 'l1') return c.comps.join(' · ').replace(/&lt;/g, '<');
+    return c.cf;
+  }
+
+  function paint() {
+    var list = steps();
+    if (idx > list.length - 1) idx = list.length - 1;
+    if (idx < 0) idx = 0;
+    var st = step(idx), A = C[st.a], B = C[st.b];
+    var focus = picked ? C[picked] : B;
+
+    reveal();
+
+    document.querySelectorAll('.card').forEach(function (el) {
+      var id = el.dataset.c;
+      el.classList.toggle('live', !REDUCED_ALL && id === st.b);
+      el.classList.toggle('prev', !REDUCED_ALL && id === st.a);
+      el.classList.toggle('pick', id === picked);
+      el.querySelector('.cbtn').setAttribute('aria-pressed', String(id === picked));
+      el.querySelector('.cdet.l1').hidden = !alt.l1;
+      el.querySelector('.cdet.l2').hidden = !alt.l2;
+    });
+    zonesEl.classList.toggle('no-l0', !alt.l0);
+
+    /* readout */
+    document.getElementById('phop').textContent =
+      'Hop ' + (idx + 1) + ' · ' + ZN[A.z] + ' → ' + ZN[B.z];
+    document.getElementById('ptitle').innerHTML = picked
+      ? focus.n + ' <span style="font-weight:400;color:var(--muted)">· component dossier</span>'
+      : A.n + ' → ' + B.n;
+    document.getElementById('pact').textContent = st.act;
+    document.getElementById('pwirerow').hidden = !alt.l3;
+    document.getElementById('pwire').textContent = st.w;
+    document.getElementById('pev').textContent = st.ev;
+    document.getElementById('pbrk').innerHTML = focus.why;
+
+    var l1r = document.getElementById('pl1row'), l2r = document.getElementById('pl2row');
+    l1r.hidden = !(alt.l1 || picked);
+    l2r.hidden = !(alt.l2 || picked);
+    if (!l1r.hidden) document.getElementById('pl1').innerHTML = focus.n + ' — ' + focus.comps.join(' · ');
+    if (!l2r.hidden) document.getElementById('pl2').innerHTML = focus.n + ' — ' + focus.cf;
+
+    var pic = document.getElementById('pic');
+    pic.innerHTML = '';
+    load(picked ? focus.ic : st.ic).then(function (svg) { pic.innerHTML = svg; });
+
+    /* tape */
+    tapeEl.querySelectorAll('li').forEach(function (li) {
+      var i = +li.dataset.i;
+      li.classList.toggle('future', !REDUCED_ALL && i > idx);
+      li.classList.toggle('now', !REDUCED_ALL && i === idx);
+    });
+    var nowLi = tapeEl.querySelector('li.now');
+    if (nowLi && !REDUCED_ALL && tapeEl.scrollHeight > tapeEl.clientHeight + 4) {
+      var off = nowLi.offsetTop - tapeEl.clientHeight / 2;
+      tapeEl.scrollTo({ top: Math.max(0, off), behavior: REDUCED ? 'auto' : 'smooth' });
+    }
+
+    document.getElementById('count').textContent = 'Hop ' + (idx + 1) + ' / ' + list.length;
+    scrub.value = String(idx);
+    scrub.setAttribute('aria-valuetext', 'Hop ' + (idx + 1) + ' of ' + list.length + ': ' + A.n.replace('&amp;', '&') + ' to ' + B.n.replace('&amp;', '&'));
+    document.getElementById('sr').textContent =
+      'Hop ' + (idx + 1) + ' of ' + list.length + ': ' + A.n.replace('&amp;', '&') + ' to ' + B.n.replace('&amp;', '&') + ' — ' + st.s;
+
+    requestAnimationFrame(function () { drawWires(); postSize(); });
+  }
+
+  /* ================= token travel ================= */
+  function travel(i, done) {
+    var p = document.getElementById('hop-' + i);
+    var tok = document.getElementById('tok');
+    var fired = false;
+    function finish() {
+      if (fired) return; fired = true;
+      if (guard) { clearTimeout(guard); guard = null; }
+      if (tok) tok.setAttribute('opacity', '0');
+      done();
+    }
+    var len = 0;
+    try { len = p ? p.getTotalLength() : 0; } catch (e) { len = 0; }
+    if (REDUCED || !p || !len || document.hidden) { finish(); return; }
+    tok.setAttribute('opacity', '1');
+    var t0 = performance.now(), dur = 520;
+    function frame(now) {
+      var k = Math.min(1, (now - t0) / dur);
+      var e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+      var pt = p.getPointAtLength(len * e);
+      tok.setAttribute('cx', pt.x); tok.setAttribute('cy', pt.y);
+      if (k < 1) rafId = requestAnimationFrame(frame); else finish();
+    }
+    rafId = requestAnimationFrame(frame);
+    guard = setTimeout(finish, dur + 320);
+  }
+
+  /* ================= transport ================= */
+  var playBtn = document.getElementById('play');
+  function stop() {
+    playing = false;
+    playBtn.setAttribute('aria-pressed', 'false');
+    playBtn.textContent = 'Play ▶';
+    if (timer) { clearTimeout(timer); timer = null; }
+    if (guard) { clearTimeout(guard); guard = null; }
+    if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+    var tok = document.getElementById('tok');
+    if (tok) tok.setAttribute('opacity', '0');
+  }
+  function tick() {
+    if (!playing) return;
+    if (idx >= steps().length - 1) { stop(); return; }
+    if (REDUCED) { idx += 1; paint(); timer = setTimeout(tick, 900); return; }
+    travel(idx, function () {
+      idx += 1; paint();
+      timer = setTimeout(tick, 430);
+    });
+  }
+  playBtn.addEventListener('click', function () {
+    if (playing) { stop(); return; }
+    picked = null;
+    if (REDUCED_ALL) { REDUCED_ALL = false; idx = 0; paint(); }
+    if (idx >= steps().length - 1) { idx = 0; paint(); }
+    playing = true;
+    playBtn.setAttribute('aria-pressed', 'true');
+    playBtn.textContent = 'Pause ‖';
+    tick();
+  });
+  function goto(i, animate) {
+    var list = steps();
+    if (i < 0 || i > list.length - 1) return;
+    picked = null;
+    if (REDUCED_ALL) { REDUCED_ALL = false; }
+    if (animate && i === idx + 1 && !REDUCED) { travel(idx, function () { idx = i; paint(); }); }
+    else { idx = i; paint(); }
+  }
+  document.getElementById('next').addEventListener('click', function () { stop(); goto(idx + 1, true); });
+  document.getElementById('prev').addEventListener('click', function () { stop(); goto(idx - 1, false); });
+  document.getElementById('rest').addEventListener('click', function () { stop(); goto(0, false); });
+  scrub.addEventListener('input', function () { stop(); goto(+scrub.value, false); });
+
+  document.querySelectorAll('[data-sc]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      stop();
+      scen = b.dataset.sc; idx = 0; picked = null;
+      document.querySelectorAll('[data-sc]').forEach(function (o) { o.setAttribute('aria-pressed', String(o === b)); });
+      COMP.forEach(function (c) { document.getElementById('card-' + c.id).hidden = true; });
+      buildTape();
+      if (REDUCED) { REDUCED_ALL = true; idx = steps().length - 1; }
+      paint();
+    });
+  });
+
+  document.querySelectorAll('[data-alt]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var k = b.dataset.alt;
+      alt[k] = !alt[k];
+      b.setAttribute('aria-pressed', String(alt[k]));
+      paint();
+    });
+  });
+
+  zonesEl.addEventListener('click', function (e) {
+    var t = e.target.closest ? e.target.closest('[data-pick]') : null;
+    if (!t) return;
+    stop();
+    picked = (picked === t.dataset.pick) ? null : t.dataset.pick;
+    paint();
+  });
+
+  /* ================= responsive / resize ================= */
+  var rt = null;
+  window.addEventListener('resize', function () {
+    clearTimeout(rt);
+    rt = setTimeout(function () { drawWires(); postSize(); }, 140);
+  });
+  if ('ResizeObserver' in window) {
+    new ResizeObserver(function () { drawWires(); postSize(); }).observe(zonesEl);
+  }
+
+  /* ================= autosize sender ================= */
+  function postSize() {
+    if (document.documentElement.dataset.embedded !== 'true') return;
+    window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+  }
+  if (document.documentElement.dataset.embedded === 'true') {
+    if ('ResizeObserver' in window) new ResizeObserver(postSize).observe(document.body);
+    window.addEventListener('load', postSize);
+    setTimeout(postSize, 400);
+  }
+
+  /* ================= boot ================= */
+  buildTape();
+  if (REDUCED) {
+    /* reduced motion: render the finished architecture with the whole run laid out.
+       Every component revealed, every hop drawn and numbered, the full run tape
+       visible and undimmed. Nothing depends on the scrubber ever moving. */
+    REDUCED_ALL = true;
+    alt.l1 = true; alt.l2 = true;
+    document.querySelectorAll('[data-alt]').forEach(function (b) {
+      b.setAttribute('aria-pressed', String(!!alt[b.dataset.alt]));
+    });
+    idx = steps().length - 1;
+    paint();
+  } else {
+    idx = 0;
+    paint();
+    var started = false;
+    var autoStart = function () {
+      if (started) return; started = true;
+      playing = true;
+      playBtn.setAttribute('aria-pressed', 'true');
+      playBtn.textContent = 'Pause ‖';
+      timer = setTimeout(tick, 520);
+    };
+    if ('IntersectionObserver' in window) {
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (en) { if (en.isIntersecting) { io.disconnect(); autoStart(); } });
+      }, { threshold: 0.15 });
+      io.observe(document.getElementById('stage'));
+    } else { autoStart(); }
+  }
+  setTimeout(function () { drawWires(); postSize(); }, 250);
+})();
+</script>
+</body>
+</html>

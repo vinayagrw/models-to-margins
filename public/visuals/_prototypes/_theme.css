@@ -1,0 +1,168 @@
+/* Private vs Public AI — shared theme tokens and base styles
+   Used by deployment-spectrum, reference-architecture, request-lifecycle,
+   self-host-topology. */
+
+:root,
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  /* Background gradient stops */
+  --bg-start: #f7efe5;
+  --bg-mid: #e8f5fa;
+  --bg-end: #f4e7e2;
+
+  /* Text */
+  --text: #0d2138;
+  --text-strong: #051324;
+  --muted: rgba(16, 42, 67, 0.72);
+  --muted-soft: rgba(16, 42, 67, 0.66);
+
+  /* Surface */
+  --surface: rgba(255, 255, 255, 0.86);
+  --surface-strong: rgba(255, 255, 255, 0.94);
+  --border: rgba(16, 42, 67, 0.14);
+  --border-strong: rgba(16, 42, 67, 0.22);
+
+  /* Accent palette */
+  --accent: #077693;
+  --accent-2: #b8520d;
+  --accent-3: #16825d;
+
+  /* Status */
+  --warn: #c93d17;
+  --good: #16825d;
+
+  /* The five deployment positions, used across all four exhibits */
+  --P1: #b8520d;  /* Managed frontier API */  
+  --P2: #077693;  /* Managed open weights */  
+  --P3: #7d3bde;  /* Sovereign-region managed */  
+  --P4: #16825d;  /* Vendor appliance, your metal */  
+  --P5: #8f680a;  /* Self-hosted open weights */  
+
+  /* Heatmap */
+  --heat-empty: rgba(16, 42, 67, 0.10);
+  --heat-partial: #f4cb73;
+  --heat-strong: #16825d;
+
+  /* Shadow */
+  --shadow: 0 18px 38px rgba(16, 42, 67, 0.12);
+  --shadow-soft: 0 12px 28px rgba(16, 42, 67, 0.10);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg-start: #040915;
+    --bg-mid: #050b16;
+    --bg-end: #02050c;
+    --text: #ebf4ff;
+    --text-strong: #ffffff;
+    --muted: rgba(235, 244, 255, 0.66);
+    --muted-soft: rgba(235, 244, 255, 0.55);
+    --surface: rgba(11, 21, 38, 0.86);
+    --surface-strong: rgba(13, 24, 42, 0.94);
+    --border: rgba(166, 212, 255, 0.16);
+    --border-strong: rgba(166, 212, 255, 0.32);
+    --accent: #22d3ee;
+    --accent-2: #f97316;
+    --accent-3: #4edab5;
+    --warn: #ff776c;
+    --good: #4edab5;
+    --P1: #f97316;
+    --P2: #22d3ee;
+    --P3: #a56cff;
+    --P4: #4edab5;
+    --P5: #f4cb73;
+    --heat-empty: rgba(166, 212, 255, 0.08);
+    --heat-partial: #f4cb73;
+    --heat-strong: #4edab5;
+    --shadow: 0 22px 60px rgba(0, 0, 0, 0.42);
+    --shadow-soft: 0 14px 32px rgba(0, 0, 0, 0.30);
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg-start: #040915;
+  --bg-mid: #050b16;
+  --bg-end: #02050c;
+  --text: #ebf4ff;
+  --text-strong: #ffffff;
+  --muted: rgba(235, 244, 255, 0.66);
+  --muted-soft: rgba(235, 244, 255, 0.55);
+  --surface: rgba(11, 21, 38, 0.86);
+  --surface-strong: rgba(13, 24, 42, 0.94);
+  --border: rgba(166, 212, 255, 0.16);
+  --border-strong: rgba(166, 212, 255, 0.32);
+  --accent: #22d3ee;
+  --accent-2: #f97316;
+  --accent-3: #4edab5;
+  --warn: #ff776c;
+  --good: #4edab5;
+  --P1: #f97316;
+  --P2: #22d3ee;
+  --P3: #a56cff;
+  --P4: #4edab5;
+  --P5: #f4cb73;
+  --heat-empty: rgba(166, 212, 255, 0.08);
+  --heat-partial: #f4cb73;
+  --heat-strong: #4edab5;
+  --shadow: 0 22px 60px rgba(0, 0, 0, 0.42);
+  --shadow-soft: 0 14px 32px rgba(0, 0, 0, 0.30);
+}
+
+/* Reset */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* Base body */
+body {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 14% 14%, rgba(34, 211, 238, 0.10), transparent 32%),
+    radial-gradient(circle at 86% 86%, rgba(249, 115, 22, 0.10), transparent 32%),
+    linear-gradient(180deg, var(--bg-start) 0%, var(--bg-mid) 48%, var(--bg-end) 100%);
+  font-family: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif;
+  color: var(--text);
+}
+
+/* Embed mode (?embed=1) — visual is loaded inside an iframe.
+   Height is AUTO here, not viewport-locked: every visual in this family posts
+   m2m:frame-size and the host page sizes the frame to the content. Locking to
+   100% would clip tall content and defeat the autosize contract. */
+:root[data-embedded="true"],
+:root[data-embedded="true"] body {
+  height: auto;
+  min-height: 0;
+  overflow: visible;
+}
+
+/* Shared shell layout */
+.shell {
+  width: min(calc(100% - 32px), 1280px);
+  margin: 0 auto;
+  padding: 28px 0 36px;
+}
+:root[data-embedded="true"] .shell {
+  width: 100%;
+  height: auto;
+  padding: 14px 18px;
+  /* Each visual's own .shell rule sets display + grid/flex template. */
+}
+
+/* Shared typography utilities */
+.eyebrow {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+/* Keyboard focus: explicit high-visibility ring on every interactive element */
+button:focus-visible,
+a:focus-visible,
+summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}

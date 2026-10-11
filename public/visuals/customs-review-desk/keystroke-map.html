@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>One keystroke, three records</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+/* Keystroke map. Single-key model for the review desk: A accept, X reject,
+   O override, E expand evidence, D disagree, J/K move focus. Click a key for
+   what it writes (filing decision, training label, legal record). A settings
+   panel shows the required remap and disable surface (A11Y-1/A11Y-2).
+   Reduced motion: everything visible, static. */
+
+.shell { display: flex; flex-direction: column; gap: 10px; }
+:root[data-embedded="true"] .shell { padding: 14px clamp(14px, 2vw, 22px); }
+
+.head h1 {
+  font-family: "Space Grotesk", sans-serif; font-weight: 700;
+  font-size: clamp(1.02rem, 2.2vw, 1.3rem); letter-spacing: -0.02em; color: var(--text-strong);
+}
+:root[data-embedded="true"] .head h1 { font-size: 1.02rem; }
+.head p { font: 500 0.72rem/1.4 "DM Sans", sans-serif; color: var(--muted); margin-top: 2px; }
+
+.wrap { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 10px; align-items: start; }
+
+.keys { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 7px; }
+.key {
+  cursor: pointer; border: 1px solid var(--border-strong); border-top: 3px solid var(--kc);
+  border-radius: 10px; background: var(--surface); box-shadow: var(--shadow-soft);
+  padding: 9px 8px 8px; display: flex; flex-direction: column; gap: 3px; text-align: left; min-width: 0;
+}
+.key kbd {
+  font: 700 0.86rem/1 "IBM Plex Mono", monospace; color: var(--kc);
+  border: 1.5px solid var(--kc); border-radius: 5px; padding: 3px 8px; width: fit-content;
+}
+.key b { font: 700 0.68rem/1.25 "Space Grotesk", sans-serif; color: var(--text-strong); }
+.key span { font: 500 0.62rem/1.35 "DM Sans", sans-serif; color: var(--muted); }
+.key[aria-pressed="true"] { box-shadow: 0 0 0 3px color-mix(in srgb, var(--kc) 25%, transparent), var(--shadow-soft); }
+
+.detail {
+  border: 1px solid var(--border); border-radius: 12px; background: var(--surface);
+  box-shadow: var(--shadow-soft); padding: 11px 13px; display: flex; flex-direction: column; gap: 6px;
+}
+.d-name {
+  font: 700 0.6rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--dc, var(--accent)); border: 1px solid color-mix(in srgb, var(--dc, var(--accent)) 45%, transparent);
+  border-radius: 999px; padding: 4px 10px; display: inline-block; width: fit-content;
+}
+.writes { display: flex; flex-direction: column; gap: 4px; margin-top: 2px; }
+.writes .w { display: flex; align-items: baseline; gap: 6px; font: 500 0.68rem/1.4 "DM Sans", sans-serif; color: var(--text); }
+.writes .w b { font: 700 0.6rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.08em; text-transform: uppercase; color: var(--dc, var(--accent)); min-width: 78px; }
+
+.settings {
+  border: 1px solid var(--border); border-left: 3px solid var(--accent-2); border-radius: 10px;
+  background: color-mix(in srgb, var(--accent-2) 6%, var(--surface)); padding: 10px 12px;
+  display: flex; flex-direction: column; gap: 5px;
+}
+.settings b.t { font: 700 0.64rem/1.2 "Space Grotesk", sans-serif; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent-2); }
+.settings ul { list-style: none; display: flex; flex-direction: column; gap: 4px; }
+.settings li { font: 500 0.7rem/1.5 "DM Sans", sans-serif; color: var(--muted); padding-left: 12px; position: relative; }
+.settings li::before { content: ""; position: absolute; left: 0; top: 0.55em; width: 5px; height: 5px; border-radius: 50%; background: var(--accent-2); }
+.settings li b { color: var(--text-strong); }
+.settings li code { font: 600 0.64rem/1.3 "IBM Plex Mono", monospace; color: var(--accent-2); }
+
+@media (max-width: 760px) {
+  .head h1 { font-size: 1rem; }
+  .wrap { grid-template-columns: minmax(0, 1fr); }
+  .keys { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="head">
+    <h1>One keystroke, three records</h1>
+    <p>Single-key model for the review desk. Click a key for what it writes when pressed.</p>
+  </div>
+
+  <div class="wrap">
+    <div>
+      <div class="keys" role="group" aria-label="Review desk single-key model">
+        <button class="key" style="--kc: var(--S-cleared)" data-i="0" aria-pressed="true"><kbd>A</kbd><b>Accept</b><span>proposed code stands</span></button>
+        <button class="key" style="--kc: var(--accent)" data-i="1" aria-pressed="false"><kbd>X</kbd><b>Reject</b><span>send to broker sign-off</span></button>
+        <button class="key" style="--kc: var(--T1)" data-i="2" aria-pressed="false"><kbd>O</kbd><b>Override</b><span>reviewer's own code</span></button>
+        <button class="key" style="--kc: var(--accent-2)" data-i="3" aria-pressed="false"><kbd>E</kbd><b>Expand</b><span>show full evidence</span></button>
+        <button class="key" style="--kc: var(--accent)" data-i="4" aria-pressed="false"><kbd>D</kbd><b>Disagree</b><span>equal-weight to accept</span></button>
+        <button class="key" style="--kc: var(--muted)" data-i="5" aria-pressed="false"><kbd>J</kbd><b>Next</b><span>move to next item</span></button>
+        <button class="key" style="--kc: var(--muted)" data-i="6" aria-pressed="false"><kbd>K</kbd><b>Prev</b><span>move to previous item</span></button>
+      </div>
+      <div class="settings" style="margin-top:8px">
+        <b class="t">Settings surface, required</b>
+        <ul>
+          <li><b>Remap</b>: every key above is rebindable in <code>Reviewer Settings → Keyboard</code>, no key is hard-coded to a physical position (A11Y-1).</li>
+          <li><b>Disable</b>: single-key mode can be turned off entirely in favour of on-screen buttons plus Tab and Enter, for reviewers who cannot use rapid single-key input (A11Y-2).</li>
+          <li><b>Conflict check</b>: remap screen blocks assigning the same key to two actions and warns on collision with screen-reader shortcuts.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="detail" aria-live="polite">
+      <span class="d-name" id="d-name"></span>
+      <div class="writes" id="d-writes"></div>
+    </div>
+  </div>
+</div>
+<script>
+(() => {
+  const DATA = [
+    { name: 'A — Accept', color: 'var(--S-cleared)', writes: [
+      ['Filing', 'the proposed HTS code is submitted as filed'],
+      ['Training label', 'recorded as a positive example at this confidence band'],
+      ['Legal record', 'reviewer identity, license number, and timestamp attached']
+    ]},
+    { name: 'X — Reject', color: 'var(--accent)', writes: [
+      ['Filing', 'line is pulled from auto-filing, escalated to broker sign-off'],
+      ['Training label', 'recorded as a negative example, reason code required'],
+      ['Legal record', 'rejection reason and reviewer identity logged for audit']
+    ]},
+    { name: 'O — Override', color: 'var(--T1)', writes: [
+      ['Filing', 'the reviewer’s own code replaces the proposed one'],
+      ['Training label', 'the strongest signal available, model was wrong and a human said why'],
+      ['Legal record', 'a typed decision object: reason code, identity, timestamp, decision source']
+    ]},
+    { name: 'E — Expand evidence', color: 'var(--accent-2)', writes: [
+      ['Filing', 'no filing effect, read-only'],
+      ['Training label', 'none'],
+      ['Legal record', 'view logged for the certification diff screen in Chapter 4']
+    ]},
+    { name: 'D — Disagree', color: 'var(--accent)', writes: [
+      ['Filing', 'opens the disagreement path, equal prominence to accept'],
+      ['Training label', 'flags the case for the calibration review queue'],
+      ['Legal record', 'disagreement rationale required before the key completes']
+    ]},
+    { name: 'J — Next item', color: 'var(--muted)', writes: [
+      ['Filing', 'no effect'], ['Training label', 'none'], ['Legal record', 'navigation only, not a decision']
+    ]},
+    { name: 'K — Previous item', color: 'var(--muted)', writes: [
+      ['Filing', 'no effect'], ['Training label', 'none'], ['Legal record', 'navigation only, not a decision']
+    ]}
+  ];
+  const keys = document.querySelectorAll('.key');
+  const render = (i) => {
+    const d = DATA[i];
+    const nameEl = document.getElementById('d-name');
+    nameEl.textContent = d.name;
+    nameEl.style.setProperty('--dc', d.color);
+    const writesEl = document.getElementById('d-writes');
+    writesEl.innerHTML = d.writes.map(([label, text]) => `<div class="w"><b>${label}</b><span>${text}</span></div>`).join('');
+  };
+  keys.forEach((btn) => btn.addEventListener('click', () => {
+    keys.forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
+    render(Number(btn.dataset.i));
+  }));
+  render(0);
+
+  if (document.documentElement.dataset.embedded === 'true') {
+    const postSize = () => window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+    if ('ResizeObserver' in window) new ResizeObserver(postSize).observe(document.body);
+    window.addEventListener('load', postSize);
+  }
+})();
+</script>
+</body>
+</html>

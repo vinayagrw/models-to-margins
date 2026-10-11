@@ -47,11 +47,11 @@
 }
 
 .live-brief__title {
-  max-width: 18ch;
+  max-width: 100%;
 }
 
 .live-brief__summary {
-  max-width: 72ch;
+  max-width: 100%;
 }
 
 .live-brief__board {
@@ -246,7 +246,7 @@
 }
 
 .live-brief__article-intro {
-  max-width: 78ch;
+  max-width: 100%;
 }
 
 @media (max-width: 1240px) {

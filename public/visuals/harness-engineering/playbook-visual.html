@@ -24,7 +24,7 @@ html, body { height: 100%; overflow: hidden; }
   font-size: clamp(1rem, 2.2vh, 1.5rem); color: var(--text-strong);
   letter-spacing: -0.01em; line-height: 1.2;
 }
-.head p { color: var(--muted); font-size: clamp(0.78rem, 1.4vh, 0.92rem); margin-top: 4px; max-width: 64ch; }
+.head p { color: var(--muted); font-size: clamp(0.78rem, 1.4vh, 0.92rem); margin-top: 4px; }
 .tabs { display: flex; gap: 6px; flex-wrap: wrap; }
 .tab {
   appearance: none; border: 1px solid var(--border); background: var(--surface);
@@ -33,18 +33,23 @@ html, body { height: 100%; overflow: hidden; }
   border-radius: 999px;
   font-size: clamp(0.72rem, 1.2vh, 0.84rem); font-weight: 700; letter-spacing: 0.04em;
   transition: 160ms ease;
+  display: inline-flex; align-items: center; gap: 7px;
 }
 .tab:hover { color: var(--text-strong); border-color: var(--border-strong); }
 .tab[aria-selected="true"] {
-  color: #ffffff;
+  color: var(--surface-strong);
   background: var(--c, var(--accent));
   border-color: var(--c, var(--accent));
   box-shadow: 0 6px 18px color-mix(in srgb, var(--c, var(--accent)) 28%, transparent);
 }
 .tab-num {
-  display: inline-block; margin-right: 6px;
   font-family: "DM Sans", sans-serif; font-weight: 800; opacity: 0.9;
 }
+.tab .pic { width: 15px; height: 15px; }
+
+.pic { display: block; color: inherit; }
+.pic svg { width: 100%; height: 100%; }
+.pic svg * { stroke: currentColor; }
 
 .panel {
   min-height: 0;
@@ -64,7 +69,7 @@ html, body { height: 100%; overflow: hidden; }
   font-size: clamp(0.66rem, 1.05vh, 0.74rem); font-weight: 700; letter-spacing: 0.16em;
   text-transform: uppercase; color: var(--c);
 }
-.panel-tag::before { content: ""; width: 10px; height: 10px; border-radius: 3px; background: var(--c); }
+.panel-tag .pic { width: 16px; height: 16px; }
 .panel-title {
   font-family: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif; font-weight: 800;
   font-size: clamp(1.2rem, 2.4vh, 1.7rem); line-height: 1.15; color: var(--text-strong);
@@ -132,14 +137,34 @@ html, body { height: 100%; overflow: hidden; }
   background: var(--surface-strong);
   padding: clamp(8px, 1.2vh, 12px) clamp(10px, 1vw, 14px);
   display: grid; grid-template-rows: auto auto; gap: 4px;
+  opacity: 0; transform: translateY(10px);
+  transition: opacity 380ms ease, transform 380ms ease;
 }
+.example.is-in { opacity: 1; transform: none; }
 .example-head {
   font-family: "DM Sans", sans-serif; font-weight: 700;
   font-size: clamp(0.78rem, 1.35vh, 0.9rem); color: var(--text-strong);
-  display: flex; align-items: center; gap: 8px;
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
 }
 .example-head::before {
   content: "→"; color: var(--c); font-weight: 800;
+}
+.badge {
+  margin-left: auto;
+  font-family: "DM Sans", sans-serif;
+  font-size: clamp(0.58rem, 0.92vh, 0.66rem); font-weight: 800;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  padding: 3px 8px; border-radius: 999px; white-space: nowrap;
+}
+.badge-build {
+  color: var(--accent-2);
+  background: color-mix(in srgb, var(--accent-2) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent-2) 38%, transparent);
+}
+.badge-platform {
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 38%, transparent);
 }
 .example-detail { font-size: clamp(0.74rem, 1.2vh, 0.84rem); color: var(--muted); line-height: 1.4; padding-left: 18px; }
 .example-code {
@@ -150,15 +175,25 @@ html, body { height: 100%; overflow: hidden; }
   font-size: clamp(0.66rem, 1.1vh, 0.78rem); line-height: 1.5;
   color: var(--text); white-space: pre; overflow-x: auto;
 }
+.badge-key {
+  display: flex; gap: 10px; flex-wrap: wrap; align-items: center;
+  font-size: clamp(0.62rem, 1vh, 0.7rem); color: var(--muted-soft);
+  letter-spacing: 0.04em;
+}
 
 @media (max-width: 880px) {
   .panel { grid-template-columns: 1fr; }
   .panel-info { border-right: 0; border-bottom: 1px solid var(--border); }
 }
+@media (prefers-reduced-motion: reduce) {
+  .example { opacity: 1; transform: none; transition: none; }
+}
 
-/* Embed: size to content and report it, the parent autosizes the frame. */
-:root[data-embedded="true"], :root[data-embedded="true"] body { height: auto; }
-:root[data-embedded="true"] .shell { height: auto; }
+/* Embed: size to content and report it, the parent autosizes the frame.
+   Overrides the family theme's viewport lock, which would clip this scene. */
+:root[data-embedded="true"], :root[data-embedded="true"] body { height: auto; overflow: visible; }
+:root[data-embedded="true"] .shell { width: 100%; height: auto; padding: 14px 18px; }
+:root[data-embedded="true"] .examples-list { overflow-y: visible; }
 </style>
 </head>
 <body>
@@ -167,6 +202,10 @@ html, body { height: 100%; overflow: hidden; }
     <div>
       <span class="eyebrow">Implementation playbook</span>
       <h1>One min-viable move per layer. Ship this sprint.</h1>
+      <p class="badge-key">
+        <span class="badge badge-build" style="margin-left: 0">You build</span> developer residue in 2026
+        <span class="badge badge-platform" style="margin-left: 0">Platform</span> inherited from the runtime
+      </p>
     </div>
     <nav class="tabs" id="tabs" role="tablist" aria-label="Harness layers"></nav>
   </header>
@@ -177,65 +216,90 @@ html, body { height: 100%; overflow: hidden; }
 </main>
 <script>
 (() => {
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- house icon loader ---------- */
+  const ICON_BASE = '../customs-entry-agent/flow-icons/';
+  const cache = {};
+  const load = (n) => cache[n] || (cache[n] = fetch(ICON_BASE + n + '.svg')
+    .then((r) => (r.ok ? r.text() : Promise.reject()))
+    .then((t) => t.replace(/stroke="#232f3e"/g, 'stroke="currentColor"')).catch(() => ''));
+  const paintIcons = () => {
+    document.querySelectorAll('[data-ic]').forEach((slot) => {
+      load(slot.dataset.ic).then((svg) => { if (!slot.firstChild) slot.innerHTML = svg; });
+    });
+  };
+
   const layers = [
     {
-      id: 'L1', name: 'Constraint', color: 'var(--L1)',
+      id: 'L1', name: 'Constraint', color: 'var(--L1)', icon: 'barrier',
       owner: 'Architecture', rate: 'Slow', shipped: 'Developer-owned',
-      purpose: 'Encode the rules the agent is not allowed to break, mechanically. No LLM in the loop. Cheap to run, zero false positives, prevents whole categories of failure without burning a single token.',
-      mvv: 'One custom linter rule per architectural decision you actually care about, with a Fix: and a Reference: line in every error message.',
-      anti: 'Leaving rules in human-readable wikis and hoping the agent reads them. If a rule isn\'t enforced mechanically, it isn\'t a constraint — it\'s a wish.',
+      metric: 'Prompts per run',
+      purpose: 'Constrain the <strong>environment first, the text second</strong>. A sandbox the agent cannot escape beats a paragraph asking it not to. Rules that survive are mechanical: no LLM in the loop, zero false positives, whole categories of failure prevented without burning a token. The layer\'s success metric is <strong>prompts per run</strong> — not how many rules you wrote.',
+      mvv: 'Run every agent session inside a sandbox profile with an explicit egress and filesystem policy, then add one custom linter rule per architectural decision you actually care about — each with a Fix: and a Reference: line.',
+      anti: 'Treating the permission prompt as a control. Anthropic (How we contain Claude, 25 May 2026) found users approved roughly 93% of permission prompts — a checkbox that is almost always ticked is telemetry, not a constraint.',
       examples: [
-        { h: 'Custom linter with actionable remediation', d: 'Every violation tells the agent how to fix it and where to read more.', code: 'ERROR: Naming convention violation\n  File: modules/billing/src/invoice_handler.py\n  Line: 47\n  Found: `processInvoice`\n  Fix: Rename to `process_invoice`\n  Reference: modules/billing/CONVENTIONS.md#naming' },
-        { h: 'ArchUnit-style structural tests', d: 'Module boundaries and dependency directions enforced at every commit ("billing may not import from auth").' },
-        { h: 'API contract validation', d: 'Shapes at module boundaries are parsed and checked at every commit.' }
+        { h: 'Sandbox profile as the primary control', b: 'platform', d: 'gVisor, Seatbelt, or a microVM with vsock-only egress: the boundary is enforced by the kernel, not by the model reading a rule. Anthropic measured an 84% cut in prompt volume once environmental controls carried the load.', code: 'sandbox:\n  runtime: gvisor          # or seatbelt | microvm\n  filesystem:\n    write: [./worktree]\n    deny:  [~/.ssh, ~/.aws]\n  network:\n    transport: vsock        # no raw egress\n    allow: [registry.internal, api.github.com]' },
+        { h: 'Auto mode: pre-execution interception', b: 'platform', d: 'Anthropic reports auto mode caught around 83% of overeager behaviour before execution at roughly a 0.4% false-block rate — the class of check that only works when it sits below the model.' },
+        { h: 'Custom linter with actionable remediation', b: 'build', d: 'Every violation tells the agent how to fix it and where to read more.', code: 'ERROR: Naming convention violation\n  File: modules/billing/src/invoice_handler.py\n  Line: 47\n  Found: `processInvoice`\n  Fix: Rename to `process_invoice`\n  Reference: modules/billing/CONVENTIONS.md#naming' },
+        { h: 'ArchUnit-style structural tests', b: 'build', d: 'Module boundaries and dependency directions enforced at every commit ("billing may not import from auth"). Textual rules, but mechanically checked.' }
       ]
     },
     {
-      id: 'L2', name: 'Context', color: 'var(--L2)',
-      owner: 'Dev team', rate: 'Medium', shipped: 'Platform helps',
-      purpose: 'Control what the model sees at each step. Curated and relevant beats comprehensive and stale, every time.',
-      mvv: 'A hand-written AGENTS.md under 100 lines that describes only what a new engineer would need on day one.',
-      anti: 'A 2,000-line LLM-generated AGENTS.md. ETH Zurich studied 138 agentfiles — LLM-generated ones hurt performance and cost +20% in tokens.',
+      id: 'L2', name: 'Context', color: 'var(--L2)', icon: 'book',
+      owner: 'Dev team', rate: 'Medium', shipped: 'Mostly platform',
+      metric: 'Relevance, not capacity',
+      purpose: 'Control what the model sees at each step. In 2026 the machinery is <strong>bought, not built</strong>: runtime compaction and history persistence are GA runtime features, and native million-token context shipped for Claude Code on 29 June 2026. Capacity is no longer the constraint, so the developer job compresses to <strong>curation — deciding what NOT to load</strong>.',
+      mvv: 'A hand-written AGENTS.md under 100 lines describing only what a new engineer needs on day one — and an explicit list of what the harness must never auto-load.',
+      anti: 'A 2,000-line LLM-generated AGENTS.md. ETH Zurich studied 138 agentfiles: LLM-generated ones slightly hurt performance while costing 20%+ more tokens. HumanLayer\'s working CLAUDE.md is under 60 lines. With a million tokens of room, relevance — not capacity — is what you are still paying for.',
       examples: [
-        { h: 'Brief map at the repo root', d: 'A short hand-written AGENTS.md or CLAUDE.md — a map of the system, not an essay.', code: '# Project Brief\nBilling platform with three core modules.\n\n## Modules\n- modules/auth/          OAuth2 + API keys\n- modules/billing/       Subscriptions, invoicing, payments\n- modules/notifications/ Email, SMS, webhooks\n\n## Key Conventions\n- REST conventions in ARCHITECTURE.md\n- Module-specific patterns in each CONVENTIONS.md' },
-        { h: 'Progressive disclosure via per-module READMEs', d: 'The brief map points at modules; module READMEs hold the detail. Nothing loads unless the agent navigates there.' },
-        { h: 'Progress files as durable scratchpads', d: 'A structured scratchpad recording completed steps, blockers, and next actions. Survives compaction and crashes.' }
+        { h: 'Runtime compaction', b: 'platform', d: 'Automatic context compaction is now a GA runtime feature. Hand-rolled summarizer loops are maintenance you no longer owe.' },
+        { h: 'History persistence across sessions', b: 'platform', d: 'The runtime keeps and rehydrates conversation history. Your job is deciding what deserves to come back, not writing the store.' },
+        { h: 'Brief map at the repo root', b: 'build', d: 'A short hand-written AGENTS.md or CLAUDE.md — a map of the system, not an essay. Curation is the whole product here.', code: '# Project Brief\nBilling platform with three core modules.\n\n## Modules\n- modules/auth/          OAuth2 + API keys\n- modules/billing/       Subscriptions, invoicing, payments\n- modules/notifications/ Email, SMS, webhooks\n\n## Key Conventions\n- REST conventions in ARCHITECTURE.md\n- Module-specific patterns in each CONVENTIONS.md\n\n## Do NOT auto-load\n- generated/**, vendor/**, *.lock, fixtures/**' },
+        { h: 'Progressive disclosure via per-module READMEs', b: 'build', d: 'The brief map points at modules; module READMEs hold the detail. Nothing loads unless the agent navigates there — the deliberate opposite of filling the window because you can.' }
       ]
     },
     {
-      id: 'L3', name: 'Execution', color: 'var(--L3)',
+      id: 'L3', name: 'Execution', color: 'var(--L3)', icon: 'gears',
       owner: 'Platform engineering', rate: 'Medium', shipped: 'Platform helps',
-      purpose: 'Give the agent the right hands for this task — no more. More tools usually produces worse results. This is where the "dumb zone" lives.',
+      metric: 'Tools exposed per task type',
+      purpose: 'Give the agent the right hands for this task — no more. More tools usually produces worse results; this is where the "dumb zone" lives. The <strong>MCP 2026-07-28 revision</strong> reshaped the layer: a stateless core (no <code>initialize</code> handshake, no <code>Mcp-Session-Id</code>), <code>Mcp-Method</code> / <code>Mcp-Name</code> header routing, and background subagents that make execution genuinely concurrent.',
       mvv: 'Name the 6-10 tools each task type actually needs, expose only those, and put everything heavier behind a sub-agent.',
-      anti: 'Connecting every MCP server you have because "the model can decide." It can — and it will spend more tokens deciding than doing.',
+      anti: 'Connecting every MCP server you have because "the model can decide." It can — and it will spend more tokens deciding than doing. The 2026 variant: keeping a stateful, session-pinned transport alive because migrating felt optional.',
       examples: [
-        { h: 'Dynamic tool scoping per task', d: 'HumanLayer replaced the full Linear MCP server (dozens of tools) with a custom CLI exposing six operations and saved thousands of tokens from tool definitions alone.' },
-        { h: 'Per-worktree sandbox isolation', d: 'Every agent session runs in its own worktree / sandbox / disposable container. State from one run cannot bleed into another.' },
-        { h: 'Sub-agent context firewall', d: 'Heavy tasks dispatch to a sub-agent so intermediate tool calls do not pollute the parent agent\'s context window.' }
+        { h: 'Stateless MCP core (2026-07-28)', b: 'platform', d: 'No initialize handshake and no Mcp-Session-Id: a tool call is a self-describing request routed by header, so any replica can serve it and load balancing stops being a special case.', code: 'POST /mcp HTTP/1.1\nMcp-Method: tools/call\nMcp-Name: billing.refund\nContent-Type: application/json\n\n{ "arguments": { "merchant_id": "m_812", "amount": 4200 } }' },
+        { h: 'tools/list caching via ttlMs + cacheScope', b: 'platform', d: 'The tool catalogue is cacheable per scope with an explicit TTL, so tool definitions stop being re-paid on every turn.', code: '{\n  "tools": [ /* ... */ ],\n  "cache": { "ttlMs": 900000, "cacheScope": "session" }\n}' },
+        { h: 'Background subagents', b: 'platform', d: 'Heavy work dispatches to a background subagent: execution becomes concurrent, and intermediate tool calls never pollute the parent context window.' },
+        { h: 'Workstream: migrate off the deprecated surface', b: 'build', d: 'Roots, Sampling, Logging and the HTTP+SSE transport are all deprecated on a twelve-month window. Name an owner, inventory every server you run, and land the migration inside that window — this is scheduled work, not a someday item.' },
+        { h: 'Dynamic tool scoping per task', b: 'build', d: 'HumanLayer replaced the full Linear MCP server (dozens of tools) with a custom CLI exposing six operations and saved thousands of tokens from tool definitions alone.' }
       ]
     },
     {
-      id: 'L4', name: 'Verification', color: 'var(--L4)',
+      id: 'L4', name: 'Verification', color: 'var(--L4)', icon: 'flask',
       owner: 'Dev + QA', rate: 'Fast', shipped: 'Developer-owned',
-      purpose: 'Prove the agent\'s output actually works before anything ships. Highest-leverage layer most teams skip.',
-      mvv: 'One pre-stop hook that runs your existing test command and exits non-zero on failure. Boris Cherny: 2-3× output quality.',
-      anti: 'Trusting the agent\'s own claim that "everything works." The model is fluent. Fluency is not correctness.',
+      metric: 'Checks that run before "done"',
+      purpose: 'Prove the agent\'s output actually works before anything ships — still the highest-leverage layer most teams skip. Two things changed in 2026: human review became a protocol primitive via <strong>MRTR <code>input_required</code></strong>, and harness configuration became a recognised experimental variable, so eval runs now have to pin it.',
+      mvv: 'One pre-stop hook that runs your existing test command and exits non-zero on failure. Boris Cherny: 2-3× output quality. Still the cheapest move on this page.',
+      anti: 'Trusting the agent\'s own claim that "everything works." The model is fluent. Fluency is not correctness. The 2026 variant: publishing an eval number without recording the harness config that produced it.',
       examples: [
-        { h: 'Pre-stop hooks: success silent, failure loud', d: 'Run formatters, type checkers, tests before the agent finishes a step. Swallow passing output, only surface errors.', code: '#!/bin/bash\n# .agent/hooks/pre-stop.sh\nset -e\nnpm run lint --silent || { echo "LINT FAILED"; exit 1; }\nnpm test --silent       || { echo "TESTS FAILED"; exit 1; }\n# Silent on success.' },
-        { h: 'Golden-case eval suite', d: 'A small but real fixed set of input/output pairs the agent must pass before any change merges. Updated every time you find a new failure mode.' },
-        { h: 'Parity manifest for migrations', d: 'The new system is correct only when its outputs match the old system on a fixed regression set.' }
+        { h: 'Pre-stop hooks: success silent, failure loud', b: 'build', d: 'Run formatters, type checkers, tests before the agent finishes a step. Swallow passing output, only surface errors.', code: '#!/bin/bash\n# .agent/hooks/pre-stop.sh\nset -e\nnpm run lint --silent || { echo "LINT FAILED"; exit 1; }\nnpm test --silent       || { echo "TESTS FAILED"; exit 1; }\n# Silent on success.' },
+        { h: 'MRTR input_required: human review inside the call', b: 'platform', d: 'Human-in-the-loop is now a protocol primitive. The tool call parks in input_required and resumes on the human answer rather than restarting the run — review stops costing you the work already done.', code: '{\n  "status": "input_required",\n  "prompt": "Approve refund of $4,200 to merchant m_812?",\n  "resume_token": "rt_9f21c4"\n}' },
+        { h: 'Harness-config manifest per eval run', b: 'build', d: 'Harness configuration is an experimental variable (arXiv:2607.04528, 5 July 2026): the same model scores differently under different harnesses. Pin the config, record it with the result, and treat an unpinned number as unpublished.', code: 'harness:\n  runtime: claude-code@2026.07\n  tools: [read, edit, bash, test]\n  sandbox: gvisor\n  context_window: 1000000\n  compaction: runtime-default\n  seed: 17' },
+        { h: 'Golden-case eval suite', b: 'build', d: 'A small but real fixed set of input/output pairs the agent must pass before any change merges. Updated every time you find a new failure mode.' }
       ]
     },
     {
-      id: 'L5', name: 'Lifecycle', color: 'var(--L5)',
-      owner: 'SRE / DevOps', rate: 'Slow once built', shipped: 'Platform helps',
-      purpose: 'Keep the agent alive as a running process — startup, health, graceful shutdown, crash recovery, cost ceilings, escalation. Once built, this layer doesn\'t change much.',
-      mvv: 'A session budget, a per-file edit cap, and one human you can wake up if either trips.',
-      anti: 'Starting an agent on a long task with no budget, no checkpoint, and no loop detection. The horror stories all live here.',
+      id: 'L5', name: 'Lifecycle', color: 'var(--L5)', icon: 'gauge',
+      owner: 'SRE / DevOps', rate: 'Slow once built', shipped: 'Mostly platform',
+      metric: 'Cost per completed run',
+      purpose: 'Keep the agent alive as a running process — startup, health, graceful shutdown, crash recovery, cost ceilings, escalation. In 2026 most of that arrived in the box: <strong>durable session logs, crash/resume and history persistence are GA runtime features</strong> in two platforms (Anthropic Managed Agents; Microsoft Agent Framework Harness, GA 22 July 2026). The developer residue is <strong>escalation policy and cost ceilings</strong> — the parts that encode your risk appetite, which no runtime can guess.',
+      mvv: 'A session budget, a per-file edit cap, and one named human you can wake up if either trips.',
+      anti: 'Hand-rolling the persistence machinery a runtime now gives you — building your own event store, resume protocol and history replay in 2026 is weeks spent re-deriving a GA feature. (The older horror story still applies: a long task with no budget, no checkpoint and no loop detection.)',
       examples: [
-        { h: 'Checkpoint + resume via durable session log', d: 'The session is a durable event log living outside the model\'s context window. wake(sessionId) fetches the log and resumes from the last event. (Anthropic Managed Agents virtualizes this.)' },
-        { h: 'Loop detection middleware', d: 'LangChain\'s LoopDetectionMiddleware caps per-file edits in a session. When the cap trips, escalate to a human instead of burning more tokens. Prevents the doom loop.' },
-        { h: 'Cost ceilings + escalation', d: 'Every session has a budget; every budget exceedance triggers a named human, not a silent retry.' }
+        { h: 'Durable session log + crash/resume', b: 'platform', d: 'The session is a durable event log outside the model context; wake(sessionId) resumes from the last good event. GA in Anthropic Managed Agents and in the Microsoft Agent Framework Harness (22 July 2026). Adopt it — do not rebuild it.' },
+        { h: 'History persistence across restarts', b: 'platform', d: 'Conversation and tool history survive process death by default. The interesting question is retention policy, not storage.' },
+        { h: 'Cost ceilings', b: 'build', d: 'Every session carries a budget; every exceedance triggers a named human, not a silent retry. Your numbers, your risk appetite — this stays yours.', code: 'limits:\n  session_usd_max: 25\n  edits_per_file_max: 8\n  wall_clock_minutes_max: 45\non_breach:\n  action: pause_and_escalate\n  notify: "@platform-oncall"' },
+        { h: 'Escalation policy', b: 'build', d: 'Who gets woken, at what threshold, with what authority to kill the run. Loop detection (LangChain\'s LoopDetectionMiddleware) provides the trigger; the policy is the part you author.' }
       ]
     }
   ];
@@ -243,15 +307,35 @@ html, body { height: 100%; overflow: hidden; }
   const tabsEl = document.getElementById('tabs');
   const panelEl = document.getElementById('panel');
 
+  const esc = (s) => s.replace(/</g, '&lt;');
+
+  const animateExamples = () => {
+    const items = Array.from(panelEl.querySelectorAll('.example'));
+    const revealAll = () => items.forEach((el) => el.classList.add('is-in'));
+    if (reduced || !('IntersectionObserver' in window)) { revealAll(); return; }
+    const io = new IntersectionObserver((entries, obs) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        obs.unobserve(entry.target);
+        const i = items.indexOf(entry.target);
+        setTimeout(() => entry.target.classList.add('is-in'), Math.max(i, 0) * 70);
+      });
+    }, { threshold: 0.01, rootMargin: '0px 0px -5% 0px' });
+    items.forEach((el) => io.observe(el));
+    setTimeout(revealAll, 2200);
+  };
+
   const renderPanel = (layer) => {
     panelEl.style.setProperty('--c', layer.color);
+    panelEl.setAttribute('aria-labelledby', 'tab-' + layer.id);
     panelEl.innerHTML = `
       <div class="panel-info">
-        <span class="panel-tag">Layer ${layer.id.slice(1)} · ${layer.name}</span>
+        <span class="panel-tag"><span class="pic" data-ic="${layer.icon}" aria-hidden="true"></span>Layer ${layer.id.slice(1)} · ${layer.name}</span>
         <h2 class="panel-title">${layer.name}</h2>
         <div class="panel-meta">
           <span class="meta-chip"><strong>Owner</strong>${layer.owner}</span>
           <span class="meta-chip"><strong>Rate</strong>${layer.rate}</span>
+          <span class="meta-chip"><strong>Metric</strong>${layer.metric}</span>
           <span class="meta-chip"><strong>${layer.shipped}</strong></span>
         </div>
         <p class="panel-purpose">${layer.purpose}</p>
@@ -265,37 +349,62 @@ html, body { height: 100%; overflow: hidden; }
         </div>
       </div>
       <div class="panel-examples">
-        <span class="examples-label">Examples</span>
+        <span class="examples-label">Patterns</span>
         <ul class="examples-list">
           ${layer.examples.map((ex) => `
             <li class="example">
-              <div class="example-head">${ex.h}</div>
+              <div class="example-head">${ex.h}<span class="badge ${ex.b === 'platform' ? 'badge-platform' : 'badge-build'}">${ex.b === 'platform' ? 'Platform' : 'You build'}</span></div>
               <div class="example-detail">${ex.d}</div>
-              ${ex.code ? `<pre class="example-code">${ex.code.replace(/</g, '&lt;')}</pre>` : ''}
+              ${ex.code ? `<pre class="example-code">${esc(ex.code)}</pre>` : ''}
             </li>
           `).join('')}
         </ul>
       </div>
     `;
+    paintIcons();
+    animateExamples();
+  };
+
+  const select = (i, focus) => {
+    const btns = Array.from(tabsEl.querySelectorAll('.tab'));
+    btns.forEach((t, j) => {
+      const on = i === j;
+      t.setAttribute('aria-selected', String(on));
+      t.tabIndex = on ? 0 : -1;
+    });
+    renderPanel(layers[i]);
+    if (focus) btns[i].focus();
   };
 
   layers.forEach((layer, i) => {
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'tab';
+    btn.id = 'tab-' + layer.id;
     btn.setAttribute('role', 'tab');
     btn.setAttribute('aria-selected', i === 0 ? 'true' : 'false');
+    btn.setAttribute('aria-controls', 'panel');
+    btn.tabIndex = i === 0 ? 0 : -1;
     btn.style.setProperty('--c', layer.color);
-    btn.innerHTML = `<span class="tab-num">${layer.id}</span>${layer.name}`;
-    btn.addEventListener('click', () => {
-      tabsEl.querySelectorAll('.tab').forEach((t) => t.setAttribute('aria-selected', 'false'));
-      btn.setAttribute('aria-selected', 'true');
-      renderPanel(layer);
+    btn.innerHTML = '<span class="pic" data-ic="' + layer.icon + '" aria-hidden="true"></span>'
+      + '<span class="tab-num">' + layer.id + '</span>' + layer.name;
+    btn.addEventListener('click', () => select(i, false));
+    btn.addEventListener('keydown', (e) => {
+      const last = layers.length - 1;
+      let next = null;
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') next = i === last ? 0 : i + 1;
+      else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') next = i === 0 ? last : i - 1;
+      else if (e.key === 'Home') next = 0;
+      else if (e.key === 'End') next = last;
+      if (next === null) return;
+      e.preventDefault();
+      select(next, true);
     });
     tabsEl.appendChild(btn);
   });
 
-  renderPanel(layers[0]);
+  paintIcons();
+  select(0, false);
 })();
 </script>
 <script>
@@ -305,6 +414,7 @@ html, body { height: 100%; overflow: hidden; }
     const postSize = () => window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
     if ('ResizeObserver' in window) new ResizeObserver(postSize).observe(document.body);
     window.addEventListener('load', postSize);
+    setTimeout(postSize, 400);
   }
 })();
 </script>

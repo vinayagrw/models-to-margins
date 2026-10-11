@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Harness architecture — semantic-zoom map (Archetype A)</title>
+<script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   Page-local tokens. Every value is derived from the shared
+   theme tokens in _theme.css via color-mix — no literal colours.
+   Dark equivalents are declared through the same three-selector
+   mechanism _theme.css uses, so an explicit toggle and the OS
+   preference both resolve.
+   ============================================================ */
+:root,
+:root[data-theme="light"] {
+  --pz-canvas: color-mix(in srgb, var(--surface) 62%, transparent);
+  --pz-node: var(--surface-strong);
+  --pz-node-edge: var(--border-strong);
+  --pz-chip: color-mix(in srgb, var(--accent) 10%, transparent);
+  --pz-chip-edge: color-mix(in srgb, var(--accent) 26%, transparent);
+  --pz-wire-bg: color-mix(in srgb, var(--L3) 12%, transparent);
+  --pz-wire-edge: color-mix(in srgb, var(--L3) 30%, transparent);
+  --pz-halo: var(--bg-mid);
+  --pz-dim: 0.16;
+  --pz-lab-bg: color-mix(in srgb, var(--surface-strong) 92%, transparent);
+  --pz-glow: 0 0 0 2px color-mix(in srgb, var(--accent) 42%, transparent);
+  /* Gap strips are where every edge label lives, so they are sized for
+     labels, not decoration. Mobile collapses them (labels move to the
+     ledger below the map). */
+  --pz-gapx: clamp(96px, 13vw, 178px);
+  --pz-gapy: clamp(92px, 11vw, 150px);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --pz-canvas: color-mix(in srgb, var(--surface) 52%, transparent);
+    --pz-chip: color-mix(in srgb, var(--accent) 16%, transparent);
+    --pz-chip-edge: color-mix(in srgb, var(--accent) 38%, transparent);
+    --pz-wire-bg: color-mix(in srgb, var(--L3) 18%, transparent);
+    --pz-wire-edge: color-mix(in srgb, var(--L3) 42%, transparent);
+    --pz-dim: 0.13;
+    --pz-lab-bg: color-mix(in srgb, var(--surface-strong) 96%, transparent);
+  }
+}
+:root[data-theme="dark"] {
+  --pz-canvas: color-mix(in srgb, var(--surface) 52%, transparent);
+  --pz-chip: color-mix(in srgb, var(--accent) 16%, transparent);
+  --pz-chip-edge: color-mix(in srgb, var(--accent) 38%, transparent);
+  --pz-wire-bg: color-mix(in srgb, var(--L3) 18%, transparent);
+  --pz-wire-edge: color-mix(in srgb, var(--L3) 42%, transparent);
+  --pz-dim: 0.13;
+  --pz-lab-bg: color-mix(in srgb, var(--surface-strong) 96%, transparent);
+}
+
+/* Embed override: the family theme locks embed mode to viewport
+   height, which breaks autosize. Restore natural document flow. */
+:root[data-embedded="true"],
+:root[data-embedded="true"] body { height: auto; overflow: visible; }
+:root[data-embedded="true"] .shell { width: 100%; height: auto; padding: 14px 16px; }
+
+body { overflow-x: hidden; }
+.shell { max-width: 1280px; }
+
+/* ---------------- head ---------------- */
+.head { margin-bottom: clamp(10px, 2vw, 16px); }
+.head h1 {
+  font-size: clamp(1.1rem, 3.4vw, 1.8rem);
+  font-weight: 700; color: var(--text-strong);
+  letter-spacing: -0.01em; margin-top: 6px; line-height: 1.15;
+}
+.head p {
+  font-family: "DM Sans", "Segoe UI", sans-serif;
+  font-size: clamp(0.8rem, 2.4vw, 0.96rem);
+  color: var(--muted); margin-top: 6px; line-height: 1.5;
+}
+
+/* ---------------- zoom control ---------------- */
+.zoombar {
+  display: flex; flex-wrap: wrap; align-items: stretch;
+  gap: 8px; margin-bottom: clamp(10px, 1.6vw, 14px);
+}
+.stops {
+  display: flex; flex: 1 1 320px; min-width: 0;
+  gap: 4px; padding: 4px;
+  border: 1px solid var(--border); border-radius: 999px;
+  background: var(--surface);
+}
+.stops button {
+  flex: 1 1 0; min-width: 0;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: clamp(0.6rem, 1.9vw, 0.76rem);
+  font-weight: 600; letter-spacing: 0.02em;
+  padding: 7px 6px; border-radius: 999px;
+  border: 1px solid transparent; background: transparent;
+  color: var(--muted); cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; gap: 1px;
+  transition: background 200ms ease, color 200ms ease, border-color 200ms ease;
+}
+.stops button .lv { font-size: 1.05em; font-weight: 700; }
+.stops button .nm {
+  font-family: "DM Sans", sans-serif; font-weight: 500;
+  font-size: 0.82em; opacity: 0.9;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;
+}
+.stops button[aria-pressed="true"] {
+  background: var(--surface-strong); border-color: var(--border-strong);
+  color: var(--text-strong);
+  box-shadow: var(--shadow-soft);
+}
+.stops button[aria-pressed="true"] .lv { color: var(--accent); }
+.runbtn {
+  flex: 0 0 auto;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: clamp(0.64rem, 1.9vw, 0.76rem); font-weight: 600;
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 8px 15px; border-radius: 999px;
+  border: 1px solid var(--border); background: var(--surface);
+  color: var(--muted); cursor: pointer;
+  transition: color 200ms ease, border-color 200ms ease, background 200ms ease;
+}
+.runbtn .dot {
+  width: 9px; height: 9px; border-radius: 50%;
+  background: currentColor; opacity: 0.4;
+}
+.runbtn[aria-pressed="true"] {
+  color: var(--text-strong); border-color: var(--accent);
+  background: var(--surface-strong);
+}
+.runbtn[aria-pressed="true"] .dot { background: var(--accent); opacity: 1; }
+.runbtn[disabled] { opacity: 0.42; cursor: not-allowed; }
+
+.readout {
+  font-family: "DM Sans", "Segoe UI", sans-serif;
+  font-size: clamp(0.74rem, 2.1vw, 0.86rem);
+  color: var(--muted); line-height: 1.45;
+  margin-bottom: clamp(8px, 1.4vw, 12px);
+  min-height: 2.6em;
+}
+.readout b { color: var(--text-strong); font-weight: 600; }
+.readout code {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 0.88em; color: var(--accent);
+}
+
+/* ---------------- map ---------------- */
+.canvas {
+  position: relative;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--pz-canvas);
+  box-shadow: var(--shadow-soft);
+  padding: clamp(30px, 4vw, 46px) clamp(10px, 2.2vw, 26px) clamp(44px, 4.5vw, 58px);
+  overflow: hidden;
+}
+.map {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  column-gap: var(--pz-gapx);
+  row-gap: var(--pz-gapy);
+  align-items: stretch;
+}
+.wires {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  overflow: visible; pointer-events: none;
+}
+
+/* frames */
+.frame rect { fill: none; stroke-width: 1.6; stroke-dasharray: 7 8; }
+.frame text {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 10px; font-weight: 600;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  paint-order: stroke fill; stroke: var(--pz-halo);
+  stroke-width: 4px; stroke-linejoin: round;
+}
+.f-net rect { stroke: var(--accent-3); }
+.f-net text { fill: var(--accent-3); }
+.f-box rect { stroke: var(--L3); }
+.f-box text { fill: var(--L3); }
+.f-out rect { stroke: var(--warn); }
+.f-out text { fill: var(--warn); }
+
+/* edges */
+.wire {
+  fill: none; stroke-width: 1.9;
+  stroke-linecap: round; stroke-linejoin: round;
+  transition: opacity 320ms ease, stroke-width 220ms ease;
+}
+.e-data .wire { stroke: var(--accent); }
+.e-ctrl .wire { stroke: var(--accent-2); stroke-dasharray: 8 6; }
+.edge.dim .wire { opacity: var(--pz-dim); }
+.edge.hot .wire { stroke-width: 3.4; }
+.edge.hot.e-data .wire { stroke: var(--L4); }
+.packet { fill: var(--L4); stroke: var(--pz-halo); stroke-width: 1.5; }
+
+/* node cards */
+.node {
+  position: relative;
+  display: flex; flex-direction: column; gap: 6px;
+  text-align: left;
+  padding: clamp(6px, 1.1vw, 12px);
+  border-radius: 12px;
+  border: 1px solid var(--pz-node-edge);
+  background: var(--pz-node);
+  box-shadow: var(--shadow-soft);
+  color: var(--text);
+  font-family: "Space Grotesk", sans-serif;
+  cursor: pointer;
+  opacity: 0; transform: translateY(10px) scale(0.97);
+  transition: opacity 520ms ease, transform 520ms ease,
+              border-color 200ms ease, box-shadow 200ms ease;
+}
+.map.in .node { opacity: 1; transform: none; }
+.node:hover { border-color: var(--accent); }
+.node[aria-pressed="true"] { border-color: var(--accent); box-shadow: var(--pz-glow), var(--shadow-soft); }
+.node.faded { opacity: 0.34; }
+.node.core {
+  border-width: 2px; border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 9%, var(--surface-strong));
+}
+.node-top { display: flex; align-items: center; gap: 7px; min-width: 0; }
+.pic {
+  flex: 0 0 auto;
+  width: clamp(15px, 2.2vw, 24px); height: clamp(15px, 2.2vw, 24px);
+  color: var(--accent); display: block;
+}
+.pic svg { width: 100%; height: 100%; display: block; }
+.pic svg * { stroke: currentColor; }
+.node.core .pic { color: var(--accent); }
+.nm {
+  font-size: clamp(0.58rem, 1.55vw, 0.88rem);
+  font-weight: 700; color: var(--text-strong);
+  line-height: 1.14; min-width: 0; overflow-wrap: anywhere;
+}
+.node.core .nm { font-size: clamp(0.63rem, 1.8vw, 1rem); }
+.rl {
+  font-family: "DM Sans", "Segoe UI", sans-serif;
+  font-size: clamp(0.5rem, 1.15vw, 0.72rem);
+  color: var(--muted-soft); line-height: 1.28;
+}
+
+/* detail tiers — the zoom */
+.tier {
+  display: grid; grid-template-rows: 0fr;
+  opacity: 0;
+  transition: grid-template-rows 520ms cubic-bezier(.4,0,.2,1),
+              opacity 380ms ease, transform 420ms ease;
+  transform: translateY(-4px) scale(0.985);
+  transform-origin: top left;
+}
+.tier > .tw { overflow: hidden; min-height: 0; }
+.map[data-level="1"] .t1,
+.map[data-level="2"] .t1,
+.map[data-level="3"] .t1,
+.map[data-level="3"] .t3 { grid-template-rows: 1fr; opacity: 1; transform: none; }
+
+.subs { list-style: none; display: flex; flex-direction: column; gap: 3px; padding-top: 5px; }
+.subs li {
+  font-family: "DM Sans", "Segoe UI", sans-serif;
+  font-size: clamp(0.49rem, 1.1vw, 0.71rem);
+  line-height: 1.26; color: var(--muted);
+  padding: 2px 5px; border-radius: 5px;
+  border: 1px solid var(--pz-chip-edge);
+  background: var(--pz-chip);
+  overflow-wrap: anywhere;
+}
+.subs li b { color: var(--text-strong); font-weight: 600; }
+.wires-list { list-style: none; display: flex; flex-direction: column; gap: 3px; padding-top: 5px; }
+.wires-list li {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: clamp(0.44rem, 0.95vw, 0.63rem);
+  line-height: 1.3; color: var(--L3);
+  padding: 2px 5px; border-radius: 5px;
+  border: 1px solid var(--pz-wire-edge);
+  background: var(--pz-wire-bg);
+  overflow-wrap: anywhere;
+}
+
+/* edge labels on the canvas */
+.lab {
+  position: absolute; z-index: 3;
+  transform: translate(-50%, -50%);
+  width: max-content; max-width: 190px; /* overridden per edge in draw() */
+  padding: 4px 7px; border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--pz-lab-bg);
+  box-shadow: var(--shadow-soft);
+  pointer-events: none;
+  opacity: 0; transition: opacity 320ms ease, border-color 220ms ease;
+}
+.map.in .lab { opacity: 1; }
+.map.in .lab.dim { opacity: 0.22; }
+.lab.hot { border-color: var(--L4); }
+.lab .n {
+  display: inline-block; margin-right: 5px;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 0.6rem; font-weight: 700; color: var(--accent);
+}
+.lab .p {
+  font-family: "DM Sans", "Segoe UI", sans-serif;
+  font-size: clamp(0.5rem, 1.05vw, 0.68rem);
+  color: var(--text); line-height: 1.25;
+}
+.lab.ctrl .p { color: var(--accent-2); }
+.lab.ctrl .n { color: var(--accent-2); }
+.lab .tier .pay {
+  font-family: "DM Sans", "Segoe UI", sans-serif;
+  font-size: clamp(0.46rem, 0.95vw, 0.62rem);
+  color: var(--muted); line-height: 1.25; padding-top: 3px;
+}
+.lab .tier .wr {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: clamp(0.42rem, 0.88vw, 0.58rem);
+  color: var(--L3); line-height: 1.3; padding-top: 3px;
+  overflow-wrap: anywhere;
+}
+.pin {
+  position: absolute; z-index: 3;
+  transform: translate(-50%, -50%);
+  width: 17px; height: 17px; border-radius: 50%;
+  display: none; align-items: center; justify-content: center;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 0.56rem; font-weight: 700;
+  border: 1px solid var(--border-strong);
+  background: var(--pz-lab-bg); color: var(--accent);
+  pointer-events: none;
+}
+.pin.ctrl { color: var(--accent-2); }
+.pin.hot { color: var(--L4); border-color: var(--L4); }
+
+/* ---------------- ledger ---------------- */
+.ledger-h {
+  margin: clamp(14px, 2vw, 20px) 0 8px;
+  font-size: clamp(0.62rem, 1.9vw, 0.72rem);
+  font-weight: 700; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--accent);
+}
+.ledger { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 8px; }
+.row {
+  display: grid; grid-template-columns: 20px 1fr; gap: 8px;
+  text-align: left; padding: 8px 10px;
+  border: 1px solid var(--border); border-radius: 10px;
+  background: var(--surface); color: var(--text);
+  font-family: "Space Grotesk", sans-serif; cursor: pointer;
+  transition: border-color 200ms ease, background 200ms ease, opacity 260ms ease;
+}
+.row:hover { border-color: var(--accent); }
+.row[aria-pressed="true"] { border-color: var(--accent); background: var(--surface-strong); }
+.row.hot { border-color: var(--L4); background: var(--surface-strong); }
+.row .idx { font-size: 0.66rem; font-weight: 700; color: var(--accent); padding-top: 1px; }
+.row.ctrl .idx { color: var(--accent-2); }
+.row .rowtxt {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.row .hop {
+  display: block;
+  font-size: clamp(0.64rem, 1.9vw, 0.76rem); font-weight: 600;
+  color: var(--text-strong); line-height: 1.25; overflow-wrap: anywhere;
+}
+.row .proto {
+  display: block;
+  font-family: "DM Sans", "Segoe UI", sans-serif;
+  font-size: clamp(0.66rem, 1.9vw, 0.78rem);
+  color: var(--muted); line-height: 1.35; margin-top: 3px; overflow-wrap: anywhere;
+}
+.row .pay {
+  font-family: "DM Sans", "Segoe UI", sans-serif;
+  font-size: clamp(0.64rem, 1.8vw, 0.75rem);
+  color: var(--muted-soft); line-height: 1.35;
+}
+.row .wr {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: clamp(0.58rem, 1.7vw, 0.68rem);
+  color: var(--L3); line-height: 1.4; overflow-wrap: anywhere;
+}
+.row .tier { margin-top: 0; }
+.ledger[data-level="0"] .row .t2,
+.ledger[data-level="1"] .row .t2,
+.ledger[data-level="0"] .row .t3,
+.ledger[data-level="1"] .row .t3,
+.ledger[data-level="2"] .row .t3 { grid-template-rows: 0fr; opacity: 0; }
+.ledger[data-level="2"] .row .t2,
+.ledger[data-level="3"] .row .t2,
+.ledger[data-level="3"] .row .t3 { grid-template-rows: 1fr; opacity: 1; transform: none; }
+
+/* ---------------- legend ---------------- */
+.legend {
+  margin-top: clamp(14px, 2vw, 20px);
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 10px;
+}
+.legend div {
+  display: flex; align-items: flex-start; gap: 9px;
+  font-family: "DM Sans", "Segoe UI", sans-serif;
+  font-size: clamp(0.72rem, 2vw, 0.83rem);
+  color: var(--muted); line-height: 1.4;
+}
+.legend .pic { width: 17px; height: 17px; margin-top: 1px; }
+.legend .l-net .pic { color: var(--accent-3); }
+.legend .l-box .pic { color: var(--L3); }
+.legend .l-out .pic { color: var(--warn); }
+.legend b { color: var(--text-strong); font-weight: 600; }
+
+@media (max-width: 760px) {
+  :root { --pz-gapx: 12px; --pz-gapy: 46px; }
+  .lab { display: none; }
+  .pin { display: flex; }
+  .canvas { padding: 26px 8px 44px; }
+  .rl { display: none; }
+  .stops button .nm { display: none; }
+  .runbtn { flex: 1 1 auto; justify-content: center; }
+  .ledger { grid-template-columns: 1fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .node, .tier, .lab, .wire, .row, .stops button, .runbtn { transition: none !important; }
+  .node { opacity: 1 !important; transform: none !important; }
+  .lab { opacity: 1 !important; }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <header class="head">
+    <div class="eyebrow">Archetype A · Semantic-zoom map</div>
+    <h1>One map, four altitudes</h1>
+    <p>The same nine boxes and nine wires the whole way down. The zoom control changes detail density in place — nothing moves, so the map you learned at L0 is the map you are still reading at L3.</p>
+  </header>
+
+  <div class="zoombar">
+    <div class="stops" role="group" aria-label="Zoom altitude">
+      <button type="button" data-level="0" aria-pressed="true"><span class="lv">L0</span><span class="nm">Context</span></button>
+      <button type="button" data-level="1" aria-pressed="false"><span class="lv">L1</span><span class="nm">Components</span></button>
+      <button type="button" data-level="2" aria-pressed="false"><span class="lv">L2</span><span class="nm">Control flow</span></button>
+      <button type="button" data-level="3" aria-pressed="false"><span class="lv">L3</span><span class="nm">Wire</span></button>
+    </div>
+    <button type="button" class="runbtn" id="runbtn" aria-pressed="false" disabled><span class="dot"></span><span id="runlabel">Run a governed run</span></button>
+  </div>
+
+  <p class="readout" id="readout" aria-live="polite"></p>
+
+  <div class="canvas">
+    <div class="map" id="map" data-level="0">
+      <svg class="wires" id="wires" role="img" aria-label="Architecture map: the harness runtime at the centre, wired to the human owner, trigger surface, model inference API, policy and identity, MCP tool servers, evidence store, per-run sandbox and enterprise systems of record. Three nested trust boundaries enclose untrusted model output inside sandboxed execution inside the enterprise network."></svg>
+    </div>
+  </div>
+
+  <div class="ledger-h">Wire ledger · every edge carries a real protocol artifact</div>
+  <div class="ledger" id="ledger" data-level="0"></div>
+
+  <div class="legend">
+    <div class="l-net"><span class="pic" data-ic="building" aria-hidden="true"></span><span><b>Enterprise network</b> — everything below the trigger row runs inside it. Nothing here reaches the public internet unbrokered.</span></div>
+    <div class="l-box"><span class="pic" data-ic="shield" aria-hidden="true"></span><span><b>Sandboxed execution</b> — gVisor on Linux, Seatbelt on macOS, or a microVM with a vsock control channel. Created per run, destroyed after.</span></div>
+    <div class="l-out"><span class="pic" data-ic="barrier" aria-hidden="true"></span><span><b>Untrusted model output</b> — model-proposed commands execute only inside the innermost frame, and leave it only through the egress broker.</span></div>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- icon loader (house standard) ---------- */
+  var ICON_BASE = '../customs-entry-agent/flow-icons/';
+  var cache = {};
+  var load = function (n) {
+    return cache[n] || (cache[n] = fetch(ICON_BASE + n + '.svg')
+      .then(function (r) { return r.ok ? r.text() : Promise.reject(); })
+      .then(function (t) { return t.replace(/stroke="#232f3e"/g, 'stroke="currentColor"'); })
+      .catch(function () { return ''; }));
+  };
+  function iconify(scope) {
+    scope.querySelectorAll('[data-ic]').forEach(function (slot) {
+      if (slot.firstChild) { return; }
+      load(slot.dataset.ic).then(function (svg) { if (!slot.firstChild) { slot.innerHTML = svg; } });
+    });
+  }
+
+  /* ---------- nodes: row-major 3x3, identical at every altitude ---------- */
+  var NODES = [
+    { id: 'human', ic: 'person', nm: 'Human owner', rl: 'accepts or denies; final authority',
+      subs: ['Approval tiers', 'Diff review gate', '<b>MRTR</b> mid-call answer', 'Named-human escalation'],
+      wire: ['prompt / answer &middot; same callId', 'approve | deny'] },
+    { id: 'trigger', ic: 'monitor', nm: 'Trigger surface', rl: 'IDE / CI / chat / cron — where a run is born',
+      subs: ['IDE or CI runner', 'Run request builder', '<b>policyId</b> + budget', '<b>approvalTier</b>'],
+      wire: ['POST /runs {goal, policyId, budget}'] },
+    { id: 'model', ic: 'cpu', nm: 'Model inference API', rl: 'turns tokens into proposed actions',
+      subs: ['<b>messages.create(tools)</b>', 'Assistant turn — text and/or tool_use', 'Tool schemas in the window', 'Proposes; never executes'],
+      wire: ['content:[{type:"tool_use", name, input}]', 'stop_reason: "tool_use"'] },
+
+    { id: 'policy', ic: 'key', nm: 'Policy &amp; identity', rl: 'OIDC, secrets, allow-list',
+      subs: ['<b>L1 Constraint</b> — tool allow-list &amp; scopes', 'OIDC workload identity', 'Secrets broker · per-run leases', 'Budget &amp; per-file edit ceilings', 'Approval tiers'],
+      wire: ['check(name, args) &rarr; allow', 'policy:{ budgetUsd: 4.00, approvalTier: "tier2" }'] },
+    { id: 'harness', ic: 'gears', nm: 'Harness runtime', rl: 'system of interest — holds the run, brokers every call', core: true,
+      subs: ['<b>L1</b> Constraint · pre-flight vs allow-list',
+             '<b>L2</b> Context · window assembly, compaction, progress file',
+             '<b>L3</b> Execution · MCP client, tools/list cache, sandbox executor',
+             '<b>L4</b> Verification · pre-stop hook, golden evals, diff gate',
+             '<b>L5</b> Lifecycle · durable session log, crash/resume, cost detection'],
+      wire: ['preflight({name, input}) &rarr; allow | deny',
+             'cacheKey: server+scope · ttlMs: 900000 · cacheScope: "session"',
+             'retry &le; 3 &middot; then abort on ceiling'] },
+    { id: 'mcp', ic: 'network', nm: 'MCP tool servers', rl: 'typed capabilities over HTTP',
+      subs: ['Header router — stateless, horizontally scaled', '<b>tools/list</b> · ttlMs, cacheScope', '<b>tools/call</b>', 'input_required (MRTR)', 'Egress broker'],
+      wire: ['POST /mcp · Mcp-Method: tools/call', 'Mcp-Name: &lt;tool&gt; · (no session id)', '&larr; tool_result | input_required'] },
+
+    { id: 'evidence', ic: 'archive', nm: 'Evidence store', rl: 'append-only run record',
+      subs: ['Durable session log', 'Policy snapshot hash', 'Per-turn transcript append', 'Run-record archive', 'Metrics + cost meter'],
+      wire: ['run.created &middot; run.completed{manifest}', 'tool.completed{hash}'] },
+    { id: 'sandbox', ic: 'shield', nm: 'Per-run sandbox', rl: 'where model output is allowed to execute',
+      subs: ['gVisor / Seatbelt / microVM', '<b>vsock</b> control channel', 'Workspace clone', 'Subagent worker pool ×3', 'Test runner (verification)'],
+      wire: ['exec (over vsock)', '&larr; result &middot; exit code 0'] },
+    { id: 'systems', ic: 'warehouse', nm: 'Systems of record', rl: 'repo, tracker, database',
+      subs: ['Repository', 'Issue tracker', 'Databases', 'Zone C allow-listed destinations'],
+      wire: ['Zone B &rarr; egress broker &rarr; Zone C allow-list'] }
+  ];
+
+  /* ---------- edges: 9, each carrying a real protocol artifact ---------- */
+  var EDGES = [
+    { id: 'e1', a: 'human', b: 'trigger', plane: 'data',
+      proto: 'task intent (NL + repo ref)',
+      pay: 'A person hands the harness a task and an intent. Nothing else in the run is self-authorising.',
+      wire: 'POST /runs { task, repo, branch }',
+      step: 'A named requester opens the run. <code>POST /runs { task, repo, branch }</code>' },
+    { id: 'e2', a: 'trigger', b: 'harness', plane: 'data',
+      proto: 'run request',
+      pay: '{ goal, policyId, budget, approvalTier } — the policy is attached at birth, not inferred later.',
+      wire: 'POST /runs {goal, policyId, budget} &rarr; run.created',
+      step: 'The trigger surface hands over a structured run request carrying <code>policyId</code>, budget and approval tier.' },
+    { id: 'e3', a: 'harness', b: 'model', plane: 'data', both: true,
+      proto: 'HTTPS · streaming',
+      pay: 'messages + tool schemas &rarr; · &larr; assistant turn + tool_use. The only place the model is invoked.',
+      wire: 'messages.create({ model, messages, tools, max_tokens }) &rarr; content:[{ type:"tool_use" }]',
+      step: 'The loop pivot: <code>messages.create(tools)</code> out, an assistant turn with <code>tool_use</code> back.' },
+    { id: 'e4', a: 'harness', b: 'mcp', plane: 'data', both: true,
+      proto: 'MCP 2026-07-28 · stateless HTTP',
+      pay: 'tools/call &rarr; · &larr; tool_result, or input_required when the server needs a human mid-call.',
+      wire: 'POST /mcp · Mcp-Method: tools/call · Mcp-Name: &lt;tool&gt; · (no session id)',
+      step: 'Header-routed <code>tools/call</code>. Stateless core — no <code>Mcp-Session-Id</code>, so any router node can serve it.' },
+    { id: 'e5', a: 'harness', b: 'sandbox', plane: 'data', both: true,
+      proto: 'exec across the isolation boundary',
+      pay: 'vsock / gVisor / Seatbelt. The only place model-proposed commands are allowed to run.',
+      wire: 'exec (over vsock) &rarr; &larr; result · exit code 0',
+      step: 'Execution crosses the isolation boundary over <code>vsock</code>, and comes back as a result plus an exit code.' },
+    { id: 'e6', a: 'sandbox', b: 'systems', plane: 'data',
+      proto: 'brokered allow-listed egress only',
+      pay: 'No direct internet. Every byte leaving the sandbox crosses the egress broker.',
+      wire: 'Zone B &rarr; egress broker &rarr; Zone C allow-list',
+      step: 'The sandbox reaches the systems of record only through the egress broker onto the Zone C allow-list.' },
+    { id: 'e7', a: 'policy', b: 'harness', plane: 'ctrl',
+      proto: 'scoped short-lived creds',
+      pay: 'Tool allow-list · argument bounds · approval tiers. Environmental controls decide — not the prompt.',
+      wire: 'check(name, args) &rarr; allow · policy:{ budgetUsd: 4.00, approvalTier: "tier2" }',
+      step: 'Policy resolves before anything runs: allow-list, budget ceiling and approval tier, pinned to the run.' },
+    { id: 'e8', a: 'harness', b: 'evidence', plane: 'ctrl',
+      proto: 'append-only',
+      pay: 'Every turn, every tool call and result, every approval decision, the hash of every diff.',
+      wire: 'tool.completed{hash} · run.completed{manifest}',
+      step: 'The run closes into the append-only record: <code>run.completed{manifest}</code>.' },
+    { id: 'e9', a: 'harness', b: 'human', plane: 'ctrl', both: true,
+      proto: 'approval only when environmental controls did not authorise',
+      pay: 'escalate &rarr; · &larr; approve / deny. A tier-2 action parks the run rather than guessing.',
+      wire: 'input_required &rarr; prompt &rarr; answer · the same call resumes',
+      step: 'Where the controls did not already authorise, the run escalates: <code>input_required</code>, then the same call resumes.' }
+  ];
+
+  /* the ordered traversal of one governed run */
+  var RUN = ['e1', 'e2', 'e7', 'e3', 'e4', 'e5', 'e6', 'e9', 'e8'];
+
+  var LEVEL_TEXT = [
+    '<b>L0 · Context.</b> Nine boxes. The model is one dependency of nine; the harness runtime is the system of interest. Zoom in — the boxes stay exactly where they are.',
+    '<b>L1 · Reference architecture.</b> Each box expands in place to its named components. The five harness layers (L1 Constraint &rarr; L5 Lifecycle) live inside the centre box, not in a separate diagram.',
+    '<b>L2 · Control flow.</b> Every edge now carries its payload, and one governed run traverses the map in order. Press <b>Run a governed run</b> to replay it.',
+    '<b>L3 · Wire and deployment.</b> The real artifacts surface: HTTP headers, message names, cache TTLs, exit codes. Same nine boxes, same nine wires.'
+  ];
+
+  var map = document.getElementById('map');
+  var svg = document.getElementById('wires');
+  var ledger = document.getElementById('ledger');
+  var readout = document.getElementById('readout');
+  var runbtn = document.getElementById('runbtn');
+  var runlabel = document.getElementById('runlabel');
+  var stops = Array.prototype.slice.call(document.querySelectorAll('.stops button'));
+
+  var SVGNS = 'http://www.w3.org/2000/svg';
+  function svgEl(n, attrs) {
+    var e = document.createElementNS(SVGNS, n);
+    Object.keys(attrs || {}).forEach(function (k) { e.setAttribute(k, attrs[k]); });
+    return e;
+  }
+
+  var state = { level: 0, sel: null, running: false, hot: null };
+  var nodeEls = {};
+  var labEls = {};
+  var pinEls = {};
+  var edgeEls = {};
+  var rowEls = {};
+  var geo = {};
+
+  /* ---------- build nodes ---------- */
+  NODES.forEach(function (n, i) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'node' + (n.core ? ' core' : '');
+    b.setAttribute('aria-pressed', 'false');
+    b.dataset.node = n.id;
+    b.style.transitionDelay = REDUCED ? '0ms' : (i * 55) + 'ms';
+    b.innerHTML =
+      '<span class="node-top"><span class="pic" data-ic="' + n.ic + '" aria-hidden="true"></span>' +
+      '<span class="nm">' + n.nm + '</span></span>' +
+      '<span class="rl">' + n.rl + '</span>' +
+      '<span class="tier t1"><span class="tw"><ul class="subs">' +
+        n.subs.map(function (s) { return '<li>' + s + '</li>'; }).join('') +
+      '</ul></span></span>' +
+      '<span class="tier t3"><span class="tw"><ul class="wires-list">' +
+        n.wire.map(function (w) { return '<li>' + w + '</li>'; }).join('') +
+      '</ul></span></span>';
+    map.appendChild(b);
+    nodeEls[n.id] = b;
+    b.addEventListener('click', function () { selectNode(n.id); });
+  });
+
+  /* ---------- build edge chrome ---------- */
+  var frameG = svgEl('g', { class: 'frames' });
+  svg.appendChild(frameG);
+  var FRAMES = [
+    { cls: 'f-net', label: 'Enterprise network' },
+    { cls: 'f-box', label: 'Sandboxed execution' },
+    { cls: 'f-out', label: 'Untrusted model output' }
+  ];
+  var frameEls = FRAMES.map(function (f) {
+    var g = svgEl('g', { class: 'frame ' + f.cls });
+    var r = svgEl('rect', { rx: '14' });
+    var t = svgEl('text', {});
+    t.textContent = f.label;
+    g.appendChild(r); g.appendChild(t); frameG.appendChild(g);
+    return { g: g, r: r, t: t };
+  });
+
+  var defs = svgEl('defs', {});
+  ['ad', 'ac', 'ah'].forEach(function (id) {
+    var m = svgEl('marker', { id: id, viewBox: '0 0 10 10', refX: '9', refY: '5',
+      markerWidth: '5', markerHeight: '5', orient: 'auto-start-reverse' });
+    var p = svgEl('path', { d: 'M0,0 L10,5 L0,10 z' });
+    p.setAttribute('fill', id === 'ad' ? 'var(--accent)' : id === 'ac' ? 'var(--accent-2)' : 'var(--L4)');
+    m.appendChild(p); defs.appendChild(m);
+  });
+  svg.appendChild(defs);
+
+  EDGES.forEach(function (e, i) {
+    var g = svgEl('g', { class: 'edge e-' + (e.plane === 'ctrl' ? 'ctrl' : 'data'), 'data-edge': e.id });
+    var p = svgEl('line', { class: 'wire' });
+    g.appendChild(p);
+    svg.appendChild(g);
+    edgeEls[e.id] = { g: g, line: p, mk: e.plane === 'ctrl' ? 'ac' : 'ad' };
+
+    var lab = document.createElement('div');
+    lab.className = 'lab' + (e.plane === 'ctrl' ? ' ctrl' : '');
+    lab.setAttribute('aria-hidden', 'true');
+    lab.innerHTML =
+      '<div class="p"><span class="n">' + (i + 1) + '</span>' + e.proto + '</div>' +
+      '<div class="tier t2 lt2"><span class="tw"><div class="pay">' + e.pay + '</div></span></div>' +
+      '<div class="tier t3"><span class="tw"><div class="wr">' + e.wire + '</div></span></div>';
+    map.appendChild(lab);
+    labEls[e.id] = lab;
+
+    var pin = document.createElement('div');
+    pin.className = 'pin' + (e.plane === 'ctrl' ? ' ctrl' : '');
+    pin.setAttribute('aria-hidden', 'true');
+    pin.textContent = String(i + 1);
+    map.appendChild(pin);
+    pinEls[e.id] = pin;
+  });
+
+  /* label tier visibility mirrors the map level */
+  var labStyle = document.createElement('style');
+  labStyle.textContent =
+    '.map[data-level="2"] .lab .lt2, .map[data-level="3"] .lab .lt2,' +
+    '.map[data-level="3"] .lab .t3 { grid-template-rows: 1fr; opacity: 1; transform: none; }';
+  document.head.appendChild(labStyle);
+
+  /* ---------- ledger ---------- */
+  var NAME = {};
+  NODES.forEach(function (n) { NAME[n.id] = n.nm; });
+  EDGES.forEach(function (e, i) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'row' + (e.plane === 'ctrl' ? ' ctrl' : '');
+    b.setAttribute('aria-pressed', 'false');
+    b.dataset.edge = e.id;
+    b.innerHTML =
+      '<span class="idx">' + (i + 1) + '</span>' +
+      '<span class="rowtxt"><span class="hop">' + NAME[e.a] + ' ' + (e.both ? '&harr;' : '&rarr;') + ' ' + NAME[e.b] + '</span>' +
+      '<span class="proto">' + e.proto + '</span>' +
+      '<span class="tier t2"><span class="tw"><span class="pay">' + e.pay + '</span></span></span>' +
+      '<span class="tier t3"><span class="tw"><span class="wr">' + e.wire + '</span></span></span></span>';
+    ledger.appendChild(b);
+    rowEls[e.id] = b;
+    b.addEventListener('click', function () { selectEdge(e.id); });
+  });
+
+  /* ---------- geometry ---------- */
+  function rectOf(el) {
+    var mb = map.getBoundingClientRect();
+    var r = el.getBoundingClientRect();
+    return { x: r.left - mb.left, y: r.top - mb.top, w: r.width, h: r.height,
+             cx: r.left - mb.left + r.width / 2, cy: r.top - mb.top + r.height / 2 };
+  }
+  /* intersection of the centre-to-centre segment with a padded rect border */
+  function exit(r, tx, ty, pad) {
+    var dx = tx - r.cx, dy = ty - r.cy;
+    if (dx === 0 && dy === 0) { return { x: r.cx, y: r.cy }; }
+    var hw = r.w / 2 + pad, hh = r.h / 2 + pad;
+    var sx = dx === 0 ? Infinity : hw / Math.abs(dx);
+    var sy = dy === 0 ? Infinity : hh / Math.abs(dy);
+    var s = Math.min(sx, sy);
+    return { x: r.cx + dx * s, y: r.cy + dy * s };
+  }
+
+  function draw() {
+    var mb = map.getBoundingClientRect();
+    if (!mb.width) { return; }
+    svg.setAttribute('viewBox', '0 0 ' + Math.round(mb.width) + ' ' + Math.round(mb.height));
+    svg.setAttribute('width', Math.round(mb.width));
+    svg.setAttribute('height', Math.round(mb.height));
+
+    var R = {};
+    NODES.forEach(function (n) { R[n.id] = rectOf(nodeEls[n.id]); });
+
+    /* Gap strips: the empty bands between grid tracks. Every edge label is
+       anchored inside one of them, so a label can never land on a node. */
+    var colL = [Infinity, Infinity, Infinity], colR = [-Infinity, -Infinity, -Infinity];
+    var rowT = [Infinity, Infinity, Infinity], rowB = [-Infinity, -Infinity, -Infinity];
+    var COL = {}, ROW = {};
+    NODES.forEach(function (n, i) {
+      var c = i % 3, r = Math.floor(i / 3), q = R[n.id];
+      COL[n.id] = c; ROW[n.id] = r;
+      colL[c] = Math.min(colL[c], q.x); colR[c] = Math.max(colR[c], q.x + q.w);
+      rowT[r] = Math.min(rowT[r], q.y); rowB[r] = Math.max(rowB[r], q.y + q.h);
+    });
+
+    EDGES.forEach(function (e) {
+      var ra = R[e.a], rb = R[e.b];
+      var p1 = exit(ra, rb.cx, rb.cy, 4);
+      var p2 = exit(rb, ra.cx, ra.cy, 4);
+      var o = edgeEls[e.id];
+      o.line.setAttribute('x1', p1.x); o.line.setAttribute('y1', p1.y);
+      o.line.setAttribute('x2', p2.x); o.line.setAttribute('y2', p2.y);
+      o.line.setAttribute('marker-end', 'url(#' + o.mk + ')');
+      if (e.both) { o.line.setAttribute('marker-start', 'url(#' + o.mk + ')'); }
+      geo[e.id] = { x1: p1.x, y1: p1.y, x2: p2.x, y2: p2.y };
+
+      var ax, ay, wid;
+      if (COL[e.a] !== COL[e.b]) {
+        /* the edge crosses a vertical gap strip — sit in it */
+        var lo = Math.min(COL[e.a], COL[e.b]);
+        var gx1 = colR[lo], gx2 = colL[lo + 1];
+        ax = (gx1 + gx2) / 2;
+        wid = Math.max(64, Math.min(260, gx2 - gx1 - 10));
+        ay = (p2.x - p1.x) === 0 ? (p1.y + p2.y) / 2
+          : p1.y + (p2.y - p1.y) * ((ax - p1.x) / (p2.x - p1.x));
+      } else {
+        /* same column — sit in the horizontal gap strip between the rows */
+        var lr = Math.min(ROW[e.a], ROW[e.b]);
+        var gy1 = rowB[lr], gy2 = rowT[lr + 1];
+        ay = (gy1 + gy2) / 2;
+        wid = Math.max(80, Math.min(260, colR[COL[e.a]] - colL[COL[e.a]] - 10));
+        ax = (p2.y - p1.y) === 0 ? (p1.x + p2.x) / 2
+          : p1.x + (p2.x - p1.x) * ((ay - p1.y) / (p2.y - p1.y));
+      }
+
+      var lab = labEls[e.id];
+      lab.style.maxWidth = Math.round(wid) + 'px';
+      lab.style.left = Math.round(ax) + 'px';
+      lab.style.top = Math.round(ay) + 'px';
+      /* keep the chip inside the canvas vertically */
+      var lh = lab.offsetHeight;
+      if (lh) {
+        var minY = lh / 2 + 2, maxY = mb.height - lh / 2 - 2;
+        if (maxY > minY) { lab.style.top = Math.round(Math.min(maxY, Math.max(minY, ay))) + 'px'; }
+      }
+      pinEls[e.id].style.left = Math.round(ax) + 'px';
+      pinEls[e.id].style.top = Math.round(ay) + 'px';
+    });
+
+    /* nested trust frames, measured from the live node rects */
+    var net = union([R.policy, R.harness, R.mcp, R.evidence, R.sandbox, R.systems]);
+    setFrame(frameEls[0], net, 13, false);
+    setFrame(frameEls[1], R.sandbox, 15, true);
+    setFrame(frameEls[2], R.sandbox, 3, true);
+  }
+  function union(list) {
+    var x1 = Infinity, y1 = Infinity, x2 = -Infinity, y2 = -Infinity;
+    list.forEach(function (r) {
+      x1 = Math.min(x1, r.x); y1 = Math.min(y1, r.y);
+      x2 = Math.max(x2, r.x + r.w); y2 = Math.max(y2, r.y + r.h);
+    });
+    return { x: x1, y: y1, w: x2 - x1, h: y2 - y1 };
+  }
+  function setFrame(f, r, pad, inside) {
+    f.r.setAttribute('x', r.x - pad); f.r.setAttribute('y', r.y - pad);
+    f.r.setAttribute('width', Math.max(0, r.w + pad * 2));
+    f.r.setAttribute('height', Math.max(0, r.h + pad * 2));
+    f.t.setAttribute('x', r.x - pad + 4);
+    f.t.setAttribute('y', inside ? r.y + r.h + pad + 11 : r.y - pad - 5);
+  }
+
+  /* ---------- selection ---------- */
+  function clearHot() {
+    EDGES.forEach(function (e) {
+      edgeEls[e.id].g.classList.remove('hot');
+      labEls[e.id].classList.remove('hot');
+      pinEls[e.id].classList.remove('hot');
+      rowEls[e.id].classList.remove('hot');
+    });
+  }
+  function applyDim() {
+    var sel = state.sel;
+    EDGES.forEach(function (e) {
+      var on = !sel || e.a === sel || e.b === sel || e.id === sel;
+      edgeEls[e.id].g.classList.toggle('dim', !on);
+      labEls[e.id].classList.toggle('dim', !on);
+    });
+    NODES.forEach(function (n) {
+      var touched = !sel || n.id === sel ||
+        EDGES.some(function (e) { return e.id === sel && (e.a === n.id || e.b === n.id); });
+      nodeEls[n.id].classList.toggle('faded', !touched);
+      nodeEls[n.id].setAttribute('aria-pressed', String(n.id === sel));
+    });
+    EDGES.forEach(function (e) { rowEls[e.id].setAttribute('aria-pressed', String(e.id === state.sel)); });
+  }
+  function selectNode(id) {
+    state.sel = state.sel === id ? null : id;
+    applyDim();
+    if (state.sel) {
+      var n = NODES.filter(function (x) { return x.id === id; })[0];
+      say('<b>' + n.nm + '</b> — ' + n.rl + '. ' +
+        EDGES.filter(function (e) { return e.a === id || e.b === id; }).length + ' wires attached.');
+    } else { say(LEVEL_TEXT[state.level]); }
+  }
+  function selectEdge(id) {
+    state.sel = state.sel === id ? null : id;
+    applyDim();
+    if (state.sel) {
+      var e = EDGES.filter(function (x) { return x.id === id; })[0];
+      say('<b>' + NAME[e.a] + ' ' + (e.both ? '↔' : '→') + ' ' + NAME[e.b] + '</b> · ' +
+        e.proto + ' · <code>' + e.wire.replace(/<[^>]+>/g, '') + '</code>');
+    } else { say(LEVEL_TEXT[state.level]); }
+  }
+  function say(html) { readout.innerHTML = html; }
+
+  /* ---------- zoom ---------- */
+  function setLevel(lv) {
+    state.level = lv;
+    map.dataset.level = String(lv);
+    ledger.dataset.level = String(lv);
+    stops.forEach(function (b) { b.setAttribute('aria-pressed', String(Number(b.dataset.level) === lv)); });
+    var canRun = lv >= 2;
+    runbtn.disabled = !canRun;
+    if (!canRun) { stopRun(); }
+    say(LEVEL_TEXT[lv]);
+    state.sel = null;
+    applyDim();
+    if (REDUCED) { draw(); }
+    else {
+      /* the box heights animate; keep redrawing wires until they settle */
+      var t0 = performance.now();
+      (function follow(now) {
+        draw();
+        if ((now || t0) - t0 < 700) { requestAnimationFrame(follow); }
+      })(t0);
+    }
+    if (canRun && !REDUCED && !state.running) { startRun(); }
+  }
+  stops.forEach(function (b) {
+    b.addEventListener('click', function () { setLevel(Number(b.dataset.level)); });
+  });
+
+  /* ---------- the governed run ---------- */
+  var raf = null, stepIdx = 0, stepT0 = 0;
+  var DUR = 1000;
+  var packet = svgEl('circle', { class: 'packet', r: '5.5', cx: '-40', cy: '-40' });
+  svg.appendChild(packet);
+
+  function markStep(i) {
+    clearHot();
+    var e = EDGES.filter(function (x) { return x.id === RUN[i]; })[0];
+    edgeEls[e.id].g.classList.add('hot');
+    labEls[e.id].classList.add('hot');
+    pinEls[e.id].classList.add('hot');
+    rowEls[e.id].classList.add('hot');
+    say('<b>Step ' + (i + 1) + ' of ' + RUN.length + '</b> · ' + e.step);
+  }
+  function frame(now) {
+    if (!state.running) { return; }
+    if (!stepT0) { stepT0 = now; markStep(stepIdx); }
+    var t = Math.min(1, (now - stepT0) / DUR);
+    var g = geo[RUN[stepIdx]];
+    if (g) {
+      packet.setAttribute('cx', g.x1 + (g.x2 - g.x1) * t);
+      packet.setAttribute('cy', g.y1 + (g.y2 - g.y1) * t);
+    }
+    if (t >= 1) { stepIdx = (stepIdx + 1) % RUN.length; stepT0 = 0; }
+    raf = requestAnimationFrame(frame);
+  }
+  function startRun() {
+    if (state.running || state.level < 2 || REDUCED) { return; }
+    state.running = true; stepIdx = 0; stepT0 = 0;
+    runbtn.setAttribute('aria-pressed', 'true');
+    runlabel.textContent = 'Pause the run';
+    packet.style.display = '';
+    raf = requestAnimationFrame(frame);
+  }
+  function stopRun() {
+    state.running = false;
+    if (raf) { cancelAnimationFrame(raf); raf = null; }
+    runbtn.setAttribute('aria-pressed', 'false');
+    runlabel.textContent = REDUCED ? 'Step through a governed run' : 'Run a governed run';
+    manual = -1;
+    packet.style.display = 'none';
+    clearHot();
+    if (state.level >= 0) { say(LEVEL_TEXT[state.level]); }
+  }
+  /* Reduced motion: the same traversal, advanced one hop per press.
+     No movement carries meaning — the step caption and the highlighted
+     edge + ledger row do. */
+  var manual = -1;
+  function stepOnce() {
+    manual += 1;
+    if (manual >= RUN.length) {
+      manual = -1;
+      clearHot();
+      packet.style.display = 'none';
+      runbtn.setAttribute('aria-pressed', 'false');
+      runlabel.textContent = 'Step through a governed run';
+      say(LEVEL_TEXT[state.level]);
+      return;
+    }
+    markStep(manual);
+    var g = geo[RUN[manual]];
+    if (g) {
+      packet.style.display = '';
+      packet.setAttribute('cx', g.x2); packet.setAttribute('cy', g.y2);
+    }
+    runbtn.setAttribute('aria-pressed', 'true');
+    runlabel.textContent = 'Next hop (' + (manual + 1) + '/' + RUN.length + ')';
+  }
+
+  packet.style.display = 'none';
+  if (REDUCED) { runlabel.textContent = 'Step through a governed run'; }
+  runbtn.addEventListener('click', function () {
+    if (REDUCED) { stepOnce(); return; }
+    if (state.running) { stopRun(); } else { startRun(); }
+  });
+
+  /* ---------- entry ---------- */
+  function reveal() {
+    map.classList.add('in');
+    draw();
+    requestAnimationFrame(draw);
+    setTimeout(draw, 700);
+  }
+  iconify(document);
+  say(LEVEL_TEXT[0]);
+  applyDim();
+
+  if (REDUCED) {
+    /* static, complete: no motion carries meaning */
+    map.classList.add('in');
+    draw();
+    setTimeout(draw, 200);
+  } else if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) { if (en.isIntersecting) { reveal(); io.disconnect(); } });
+    }, { threshold: 0.12 });
+    io.observe(map);
+    setTimeout(function () { if (!map.classList.contains('in')) { reveal(); } }, 2500);
+  } else {
+    reveal();
+  }
+
+  if ('ResizeObserver' in window) { new ResizeObserver(draw).observe(map); }
+  window.addEventListener('resize', draw);
+  window.addEventListener('load', function () { draw(); setTimeout(draw, 300); });
+  document.fonts && document.fonts.ready && document.fonts.ready.then(draw);
+
+  /* ---------- autosize sender ---------- */
+  if (document.documentElement.dataset.embedded === 'true') {
+    var postSize = function () {
+      window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+    };
+    if ('ResizeObserver' in window) { new ResizeObserver(postSize).observe(document.body); }
+    window.addEventListener('load', postSize);
+    setTimeout(postSize, 400);
+  }
+})();
+</script>
+</body>
+</html>

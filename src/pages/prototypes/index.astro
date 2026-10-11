@@ -1,0 +1,87 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const groups = [
+  {
+    page: 'Harness Engineering',
+    href: '/deep-dives/harness-engineering',
+    items: [
+      { id: 'harness-a', archetype: 'A · Semantic-zoom map',
+        blurb: 'One fixed canvas of the whole system. A four-stop zoom changes detail density in place — nodes never move, so you learn the territory once and keep it.' },
+      { id: 'harness-b', archetype: 'B · Drill-down, focus + context',
+        blurb: 'A hierarchy you descend. Each level is its own purpose-built diagram, with a breadcrumb and a persistent mini-map so you never lose the whole.' },
+      { id: 'harness-c', archetype: 'C · Run-replay timeline',
+        blurb: 'Follow one governed run end to end. The architecture assembles itself as the run proceeds; altitude is a second axis you open in place.' }
+    ]
+  },
+  {
+    page: 'Private AI vs Public AI',
+    href: '/deep-dives/private-vs-public-ai-architecture',
+    items: [
+      { id: 'private-a', archetype: 'A · Semantic-zoom map',
+        blurb: 'One fixed canvas of the deployment landscape. Zoom changes detail density in place; every edge gains its payload label as you descend.' },
+      { id: 'private-b', archetype: 'B · Drill-down, focus + context',
+        blurb: 'Descend from a deployment position into its own internals. Strong here because the five positions genuinely differ underneath.' },
+      { id: 'private-c', archetype: 'C · Run-replay timeline',
+        blurb: 'Follow one request end to end and watch the custody chain change as you switch which deployment position it runs against.' }
+    ]
+  }
+];
+---
+
+<BaseLayout
+  title="Architecture prototypes | Models to Margins"
+  description="Six live prototypes of a single end-to-end technical architecture diagram — three archetypes across two deep dives."
+  currentPath="/prototypes"
+>
+  <section class="article-shell">
+    <header>
+      <span class="eyebrow warm">Internal review</span>
+      <h1>Pick one architecture per page.</h1>
+      <p class="lead">
+        Each prototype carries all four altitudes — context, reference architecture, control flow, and the wire —
+        inside a single frame. Same content in all three; only the structure differs. Pick one per page and the
+        winner becomes that page's centrepiece.
+      </p>
+    </header>
+
+    {groups.map((g) => (
+      <div class="proto-group">
+        <h2>{g.page}</h2>
+        <p class="proto-target">Destination: <a href={g.href}>{g.href}</a></p>
+        <div class="proto-grid">
+          {g.items.map((it) => (
+            <article class="proto-card">
+              <h3>{it.archetype}</h3>
+              <p>{it.blurb}</p>
+              <a class="proto-open" href={`/visuals/_prototypes/${it.id}.html`}>Open {it.id} &rarr;</a>
+            </article>
+          ))}
+        </div>
+      </div>
+    ))}
+  </section>
+</BaseLayout>
+
+<style>
+  .proto-group { margin-top: 40px; }
+  .proto-group h2 { margin-bottom: 4px; }
+  .proto-target { font-size: 0.85rem; opacity: 0.7; margin-top: 0; }
+  .proto-grid {
+    display: grid;
+    gap: 16px;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    margin-top: 16px;
+  }
+  .proto-card {
+    border: 1px solid var(--border, rgba(128,128,128,0.28));
+    border-radius: 8px;
+    padding: 18px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .proto-card h3 { margin: 0; font-size: 1rem; }
+  .proto-card p { margin: 0; font-size: 0.92rem; line-height: 1.5; }
+  .proto-open { margin-top: auto; font-weight: 600; font-size: 0.9rem; }
+</style>

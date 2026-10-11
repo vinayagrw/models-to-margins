@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Gateway Is The Product — Reference Architecture</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+/* Scene-specific: gateway-centric enterprise reference architecture */
+
+.shell { display: flex; flex-direction: column; gap: clamp(12px, 1.8vw, 20px); }
+
+.head { display: flex; flex-direction: column; gap: 6px; }
+.head h1 {
+  font-size: clamp(1.15rem, 2.6vw, 1.85rem);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--text-strong);
+  line-height: 1.15;
+}
+.head p {
+  font-family: "DM Sans", "Segoe UI", sans-serif;
+  font-size: clamp(0.82rem, 1.5vw, 0.98rem);
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+/* ---- controls ---- */
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(6px, 1vw, 10px);
+  align-items: center;
+}
+.controls .lbl {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted-soft);
+  margin-right: 2px;
+}
+.seg {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 5px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  box-shadow: var(--shadow-soft);
+}
+.seg button {
+  font-family: inherit;
+  font-size: clamp(0.7rem, 1.25vw, 0.82rem);
+  font-weight: 600;
+  color: var(--muted);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 7px clamp(9px, 1.6vw, 15px);
+  cursor: pointer;
+  transition: background 0.22s ease, color 0.22s ease, border-color 0.22s ease;
+}
+.seg button:hover { color: var(--text-strong); background: color-mix(in srgb, var(--accent) 10%, transparent); }
+.seg button[aria-pressed="true"] {
+  color: var(--text-strong);
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+}
+
+.readout {
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--accent);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: var(--shadow-soft);
+  padding: clamp(10px, 1.6vw, 15px) clamp(12px, 1.8vw, 18px);
+  font-family: "DM Sans", "Segoe UI", sans-serif;
+  font-size: clamp(0.79rem, 1.4vw, 0.93rem);
+  line-height: 1.55;
+  color: var(--muted);
+}
+.readout .rt {
+  display: block;
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 700;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+.readout strong { color: var(--text-strong); font-weight: 600; }
+
+/* ---- architecture canvas ---- */
+.arch { position: relative; width: 100%; }
+.wires {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.cols {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.45fr) minmax(0, 0.92fr);
+  gap: clamp(58px, 8vw, 132px);
+  align-items: start;
+}
+.col { display: flex; flex-direction: column; gap: clamp(8px, 1.2vw, 12px); }
+
+.coltitle {
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted-soft);
+}
+
+/* node cards */
+.node {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface-strong);
+  box-shadow: var(--shadow-soft);
+  padding: clamp(8px, 1.2vw, 12px);
+  color: var(--text);
+  transition: border-color 0.22s ease, transform 0.22s ease, box-shadow 0.22s ease;
+}
+.node:hover { border-color: var(--border-strong); transform: translateY(-1px); }
+.node[aria-expanded="true"] {
+  border-color: color-mix(in srgb, var(--nc, var(--accent)) 70%, transparent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--nc, var(--accent)) 22%, transparent), var(--shadow-soft);
+}
+.node.on {
+  border-color: color-mix(in srgb, var(--nc, var(--accent)) 78%, transparent);
+  background: color-mix(in srgb, var(--nc, var(--accent)) 10%, var(--surface-strong));
+}
+.node .pic {
+  flex: 0 0 auto;
+  width: clamp(20px, 2.6vw, 26px);
+  height: clamp(20px, 2.6vw, 26px);
+  color: var(--nc, var(--accent));
+}
+.pic svg { width: 100%; height: 100%; }
+.pic svg * { stroke: currentColor; }
+.node .tx { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.node .nm {
+  font-size: clamp(0.74rem, 1.3vw, 0.87rem);
+  font-weight: 600;
+  color: var(--text-strong);
+  line-height: 1.25;
+}
+.node .sub {
+  font-family: "DM Sans", "Segoe UI", sans-serif;
+  font-size: clamp(0.64rem, 1.1vw, 0.74rem);
+  color: var(--muted-soft);
+  line-height: 1.35;
+}
+
+/* gateway */
+.gw {
+  position: relative;
+  z-index: 1;
+  border: 2px solid color-mix(in srgb, var(--accent) 62%, transparent);
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--accent) 8%, var(--surface-strong));
+  box-shadow: var(--shadow);
+  padding: clamp(10px, 1.6vw, 16px);
+  display: flex;
+  flex-direction: column;
+  gap: clamp(8px, 1.2vw, 12px);
+}
+.gwhead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
+  cursor: pointer;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  padding: 4px 6px;
+  color: var(--text);
+  transition: background 0.22s ease, border-color 0.22s ease;
+}
+.gwhead:hover { background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.gwhead[aria-expanded="true"] { border-color: color-mix(in srgb, var(--accent) 60%, transparent); }
+.gwhead .pic { flex: 0 0 auto; width: clamp(26px, 3.2vw, 34px); height: clamp(26px, 3.2vw, 34px); color: var(--accent); }
+.gwhead h2 {
+  font-size: clamp(0.9rem, 1.8vw, 1.15rem);
+  font-weight: 700;
+  color: var(--text-strong);
+  line-height: 1.15;
+}
+.gwhead .sub {
+  font-family: "DM Sans", "Segoe UI", sans-serif;
+  font-size: clamp(0.65rem, 1.1vw, 0.76rem);
+  color: var(--muted-soft);
+}
+.fns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(6px, 1vw, 10px); }
+.fn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-align: left;
+  font-family: inherit;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  padding: 8px;
+  color: var(--text);
+  opacity: 0.28;
+  transition: opacity 0.4s ease, border-color 0.22s ease, background 0.22s ease;
+}
+.fn.lit { opacity: 1; }
+.fn:hover { border-color: var(--border-strong); background: var(--surface-strong); }
+.fn[aria-expanded="true"] {
+  border-color: color-mix(in srgb, var(--accent) 70%, transparent);
+  background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+}
+.fn .pic { flex: 0 0 auto; width: 18px; height: 18px; color: var(--accent); }
+.fn .nm { font-size: clamp(0.68rem, 1.15vw, 0.79rem); font-weight: 600; color: var(--text-strong); line-height: 1.2; }
+
+/* shared planes band */
+.band {
+  position: relative;
+  z-index: 1;
+  margin-top: clamp(54px, 7vw, 96px);
+  border: 1px dashed var(--border-strong);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--surface) 70%, transparent);
+  padding: clamp(9px, 1.4vw, 14px);
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+.bandtiles { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: clamp(7px, 1.1vw, 11px); }
+
+/* reveal */
+.rev { opacity: 0; transform: translateY(10px); transition: opacity 0.55s ease, transform 0.55s ease; }
+.rev.in { opacity: 1; transform: none; }
+
+/* svg wires */
+.edge {
+  fill: none;
+  stroke: var(--border-strong);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  opacity: 0;
+  transition: opacity 0.5s ease, stroke 0.3s ease, stroke-width 0.3s ease;
+}
+.wires.in .edge { opacity: 0.85; }
+.edge.ctrl { stroke-dasharray: 5 5; stroke: color-mix(in srgb, var(--accent-3) 75%, transparent); }
+.edge.live { stroke: var(--rc, var(--accent)); stroke-width: 3; }
+.edge.march { stroke-dasharray: 11 9; animation: march 1.8s linear infinite; }
+@keyframes march { to { stroke-dashoffset: -40; } }
+.dot { fill: var(--rc, var(--accent)); opacity: 0; }
+.dot.on { opacity: 1; }
+.elabel {
+  font-family: "DM Sans", "Segoe UI", sans-serif;
+  font-size: 10px;
+  fill: var(--muted);
+  stroke: var(--bg-mid);
+  stroke-width: 3.4;
+  paint-order: stroke fill;
+  text-anchor: middle;
+  opacity: 0;
+  transition: opacity 0.5s ease, fill 0.3s ease;
+}
+.wires.in .elabel { opacity: 1; }
+.elabel.live { fill: var(--text-strong); font-weight: 600; }
+.perim {
+  fill: none;
+  stroke: color-mix(in srgb, var(--accent-2) 70%, transparent);
+  stroke-width: 1.5;
+  stroke-dasharray: 9 7;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+.wires.in .perim { opacity: 0.9; }
+.perimlabel {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  fill: var(--accent-2);
+  stroke: var(--bg-mid);
+  stroke-width: 3.4;
+  paint-order: stroke fill;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+.wires.in .perimlabel { opacity: 1; }
+
+/* detail strip */
+.detail {
+  border: 1px solid var(--border-strong);
+  border-radius: 14px;
+  background: var(--surface-strong);
+  box-shadow: var(--shadow-soft);
+  padding: clamp(11px, 1.7vw, 17px);
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(10px, 1.5vw, 16px);
+}
+.detail[hidden] { display: none; }
+.detail .dh { grid-column: 1 / -1; display: flex; align-items: baseline; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.detail h3 { font-size: clamp(0.86rem, 1.6vw, 1.02rem); font-weight: 700; color: var(--text-strong); }
+.detail .close {
+  font-family: inherit;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 4px 11px;
+  cursor: pointer;
+}
+.detail .close:hover { color: var(--text-strong); border-color: var(--border-strong); }
+.detail dt {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+.detail dd {
+  font-family: "DM Sans", "Segoe UI", sans-serif;
+  font-size: clamp(0.73rem, 1.3vw, 0.86rem);
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(8px, 1.6vw, 18px);
+  font-family: "DM Sans", "Segoe UI", sans-serif;
+  font-size: clamp(0.66rem, 1.15vw, 0.76rem);
+  color: var(--muted-soft);
+}
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { width: 22px; height: 0; border-top: 2px solid var(--border-strong); display: inline-block; }
+.legend i.c { border-top-style: dashed; border-color: var(--accent-3); }
+.legend i.p { border-top-style: dashed; border-color: var(--accent-2); }
+.legend b { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+
+@media (max-width: 760px) {
+  .cols { grid-template-columns: minmax(0, 1fr); gap: clamp(56px, 14vw, 90px); }
+  .fns { grid-template-columns: minmax(0, 1fr); }
+  .bandtiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .detail { grid-template-columns: minmax(0, 1fr); }
+  .band { margin-top: clamp(56px, 14vw, 90px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rev, .edge, .elabel, .perim, .perimlabel, .fn { transition: none !important; }
+  .edge.march { animation: none !important; stroke-dasharray: none !important; }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <header class="head">
+    <span class="eyebrow">Leg 3 · Reference architecture · Altitude L1</span>
+    <h1>The gateway is the product</h1>
+    <p>Models are swappable. The gateway — routing, identity, budget, redaction, cache, audit — is the durable asset your enterprise actually owns. Every arrow below is labelled with what crosses it.</p>
+  </header>
+
+  <div class="controls">
+    <span class="lbl">Routing policy</span>
+    <div class="seg" role="group" aria-label="Routing policy">
+      <button type="button" data-mode="capability" aria-pressed="true">Route by capability</button>
+      <button type="button" data-mode="cost" aria-pressed="false">Route by cost</button>
+      <button type="button" data-mode="residency" aria-pressed="false">Route by residency</button>
+    </div>
+  </div>
+
+  <p class="readout" id="readout" role="status" aria-live="polite"></p>
+
+  <div class="arch" id="arch">
+    <svg class="wires" id="wires" aria-hidden="true" preserveAspectRatio="none"></svg>
+
+    <div class="cols">
+      <section class="col rev" id="col-clients" data-stage="0">
+        <span class="coltitle">1 · Client applications</span>
+        <button type="button" class="node" id="n-copilot" aria-expanded="false"><span class="pic" data-ic="monitor" aria-hidden="true"></span><span class="tx"><span class="nm">Internal copilot</span><span class="sub">Staff-facing, SSO identity</span></span></button>
+        <button type="button" class="node" id="n-assistant" aria-expanded="false"><span class="pic" data-ic="monitor" aria-hidden="true"></span><span class="tx"><span class="nm">Customer-facing assistant</span><span class="sub">Public surface, hostile input</span></span></button>
+        <button type="button" class="node" id="n-batch" aria-expanded="false"><span class="pic" data-ic="document" aria-hidden="true"></span><span class="tx"><span class="nm">Batch / document pipeline</span><span class="sub">Bulk extraction, offline SLA</span></span></button>
+        <button type="button" class="node" id="n-agent" aria-expanded="false"><span class="pic" data-ic="robot" aria-hidden="true"></span><span class="tx"><span class="nm">Agent runtime</span><span class="sub">Multi-step, tool-calling loops</span></span></button>
+      </section>
+
+      <section class="col rev" id="col-gw" data-stage="1">
+        <span class="coltitle">2 · The AI gateway</span>
+        <div class="gw" id="gw-card">
+          <button type="button" class="gwhead" id="n-gw" aria-expanded="false">
+            <span class="pic" data-ic="exchange" aria-hidden="true"></span>
+            <span class="tx"><h2>AI gateway</h2><span class="sub">One choke point. Every call, every tenant, every model.</span></span>
+          </button>
+          <div class="fns">
+            <button type="button" class="fn" id="n-route" aria-expanded="false"><span class="pic" data-ic="split" aria-hidden="true"></span><span class="nm">Routing &amp; model selection</span></button>
+            <button type="button" class="fn" id="n-auth" aria-expanded="false"><span class="pic" data-ic="key" aria-hidden="true"></span><span class="nm">AuthN / AuthZ &amp; tenant identity</span></button>
+            <button type="button" class="fn" id="n-quota" aria-expanded="false"><span class="pic" data-ic="gauge" aria-hidden="true"></span><span class="nm">Quota, rate limit &amp; budget</span></button>
+            <button type="button" class="fn" id="n-pii" aria-expanded="false"><span class="pic" data-ic="eye" aria-hidden="true"></span><span class="nm">PII detection &amp; redaction</span></button>
+            <button type="button" class="fn" id="n-cache" aria-expanded="false"><span class="pic" data-ic="archive" aria-hidden="true"></span><span class="nm">Semantic cache</span></button>
+            <button type="button" class="fn" id="n-audit" aria-expanded="false"><span class="pic" data-ic="ledger" aria-hidden="true"></span><span class="nm">Audit log &amp; cost meter</span></button>
+          </div>
+        </div>
+      </section>
+
+      <section class="col rev" id="col-back" data-stage="2">
+        <span class="coltitle">3 · Model backends</span>
+        <button type="button" class="node" id="n-frontier" style="--nc: var(--P1);" aria-expanded="false"><span class="pic" data-ic="cpu" aria-hidden="true"></span><span class="tx"><span class="nm">Frontier managed API</span><span class="sub">Claude / GPT / Gemini · outside perimeter</span></span></button>
+        <button type="button" class="node" id="n-open" style="--nc: var(--P2);" aria-expanded="false"><span class="pic" data-ic="network" aria-hidden="true"></span><span class="tx"><span class="nm">Managed open weights</span><span class="sub">Bedrock / Vertex catalogue · outside perimeter</span></span></button>
+        <button type="button" class="node" id="n-self" style="--nc: var(--P5);" aria-expanded="false"><span class="pic" data-ic="shield" aria-hidden="true"></span><span class="tx"><span class="nm">Self-hosted cluster</span><span class="sub">vLLM / SGLang on your GPUs · inside perimeter</span></span></button>
+      </section>
+    </div>
+
+    <section class="band rev" id="band" data-stage="3">
+      <span class="coltitle">Shared planes · one per estate, not one per app</span>
+      <div class="bandtiles">
+        <button type="button" class="node" id="n-retrieval" style="--nc: var(--accent);" aria-expanded="false"><span class="pic" data-ic="warehouse" aria-hidden="true"></span><span class="tx"><span class="nm">Retrieval / vector store</span></span></button>
+        <button type="button" class="node" id="n-eval" style="--nc: var(--accent-3);" aria-expanded="false"><span class="pic" data-ic="check" aria-hidden="true"></span><span class="tx"><span class="nm">Evaluation harness</span></span></button>
+        <button type="button" class="node" id="n-cost" style="--nc: var(--accent-2);" aria-expanded="false"><span class="pic" data-ic="coin" aria-hidden="true"></span><span class="tx"><span class="nm">Cost meter</span></span></button>
+        <button type="button" class="node" id="n-policy" style="--nc: var(--accent-3);" aria-expanded="false"><span class="pic" data-ic="gov" aria-hidden="true"></span><span class="tx"><span class="nm">Policy &amp; residency controller</span></span></button>
+        <button type="button" class="node" id="n-store" style="--nc: var(--accent);" aria-expanded="false"><span class="pic" data-ic="archive" aria-hidden="true"></span><span class="tx"><span class="nm">Audit store (WORM)</span></span></button>
+      </div>
+    </section>
+  </div>
+
+  <div class="detail" id="detail" hidden>
+    <div class="dh">
+      <h3 id="d-title"></h3>
+      <button type="button" class="close" id="d-close">Close</button>
+    </div>
+    <div><dt>What it does</dt><dd id="d-does"></dd></div>
+    <div><dt>Who owns it</dt><dd id="d-owner"></dd></div>
+    <div><dt>What fails without it</dt><dd id="d-fails"></dd></div>
+  </div>
+
+  <p class="legend">
+    <span><i></i> Data plane — request / response</span>
+    <span><i class="c"></i> Control plane — constraints and scores</span>
+    <span><i class="p"></i> Your perimeter</span>
+    <span><b style="background: var(--P1);"></b> Frontier managed</span>
+    <span><b style="background: var(--P2);"></b> Managed open weights</span>
+    <span><b style="background: var(--P5);"></b> Self-hosted</span>
+  </p>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- icons ---------- */
+  var ICON_BASE = '../customs-entry-agent/flow-icons/';
+  var cache = {};
+  var load = function (n) {
+    return cache[n] || (cache[n] = fetch(ICON_BASE + n + '.svg')
+      .then(function (r) { return r.ok ? r.text() : Promise.reject(); })
+      .then(function (t) { return t.replace(/stroke="#232f3e"/g, 'stroke="currentColor"'); })
+      .catch(function () { return ''; }));
+  };
+  document.querySelectorAll('[data-ic]').forEach(function (slot) {
+    load(slot.dataset.ic).then(function (svg) { if (!slot.firstChild) { slot.innerHTML = svg; } });
+  });
+
+  var SVGNS = 'http://www.w3.org/2000/svg';
+  var arch = document.getElementById('arch');
+  var wires = document.getElementById('wires');
+  var readout = document.getElementById('readout');
+  var detail = document.getElementById('detail');
+
+  /* ---------- edge model ---------- */
+  var EDGES = [
+    { id: 'cli1', from: 'n-copilot',   to: 'gw-card', a: 'r', b: 'l', ao: 0.5, bo: 0.14 },
+    { id: 'cli2', from: 'n-assistant', to: 'gw-card', a: 'r', b: 'l', ao: 0.5, bo: 0.34, label: 'prompt + tenant identity' },
+    { id: 'cli3', from: 'n-batch',     to: 'gw-card', a: 'r', b: 'l', ao: 0.5, bo: 0.56 },
+    { id: 'cli4', from: 'n-agent',     to: 'gw-card', a: 'r', b: 'l', ao: 0.5, bo: 0.78 },
+
+    { id: 'ret1', from: 'gw-card', to: 'n-retrieval', a: 'b', b: 't', ao: 0.10, bo: 0.34, label: 'embedding query' },
+    { id: 'ret2', from: 'n-retrieval', to: 'gw-card', a: 't', b: 'b', ao: 0.68, bo: 0.22, label: 'retrieved chunks' },
+
+    { id: 'out1', from: 'gw-card', to: 'n-frontier', a: 'r', b: 'l', ao: 0.22, bo: 0.34, label: 'redacted prompt + routing decision' },
+    { id: 'in1',  from: 'n-frontier', to: 'gw-card', a: 'l', b: 'r', ao: 0.72, bo: 0.32, label: 'completion + usage' },
+    { id: 'out2', from: 'gw-card', to: 'n-open', a: 'r', b: 'l', ao: 0.48, bo: 0.34, label: 'redacted prompt + routing decision' },
+    { id: 'in2',  from: 'n-open', to: 'gw-card', a: 'l', b: 'r', ao: 0.72, bo: 0.58, label: 'completion + usage' },
+    { id: 'out3', from: 'gw-card', to: 'n-self', a: 'r', b: 'l', ao: 0.74, bo: 0.34, label: 'redacted prompt + routing decision — never leaves your perimeter' },
+    { id: 'in3',  from: 'n-self', to: 'gw-card', a: 'l', b: 'r', ao: 0.72, bo: 0.86, label: 'completion + usage' },
+
+    { id: 'cost', from: 'gw-card', to: 'n-cost', a: 'b', b: 't', ao: 0.46, bo: 0.5, label: 'token counts + $ per call' },
+    { id: 'aud',  from: 'gw-card', to: 'n-store', a: 'b', b: 't', ao: 0.90, bo: 0.5, label: 'request record (hash, model, policy decision)' },
+
+    { id: 'pol',  from: 'n-policy', to: 'gw-card', a: 't', b: 'b', ao: 0.5, bo: 0.74, ctrl: true, label: 'residency constraint + allowed backend set' },
+    { id: 'evl',  from: 'n-eval', to: 'gw-card', a: 't', b: 'b', ao: 0.5, bo: 0.60, ctrl: true, label: 'quality scores feeding routing' }
+  ];
+
+  var MODES = {
+    capability: {
+      target: 'n-frontier', out: 'out1', back: 'in1', color: 'var(--P1)',
+      title: 'Route by capability',
+      html: 'Send the hard work to the strongest model available. <strong>Easiest to reason about, highest unit cost</strong> — you pay frontier prices for every call, including the trivial ones a small model would have answered correctly.'
+    },
+    cost: {
+      target: 'n-open', out: 'out2', back: 'in2', color: 'var(--P2)',
+      title: 'Route by cost',
+      html: 'Send each request to the cheapest model that is adequate for it. The trap: <strong>a cheaper model that fails and retries is not cheaper</strong> — measure cost per <strong>successful</strong> completion, not cost per call, or your savings evaporate into retry loops and human rework.'
+    },
+    residency: {
+      target: 'n-self', out: 'out3', back: 'in3', color: 'var(--P5)',
+      title: 'Route by residency',
+      html: 'Only backends inside the required boundary are eligible — here, the self-hosted cluster. <strong>This is a constraint, not an optimisation — it must be evaluated FIRST</strong>, and capability and cost policies then apply only to whatever survives it.'
+    }
+  };
+
+  var DETAILS = {
+    'n-copilot': ['Internal copilot', 'Staff-facing chat and drafting surface, authenticated through corporate SSO and scoped to the employee’s own entitlements.', 'The owning line-of-business product team, on shared platform rails.', 'Every department buys its own tool, each with its own key, prompt and log format — no consolidated spend or audit trail.'],
+    'n-assistant': ['Customer-facing assistant', 'Public-facing surface. Untrusted input arrives here, so prompt-injection and PII exposure are design problems, not edge cases.', 'The customer-experience team, with security review on the prompt surface.', 'Hostile input reaches the model and the tools behind it with no redaction or policy check between them.'],
+    'n-batch': ['Batch / document pipeline', 'Bulk extraction and classification over documents, run offline against a throughput SLA rather than a latency one.', 'The data / document-operations team.', 'Bulk jobs contend with interactive traffic for the same rate limits and starve your live surfaces at month-end.'],
+    'n-agent': ['Agent runtime', 'Multi-step tool-calling loops. One user action can become dozens of model calls, so it is the largest and least predictable cost centre.', 'The platform engineering team that owns the loop and its tool registry.', 'Runaway loops burn budget invisibly, with no per-step record of what the agent decided or why.'],
+    'n-gw': ['AI gateway', 'The single choke point every model call passes through: identity, budget, redaction, routing, caching and audit applied uniformly, regardless of which model answers.', 'Platform engineering — it is a product with a roadmap, not a proxy someone configured once.', 'Model choice leaks into every application. Swapping providers becomes an N-team migration instead of a config change.'],
+    'n-route': ['Routing &amp; model selection', 'Chooses a backend per request from capability, cost and residency rules — and records which rule fired.', 'Platform engineering, with the policy set reviewed by risk.', 'Model choice is hard-coded in application code and every price change or deprecation becomes a release.'],
+    'n-auth': ['AuthN / AuthZ &amp; tenant identity', 'Authenticates the caller and carries tenant and user identity forward, so entitlements and quotas attach to a person, not to a shared key.', 'Identity and access management, jointly with platform.', 'One shared API key for the whole company: no attribution, no revocation, no per-tenant isolation.'],
+    'n-quota': ['Quota, rate limit &amp; budget', 'Enforces per-team and per-tenant spend ceilings and request rates before the call reaches a paid backend.', 'FinOps, with platform enforcing the limits.', 'A single misbehaving loop can consume the entire month’s budget in an afternoon, and you find out from the invoice.'],
+    'n-pii': ['PII detection &amp; redaction', 'Detects and strips regulated identifiers on the way out, and re-hydrates references on the way back where the use case requires it.', 'Privacy / data protection, implemented by platform.', 'Regulated data crosses a third-party boundary in cleartext and the breach is discovered during an audit, not before.'],
+    'n-cache': ['Semantic cache', 'Serves near-duplicate requests from a previous answer instead of paying for the same completion twice.', 'Platform engineering, tuned with the owning product team.', 'You pay full price for repeated questions — typically the largest, easiest saving left on the table.'],
+    'n-audit': ['Audit log &amp; cost meter', 'Writes an immutable record per call — prompt hash, model, policy decision, token counts, cost — and meters spend as it happens.', 'Platform engineering; the record is consumed by risk and finance.', 'You cannot answer “which model saw this customer’s data, and what did it cost?” — the two questions every regulator and CFO asks.'],
+    'n-frontier': ['Frontier managed API', 'The strongest general models, consumed as a vendor API: Claude, GPT, Gemini. Highest capability, highest unit price, outside your perimeter.', 'Vendor operates the model; you own the contract and the data-processing terms.', 'You have no ceiling on task difficulty — the hardest 5% of requests have nowhere to escalate to.'],
+    'n-open': ['Managed open weights', 'Open-weight models served from a cloud catalogue such as Bedrock or Vertex. Cheaper per token, still outside your perimeter.', 'Cloud provider operates it; you own model selection and version pinning.', 'Everything routes to frontier pricing, including the bulk work that a mid-tier model handles correctly.'],
+    'n-self': ['Self-hosted cluster', 'Open weights served on your own GPUs with vLLM or SGLang. Data never leaves your network; you carry the capacity and reliability burden.', 'Your infrastructure and ML-platform teams — including on-call.', 'Workloads with a hard residency or air-gap constraint have no compliant home, and the whole use case stalls.'],
+    'n-retrieval': ['Retrieval / vector store', 'One embedding and chunk store for the estate, with access control inherited from the source systems.', 'The data platform team.', 'Every application builds its own index, and the same document is embedded, permissioned and drifted five different ways.'],
+    'n-eval': ['Evaluation harness', 'Scores candidate models and prompts against fixed task sets, and feeds those scores back into routing decisions.', 'The ML-platform team, with task sets authored by the business.', 'Model swaps become guesswork — you learn a regression from customer complaints instead of a scoreboard.'],
+    'n-cost': ['Cost meter', 'Aggregates token counts and spend into per-team, per-feature and per-successful-outcome unit economics.', 'FinOps, fed by the gateway.', 'AI spend arrives as a single opaque line item that nobody can defend or attribute.'],
+    'n-policy': ['Policy &amp; residency controller', 'Publishes the allowed backend set per workload from residency, contractual and risk rules. It constrains routing rather than advising it.', 'Risk, legal and data protection.', 'Residency becomes a per-team promise in a slide deck rather than an enforced control at the choke point.'],
+    'n-store': ['Audit store (WORM)', 'Write-once retention of the gateway’s request records, held for the retention period your regulator expects.', 'Risk and compliance, on the platform’s storage.', 'The audit trail is mutable or expires, so it proves nothing when it is finally needed.']
+  };
+
+  /* ---------- geometry ---------- */
+  var mode = 'capability';
+  var built = [];
+
+  function rectOf(el) {
+    var r = el.getBoundingClientRect();
+    var b = arch.getBoundingClientRect();
+    return { x: r.left - b.left, y: r.top - b.top, w: r.width, h: r.height };
+  }
+
+  function narrow() { return arch.getBoundingClientRect().width < 760; }
+
+  function mapSide(s) {
+    if (!narrow()) { return s; }
+    if (s === 'r') { return 'b'; }
+    if (s === 'l') { return 't'; }
+    return s;
+  }
+
+  function anchor(el, side, off) {
+    var r = rectOf(el);
+    if (side === 'r') { return [r.x + r.w, r.y + r.h * off]; }
+    if (side === 'l') { return [r.x, r.y + r.h * off]; }
+    if (side === 'b') { return [r.x + r.w * off, r.y + r.h]; }
+    return [r.x + r.w * off, r.y];
+  }
+
+  function curve(a, b, horiz) {
+    if (horiz) {
+      var mx = (a[0] + b[0]) / 2;
+      return 'M' + a[0] + ',' + a[1] + ' C' + mx + ',' + a[1] + ' ' + mx + ',' + b[1] + ' ' + b[0] + ',' + b[1];
+    }
+    var my = (a[1] + b[1]) / 2;
+    return 'M' + a[0] + ',' + a[1] + ' C' + a[0] + ',' + my + ' ' + b[0] + ',' + my + ' ' + b[0] + ',' + b[1];
+  }
+
+  function wrap(text, max) {
+    var words = String(text).split(' ');
+    var lines = [];
+    var cur = '';
+    words.forEach(function (w) {
+      if (!cur) { cur = w; }
+      else if ((cur + ' ' + w).length <= max) { cur += ' ' + w; }
+      else { lines.push(cur); cur = w; }
+    });
+    if (cur) { lines.push(cur); }
+    if (lines.length > 3) { lines = [lines[0], lines[1], lines.slice(2).join(' ')]; }
+    return lines;
+  }
+
+  function makeEl(name, attrs) {
+    var el = document.createElementNS(SVGNS, name);
+    Object.keys(attrs).forEach(function (k) { el.setAttribute(k, attrs[k]); });
+    return el;
+  }
+
+  function perimeterPath() {
+    var pad = 14;
+    var clients = rectOf(document.getElementById('col-clients'));
+    var gw = rectOf(document.getElementById('gw-card'));
+    var band = rectOf(document.getElementById('band'));
+    var self = rectOf(document.getElementById('n-self'));
+
+    if (narrow()) {
+      return [
+        'M' + (Math.min(clients.x, gw.x, band.x) - pad) + ',' + (clients.y - pad) +
+        ' H' + (Math.max(clients.x + clients.w, gw.x + gw.w, band.x + band.w) + pad) +
+        ' V' + (gw.y + gw.h + pad) +
+        ' H' + (Math.min(clients.x, gw.x) - pad) + ' Z',
+        'M' + (self.x - pad) + ',' + (self.y - pad) +
+        ' H' + (self.x + self.w + pad) + ' V' + (self.y + self.h + pad) +
+        ' H' + (self.x - pad) + ' Z',
+        'M' + (band.x - pad) + ',' + (band.y - pad) +
+        ' H' + (band.x + band.w + pad) + ' V' + (band.y + band.h + pad) +
+        ' H' + (band.x - pad) + ' Z'
+      ].join(' ');
+    }
+
+    var L = Math.min(clients.x, band.x) - pad;
+    var T = Math.min(clients.y, gw.y) - pad;
+    var B = band.y + band.h + pad;
+    var R1 = gw.x + gw.w + pad;
+    var R2 = self.x + self.w + pad;
+    var sT = Math.max(self.y - pad, T + 10);
+    var sB = Math.min(self.y + self.h + pad, B - 10);
+    return 'M' + L + ',' + T + ' H' + R1 + ' V' + sT + ' H' + R2 + ' V' + sB +
+      ' H' + R1 + ' V' + B + ' H' + L + ' Z';
+  }
+
+  function build() {
+    var b = arch.getBoundingClientRect();
+    var W = Math.max(1, Math.round(b.width));
+    var H = Math.max(1, Math.round(b.height));
+    wires.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+    wires.setAttribute('width', W);
+    wires.setAttribute('height', H);
+    while (wires.firstChild) { wires.removeChild(wires.firstChild); }
+    built = [];
+
+    var perim = makeEl('path', { d: perimeterPath(), class: 'perim', rx: '16' });
+    wires.appendChild(perim);
+    var clientsR = rectOf(document.getElementById('col-clients'));
+    var plabel = makeEl('text', {
+      x: clientsR.x - 6,
+      y: Math.max(12, clientsR.y - 20),
+      class: 'perimlabel'
+    });
+    plabel.textContent = 'Inside your perimeter';
+    wires.appendChild(plabel);
+
+    EDGES.forEach(function (e) {
+      var fromEl = document.getElementById(e.from);
+      var toEl = document.getElementById(e.to);
+      if (!fromEl || !toEl) { return; }
+      var sa = mapSide(e.a);
+      var sb = mapSide(e.b);
+      var horiz = (sa === 'l' || sa === 'r') && (sb === 'l' || sb === 'r');
+      var p1 = anchor(fromEl, sa, e.ao);
+      var p2 = anchor(toEl, sb, e.bo);
+      var path = makeEl('path', { d: curve(p1, p2, horiz), class: 'edge' + (e.ctrl ? ' ctrl' : ''), 'data-edge': e.id });
+      wires.appendChild(path);
+
+      var label = null;
+      if (e.label) {
+        var mid;
+        try { mid = path.getPointAtLength(path.getTotalLength() * 0.5); }
+        catch (err) { mid = { x: (p1[0] + p2[0]) / 2, y: (p1[1] + p2[1]) / 2 }; }
+        var lines = wrap(e.label, 24);
+        label = makeEl('text', {
+          x: mid.x,
+          y: mid.y - (lines.length - 1) * 5.5 - 4,
+          class: 'elabel',
+          'data-edge': e.id
+        });
+        lines.forEach(function (ln, i) {
+          var ts = makeEl('tspan', { x: mid.x, dy: i === 0 ? 0 : 11.5 });
+          ts.textContent = ln;
+          label.appendChild(ts);
+        });
+        wires.appendChild(label);
+      }
+      built.push({ spec: e, path: path, label: label });
+    });
+
+    var dot = makeEl('circle', { r: 4.6, cx: -20, cy: -20, class: 'dot', id: 'flowdot' });
+    wires.appendChild(dot);
+    applyMode();
+  }
+
+  /* ---------- mode ---------- */
+  var dotRaf = null;
+
+  function stopDot() {
+    if (dotRaf) { cancelAnimationFrame(dotRaf); dotRaf = null; }
+    var d = document.getElementById('flowdot');
+    if (d) { d.classList.remove('on'); }
+  }
+
+  function runDot(paths) {
+    stopDot();
+    if (reduced || !paths.length) { return; }
+    var dot = document.getElementById('flowdot');
+    if (!dot) { return; }
+    dot.classList.add('on');
+    var lens = paths.map(function (p) { try { return p.getTotalLength(); } catch (e) { return 0; } });
+    var total = lens.reduce(function (a, c) { return a + c; }, 0);
+    if (!total) { return; }
+    var start = null;
+    var dur = 2600;
+    var step = function (ts) {
+      if (start === null) { start = ts; }
+      var t = ((ts - start) % dur) / dur;
+      var travel = t * total;
+      for (var i = 0; i < paths.length; i++) {
+        if (travel <= lens[i] || i === paths.length - 1) {
+          try {
+            var pt = paths[i].getPointAtLength(Math.min(travel, lens[i]));
+            dot.setAttribute('cx', pt.x);
+            dot.setAttribute('cy', pt.y);
+          } catch (e) { /* detached */ }
+          break;
+        }
+        travel -= lens[i];
+      }
+      dotRaf = requestAnimationFrame(step);
+    };
+    dotRaf = requestAnimationFrame(step);
+  }
+
+  function applyMode() {
+    var m = MODES[mode];
+    var liveIds = ['cli2', m.out, m.back];
+    var seq = [];
+    built.forEach(function (b) {
+      var live = liveIds.indexOf(b.spec.id) !== -1;
+      b.path.classList.toggle('live', live);
+      b.path.classList.toggle('march', live && !reduced);
+      b.path.style.setProperty('--rc', live ? m.color : '');
+      if (b.label) { b.label.classList.toggle('live', live); }
+      if (live) { seq.push(b); }
+    });
+    var ordered = ['cli2', m.out].map(function (id) {
+      var f = built.filter(function (b) { return b.spec.id === id; })[0];
+      return f ? f.path : null;
+    }).filter(Boolean);
+    document.querySelectorAll('.node').forEach(function (n) { n.classList.remove('on'); });
+    var t = document.getElementById(m.target);
+    if (t) { t.classList.add('on'); }
+    var a = document.getElementById('n-assistant');
+    if (a) { a.classList.add('on'); }
+    var dot = document.getElementById('flowdot');
+    if (dot) { dot.style.setProperty('--rc', m.color); }
+    runDot(ordered);
+    readout.innerHTML = '<span class="rt">' + m.title + '</span>' + m.html;
+  }
+
+  document.querySelectorAll('.seg button').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      mode = btn.dataset.mode;
+      document.querySelectorAll('.seg button').forEach(function (o) {
+        o.setAttribute('aria-pressed', String(o === btn));
+      });
+      applyMode();
+    });
+  });
+
+  /* ---------- detail strip ---------- */
+  var openId = null;
+  function closeDetail() {
+    if (openId) {
+      var prev = document.getElementById(openId);
+      if (prev) { prev.setAttribute('aria-expanded', 'false'); }
+    }
+    openId = null;
+    detail.hidden = true;
+  }
+  function openDetail(id) {
+    var d = DETAILS[id];
+    if (!d) { return; }
+    if (openId === id) { closeDetail(); return; }
+    closeDetail();
+    openId = id;
+    var el = document.getElementById(id);
+    if (el) { el.setAttribute('aria-expanded', 'true'); }
+    document.getElementById('d-title').innerHTML = d[0];
+    document.getElementById('d-does').textContent = d[1];
+    document.getElementById('d-owner').textContent = d[2];
+    document.getElementById('d-fails').textContent = d[3];
+    detail.hidden = false;
+  }
+  Object.keys(DETAILS).forEach(function (id) {
+    var el = document.getElementById(id);
+    if (el) { el.addEventListener('click', function () { openDetail(id); }); }
+  });
+  document.getElementById('d-close').addEventListener('click', closeDetail);
+  document.addEventListener('keydown', function (ev) {
+    if (ev.key === 'Escape' && openId) { closeDetail(); }
+  });
+
+  /* ---------- reveal ---------- */
+  function revealAll(instant) {
+    var cols = document.querySelectorAll('.rev');
+    cols.forEach(function (c) {
+      var delay = instant ? 0 : Number(c.dataset.stage || 0) * 130;
+      setTimeout(function () { c.classList.add('in'); }, delay);
+    });
+    var fns = document.querySelectorAll('.fn');
+    fns.forEach(function (f, i) {
+      var delay = instant ? 0 : 420 + i * 130;
+      setTimeout(function () { f.classList.add('lit'); }, delay);
+    });
+    setTimeout(function () { wires.classList.add('in'); }, instant ? 0 : 640);
+  }
+
+  var started = false;
+  function start() {
+    if (started) { return; }
+    started = true;
+    build();
+    revealAll(reduced);
+  }
+
+  if (reduced || !('IntersectionObserver' in window)) {
+    start();
+  } else {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (en.isIntersecting) { start(); io.disconnect(); }
+      });
+    }, { threshold: 0.15 });
+    io.observe(arch);
+  }
+
+  /* rebuild wires when layout changes */
+  var rt = null;
+  var rebuild = function () {
+    if (!started) { return; }
+    clearTimeout(rt);
+    rt = setTimeout(build, 120);
+  };
+  window.addEventListener('resize', rebuild);
+  if ('ResizeObserver' in window) { new ResizeObserver(rebuild).observe(arch); }
+  window.addEventListener('load', rebuild);
+
+  /* ---------- autosize ---------- */
+  if (document.documentElement.dataset.embedded === 'true') {
+    var postSize = function () {
+      window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+    };
+    if ('ResizeObserver' in window) { new ResizeObserver(postSize).observe(document.body); }
+    window.addEventListener('load', postSize);
+    setTimeout(postSize, 400);
+  }
+})();
+</script>
+</body>
+</html>

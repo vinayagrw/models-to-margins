@@ -1,0 +1,209 @@
+/* AI Governance Before ROI — shared theme tokens and base styles.
+   Family identity mirrors the page's "boardroom / filing" template:
+   light = ivory stock with oxblood rule, dark = graphite stock with brass foil.
+   Used by every visual under /visuals/ai-governance-before-roi/. */
+
+:root,
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  /* Background gradient stops (ivory stock) */
+  --bg-start: #f6f2e9;
+  --bg-mid: #f0ebdd;
+  --bg-end: #efeadd;
+
+  /* Text */
+  --text: #191713;
+  --text-strong: #191713;
+  --muted: rgba(58, 53, 44, 0.82);
+  --muted-soft: rgba(58, 53, 44, 0.68);
+
+  /* Surface */
+  --surface: rgba(255, 253, 247, 0.9);
+  --surface-strong: rgba(255, 253, 247, 0.98);
+  --surface-sunk: #ece6d8;
+  --border: rgba(80, 68, 40, 0.18);
+  --border-strong: rgba(80, 68, 40, 0.32);
+
+  /* Accent palette: oxblood, deep navy, clearance green */
+  --accent: #7c2130;
+  --accent-2: #1e3a5f;
+  --accent-3: #1f5a3e;
+
+  /* Status */
+  --warn: #7a5a12;
+  --good: #1f5a3e;
+
+  /* Evidence-chip colors */
+  --confirmed: #1f5a3e;
+  --proposed: #1e3a5f;
+  --open: #7a5a12;
+  --vendor: #7c2130;
+
+  /* Shadow */
+  --shadow: 0 18px 38px rgba(25, 23, 19, 0.14);
+  --shadow-soft: 0 12px 28px rgba(25, 23, 19, 0.1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg-start: #15161a;
+    --bg-mid: #181a1f;
+    --bg-end: #1a1c21;
+    --text: #eee9de;
+    --text-strong: #ffffff;
+    --muted: rgba(238, 233, 222, 0.72);
+    --muted-soft: rgba(238, 233, 222, 0.58);
+    --surface: rgba(30, 32, 39, 0.9);
+    --surface-strong: rgba(35, 38, 46, 0.96);
+    --surface-sunk: #23262e;
+    --border: rgba(180, 170, 140, 0.18);
+    --border-strong: rgba(180, 170, 140, 0.32);
+    --accent: #c79a45;
+    --accent-2: #86abdd;
+    --accent-3: #7fcba4;
+    --warn: #d9b45e;
+    --good: #7fcba4;
+    --confirmed: #7fcba4;
+    --proposed: #86abdd;
+    --open: #d9b45e;
+    --vendor: #e08a98;
+    --shadow: 0 22px 60px rgba(0, 0, 0, 0.5);
+    --shadow-soft: 0 14px 32px rgba(0, 0, 0, 0.36);
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg-start: #15161a;
+  --bg-mid: #181a1f;
+  --bg-end: #1a1c21;
+  --text: #eee9de;
+  --text-strong: #ffffff;
+  --muted: rgba(238, 233, 222, 0.72);
+  --muted-soft: rgba(238, 233, 222, 0.58);
+  --surface: rgba(30, 32, 39, 0.9);
+  --surface-strong: rgba(35, 38, 46, 0.96);
+  --surface-sunk: #23262e;
+  --border: rgba(180, 170, 140, 0.18);
+  --border-strong: rgba(180, 170, 140, 0.32);
+  --accent: #c79a45;
+  --accent-2: #86abdd;
+  --accent-3: #7fcba4;
+  --warn: #d9b45e;
+  --good: #7fcba4;
+  --confirmed: #7fcba4;
+  --proposed: #86abdd;
+  --open: #d9b45e;
+  --vendor: #e08a98;
+  --shadow: 0 22px 60px rgba(0, 0, 0, 0.5);
+  --shadow-soft: 0 14px 32px rgba(0, 0, 0, 0.36);
+}
+
+/* Reset */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* Base body */
+body {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 14% 14%, rgba(124, 33, 48, 0.06), transparent 32%),
+    radial-gradient(circle at 86% 86%, rgba(30, 58, 95, 0.06), transparent 32%),
+    linear-gradient(180deg, var(--bg-start) 0%, var(--bg-mid) 48%, var(--bg-end) 100%);
+  font-family: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  color: var(--text);
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+/* Embed mode (?embed=1) — visual is loaded inside an iframe.
+   Every visual in this family autosizes: size to content, report the height
+   via postMessage({type:'m2m:frame-size'}), and the parent hugs the content.
+   Never lock to viewport height — no stretched, half-empty panels. */
+:root[data-embedded="true"],
+:root[data-embedded="true"] body {
+  height: auto;
+}
+:root[data-embedded="true"] body {
+  min-height: 0;
+}
+
+/* Shared shell layout */
+.shell {
+  width: min(calc(100% - 32px), 1280px);
+  margin: 0 auto;
+  padding: 28px 0 36px;
+}
+:root[data-embedded="true"] .shell {
+  width: 100%;
+  height: auto;
+  padding: 14px 18px;
+  /* Each visual's own .shell rule sets display + grid/flex template. */
+}
+
+/* Keyboard focus: explicit high-visibility ring on every interactive element */
+button:focus-visible,
+a:focus-visible,
+summary:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--accent-2);
+  outline-offset: 2px;
+}
+
+/* Shared typography utilities */
+.eyebrow {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+/* Filing chip — shared across the family for evidence-verdict labels.
+   Near-square, IBM Plex Mono, a 3px leading block in currentColor. */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.625rem;
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border: 1px solid currentColor;
+  border-radius: 2px;
+  padding: 0.15em 0.5em;
+  white-space: nowrap;
+}
+.chip::before {
+  content: "";
+  width: 3px;
+  height: 9px;
+  background: currentColor;
+}
+.chip--confirmed { color: var(--confirmed); }
+.chip--proposed { color: var(--proposed); }
+.chip--open { color: var(--open); }
+.chip--vendor-claim { color: var(--vendor); }
+.chip[hidden] { display: none; }
+
+/* Dot leader utility — repeating radial gradient, no image file. */
+.leader {
+  height: 8px;
+  min-width: 12px;
+  opacity: 0.35;
+  background-image: radial-gradient(currentColor 1px, transparent 1px);
+  background-size: 6px 6px;
+  background-position: 0 bottom;
+  background-repeat: repeat-x;
+}
+
+/* Respect the reader's motion preference: rebuilt figures animate, so the
+   whole family collapses motion to a single frame when asked. Scripted
+   animation (rAF token travel, count-ups) must ALSO check this query and
+   jump to the finished state. */
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+}

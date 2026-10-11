@@ -4,34 +4,43 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>The Metric Chain — a playable model of leakage</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
 <script src="./_theme-bootstrap.js"></script>
 <link rel="stylesheet" href="./_theme.css">
 <style>
-.shell { display: flex; flex-direction: column; gap: clamp(7px,1.3vh,14px); justify-content: space-between; }
+:root[data-embedded="true"], :root[data-embedded="true"] body { height: auto; }
+.shell { display: flex; flex-direction: column; gap: clamp(8px,1.3vh,14px); }
 .head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; }
 .head h1 { font-size: clamp(1.05rem,2vw,1.5rem); font-weight: 700; letter-spacing: -0.02em; color: var(--text-strong); }
 .head p { color: var(--muted); font-size: 0.8rem; }
-.presets { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.ctl { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.replay { font: inherit; cursor: pointer; border-radius: 999px; padding: 5px 12px; font-size: 0.74rem; font-weight: 700;
+  min-height: 32px; border: 1px solid var(--accent); background: transparent; color: var(--accent); }
+.replay:hover { background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.replay:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .preset { font: inherit; cursor: pointer; border-radius: 999px; padding: 5px 12px; font-size: 0.74rem; font-weight: 600;
-  border: 1px solid var(--border-strong); background: var(--surface); color: var(--muted); transition: all .18s ease; }
+  min-height: 32px; border: 1px solid var(--border-strong); background: var(--surface); color: var(--muted); transition: all .18s ease; }
 .preset:hover { border-color: var(--accent); color: var(--text); }
 .preset[aria-pressed="true"] { background: linear-gradient(135deg, var(--accent), var(--accent-3)); color: #fff; border-color: transparent; box-shadow: var(--shadow-soft); }
 .preset.cuts[aria-pressed="true"] { background: linear-gradient(135deg, var(--warn), #b91c1c); }
 
-/* live chain of vertical magnitude bars */
+/* live chain of icon-led magnitude bars, the leak packet rides across it */
 .chain { display: grid; grid-template-columns: repeat(9, auto); align-items: end; justify-content: space-between; gap: 0; position: relative; padding: 2px 0; }
 .node { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 0; }
+.pic { width: 30px; height: 30px; display: grid; place-items: center; color: var(--c);
+  background: color-mix(in srgb, var(--c) 10%, var(--surface)); border: 1.5px solid color-mix(in srgb, var(--c) 45%, var(--border)); border-radius: 8px; }
+.pic svg { width: 20px; height: 20px; display: block; }
+.pic svg * { stroke: currentColor; }
 .barwrap { width: clamp(40px,7vw,72px); height: clamp(78px,15vh,128px); border-radius: 9px 9px 7px 7px; position: relative;
   background: color-mix(in srgb, var(--c) 9%, var(--surface)); border: 1px solid var(--border); overflow: hidden; display: flex; align-items: flex-end; }
-.fill { width: 100%; border-radius: 0 0 6px 6px; transition: height .45s cubic-bezier(.4,.05,.2,1), background .3s ease;
+.fill { width: 100%; height: var(--mag,0%); border-radius: 0 0 6px 6px; transition: height .45s cubic-bezier(.4,.05,.2,1), width .45s cubic-bezier(.4,.05,.2,1), background .3s ease;
   background: linear-gradient(180deg, var(--c), color-mix(in srgb, var(--c) 62%, #000 16%)); box-shadow: var(--shadow-soft); }
 .barwrap.neg .fill { background: linear-gradient(180deg, var(--warn), #7f1d1d); }
 .barwrap .zero { position: absolute; left: 0; right: 0; bottom: 50%; height: 1px; background: var(--border-strong); opacity: .55; }
 .delta { font-size: clamp(0.84rem,1.7vh,1.18rem); font-weight: 800; font-variant-numeric: tabular-nums; color: var(--text-strong); line-height: 1; }
 .delta.neg { color: var(--warn); }
 .nm { font-size: clamp(0.6rem,1.2vh,0.74rem); font-weight: 700; color: var(--text); text-align: center; letter-spacing: .01em; }
-.unit { font-size: 0.56rem; opacity: 0.7; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; text-align:center; }
+.unit { font-size: 0.56rem; opacity: 0.7; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; text-align: center; }
 
 /* the link cell: an arrow track with a flowing spark + the slider underneath */
 .link { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 0 clamp(2px,0.7vw,10px); align-self: stretch; justify-content: center; min-width: clamp(46px,8vw,88px); }
@@ -41,10 +50,16 @@
 .track.neg { background: repeating-linear-gradient(90deg, var(--warn) 0 5px, transparent 5px 10px); }
 .track.neg .spark { display: none; }
 @keyframes travel { 0%{ left:-6%; opacity:0;} 14%{opacity:var(--op,1);} 86%{opacity:var(--op,1);} 100%{ left:100%; opacity:0;} }
-.slider { width: 100%; accent-color: var(--accent); cursor: pointer; height: 16px; }
+.slider { width: 100%; max-width: 100%; accent-color: var(--accent); cursor: pointer; height: 16px; }
 .lpct { font-size: 0.66rem; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--text-strong); }
 .lpct.neg { color: var(--warn); }
 .llbl { font-size: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted-soft); white-space: nowrap; }
+
+/* the leak packet: the win itself, shrinking as it crosses each link */
+.packet { position: absolute; left: 0; top: 0; width: 14px; height: 14px; border-radius: 50%;
+  background: var(--accent); box-shadow: 0 0 10px color-mix(in srgb, var(--accent) 70%, transparent);
+  transform: translate(-50%,-50%) scale(1); opacity: 0; pointer-events: none; z-index: 2; }
+.packet.neg { background: var(--warn); box-shadow: 0 0 10px color-mix(in srgb, var(--warn) 70%, transparent); }
 
 .readout { border-radius: 12px; border: 1px solid var(--border); background: var(--surface); padding: 9px 14px; box-shadow: var(--shadow-soft);
   display: flex; gap: 12px; align-items: center; }
@@ -53,8 +68,25 @@
 .readout.win .tag { background: var(--good); }
 .readout .txt { font-size: 0.82rem; line-height: 1.4; color: var(--text); }
 .readout .txt b { color: var(--text-strong); }
-@media (max-width: 600px){ .llbl { display:none; } .unit { display:none; } }
-@media (prefers-reduced-motion: reduce){ .fill { transition: none; } }
+
+/* below 620px the chain stacks vertically: bars fill left to right */
+@media (max-width: 620px){
+  .chain { display: flex; flex-direction: column; align-items: stretch; gap: 6px; }
+  .node { display: grid; grid-template-columns: 38px 1fr auto; grid-template-rows: auto auto; align-items: center; gap: 2px 10px; }
+  .pic { grid-row: 1 / 3; }
+  .nm { grid-column: 2; grid-row: 1; text-align: left; justify-self: start; }
+  .barwrap { grid-column: 2; grid-row: 2; width: 100%; height: 16px; align-items: stretch; justify-content: flex-start; border-radius: 8px; }
+  .fill { width: var(--mag,0%); height: 100%; border-radius: 6px 0 0 6px; background: linear-gradient(90deg, var(--c), color-mix(in srgb, var(--c) 62%, #000 16%)); }
+  .barwrap.neg .fill { background: linear-gradient(90deg, var(--warn), #7f1d1d); }
+  .barwrap .zero { left: 50%; right: auto; top: 0; bottom: 0; width: 1px; height: auto; }
+  .delta { grid-column: 3; grid-row: 1 / 3; }
+  .unit { display: none; }
+  .link { flex-direction: row; min-width: 0; padding: 0 0 0 48px; gap: 8px; }
+  .track { display: none; }
+  .llbl { display: none; }
+  .slider { flex: 1; min-width: 0; }
+}
+@media (prefers-reduced-motion: reduce){ .fill { transition: none; } .spark { display: none; } .packet { display: none; } }
 </style>
 </head>
 <body>
@@ -63,18 +95,27 @@
     <h1>Tune the chain. Watch the win leak.</h1>
     <p>A 100% win enters at System. Drag each link to set how much survives — then read what reaches Business.</p>
   </div>
-  <div class="presets" id="presets"></div>
+  <div class="ctl">
+    <button type="button" class="replay" id="replay">Replay the leak</button>
+    <span class="presets" id="presets" style="display:contents"></span>
+  </div>
   <div class="chain" id="chain"></div>
   <div class="readout" id="readout" aria-live="polite"><span class="tag" id="rtag"></span><span class="txt" id="rtxt"></span></div>
 </main>
 
 <script>
+(() => {
+const ICON_BASE = '../customs-entry-agent/flow-icons/';
+const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+/* icon per stage, derived from each stage's own unit: gauge for the P95 latency
+   win, cpu for model headroom, check for output acceptance, person for UX
+   completion, coin for business retention */
 const NODES = [
-  { nm:'System',  v:'--sys', unit:'−200ms P95' },
-  { nm:'Model',   v:'--mod', unit:'headroom' },
-  { nm:'Output',  v:'--out', unit:'acceptance' },
-  { nm:'UX',      v:'--ux',  unit:'completion' },
-  { nm:'Business',v:'--biz', unit:'retention' },
+  { nm:'System',  v:'--sys', unit:'−200ms P95',  icon:'gauge' },
+  { nm:'Model',   v:'--mod', unit:'headroom',    icon:'cpu' },
+  { nm:'Output',  v:'--out', unit:'acceptance',  icon:'check' },
+  { nm:'UX',      v:'--ux',  unit:'completion',  icon:'person' },
+  { nm:'Business',v:'--biz', unit:'retention',   icon:'coin' },
 ];
 const LINKLBL = ['Sys→Model','Model→Out','Out→UX','UX→Biz'];
 const PRESETS = {
@@ -86,12 +127,13 @@ const PRESETS = {
 };
 let coef = [100,100,100,100];   // percent per link
 let activePreset = 'healthy';
+let revealed = 5;               // bars visible up to this index, staged by the packet
 
 const presetsEl = document.getElementById('presets');
 Object.entries(PRESETS).forEach(([k,p])=>{
   const b=document.createElement('button'); b.className='preset'+(k==='cuts'?' cuts':''); b.dataset.k=k; b.textContent=p.label;
   b.setAttribute('aria-pressed', k===activePreset?'true':'false');
-  b.addEventListener('click', ()=>{ coef=[...p.c]; activePreset=k; syncSliders(); render(); });
+  b.addEventListener('click', ()=>{ coef=[...p.c]; activePreset=k; syncSliders(); runLeak(); });
   presetsEl.appendChild(b);
 });
 
@@ -99,9 +141,9 @@ const chain = document.getElementById('chain');
 function build(){
   chain.innerHTML='';
   NODES.forEach((n,i)=>{
-    const node=document.createElement('div'); node.className='node';
-    node.innerHTML=`<div class="delta" id="d${i}"></div>
-      <div class="barwrap" id="bw${i}" style="--c:var(${n.v})"><div class="zero"></div><div class="fill" id="f${i}"></div></div>
+    const node=document.createElement('div'); node.className='node'; node.style.setProperty('--c',`var(${n.v})`);
+    node.innerHTML=`<span class="pic" data-icon="${n.icon}" aria-hidden="true"></span><div class="delta" id="d${i}"></div>
+      <div class="barwrap" id="bw${i}"><div class="zero"></div><div class="fill" id="f${i}"></div></div>
       <div class="nm">${n.nm}</div><div class="unit">${n.unit}</div>`;
     chain.appendChild(node);
     if(i<4){
@@ -113,11 +155,23 @@ function build(){
       chain.appendChild(link);
     }
   });
+  const packet=document.createElement('div'); packet.className='packet'; packet.id='packet'; packet.setAttribute('aria-hidden','true');
+  chain.appendChild(packet);
   for(let i=0;i<4;i++){
     document.getElementById('s'+i).addEventListener('input', e=>{
-      coef[i]=+e.target.value; activePreset=detectPreset(); syncPresetButtons(); render();
+      coef[i]=+e.target.value; activePreset=detectPreset(); syncPresetButtons();
+      stopLeak(); revealed=5; render();
     });
   }
+  /* shared line-art icons, inlined with the stroke swapped to currentColor so
+     each stage keeps its own chain colour. A failed fetch leaves the slot
+     empty and the text still carries the node. */
+  chain.querySelectorAll('[data-icon]').forEach(slot=>{
+    fetch(ICON_BASE + slot.dataset.icon + '.svg')
+      .then(r => (r.ok ? r.text() : Promise.reject()))
+      .then(t => { slot.innerHTML = t.replace(/stroke="#232f3e"/g, 'stroke="currentColor"'); })
+      .catch(() => {});
+  });
 }
 function detectPreset(){
   for(const [k,p] of Object.entries(PRESETS)){ if(p.c.every((x,i)=>x===coef[i])) return k; }
@@ -128,18 +182,21 @@ function syncPresetButtons(){
 }
 function syncSliders(){ for(let i=0;i<4;i++){ const s=document.getElementById('s'+i); if(s) s.value=coef[i]; } syncPresetButtons(); }
 
-function render(){
-  // propagate
+function chainVals(){
   let v=100; const vals=[100];
   for(let i=0;i<4;i++){ v=v*(coef[i]/100); vals.push(v); }
-  const MAXH=100; // bar height %
+  return vals;
+}
+function render(){
+  const vals=chainVals();
+  const MAXH=100; // bar magnitude %
   NODES.forEach((n,i)=>{
     const val=vals[i]; const pct=Math.round(val);
     const d=document.getElementById('d'+i);
     d.textContent=(i===0?'100%':(val<0?'▼ ':(pct>0?'+':''))+pct+'%'); d.classList.toggle('neg', val<0);
     const f=document.getElementById('f'+i); const bw=document.getElementById('bw'+i);
     const mag=Math.min(Math.abs(val),120)/120*MAXH;
-    f.style.height=mag+'%'; bw.classList.toggle('neg', val<0);
+    f.style.setProperty('--mag', (i<revealed?mag:0)+'%'); bw.classList.toggle('neg', val<0);
   });
   for(let i=0;i<4;i++){
     const c=coef[i]; const p=document.getElementById('p'+i); const t=document.getElementById('t'+i);
@@ -149,7 +206,7 @@ function render(){
     if(sp){ const frac=Math.max(0,Math.min(c/100,1.2)); sp.style.setProperty('--op', c<=0?'0':String(0.25+frac*0.75)); sp.style.setProperty('--spd', (1.4+(1.2-frac)*1.4).toFixed(2)+'s'); }
   }
   // verdict
-  const fin=vals[4]; const prod=coef.reduce((a,b)=>a*(b/100),1); // == fin/100
+  const fin=vals[4];
   const r=document.getElementById('readout'); const tag=document.getElementById('rtag'); const txt=document.getElementById('rtxt');
   let cls='readout', t='', x='';
   const allHealthyLooking = coef.every(c=>c>=85 && c<=100);
@@ -160,7 +217,64 @@ function render(){
   else { cls+=' warn'; t=`Mostly lost (${Math.round(fin)}%)`; x='Almost nothing survives to Business. Either a link <b>saturated</b> (a win nobody could feel) or one arrow is near zero. You optimized a number, not an outcome.'; }
   r.className=cls; tag.textContent=t; txt.innerHTML=x;
 }
+
+/* The leak packet: the win itself enters at System and rides the chain,
+   shrinking to the surviving fraction as it crosses each link, lighting each
+   bar as it arrives. rAF t0 comes from the first frame timestamp, never
+   performance.now(): sandboxed iframes can disagree between the two clocks. */
+const DWELL = 700;
+let raf = 0;
+function stopLeak(){ cancelAnimationFrame(raf); const pk=document.getElementById('packet'); if(pk) pk.style.opacity='0'; }
+function runLeak(){
+  stopLeak();
+  if(reduced){ revealed=5; render(); return; }
+  const vals=chainVals();
+  revealed=1; render();
+  const pk=document.getElementById('packet');
+  const cRect=chain.getBoundingClientRect();
+  const stops=NODES.map((n,i)=>{
+    const r=document.getElementById('bw'+i).getBoundingClientRect();
+    return { x:r.left-cRect.left+r.width/2, y:r.top-cRect.top+r.height/2 };
+  });
+  pk.style.opacity='1'; pk.classList.remove('neg');
+  let t0=null;
+  const step=(ts)=>{
+    if(t0===null) t0=ts;
+    const t=ts-t0;
+    const i=Math.min(3, Math.floor(t/DWELL));
+    const f=Math.min(1,(t-i*DWELL)/DWELL);
+    const a=stops[i], b=stops[i+1];
+    pk.style.left=(a.x+(b.x-a.x)*f)+'px';
+    pk.style.top=(a.y+(b.y-a.y)*f)+'px';
+    const val=vals[i]+(vals[i+1]-vals[i])*f;
+    pk.style.transform=`translate(-50%,-50%) scale(${Math.max(0.25,Math.min(Math.abs(val),120)/100)})`;
+    pk.classList.toggle('neg', val<0);
+    if(f>=0.96 && revealed<i+2){ revealed=i+2; render(); }
+    if(t<DWELL*4){ raf=requestAnimationFrame(step); }
+    else { pk.style.opacity='0'; revealed=5; render(); }
+  };
+  raf=requestAnimationFrame(step);
+}
+document.getElementById('replay').addEventListener('click', runLeak);
+
 build(); render();
+
+/* autoplay once when the figure scrolls into view. threshold 0, not 0.2: the
+   chain can exceed a phone viewport, and a fraction of a too-tall element
+   never intersects. */
+if ('IntersectionObserver' in window) {
+  const io = new IntersectionObserver((entries) => {
+    if (entries.some((e) => e.isIntersecting)) { io.disconnect(); runLeak(); }
+  }, { threshold: 0 });
+  io.observe(chain);
+} else { runLeak(); }
+
+if (document.documentElement.dataset.embedded === 'true') {
+  const postSize = () => window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+  if ('ResizeObserver' in window) new ResizeObserver(postSize).observe(document.body);
+  window.addEventListener('load', postSize);
+}
+})();
 </script>
 </body>
 </html>

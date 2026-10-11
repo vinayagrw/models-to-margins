@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>One request, end to end</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+/* Scene-specific: swimlane control-flow of one gateway request */
+
+.shell { display: block; }
+.head { margin-bottom: clamp(12px, 2vw, 18px); }
+.head h1 {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: clamp(1.28rem, 3.1vw, 2rem);
+  font-weight: 700;
+  color: var(--text-strong);
+  letter-spacing: -0.01em;
+  margin-top: 6px;
+}
+.head p {
+  font-family: "DM Sans", sans-serif;
+  font-size: clamp(0.86rem, 1.7vw, 1rem);
+  color: var(--muted);
+  margin-top: 8px;
+  line-height: 1.55;
+}
+
+/* ---- controls ---- */
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(8px, 1.4vw, 14px);
+  align-items: center;
+  margin-bottom: clamp(10px, 1.8vw, 16px);
+}
+.grp {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 5px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: var(--shadow-soft);
+}
+.grp .lbl {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted-soft);
+  align-self: center;
+  padding: 0 8px 0 6px;
+}
+button {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: clamp(0.72rem, 1.4vw, 0.82rem);
+  font-weight: 600;
+  color: var(--text);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  padding: 7px clamp(9px, 1.5vw, 14px);
+  cursor: pointer;
+  transition: background 160ms ease, color 160ms ease, border-color 160ms ease;
+  line-height: 1.2;
+}
+button:hover { background: color-mix(in srgb, var(--accent) 12%, transparent); }
+button[aria-pressed="true"] {
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+  border-color: color-mix(in srgb, var(--accent) 52%, transparent);
+  color: var(--text-strong);
+}
+.step-count {
+  font-family: "DM Sans", sans-serif;
+  font-size: 0.76rem;
+  color: var(--muted-soft);
+  padding-left: 2px;
+}
+
+/* ---- board ---- */
+.board {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) clamp(250px, 27%, 350px);
+  gap: clamp(12px, 1.8vw, 20px);
+  align-items: start;
+}
+.stage {
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  padding: clamp(8px, 1.2vw, 14px);
+  overflow-x: auto;
+  overflow-y: hidden;
+  min-width: 0;
+}
+.stage svg { display: block; width: 100%; height: auto; }
+
+/* ---- nodes ---- */
+.nd .shape {
+  fill: var(--surface-strong);
+  stroke: var(--border-strong);
+  stroke-width: 2;
+  transition: stroke 200ms ease, fill 200ms ease, stroke-width 200ms ease;
+}
+.nd .halo { fill: none; stroke: none; }
+.nd.tone-warn .shape { stroke: color-mix(in srgb, var(--warn) 62%, transparent); }
+.nd.tone-good .shape { stroke: color-mix(in srgb, var(--good) 62%, transparent); }
+.nd.kind-dec .shape { stroke-dasharray: none; stroke-width: 2.4; }
+
+.nd { opacity: 1; transition: opacity 220ms ease; cursor: pointer; }
+.nd.lane-dim { opacity: 0.4; }
+.nd.off { opacity: 0.15; }
+.nd.active { opacity: 1; }
+.nd.active .shape {
+  stroke: var(--accent);
+  stroke-width: 3.4;
+  fill: color-mix(in srgb, var(--accent) 12%, var(--surface-strong));
+}
+.nd.active.tone-warn .shape {
+  stroke: var(--warn);
+  fill: color-mix(in srgb, var(--warn) 14%, var(--surface-strong));
+}
+.nd.active.tone-good .shape {
+  stroke: var(--good);
+  fill: color-mix(in srgb, var(--good) 14%, var(--surface-strong));
+}
+.nd.active .halo {
+  stroke: color-mix(in srgb, var(--accent) 34%, transparent);
+  stroke-width: 10;
+}
+.nd:focus { outline: none; }
+.nd:focus-visible .shape { stroke: var(--accent); stroke-width: 3.4; }
+
+.nbody {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 0 10px;
+  font-family: "Space Grotesk", sans-serif;
+  color: var(--text-strong);
+  text-align: left;
+}
+.nbody.center { justify-content: center; text-align: center; flex-direction: column; gap: 3px; padding: 0 6px; }
+.nbody .pic {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  color: var(--accent);
+  display: block;
+}
+.nbody.center .pic { width: 22px; height: 22px; }
+.pic svg { width: 100%; height: 100%; }
+.pic svg * { stroke: currentColor; }
+.nd.tone-warn .pic { color: var(--warn); }
+.nd.tone-good .pic { color: var(--good); }
+.ntxt {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+/* Title and subtitle stack (they are block, not inline), so the pair is taller than it
+   used to be when they shared a line box. Edge paths are authored against the original
+   node heights, so the type is tightened to fit rather than the shapes being grown. */
+.ntitle { display: block; font-size: 15.5px; font-weight: 700; line-height: 1.1; overflow-wrap: anywhere; }
+.nsub {
+  display: block;
+  font-family: "DM Sans", sans-serif;
+  font-size: 11.5px;
+  font-weight: 400;
+  color: var(--muted);
+  line-height: 1.15;
+  margin-top: 1px;
+  overflow-wrap: anywhere;
+}
+.nbody.center .ntitle { font-size: 14.5px; }
+.nbody.center .nsub { font-size: 11px; }
+.stepno {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  fill: var(--muted-soft);
+}
+
+/* ---- edges ---- */
+.eg { transition: opacity 220ms ease; }
+.eg path {
+  fill: none;
+  stroke: var(--border-strong);
+  stroke-width: 2.2;
+  transition: stroke 220ms ease, stroke-width 220ms ease;
+}
+.eg.warn path { stroke: color-mix(in srgb, var(--warn) 60%, transparent); }
+.eg.good path { stroke: color-mix(in srgb, var(--good) 60%, transparent); }
+.eg.off { opacity: 0.13; }
+.eg.lit path { stroke: var(--accent); stroke-width: 3.2; }
+.eg.lit.warn path { stroke: var(--warn); }
+.eg.lit.good path { stroke: var(--good); }
+.elabel {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  fill: var(--muted);
+  letter-spacing: 0.04em;
+}
+.eg.lit .elabel { fill: var(--text-strong); }
+.eg.untaken { opacity: 0.16; }
+
+/* ---- lanes ---- */
+.laneband { fill: color-mix(in srgb, var(--accent) 4%, transparent); transition: fill 220ms ease; }
+.laneband.hot { fill: color-mix(in srgb, var(--accent) 11%, transparent); }
+.lanerule { stroke: var(--border); stroke-width: 1.4; stroke-dasharray: 5 7; }
+.lanelabel {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  fill: var(--muted-soft);
+  transition: fill 220ms ease;
+}
+.lanelabel.hot { fill: var(--accent); }
+
+/* ---- annotations ---- */
+.anno {
+  font-family: "DM Sans", sans-serif;
+  font-size: 13.5px;
+  line-height: 1.42;
+  color: var(--muted);
+  border-left: 4px solid color-mix(in srgb, var(--accent-2) 70%, transparent);
+  background: color-mix(in srgb, var(--accent-2) 8%, transparent);
+  border-radius: 0 10px 10px 0;
+  padding: 10px 12px;
+}
+.anno b {
+  font-family: "Space Grotesk", sans-serif;
+  color: var(--text-strong);
+  font-weight: 700;
+  display: block;
+  margin-bottom: 3px;
+  font-size: 14px;
+}
+.anno.warnish { border-left-color: color-mix(in srgb, var(--warn) 75%, transparent); background: color-mix(in srgb, var(--warn) 8%, transparent); }
+
+/* ---- token ---- */
+.token { fill: var(--accent); stroke: var(--surface-strong); stroke-width: 2.5; opacity: 0; }
+.token.on { opacity: 1; }
+
+/* ---- readout ---- */
+.readout {
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  padding: clamp(13px, 1.6vw, 18px);
+  min-width: 0;
+}
+.rchip {
+  display: inline-block;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  border-radius: 999px;
+  padding: 3px 9px;
+}
+.readout.warn .rchip { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 42%, transparent); background: color-mix(in srgb, var(--warn) 10%, transparent); }
+.readout.good .rchip { color: var(--good); border-color: color-mix(in srgb, var(--good) 42%, transparent); background: color-mix(in srgb, var(--good) 10%, transparent); }
+.rtitle {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: clamp(1rem, 2vw, 1.18rem);
+  font-weight: 700;
+  color: var(--text-strong);
+  margin: 9px 0 2px;
+  line-height: 1.2;
+}
+.rkind {
+  font-family: "DM Sans", sans-serif;
+  font-size: 0.76rem;
+  color: var(--muted-soft);
+}
+.rrow { margin-top: 13px; }
+.rlab {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--muted-soft);
+  margin-bottom: 3px;
+}
+.rval {
+  font-family: "DM Sans", sans-serif;
+  font-size: clamp(0.8rem, 1.5vw, 0.9rem);
+  color: var(--text);
+  line-height: 1.5;
+}
+.payload {
+  position: relative;
+  display: inline-block;
+  font-family: "DM Sans", sans-serif;
+  font-size: clamp(0.78rem, 1.5vw, 0.88rem);
+  color: var(--text);
+  line-height: 1.45;
+  border: 1px dashed var(--border-strong);
+  border-radius: 9px;
+  padding: 7px 10px;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--accent) 6%, transparent);
+}
+.payload::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(90deg,
+    color-mix(in srgb, var(--accent-2) 78%, transparent) 0 12px,
+    transparent 12px 20px);
+  transform: translateX(-102%);
+  opacity: 0;
+}
+.payload.masking::after { animation: mask-sweep 900ms ease forwards; }
+@keyframes mask-sweep {
+  0% { transform: translateX(-102%); opacity: 0.95; }
+  55% { transform: translateX(0%); opacity: 0.95; }
+  100% { transform: translateX(0%); opacity: 0.32; }
+}
+
+/* ---- responsive ---- */
+@media (max-width: 760px) {
+  .board { grid-template-columns: minmax(0, 1fr); }
+  .stage svg { min-width: 660px; }
+  .controls { gap: 8px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .payload.masking::after { animation: none; opacity: 0.32; transform: translateX(0); }
+  .nd, .eg, .laneband, .lanelabel { transition: none; }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <header class="head">
+    <div class="eyebrow">Leg 4 · Request lifecycle · Altitude L2</div>
+    <h1>One request, end to end</h1>
+    <p>A single prompt crossing the gateway: classified, checked against residency, cached, budgeted, tiered, redacted, invoked, and accounted for. Every diamond is a place where the answer can stop being a completion and start being a policy decision.</p>
+  </header>
+
+  <div class="controls">
+    <div class="grp" role="group" aria-label="Transport">
+      <button type="button" id="prev" aria-pressed="false">◀ Prev</button>
+      <button type="button" id="play" aria-pressed="false">Play ▶</button>
+      <button type="button" id="next" aria-pressed="false">Next ▶</button>
+    </div>
+    <div class="grp" role="group" aria-label="Scenario">
+      <span class="lbl">Scenario</span>
+      <button type="button" class="scn" data-scn="public" aria-pressed="true">Public data, cost-routed</button>
+      <button type="button" class="scn" data-scn="restricted" aria-pressed="false">Restricted data, residency-constrained</button>
+      <button type="button" class="scn" data-scn="outage" aria-pressed="false">Backend outage</button>
+    </div>
+    <span class="step-count" id="stepcount" aria-live="polite"></span>
+  </div>
+
+  <div class="board">
+    <div class="stage" id="stage"></div>
+    <aside class="readout" id="readout" aria-live="polite">
+      <span class="rchip" id="rchip">Application</span>
+      <div class="rtitle" id="rtitle">Submit request</div>
+      <div class="rkind" id="rkind">Process step</div>
+      <div class="rrow">
+        <div class="rlab">What happens</div>
+        <div class="rval" id="rwhat"></div>
+      </div>
+      <div class="rrow">
+        <div class="rlab">Data in flight here</div>
+        <div class="payload" id="rdata"></div>
+      </div>
+      <div class="rrow">
+        <div class="rlab">What is recorded</div>
+        <div class="rval" id="rrec"></div>
+      </div>
+      <div class="rrow">
+        <div class="rlab">What breaks without this step</div>
+        <div class="rval" id="rbreak"></div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var VW = 1260, VH = 1860;
+
+  var LANES = [
+    { id: 'app',    label: 'Application',      x0: 0,    x1: 160 },
+    { id: 'gw',     label: 'Gateway',          x0: 160,  x1: 660 },
+    { id: 'pol',    label: 'Policy & residency', x0: 660, x1: 920 },
+    { id: 'mod',    label: 'Model backend',    x0: 920,  x1: 1110 },
+    { id: 'aud',    label: 'Audit & cost',     x0: 1110, x1: 1260 }
+  ];
+  var LANE_NAME = {};
+  LANES.forEach(function (l) { LANE_NAME[l.id] = l.label; });
+
+  var TOP = 34; /* lane header band height */
+
+  var N = [
+    { id: 'n1', lane: 'app', kind: 'proc', x: 80, y: 100, w: 150, h: 60, icon: 'monitor', step: 1,
+      title: 'Submit request', sub: 'prompt + tenant identity',
+      what: 'The calling application posts a prompt together with the tenant identity it is acting for. No routing decision has been made yet.',
+      data: 'Raw prompt, unredacted — still inside your perimeter.',
+      rec: 'Request id, tenant, caller service, arrival timestamp.',
+      brk: 'Without an identity on the request, every later policy decision is a guess and every cost line is unattributable.' },
+
+    { id: 'n2', lane: 'gw', kind: 'proc', x: 300, y: 200, w: 180, h: 60, icon: 'radar', step: 2,
+      title: 'Classify sensitivity', sub: 'public / internal / restricted',
+      what: 'The gateway inspects the payload and assigns a sensitivity class. This is the input to every downstream policy question.',
+      data: 'Raw prompt, unredacted, plus a derived sensitivity label.',
+      rec: 'Sensitivity class, classifier version, confidence.',
+      brk: 'With no class, residency and redaction have nothing to key off, so the model choice silently becomes the data-handling decision.' },
+
+    { id: 'd1', lane: 'pol', kind: 'dec', x: 790, y: 310, w: 190, h: 96, icon: 'gov', step: 3,
+      title: 'Residency constraint applies?', sub: '',
+      what: 'Given the sensitivity class and the tenant jurisdiction, does this request carry a data-residency obligation?',
+      data: 'Sensitivity class and tenant jurisdiction — the prompt itself is not needed to answer this.',
+      rec: 'Rule set version and the branch taken.',
+      brk: 'Skip this and residency becomes an after-the-fact audit finding instead of a runtime constraint.' },
+
+    { id: 'n3', lane: 'pol', kind: 'proc', x: 790, y: 420, w: 180, h: 60, icon: 'barrier', step: 3,
+      title: 'Narrow allowed set', sub: 'in-boundary backends only',
+      what: 'The candidate backend list is filtered down to those physically inside the required boundary. Everything else is removed from consideration.',
+      data: 'Backend metadata only — region, operator, contractual boundary.',
+      rec: 'Backends admitted and backends excluded, with the reason.',
+      brk: 'An unfiltered candidate list means a cheap out-of-boundary model can win on price and export the data as a side effect.' },
+
+    { id: 'd2', lane: 'pol', kind: 'dec', x: 790, y: 530, w: 190, h: 96, icon: 'scales', step: 3,
+      title: 'Any allowed backend remains?', sub: '',
+      what: 'After filtering, is there at least one compliant backend left that can serve this class of data?',
+      data: 'The surviving allowed set.',
+      rec: 'Size of the surviving set and the constraint that produced it.',
+      brk: 'Without this check an empty set is discovered at invoke time, and the natural recovery is to relax the constraint — exactly the wrong reflex.' },
+
+    { id: 'xa', lane: 'pol', kind: 'term', x: 790, y: 640, w: 190, h: 60, icon: 'warning', tone: 'warn', step: 3,
+      title: 'Blocked by residency', sub: 'terminal exit A · fail closed',
+      what: 'No compliant backend exists, so the request is refused. It is refused loudly, as a policy event, not degraded quietly to a permitted-but-non-compliant model.',
+      data: 'Nothing leaves the perimeter. The prompt is discarded after logging its hash.',
+      rec: 'Policy event: rule that blocked, empty allowed set, tenant, request hash. No prompt body.',
+      brk: 'Without a hard exit here the system falls open — it answers, the caller sees success, and the breach is invisible until an audit.' },
+
+    { id: 'd3', lane: 'gw', kind: 'dec', x: 300, y: 640, w: 190, h: 96, icon: 'archive', step: 4,
+      title: 'Semantic cache hit?', sub: '',
+      what: 'Is there a semantically equivalent prior completion, cached within the same tenant and the same sensitivity class?',
+      data: 'Prompt embedding, scoped to this tenant. Cross-tenant lookup is not permitted.',
+      rec: 'Cache probe result, similarity score, cache partition.',
+      brk: 'No cache means you pay full model price for the questions your organisation asks over and over — and latency stays at model speed.' },
+
+    { id: 'nc', lane: 'gw', kind: 'proc', x: 540, y: 700, w: 180, h: 60, icon: 'archive', step: 4,
+      title: 'Serve cached completion', sub: 'no model call made',
+      what: 'The stored completion is returned directly. No backend is invoked, so no token cost and no new data movement.',
+      data: 'A previously generated completion, already inside the boundary.',
+      rec: 'Cache hit, key, age of the entry, cost avoided.',
+      brk: 'Without an explicit cached path the accounting lies: a free answer gets booked as a model call, or a model call gets booked as free.' },
+
+    { id: 'd4', lane: 'gw', kind: 'dec', x: 300, y: 750, w: 190, h: 96, icon: 'gauge', step: 5,
+      title: 'Within quota / budget?', sub: '',
+      what: 'Does this tenant have headroom against its spend and rate envelope for the current window?',
+      data: 'Counters only — spend to date, token rate, request rate.',
+      rec: 'Quota window, consumption at decision time, headroom left.',
+      brk: 'Without a budget gate a single runaway loop can spend a quarter of budget before anyone opens a dashboard.' },
+
+    { id: 'xb', lane: 'gw', kind: 'term', x: 540, y: 920, w: 180, h: 60, icon: 'coin', tone: 'warn', step: 5,
+      title: 'Over quota', sub: 'terminal exit B · pre-agreed',
+      what: 'The envelope is exhausted, so the pre-agreed behaviour fires — degrade to a cheaper tier or reject outright. Which one it is was decided before the incident, not during it.',
+      data: 'Nothing leaves. The caller gets a typed quota error or a declared lower-tier answer.',
+      rec: 'Quota breach event, tenant, window, chosen behaviour.',
+      brk: 'Without a defined behaviour, the runtime improvises under pressure and every team gets a different answer to "what happens when we run out".' },
+
+    { id: 'n5', lane: 'gw', kind: 'proc', x: 300, y: 870, w: 180, h: 60, icon: 'split', step: 6,
+      title: 'Model tier selection', sub: 'from the surviving set only',
+      what: 'Capability and cost policy pick a tier — but only among backends residency already approved. Cost optimisation operates inside the compliance boundary, never across it.',
+      data: 'Prompt shape and size estimates; the prompt body is not yet redacted.',
+      rec: 'Chosen tier, the policy that chose it, the runners-up.',
+      brk: 'Select first and filter later and you have made the residency decision by accident, dressed as a routing optimisation.' },
+
+    { id: 'n6', lane: 'gw', kind: 'proc', x: 300, y: 980, w: 180, h: 60, icon: 'shield', step: 7,
+      title: 'Redact PII', sub: 'before the call leaves',
+      what: 'Identifiers are masked or tokenised at the last hop inside your perimeter, so what crosses the boundary is the question without the person.',
+      data: 'Prompt with identifiers masked — this is the last point at which the raw text exists.',
+      rec: 'Redaction policy version, count and classes of entities masked. Never the masked values.',
+      brk: 'Without redaction your provider logs, and anyone with access to them, hold customer identifiers you never intended to send.' },
+
+    { id: 'n7', lane: 'mod', kind: 'proc', x: 1015, y: 1080, w: 180, h: 60, icon: 'cpu', step: 8,
+      title: 'Invoke backend', sub: 'chosen tier',
+      what: 'The redacted request is dispatched to the selected in-boundary backend.',
+      data: 'Redacted prompt, now outside your process but inside the approved boundary.',
+      rec: 'Backend id, region, attempt number, latency.',
+      brk: 'Without a single choke point for invocation, teams call providers directly and none of the preceding nine steps apply to them.' },
+
+    { id: 'd5', lane: 'mod', kind: 'dec', x: 1015, y: 1190, w: 190, h: 96, icon: 'network', step: 8,
+      title: 'Backend healthy?', sub: '',
+      what: 'Did the chosen backend answer inside its error and latency budget?',
+      data: 'Response or error signal; the redacted prompt is in flight.',
+      rec: 'Health verdict, error class, time to failure.',
+      brk: 'Without health detection a degraded provider turns into your outage, one timeout at a time.' },
+
+    { id: 'n8', lane: 'mod', kind: 'proc', x: 1015, y: 1340, w: 180, h: 60, icon: 'exchange', step: 8,
+      title: 'Fallback tier', sub: 'candidate, not yet approved',
+      what: 'A standby backend is nominated. It is a candidate only — being available is not the same as being allowed.',
+      data: 'Redacted prompt, held pending the boundary re-check.',
+      rec: 'Fallback candidate, why the primary was abandoned.',
+      brk: 'Without a named fallback, failover is whatever the retry library happens to do next.' },
+
+    { id: 'd6', lane: 'pol', kind: 'dec', x: 790, y: 1340, w: 190, h: 96, icon: 'gov', step: 8,
+      title: 'Fallback inside the same boundary?', sub: '',
+      what: 'The same residency test is re-run against the fallback. Failover does not inherit the primary approval.',
+      data: 'Fallback backend metadata; the prompt is held, not sent.',
+      rec: 'Boundary verdict for the fallback, rule version.',
+      brk: 'Without this re-check, your outage procedure quietly becomes a data-export procedure.' },
+
+    { id: 'xc', lane: 'pol', kind: 'term', x: 790, y: 1460, w: 190, h: 60, icon: 'warning', tone: 'warn', step: 8,
+      title: 'Fallback blocked', sub: 'terminal exit C · fail closed',
+      what: 'The only healthy standby sits in another jurisdiction, so the request is refused rather than exported. Availability loses to residency, on purpose.',
+      data: 'Nothing crosses the boundary. The held prompt is dropped.',
+      rec: 'Policy event tied to the outage incident: primary failure, rejected fallback, boundary rule.',
+      brk: 'Without this exit, the one moment your system is under stress is the one moment it ignores its own rules.' },
+
+    { id: 'n9', lane: 'gw', kind: 'proc', x: 300, y: 1480, w: 180, h: 60, icon: 'document', step: 9,
+      title: 'Receive completion', sub: 'write to cache if cacheable',
+      what: 'The completion returns to the gateway, is un-tokenised where the redaction was reversible, and is written to the tenant-scoped cache when policy allows.',
+      data: 'Completion text, re-associated with the original identifiers inside your perimeter.',
+      rec: 'Cacheability verdict, cache key, response hash.',
+      brk: 'Without a controlled return path, un-redaction and cache writes happen ad hoc in application code, outside policy.' },
+
+    { id: 'n10', lane: 'aud', kind: 'proc', x: 1185, y: 1700, w: 140, h: 60, icon: 'coin', step: 10,
+      title: 'Record', sub: 'audit + cost line',
+      what: 'One immutable record: request hash, model used, the policy decision at every gate, token counts and cost.',
+      data: 'Metadata and hashes. The prompt body is deliberately not stored here.',
+      rec: 'Request hash, backend, region, policy decisions, prompt and completion tokens, cost, latency.',
+      brk: 'Without the record you cannot attribute spend, cannot prove where data went, and cannot answer a regulator with anything but a shrug.' },
+
+    { id: 'n11', lane: 'app', kind: 'term', x: 80, y: 1810, w: 150, h: 60, icon: 'check', tone: 'good', step: 11,
+      title: 'Completed', sub: 'response returned',
+      what: 'The application receives the completion, carrying the metadata that says which model answered and under which policy.',
+      data: 'Completion, back inside the calling application.',
+      rec: 'Delivery timestamp, end-to-end latency, the decision trail id.',
+      brk: 'Without returning the decision trail, the caller cannot tell a compliant answer from a lucky one.' }
+  ];
+
+  var NBY = {};
+  N.forEach(function (n) { NBY[n.id] = n; });
+
+  /* Edges: id, from, to, path, optional label + label position, tone */
+  var E = [
+    { id: 'e1',  f: 'n1',  t: 'n2',  d: 'M80,130 V150 H300 V170' },
+    { id: 'e2',  f: 'n2',  t: 'd1',  d: 'M300,230 V250 H790 V262' },
+    { id: 'e3',  f: 'd1',  t: 'n3',  d: 'M790,358 V390', lab: 'Yes', lx: 806, ly: 378 },
+    { id: 'e4',  f: 'n3',  t: 'd2',  d: 'M790,450 V482' },
+    { id: 'e5',  f: 'd1',  t: 'd2',  d: 'M695,310 H672 V470 H790 V482', lab: 'No', lx: 634, ly: 302 },
+    { id: 'e6',  f: 'd2',  t: 'xa',  d: 'M790,578 V610', lab: 'No', lx: 806, ly: 598, tone: 'warn' },
+    { id: 'e7',  f: 'd2',  t: 'd3',  d: 'M695,530 H520 V560 H300 V592', lab: 'Yes', lx: 612, ly: 520 },
+    { id: 'e8',  f: 'd3',  t: 'nc',  d: 'M395,640 H430 V700 H450', lab: 'Yes', lx: 400, ly: 626 },
+    { id: 'e9',  f: 'd3',  t: 'd4',  d: 'M300,688 V702', lab: 'No', lx: 316, ly: 700 },
+    { id: 'e10', f: 'nc',  t: 'n9',  d: 'M540,730 V752 H640 V1420 H300 V1450' },
+    { id: 'e11', f: 'd4',  t: 'xb',  d: 'M395,750 H428 V920 H450', lab: 'No', lx: 400, ly: 736, tone: 'warn' },
+    { id: 'e12', f: 'd4',  t: 'n5',  d: 'M300,798 V840', lab: 'Yes', lx: 316, ly: 826 },
+    { id: 'e13', f: 'n5',  t: 'n6',  d: 'M300,900 V950' },
+    { id: 'e14', f: 'n6',  t: 'n7',  d: 'M300,1010 V1040 H1015 V1050' },
+    { id: 'e15', f: 'n7',  t: 'd5',  d: 'M1015,1110 V1142' },
+    { id: 'e16', f: 'd5',  t: 'n8',  d: 'M1015,1238 V1310', lab: 'No', lx: 1031, ly: 1276, tone: 'warn' },
+    { id: 'e17', f: 'n8',  t: 'd6',  d: 'M925,1340 H885' },
+    { id: 'e18', f: 'd6',  t: 'xc',  d: 'M790,1388 V1430', lab: 'No', lx: 806, ly: 1416, tone: 'warn' },
+    { id: 'e19', f: 'd6',  t: 'n7',  d: 'M695,1340 H668 V1080 H925', lab: 'Yes · retry', lx: 560, ly: 1332 },
+    { id: 'e20', f: 'd5',  t: 'n9',  d: 'M920,1190 H600 V1480 H390', lab: 'Yes', lx: 866, ly: 1178 },
+    { id: 'e21', f: 'n9',  t: 'n10', d: 'M300,1510 V1660 H1185 V1670' },
+    { id: 'e22', f: 'n10', t: 'n11', d: 'M1185,1730 V1770 H80 V1780', tone: 'good' }
+  ];
+
+  var EBY = {};
+  E.forEach(function (e) { EBY[e.id] = e; });
+
+  var ANNO = [
+    { x: 372, y: 262, w: 276, h: 150, cls: '',
+      html: '<b>Classification comes before model selection.</b>Select the model first and you have made the residency decision by accident.' },
+    { x: 938, y: 596, w: 302, h: 154, cls: 'warnish',
+      html: '<b>Fail closed.</b>Never silently downgrade to a permitted model — that is a policy breach wearing a success response.' },
+    { x: 388, y: 1496, w: 296, h: 150, cls: 'warnish',
+      html: '<b>Your outage procedure is also a data-export procedure.</b>If the fallback tier sits in another jurisdiction, the failover breaks residency.' }
+  ];
+
+  /* Scenario definitions: ordered node path + participating edges */
+  var SCN = {
+    'public': {
+      nodes: ['n1', 'n2', 'd1', 'd2', 'd3', 'd4', 'n5', 'n6', 'n7', 'd5', 'n9', 'n10', 'n11'],
+      edges: ['e1', 'e2', 'e5', 'e7', 'e9', 'e12', 'e13', 'e14', 'e15', 'e20', 'e21', 'e22']
+    },
+    'restricted': {
+      nodes: ['n1', 'n2', 'd1', 'n3', 'd2', 'xa'],
+      edges: ['e1', 'e2', 'e3', 'e4', 'e6']
+    },
+    'outage': {
+      nodes: ['n1', 'n2', 'd1', 'n3', 'd2', 'd3', 'd4', 'n5', 'n6', 'n7', 'd5', 'n8', 'd6', 'xc'],
+      edges: ['e1', 'e2', 'e3', 'e4', 'e7', 'e9', 'e12', 'e13', 'e14', 'e15', 'e16', 'e17', 'e18']
+    }
+  };
+
+  /* ---------- build svg ---------- */
+  function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+  function shapeFor(n) {
+    var hw = n.w / 2, hh = n.h / 2;
+    if (n.kind === 'dec') {
+      var pts = [n.x + ',' + (n.y - hh), (n.x + hw) + ',' + n.y, n.x + ',' + (n.y + hh), (n.x - hw) + ',' + n.y].join(' ');
+      return '<polygon class="halo" points="' + pts + '"></polygon>' +
+             '<polygon class="shape" points="' + pts + '"></polygon>';
+    }
+    var rx = n.kind === 'term' ? hh : 12;
+    var r = 'x="' + (n.x - hw) + '" y="' + (n.y - hh) + '" width="' + n.w + '" height="' + n.h + '" rx="' + rx + '"';
+    return '<rect class="halo" ' + r + '></rect><rect class="shape" ' + r + '></rect>';
+  }
+
+  function bodyFor(n) {
+    var centered = n.kind === 'dec' || n.kind === 'term';
+    var hw = n.w / 2, hh = n.h / 2;
+    var fw = n.kind === 'dec' ? n.w * 0.74 : n.w;
+    var fh = n.kind === 'dec' ? n.h * 0.74 : n.h;
+    var fx = n.x - fw / 2, fy = n.y - fh / 2;
+    var inner = '<span class="pic" data-ic="' + n.icon + '" aria-hidden="true"></span>' +
+      '<span class="ntxt"><span class="ntitle">' + esc(n.title) + '</span>' +
+      (n.sub ? '<span class="nsub">' + esc(n.sub) + '</span>' : '') + '</span>';
+    return '<foreignObject x="' + fx + '" y="' + fy + '" width="' + fw + '" height="' + fh + '">' +
+      '<div xmlns="http://www.w3.org/1999/xhtml" class="nbody' + (centered ? ' center' : '') + '">' + inner + '</div>' +
+      '</foreignObject>' +
+      (n.step ? '<text class="stepno" x="' + (n.x - hw + 4) + '" y="' + (n.y - hh - 6) + '">' + n.step + '</text>' : '');
+  }
+
+  var parts = [];
+  parts.push('<svg viewBox="0 0 ' + VW + ' ' + VH + '" role="img" aria-label="Swimlane control flow of one request across an AI gateway" xmlns="http://www.w3.org/2000/svg">');
+  parts.push('<defs>' +
+    '<marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="currentColor"/></marker>' +
+    '</defs>');
+
+  /* lane bands */
+  LANES.forEach(function (l) {
+    parts.push('<g data-laneband="' + l.id + '">' +
+      '<rect class="laneband" x="' + l.x0 + '" y="0" width="' + (l.x1 - l.x0) + '" height="' + VH + '" rx="10"></rect>' +
+      '<line class="lanerule" x1="' + l.x1 + '" y1="0" x2="' + l.x1 + '" y2="' + VH + '"></line>' +
+      '<text class="lanelabel" x="' + ((l.x0 + l.x1) / 2) + '" y="' + (TOP - 12) + '" text-anchor="middle">' + esc(l.label) + '</text>' +
+      '</g>');
+  });
+
+  /* edges */
+  E.forEach(function (e) {
+    var cls = 'eg' + (e.tone ? ' ' + e.tone : '');
+    parts.push('<g class="' + cls + '" data-edge="' + e.id + '" style="color:inherit">' +
+      '<path d="' + e.d + '" marker-end="url(#ah)"></path>' +
+      (e.lab ? '<text class="elabel" x="' + e.lx + '" y="' + e.ly + '">' + esc(e.lab) + '</text>' : '') +
+      '</g>');
+  });
+
+  /* annotations */
+  ANNO.forEach(function (a) {
+    parts.push('<foreignObject x="' + a.x + '" y="' + a.y + '" width="' + a.w + '" height="' + a.h + '">' +
+      '<div xmlns="http://www.w3.org/1999/xhtml" class="anno ' + a.cls + '">' + a.html + '</div></foreignObject>');
+  });
+
+  /* nodes */
+  N.forEach(function (n) {
+    parts.push('<g class="nd kind-' + n.kind + (n.tone ? ' tone-' + n.tone : '') + '" data-node="' + n.id + '" data-lane="' + n.lane + '" tabindex="0" role="button" aria-label="' + esc(n.title) + '">' +
+      shapeFor(n) + bodyFor(n) + '</g>');
+  });
+
+  parts.push('<circle class="token" id="token" r="9" cx="-50" cy="-50"></circle>');
+  parts.push('</svg>');
+
+  var stage = document.getElementById('stage');
+  stage.innerHTML = parts.join('');
+
+  /* ---------- icons ---------- */
+  var ICON_BASE = '../customs-entry-agent/flow-icons/';
+  var cache = {};
+  var load = function (n) {
+    return cache[n] || (cache[n] = fetch(ICON_BASE + n + '.svg')
+      .then(function (r) { return r.ok ? r.text() : Promise.reject(); })
+      .then(function (t) { return t.replace(/stroke="#232f3e"/g, 'stroke="currentColor"'); })
+      .catch(function () { return ''; }));
+  };
+  document.querySelectorAll('[data-ic]').forEach(function (slot) {
+    load(slot.dataset.ic).then(function (svg) { if (!slot.firstChild) { slot.innerHTML = svg; } });
+  });
+
+  /* ---------- state ---------- */
+  var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var scnKey = 'public';
+  var idx = 0;
+  var playing = false;
+  var timer = null;
+  var raf = null;
+
+  var svg = stage.querySelector('svg');
+  var token = document.getElementById('token');
+  var nodeEls = {}, edgeEls = {}, bandEls = {};
+  svg.querySelectorAll('[data-node]').forEach(function (g) { nodeEls[g.dataset.node] = g; });
+  svg.querySelectorAll('[data-edge]').forEach(function (g) { edgeEls[g.dataset.edge] = g; });
+  svg.querySelectorAll('[data-laneband]').forEach(function (g) { bandEls[g.dataset.laneband] = g; });
+
+  var elPrev = document.getElementById('prev');
+  var elPlay = document.getElementById('play');
+  var elNext = document.getElementById('next');
+  var elCount = document.getElementById('stepcount');
+  var readout = document.getElementById('readout');
+
+  function scn() { return SCN[scnKey]; }
+
+  function edgeInto(nodeId) {
+    var path = scn().nodes;
+    var pos = path.indexOf(nodeId);
+    if (pos <= 0) { return null; }
+    var prevId = path[pos - 1];
+    var list = scn().edges;
+    for (var i = 0; i < list.length; i++) {
+      var e = EBY[list[i]];
+      if (e.f === prevId && e.t === nodeId) { return e; }
+    }
+    return null;
+  }
+
+  function stopToken() {
+    if (raf) { cancelAnimationFrame(raf); raf = null; }
+    token.classList.remove('on');
+  }
+
+  function travel(edge, done) {
+    if (!edge || reduced) { if (done) { done(); } return; }
+    var p = edgeEls[edge.id].querySelector('path');
+    var len = p.getTotalLength();
+    var t0 = null, dur = 550;
+    token.classList.add('on');
+    function frame(ts) {
+      if (t0 === null) { t0 = ts; }
+      var k = Math.min(1, (ts - t0) / dur);
+      var pt = p.getPointAtLength(len * k);
+      token.setAttribute('cx', pt.x);
+      token.setAttribute('cy', pt.y);
+      if (k < 1) { raf = requestAnimationFrame(frame); }
+      else { raf = null; token.classList.remove('on'); if (done) { done(); } }
+    }
+    raf = requestAnimationFrame(frame);
+  }
+
+  function render(animateEdge) {
+    var path = scn().nodes;
+    var active = path[idx];
+    var n = NBY[active];
+    var onNodes = {}, onEdges = {};
+    path.forEach(function (id) { onNodes[id] = true; });
+    scn().edges.forEach(function (id) { onEdges[id] = true; });
+
+    Object.keys(nodeEls).forEach(function (id) {
+      var g = nodeEls[id];
+      g.classList.toggle('off', !onNodes[id]);
+      g.classList.toggle('active', id === active);
+      g.classList.toggle('lane-dim', !!onNodes[id] && id !== active && NBY[id].lane !== n.lane);
+    });
+
+    var reachedEdges = {};
+    for (var i = 1; i <= idx; i++) {
+      var e = edgeInto(path[i]);
+      if (e) { reachedEdges[e.id] = true; }
+    }
+    Object.keys(edgeEls).forEach(function (id) {
+      var g = edgeEls[id];
+      var participates = !!onEdges[id];
+      g.classList.toggle('off', !participates);
+      g.classList.toggle('untaken', participates && !reachedEdges[id]);
+      g.classList.toggle('lit', !!reachedEdges[id]);
+    });
+
+    LANES.forEach(function (l) { bandEls[l.id].querySelector('.laneband').classList.toggle('hot', l.id === n.lane); });
+    LANES.forEach(function (l) { bandEls[l.id].querySelector('.lanelabel').classList.toggle('hot', l.id === n.lane); });
+
+    readout.classList.toggle('warn', n.tone === 'warn');
+    readout.classList.toggle('good', n.tone === 'good');
+    document.getElementById('rchip').textContent = LANE_NAME[n.lane];
+    document.getElementById('rtitle').textContent = n.title;
+    document.getElementById('rkind').textContent =
+      n.kind === 'dec' ? 'Decision point' : (n.kind === 'term' ? 'Terminal state' : 'Process step');
+    document.getElementById('rwhat').textContent = n.what;
+    var dataEl = document.getElementById('rdata');
+    dataEl.textContent = n.data;
+    dataEl.classList.remove('masking');
+    if (n.id === 'n6') { void dataEl.offsetWidth; dataEl.classList.add('masking'); }
+    document.getElementById('rrec').textContent = n.rec;
+    document.getElementById('rbreak').textContent = n.brk;
+
+    elCount.textContent = 'Step ' + (idx + 1) + ' of ' + path.length;
+    elPrev.disabled = false;
+    elNext.disabled = false;
+
+    if (animateEdge) { travel(animateEdge); }
+  }
+
+  function goto(i, withTravel) {
+    var path = scn().nodes;
+    var next = Math.max(0, Math.min(path.length - 1, i));
+    var edge = null;
+    if (withTravel && next === idx + 1) { edge = edgeInto(path[next]); }
+    idx = next;
+    stopToken();
+    render(edge);
+  }
+
+  function setScenario(key) {
+    scnKey = key;
+    idx = 0;
+    stop();
+    document.querySelectorAll('.scn').forEach(function (b) {
+      b.setAttribute('aria-pressed', String(b.dataset.scn === key));
+    });
+    stopToken();
+    render(null);
+  }
+
+  function stop() {
+    playing = false;
+    if (timer) { clearTimeout(timer); timer = null; }
+    elPlay.setAttribute('aria-pressed', 'false');
+    elPlay.textContent = 'Play ▶';
+  }
+
+  function tick() {
+    if (!playing) { return; }
+    var path = scn().nodes;
+    if (idx >= path.length - 1) { stop(); return; }
+    goto(idx + 1, true);
+    timer = setTimeout(tick, reduced ? 700 : 640);
+  }
+
+  function play() {
+    if (playing) { stop(); return; }
+    playing = true;
+    elPlay.setAttribute('aria-pressed', 'true');
+    elPlay.textContent = 'Pause ❚❚';
+    if (idx >= scn().nodes.length - 1) { idx = 0; render(null); }
+    timer = setTimeout(tick, 260);
+  }
+
+  elPrev.addEventListener('click', function () { stop(); goto(idx - 1, false); });
+  elNext.addEventListener('click', function () { stop(); goto(idx + 1, true); });
+  elPlay.addEventListener('click', play);
+  document.querySelectorAll('.scn').forEach(function (b) {
+    b.addEventListener('click', function () { setScenario(b.dataset.scn); });
+  });
+
+  Object.keys(nodeEls).forEach(function (id) {
+    var g = nodeEls[id];
+    function pick() {
+      var path = scn().nodes;
+      var pos = path.indexOf(id);
+      if (pos === -1) {
+        /* node is off-path: switch to the scenario that contains it, if any */
+        var keys = Object.keys(SCN);
+        for (var i = 0; i < keys.length; i++) {
+          if (SCN[keys[i]].nodes.indexOf(id) !== -1) { setScenario(keys[i]); pos = SCN[keys[i]].nodes.indexOf(id); break; }
+        }
+        if (pos === -1) {
+          /* still off every scenario (e.g. the cached branch) — show its readout only */
+          stop();
+          var n = NBY[id];
+          Object.keys(nodeEls).forEach(function (k) { nodeEls[k].classList.toggle('active', k === id); });
+          document.getElementById('rchip').textContent = LANE_NAME[n.lane];
+          document.getElementById('rtitle').textContent = n.title;
+          document.getElementById('rkind').textContent =
+            n.kind === 'dec' ? 'Decision point' : (n.kind === 'term' ? 'Terminal state' : 'Process step');
+          document.getElementById('rwhat').textContent = n.what;
+          var d = document.getElementById('rdata');
+          d.textContent = n.data;
+          document.getElementById('rrec').textContent = n.rec;
+          document.getElementById('rbreak').textContent = n.brk;
+          return;
+        }
+      }
+      stop();
+      goto(pos, false);
+    }
+    g.addEventListener('click', pick);
+    g.addEventListener('keydown', function (ev) {
+      if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); pick(); }
+    });
+  });
+
+  /* ---------- IO-gated first run ---------- */
+  var started = false;
+  function start() {
+    if (started) { return; }
+    started = true;
+    render(null);
+    if (!reduced) { setTimeout(function () { if (!playing && idx === 0) { play(); } }, 500); }
+  }
+
+  render(null);
+
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (en.isIntersecting) { start(); io.disconnect(); }
+      });
+    }, { threshold: 0.15 });
+    io.observe(stage);
+  } else {
+    start();
+  }
+
+  /* -------

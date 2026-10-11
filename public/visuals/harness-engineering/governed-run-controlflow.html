@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>One Governed Run, End to End</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+/* ---- Embed override: family theme locks embed to viewport height; autosize needs auto ---- */
+:root[data-embedded="true"], :root[data-embedded="true"] body { height: auto; overflow: visible; }
+:root[data-embedded="true"] .shell { width: 100%; height: auto; padding: 14px 18px; }
+
+body { font-family: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif; }
+
+.shell { display: flex; flex-direction: column; gap: clamp(12px, 1.6vw, 18px); }
+
+.head { display: flex; flex-direction: column; gap: 6px; }
+.head h1 {
+  font-size: clamp(1.15rem, 1rem + 1.1vw, 1.72rem);
+  font-weight: 700; letter-spacing: -0.01em; color: var(--text-strong); line-height: 1.16;
+}
+.head p { font-size: clamp(0.84rem, 0.8rem + 0.25vw, 0.98rem); color: var(--muted); line-height: 1.5; }
+
+/* ---- Controls ---- */
+.bar { display: flex; flex-wrap: wrap; gap: clamp(8px, 1vw, 14px); align-items: center; }
+.grp {
+  display: flex; flex-wrap: wrap; gap: 6px; padding: 5px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 999px;
+}
+.grp > .lbl {
+  font-size: clamp(0.6rem, 0.56rem + 0.12vw, 0.68rem); font-weight: 700; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--muted-soft); align-self: center; padding: 0 8px 0 10px;
+}
+button {
+  font: inherit; cursor: pointer; border-radius: 999px; border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--surface-strong) 92%, transparent);
+  color: var(--text); padding: clamp(6px, 0.7vw, 9px) clamp(11px, 1.2vw, 16px);
+  font-size: clamp(0.74rem, 0.7rem + 0.16vw, 0.86rem); font-weight: 600;
+  transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+}
+button:hover { border-color: var(--border-strong); transform: translateY(-1px); }
+button[aria-pressed="true"] {
+  background: var(--accent); border-color: var(--accent);
+  color: var(--bg-start); box-shadow: var(--shadow-soft);
+}
+.step-count {
+  font-size: clamp(0.7rem, 0.66rem + 0.14vw, 0.8rem); color: var(--muted);
+  font-variant-numeric: tabular-nums; padding-left: 4px;
+}
+
+/* ---- Layout ---- */
+.body { display: grid; grid-template-columns: 1fr; gap: clamp(12px, 1.4vw, 18px); align-items: start; }
+@media (min-width: 1100px) { .body { grid-template-columns: minmax(0, 1fr) clamp(300px, 26vw, 360px); } }
+
+.stage {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 18px;
+  box-shadow: var(--shadow-soft); padding: clamp(8px, 1vw, 14px);
+  overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch;
+}
+.stage svg { display: block; width: 100%; height: auto; }
+@media (min-width: 761px) { .stage svg { min-width: 900px; } }
+
+/* ---- Diagram primitives ---- */
+.laneband { transition: opacity 0.3s ease; }
+.lanelab { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; line-height: 1.25; }
+.bandtitle { font-family: "Space Grotesk", sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; }
+
+.node { cursor: pointer; transition: opacity 0.3s ease; }
+.node .shape {
+  fill: var(--surface-strong); stroke: var(--border-strong); stroke-width: 1.4;
+  transition: stroke 0.2s ease, stroke-width 0.2s ease, fill 0.2s ease;
+}
+.node.dia .shape { stroke-dasharray: none; }
+.node.principle .shape { stroke: var(--accent-2); stroke-dasharray: 6 4; }
+.node.dim { opacity: 0.24; }
+.node.lanedim { opacity: 0.42; }
+.node.on .shape { stroke-width: 2.6; }
+.node:hover .shape { stroke-width: 2.2; }
+.node.on .nb { color: var(--text-strong); }
+
+.nb {
+  display: flex; align-items: center; gap: 7px; height: 100%;
+  padding: 0 9px; color: var(--text); overflow: hidden;
+}
+.nb.col { flex-direction: column; justify-content: center; gap: 2px; text-align: center; padding: 0 6px; }
+.pic { flex: 0 0 auto; width: 19px; height: 19px; display: block; color: inherit; opacity: 0.92; }
+.pic svg { width: 100%; height: 100%; }
+.pic svg * { stroke: currentColor; }
+.ntx { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.nl { font-size: 11.5px; font-weight: 600; line-height: 1.18; letter-spacing: -0.005em; }
+.nk { font-family: "DM Sans", ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 9px; line-height: 1.2; color: var(--muted-soft); }
+.node.on .nk { color: var(--muted); }
+.nd { font-size: 10.5px; font-weight: 600; line-height: 1.16; }
+
+.edge { fill: none; stroke: var(--border-strong); stroke-width: 1.6; transition: opacity 0.3s ease, stroke 0.25s ease, stroke-width 0.25s ease; }
+.edge.dashed { stroke: var(--accent-2); stroke-dasharray: 7 5; }
+.edge.dim { opacity: 0.14; }
+.edge.live { stroke: var(--accent); stroke-width: 2.4; }
+.edge.dashed.live { stroke: var(--accent-2); }
+.elab {
+  font-family: "DM Sans", ui-monospace, monospace; font-size: 8.5px; font-weight: 500;
+  fill: var(--muted); text-anchor: middle; dominant-baseline: middle;
+  paint-order: stroke; stroke: var(--bg-mid); stroke-width: 4px; stroke-linejoin: round;
+  transition: opacity 0.3s ease;
+}
+.elab.dim { opacity: 0.12; }
+.elab.live { fill: var(--text-strong); }
+
+#token { fill: var(--accent); stroke: var(--bg-start); stroke-width: 2; }
+
+/* ---- Readout ---- */
+.panel {
+  background: var(--surface-strong); border: 1px solid var(--border); border-radius: 18px;
+  box-shadow: var(--shadow-soft); padding: clamp(13px, 1.4vw, 19px);
+  display: flex; flex-direction: column; gap: clamp(9px, 1vw, 13px);
+}
+.p-top { display: flex; align-items: center; gap: 9px; }
+.p-ic { width: 26px; height: 26px; flex: 0 0 auto; color: var(--accent); }
+.p-ic svg { width: 100%; height: 100%; }
+.p-ic svg * { stroke: currentColor; }
+.p-lane {
+  font-size: 0.6rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--muted-soft); display: block;
+}
+.p-title { font-size: clamp(0.95rem, 0.9rem + 0.24vw, 1.12rem); font-weight: 700; color: var(--text-strong); line-height: 1.2; }
+.p-row { display: flex; flex-direction: column; gap: 3px; }
+.p-k {
+  font-size: 0.6rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent);
+}
+.p-v { font-size: clamp(0.79rem, 0.76rem + 0.16vw, 0.89rem); line-height: 1.45; color: var(--text); }
+.p-v.mono {
+  font-family: "DM Sans", ui-monospace, SFMono-Regular, Menlo, monospace;
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 26%, transparent);
+  border-radius: 8px; padding: 6px 9px; word-break: break-word; font-size: 0.78rem;
+}
+.p-v.breaks { color: var(--muted); }
+.p-v.breaks b { color: var(--warn); font-weight: 600; }
+
+.ctxwrap { display: flex; flex-direction: column; gap: 4px; }
+.ctxwrap[hidden] { display: none; }
+.ctxbar {
+  height: 9px; border-radius: 999px; background: color-mix(in srgb, var(--text) 10%, transparent); overflow: hidden;
+}
+.ctxfill {
+  height: 100%; width: 100%; border-radius: 999px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-3));
+  transition: width 0.9s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.ctxfill.shrunk { width: 34%; }
+
+.legend { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; }
+.lg { display: flex; align-items: center; gap: 6px; font-size: clamp(0.68rem, 0.65rem + 0.12vw, 0.76rem); color: var(--muted); }
+.sw { width: 13px; height: 13px; border-radius: 4px; border: 1px solid var(--border-strong); flex: 0 0 auto; }
+.sw.dia { border-radius: 2px; transform: rotate(45deg); width: 11px; height: 11px; }
+.sw.good { background: color-mix(in srgb, var(--good) 40%, transparent); border-color: var(--good); }
+.sw.warn { background: color-mix(in srgb, var(--warn) 40%, transparent); border-color: var(--warn); }
+.sw.esc { background: color-mix(in srgb, var(--accent-2) 40%, transparent); border-color: var(--accent-2); }
+
+.foot {
+  font-size: clamp(0.72rem, 0.69rem + 0.14vw, 0.82rem); color: var(--muted-soft); line-height: 1.5;
+  border-top: 1px solid var(--border); padding-top: 10px;
+}
+.sr {
+  position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+}
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <header class="head">
+    <span class="eyebrow">Scene 5 · Control flow · Altitude L2</span>
+    <h1>One governed run, end to end</h1>
+    <p>Five lanes, one task. Boxes are steps the harness takes; diamonds are the decisions it is forced to make. Step through the run, or replay it as a denial, a mid-call interrupt, or a verification failure.</p>
+  </header>
+
+  <div class="bar">
+    <div class="grp" role="group" aria-label="Scenario">
+      <span class="lbl">Scenario</span>
+      <button type="button" data-sc="happy" aria-pressed="true">Happy path</button>
+      <button type="button" data-sc="denied" aria-pressed="false">Denied tool</button>
+      <button type="button" data-sc="verify" aria-pressed="false">Verification fails</button>
+    </div>
+    <div class="grp" role="group" aria-label="Transport">
+      <button type="button" id="prev" aria-pressed="false">◀ Prev</button>
+      <button type="button" id="play" aria-pressed="false">Play ▶</button>
+      <button type="button" id="next" aria-pressed="false">Next ▶</button>
+    </div>
+    <span class="step-count" id="count" aria-live="polite">Step 1 / 1</span>
+  </div>
+
+  <div class="body">
+    <div class="stage" id="stage"></div>
+    <aside class="panel" id="panel" aria-live="polite">
+      <div class="p-top">
+        <span class="p-ic" id="pic" aria-hidden="true"></span>
+        <span>
+          <span class="p-lane" id="plane">Human</span>
+          <span class="p-title" id="ptitle">Submit task</span>
+        </span>
+      </div>
+      <div class="p-row"><span class="p-k">What the harness does</span><span class="p-v" id="pwhat"></span></div>
+      <div class="p-row"><span class="p-k">Wire artifact</span><span class="p-v mono" id="pwire"></span></div>
+      <div class="ctxwrap" id="ctxwrap" hidden>
+        <span class="p-k">Context window</span>
+        <div class="ctxbar"><div class="ctxfill" id="ctxfill"></div></div>
+      </div>
+      <div class="p-row"><span class="p-k">Evidence emitted</span><span class="p-v" id="pev"></span></div>
+      <div class="p-row"><span class="p-k">Without it</span><span class="p-v breaks" id="pbreak"></span></div>
+      <div class="legend" aria-hidden="true">
+        <span class="lg"><span class="sw"></span>Process</span>
+        <span class="lg"><span class="sw dia"></span>Decision</span>
+        <span class="lg"><span class="sw good"></span>Approved</span>
+        <span class="lg"><span class="sw warn"></span>Denied / aborted</span>
+        <span class="lg"><span class="sw esc"></span>Escalated</span>
+      </div>
+    </aside>
+  </div>
+
+  <p class="foot">Every terminal state writes a run record to the evidence store. The dashed orange edge is the principle loop: a denial, an abort, or a failed verification is an instruction to author a new L1 rule, not a one-off exception.</p>
+  <p class="sr" id="sr" aria-live="polite"></p>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------------- geometry ---------------- */
+  var VBW = 1150, VBH = 2352;
+  var S = [175, 318, 461, 604, 747, 890, 1033];
+  var BAND = [0, 790, 1580];
+  var ROW = { human: 90, hA: 196, hB: 322, model: 433, mcpA: 532, mcpB: 626, ev: 710 };
+  var NW = 132, NH = 58, DW = 144, DH = 96;
+  var NAR_W = 400, NAR_NW = 288, NAR_NH = 62, NAR_DH = 74, NAR_STEP = 96, NAR_Y0 = 44;
+
+  var LANES = [
+    { id: 'human', name: 'Human', tone: 'var(--accent-2)', t: 44, b: 136 },
+    { id: 'harness', name: 'Harness control loop', tone: 'var(--accent)', t: 148, b: 386 },
+    { id: 'model', name: 'Model', tone: 'var(--L3)', t: 396, b: 470 },
+    { id: 'mcp', name: 'MCP server / sandbox', tone: 'var(--L4)', t: 480, b: 662 },
+    { id: 'evidence', name: 'Evidence store', tone: 'var(--L5)', t: 672, b: 752 }
+  ];
+  var BAND_TITLES = ['1 — Plan and authorise', '2 — Call the tool', '3 — Verify, package, close'];
+
+  /* ---------------- nodes ---------------- */
+  var N = [
+    { id: 'n1', lane: 'human', band: 0, slot: 0, row: 'human', ic: 'person', t: 'Submit task', k: 'prompt + intent',
+      what: 'A person hands the harness a task and an intent. Nothing else in the run is self-authorising.',
+      wire: 'POST /runs { task, repo, branch }',
+      ev: 'Run opened: requester, task text, timestamp.',
+      breaks: 'Without a named requester there is <b>nobody to hold accountable</b> for what the agent did.' },
+    { id: 'n2', lane: 'harness', band: 0, slot: 0, row: 'hA', ic: 'gavel', t: 'Resolve policy', k: 'allow-list · budget · tier',
+      what: 'The harness resolves the L1 constraint set for this requester and repo: which tools exist, what the run may spend, which actions need a human.',
+      wire: 'policy: { allowList:["search_repo","run_tests"], budgetUsd: 4.00, approvalTier: "tier2" }',
+      ev: 'Policy snapshot hash pinned to the run record.',
+      breaks: 'Without a resolved policy the agent’s reach is <b>whatever the credentials happen to allow</b>.' },
+    { id: 'n3', lane: 'harness', band: 0, slot: 1, row: 'hA', ic: 'book', t: 'Assemble context window', k: 'system + task + tools',
+      what: 'System prompt, task, working state and the tool schemas are packed into one window under an explicit token budget.',
+      wire: 'system + messages[] + tools[] → budget 180k tok',
+      ev: 'Context manifest: which files, which schemas, how many tokens.',
+      breaks: 'Without a manifest you cannot answer <b>"what did the model actually see"</b> after a bad turn.' },
+    { id: 'd1', lane: 'harness', band: 0, slot: 1, row: 'hB', ic: 'split', t: 'tools/list cache hit?', k: '', dia: true,
+      what: 'Tool schemas are expensive and near-static. The harness checks its own cache before paying for a discovery round trip.',
+      wire: 'cacheKey: server+scope · ttlMs: 900000 · cacheScope: "session"',
+      ev: 'Cache hit/miss counter on the run.',
+      breaks: 'Without it every turn re-fetches schemas and you pay <b>discovery latency on every loop</b>.' },
+    { id: 'n3b', lane: 'mcp', band: 0, slot: 1, row: 'mcpA', ic: 'network', t: 'Fetch tools/list, cache', k: 'miss path',
+      what: 'On a miss the harness calls the server for its tool catalogue, then writes it into the cache under the declared scope and TTL.',
+      wire: 'Mcp-Method: tools/list → cache.put(key, tools, ttlMs: 900000)',
+      ev: 'Schema version recorded, so a silently changed tool is detectable.',
+      breaks: 'Without a version record a <b>tool that changed shape mid-run</b> looks like a model failure.' },
+    { id: 'n4', lane: 'harness', band: 0, slot: 2, row: 'hA', ic: 'exchange', t: 'messages.create(tools)', k: 'the loop pivot',
+      what: 'The harness makes the model call. Every loop-back in this diagram returns here — this is the only place the model is invoked.',
+      wire: 'messages.create({ model, messages, tools, max_tokens })',
+      ev: 'Turn index, token counts in and out, cost delta.',
+      breaks: 'Without a single call site, <b>cost and turn accounting scatter</b> and no ceiling can be enforced.' },
+    { id: 'n5', lane: 'model', band: 0, slot: 2, row: 'model', ic: 'cpu', t: 'Assistant turn', k: 'text and/or tool_use',
+      what: 'The model returns a turn. It may be prose, one or more tool_use blocks, or both. The model proposes; it never executes.',
+      wire: 'content: [ { type: "tool_use", name: "search_repo", input: {…} } ]',
+      ev: 'Raw turn appended to the transcript before anything acts on it.',
+      breaks: 'Without storing the raw turn you lose <b>the only record of what was proposed</b> versus what ran.' },
+    { id: 'd2', lane: 'harness', band: 0, slot: 3, row: 'hB', ic: 'split', t: 'Contains tool_use?', k: '', dia: true,
+      what: 'The branch that decides whether this turn acts on the world or ends the working phase.',
+      wire: 'stop_reason === "tool_use" ? act : verify',
+      ev: 'Branch taken, recorded per turn.',
+      breaks: 'Without this check the harness either <b>loops forever</b> or stops before the work is done.' },
+    { id: 'n6', lane: 'harness', band: 0, slot: 4, row: 'hA', ic: 'shield', t: 'Pre-flight vs allow-list', k: 'before the call',
+      what: 'The requested tool and its arguments are checked against the resolved allow-list and argument constraints — before any network call leaves the harness.',
+      wire: 'preflight({ name: "search_repo", input }) → allow | deny',
+      ev: 'Pre-flight verdict with the rule id that decided it.',
+      breaks: 'Without a pre-flight, the <b>server becomes your only control point</b> — and it trusts you.' },
+    { id: 'd3', lane: 'harness', band: 0, slot: 4, row: 'hB', ic: 'split', t: 'Authorised by environmental controls?', k: '', dia: true,
+      what: 'Environmental controls — allow-list, argument bounds, approval tier — decide. Not the model, and not the prompt.',
+      wire: 'authorised: false, rule: "L1.tools.deny.write_prod"',
+      ev: 'Authorisation decision and rule id on the run record.',
+      breaks: 'Without controls outside the prompt, <b>a persuasive turn is an authorisation</b>.' },
+    { id: 'n6a', lane: 'human', band: 0, slot: 5, row: 'human', ic: 'person', t: 'Escalate · approval tier', k: 'human in the loop',
+      what: 'A denial that matches an approval tier is escalated to a person with the tool, the arguments and the rule that blocked it.',
+      wire: 'escalation: { tool, input, rule, requestedBy, tier: "tier2" }',
+      ev: 'Escalation record: who was asked, what they saw, what they answered.',
+      breaks: 'Without escalation every denial is a dead end and operators <b>route around the harness</b>.' },
+    { id: 'tDenied', lane: 'evidence', band: 0, slot: 5, row: 'ev', ic: 'warning', t: 'Denied · recorded refusal', k: 'terminal', term: 'warn',
+      what: 'The deny path terminates at a recorded refusal — a first-class outcome, not an error. The run ends with the tool never called.',
+      wire: 'terminal: "denied", refusal: { rule, tool, at }',
+      ev: 'Run record: denied, with the rule that refused and the escalation trail.',
+      breaks: 'Without a recorded refusal, denials are <b>invisible and the same rule gets fought weekly</b>.' },
+    { id: 'tEsc', lane: 'evidence', band: 0, slot: 6, row: 'ev', ic: 'archive', t: 'Escalated · awaiting human', k: 'terminal', term: 'esc',
+      what: 'The run parks pending a human decision. The harness holds state; it does not guess and it does not proceed.',
+      wire: 'terminal: "escalated", awaiting: "tier2 approver"',
+      ev: 'Run record: escalated, with the pending decision and its age.',
+      breaks: 'Without a parked state the harness <b>either blocks a worker or invents an answer</b>.' },
+
+    { id: 'n7', lane: 'harness', band: 1, slot: 0, row: 'hA', ic: 'transmit', t: 'tools/call · stateless HTTP', k: 'no session id',
+      what: 'The authorised call goes out over stateless HTTP. Method and tool name travel in headers; there is no session id, so any replica can serve it.',
+      wire: 'Mcp-Method: tools/call\nMcp-Name: search_repo\n(no Mcp-Session-Id)',
+      ev: 'Request id, headers and argument hash on the run record.',
+      breaks: 'Without statelessness you cannot <b>scale, retry or fail over</b> a call mid-run.' },
+    { id: 'd4', lane: 'mcp', band: 1, slot: 1, row: 'mcpA', ic: 'split', t: 'Needs a human mid-call?', k: '', dia: true,
+      what: 'The server itself may find it needs a person — a missing field, a confirmation, a choice only a human can make.',
+      wire: 'resultType: "input_required" | "completed"',
+      ev: 'Mid-call interrupt flag on the tool invocation.',
+      breaks: 'Without it the server must <b>guess or fail</b>, and the harness cannot tell the two apart.' },
+    { id: 'n8a', lane: 'mcp', band: 1, slot: 1, row: 'mcpB', ic: 'bell', t: 'Returns input_required', k: 'MRTR',
+      what: 'A mid-request tool return (MRTR): the call is suspended, not failed. The server states exactly what it needs.',
+      wire: 'resultType: "input_required", prompt: "Which branch?", callId: "c_84f2"',
+      ev: 'Interrupt recorded against the same callId.',
+      breaks: 'Without MRTR the server <b>errors out and the whole turn is retried</b> from scratch.' },
+    { id: 'n8b', lane: 'human', band: 1, slot: 2, row: 'human', ic: 'person', t: 'Human answers', k: 'same callId',
+      what: 'A person answers the specific question. The answer is bound to the original callId, not to a new request.',
+      wire: 'POST /calls/c_84f2/input { branch: "release/4.2" }',
+      ev: 'Who answered, what they were asked, what they said.',
+      breaks: 'Without binding to the callId the answer <b>lands in the wrong invocation</b>.' },
+    { id: 'n8', lane: 'mcp', band: 1, slot: 2, row: 'mcpA', ic: 'gears', t: 'Executes in sandbox', k: 'the SAME call resumes',
+      what: 'The same call resumes and executes inside the sandbox — it is not restarted as a fresh tools/call. Side effects happen exactly once.',
+      wire: 'resume(callId: "c_84f2") → exec in sandbox',
+      ev: 'Sandbox image, resource ceiling, wall-clock duration.',
+      breaks: 'Without resume-in-place a mid-call answer means <b>the tool runs twice</b>.' },
+    { id: 'n9', lane: 'mcp', band: 1, slot: 3, row: 'hA', ic: 'exchange', t: 'tool_result returned', k: 'typed payload',
+      what: 'The result comes back typed and bounded, tagged with the tool_use id the model emitted.',
+      wire: 'content: [ { type: "tool_result", tool_use_id: "tu_01", content: […] } ]',
+      ev: 'Result size, truncation flag, exit status.',
+      breaks: 'Without bounds a single large result <b>blows the context window</b> in one hop.' },
+    { id: 'n10', lane: 'harness', band: 1, slot: 4, row: 'hA', ic: 'archive', t: 'Append transcript + evidence', k: 'append-only',
+      what: 'Turn and result are appended to an append-only transcript and mirrored into the evidence store as the run proceeds — not at the end.',
+      wire: 'transcript.append(turn, result) → evidence.put(runId, seq)',
+      ev: 'Ordered, hash-chained transcript entries.',
+      breaks: 'Without streaming evidence, a crashed run leaves <b>no record of how far it got</b>.' },
+    { id: 'ev2', lane: 'evidence', band: 1, slot: 4, row: 'ev', ic: 'ledger', t: 'Run record appended', k: 'per turn',
+      what: 'The evidence store gains one immutable entry per turn: what was proposed, what was authorised, what ran, what came back.',
+      wire: 'evidence.put({ runId, seq, turn, verdict, resultHash })',
+      ev: 'The record itself — this lane is the audit surface.',
+      breaks: 'Without per-turn records you can only audit <b>the final diff, not the reasoning</b>.' },
+    { id: 'd5', lane: 'harness', band: 1, slot: 5, row: 'hB', ic: 'gauge', t: 'Context over budget?', k: '', dia: true,
+      what: 'The harness measures the window against its budget before the next model call, not after an overflow error.',
+      wire: 'usedTokens: 171_400 / budget: 180_000 → compact',
+      ev: 'Token high-water mark per turn.',
+      breaks: 'Without a budget check the run dies on <b>a context-length error mid-task</b>.' },
+    { id: 'n10a', lane: 'harness', band: 1, slot: 6, row: 'hA', ic: 'archive', t: 'Compaction + history persist', k: 'progress file rewritten',
+      what: 'Older turns are compacted into a summary, full history is persisted out of band, and the progress file is rewritten so the next turn starts from durable state.',
+      wire: 'compact(turns[0..n-6]) → summary; persist(history); write(PROGRESS.md)',
+      ev: 'Compaction boundary and the pre-compaction history pointer.',
+      breaks: 'Without a rewritten progress file, compaction <b>silently amnesias the run</b>.' },
+
+    { id: 'd6', lane: 'harness', band: 2, slot: 1, row: 'hB', ic: 'coin', t: 'Loop / cost ceiling tripped?', k: '', dia: true,
+      what: 'Hard ceilings on turns, wall clock and spend. Checked every loop, enforced by the harness rather than by hope.',
+      wire: 'turns: 24/40 · spentUsd: 3.91/4.00 · elapsed: 11m/20m',
+      ev: 'Ceiling counters on every turn.',
+      breaks: 'Without ceilings a stuck loop <b>bills all night and calls it progress</b>.' },
+    { id: 'tAbort', lane: 'evidence', band: 2, slot: 1, row: 'ev', ic: 'warning', t: 'Aborted · ceiling', k: 'terminal', term: 'warn',
+      what: 'The run stops itself at the ceiling and closes cleanly, with partial work and the reason preserved.',
+      wire: 'terminal: "aborted", reason: "cost_ceiling", spentUsd: 4.00',
+      ev: 'Run record: aborted, which ceiling, how far it got.',
+      breaks: 'Without a clean abort you get <b>a half-applied change and no explanation</b>.' },
+    { id: 'n11', lane: 'harness', band: 2, slot: 2, row: 'hA', ic: 'flask', t: 'Verification · pre-stop hook', k: 'tests · lint · evals',
+      what: 'Before the run may stop, a pre-stop hook runs the project’s own checks. The model does not get to declare itself finished.',
+      wire: 'hook: "pre-stop" → npm test && npm run lint && evals:run',
+      ev: 'Raw test, lint and eval output attached to the run.',
+      breaks: 'Without a pre-stop hook, <b>"done" means the model said so</b>.' },
+    { id: 'd7', lane: 'harness', band: 2, slot: 2, row: 'hB', ic: 'check', t: 'Pass?', k: '', dia: true,
+      what: 'The gate. Pass and the run packages; fail and the failure becomes the next turn’s input.',
+      wire: 'verification: { tests: "fail", failed: 2, lint: "pass" }',
+      ev: 'Verification verdict per attempt.',
+      breaks: 'Without a gate, failing tests <b>ship as a completed run</b>.' },
+    { id: 'n11a', lane: 'harness', band: 2, slot: 3, row: 'hA', ic: 'warning', t: 'Failure fed back · retry 2/3', k: 'retry cap: 3',
+      what: 'The failure is fed back as a normal turn — real output, not a scolding. Bounded by a hard retry cap of three attempts.',
+      wire: 'retry: 2/3 → messages.append({ role:"user", content: testOutput })',
+      ev: 'Attempt counter and the exact failure text fed back.',
+      breaks: 'Without a cap the agent <b>grinds on the same failing test until the budget dies</b>.' },
+    { id: 'n12', lane: 'harness', band: 2, slot: 4, row: 'hA', ic: 'archive', t: 'Package evidence bundle', k: 'reviewable artefact',
+      what: 'One bundle a reviewer can actually read: the diff, the test output, a transcript hash and the harness-config manifest that produced it.',
+      wire: 'bundle: { diff, testOutput, transcriptHash, harnessConfigManifest }',
+      ev: 'The bundle, addressable by run id.',
+      breaks: 'Without a bundle, review means <b>reading a chat log at midnight</b>.' },
+    { id: 'ev3', lane: 'evidence', band: 2, slot: 4, row: 'ev', ic: 'ledger', t: 'Bundle stored', k: 'diff · tests · hash · manifest',
+      what: 'The bundle lands in the evidence store, immutable and linked to the policy snapshot the run started from.',
+      wire: 'evidence.put({ runId, bundle, policyHash })',
+      ev: 'The permanent artefact of the run.',
+      breaks: 'Without storage the evidence <b>lives only in the reviewer’s terminal</b>.' },
+    { id: 'n13', lane: 'human', band: 2, slot: 5, row: 'human', ic: 'personcheck', t: 'Final authority', k: 'human approves',
+      what: 'A person reads the bundle and decides. The harness has made the decision cheap and fast; it has not taken it.',
+      wire: 'POST /runs/r_918/approve { by, note }',
+      ev: 'Approver, timestamp, and what they were shown.',
+      breaks: 'Without a named approver, <b>nobody owns the change</b> once it is in production.' },
+    { id: 'tOk', lane: 'evidence', band: 2, slot: 5, row: 'ev', ic: 'check', t: 'Completed · approved', k: 'terminal', term: 'good',
+      what: 'The only terminal state that ships anything — and it is reached through a human, not around one.',
+      wire: 'terminal: "completed_approved", approvedBy: "…"',
+      ev: 'Run record: completed, approved, bundle attached.',
+      breaks: 'Without an explicit approved state, <b>"it merged" is the only signal you have</b>.' },
+    { id: 'nPr', lane: 'harness', band: 2, slot: 6, row: 'hB', ic: 'gavel', t: 'Author a new L1 rule', k: 'the principle loop', principle: true,
+      what: 'Every denial, abort and failed verification is an instruction. The fix is a new L1 constraint in the policy store — not a one-off exception for this run.',
+      wire: 'policy.append({ id: "L1.tools.deny.write_prod", from: "run r_918" })',
+      ev: 'Rule provenance: which run produced which constraint.',
+      breaks: 'Without the loop back to policy, <b>the same failure recurs forever</b> and the harness never learns.' }
+  ];
+
+  var NODE = {};
+  N.forEach(function (n, i) { n.nord = i; NODE[n.id] = n; });
+
+  var LANE_NAME = {};
+  LANES.forEach(function (l) { LANE_NAME[l.id] = l.name; });
+
+  /* ---------------- edges ---------------- */
+  /* kinds: 'gen' generic router, 'pts' explicit waypoints (wide mode only) */
+  var E = [
+    { id: 'e1', a: 'n1', b: 'n2', l: 'task + intent' },
+    { id: 'e2', a: 'n2', b: 'n3', l: 'policy resolved' },
+    { id: 'e3', a: 'n3', b: 'd1', l: '' },
+    { id: 'e4', a: 'd1', b: 'n3b', l: 'miss', off: -18 },
+    { id: 'e5', a: 'n3b', b: 'd1', l: 'cached', off: 18 },
+    { id: 'e6', a: 'd1', b: 'n4', l: 'hit' },
+    { id: 'e7', a: 'n4', b: 'n5', l: 'messages.create' },
+    { id: 'e8', a: 'n5', b: 'd2', l: 'assistant turn' },
+    { id: 'e9', a: 'd2', b: 'n6', l: 'yes', pts: [[616, 282], [616, 234], [735, 234], [735, 225]] },
+    { id: 'e10', a: 'd2', b: 'n11', l: 'no → verify', pts: [[604, 274], [604, 240], [1118, 240], [1118, 1730], [461, 1730], [461, 1747]] },
+    { id: 'e11', a: 'n6', b: 'd3', l: '' },
+    { id: 'e12', a: 'd3', b: 'n6a', l: 'deny' },
+    { id: 'e13', a: 'n6a', b: 'tDenied', l: 'refusal recorded' },
+    { id: 'e14', a: 'n6a', b: 'tEsc', l: 'parked' },
+    { id: 'e15', a: 'd3', b: 'n7', l: 'authorised', pts: [[819, 322], [1110, 322], [1110, 770], [104, 770], [104, 986], [109, 986]] },
+    { id: 'e16', a: 'n7', b: 'd4', l: 'Mcp-Method: tools/call' },
+    { id: 'e17', a: 'd4', b: 'n8a', l: 'yes', off: -16 },
+    { id: 'e18', a: 'n8a', b: 'n8b', l: 'input_required', pts: [[384, 1416], [532, 1416], [532, 880], [527, 880]] },
+    { id: 'e19', a: 'n8b', b: 'n8', l: 'same call resumes', off: 14 },
+    { id: 'e20', a: 'd4', b: 'n8', l: 'no' },
+    { id: 'e21', a: 'n8', b: 'n9', l: 'tool_result' },
+    { id: 'e22', a: 'n9', b: 'n10', l: '' },
+    { id: 'e23', a: 'n10', b: 'ev2', l: 'append' },
+    { id: 'e24', a: 'n10', b: 'd5', l: '' },
+    { id: 'e25', a: 'd5', b: 'n10a', l: 'yes' },
+    { id: 'e26', a: 'n10a', b: 'n4', l: 'loop back', pts: [[1033, 957], [1033, 775], [96, 775], [96, 246], [604, 246], [604, 225]] },
+    { id: 'e27', a: 'd5', b: 'd6', l: 'no', pts: [[962, 1112], [1110, 1112], [1110, 1560], [104, 1560], [104, 1902], [246, 1902]] },
+    { id: 'e28', a: 'd6', b: 'tAbort', l: 'yes' },
+    { id: 'e29', a: 'd6', b: 'n4', l: 'no → next turn', pts: [[246, 1902], [88, 1902], [88, 254], [596, 254], [596, 225]] },
+    { id: 'e30', a: 'n11', b: 'd7', l: '' },
+    { id: 'e31', a: 'd7', b: 'n12', l: 'pass', pts: [[533, 1902], [760, 1902], [760, 1805]] },
+    { id: 'e32', a: 'd7', b: 'n11a', l: 'fail', pts: [[533, 1902], [586, 1902], [586, 1805]] },
+    { id: 'e33', a: 'n11a', b: 'n4', l: 'retry ≤ 3', pts: [[604, 1747], [604, 1700], [80, 1700], [80, 262], [612, 262], [612, 225]] },
+    { id: 'e34', a: 'n12', b: 'ev3', l: 'store' },
+    { id: 'e35', a: 'n12', b: 'n13', l: 'hand off' },
+    { id: 'e36', a: 'n13', b: 'tOk', l: 'approve' },
+    { id: 'e41', a: 'n11a', b: 'd6', l: 'retry cap exhausted', pts: [[620, 1747], [620, 1712], [318, 1712], [318, 1854]] },
+    { id: 'e37', a: 'tDenied', b: 'nPr', l: 'principle', dash: true, pts: [[890, 739], [890, 775], [1104, 775], [1104, 1902], [1099, 1902]] },
+    { id: 'e38', a: 'tAbort', b: 'nPr', l: 'principle', dash: true, pts: [[318, 2319], [318, 2330], [1033, 2330], [1033, 1950]] },
+    { id: 'e39', a: 'n11a', b: 'nPr', l: 'principle', dash: true, pts: [[604, 1805], [604, 1830], [1033, 1830], [1033, 1873]] },
+    { id: 'e40', a: 'nPr', b: 'n2', l: 'new L1 rule', dash: true, pts: [[1099, 1902], [1136, 1902], [1136, 142], [175, 142], [175, 167]] }
+  ];
+  var EDGE = {};
+  E.forEach(function (e) { EDGE[e.id] = e; });
+
+  /* ---------------- scenarios ---------------- */
+  var SC = {
+    happy: {
+      nodes: ['n1', 'n2', 'n3', 'd1', 'n4', 'n5', 'd2', 'n6', 'd3', 'n7', 'd4', 'n8', 'n9', 'n10', 'd5', 'd6', 'n4', 'n5', 'd2', 'n11', 'd7', 'n12', 'n13', 'tOk'],
+      edges: ['e1', 'e2', 'e3', 'e6', 'e7', 'e8', 'e9', 'e11', 'e15', 'e16', 'e20', 'e21', 'e22', 'e24', 'e27', 'e29', 'e7', 'e8', 'e10', 'e30', 'e31', 'e35', 'e36'],
+      extra: ['e23', 'e34']
+    },
+    denied: {
+      nodes: ['n1', 'n2', 'n3', 'd1', 'n3b', 'd1', 'n4', 'n5', 'd2', 'n6', 'd3', 'n6a', 'tDenied', 'nPr', 'n2'],
+      edges: ['e1', 'e2', 'e3', 'e4', 'e5', 'e6', 'e7', 'e8', 'e9', 'e11', 'e12', 'e13', 'e37', 'e40'],
+      extra: ['e14']
+    },
+    verify: {
+      nodes: ['n1', 'n2', 'n3', 'd1', 'n4', 'n5', 'd2', 'n6', 'd3', 'n7', 'd4', 'n8a', 'n8b', 'n8', 'n9', 'n10', 'd5', 'n10a', 'n4', 'n5', 'd2', 'n11', 'd7', 'n11a', 'd6', 'tAbort', 'nPr', 'n2'],
+      edges: ['e1', 'e2', 'e3', 'e6', 'e7', 'e8', 'e9', 'e11', 'e15', 'e16', 'e17', 'e18', 'e19', 'e21', 'e22', 'e24', 'e25', 'e26', 'e7', 'e8', 'e10', 'e30', 'e32', 'e41', 'e28', 'e38', 'e40'],
+      extra: ['e23']
+    }
+  };
+
+  /* ---------------- layout helpers ---------------- */
+  var narrow = false;
+
+  function geo(n) {
+    if (narrow) {
+      var h = n.dia ? NAR_DH : NAR_NH;
+      var cy = NAR_Y0 + n.nord * NAR_STEP + h / 2;
+      return { cx: NAR_W / 2, cy: cy, w: NAR_NW, h: h };
+    }
+    var w = n.dia ? DW : NW, hh = n.dia ? DH : NH;
+    return { cx: S[n.slot], cy: BAND[n.band] + ROW[n.row], w: w, h: hh };
+  }
+  function box(n) {
+    var g = geo(n);
+    return { cx: g.cx, cy: g.cy, w: g.w, h: g.h, l: g.cx - g.w / 2, r: g.cx + g.w / 2, t: g.cy - g.h / 2, b: g.cy + g.h / 2 };
+  }
+
+  function roundPath(pts, r) {
+    if (pts.length < 2) return '';
+    var d = 'M ' + pts[0][0] + ' ' + pts[0][1];
+    for (var i = 1; i < pts.length - 1; i++) {
+      var p0 = pts[i - 1], p1 = pts[i], p2 = pts[i + 1];
+      var d1 = Math.hypot(p1[0] - p0[0], p1[1] - p0[1]);
+      var d2 = Math.hypot(p2[0] - p1[0], p2[1] - p1[1]);
+      var rr = Math.min(r, d1 / 2, d2 / 2);
+      if (!isFinite(rr) || rr < 1) { d += ' L ' + p1[0] + ' ' + p1[1]; continue; }
+      var ax = p1[0] + (p0[0] - p1[0]) / d1 * rr, ay = p1[1] + (p0[1] - p1[1]) / d1 * rr;
+      var bx = p1[0] + (p2[0] - p1[0]) / d2 * rr, by = p1[1] + (p2[1] - p1[1]) / d2 * rr;
+      d += ' L ' + ax.toFixed(1) + ' ' + ay.toFixed(1) + ' Q ' + p1[0] + ' ' + p1[1] + ' ' + bx.toFixed(1) + ' ' + by.toFixed(1);
+    }
+    var last = pts[pts.length - 1];
+    d += ' L ' + last[0] + ' ' + last[1];
+    return d;
+  }
+
+  function genPts(e) {
+    var A = box(NODE[e.a]), B = box(NODE[e.b]), off = e.off || 0;
+    if (narrow) {
+      var da = NODE[e.b].nord - NODE[e.a].nord;
+      if (da === 1) return [[A.cx + off, A.b], [B.cx + off, B.t]];
+      if (da > 1) return [[A.r, A.cy], [372, A.cy], [372, B.cy], [B.r, B.cy]];
+      return [[A.l, A.cy], [28, A.cy], [28, B.cy], [B.l, B.cy]];
+    }
+    if (B.cx > A.cx + 6) {
+      if (Math.abs(A.cy - B.cy) < 4) return [[A.r, A.cy], [B.l, B.cy]];
+      var mx = (A.r + B.l) / 2;
+      return [[A.r, A.cy], [mx, A.cy], [mx, B.cy], [B.l, B.cy]];
+    }
+    if (B.cx < A.cx - 6) {
+      if (Math.abs(A.cy - B.cy) < 4) return [[A.l, A.cy], [B.r, B.cy]];
+      var mx2 = (A.l + B.r) / 2;
+      return [[A.l, A.cy], [mx2, A.cy], [mx2, B.cy], [B.r, B.cy]];
+    }
+    if (B.cy > A.cy) return [[A.cx + off, A.b], [B.cx + off, B.t]];
+    return [[A.cx + off, A.t], [B.cx + off, B.b]];
+  }
+
+  function pathFor(e) {
+    if (!narrow && e.pts) return roundPath(e.pts, 14);
+    return roundPath(genPts(e), 14);
+  }
+
+  /* ---------------- render ---------------- */
+  var stage = document.getElementById('stage');
+
+  function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+  function nodeMarkup(n) {
+    var g = box(n);
+    var cls = 'node' + (n.dia ? ' dia' : '') + (n.principle ? ' principle' : '');
+    var tone = n.term === 'good' ? 'var(--good)' : n.term === 'warn' ? 'var(--warn)' : n.term === 'esc' ? 'var(--accent-2)' : null;
+    var shape;
+    if (n.dia && !narrow) {
+      var pp = [g.cx + ',' + g.t, g.r + ',' + g.cy, g.cx + ',' + g.b, g.l + ',' + g.cy].join(' ');
+      shape = '<polygon class="shape" points="' + pp + '"></polygon>';
+    } else {
+      var rx = n.term ? g.h / 2 : (n.dia ? 8 : 11);
+      var st = tone ? ' style="stroke:' + tone + ';fill:color-mix(in srgb, ' + tone + ' 14%, var(--surface-strong))"' : '';
+      shape = '<rect class="shape" x="' + g.l + '" y="' + g.t + '" width="' + g.w + '" height="' + g.h + '" rx="' + rx + '"' + st + '></rect>';
+    }
+    var fow, foh;
+    if (n.dia && !narrow) { fow = 100; foh = 56; } else { fow = g.w - 6; foh = g.h - 6; }
+    var fx = g.cx - fow / 2, fy = g.cy - foh / 2;
+    var inner;
+    if (n.dia && !narrow) {
+      inner = '<div class="nb col"><span class="pic" data-ic="' + n.ic + '" aria-hidden="true"></span><span class="nd">' + esc(n.t) + '</span></div>';
+    } else {
+      inner = '<div class="nb"><span class="pic" data-ic="' + n.ic + '" aria-hidden="true"></span>' +
+        '<span class="ntx"><span class="nl">' + esc(n.t) + '</span>' + (n.k ? '<span class="nk">' + esc(n.k) + '</span>' : '') + '</span></div>';
+    }
+    return '<g class="' + cls + '" data-id="' + n.id + '" role="button" tabindex="0" aria-label="' + esc(LANE_NAME[n.lane] + ': ' + n.t) + '">' +
+      shape + '<foreignObject x="' + fx + '" y="' + fy + '" width="' + fow + '" height="' + foh + '">' + inner + '</foreignObject></g>';
+  }
+
+  function render() {
+    var W = narrow ? NAR_W : VBW;
+    var H = narrow ? (NAR_Y0 + N.length * NAR_STEP + 30) : VBH;
+    var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Control flow of one governed run across five lanes" xmlns="http://www.w3.org/2000/svg">';
+    s += '<defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">' +
+      '<path d="M 0 0 L 10 5 L 0 10 z" fill="context-stroke"></path></marker></defs>';
+
+    /* lane bands */
+    if (!narrow) {
+      for (var bi = 0; bi < BAND.length; bi++) {
+        var oy = BAND[bi];
+        s += '<text class="bandtitle" x="8" y="' + (oy + 26) + '" fill="var(--muted-soft)">' + esc(BAND_TITLES[bi]) + '</text>';
+        for (var li = 0; li < LANES.length; li++) {
+          var L = LANES[li];
+          s += '<g class="laneband" data-lane="' + L.id + '">' +
+            '<rect x="4" y="' + (oy + L.t) + '" width="' + (VBW - 12) + '" height="' + (L.b - L.t) + '" rx="12" ' +
+            'fill="color-mix(in srgb, ' + L.tone + ' 7%, transparent)" stroke="color-mix(in srgb, ' + L.tone + ' 22%, transparent)" stroke-width="1"></rect>' +
+            '<foreignObject x="6" y="' + (oy + L.t + 6) + '" width="68" height="' + (L.b - L.t - 10) + '">' +
+            '<div class="lanelab" style="color:' + L.tone + '">' + esc(L.name) + '</div></foreignObject></g>';
+        }
+      }
+    } else {
+      s += '<text class="bandtitle" x="12" y="26" fill="var(--muted-soft)">Governed run · top to bottom</text>';
+    }
+
+    /* edges */
+    s += '<g id="edges">';
+    E.forEach(function (e) {
+      s += '<path class="edge' + (e.dash ? ' dashed' : '') + '" id="p_' + e.id + '" d="' + pathFor(e) + '" marker-end="url(#ah)"></path>';
+    });
+    s += '</g>';
+
+    /* nodes */
+    s += '<g id="nodes">';
+    N.forEach(function (n) { s += nodeMarkup(n); });
+    s += '</g>';
+
+    /* edge labels (positioned after mount) */
+    s += '<g id="elabs">';
+    E.forEach(function (e) { if (e.l) s += '<text class="elab" id="l_' + e.id + '">' + esc(e.l) + '</text>'; });
+    s += '</g>';
+
+    s += '<circle id="token" r="6" cx="-50" cy="-50" opacity="0"></circle>';
+    s += '</svg>';
+    stage.innerHTML = s;
+
+    /* place edge labels at path midpoints.
+       The lane-label gutter occupies x 6-74 (foreignObject x=6 width=68), and the three
+       feedback edges route back through x=80/88/96, so a midpoint label centred there
+       would sit under the lane name. Clamp each label clear of the gutter using its own
+       measured width, since .elab is text-anchor:middle. */
+    var GUTTER_R = 78;
+    E.forEach(function (e) {
+      if (!e.l) return;
+      var p = document.getElementById('p_' + e.id), t = document.getElementById('l_' + e.id);
+      if (!p || !t) return;
+      try {
+        var pt = p.getPointAtLength(p.getTotalLength() * 0.5);
+        t.setAttribute('x', pt.x.toFixed(1));
+        t.setAttribute('y', (pt.y - 8).toFixed(1));
+        var bb = t.getBBox();
+        if (bb.x < GUTTER_R) t.setAttribute('x', (pt.x + (GUTTER_R - bb.x)).toFixed(1));
+      } catch (err) { t.setAttribute('x', '-999'); t.setAttribute('y', '-999'); }
+    });
+
+    /* De-clash edge labels. A path midpoint is a good first guess but in the narrow
+       single-column layout it regularly lands on a node label or on another edge label,
+       so nudge each one vertically until it is clear. Screen-space test, converted back
+       into user units via the SVG's current scale. */
+    (function declash() {
+      var svgEl = document.querySelector('#stage svg') || document.querySelector('svg');
+      if (!svgEl || !svgEl.viewBox || !svgEl.viewBox.baseVal) return;
+      var vbw = svgEl.viewBox.baseVal.width, brw = svgEl.getBoundingClientRect().width;
+      if (!vbw || !brw) return;
+      var k = brw / vbw;
+      if (!k || !isFinite(k)) return;
+      var hit = function (a, b) {
+        return !(a.right <= b.left + 1 || a.left >= b.right - 1 ||
+                 a.bottom <= b.top + 1 || a.top >= b.bottom - 1);
+      };
+      var fixed = [].slice.call(document.querySelectorAll('.nl, .nk, .lanelab'))
+        .map(function (e) { return e.getBoundingClientRect(); })
+        .filter(function (r) { return r.width > 1 && r.height > 1; });
+      var placed = [];
+      [].slice.call(document.querySelectorAll('.elab')).forEach(function (t) {
+        var y0 = parseFloat(t.getAttribute('y'));
+        var x0 = parseFloat(t.getAttribute('x'));
+        if (!isFinite(y0) || !isFinite(x0) || x0 < -900) return;
+        for (var step = 0; step < 8; step++) {
+          var r = t.getBoundingClientRect();
+          var clash = false, i;
+          for (i = 0; i < fixed.length; i++) { if (hit(r, fixed[i])) { clash = true; break; } }
+          if (!clash) for (i = 0; i < placed.length; i++) { if (hit(r, placed[i])) { clash = true; break; } }
+          if (!clash) break;
+          var dir = (step % 2 === 0) ? -1 : 1;
+          var mag = Math.floor(step / 2) + 1;
+          t.setAttribute('y', (y0 + dir * mag * 11 / k).toFixed(1));
+        }
+        placed.push(t.getBoundingClientRect());
+      });
+    })();
+
+    loadIcons();
+    wireNodes();
+    paint();
+  }
+
+  /* ---------------- icons ---------------- */
+  var ICON_BASE = '../customs-entry-agent/flow-icons/';
+  var cache = {};
+  var load = function (n) {
+    return cache[n] || (cache[n] = fetch(ICON_BASE + n + '.svg')
+      .then(function (r) { return r.ok ? r.text() : Promise.reject(); })
+      .then(function (t) { return t.replace(/stroke="#232f3e"/g, 'stroke="currentColor"'); })
+      .catch(function () { return ''; }));
+  };
+  function loadIcons() {
+    document.querySelectorAll('[data-ic]').forEach(function (slot) {
+      load(slot.dataset.ic).then(function (svg) { if (!slot.firstChild) slot.innerHTML = svg; });
+    });
+  }
+
+  /* ---------------- state ---------------- */
+  var scenario = 'happy', idx = 0, playing = false, timer = null, rafId = null;
+
+  function cur() { return SC[scenario]; }
+  function activeId() { return cur().nodes[idx]; }
+
+  function paint() {
+    var sc = cur();
+    var live = {};
+    sc.edges.forEach(function (id) { live[id] = true; });
+    (sc.extra || []).forEach(function (id) { live[id] = true; });
+    var aId = activeId(), aNode = NODE[aId];
+
+    E.forEach(function (e) {
+      var p = document.getElementById('p_' + e.id), t = document.getElementById('l_' + e.id);
+      var on = !!live[e.id];
+      if (p) { p.classList.toggle('dim', !on); p.classList.toggle('live', on); }
+      if (t) { t.classList.toggle('dim', !on); t.classList.toggle('live', on); }
+    });
+
+    document.querySelectorAll('.node').forEach(function (g) {
+      var n = NODE[g.dataset.id];
+      var inRun = sc.nodes.indexOf(n.id) !== -1;
+      g.classList.toggle('on', n.id === aId);
+      g.classList.toggle('dim', !inRun && n.lane !== aNode.lane);
+      g.classList.toggle('lanedim', inRun && n.id !== aId && n.lane !== aNode.lane);
+    });
+
+    document.querySelectorAll('.laneband').forEach(function (g) {
+      g.style.opacity = g.dataset.lane === aNode.lane ? '1' : '0.4';
+    });
+
+    var cw = document.getElementById('ctxwrap'), cf = document.getElementById('ctxfill');
+    var showCtx = aId === 'd5' || aId === 'n10a';
+    cw.hidden = !showCtx;
+    if (showCtx) {
+      cf.classList.remove('shrunk');
+      if (aId === 'n10a') {
+        if (REDUCED) { cf.classList.add('shrunk'); }
+        else { requestAnimationFrame(function () { requestAnimationFrame(function () { cf.classList.add('shrunk'); }); }); }
+      }
+    }
+
+    document.getElementById('plane').textContent = LANE_NAME[aNode.lane];
+    document.getElementById('ptitle').textContent = aNode.t;
+    document.getElementById('pwhat').textContent = aNode.what;
+    document.getElementById('pwire').textContent = aNode.wire;
+    document.getElementById('pev').textContent = aNode.ev;
+    document.getElementById('pbreak').innerHTML = aNode.breaks;
+    var pic = document.getElementById('pic');
+    pic.innerHTML = '';
+    load(aNode.ic).then(function (svg) { pic.innerHTML = svg; });
+    document.getElementById('count').textContent = 'Step ' + (idx + 1) + ' / ' + sc.nodes.length;
+    document.getElementById('sr').textContent = 'Step ' + (idx + 1) + ' of ' + sc.nodes.length + ': ' + LANE_NAME[aNode.lane] + ' — ' + aNode.t;
+
+    scrollToActive();
+  }
+
+  function scrollToActive() {
+    if (narrow) return;
+    var g = stage.querySelector('.node.on .shape');
+    if (!g || !stage.scrollWidth) return;
+    var svg = stage.querySelector('svg');
+    if (!svg) return;
+    var scale = svg.getBoundingClientRect().width / VBW;
+    var b = box(NODE[activeId()]);
+    var target = b.cx * scale - stage.clientWidth / 2;
+    var max = stage.scrollWidth - stage.clientWidth;
+    if (max <= 2) return;
+    stage.scrollTo({ left: Math.max(0, Math.min(max, target)), behavior: REDUCED ? 'auto' : 'smooth' });
+  }
+
+  /* ---------------- token travel ---------------- */
+  var guard = null;
+  function travel(edgeId, done) {
+    var tok = document.getElementById('token');
+    var p = edgeId && document.getElementById('p_' + edgeId);
+    var fired = false;
+    var finish = function () {
+      if (fired) return;
+      fired = true;
+      if (guard) { clearTimeout(guard); guard = null; }
+      if (tok) tok.setAttribute('opacity', '0');
+      done();
+    };
+    var len = p ? p.getTotalLength() : 0;
+    if (REDUCED || !p || !len || document.hidden) { finish(); return; }
+    tok.setAttribute('opacity', '1');
+    var t0 = performance.now(), dur = 600;
+    function frame(now) {
+      var k = Math.min(1, (now - t0) / dur);
+      var e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+      var pt = p.getPointAtLength(len * e);
+      tok.setAttribute('cx', pt.x); tok.setAttribute('cy', pt.y);
+      if (k < 1) { rafId = requestAnimationFrame(frame); }
+      else { finish(); }
+    }
+    rafId = requestAnimationFrame(frame);
+    /* watchdog: rAF is paused in hidden tabs — never leave the run stalled */
+    guard = setTimeout(finish, dur + 350);
+  }
+
+  function go(next, animate) {
+    var sc = cur();
+    if (next < 0 || next >= sc.nodes.length) return;
+    var forward = next === idx + 1;
+    var edgeId = forward ? sc.edges[idx] : null;
+    if (animate && edgeId && !REDUCED) {
+      travel(edgeId, function () { idx = next; paint(); });
+    } else {
+      idx = next; paint();
+    }
+  }
+
+  /* ---------------- transport ---------------- */
+  var playBtn = document.getElementById('play');
+  function stop() {
+    playing = false;
+    playBtn.setAttribute('aria-pressed', 'false');
+    playBtn.textContent = 'Play ▶';
+    if (timer) { clearTimeout(timer); timer = null; }
+    if (guard) { clearTimeout(guard); guard = null; }
+    if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+    var tok = document.getElementById('token');
+    if (tok) tok.setAttribute('opacity', '0');
+  }
+  function tick() {
+    if (!playing) return;
+    if (idx >= cur().nodes.length - 1) { stop(); return; }
+    var sc = cur(), edgeId = sc.edges[idx], nxt = idx + 1;
+    if (REDUCED) {
+      idx = nxt; paint();
+      timer = setTimeout(tick, 900);
+    } else {
+      travel(edgeId, function () {
+        idx = nxt; paint();
+        timer = setTimeout(tick, 420);
+      });
+    }
+  }
+  playBtn.addEventListener('click', function () {
+    if (playing) { stop(); return; }
+    playing = true;
+    playBtn.setAttribute('aria-pressed', 'true');
+    playBtn.textContent = 'Pause ‖';
+    if (idx >= cur().nodes.length - 1) { idx = 0; paint(); }
+    tick();
+  });
+  document.getElementById('prev').addEventListener('click', function () { stop(); go(idx - 1, false); });
+  document.getElementById('next').addEventListener('click', function () { stop(); go(idx + 1, true); });
+
+  document.querySelectorAll('[data-sc]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      stop();
+      scenario = b.dataset.sc;
+      idx = 0;
+      document.querySelectorAll('[data-sc]').forEach(function (o) {
+        o.setAttribute('aria-pressed', String(o === b));
+      });
+      paint();
+    });
+  });
+
+  function wireNodes() {
+    stage.querySelectorAll('.node').forEach(function (g) {
+      var pick = function () {
+        stop();
+        var id = g.dataset.id;
+        var at = cur().nodes.indexOf(id);
+        if (at !== -1) { idx = at; paint(); }
+        else { showOnly(id); }
+      };
+      g.addEventListener('click', pick);
+      g.addEventListener('keydown', function (ev) {
+        if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); pick(); }
+      });
+    });
+  }
+
+  function showOnly(id) {
+    var n = NODE[id];
+    document.qu

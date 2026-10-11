@@ -1,0 +1,201 @@
+/* ============================================================================
+   Control Tower instruments — shared theme.
+   Token names and values mirror /styles/deep-dive-tower.css so instruments and
+   page chrome read as one console. Dark is the night tower, light is the same
+   room at 11am.
+
+   Contrast contract, binding:
+     --live      FILL AND TEXT. 4.8:1 light, 6.4:1 dark.
+     --live-dim  FILL ONLY.
+     --ink-3     muted text, 4.5:1 minimum against --panel in both modes.
+   ========================================================================== */
+
+:root,
+:root[data-theme="light"] {
+  --bg-0: #eceff2;
+  --bg-1: #e2e7ec;
+  --panel: #f7f9fb;
+  --panel-2: #eaeff4;
+  --rule: #a8b6c2;
+  --rule-strong: #778996;
+  --rule-faint: rgba(40, 62, 80, 0.10);
+  --ink: #101a22;
+  --ink-2: #35485a;
+  --ink-3: #5a6f80;
+  --live: #0a6b86;
+  --live-dim: rgba(10, 107, 134, 0.11);
+  --on-live: #f2fbfd;
+  --ok: #1d6446;
+  --ok-dim: rgba(29, 100, 70, 0.11);
+  --warn: #8a5a0c;
+  --warn-dim: rgba(138, 90, 12, 0.12);
+  --alarm: #a52a1c;
+  --alarm-dim: rgba(165, 42, 28, 0.10);
+  --shadow: rgba(24, 40, 56, 0.20);
+  --glow: none;
+
+  --display: "Chakra Petch", system-ui, sans-serif;
+  --body-font: "Manrope", "Segoe UI", system-ui, sans-serif;
+  --mono: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
+}
+
+/* A figure opened standalone before any script runs still needs a sane mode. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg-0: #0a1016;
+    --bg-1: #070c11;
+    --panel: #101a22;
+    --panel-2: #152230;
+    --rule: #2b3f52;
+    --rule-strong: #486478;
+    --rule-faint: rgba(120, 190, 230, 0.07);
+    --ink: #e4eef5;
+    --ink-2: #adc2d1;
+    --ink-3: #7f97a8;
+    --live: #34c6ea;
+    --live-dim: rgba(52, 198, 234, 0.13);
+    --on-live: #04191f;
+    --ok: #45d493;
+    --ok-dim: rgba(69, 212, 147, 0.13);
+    --warn: #e6a93f;
+    --warn-dim: rgba(230, 169, 63, 0.14);
+    --alarm: #ff6f58;
+    --alarm-dim: rgba(255, 111, 88, 0.14);
+    --shadow: rgba(0, 0, 0, 0.6);
+    --glow: 0 0 12px -2px currentColor;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg-0: #0a1016;
+  --bg-1: #070c11;
+  --panel: #101a22;
+  --panel-2: #152230;
+  --rule: #2b3f52;
+  --rule-strong: #486478;
+  --rule-faint: rgba(120, 190, 230, 0.07);
+  --ink: #e4eef5;
+  --ink-2: #adc2d1;
+  --ink-3: #7f97a8;
+  --live: #34c6ea;
+  --live-dim: rgba(52, 198, 234, 0.13);
+  --on-live: #04191f;
+  --ok: #45d493;
+  --ok-dim: rgba(69, 212, 147, 0.13);
+  --warn: #e6a93f;
+  --warn-dim: rgba(230, 169, 63, 0.14);
+  --alarm: #ff6f58;
+  --alarm-dim: rgba(255, 111, 88, 0.14);
+  --shadow: rgba(0, 0, 0, 0.6);
+  --glow: 0 0 12px -2px currentColor;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: linear-gradient(180deg, var(--bg-0), var(--bg-1));
+  color: var(--ink-2);
+  font-family: var(--body-font);
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Embedded: the host frame owns the height, so release the viewport lock or
+   document.body.scrollHeight is meaningless and autosize cannot work. */
+:root[data-embedded="true"],
+:root[data-embedded="true"] body { height: auto; }
+:root[data-embedded="true"] body { min-height: 0; background: transparent; }
+
+.shell {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: clamp(12px, 3vw, 20px);
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.head { display: flex; flex-direction: column; gap: 6px; }
+.head h1 {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: clamp(1.02rem, 2.4vw, 1.3rem);
+  line-height: 1.2;
+  color: var(--ink);
+}
+.head p {
+  font-size: clamp(0.82rem, 1.5vw, 0.9rem);
+  line-height: 1.5;
+  color: var(--ink-2);
+  max-width: 72ch;
+}
+
+.eyebrow {
+  font-family: var(--mono);
+  font-size: 0.64rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+/* Verdict chips, the same six grades the page uses. */
+.stampline { display: flex; flex-wrap: wrap; gap: 6px; }
+.stamp {
+  display: inline-block;
+  padding: 2px 8px;
+  font-family: var(--mono);
+  font-size: 0.61rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border: 1px solid currentColor;
+  border-radius: 3px;
+}
+.stamp--confirmed { color: var(--ok); background: var(--ok-dim); }
+.stamp--vendor-claim { color: var(--warn); background: var(--warn-dim); }
+.stamp--proposed { color: var(--live); background: var(--live-dim); }
+.stamp--open { color: var(--alarm); background: var(--alarm-dim); }
+.stamp--hold { color: var(--alarm); background: var(--alarm-dim); border-width: 2px; }
+.stamp--illustrative { color: var(--ink-3); border-style: dashed; }
+
+.card {
+  padding: 12px 14px;
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+}
+
+/* The lamp, this family's signature mark. */
+.lamp {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--ink-3);
+  box-shadow: var(--glow);
+}
+.lamp--ok { background: var(--ok); color: var(--ok); }
+.lamp--warn { background: var(--warn); color: var(--warn); }
+.lamp--alarm { background: var(--alarm); color: var(--alarm); }
+
+button {
+  font: inherit;
+  cursor: pointer;
+  color: var(--ink);
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  padding: 8px 12px;
+}
+button:hover { border-color: var(--live); color: var(--live); }
+
+:focus-visible {
+  outline: 2px solid var(--live);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+}

@@ -36,7 +36,6 @@
   --at-mono: "IBM Plex Mono", "Cascadia Code", ui-monospace, monospace;
 
   /* layout scale */
-  --at-prose: clamp(40rem, 64vw, 64rem);
   --at-wide: clamp(1240px, 92vw, 1600px);
 
   position: relative;
@@ -165,7 +164,7 @@
   font-size: clamp(0.88rem, 1.7vw, 1.02rem);
   color: var(--at-signal);
   margin: 0.85rem 0 0;
-  max-width: 72ch;
+  max-width: 100%;
 }
 .dd-atlas .at-slash { color: var(--at-alert); font-weight: 700; }
 
@@ -176,7 +175,7 @@
   line-height: 1.62;
   color: var(--at-ink-2);
   margin: 1.1rem 0 0;
-  max-width: 88ch;
+  max-width: 100%;
 }
 
 /* instrument readout strip. Author coords as "Label · value" strings. */
@@ -587,7 +586,7 @@
 .dd-atlas .article-body .at-solution-map__head {
   display: grid;
   gap: 0.35rem;
-  max-width: 76ch;
+  max-width: 100%;
 }
 .dd-atlas .article-body .at-solution-map__head > span {
   font-family: var(--at-mono);

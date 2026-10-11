@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The coordination landscape, Aug 17</title>
+<script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+.shell { display: flex; flex-direction: column; gap: 12px; }
+:root[data-embedded="true"] .shell { padding: 14px clamp(14px, 2vw, 22px); }
+.head h1 { font-family: "Archivo", sans-serif; font-weight: 700; font-size: clamp(1.0rem, 2.2vw, 1.26rem); color: var(--text-strong); }
+.head p { font: 500 0.76rem/1.4 "IBM Plex Sans", sans-serif; color: var(--muted); margin-top: 3px; }
+
+.ctl { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.ctl button {
+  min-height: 34px; padding: 6px 12px; cursor: pointer;
+  font: 600 0.64rem/1 "IBM Plex Mono", monospace; letter-spacing: 0.07em; text-transform: uppercase;
+  color: var(--accent); background: transparent; border: 1px solid var(--accent);
+}
+.ctl button:hover { background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.ctl button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.ctl .hint { font: 500 0.68rem/1.3 "IBM Plex Sans", sans-serif; color: var(--muted-soft); }
+
+/* The rings ARE the argument: the framework is the outer ring, the alliance the
+   inner one, members stand on it and the missing labs stand outside the ring. */
+.map { border: 1px solid var(--border-strong); background: var(--surface); padding: 10px 6px 4px; }
+.map svg { display: block; width: 100%; max-width: 460px; height: auto; margin: 0 auto; }
+.ring-o { fill: none; stroke: var(--border-strong); stroke-width: 2; stroke-dasharray: 6 7; opacity: 0; }
+.ring-i { fill: none; stroke: var(--accent); stroke-width: 2; }
+.rlabel { font: 600 8.5px "IBM Plex Mono", monospace; letter-spacing: 0.06em; text-transform: uppercase; fill: var(--muted); }
+.olabel { font: 600 9px "IBM Plex Mono", monospace; letter-spacing: 0.05em; text-transform: uppercase; fill: var(--signal); opacity: 0; transition: opacity 300ms; }
+.node { opacity: 0; transition: opacity 320ms; color: var(--muted); }
+.node.on, .olabel.on { opacity: 1; }
+.node .nbox { fill: var(--surface); stroke: var(--border-strong); stroke-width: 1.5; }
+.node .nlabel { font: 500 10px "IBM Plex Sans", sans-serif; fill: var(--text); text-anchor: middle; }
+.node.body-node { color: var(--text-strong); }
+.node.body-node .nbox { stroke-width: 2; }
+.node.out { color: var(--signal); }
+.node.out .nbox { stroke: var(--signal); stroke-dasharray: 4 3; fill: color-mix(in srgb, var(--signal) 8%, transparent); }
+.node.out .nlabel { fill: var(--signal); }
+.node svg * { stroke: currentColor; }
+/* selection states, driven by data-grp membership */
+.dim { opacity: 0.16 !important; }
+.node.hot { color: var(--accent); }
+.node.hot .nbox { stroke: var(--accent); }
+.node.out.hot { color: var(--signal); }
+.node.out.hot .nbox { stroke-width: 2.5; }
+.ring-o.hot { stroke: var(--accent-2); stroke-width: 2.5; }
+.ring-i.hot { stroke-width: 3.5; }
+.olabel.hot { font-weight: 700; }
+
+/* body picker: real buttons carrying the preserved ring labels */
+.bodies { display: flex; flex-direction: column; border: 1px solid var(--border-strong); }
+.body-btn {
+  display: grid; grid-template-columns: 44px 1fr; align-items: center; gap: 4px;
+  min-height: 44px; padding: 8px 10px 8px 0; cursor: pointer; text-align: left;
+  background: transparent; border: 0; width: 100%; font-family: inherit;
+}
+.body-btn + .body-btn { border-top: 1px solid var(--border); }
+.body-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.body-btn .bic {
+  width: 30px; height: 30px; margin: 0 auto; display: grid; place-items: center;
+  background: var(--surface); border: 1.5px solid var(--border-strong); color: var(--muted);
+  transition: color 250ms, border-color 250ms;
+}
+.body-btn .bic svg { width: 20px; height: 20px; display: block; }
+.body-btn .bic svg * { stroke: currentColor; }
+.body-btn[aria-pressed="true"] .bic { color: var(--accent); border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent); }
+.body-btn b { font: 600 0.73rem/1.35 "IBM Plex Sans", sans-serif; color: var(--text-strong); }
+.body-btn[aria-pressed="true"] b { color: var(--accent); }
+.mandate {
+  font: 500 0.7rem/1.45 "IBM Plex Sans", sans-serif; color: var(--muted);
+  border-left: 2px solid var(--accent); padding: 6px 0 6px 10px; margin: 0;
+}
+.mandate[hidden] { display: none; }
+
+.letters { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; margin-top: 4px; }
+.letter { border: 1px solid var(--border-strong); padding: 10px 12px; background: var(--surface); position: relative; }
+.letter .lic { position: absolute; top: 10px; right: 10px; width: 22px; height: 22px; color: var(--muted-soft); }
+.letter .lic svg { width: 22px; height: 22px; display: block; }
+.letter .lic svg * { stroke: currentColor; }
+.letter b { display: block; font: 700 0.78rem/1.3 "Archivo", sans-serif; color: var(--text-strong); padding-right: 28px; }
+.letter span { font: 500 0.68rem/1.45 "IBM Plex Sans", sans-serif; color: var(--muted); }
+.letter .count { font: 700 1.1rem/1 "IBM Plex Mono", monospace; color: var(--accent); display: block; margin: 4px 0; }
+
+.caption { font: 500 0.72rem/1.5 "IBM Plex Sans", sans-serif; color: var(--muted); }
+.caption b { color: var(--text-strong); font-weight: 600; }
+
+@media (max-width: 620px) { .letters { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="head">
+    <h1>The one policy instrument in force doesn't reach this class</h1>
+    <p>Scope boundary, alliance membership, and two letters that must not be conflated.</p>
+  </div>
+
+  <div class="ctl">
+    <button type="button" id="replay">Replay</button>
+    <span class="hint">Tap a body below to light its members and read its mandate.</span>
+  </div>
+
+  <div class="map">
+    <svg id="rings" viewBox="0 0 320 410" role="img" aria-label="Nested governance rings. The White House framework is the outer dashed ring, the Open Secure AI Alliance the inner ring with eight member companies standing on it, and OpenAI, Anthropic and Google DeepMind stand outside the ring.">
+      <circle class="ring-o" id="ringO" data-grp="framework" cx="160" cy="168" r="140"/>
+      <circle class="ring-i" id="ringI" data-grp="alliance" cx="160" cy="168" r="88"/>
+      <text class="rlabel" x="160" y="56" text-anchor="middle">Framework</text>
+      <text class="rlabel" x="160" y="108" text-anchor="middle">Alliance + SAFE</text>
+      <text class="olabel" id="olabel" data-grp="outside" x="160" y="332" text-anchor="middle">Outside the alliance, as of Aug 17</text>
+      <g id="nodes"></g>
+    </svg>
+  </div>
+
+  <div class="bodies" id="bodies">
+    <button type="button" class="body-btn" data-body="framework" data-icon="gov" aria-pressed="false">
+      <span class="bic" data-pic aria-hidden="true"></span>
+      <b>White House voluntary framework, Aug 3-4 2026 &middot; closed frontier models only</b>
+    </button>
+    <button type="button" class="body-btn" data-body="alliance" data-icon="building" aria-pressed="false">
+      <span class="bic" data-pic aria-hidden="true"></span>
+      <b>Open Secure AI Alliance + SAFE, 120+ members, Aug 4</b>
+    </button>
+    <button type="button" class="body-btn" data-body="outside" data-icon="flask" aria-pressed="false">
+      <span class="bic" data-pic aria-hidden="true"></span>
+      <b>Outside the alliance, as of Aug 17</b>
+    </button>
+  </div>
+  <p class="mandate" id="mandate" hidden></p>
+
+  <div class="letters">
+    <div class="letter">
+      <span class="lic" data-lic="envelope" aria-hidden="true"></span>
+      <b>Aug 12 pacing letter</b>
+      <span class="count" id="c1">1,376</span>
+      <span>Frontier-lab employees asking the US government to support pacing the frontier of automated AI development. Distinct from the letter below.</span>
+    </div>
+    <div class="letter">
+      <span class="lic" data-lic="envelope" aria-hidden="true"></span>
+      <b>Jul 24 open-weights letter</b>
+      <span class="count" id="c2">270+</span>
+      <span>Industry signatories arguing against broad open-weight restrictions. Anthropic is notably absent. Do not conflate with the pacing letter.</span>
+    </div>
+  </div>
+
+  <p class="caption">Membership gaps are drawn as members standing outside the ring, never as struck-out or redacted names. The framework's own scope boundary, closed models only, is the ring that never reaches the models this page is about.</p>
+</div>
+<script>
+(() => {
+  const ICON_BASE = '../customs-entry-agent/flow-icons/';
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const SVGNS = 'http://www.w3.org/2000/svg';
+  const svg = document.getElementById('rings');
+  const nodesG = document.getElementById('nodes');
+  const ringO = document.getElementById('ringO');
+  const ringI = document.getElementById('ringI');
+  const olabel = document.getElementById('olabel');
+  const CIRC = 2 * Math.PI * 88; // inner ring circumference, for the draw-on
+  ringI.style.strokeDasharray = CIRC;
+  ringI.style.strokeDashoffset = CIRC;
+
+  /* Icons are the shared line-art SVGs, fetched once per name with the stroke
+     swapped to currentColor. A failed fetch leaves the slot empty. */
+  const cache = {};
+  const icon = (name) => cache[name] || (cache[name] =
+    fetch(ICON_BASE + name + '.svg')
+      .then((r) => (r.ok ? r.text() : Promise.reject()))
+      .then((t) => t.replace(/stroke="#232f3e"/g, 'stroke="currentColor"'))
+      .catch(() => null));
+  const placeSvgIcon = (g, name, size) => icon(name).then((t) => {
+    if (!t) return;
+    const el = new DOMParser().parseFromString(t, 'image/svg+xml').documentElement;
+    el.setAttribute('x', -size / 2); el.setAttribute('y', -size / 2);
+    el.setAttribute('width', size); el.setAttribute('height', size);
+    g.appendChild(el);
+  });
+
+  /* one helper builds every node: box + icon + label at a fixed spot */
+  const makeNode = (x, y, ic, label, cls, grp, lx, ly) => {
+    const g = document.createElementNS(SVGNS, 'g');
+    g.setAttribute('class', 'node ' + cls);
+    g.setAttribute('transform', 'translate(' + x + ',' + y + ')');
+    if (grp) g.dataset.grp = grp;
+    const box = document.createElementNS(SVGNS, 'rect');
+    box.setAttribute('class', 'nbox');
+    box.setAttribute('x', -13); box.setAttribute('y', -13);
+    box.setAttribute('width', 26); box.setAttribute('height', 26);
+    g.appendChild(box);
+    placeSvgIcon(g, ic, 18);
+    if (label) {
+      const t = document.createElementNS(SVGNS, 'text');
+      t.setAttribute('class', 'nlabel');
+      t.setAttribute('x', lx); t.setAttribute('y', ly);
+      t.textContent = label;
+      g.appendChild(t);
+    }
+    nodesG.appendChild(g);
+    return g;
+  };
+
+  /* member companies stand ON the inner ring, angle in degrees, 0 = right */
+  const CX = 160, CY = 168, RI = 88, RL = 116;
+  const MEMBERS = [
+    { n: 'Hugging Face', ic: 'robot', a: -60 }, { n: 'Cisco', ic: 'network', a: -20 },
+    { n: 'IBM', ic: 'building', a: 20 }, { n: 'Microsoft', ic: 'monitor', a: 60 },
+    { n: 'NVIDIA', ic: 'cpu', a: 120 }, { n: 'Red Hat', ic: 'gears', a: 160 },
+    { n: 'Adobe', ic: 'document', a: 200 }, { n: 'CrowdStrike', ic: 'shield', a: 240 },
+  ];
+  const govNode = makeNode(160, 28, 'gov', '', 'body-node', 'framework', 0, 0);
+  const allyNode = makeNode(160, 80, 'building', '', 'body-node', 'alliance', 0, 0);
+  const memberNodes = MEMBERS.map((m) => {
+    const rad = m.a * Math.PI / 180;
+    const x = CX + RI * Math.cos(rad), y = CY + RI * Math.sin(rad);
+    const lx = (RL - RI) * Math.cos(rad), ly = (RL - RI) * Math.sin(rad) + 3;
+    return makeNode(x, y, m.ic, m.n, 'member', 'alliance', lx, ly);
+  });
+  /* the three labs stand outside the ring, per the caption's rule */
+  const OUTS = [{ n: 'OpenAI', x: 70 }, { n: 'Anthropic', x: 160 }, { n: 'Google DeepMind', x: 250 }];
+  const outNodes = OUTS.map((o) => makeNode(o.x, 364, 'flask', o.n, 'out', 'outside', 0, 30));
+
+  /* body picker: select highlights the body's ring and members, dims the rest,
+     and shows its one-line mandate */
+  const MANDATES = {
+    framework: 'The one policy instrument in force, scoped to closed frontier models only, so it never reaches the models this page is about.',
+    alliance: 'A 120+ member industry coordination body announced Aug 4, drawn as the inner ring with its members standing on it.',
+    outside: 'Not alliance members as of Aug 17, drawn standing outside the ring rather than struck out or redacted.',
+  };
+  const grpEls = Array.from(svg.querySelectorAll('[data-grp]'));
+  const btns = Array.from(document.querySelectorAll('.body-btn'));
+  const mandate = document.getElementById('mandate');
+  let selected = null;
+  const select = (body) => {
+    selected = selected === body ? null : body;
+    btns.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.body === selected)));
+    grpEls.forEach((el) => {
+      el.classList.toggle('dim', !!selected && el.dataset.grp !== selected);
+      el.classList.toggle('hot', el.dataset.grp === selected);
+    });
+    mandate.hidden = !selected;
+    mandate.textContent = selected ? MANDATES[selected] : '';
+  };
+  btns.forEach((b) => b.addEventListener('click', () => select(b.dataset.body)));
+
+  /* HTML icon slots: body buttons and letter envelopes */
+  document.querySelectorAll('.body-btn').forEach((b) =>
+    icon(b.dataset.icon).then((t) => { if (t) b.querySelector('[data-pic]').innerHTML = t; }));
+  document.querySelectorAll('[data-lic]').forEach((s) =>
+    icon(s.dataset.lic).then((t) => { if (t) s.innerHTML = t; }));
+
+  /* one master rAF timeline: outer ring fades in, inner ring draws on, members
+     light in sequence, the missing labs appear last, letter counts run up.
+     t0 comes from the first frame timestamp, never performance.now(): sandboxed
+     iframes can disagree between the two clocks. */
+  const c1 = document.getElementById('c1'), c2 = document.getElementById('c2');
+  const seq = [{ el: govNode, at: 120 }, { el: allyNode, at: 700 }]
+    .concat(memberNodes.map((el, i) => ({ el, at: 950 + i * 110 })))
+    .concat([{ el: olabel, at: 1900 }])
+    .concat(outNodes.map((el, i) => ({ el, at: 2050 + i * 150 })));
+  const clamp = (v) => Math.max(0, Math.min(1, v));
+  const finish = () => {
+    ringO.style.opacity = '1';
+    ringI.style.strokeDashoffset = '0';
+    seq.forEach((s) => s.el.classList.add('on'));
+    c1.textContent = '1,376'; c2.textContent = '270+';
+  };
+  let raf = 0;
+  const run = () => {
+    cancelAnimationFrame(raf);
+    select(null); /* clears any body selection and its dimming */
+    if (reduced) { finish(); return; }
+    ringO.style.opacity = '0';
+    ringI.style.strokeDashoffset = CIRC;
+    seq.forEach((s) => s.el.classList.remove('on'));
+    c1.textContent = '0'; c2.textContent = '0';
+    let t0 = null;
+    const step = (ts) => {
+      if (t0 === null) t0 = ts;
+      const t = ts - t0;
+      ringO.style.opacity = clamp(t / 450);
+      const p = clamp((t - 250) / 800);
+      ringI.style.strokeDashoffset = CIRC * Math.pow(1 - p, 2);
+      seq.forEach((s) => { if (t >= s.at) s.el.classList.add('on'); });
+      const cp = clamp((t - 1700) / 1100);
+      c1.textContent = Math.round(1376 * cp).toLocaleString('en-US');
+      c2.textContent = Math.round(270 * cp) + '+';
+      if (t < 3100) raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+  };
+
+  document.getElementById('replay').addEventListener('click', run);
+
+  /* threshold 0, not 0.2: the figure can exceed a phone viewport, and a
+     fraction of a too-tall element never intersects. */
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting)) { io.disconnect(); run(); }
+    }, { threshold: 0 });
+    io.observe(svg);
+  } else { run(); }
+
+  if (document.documentElement.dataset.embedded === 'true') {
+    const postSize = () => window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+    if ('ResizeObserver' in window) new ResizeObserver(postSize).observe(document.body);
+    window.addEventListener('load', postSize);
+    window.addEventListener('resize', postSize);
+  }
+})();
+</script>
+</body>
+</html>

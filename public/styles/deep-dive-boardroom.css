@@ -1,0 +1,942 @@
+/* ============================================================================
+   Boardroom — bespoke "boardroom" template for governance / filing deep-dives.
+   Every rule is scoped under .dd-boardroom so nothing leaks to other pages.
+
+   Identity: an annual-report / proxy-statement filing. Ivory stock, engraved
+   Fraunces display, oxblood rule, dot leaders, tabular figures. Dark theme is
+   the same filing printed on graphite with brass foil. No image files, no
+   skeuomorphism, no paper texture.
+
+   Token base below is the ivory stock (light); [data-theme="dark"] re-skins it,
+   matching the mechanism used by deep-dive-atlas.css exactly.
+   ========================================================================== */
+
+.dd-boardroom.article-shell {
+  /* ivory stock (light) */
+  --bd-bg: #f6f2e9;
+  --bd-bg-2: #efeadd;
+  --bd-surface: #fffdf7;
+  --bd-surface-sunk: #ece6d8;
+  --bd-ink: #191713;
+  --bd-ink-2: #3a352c;
+  --bd-muted: #67604f;
+  --bd-rule: #d9d1be;
+  --bd-rule-strong: #b3a88e;
+  --bd-accent: #7c2130;
+  --bd-accent-soft: #f0e0e0;
+  --bd-accent-2: #1e3a5f;
+  --bd-accent-2-soft: #dee5ef;
+  --bd-shadow: 0 1px 0 #d9d1be, 0 12px 28px -22px rgba(25, 23, 19, 0.45);
+
+  /* evidence chip triplets */
+  --bd-chip-confirmed: #1f5a3e;
+  --bd-chip-confirmed-bg: #e2eee6;
+  --bd-chip-confirmed-bd: #9cc2ae;
+  --bd-chip-proposed: #1e3a5f;
+  --bd-chip-proposed-bg: #dee5ef;
+  --bd-chip-proposed-bd: #a9bcd4;
+  --bd-chip-open: #7a5a12;
+  --bd-chip-open-bg: #f3e9ce;
+  --bd-chip-open-bd: #cbb37a;
+  --bd-chip-vendor: #7c2130;
+  --bd-chip-vendor-bg: #f0e0e0;
+  --bd-chip-vendor-bd: #c99aa1;
+
+  --bd-display: "Fraunces", "Iowan Old Style", Georgia, serif;
+  --bd-body-font: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --bd-mono: "IBM Plex Mono", "Cascadia Code", ui-monospace, monospace;
+
+  /* layout scale */
+  --bd-wide: clamp(1180px, 92vw, 1600px);
+
+  position: relative;
+  color: var(--bd-ink);
+  font-family: var(--bd-body-font);
+  background: linear-gradient(180deg, var(--bd-bg), var(--bd-bg-2));
+  border: 1px solid var(--bd-rule-strong);
+  border-radius: 0;
+  box-shadow: var(--bd-shadow);
+  padding: clamp(20px, 3.5vw, 44px);
+  margin-top: 8px;
+  /* clip, not hidden: clips decoration without creating a scroll container,
+     so the sticky agenda rail keeps pinning. */
+  overflow: clip;
+  counter-reset: exhibit;
+}
+
+/* ============================================================
+   Graphite stock with brass foil (dark).
+   ============================================================ */
+[data-theme="dark"] .dd-boardroom.article-shell {
+  --bd-bg: #15161a;
+  --bd-bg-2: #1a1c21;
+  --bd-surface: #1e2027;
+  --bd-surface-sunk: #23262e;
+  --bd-ink: #eee9de;
+  --bd-ink-2: #cfc8ba;
+  --bd-muted: #9b9487;
+  --bd-rule: #32353d;
+  --bd-rule-strong: #4a4e58;
+  --bd-accent: #c79a45;
+  --bd-accent-soft: #2e2718;
+  --bd-accent-2: #86abdd;
+  --bd-accent-2-soft: #1b2532;
+  --bd-shadow: 0 1px 0 #32353d, 0 14px 30px -22px rgba(0, 0, 0, 0.7);
+
+  --bd-chip-confirmed: #7fcba4;
+  --bd-chip-confirmed-bg: #16281f;
+  --bd-chip-confirmed-bd: #2f5544;
+  --bd-chip-proposed: #86abdd;
+  --bd-chip-proposed-bg: #1b2532;
+  --bd-chip-proposed-bd: #33465e;
+  --bd-chip-open: #d9b45e;
+  --bd-chip-open-bg: #2b2415;
+  --bd-chip-open-bd: #4e4324;
+  --bd-chip-vendor: #e08a98;
+  --bd-chip-vendor-bg: #2e1a1e;
+  --bd-chip-vendor-bd: #5a3038;
+}
+
+/* Trim-mark frame: a hairline inset rule reading as a document trim. */
+.dd-boardroom::before {
+  content: "";
+  position: absolute;
+  inset: 10px;
+  border: 1px solid var(--bd-rule);
+  pointer-events: none;
+}
+
+/* Focus is never removed; the navy/steel accent clears 3:1 on every surface. */
+.dd-boardroom :focus-visible {
+  outline: 2px solid var(--bd-accent-2);
+  outline-offset: 2px;
+}
+
+/* ----------------------------------------------------------------- Header -- */
+.dd-boardroom .br-header {
+  position: relative;
+  max-width: var(--bd-wide);
+  margin: 0 auto;
+  padding-bottom: clamp(18px, 3vw, 28px);
+  border-bottom: 2px solid var(--bd-accent);
+}
+
+/* Docket line */
+.dd-boardroom .br-formline {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-family: var(--bd-mono);
+  font-weight: 500;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--bd-accent);
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--bd-accent);
+}
+.dd-boardroom .br-formline-tag { color: var(--bd-ink-2); }
+.dd-boardroom .br-formline-sep { color: var(--bd-rule-strong); }
+.dd-boardroom .br-formline-no { color: var(--bd-accent); }
+
+/* Corner stamp — decorative twin of the "unaudited" coords row. */
+.dd-boardroom .br-stamp {
+  position: absolute;
+  top: 0;
+  right: 0;
+  transform: rotate(-4deg);
+  border: 1.5px solid var(--bd-accent);
+  border-radius: 2px;
+  padding: 5px 10px;
+  font-family: var(--bd-mono);
+  font-weight: 500;
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--bd-accent);
+  background: transparent;
+}
+
+.dd-boardroom .br-title {
+  font-family: var(--bd-display);
+  font-variation-settings: "SOFT" 0, "WONK" 1;
+  font-weight: 700;
+  font-size: clamp(2.6rem, 6vw, 4.6rem);
+  line-height: 1.03;
+  letter-spacing: -0.02em;
+  overflow-wrap: break-word;
+  color: var(--bd-ink);
+  margin: 0.4em 0 0;
+}
+
+.dd-boardroom .br-subtitle {
+  font-family: var(--bd-display);
+  font-variation-settings: "SOFT" 0, "WONK" 1;
+  font-weight: 400;
+  font-style: italic;
+  font-size: clamp(1.05rem, 2.1vw, 1.35rem);
+  line-height: 1.45;
+  color: var(--bd-ink-2);
+  margin: 0.8rem 0 0;
+  max-width: 100%;
+}
+.dd-boardroom .br-rule-mark {
+  color: var(--bd-accent);
+  font-style: normal;
+  font-weight: 600;
+  margin-right: 0.35em;
+}
+
+.dd-boardroom .br-lead {
+  font-family: var(--bd-body-font);
+  font-weight: 400;
+  font-size: 1.2rem;
+  line-height: 1.65;
+  color: var(--bd-muted);
+  margin: 1.1rem 0 0;
+  max-width: 100%;
+}
+
+/* Coords strip — hairline rows with dot leaders between label and value.
+   Author each cell as "LABEL · value"; the leader is drawn in CSS. */
+.dd-boardroom .br-coords {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 clamp(16px, 3vw, 40px);
+  margin: 1.5rem 0 0;
+  border-top: 1px solid var(--bd-rule);
+}
+.dd-boardroom .br-coords span {
+  display: block;
+  position: relative;
+  padding: 8px 2px;
+  border-bottom: 1px solid var(--bd-rule);
+  font-family: var(--bd-mono);
+  font-weight: 400;
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums lining-nums;
+  color: var(--bd-ink-2);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.dd-boardroom .br-header-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px 22px;
+  margin-top: 1.5rem;
+}
+.dd-boardroom .back-link,
+.dd-boardroom .meta-row,
+.dd-boardroom .meta-pill,
+.dd-boardroom .entry-meta { color: var(--bd-muted); }
+.dd-boardroom .tag-row { margin-top: 1.2rem; }
+.dd-boardroom .tag {
+  background: transparent;
+  border: 1px solid var(--bd-rule-strong);
+  border-radius: 2px;
+  color: var(--bd-ink-2);
+  font-family: var(--bd-mono);
+  font-size: 0.69rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 5px 10px;
+}
+
+/* --------------------------------------------------- Layout + agenda rail -- */
+.dd-boardroom .br-layout {
+  display: grid;
+  grid-template-columns: 232px minmax(0, 1fr);
+  gap: clamp(20px, 3vw, 40px);
+  margin-top: clamp(18px, 2.5vw, 30px);
+  max-width: var(--bd-wide);
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* The order of business. Sticky under the site header on wide screens. */
+.dd-boardroom .br-spine-index {
+  position: sticky;
+  top: 92px;
+  align-self: start;
+  height: max-content;
+  max-height: calc(100vh - 116px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border: 1px solid var(--bd-rule);
+  background: var(--bd-bg-2);
+  padding: 0 0 6px;
+  scrollbar-width: thin;
+}
+.dd-boardroom .br-spine-index::before {
+  content: "Order of business";
+  display: block;
+  padding: 8px 12px;
+  margin-bottom: 4px;
+  font-family: var(--bd-mono);
+  font-weight: 500;
+  font-size: 0.66rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--bd-muted);
+  background: var(--bd-surface-sunk);
+  border-bottom: 1px solid var(--bd-rule);
+}
+.dd-boardroom .br-agenda {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.dd-boardroom .br-agenda-item { margin: 0; padding: 0; }
+.dd-boardroom .br-agenda-link {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: baseline;
+  gap: 4px 8px;
+  padding: 7px 12px;
+  border-left: 2px solid transparent;
+  text-decoration: none;
+  color: var(--bd-muted);
+  transition: color 0.12s ease, border-color 0.12s ease, background 0.12s ease;
+}
+.dd-boardroom .br-agenda-no {
+  font-family: var(--bd-mono);
+  font-weight: 500;
+  font-size: 0.66rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums lining-nums;
+  color: var(--bd-muted);
+}
+/* Dot leader — a repeating radial gradient, no image, no dashed border. */
+.dd-boardroom .br-agenda-leader {
+  align-self: end;
+  height: 9px;
+  min-width: 12px;
+  opacity: 0.35;
+  background-image: radial-gradient(currentColor 1px, transparent 1px);
+  background-size: 6px 6px;
+  background-position: 0 bottom;
+  background-repeat: repeat-x;
+}
+.dd-boardroom .br-agenda-label {
+  grid-column: 1 / -1;
+  font-size: 0.8rem;
+  line-height: 1.32;
+}
+.dd-boardroom .br-agenda-link:hover { color: var(--bd-ink); }
+.dd-boardroom .br-agenda-link.is-active {
+  color: var(--bd-ink);
+  border-left-color: var(--bd-accent);
+  background: var(--bd-surface);
+}
+.dd-boardroom .br-agenda-link.is-active .br-agenda-no { color: var(--bd-accent); }
+.dd-boardroom .br-agenda-link.is-active .br-agenda-leader { opacity: 0.15; }
+
+/* Exhibit sub-links: only the chapter being read expands, so the agenda stays
+   scannable rather than becoming a wall of links. */
+.dd-boardroom .br-agenda-fig {
+  display: none;
+  padding: 4px 12px 4px 30px;
+  border-left: 2px solid transparent;
+  font-size: 0.74rem;
+  line-height: 1.35;
+  color: var(--bd-muted);
+  text-decoration: none;
+}
+.dd-boardroom .br-agenda-fig::before {
+  content: "";
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  margin: 0 8px 2px -12px;
+  border: 1px solid var(--bd-rule-strong);
+}
+.dd-boardroom .br-agenda-item.is-open .br-agenda-fig { display: block; }
+.dd-boardroom .br-agenda-fig:hover { color: var(--bd-ink); }
+.dd-boardroom .br-agenda-fig:hover::before {
+  border-color: var(--bd-accent);
+  background: var(--bd-accent);
+}
+
+/* ============================================================
+   Typography reset — neutralize the global terminal aesthetic.
+   :where() keeps this at (0,2,0): above the global reset at (0,1,2),
+   below this sheet's own element rules at (0,2,1). Any custom class
+   used INSIDE the body must be styled at (0,3,0) via
+   .dd-boardroom .article-body .the-class — see the chip block below.
+   ============================================================ */
+.dd-boardroom .article-body :where(:not(pre > code)) {
+  display: revert;
+  padding: revert;
+  border: revert;
+  border-radius: 0;
+  background: none;
+  font-family: var(--bd-body-font);
+  font-size: revert;
+  color: revert;
+}
+
+.dd-boardroom .article-body {
+  position: relative;
+  margin-top: 0;
+  min-width: 0;
+  color: var(--bd-ink-2);
+  font-size: 1.0625rem;
+  line-height: 1.72;
+}
+.dd-boardroom .article-body > p,
+.dd-boardroom .article-body > ul,
+.dd-boardroom .article-body > ol,
+.dd-boardroom .article-body > h3,
+.dd-boardroom .article-body > h4,
+.dd-boardroom .article-body > blockquote,
+.dd-boardroom .article-body > .note-panel,
+.dd-boardroom .article-body > .callout {
+  max-width: 100%;
+}
+
+.dd-boardroom .article-body p,
+.dd-boardroom .article-body li { color: var(--bd-ink-2); }
+.dd-boardroom .article-body strong { color: var(--bd-ink); font-weight: 600; }
+.dd-boardroom .article-body em { font-style: italic; }
+.dd-boardroom .article-body a {
+  color: var(--bd-accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-thickness: 1px;
+}
+
+/* Chapter headings — engraved, with a drop-figure numeral in the left margin
+   supplied by the heading's own text; a 2px oxblood rule opens each section. */
+.dd-boardroom .br-body h2 {
+  position: relative;
+  font-family: var(--bd-display);
+  font-variation-settings: "SOFT" 0, "WONK" 1;
+  font-weight: 600;
+  font-size: clamp(1.7rem, 3.2vw, 2.4rem);
+  line-height: 1.14;
+  letter-spacing: -0.012em;
+  color: var(--bd-ink);
+  margin: 3.2rem 0 1.1rem;
+  padding: 20px 0 0;
+  border-top: 2px solid var(--bd-accent);
+  scroll-margin-top: 120px;
+}
+.dd-boardroom .br-body h2:first-of-type {
+  margin-top: 0.6rem;
+  border-top: 0;
+  padding-top: 0;
+}
+
+.dd-boardroom .br-body h3,
+.dd-boardroom .br-body h4 {
+  font-family: var(--bd-display);
+  font-variation-settings: "SOFT" 0, "WONK" 1;
+  font-weight: 600;
+  color: var(--bd-ink);
+  margin: 1.9rem 0 0.55rem;
+}
+.dd-boardroom .br-body h3 { font-size: 1.24rem; }
+.dd-boardroom .br-body h4 {
+  font-family: var(--bd-mono);
+  font-weight: 500;
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--bd-muted);
+}
+
+/* inline code + pre */
+.dd-boardroom .article-body :not(pre) > code {
+  font-family: var(--bd-mono);
+  font-size: 0.86em;
+  color: var(--bd-ink);
+  background: var(--bd-surface-sunk);
+  border: 1px solid var(--bd-rule);
+  border-radius: 2px;
+  padding: 0.08em 0.36em;
+}
+.dd-boardroom .article-body pre {
+  border: 1px solid var(--bd-rule);
+  border-radius: 0;
+  background: var(--bd-surface-sunk);
+}
+.dd-boardroom .article-body pre code {
+  font-family: var(--bd-mono);
+  color: var(--bd-ink);
+}
+
+/* -------------------------------------------------------- Evidence chips -- */
+/* Near-square filing chips with a 3px leading block. Both selectors carry
+   (0,3,0)+ so the typography revert cannot strip them. */
+.dd-boardroom .br-chip,
+.dd-boardroom .article-body .br-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--bd-mono);
+  font-weight: 500;
+  font-size: 0.6875rem;
+  line-height: 1.2;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border: 1px solid var(--bd-rule-strong);
+  border-radius: 2px;
+  padding: 0.15em 0.5em;
+  color: var(--bd-ink-2);
+  background: var(--bd-surface);
+  white-space: nowrap;
+}
+.dd-boardroom .br-chip::before,
+.dd-boardroom .article-body .br-chip::before {
+  content: "";
+  width: 3px;
+  height: 9px;
+  background: currentColor;
+}
+.dd-boardroom .br-chip--confirmed,
+.dd-boardroom .article-body .br-chip--confirmed {
+  color: var(--bd-chip-confirmed);
+  background: var(--bd-chip-confirmed-bg);
+  border-color: var(--bd-chip-confirmed-bd);
+}
+.dd-boardroom .br-chip--proposed,
+.dd-boardroom .article-body .br-chip--proposed {
+  color: var(--bd-chip-proposed);
+  background: var(--bd-chip-proposed-bg);
+  border-color: var(--bd-chip-proposed-bd);
+}
+.dd-boardroom .br-chip--open,
+.dd-boardroom .article-body .br-chip--open {
+  color: var(--bd-chip-open);
+  background: var(--bd-chip-open-bg);
+  border-color: var(--bd-chip-open-bd);
+}
+.dd-boardroom .br-chip--vendor-claim,
+.dd-boardroom .article-body .br-chip--vendor-claim {
+  color: var(--bd-chip-vendor);
+  background: var(--bd-chip-vendor-bg);
+  border-color: var(--bd-chip-vendor-bd);
+}
+
+/* ------------------------------------------------------------ Stat strip -- */
+.dd-boardroom .article-body .stat-strip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0;
+  margin-top: 1.6rem;
+  margin-bottom: 1.8rem;
+  border: 1px solid var(--bd-rule-strong);
+  background: var(--bd-surface);
+}
+.dd-boardroom .article-body .br-stat {
+  padding: 1rem 1.1rem 1.05rem;
+  min-width: 0;
+  border-left: 1px solid var(--bd-rule);
+}
+.dd-boardroom .article-body .br-stat:first-child { border-left: 0; }
+.dd-boardroom .article-body .br-stat > b {
+  display: block;
+  font-family: var(--bd-display);
+  font-variation-settings: "SOFT" 0, "WONK" 1;
+  font-weight: 700;
+  font-size: clamp(2rem, 4.5vw, 3.1rem);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--bd-ink);
+  font-variant-numeric: tabular-nums lining-nums;
+}
+.dd-boardroom .article-body .br-stat.alert > b { color: var(--bd-accent); }
+.dd-boardroom .article-body .br-stat.warn > b { color: var(--bd-chip-open); }
+.dd-boardroom .article-body .br-stat > span {
+  display: block;
+  font-family: var(--bd-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  line-height: 1.5;
+  color: var(--bd-muted);
+  margin-top: 0.5rem;
+}
+.dd-boardroom .article-body .br-stat > span:first-of-type { color: var(--bd-ink-2); }
+
+/* ------------------------------------------------------ Note to the reader */
+.dd-boardroom .article-body .note-panel {
+  display: block;
+  border: 1px solid var(--bd-rule);
+  border-left: 4px solid var(--bd-accent);
+  border-radius: 0;
+  background: var(--bd-surface);
+  padding: 0.9rem 1.15rem 1rem;
+  margin-top: 0;
+  margin-bottom: 1.7rem;
+}
+.dd-boardroom .article-body .note-panel::before {
+  content: "Note to the reader";
+  display: block;
+  margin-bottom: 0.6rem;
+  font-family: var(--bd-mono);
+  font-weight: 500;
+  font-size: 0.66rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--bd-accent);
+}
+.dd-boardroom .article-body .note-panel p {
+  margin: 0.5rem 0 0;
+  font-size: 0.99rem;
+  font-style: italic;
+  color: var(--bd-ink-2);
+}
+.dd-boardroom .article-body .note-panel p:first-of-type { margin-top: 0; }
+
+/* -------------------------------------------------------------- Callouts -- */
+/* Hairline box with the label straddling the top border, legend-style. No
+   coloured fill; variants differ only in label colour. */
+.dd-boardroom .article-body .callout {
+  display: block;
+  position: relative;
+  padding: 1.15rem 1.1rem 1rem;
+  border: 1px solid var(--bd-rule-strong);
+  border-radius: 0;
+  background: var(--bd-surface);
+  color: var(--bd-ink-2);
+  margin-top: 1.8rem;
+  margin-bottom: 1.6rem;
+}
+.dd-boardroom .article-body .callout > strong {
+  position: absolute;
+  top: 0;
+  left: 14px;
+  transform: translateY(-50%);
+  padding: 0 8px;
+  background: var(--bd-surface);
+  font-family: var(--bd-mono);
+  font-weight: 500;
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--bd-muted);
+}
+.dd-boardroom .article-body .callout p { margin: 0; font-size: 0.98rem; }
+.dd-boardroom .article-body .callout p + p { margin-top: 0.6rem; }
+.dd-boardroom .article-body .callout.resolution > strong { color: var(--bd-accent-2); }
+.dd-boardroom .article-body .callout.caveat > strong,
+.dd-boardroom .article-body .callout.warm > strong,
+.dd-boardroom .article-body .callout.alert > strong { color: var(--bd-accent); }
+.dd-boardroom .article-body .callout.counter-signal > strong,
+.dd-boardroom .article-body .callout.neutral > strong { color: var(--bd-muted); }
+
+/* ------------------------------------------------------------ Blockquote -- */
+.dd-boardroom .article-body blockquote {
+  margin-top: 1.9rem;
+  margin-bottom: 1.9rem;
+  padding: 1.1rem 0;
+  border: 0;
+  border-top: 2px solid var(--bd-accent);
+  border-bottom: 2px solid var(--bd-accent);
+  background: none;
+}
+.dd-boardroom .article-body blockquote p {
+  font-family: var(--bd-display);
+  font-variation-settings: "SOFT" 0, "WONK" 1;
+  font-weight: 400;
+  font-style: italic;
+  font-size: 1.35rem;
+  line-height: 1.5;
+  color: var(--bd-ink);
+  margin: 0;
+}
+.dd-boardroom .article-body blockquote p + p { margin-top: 0.6rem; }
+.dd-boardroom .article-body blockquote cite,
+.dd-boardroom .article-body blockquote footer {
+  display: block;
+  margin-top: 0.7rem;
+  font-family: var(--bd-mono);
+  font-style: normal;
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--bd-muted);
+}
+
+/* ---------------------------------------------------------------- Tables -- */
+/* Wide tables scroll inside their own container rather than widening the page.
+   Author-side: wrap in <div class="table-wrap"> when a table is genuinely wide;
+   the bare-table fallback below also scrolls. */
+.dd-boardroom .article-body .table-wrap {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  margin-top: 1.6rem;
+  margin-bottom: 1.6rem;
+  border: 1px solid var(--bd-rule-strong);
+}
+.dd-boardroom .article-body .table-wrap > table {
+  margin: 0;
+  border: 0;
+  min-width: 520px;
+}
+.dd-boardroom .article-body table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1.6rem;
+  margin-bottom: 1.6rem;
+  border: 1px solid var(--bd-rule-strong);
+  font-size: 0.92rem;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+.dd-boardroom .article-body th,
+.dd-boardroom .article-body td {
+  display: table-cell;
+  padding: 8px 13px;
+  border: 0;
+  border-bottom: 1px solid var(--bd-rule);
+  text-align: left;
+  vertical-align: top;
+  color: var(--bd-ink-2);
+}
+.dd-boardroom .article-body th {
+  font-family: var(--bd-mono);
+  font-weight: 500;
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--bd-ink);
+  background: var(--bd-surface-sunk);
+  border-bottom: 1px solid var(--bd-rule-strong);
+}
+.dd-boardroom .article-body tbody tr:last-child td { border-bottom: 0; }
+.dd-boardroom .article-body tbody tr:nth-child(even) td { background: var(--bd-bg-2); }
+.dd-boardroom .article-body td strong { color: var(--bd-ink); }
+
+/* ----------------------------------------------------- Details / appendix -- */
+.dd-boardroom .article-body details {
+  margin-top: 1.5rem;
+  margin-bottom: 2rem;
+  border: 1px solid var(--bd-rule-strong);
+  border-radius: 0;
+  background: var(--bd-surface);
+}
+.dd-boardroom .article-body summary {
+  list-style: none;
+  cursor: pointer;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  font-family: var(--bd-mono);
+  font-weight: 500;
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--bd-ink);
+  background: var(--bd-surface-sunk);
+}
+.dd-boardroom .article-body summary::-webkit-details-marker { display: none; }
+.dd-boardroom .article-body summary::after {
+  content: "+";
+  font-size: 0.95rem;
+  line-height: 1;
+  color: var(--bd-accent);
+}
+.dd-boardroom .article-body details[open] > summary::after { content: "\2212"; }
+.dd-boardroom .article-body details[open] > summary {
+  border-bottom: 1px solid var(--bd-rule-strong);
+}
+.dd-boardroom .article-body details table { margin: 0; border: 0; }
+.dd-boardroom .article-body details > div > table { margin: 0; border: 0; }
+.dd-boardroom .article-body details .table-wrap { margin: 0; border: 0; }
+
+/* section separator */
+.dd-boardroom .article-body hr {
+  border: 0;
+  border-top: 1px solid var(--bd-rule);
+  margin: 2.4rem 0;
+}
+
+/* ---------------------------------------------------- Exhibit plate chrome */
+/* AUTHORING RULE: the head strip is exactly 26px tall. Authors must add 26 to
+   the intended visual height when setting --vf-h / --vf-h-m on a .visual-frame,
+   which is the same convention deep-dive-atlas.css uses. Autosizing visuals
+   self-correct via postMessage and can ignore this. */
+.dd-boardroom .br-body { counter-reset: exhibit; }
+.dd-boardroom .article-body .visual-frame {
+  position: relative;
+  counter-increment: exhibit;
+  border: 1px solid var(--bd-rule-strong);
+  border-radius: 0;
+  background: var(--bd-surface);
+  box-shadow: var(--bd-shadow);
+  margin-top: 1.8rem;
+  margin-bottom: 2.2rem;
+  padding-top: 26px;
+  overflow: hidden;
+  scroll-margin-top: 120px;
+}
+.dd-boardroom .article-body .visual-frame::before {
+  content: "Exhibit " counter(exhibit, upper-alpha);
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  font-family: var(--bd-mono);
+  font-weight: 500;
+  font-size: 0.66rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--bd-accent);
+  background: var(--bd-surface-sunk);
+  border-bottom: 1px solid var(--bd-rule-strong);
+  z-index: 1;
+}
+.dd-boardroom .article-body .visual-frame::after {
+  content: "Fig. " counter(exhibit, decimal-leading-zero);
+  position: absolute;
+  top: 0;
+  right: 12px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  font-family: var(--bd-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums lining-nums;
+  color: var(--bd-muted);
+  z-index: 2;
+}
+.dd-boardroom .article-body .visual-frame:focus-within {
+  outline: 2px solid var(--bd-accent-2);
+  outline-offset: 2px;
+}
+.dd-boardroom .article-body .visual-frame iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: var(--bd-surface);
+}
+/* Caption plus its mono provenance line, authored as figcaption or .vf-caption */
+.dd-boardroom .article-body .visual-frame + figcaption,
+.dd-boardroom .article-body .vf-caption {
+  display: block;
+  margin: -1.6rem 0 2rem;
+  font-size: 0.93rem;
+  font-style: italic;
+  line-height: 1.55;
+  color: var(--bd-ink-2);
+}
+.dd-boardroom .article-body .vf-source {
+  display: block;
+  margin: 0.35rem 0 2rem;
+  font-family: var(--bd-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--bd-muted);
+}
+
+/* ------------------------------------------------------------ Preferences -- */
+@media (prefers-contrast: more) {
+  .dd-boardroom.article-shell { --bd-rule: var(--bd-rule-strong); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dd-boardroom .br-agenda-link,
+  .dd-boardroom .br-agenda-fig,
+  .dd-boardroom .article-body .visual-frame { transition: none; }
+}
+
+/* ----------------------------------------------------------- Responsive --- */
+@media (max-width: 960px) {
+  /* minmax(0,1fr), never bare 1fr: a wide table's min-content would inflate
+     the column past the viewport, invisibly, under the shell's overflow:clip. */
+  .dd-boardroom .br-layout { grid-template-columns: minmax(0, 1fr); }
+  .dd-boardroom .br-spine-index {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    align-self: stretch;
+    max-height: none;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+    border: 0;
+    border-bottom: 2px solid var(--bd-accent);
+    margin-bottom: 16px;
+    padding: 4px 0;
+    background: linear-gradient(180deg, var(--bd-bg), var(--bd-bg-2));
+    scroll-snap-type: x proximity;
+  }
+  .dd-boardroom .br-spine-index::before { display: none; }
+  .dd-boardroom .br-agenda { display: flex; }
+  .dd-boardroom .br-agenda-item { flex: 0 0 auto; scroll-snap-align: center; }
+  .dd-boardroom .br-agenda-link {
+    grid-template-columns: auto auto;
+    white-space: nowrap;
+    border-left: 0;
+    border-bottom: 2px solid transparent;
+  }
+  .dd-boardroom .br-agenda-leader { display: none; }
+  /* The only legitimate `ch` cap in the codebase: this is ellipsis truncation
+     for a horizontally scrolling nav strip, not a reading measure. Every other
+     `ch` cap on text was removed because it starved the column. Keep this one. */
+  .dd-boardroom .br-agenda-label {
+    grid-column: auto;
+    max-width: 22ch;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .dd-boardroom .br-agenda-link.is-active {
+    border-left-color: transparent;
+    border-bottom-color: var(--bd-accent);
+    background: transparent;
+  }
+  .dd-boardroom .br-agenda-item.is-open .br-agenda-fig { display: none; }
+  .dd-boardroom .br-body h2,
+  .dd-boardroom .article-body .visual-frame { scroll-margin-top: 108px; }
+  .dd-boardroom .article-body .stat-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .dd-boardroom .article-body .br-stat:nth-child(3) { border-left: 0; }
+  .dd-boardroom .article-body .br-stat:nth-child(n + 3) { border-top: 1px solid var(--bd-rule); }
+}
+
+@media (max-width: 860px) {
+  .dd-boardroom .br-coords { grid-template-columns: minmax(0, 1fr); }
+}
+
+@media (max-width: 720px) {
+  .dd-boardroom .br-stamp { display: none; }
+  .dd-boardroom .br-header { padding-bottom: 18px; }
+  .dd-boardroom .br-title { font-size: clamp(2rem, 9vw, 2.8rem); }
+  .dd-boardroom .br-lead { font-size: 1.06rem; }
+}
+
+@media (max-width: 560px) {
+  .dd-boardroom::before { display: none; }
+  .dd-boardroom .article-body .stat-strip { grid-template-columns: minmax(0, 1fr); }
+  .dd-boardroom .article-body .br-stat { border-left: 0; }
+  .dd-boardroom .article-body .br-stat + .br-stat { border-top: 1px solid var(--bd-rule); }
+}
+
+/* ------------------------------------------------- Wide-screen breakout -- */
+/* global.css lifts the .site-shell cap to 1800px for article pages at
+   >=1640px; here the template's own wide cap follows suit so content fills
+   the larger shell instead of stopping at 1600px. */
+@supports selector(:has(*)) {
+  @media (min-width: 1640px) {
+    .dd-boardroom.article-shell { --bd-wide: 100%; }
+  }
+}

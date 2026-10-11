@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Where coverage collapses</title>
+<script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+.shell { display: flex; flex-direction: column; gap: 12px; }
+:root[data-embedded="true"] .shell { padding: 14px clamp(14px, 2vw, 22px); }
+.head h1 { font-family: "Archivo", sans-serif; font-weight: 700; font-size: clamp(1.0rem, 2.2vw, 1.26rem); color: var(--text-strong); }
+.head p { font: 500 0.76rem/1.4 "IBM Plex Sans", sans-serif; color: var(--muted); margin-top: 3px; }
+
+.ctl { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.ctl button {
+  min-height: 34px; padding: 6px 12px; cursor: pointer;
+  font: 600 0.64rem/1 "IBM Plex Mono", monospace; letter-spacing: 0.07em; text-transform: uppercase;
+  color: var(--accent); background: transparent; border: 1px solid var(--accent);
+}
+.ctl button:hover { background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.ctl button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.ctl .hint { font: 500 0.68rem/1.3 "IBM Plex Sans", sans-serif; color: var(--muted-soft); }
+
+.legend { display: flex; gap: 16px; flex-wrap: wrap; font: 500 0.7rem/1.3 "IBM Plex Sans", sans-serif; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 5px; }
+.legend .slot { width: 16px; height: 16px; }
+.legend .covered .slot { color: var(--good); }
+.legend .partial .slot { color: var(--warn); }
+.legend .absent .slot { color: var(--signal); }
+
+/* The matrix: each row is a button leading with the control plane's icon,
+   coverage encoded as icon + colour per adversary column. */
+.grid { border: 1px solid var(--border-strong); }
+.hrow, .row {
+  display: grid; grid-template-columns: minmax(150px, 1.4fr) repeat(3, minmax(64px, 1fr));
+  align-items: center;
+}
+.hrow { background: var(--surface-strong); border-bottom: 1px solid var(--border); }
+.hrow span {
+  padding: 8px 6px; text-align: center;
+  font: 600 0.62rem/1.3 "IBM Plex Mono", monospace; letter-spacing: 0.05em; text-transform: uppercase;
+  color: var(--muted); transition: color 300ms;
+}
+.hrow span:first-child { text-align: left; padding-left: 12px; color: var(--text-strong); }
+.hrow span.lit { color: var(--text-strong); }
+.hrow span.exploited { border-bottom: 3px solid var(--accent); margin-bottom: -1px; }
+.hrow span.exploited.lit { color: var(--accent); }
+
+.row {
+  width: 100%; background: transparent; border: 0; padding: 0; cursor: pointer;
+  font-family: inherit; text-align: left;
+}
+.row + .row { border-top: 1px solid var(--border); }
+.row:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.rhead { display: flex; align-items: center; gap: 9px; padding: 8px 6px 8px 10px; min-width: 0; }
+.pic {
+  flex: 0 0 30px; width: 30px; height: 30px; display: grid; place-items: center;
+  background: var(--surface); border: 1.5px solid var(--border-strong); color: var(--muted);
+}
+.pic svg { width: 20px; height: 20px; display: block; }
+.pic svg *, .slot svg * { stroke: currentColor; }
+.rhead b { font: 500 0.75rem/1.3 "IBM Plex Sans", sans-serif; color: var(--text); }
+.row[aria-expanded="true"] .pic { color: var(--accent); border-color: var(--accent); }
+
+.cell { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 4px; }
+.cell .slot { width: 20px; height: 20px; }
+.cell small { font: 600 0.56rem/1.2 "IBM Plex Mono", monospace; letter-spacing: 0.04em; text-transform: uppercase; }
+.cell.covered { color: var(--good); }
+.cell.partial { color: var(--warn); }
+.cell.absent { color: var(--signal); }
+.ctag { display: none; }
+
+/* stamp-in: cells land like a stamp, column by column */
+.cell { opacity: 0; transform: scale(1.5); transition: opacity 240ms, transform 240ms cubic-bezier(0.2, 1.4, 0.4, 1); }
+.cell.in { opacity: 1; transform: scale(1); }
+
+.more {
+  grid-column: 1 / -1; display: none; margin: 0 12px 10px;
+  font: 500 0.7rem/1.45 "IBM Plex Sans", sans-serif; color: var(--muted);
+  border-left: 2px solid var(--accent); padding-left: 8px;
+}
+.row[aria-expanded="true"] .more { display: block; }
+
+.caption { font: 500 0.72rem/1.5 "IBM Plex Sans", sans-serif; color: var(--muted); }
+.caption b { color: var(--text-strong); font-weight: 600; }
+
+@media (max-width: 620px) {
+  .hrow { display: none; }
+  .row { grid-template-columns: repeat(3, 1fr); }
+  .rhead { grid-column: 1 / -1; padding-bottom: 2px; }
+  /* header row is hidden, so each cell carries its own column tag */
+  .ctag {
+    display: block; font: 600 0.52rem/1.25 "IBM Plex Mono", monospace;
+    letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted-soft);
+    text-align: center; font-style: normal;
+  }
+  .cell.exp { box-shadow: inset 0 3px 0 var(--accent); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cell { transition: none; }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="head">
+    <h1>Control coverage against three adversary types</h1>
+    <p>The open-framework operator column is where nearly everything goes empty.</p>
+  </div>
+
+  <div class="ctl">
+    <button type="button" id="replay">Replay stamps</button>
+    <span class="hint">Coverage stamps in column by column. Tap a row for the gap.</span>
+  </div>
+
+  <div class="legend">
+    <span class="covered"><span class="slot" data-status="check"></span> Covered</span>
+    <span class="partial"><span class="slot" data-status="warning"></span> Partial</span>
+    <span class="absent"><span class="slot" data-status="barrier"></span> Absent</span>
+  </div>
+
+  <div class="grid" id="grid" role="group" aria-label="Control gap matrix">
+    <div class="hrow">
+      <span>Control mechanism</span>
+      <span data-col="0">Closed-model user</span>
+      <span data-col="1">Open-weight self-hoster</span>
+      <span data-col="2" class="exploited">Open-framework operator</span>
+    </div>
+
+    <button type="button" class="row" data-icon="flask" aria-expanded="false">
+      <span class="rhead"><span class="pic" data-pic aria-hidden="true"></span><b>Pre-release model review</b></span>
+      <span class="cell covered"><i class="ctag">Closed-model user</i><span class="slot" data-status="check"></span><small>Covered</small></span>
+      <span class="cell absent"><i class="ctag">Open-weight self-hoster</i><span class="slot" data-status="barrier"></span><small>Absent</small></span>
+      <span class="cell absent exp"><i class="ctag">Open-framework operator</i><span class="slot" data-status="barrier"></span><small>Absent</small></span>
+      <span class="more">Review happens inside the vendor. An adversary who never touches the vendor's release process is never reviewed.</span>
+    </button>
+
+    <button type="button" class="row" data-icon="key" aria-expanded="false">
+      <span class="rhead"><span class="pic" data-pic aria-hidden="true"></span><b>Provider API gating</b></span>
+      <span class="cell covered"><i class="ctag">Closed-model user</i><span class="slot" data-status="check"></span><small>Covered</small></span>
+      <span class="cell absent"><i class="ctag">Open-weight self-hoster</i><span class="slot" data-status="barrier"></span><small>Absent</small></span>
+      <span class="cell absent exp"><i class="ctag">Open-framework operator</i><span class="slot" data-status="barrier"></span><small>Absent</small></span>
+      <span class="more">Gating lives at the vendor's API edge. Self-hosted weights and open frameworks never present a request to gate.</span>
+    </button>
+
+    <button type="button" class="row" data-icon="shield" aria-expanded="false">
+      <span class="rhead"><span class="pic" data-pic aria-hidden="true"></span><b>Refusal training</b></span>
+      <span class="cell partial"><i class="ctag">Closed-model user</i><span class="slot" data-status="warning"></span><small>Partial</small></span>
+      <span class="cell absent"><i class="ctag">Open-weight self-hoster</i><span class="slot" data-status="barrier"></span><small>Absent</small></span>
+      <span class="cell absent exp"><i class="ctag">Open-framework operator</i><span class="slot" data-status="barrier"></span><small>Absent</small></span>
+      <span class="more">Refusals can be argued around even on closed models, and fine-tuning strips them from open weights entirely.</span>
+    </button>
+
+    <button type="button" class="row" data-icon="personcheck" aria-expanded="false">
+      <span class="rhead"><span class="pic" data-pic aria-hidden="true"></span><b>Account &amp; identity control</b></span>
+      <span class="cell covered"><i class="ctag">Closed-model user</i><span class="slot" data-status="check"></span><small>Covered</small></span>
+      <span class="cell covered"><i class="ctag">Open-weight self-hoster</i><span class="slot" data-status="check"></span><small>Covered</small></span>
+      <span class="cell partial exp"><i class="ctag">Open-framework operator</i><span class="slot" data-status="warning"></span><small>Partial</small></span>
+      <span class="more">Vendor accounts can be banned. An operator who needs no vendor only exposes the identities it steals inside the victim's estate.</span>
+    </button>
+
+    <button type="button" class="row" data-icon="cpu" aria-expanded="false">
+      <span class="rhead"><span class="pic" data-pic aria-hidden="true"></span><b>Runtime containment</b></span>
+      <span class="cell partial"><i class="ctag">Closed-model user</i><span class="slot" data-status="warning"></span><small>Partial</small></span>
+      <span class="cell partial"><i class="ctag">Open-weight self-hoster</i><span class="slot" data-status="warning"></span><small>Partial</small></span>
+      <span class="cell partial exp"><i class="ctag">Open-framework operator</i><span class="slot" data-status="warning"></span><small>Partial</small></span>
+      <span class="more">Containment sits in whatever estate the agent runs in. It works against every adversary type but only as well as that estate is configured.</span>
+    </button>
+
+    <button type="button" class="row" data-icon="megaphone" aria-expanded="false">
+      <span class="rhead"><span class="pic" data-pic aria-hidden="true"></span><b>Disclosure regimes</b></span>
+      <span class="cell partial"><i class="ctag">Closed-model user</i><span class="slot" data-status="warning"></span><small>Partial</small></span>
+      <span class="cell partial"><i class="ctag">Open-weight self-hoster</i><span class="slot" data-status="warning"></span><small>Partial</small></span>
+      <span class="cell partial exp"><i class="ctag">Open-framework operator</i><span class="slot" data-status="warning"></span><small>Partial</small></span>
+      <span class="more">Disclosure reaches every adversary type in principle but always after the fact and only if the incident is noticed and reported.</span>
+    </button>
+  </div>
+
+  <p class="caption">Only two rows, identity and runtime, stay populated once the adversary needs no vendor at all. That gap is the entire argument for the defense architecture in the next chapter, in one image.</p>
+</div>
+<script>
+(() => {
+  const ICON_BASE = '../customs-entry-agent/flow-icons/';
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const grid = document.getElementById('grid');
+  const rows = Array.from(grid.querySelectorAll('.row'));
+  const heads = Array.from(grid.querySelectorAll('.hrow [data-col]'));
+
+  /* Icons are shared line-art SVGs; fetched once per name and inlined with the
+     stroke swapped to currentColor so they follow each cell's status colour. A
+     failed fetch leaves the slot empty and the status word still carries it. */
+  const cache = {};
+  const icon = (name) => (cache[name] ||= fetch(ICON_BASE + name + '.svg')
+    .then((r) => (r.ok ? r.text() : Promise.reject()))
+    .then((t) => t.replace(/stroke="#232f3e"/g, 'stroke="currentColor"'))
+    .catch(() => ''));
+  rows.forEach((row) => {
+    const slot = row.querySelector('[data-pic]');
+    icon(row.dataset.icon).then((t) => { slot.innerHTML = t; });
+  });
+  document.querySelectorAll('.slot[data-status]').forEach((slot) => {
+    icon(slot.dataset.status).then((t) => { slot.innerHTML = t; });
+  });
+
+  /* expand/collapse the one-line gap detail on tap or Enter */
+  rows.forEach((row) => {
+    row.addEventListener('click', () => {
+      const open = row.getAttribute('aria-expanded') === 'true';
+      row.setAttribute('aria-expanded', String(!open));
+    });
+  });
+
+  /* Cells stamp in column by column, staggered down the rows, so the last
+     column visibly empties out. rAF t0 comes from the first frame timestamp,
+     never performance.now(): sandboxed iframes can disagree between clocks. */
+  const COL_GAP = 850, ROW_GAP = 110;
+  const cells = [];
+  rows.forEach((row, ri) => {
+    row.querySelectorAll('.cell').forEach((cell, ci) => {
+      cells.push({ el: cell, col: ci, at: ci * COL_GAP + ri * ROW_GAP });
+    });
+  });
+  const total = 2 * COL_GAP + (rows.length - 1) * ROW_GAP + 300;
+  let raf = 0;
+  const run = () => {
+    cancelAnimationFrame(raf);
+    if (reduced) {
+      cells.forEach((c) => c.el.classList.add('in'));
+      heads.forEach((h) => h.classList.add('lit'));
+      return;
+    }
+    cells.forEach((c) => c.el.classList.remove('in'));
+    heads.forEach((h) => h.classList.remove('lit'));
+    let t0 = null;
+    const step = (ts) => {
+      if (t0 === null) t0 = ts;
+      const t = ts - t0;
+      cells.forEach((c) => { if (t >= c.at) c.el.classList.add('in'); });
+      heads.forEach((h, i) => { if (t >= i * COL_GAP) h.classList.add('lit'); });
+      if (t < total) raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+  };
+
+  document.getElementById('replay').addEventListener('click', run);
+
+  /* threshold 0, not 0.2: the matrix can exceed a phone viewport, and a
+     fraction of a too-tall element never intersects. */
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting)) { io.disconnect(); run(); }
+    }, { threshold: 0 });
+    io.observe(grid);
+  } else { run(); }
+
+  if (document.documentElement.dataset.embedded === 'true') {
+    const postSize = () => window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+    if ('ResizeObserver' in window) new ResizeObserver(postSize).observe(document.body);
+    window.addEventListener('load', postSize);
+    window.addEventListener('resize', postSize);
+  }
+})();
+</script>
+</body>
+</html>

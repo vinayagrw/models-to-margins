@@ -1,0 +1,1084 @@
+/* ============================================================================
+   Control Tower — bespoke "tower" template for operations deep-dives.
+   Every rule is scoped under .dd-tower so nothing leaks to other pages.
+
+   Identity: the ops room that watches a shipment cross a border. Not a
+   document — an instrument. Every claim on the page wants three things beside
+   it: who owns this, what is the state, and what clock is running. Dark is the
+   night tower, near-black glass with cyan and amber lamps. Light is the same
+   room at 11am: cool paper-grey, the lamps kept saturated because a lamp that
+   is not obviously lit is not a lamp.
+
+   Accessibility contract, binding:
+     --tw-live       FILL AND TEXT. 4.8:1 on light, 6.4:1 on dark.
+     --tw-live-dim   FILL ONLY. Never put text on it without --tw-ink.
+     --tw-ink-3      muted text. 4.5:1 minimum against --tw-panel, both modes.
+   Grid and scanline textures never exceed 0.10 alpha, so they cannot depress
+   text contrast below the ratios above.
+   ========================================================================== */
+
+.dd-tower.article-shell {
+  /* --- day room (light) --- */
+  --tw-bg-0: #eceff2;
+  --tw-bg-1: #e2e7ec;
+  --tw-panel: #f7f9fb;
+  --tw-panel-2: #eaeff4;
+  --tw-rule: #a8b6c2;
+  --tw-rule-strong: #778996;
+  --tw-rule-faint: rgba(40, 62, 80, 0.10);
+  --tw-ink: #101a22;
+  --tw-ink-2: #35485a;
+  --tw-ink-3: #5a6f80;
+  --tw-live: #0a6b86;
+  --tw-live-dim: rgba(10, 107, 134, 0.11);
+  --tw-on-live: #f2fbfd;
+  --tw-ok: #1d6446;
+  --tw-ok-dim: rgba(29, 100, 70, 0.11);
+  --tw-warn: #8a5a0c;
+  --tw-warn-dim: rgba(138, 90, 12, 0.12);
+  --tw-alarm: #a52a1c;
+  --tw-alarm-dim: rgba(165, 42, 28, 0.10);
+  --tw-shadow: rgba(24, 40, 56, 0.20);
+  --tw-glow: none;
+
+  --tw-display: "Chakra Petch", "Saira Condensed", system-ui, sans-serif;
+  --tw-body-font: "Manrope", "Segoe UI", system-ui, sans-serif;
+  --tw-mono: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
+
+  --tw-rail: 244px;
+  --tw-stick: 96px;
+
+  position: relative;
+  color: var(--tw-ink);
+  font-family: var(--tw-body-font);
+  /* Instrument grid. Decorative, kept under 0.10 alpha. */
+  background:
+    linear-gradient(0deg, var(--tw-rule-faint) 1px, transparent 1px),
+    linear-gradient(90deg, var(--tw-rule-faint) 1px, transparent 1px),
+    linear-gradient(180deg, var(--tw-bg-0), var(--tw-bg-1));
+  background-size: 44px 44px, 44px 44px, auto;
+  border: 1px solid var(--tw-rule);
+  border-radius: 6px;
+  box-shadow: 0 18px 50px -28px var(--tw-shadow);
+  padding: clamp(20px, 4vw, 46px);
+  margin-top: 8px;
+  /* clip, not hidden: clips decoration without creating a scroll container,
+     so the sticky station index keeps pinning. */
+  overflow: clip;
+}
+
+/* ============================================================
+   Night tower (dark) — the site default mode.
+   ============================================================ */
+[data-theme="dark"] .dd-tower.article-shell {
+  --tw-bg-0: #0a1016;
+  --tw-bg-1: #070c11;
+  --tw-panel: #101a22;
+  --tw-panel-2: #152230;
+  --tw-rule: #2b3f52;
+  --tw-rule-strong: #486478;
+  --tw-rule-faint: rgba(120, 190, 230, 0.07);
+  --tw-ink: #e4eef5;
+  --tw-ink-2: #adc2d1;
+  --tw-ink-3: #7f97a8;
+  --tw-live: #34c6ea;
+  --tw-live-dim: rgba(52, 198, 234, 0.13);
+  --tw-on-live: #04191f;
+  --tw-ok: #45d493;
+  --tw-ok-dim: rgba(69, 212, 147, 0.13);
+  --tw-warn: #e6a93f;
+  --tw-warn-dim: rgba(230, 169, 63, 0.14);
+  --tw-alarm: #ff6f58;
+  --tw-alarm-dim: rgba(255, 111, 88, 0.14);
+  --tw-shadow: rgba(0, 0, 0, 0.6);
+  --tw-glow: 0 0 12px -2px currentColor;
+  box-shadow: 0 18px 54px -30px var(--tw-shadow);
+}
+
+/* ============================================================
+   Header — the tower's status board.
+   ============================================================ */
+.dd-tower .tw-header {
+  position: relative;
+  padding-bottom: 22px;
+  margin-bottom: 26px;
+  border-bottom: 1px solid var(--tw-rule);
+}
+
+.dd-tower .tw-readout {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+  font-family: var(--tw-mono);
+  font-size: 0.69rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--tw-ink-3);
+}
+
+.dd-tower .tw-readout-tag {
+  padding: 3px 9px;
+  color: var(--tw-on-live);
+  background: var(--tw-live);
+  border-radius: 3px;
+}
+
+.dd-tower .tw-readout-no { color: var(--tw-ink-2); }
+
+.dd-tower .tw-readout-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  padding: 3px 10px;
+  color: var(--tw-ok);
+  border: 1px solid currentColor;
+  border-radius: 3px;
+}
+.dd-tower .tw-readout-status::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: var(--tw-glow);
+}
+
+.dd-tower .tw-title {
+  margin: 0 0 10px;
+  font-family: var(--tw-display);
+  font-weight: 700;
+  font-size: clamp(1.9rem, 4.6vw, 3rem);
+  line-height: 1.08;
+  letter-spacing: -0.01em;
+  color: var(--tw-ink);
+}
+
+.dd-tower .tw-subtitle {
+  margin: 0 0 14px;
+  font-family: var(--tw-mono);
+  font-size: 0.86rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--tw-live);
+}
+
+.dd-tower .tw-lead {
+  max-width: 100%;
+  margin: 0 0 18px;
+  font-size: clamp(1rem, 1.5vw, 1.12rem);
+  line-height: 1.62;
+  color: var(--tw-ink-2);
+}
+
+.dd-tower .tw-coords {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.dd-tower .tw-coords > span {
+  padding: 6px 11px;
+  font-family: var(--tw-mono);
+  font-size: 0.67rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--tw-ink-3);
+  background: var(--tw-panel);
+  border: 1px solid var(--tw-rule);
+  border-radius: 3px;
+}
+
+.dd-tower .tw-header-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+/* Re-tint the global chrome so it belongs to this console. */
+.dd-tower .back-link {
+  font-family: var(--tw-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--tw-live);
+}
+.dd-tower .meta-pill {
+  font-family: var(--tw-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  color: var(--tw-ink-3);
+  background: var(--tw-panel);
+  border: 1px solid var(--tw-rule);
+  border-radius: 3px;
+}
+.dd-tower .tag {
+  font-family: var(--tw-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--tw-ink-2);
+  background: var(--tw-panel-2);
+  border: 1px solid var(--tw-rule);
+  border-radius: 3px;
+}
+
+/* ============================================================
+   Layout + the station index.
+   ============================================================ */
+.dd-tower .tw-layout {
+  display: grid;
+  grid-template-columns: var(--tw-rail) minmax(0, 1fr);
+  gap: clamp(20px, 3.4vw, 44px);
+  align-items: start;
+}
+
+.dd-tower .tw-spine-index {
+  position: sticky;
+  top: var(--tw-stick);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px;
+  background: var(--tw-panel);
+  border: 1px solid var(--tw-rule);
+  border-radius: 5px;
+  max-height: calc(100vh - var(--tw-stick) - 24px);
+  overflow-y: auto;
+}
+
+.dd-tower .tw-index-link {
+  position: relative;
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  gap: 9px;
+  align-items: baseline;
+  padding: 8px 10px;
+  text-decoration: none;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  transition: background 0.16s ease, border-color 0.16s ease;
+}
+
+.dd-tower .tw-index-no {
+  font-family: var(--tw-mono);
+  font-size: 0.67rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--tw-ink-3);
+}
+
+.dd-tower .tw-index-label {
+  font-size: 0.82rem;
+  line-height: 1.34;
+  color: var(--tw-ink-2);
+}
+
+.dd-tower .tw-index-link:hover {
+  background: var(--tw-panel-2);
+  border-color: var(--tw-rule);
+}
+.dd-tower .tw-index-link:hover .tw-index-label { color: var(--tw-ink); }
+
+.dd-tower .tw-index-link.is-active {
+  background: var(--tw-live-dim);
+  border-color: var(--tw-live);
+}
+.dd-tower .tw-index-link.is-active .tw-index-no { color: var(--tw-live); }
+.dd-tower .tw-index-link.is-active .tw-index-label {
+  color: var(--tw-ink);
+  font-weight: 600;
+}
+.dd-tower .tw-index-link:focus-visible {
+  outline: 2px solid var(--tw-live);
+  outline-offset: 2px;
+}
+
+/* ============================================================
+   Typography reset — neutralize the global terminal aesthetic.
+   :where() keeps this at (0,2,0): above the global reset at (0,1,2),
+   below this sheet's own element rules at (0,2,1). Any custom class used
+   INSIDE the body must be styled at (0,3,0) via
+   .dd-tower .article-body .the-class — see the component blocks below.
+   ============================================================ */
+.dd-tower .article-body :where(:not(pre > code)) {
+  display: revert;
+  padding: revert;
+  border: revert;
+  border-radius: 0;
+  background: none;
+  font-family: var(--tw-body-font);
+  font-size: revert;
+  color: revert;
+}
+
+.dd-tower .article-body {
+  max-width: 100%;
+  color: var(--tw-ink-2);
+  font-size: 1rem;
+  line-height: 1.72;
+}
+
+.dd-tower .article-body > * { max-width: 100%; }
+
+.dd-tower .article-body p { margin: 0 0 1.1em; }
+.dd-tower .article-body strong { color: var(--tw-ink); font-weight: 700; }
+.dd-tower .article-body em { font-style: italic; color: var(--tw-ink); }
+
+.dd-tower .article-body a {
+  color: var(--tw-live);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-thickness: 1px;
+}
+.dd-tower .article-body a:hover { text-decoration-thickness: 2px; }
+.dd-tower .article-body a:focus-visible {
+  outline: 2px solid var(--tw-live);
+  outline-offset: 2px;
+}
+
+.dd-tower .article-body ul,
+.dd-tower .article-body ol {
+  margin: 0 0 1.2em;
+  padding-left: 1.3em;
+}
+.dd-tower .article-body li { margin-bottom: 0.5em; }
+.dd-tower .article-body ul li::marker { color: var(--tw-live); }
+.dd-tower .article-body ol li::marker {
+  color: var(--tw-ink-3);
+  font-family: var(--tw-mono);
+  font-size: 0.86em;
+}
+
+/* Station heading — a panel header with a live bar. */
+.dd-tower .article-body h2 {
+  scroll-margin-top: calc(var(--tw-stick) + 18px);
+  position: relative;
+  margin: 2.6em 0 0.9em;
+  padding: 10px 0 10px 14px;
+  font-family: var(--tw-display);
+  font-weight: 700;
+  font-size: clamp(1.3rem, 2.5vw, 1.7rem);
+  line-height: 1.2;
+  color: var(--tw-ink);
+  border-left: 3px solid var(--tw-rule-strong);
+  transition: border-color 0.2s ease;
+}
+.dd-tower .article-body h2:first-child { margin-top: 0; }
+.dd-tower .article-body h2.is-current {
+  border-left-color: var(--tw-live);
+}
+
+.dd-tower .article-body h3 {
+  margin: 2em 0 0.6em;
+  font-family: var(--tw-display);
+  font-weight: 600;
+  font-size: 1.12rem;
+  color: var(--tw-ink);
+}
+.dd-tower .article-body h4 {
+  margin: 1.6em 0 0.5em;
+  font-family: var(--tw-mono);
+  font-weight: 600;
+  font-size: 0.77rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--tw-ink-3);
+}
+
+.dd-tower .article-body code {
+  font-family: var(--tw-mono);
+  font-size: 0.88em;
+  color: var(--tw-ink);
+  background: var(--tw-panel-2);
+  border: 1px solid var(--tw-rule-faint);
+  border-radius: 3px;
+  padding: 1px 5px;
+}
+.dd-tower .article-body pre {
+  margin: 0 0 1.3em;
+  padding: 14px 16px;
+  overflow-x: auto;
+  font-family: var(--tw-mono);
+  font-size: 0.82rem;
+  line-height: 1.6;
+  color: var(--tw-ink);
+  background: var(--tw-panel);
+  border: 1px solid var(--tw-rule);
+  border-left: 3px solid var(--tw-live);
+  border-radius: 3px;
+}
+.dd-tower .article-body pre code {
+  padding: 0;
+  border: 0;
+  background: none;
+}
+
+/* ============================================================
+   Component — evidence chips. Same six grades the house uses.
+   ============================================================ */
+.dd-tower .article-body .tw-chip {
+  display: inline-block;
+  padding: 2px 8px;
+  margin-right: 6px;
+  font-family: var(--tw-mono);
+  font-size: 0.63rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border: 1px solid currentColor;
+  border-radius: 3px;
+  vertical-align: 2px;
+}
+.dd-tower .article-body .tw-chip--confirmed {
+  color: var(--tw-ok);
+  background: var(--tw-ok-dim);
+}
+.dd-tower .article-body .tw-chip--vendor-claim {
+  color: var(--tw-warn);
+  background: var(--tw-warn-dim);
+}
+.dd-tower .article-body .tw-chip--proposed {
+  color: var(--tw-live);
+  background: var(--tw-live-dim);
+}
+.dd-tower .article-body .tw-chip--open {
+  color: var(--tw-alarm);
+  background: var(--tw-alarm-dim);
+}
+.dd-tower .article-body .tw-chip--hold {
+  color: var(--tw-alarm);
+  background: var(--tw-alarm-dim);
+  border-width: 2px;
+}
+.dd-tower .article-body .tw-chip--illustrative {
+  color: var(--tw-ink-3);
+  border-style: dashed;
+}
+
+/* ============================================================
+   Component — the control row. This template's signature element.
+   A lamp, the thing being watched, who owns it, and what clock runs.
+   ============================================================ */
+.dd-tower .article-body .tw-board {
+  margin: 0 0 1.6em;
+  border: 1px solid var(--tw-rule);
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.dd-tower .article-body .tw-row {
+  display: grid;
+  grid-template-columns: 10px minmax(0, 1fr) auto;
+  grid-template-areas:
+    "lamp what  clock"
+    "....  note  ....."
+    "....  owner .....";
+  column-gap: 12px;
+  align-items: start;
+  padding: 12px 14px;
+  background: var(--tw-panel);
+  border-bottom: 1px solid var(--tw-rule-faint);
+}
+.dd-tower .article-body .tw-row:last-child { border-bottom: 0; }
+.dd-tower .article-body .tw-row:nth-child(even) { background: var(--tw-panel-2); }
+
+/* The lamp. Colour is set by the state modifier on the row. */
+.dd-tower .article-body .tw-row::before {
+  content: "";
+  grid-area: lamp;
+  width: 10px;
+  height: 10px;
+  margin-top: 6px;
+  border-radius: 50%;
+  background: var(--tw-ink-3);
+  box-shadow: var(--tw-glow);
+}
+.dd-tower .article-body .tw-row.is-ok::before { background: var(--tw-ok); color: var(--tw-ok); }
+.dd-tower .article-body .tw-row.is-warn::before { background: var(--tw-warn); color: var(--tw-warn); }
+.dd-tower .article-body .tw-row.is-alarm::before { background: var(--tw-alarm); color: var(--tw-alarm); }
+
+.dd-tower .article-body .tw-row-what {
+  grid-area: what;
+  display: block;
+  font-family: var(--tw-display);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--tw-ink);
+}
+.dd-tower .article-body .tw-row-note {
+  grid-area: note;
+  display: block;
+  margin-top: 3px;
+  font-size: 0.87rem;
+  line-height: 1.55;
+  color: var(--tw-ink-2);
+}
+.dd-tower .article-body .tw-row-owner {
+  grid-area: owner;
+  display: block;
+  margin-top: 5px;
+  font-family: var(--tw-mono);
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--tw-ink-3);
+}
+.dd-tower .article-body .tw-row-clock {
+  grid-area: clock;
+  text-align: right;
+  font-family: var(--tw-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  color: var(--tw-ink-3);
+}
+.dd-tower .article-body .tw-row.is-alarm .tw-row-clock { color: var(--tw-alarm); }
+.dd-tower .article-body .tw-row.is-warn .tw-row-clock { color: var(--tw-warn); }
+
+/* ============================================================
+   Component — stat strip. Not in global.css; every template defines it.
+   ============================================================ */
+.dd-tower .article-body .stat-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+  margin: 0 0 1.6em;
+}
+.dd-tower .article-body .tw-stat {
+  padding: 12px 14px;
+  background: var(--tw-panel);
+  border: 1px solid var(--tw-rule);
+  border-radius: 4px;
+}
+.dd-tower .article-body .tw-stat > b {
+  display: block;
+  font-family: var(--tw-display);
+  font-size: clamp(1.4rem, 3vw, 1.9rem);
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--tw-ink);
+}
+.dd-tower .article-body .tw-stat > span {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: var(--tw-ink-3);
+}
+.dd-tower .article-body .tw-stat.alert {
+  border-color: var(--tw-alarm);
+  background: var(--tw-alarm-dim);
+}
+.dd-tower .article-body .tw-stat.warn {
+  border-color: var(--tw-warn);
+  background: var(--tw-warn-dim);
+}
+.dd-tower .article-body .tw-stat.good {
+  border-color: var(--tw-ok);
+  background: var(--tw-ok-dim);
+}
+
+/* ============================================================
+   Component — note panel, callouts, blockquote.
+   ============================================================ */
+.dd-tower .article-body .note-panel {
+  margin: 0 0 1.5em;
+  padding: 14px 16px;
+  background: var(--tw-panel-2);
+  border: 1px solid var(--tw-rule);
+  border-radius: 4px;
+  font-size: 0.9rem;
+  color: var(--tw-ink-2);
+}
+.dd-tower .article-body .note-panel p { margin: 0 0 0.6em; }
+.dd-tower .article-body .note-panel p:last-child { margin: 0; }
+
+.dd-tower .article-body .callout {
+  margin: 0 0 1.5em;
+  padding: 14px 16px;
+  background: var(--tw-panel);
+  border: 1px solid var(--tw-rule);
+  border-left: 4px solid var(--tw-rule-strong);
+  border-radius: 4px;
+}
+.dd-tower .article-body .callout > strong {
+  display: block;
+  margin-bottom: 6px;
+  font-family: var(--tw-mono);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--tw-ink-3);
+}
+.dd-tower .article-body .callout p { margin: 0 0 0.6em; }
+.dd-tower .article-body .callout p:last-child { margin: 0; }
+.dd-tower .article-body .callout.alert {
+  border-left-color: var(--tw-alarm);
+  background: var(--tw-alarm-dim);
+}
+.dd-tower .article-body .callout.alert > strong { color: var(--tw-alarm); }
+.dd-tower .article-body .callout.warm {
+  border-left-color: var(--tw-warn);
+  background: var(--tw-warn-dim);
+}
+.dd-tower .article-body .callout.warm > strong { color: var(--tw-warn); }
+.dd-tower .article-body .callout.green {
+  border-left-color: var(--tw-ok);
+  background: var(--tw-ok-dim);
+}
+.dd-tower .article-body .callout.green > strong { color: var(--tw-ok); }
+.dd-tower .article-body .callout.neutral {
+  border-left-color: var(--tw-live);
+  background: var(--tw-live-dim);
+}
+.dd-tower .article-body .callout.neutral > strong { color: var(--tw-live); }
+
+.dd-tower .article-body blockquote {
+  margin: 0 0 1.5em;
+  padding: 4px 0 4px 18px;
+  border-left: 3px solid var(--tw-live);
+  font-family: var(--tw-display);
+  font-size: 1.14rem;
+  font-weight: 500;
+  line-height: 1.5;
+  color: var(--tw-ink);
+}
+.dd-tower .article-body blockquote p:last-child { margin: 0; }
+.dd-tower .article-body blockquote cite {
+  display: block;
+  margin-top: 8px;
+  font-family: var(--tw-mono);
+  font-size: 0.72rem;
+  font-style: normal;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--tw-ink-3);
+}
+
+/* ============================================================
+   Component — tables. Wrapper is required at narrow widths, and the
+   wrapper is what scrolls, never the page.
+   ============================================================ */
+.dd-tower .article-body .tw-table-scroll {
+  margin: 0 0 1.6em;
+  overflow-x: auto;
+  border: 1px solid var(--tw-rule);
+  border-radius: 4px;
+}
+.dd-tower .article-body .tw-table-scroll:focus-visible {
+  outline: 2px solid var(--tw-live);
+  outline-offset: 2px;
+}
+.dd-tower .article-body table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.86rem;
+}
+.dd-tower .article-body caption {
+  padding: 9px 12px;
+  font-family: var(--tw-mono);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-align: left;
+  color: var(--tw-ink-3);
+  background: var(--tw-panel-2);
+  border-bottom: 1px solid var(--tw-rule);
+}
+.dd-tower .article-body th,
+.dd-tower .article-body td {
+  padding: 9px 12px;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--tw-rule-faint);
+}
+.dd-tower .article-body th {
+  font-family: var(--tw-mono);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--tw-ink-3);
+  background: var(--tw-panel-2);
+  border-bottom: 1px solid var(--tw-rule);
+}
+.dd-tower .article-body td { color: var(--tw-ink-2); }
+.dd-tower .article-body tbody tr:nth-child(even) { background: var(--tw-panel); }
+.dd-tower .article-body tbody tr:last-child td { border-bottom: 0; }
+
+/* ============================================================
+   Component — appendix plates.
+   ============================================================ */
+.dd-tower .article-body details {
+  margin: 0 0 1.4em;
+  padding: 0;
+  background: var(--tw-panel);
+  border: 1px solid var(--tw-rule);
+  border-radius: 4px;
+}
+.dd-tower .article-body details > summary {
+  padding: 11px 14px;
+  cursor: pointer;
+  font-family: var(--tw-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--tw-ink-2);
+  list-style: none;
+}
+.dd-tower .article-body details > summary::-webkit-details-marker { display: none; }
+.dd-tower .article-body details > summary::after {
+  content: "+";
+  float: right;
+  font-weight: 700;
+  color: var(--tw-live);
+}
+.dd-tower .article-body details[open] > summary::after { content: "\2212"; }
+.dd-tower .article-body details[open] > summary {
+  border-bottom: 1px solid var(--tw-rule);
+}
+.dd-tower .article-body details > *:not(summary) {
+  margin-left: 14px;
+  margin-right: 14px;
+}
+.dd-tower .article-body details > *:not(summary):first-of-type { margin-top: 12px; }
+.dd-tower .article-body details > *:last-child { margin-bottom: 12px; }
+.dd-tower .article-body details .tw-table-scroll {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+/* ============================================================
+   Figures.
+   ============================================================ */
+.dd-tower .article-body .visual-frame {
+  position: relative;
+  margin: 0 0 1.6em;
+  padding-top: 26px;
+  background: var(--tw-panel);
+  border: 1px solid var(--tw-rule);
+  border-radius: 5px;
+  overflow: hidden;
+}
+/* The instrument head strip. Its 26px height is added to padding-top above;
+   if you change one, change both. */
+.dd-tower .article-body .visual-frame::before {
+  content: "Instrument " counter(figure);
+  counter-increment: figure;
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  font-family: var(--tw-mono);
+  font-size: 0.63rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--tw-ink-3);
+  background: var(--tw-panel-2);
+  border-bottom: 1px solid var(--tw-rule-faint);
+}
+.dd-tower .article-body { counter-reset: figure; }
+.dd-tower .article-body .visual-frame iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+/* The plain claim sentence that precedes every figure. */
+.dd-tower .article-body .tw-fig-claim {
+  margin: 0 0 0.6em;
+  padding-left: 10px;
+  border-left: 2px solid var(--tw-live);
+  font-size: 0.94rem;
+  font-weight: 500;
+  line-height: 1.5;
+  color: var(--tw-ink);
+}
+
+/* ============================================================
+   Motion. The entry animation is gated on .tw-loaded, added by the spine
+   script. Without that class the header would stay invisible, so the
+   reduce block below must also neutralise the initial state.
+   ============================================================ */
+@media (prefers-reduced-motion: no-preference) {
+  .dd-tower .tw-title,
+  .dd-tower .tw-subtitle,
+  .dd-tower .tw-lead {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  .dd-tower.tw-loaded .tw-title,
+  .dd-tower.tw-loaded .tw-subtitle,
+  .dd-tower.tw-loaded .tw-lead {
+    animation: tw-rise 0.5s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+  }
+  .dd-tower.tw-loaded .tw-subtitle { animation-delay: 0.06s; }
+  .dd-tower.tw-loaded .tw-lead { animation-delay: 0.12s; }
+}
+
+@keyframes tw-rise {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dd-tower .tw-title,
+  .dd-tower .tw-subtitle,
+  .dd-tower .tw-lead {
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
+  .dd-tower .tw-index-link { transition: none; }
+  .dd-tower .article-body h2 { transition: none; }
+}
+
+/* ============================================================
+   Responsive. The house ladder is 960 / 860 / 720 / 560. At 720 the site
+   header goes static, so the sticky offset must go to zero.
+   ============================================================ */
+@media (max-width: 960px) {
+  .dd-tower .tw-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 18px;
+  }
+  .dd-tower .tw-spine-index {
+    flex-direction: row;
+    gap: 6px;
+    max-height: none;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 8px;
+    scrollbar-width: thin;
+  }
+  .dd-tower .tw-index-link {
+    flex: 0 0 auto;
+    grid-template-columns: auto auto;
+    gap: 6px;
+    align-items: center;
+    border-color: var(--tw-rule);
+    white-space: nowrap;
+  }
+  .dd-tower .tw-index-label { font-size: 0.76rem; }
+}
+
+@media (max-width: 860px) {
+  .dd-tower .article-body .stat-strip {
+    grid-template-columns: repeat(auto-fit, minmax(128px, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .dd-tower.article-shell {
+    --tw-stick: 0px;
+    padding: clamp(16px, 4vw, 24px);
+  }
+  .dd-tower .tw-readout-status { margin-left: 0; }
+  .dd-tower .article-body .tw-row {
+    grid-template-columns: 10px minmax(0, 1fr);
+    grid-template-areas:
+      "lamp what"
+      ".... note"
+      ".... owner"
+      ".... clock";
+  }
+  .dd-tower .article-body .tw-row-clock {
+    text-align: left;
+    margin-top: 4px;
+  }
+}
+
+@media (max-width: 560px) {
+  .dd-tower .article-body .stat-strip { grid-template-columns: 1fr 1fr; }
+}
+
+/* ============================================================
+   Addendum — component families the harness-engineering page brings
+   with it from the default article shell. Without these they fall
+   through to global.css and render in the site palette inside the
+   tower, which reads as two designs stacked. Re-tokenised here to
+   --tw-*, mirroring the .tw-stat / .note-panel treatment above.
+   ============================================================ */
+
+/* --- signal grid: the four opening claims --------------------- */
+.dd-tower .article-body .signal-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 10px;
+  margin: 0 0 1.6em;
+}
+.dd-tower .article-body .signal-card {
+  padding: 14px 16px;
+  background: var(--tw-panel);
+  border: 1px solid var(--tw-rule);
+  border-left: 3px solid var(--tw-live);
+  border-radius: 4px;
+}
+.dd-tower .article-body .signal-label {
+  display: block;
+  margin-bottom: 6px;
+  font-family: var(--tw-mono);
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--tw-live);
+}
+.dd-tower .article-body .signal-card > strong {
+  display: block;
+  font-family: var(--tw-display);
+  font-size: 1.02rem;
+  line-height: 1.25;
+  color: var(--tw-ink);
+}
+.dd-tower .article-body .signal-card p {
+  margin: 6px 0 0;
+  font-size: 0.87rem;
+  line-height: 1.55;
+  color: var(--tw-ink-2);
+}
+
+/* --- reading map: the scene index above the body -------------- */
+.dd-tower .article-body .reading-map {
+  margin: 0 0 1.6em;
+  padding: 14px 16px;
+  background: var(--tw-panel-2);
+  border: 1px solid var(--tw-rule);
+  border-radius: 4px;
+}
+.dd-tower .article-body .reading-map-label {
+  margin: 0 0 10px;
+  font-family: var(--tw-mono);
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--tw-ink-3);
+}
+.dd-tower .article-body .reading-map-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 8px;
+}
+.dd-tower .article-body .reading-link {
+  display: block;
+  padding: 9px 11px;
+  background: var(--tw-panel);
+  border: 1px solid var(--tw-rule);
+  border-radius: 3px;
+  text-decoration: none;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.dd-tower .article-body .reading-link:hover,
+.dd-tower .article-body .reading-link:focus-visible {
+  border-color: var(--tw-live);
+  background: var(--tw-live-dim);
+}
+.dd-tower .article-body .reading-link > strong {
+  display: block;
+  font-family: var(--tw-display);
+  font-size: 0.9rem;
+  color: var(--tw-ink);
+}
+.dd-tower .article-body .reading-link > span {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.79rem;
+  line-height: 1.45;
+  color: var(--tw-ink-3);
+}
+
+/* --- thesis grid: the three-up argument cards ----------------- */
+.dd-tower .article-body .thesis-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 10px;
+  margin: 0 0 1.6em;
+}
+.dd-tower .article-body .thesis-card {
+  padding: 14px 16px;
+  background: var(--tw-panel);
+  border: 1px solid var(--tw-rule);
+  border-top: 3px solid var(--tw-ok);
+  border-radius: 4px;
+}
+.dd-tower .article-body .thesis-card > em {
+  display: block;
+  margin-bottom: 6px;
+  font-family: var(--tw-mono);
+  font-style: normal;
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--tw-ok);
+}
+.dd-tower .article-body .thesis-card > strong {
+  display: block;
+  font-family: var(--tw-display);
+  font-size: 1rem;
+  line-height: 1.25;
+  color: var(--tw-ink);
+}
+.dd-tower .article-body .thesis-card p {
+  margin: 6px 0 0;
+  font-size: 0.87rem;
+  line-height: 1.55;
+  color: var(--tw-ink-2);
+}
+
+/* --- action grid: the closing "when not to" cards ------------- */
+.dd-tower .article-body .action-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 10px;
+  margin: 0 0 1.6em;
+}
+.dd-tower .article-body .action-card {
+  padding: 12px 14px;
+  background: var(--tw-panel-2);
+  border: 1px solid var(--tw-rule);
+  border-radius: 4px;
+}
+.dd-tower .article-body .action-card > strong {
+  display: block;
+  font-family: var(--tw-display);
+  font-size: 0.94rem;
+  color: var(--tw-ink);
+}
+.dd-tower .article-body .action-card p {
+  margin: 5px 0 0;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--tw-ink-2);
+}
+/* The last card is the bottom line, not another case. Lamp it amber. */
+.dd-tower .article-body .action-card:last-child {
+  border-left: 3px solid var(--tw-warn);
+}
+
+@media (max-width: 720px) {
+  .dd-tower .article-body .signal-grid,
+  .dd-tower .article-body .thesis-grid,
+  .dd-tower .article-body .reading-map-grid,
+  .dd-tower .article-body .action-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

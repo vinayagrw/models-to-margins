@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Agentic Principle · Vocabulary · Sources</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+/* Closing slide: Agentic Principle quote + flippable vocab cards + sources strip. Fluid sizing.
+   Note: the .hashimoto-* CSS class names are kept for git-history continuity; visible text says "Agentic". */
+html, body { height: 100%; overflow: hidden; }
+.shell {
+  width: 100%; height: 100%;
+  margin: 0;
+  padding: clamp(10px, 1.6vh, 18px) clamp(14px, 2vw, 22px);
+  display: grid; grid-template-rows: auto 1fr auto;
+  gap: clamp(8px, 1.2vh, 14px);
+  max-width: none;
+}
+
+/* Agentic Principle hero quote (class names kept for stability) */
+.hashimoto {
+  border-radius: 18px;
+  padding: clamp(12px, 1.8vh, 20px) clamp(16px, 2vw, 26px);
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--accent) 14%, transparent), color-mix(in srgb, var(--accent-2) 14%, transparent)),
+    var(--surface);
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--border));
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: clamp(12px, 1.6vw, 22px); align-items: center;
+}
+.hashimoto-mark {
+  font-family: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif; font-weight: 800;
+  font-size: clamp(2.2rem, 5vh, 3.6rem); line-height: 0.8;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.hashimoto-body {
+  display: grid; gap: 4px;
+}
+.hashimoto-eyebrow {
+  font-size: clamp(0.62rem, 1vh, 0.72rem); letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--accent); font-weight: 700;
+}
+.hashimoto-quote {
+  font-family: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif; font-weight: 700;
+  font-size: clamp(0.96rem, 1.9vh, 1.3rem); line-height: 1.32;
+  color: var(--text-strong); letter-spacing: -0.005em;
+}
+.hashimoto-quote em { font-style: normal; color: var(--accent-2); }
+.hashimoto-attr {
+  font-family: "DM Sans", sans-serif;
+  font-size: clamp(0.74rem, 1.2vh, 0.84rem); color: var(--muted);
+}
+.hashimoto-coda {
+  font-family: 'DM Sans', sans-serif;
+  font-size: clamp(0.74rem, 1.2vh, 0.84rem);
+  color: var(--muted); text-align: right; align-self: end;
+}
+
+/* Vocabulary grid (flip cards) — sized to fit available height */
+.vocab-section { min-height: 0; display: grid; grid-template-rows: auto 1fr; gap: clamp(6px, 1vh, 10px); }
+.vocab-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.vocab-head h2 {
+  font-family: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif; font-weight: 700;
+  font-size: clamp(0.95rem, 1.7vh, 1.15rem); color: var(--text-strong); letter-spacing: -0.005em;
+}
+.vocab-hint { font-size: clamp(0.7rem, 1.1vh, 0.78rem); color: var(--muted); }
+.vocab-grid {
+  min-height: 0;
+  display: grid; gap: clamp(6px, 0.9vh, 10px);
+  grid-template-columns: repeat(auto-fill, minmax(clamp(150px, 13vw, 190px), 1fr));
+  /* 13 terms, target ~3 rows fit. Each row scales to available space. */
+  grid-auto-rows: minmax(clamp(64px, 9vh, 96px), 1fr);
+  padding: 2px;
+}
+.vocab-card {
+  perspective: 800px; cursor: pointer;
+  background: transparent; border: 0; padding: 0;
+  font: inherit; color: inherit;
+}
+.vocab-inner {
+  position: relative; width: 100%; height: 100%;
+  transform-style: preserve-3d; transition: transform 360ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  border-radius: 12px;
+}
+.vocab-card[aria-pressed="true"] .vocab-inner { transform: rotateY(180deg); }
+@media (prefers-reduced-motion: reduce) { .vocab-inner { transition: none; } }
+.vocab-face {
+  position: absolute; inset: 0;
+  padding: clamp(8px, 1.2vh, 12px) clamp(10px, 1vw, 14px);
+  border: 1px solid var(--border); border-radius: 12px;
+  background: var(--surface-strong); backface-visibility: hidden;
+  display: flex; flex-direction: column; justify-content: center;
+  text-align: left;
+}
+.vocab-front .vocab-term {
+  font-family: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif; font-weight: 700;
+  font-size: clamp(0.84rem, 1.45vh, 1rem);
+  color: var(--text-strong); letter-spacing: -0.005em; line-height: 1.2;
+}
+.vocab-front .vocab-tip {
+  margin-top: 4px;
+  font-size: clamp(0.66rem, 1vh, 0.74rem); color: var(--muted);
+  letter-spacing: 0.04em;
+}
+.vocab-back {
+  transform: rotateY(180deg);
+  background: color-mix(in srgb, var(--c, var(--accent)) 10%, var(--surface-strong));
+  border-color: color-mix(in srgb, var(--c, var(--accent)) 40%, var(--border));
+}
+.vocab-back .vocab-def {
+  font-size: clamp(0.74rem, 1.2vh, 0.84rem); line-height: 1.4; color: var(--text);
+}
+.vocab-back .vocab-source {
+  margin-top: 4px;
+  font-size: clamp(0.6rem, 0.95vh, 0.68rem); letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--c, var(--accent)); font-weight: 700;
+}
+
+/* Sources strip */
+.sources {
+  border-radius: 14px;
+  padding: clamp(8px, 1.2vh, 12px) clamp(12px, 1.4vw, 18px);
+  background: var(--surface-strong); border: 1px solid var(--border);
+  display: grid; grid-template-columns: auto 1fr; gap: clamp(10px, 1.2vw, 16px); align-items: center;
+}
+.sources-label {
+  font-size: clamp(0.62rem, 1vh, 0.7rem); font-weight: 700; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--accent);
+}
+.sources-list {
+  display: flex; flex-wrap: wrap; gap: 8px 14px;
+  font-size: clamp(0.74rem, 1.2vh, 0.84rem);
+}
+.sources-list a {
+  color: var(--text); text-decoration: none;
+  border-bottom: 1px dashed var(--border-strong);
+  padding-bottom: 1px;
+}
+.sources-list a:hover { color: var(--accent); border-bottom-color: var(--accent); }
+
+@media (max-width: 720px) {
+  .hashimoto { grid-template-columns: 1fr; gap: 8px; padding: 12px 14px; }
+  .hashimoto-mark { font-size: 2rem; }
+  .vocab-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+}
+
+/* Embed: size to content and report it, the parent autosizes the frame. */
+:root[data-embedded="true"], :root[data-embedded="true"] body { height: auto; }
+:root[data-embedded="true"] .shell { height: auto; }
+</style>
+</head>
+<body>
+<main class="shell">
+  <section class="hashimoto" aria-label="The Agentic Principle">
+    <span class="hashimoto-mark" aria-hidden="true">"</span>
+    <div class="hashimoto-body">
+      <span class="hashimoto-eyebrow">The single rule that compounds harness quality</span>
+      <p class="hashimoto-quote">Anytime you find an agent makes a mistake, you take the time to engineer a solution such that the agent <em>never makes that mistake again</em>.</p>
+      <span class="hashimoto-attr">— Mitchell Hashimoto, February 5 2026, the post that seeded harness engineering</span>
+    </div>
+    <div style="font-family: 'DM Sans', sans-serif; font-size: 0.78rem; color: var(--muted); text-align: right; align-self: end;">
+      Every other rule in this deck<br>is downstream of that one.
+    </div>
+  </section>
+
+  <section class="vocab-section" aria-label="Vocabulary cheat sheet">
+    <div class="vocab-head">
+      <h2>Vocabulary cheat sheet</h2>
+      <span class="vocab-hint">Tap a card to flip · 13 terms</span>
+    </div>
+    <div class="vocab-grid" id="vocabGrid" role="group" aria-label="Vocabulary cards, tap a card to flip it"></div>
+  </section>
+
+</main>
+
+<script>
+(() => {
+  const vocab = [
+    { term: 'Agent = Model + Harness', tip: 'Equation', def: 'The foundational equation. The agent is not the model — it\'s the model plus everything around it.', source: 'Anthropic, OpenAI, LangChain', color: 'var(--accent)' },
+    { term: 'Harness engineering', tip: 'The discipline', def: 'Designing the load-bearing system around the model. The 2026 inflection.', source: 'Anthropic', color: 'var(--accent-2)' },
+    { term: 'Meta-harness', tip: 'Platform pattern', def: 'A platform that virtualizes parts of the harness so you don\'t build them. Anthropic Managed Agents is one.', source: 'Anthropic', color: 'var(--L3)' },
+    { term: 'The dumb zone', tip: 'Failure mode', def: 'When the model spends more tokens reasoning about tools than doing the work. Caused by exposing too many tools.', source: 'Shorthand, after Vercel d0', color: 'var(--L3)' },
+    { term: 'Context rot', tip: 'Failure mode', def: 'Gradual goal-drift in long-running sessions as the original task gets buried under tool output.', source: 'LangChain', color: 'var(--L2)' },
+    { term: 'Doom loop', tip: 'Failure mode', def: 'An infinite retry pattern that burns thousands of dollars overnight. Prevented by L5 loop detection.', source: 'LangChain', color: 'var(--L5)' },
+    { term: 'Success silent, failure loud', tip: 'Design principle', def: 'Verification design rule: pre-stop hooks should exit 0 silently and exit non-zero with detail. Exit code, not narration.', source: 'HumanLayer', color: 'var(--L4)' },
+    { term: 'Repository-as-truth', tip: 'OpenAI pattern', def: 'The repo is the agent\'s only source of ground truth. If it\'s not in the repo, it doesn\'t exist.', source: 'OpenAI Codex', color: 'var(--L1)' },
+    { term: 'Progressive disclosure', tip: 'OpenAI pattern', def: 'A short brief map points at module-level docs; nothing is loaded unless the agent navigates there.', source: 'OpenAI Codex', color: 'var(--L2)' },
+    { term: 'Application legibility', tip: 'OpenAI pattern', def: 'The running system is observable enough that the agent (and a human) can inspect real behavior, not just code.', source: 'OpenAI Codex', color: 'var(--L4)' },
+    { term: 'Mechanical enforcement', tip: 'OpenAI pattern', def: 'Architecture and coding "taste" turned into rules a linter or structural test can enforce — no human in the loop.', source: 'OpenAI Codex', color: 'var(--L1)' },
+    { term: 'Merge fast, fix fast', tip: 'OpenAI pattern', def: 'The merge philosophy that follows from high-throughput agent output. Quality is recaptured post-merge, not pre-merge.', source: 'OpenAI Codex', color: 'var(--L4)' },
+    { term: 'The Agentic Principle', tip: 'The compounding rule', def: 'Every agent mistake gets engineered out so it never happens again.', source: '', color: 'var(--accent)' }
+  ];
+
+  const grid = document.getElementById('vocabGrid');
+  vocab.forEach((v) => {
+    const card = document.createElement('button');
+    card.type = 'button';
+    card.className = 'vocab-card';
+    card.setAttribute('aria-pressed', 'false');
+    card.setAttribute('aria-label', `${v.term}: ${v.def}`);
+    card.style.setProperty('--c', v.color);
+    card.innerHTML = `
+      <div class="vocab-inner">
+        <div class="vocab-face vocab-front">
+          <div class="vocab-term">${v.term}</div>
+          <div class="vocab-tip">${v.tip} — tap to flip</div>
+        </div>
+        <div class="vocab-face vocab-back">
+          <div class="vocab-def">${v.def}</div>
+          <div class="vocab-source">${v.source}</div>
+        </div>
+      </div>
+    `;
+    card.addEventListener('click', () => {
+      const next = card.getAttribute('aria-pressed') === 'true' ? 'false' : 'true';
+      card.setAttribute('aria-pressed', next);
+    });
+    grid.appendChild(card);
+  });
+})();
+</script>
+<script>
+(() => {
+  /* Report content height so the parent frame hugs the content. */
+  if (document.documentElement.dataset.embedded === 'true') {
+    const postSize = () => window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+    if ('ResizeObserver' in window) new ResizeObserver(postSize).observe(document.body);
+    window.addEventListener('load', postSize);
+  }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,233 @@
+/* The Drop Line — shared theme for the fused custody/ownership diagram.
+ *
+ * This figure carries two arguments at once, so it carries two colour
+ * registers. Keeping them visually separable is the whole reason the fused
+ * diagram reads as one idea rather than as mush:
+ *
+ *   --chain   warm sepia. The paper record: parties, the spine, the handoffs.
+ *             Inherited in spirit from the waybill family.
+ *   --gutter  cool cyan. The instrument: dropped state, owner lamps, clocks.
+ *             Inherited in spirit from the tower family.
+ *   --alarm   red, and red only. Reserved for where the drop bills.
+ *
+ * Three hues, three jobs. A reader never has to ask which register they are
+ * looking at, and the cost band is the only thing on the page that is red.
+ *
+ * Contrast contract, binding:
+ *   --chain, --gutter, --alarm   FILL AND TEXT. Each clears 4.5:1 on --panel
+ *                                in both themes.
+ *   --*-dim                      FILL ONLY. Never put text in these.
+ *   --ink-3                      muted text, 4.5:1 minimum against --panel.
+ */
+
+:root,
+:root[data-theme="light"] {
+  --bg-0: #f1efeb;
+  --bg-1: #e7e4de;
+  --panel: #fbfaf8;
+  --panel-2: #f2efea;
+  --rule: #b5aea3;
+  --rule-strong: #8b8377;
+  --rule-faint: rgba(58, 50, 38, 0.10);
+  --ink: #1a1714;
+  --ink-2: #44403a;
+  --ink-3: #6a6359;
+
+  --chain: #8a4b2a;
+  --chain-dim: rgba(138, 75, 42, 0.10);
+  --on-chain: #fff8f3;
+
+  --gutter: #0b6a80;
+  --gutter-dim: rgba(11, 106, 128, 0.11);
+  --on-gutter: #f2fbfd;
+
+  --ok: #1d6446;
+  --ok-dim: rgba(29, 100, 70, 0.11);
+  --warn: #8a5a0c;
+  --warn-dim: rgba(138, 90, 12, 0.12);
+  --alarm: #a52a1c;
+  --alarm-dim: rgba(165, 42, 28, 0.10);
+
+  --shadow: rgba(40, 32, 24, 0.18);
+  --glow: none;
+
+  --display: "IBM Plex Sans Condensed", "Arial Narrow", sans-serif;
+  --body-font: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+
+/* Standalone open, before any script runs. The bootstrap normally stamps
+   data-theme synchronously, but a figure fetched directly still deserves to
+   respect the OS preference. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg-0: #14120f;
+    --bg-1: #0d0b09;
+    --panel: #1c1916;
+    --panel-2: #23201c;
+    --rule: #4a443b;
+    --rule-strong: #6b6255;
+    --rule-faint: rgba(220, 200, 170, 0.07);
+    --ink: #f0ece5;
+    --ink-2: #c4bdb2;
+    --ink-3: #948c80;
+
+    --chain: #e0925f;
+    --chain-dim: rgba(224, 146, 95, 0.14);
+    --on-chain: #1e1109;
+
+    --gutter: #34c6ea;
+    --gutter-dim: rgba(52, 198, 234, 0.13);
+    --on-gutter: #04191f;
+
+    --ok: #45d493;
+    --ok-dim: rgba(69, 212, 147, 0.13);
+    --warn: #e6a93f;
+    --warn-dim: rgba(230, 169, 63, 0.14);
+    --alarm: #ff6f58;
+    --alarm-dim: rgba(255, 111, 88, 0.14);
+
+    --shadow: rgba(0, 0, 0, 0.6);
+    --glow: 0 0 12px -2px currentColor;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg-0: #14120f;
+  --bg-1: #0d0b09;
+  --panel: #1c1916;
+  --panel-2: #23201c;
+  --rule: #4a443b;
+  --rule-strong: #6b6255;
+  --rule-faint: rgba(220, 200, 170, 0.07);
+  --ink: #f0ece5;
+  --ink-2: #c4bdb2;
+  --ink-3: #948c80;
+
+  --chain: #e0925f;
+  --chain-dim: rgba(224, 146, 95, 0.14);
+  --on-chain: #1e1109;
+
+  --gutter: #34c6ea;
+  --gutter-dim: rgba(52, 198, 234, 0.13);
+  --on-gutter: #04191f;
+
+  --ok: #45d493;
+  --ok-dim: rgba(69, 212, 147, 0.13);
+  --warn: #e6a93f;
+  --warn-dim: rgba(230, 169, 63, 0.14);
+  --alarm: #ff6f58;
+  --alarm-dim: rgba(255, 111, 88, 0.14);
+
+  --shadow: rgba(0, 0, 0, 0.6);
+  --glow: 0 0 12px -2px currentColor;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: linear-gradient(var(--bg-0), var(--bg-1));
+  font-family: var(--body-font);
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--ink-2);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Embed mode (?embed=1). Every visual in this family autosizes: size to
+   content, report the height by postMessage, and let the parent hug it.
+   Never lock to viewport height — no stretched, half-empty panels. */
+:root[data-embedded="true"],
+:root[data-embedded="true"] body { height: auto; }
+:root[data-embedded="true"] body { min-height: 0; background: transparent; }
+
+.shell {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: clamp(12px, 3vw, 20px);
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.head { display: flex; flex-direction: column; gap: 7px; }
+.head h1 {
+  font-family: var(--display);
+  font-size: clamp(1.02rem, 2.4vw, 1.3rem);
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--ink);
+}
+.head p { font-size: 0.92rem; max-width: 74ch; }
+
+.eyebrow {
+  font-family: var(--mono);
+  font-size: 0.63rem;
+  font-weight: 600;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.stampline { display: flex; flex-wrap: wrap; gap: 6px; }
+
+/* Verdict stamps, the same six grades the pages use. Border style and word
+   carry the grade, never colour alone. */
+.stamp {
+  display: inline-block;
+  padding: 2px 8px;
+  font-family: var(--mono);
+  font-size: 0.61rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border: 1px solid currentColor;
+  border-radius: 2px;
+}
+.stamp--confirmed    { color: var(--ok);     background: var(--ok-dim); }
+.stamp--vendor-claim { color: var(--warn);   background: var(--warn-dim); }
+.stamp--proposed     { color: var(--gutter); background: var(--gutter-dim); }
+.stamp--open         { color: var(--alarm);  background: var(--alarm-dim); }
+.stamp--hold         { color: var(--alarm);  background: var(--alarm-dim); border-style: double; border-width: 3px; }
+.stamp--illustrative { color: var(--ink-3);  border-style: dashed; }
+
+/* Owner lamp. `color` is set alongside `background` because --glow resolves
+   against currentColor. */
+.lamp {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--ink-3);
+  box-shadow: var(--glow);
+  flex: none;
+}
+.lamp--ok    { background: var(--ok);    color: var(--ok); }
+.lamp--warn  { background: var(--warn);  color: var(--warn); }
+.lamp--alarm { background: var(--alarm); color: var(--alarm); }
+
+.card {
+  padding: 12px 14px;
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+}
+button:hover { border-color: var(--gutter); }
+
+:focus-visible {
+  outline: 2px solid var(--gutter);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+}

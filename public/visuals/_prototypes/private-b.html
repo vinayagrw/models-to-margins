@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Private AI — drill-down architecture (archetype B)</title>
+<script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+/* ============================================================
+   Archetype B — drill-down with focus + context.
+   Four altitudes in one frame: L0 landscape, L1 control plane,
+   L2 request lifecycle, L3 backend interior.
+   Every colour below is a token. No literal colours anywhere.
+   ============================================================ */
+:root {
+  --node-bg: var(--surface);
+  --node-bg-strong: var(--surface-strong);
+  --node-bd: var(--border);
+  --node-bd-hot: var(--border-strong);
+  --wire: color-mix(in srgb, var(--text) 34%, transparent);
+  --wire-soft: color-mix(in srgb, var(--text) 18%, transparent);
+  --wire-hot: var(--accent);
+  --wire-warn: var(--warn);
+  --wire-good: var(--good);
+  --ghost-bg: color-mix(in srgb, var(--accent) 16%, var(--surface-strong));
+  --chip-bg: color-mix(in srgb, var(--text) 7%, transparent);
+  --tint-8: color-mix(in srgb, var(--c, var(--accent)) 8%, var(--surface));
+  --tint-14: color-mix(in srgb, var(--c, var(--accent)) 14%, var(--surface-strong));
+  --tint-40: color-mix(in srgb, var(--c, var(--accent)) 40%, transparent);
+  --warn-tint: color-mix(in srgb, var(--warn) 12%, var(--surface));
+  --good-tint: color-mix(in srgb, var(--good) 12%, var(--surface));
+  --opaque-tint: color-mix(in srgb, var(--text) 6%, transparent);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --wire: color-mix(in srgb, var(--text) 40%, transparent);
+    --wire-soft: color-mix(in srgb, var(--text) 22%, transparent);
+    --ghost-bg: color-mix(in srgb, var(--accent) 22%, var(--surface-strong));
+    --chip-bg: color-mix(in srgb, var(--text) 10%, transparent);
+    --opaque-tint: color-mix(in srgb, var(--text) 9%, transparent);
+  }
+}
+:root[data-theme="dark"] {
+  --wire: color-mix(in srgb, var(--text) 40%, transparent);
+  --wire-soft: color-mix(in srgb, var(--text) 22%, transparent);
+  --ghost-bg: color-mix(in srgb, var(--accent) 22%, var(--surface-strong));
+  --chip-bg: color-mix(in srgb, var(--text) 10%, transparent);
+  --opaque-tint: color-mix(in srgb, var(--text) 9%, transparent);
+}
+
+.shell { display: flex; flex-direction: column; gap: clamp(12px, 2vw, 18px); overflow-x: hidden; }
+
+/* ---------- head ---------- */
+.head h1 {
+  font-size: clamp(1.1rem, 3.2vw, 1.8rem); font-weight: 700;
+  color: var(--text-strong); letter-spacing: -0.01em; margin: 5px 0; line-height: 1.15;
+}
+.head p {
+  font-family: "DM Sans", "Segoe UI", sans-serif;
+  font-size: clamp(0.78rem, 2.2vw, 0.95rem); color: var(--muted); line-height: 1.5;
+}
+.head p b { color: var(--text-strong); font-weight: 600; }
+
+/* ---------- chrome: breadcrumb + up ---------- */
+.chrome {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+  padding: 8px 10px; border: 1px solid var(--node-bd); border-radius: 12px;
+  background: var(--node-bg); box-shadow: var(--shadow-soft);
+}
+.crumbs { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; min-width: 0; flex: 1 1 220px; }
+.crumb {
+  display: inline-flex; align-items: center; gap: 6px; min-width: 0;
+  border: 1px solid transparent; background: transparent; color: var(--muted);
+  font-family: "Space Grotesk", sans-serif; font-size: clamp(0.64rem, 1.9vw, 0.76rem);
+  font-weight: 600; padding: 4px 8px; border-radius: 8px; cursor: pointer;
+}
+.crumb .pic { width: 14px; height: 14px; flex: none; }
+.crumb:hover { background: var(--chip-bg); color: var(--text-strong); }
+.crumb[aria-current="page"] {
+  color: var(--text-strong); background: var(--chip-bg);
+  border-color: var(--node-bd); cursor: default;
+}
+.crumb .lv { font-size: 0.86em; opacity: 0.7; letter-spacing: 0.08em; }
+.sep { color: var(--muted-soft); font-size: 0.8rem; flex: none; }
+.upbtn {
+  display: inline-flex; align-items: center; gap: 7px; flex: none;
+  border: 1px solid var(--node-bd-hot); background: var(--node-bg-strong); color: var(--text);
+  font-family: "Space Grotesk", sans-serif; font-size: clamp(0.64rem, 1.9vw, 0.75rem);
+  font-weight: 700; padding: 6px 11px; border-radius: 9px; cursor: pointer;
+}
+.upbtn .pic { width: 14px; height: 14px; }
+.upbtn[disabled] { opacity: 0.4; cursor: not-allowed; }
+.upbtn:not([disabled]):hover { border-color: var(--accent); color: var(--text-strong); }
+.upbtn kbd {
+  font-family: inherit; font-size: 0.82em; padding: 1px 5px; border-radius: 5px;
+  background: var(--chip-bg); border: 1px solid var(--node-bd);
+}
+
+/* ---------- body: stage + minimap ---------- */
+.body { display: grid; grid-template-columns: minmax(0, 1fr) 208px; gap: clamp(10px, 1.6vw, 16px); align-items: start; }
+
+.stage {
+  position: relative; min-width: 0;
+  border: 1px solid var(--node-bd); border-radius: 16px;
+  background: var(--node-bg); box-shadow: var(--shadow);
+  padding: clamp(12px, 2vw, 20px); overflow: hidden;
+}
+.view { opacity: 0; transform: scale(0.965); transition: opacity 380ms ease, transform 380ms cubic-bezier(.22,.61,.36,1); }
+.view.in { opacity: 1; transform: none; }
+.reduced .view { opacity: 1; transform: none; transition: none; }
+
+.vhead { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px; margin-bottom: 4px; }
+.vhead h2 {
+  font-size: clamp(0.92rem, 2.6vw, 1.2rem); font-weight: 700;
+  color: var(--text-strong); letter-spacing: -0.01em; outline: none;
+}
+.vhead .lvtag {
+  font-family: "Space Grotesk", sans-serif; font-size: 0.62rem; font-weight: 700;
+  letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent);
+  border: 1px solid var(--node-bd); border-radius: 6px; padding: 2px 6px;
+}
+.vdek {
+  font-family: "DM Sans", sans-serif; font-size: clamp(0.74rem, 2vw, 0.87rem);
+  color: var(--muted); line-height: 1.5; margin-bottom: clamp(10px, 1.8vw, 16px);
+}
+.vdek b { color: var(--text-strong); font-weight: 600; }
+
+/* ---------- minimap ---------- */
+.minimap {
+  position: sticky; top: 8px;
+  border: 1px solid var(--node-bd); border-radius: 14px;
+  background: var(--node-bg); box-shadow: var(--shadow-soft);
+  padding: 10px; display: flex; flex-direction: column; gap: 7px;
+}
+.mmhead {
+  font-family: "Space Grotesk", sans-serif; font-size: 0.58rem; font-weight: 700;
+  letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted-soft);
+  display: flex; align-items: center; gap: 6px;
+}
+.mmhead .pic { width: 13px; height: 13px; }
+.mmaxis { display: flex; flex-direction: column; gap: 5px; }
+.mm {
+  --c: var(--accent);
+  display: flex; align-items: center; gap: 7px; text-align: left; min-width: 0;
+  border: 1px solid var(--node-bd); border-radius: 9px; padding: 6px 7px;
+  background: transparent; color: var(--muted); cursor: pointer;
+  font-family: "Space Grotesk", sans-serif; font-size: 0.68rem; font-weight: 600;
+  transition: background 180ms ease, border-color 180ms ease, color 180ms ease;
+}
+.mm .pic { width: 15px; height: 15px; flex: none; color: var(--c); }
+.mm .mmid { font-size: 0.62rem; opacity: 0.75; flex: none; }
+.mm .mmnm { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mm:hover { border-color: var(--tint-40); color: var(--text-strong); }
+.mm[aria-pressed="true"] {
+  color: var(--text-strong); border-color: var(--c); background: var(--tint-14);
+}
+.mmfoot {
+  font-family: "DM Sans", sans-serif; font-size: 0.64rem; color: var(--muted-soft);
+  line-height: 1.42; border-top: 1px solid var(--node-bd); padding-top: 7px;
+}
+
+/* ---------- generic node ---------- */
+.node {
+  --c: var(--accent);
+  display: flex; gap: 8px; align-items: flex-start; text-align: left; min-width: 0;
+  border: 1px solid var(--node-bd); border-radius: 12px; padding: 9px 10px;
+  background: var(--node-bg); color: var(--text); box-shadow: var(--shadow-soft);
+  font-family: "Space Grotesk", sans-serif; width: 100%;
+}
+button.node { cursor: pointer; transition: border-color 180ms ease, background 180ms ease, transform 180ms ease; }
+button.node:hover { border-color: var(--c); background: var(--tint-8); transform: translateY(-1px); }
+.node .pic { width: 20px; height: 20px; flex: none; color: var(--c); margin-top: 1px; }
+.node .tx { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.node .nm { font-size: clamp(0.72rem, 2vw, 0.82rem); font-weight: 700; color: var(--text-strong); line-height: 1.25; }
+.node .sub { font-family: "DM Sans", sans-serif; font-size: clamp(0.63rem, 1.8vw, 0.72rem); color: var(--muted); line-height: 1.4; }
+.node .drill {
+  margin-top: 3px; font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--c);
+}
+.node.warn { --c: var(--warn); background: var(--warn-tint); }
+.node.good { --c: var(--good); background: var(--good-tint); }
+.node.opaque { background: var(--opaque-tint); border-style: dashed; }
+
+.pic svg { width: 100%; height: 100%; display: block; }
+
+/* ---------- group ---------- */
+.group { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.gtitle {
+  font-family: "Space Grotesk", sans-serif; font-size: 0.58rem; font-weight: 700;
+  letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted-soft);
+}
+
+/* ---------- edges ---------- */
+.edge { display: flex; align-items: center; gap: 7px; min-width: 0; }
+.edge .wire { position: relative; flex: 1 1 auto; height: 2px; min-width: 26px; background: var(--wire-soft); border-radius: 2px; overflow: hidden; }
+.edge .wire::before {
+  content: ""; position: absolute; inset: 0; border-radius: 2px;
+  background: var(--wire); transform-origin: left center; transform: scaleX(0);
+  transition: transform 620ms cubic-bezier(.22,.61,.36,1);
+}
+.view.in .edge .wire::before { transform: scaleX(1); }
+.reduced .edge .wire::before { transform: scaleX(1); transition: none; }
+.edge .wire i {
+  position: absolute; top: -2px; left: 0; width: 6px; height: 6px; border-radius: 50%;
+  background: var(--wire-hot); opacity: 0;
+}
+.view.in .edge.pulse .wire i { animation: run 2.6s linear infinite; }
+.reduced .edge .wire i { display: none; }
+@keyframes run { 0% { left: 0; opacity: 0; } 12% { opacity: 1; } 88% { opacity: 1; } 100% { left: 100%; opacity: 0; } }
+.edge .tip { flex: none; color: var(--wire); font-size: 0.8rem; line-height: 1; }
+.elabel {
+  flex: 0 1 auto; min-width: 0;
+  font-family: "DM Sans", sans-serif; font-size: clamp(0.6rem, 1.7vw, 0.68rem);
+  color: var(--muted); line-height: 1.35;
+  background: var(--chip-bg); border-radius: 6px; padding: 3px 7px;
+}
+.edge.warn .wire::before, .edge.warn .tip { background: var(--wire-warn); color: var(--wire-warn); }
+.edge.warn .tip { background: transparent; }
+.edge.good .wire::before, .edge.good .tip { background: var(--wire-good); color: var(--wire-good); }
+.edge.good .tip { background: transparent; }
+.edge.warn .elabel { color: var(--warn); }
+
+/* vertical edge variant */
+.vedge { display: flex; align-items: center; gap: 8px; padding: 2px 0 2px 18px; }
+.vedge .wire { width: 2px; height: 26px; flex: none; background: var(--wire-soft); position: relative; overflow: hidden; border-radius: 2px; }
+.vedge .wire::before { transform-origin: top center; transform: scaleY(0); transition: transform 520ms cubic-bezier(.22,.61,.36,1); }
+.view.in .vedge .wire::before { transform: scaleY(1); }
+.reduced .vedge .wire::before { transform: scaleY(1); transition: none; }
+
+/* ---------- L0 ---------- */
+.axis { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: clamp(7px, 1vw, 11px); }
+.pos {
+  --c: var(--accent);
+  display: flex; flex-direction: column; gap: 7px; text-align: left; min-width: 0;
+  border: 1px solid var(--node-bd); border-radius: 14px; padding: clamp(9px, 1.3vw, 13px);
+  background: var(--node-bg); color: var(--text); cursor: pointer;
+  font-family: "Space Grotesk", sans-serif; box-shadow: var(--shadow-soft);
+  transition: border-color 180ms ease, background 180ms ease, transform 180ms ease;
+}
+.pos:hover, .pos[aria-pressed="true"] { border-color: var(--c); background: var(--tint-8); transform: translateY(-2px); }
+.pos .rank { display: flex; align-items: center; gap: 6px; font-size: 0.58rem; font-weight: 700; letter-spacing: 0.12em; color: var(--muted-soft); }
+.pos .rank i { font-style: normal; display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; border-radius: 5px; background: var(--tint-14); color: var(--c); }
+.pos .pic { width: 24px; height: 24px; color: var(--c); }
+.pos .name { font-size: clamp(0.7rem, 1.9vw, 0.8rem); font-weight: 700; color: var(--text-strong); line-height: 1.25; }
+.pos .eg { font-family: "DM Sans", sans-serif; font-size: clamp(0.6rem, 1.7vw, 0.68rem); color: var(--muted); line-height: 1.4; }
+.custody { display: flex; flex-direction: column; gap: 3px; border-top: 1px solid var(--node-bd); padding-top: 6px; }
+.cl { display: flex; align-items: center; gap: 5px; font-size: 0.6rem; }
+.cl .pic { width: 12px; height: 12px; color: var(--muted-soft); flex: none; }
+.cl .cln { flex: 1 1 auto; min-width: 0; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hb { flex: none; font-size: 0.55rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 1px 5px; border-radius: 5px; border: 1px solid var(--node-bd); color: var(--muted); }
+.hb.you { color: var(--good); border-color: var(--tint-40); }
+.hb.vendor { color: var(--warn); }
+.pos .drill { font-size: 0.58rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--c); }
+.burden { display: flex; align-items: center; gap: 4px; font-size: 0.56rem; font-weight: 700; letter-spacing: 0.1em; color: var(--muted-soft); }
+.burden s { width: 7px; height: 7px; border-radius: 50%; background: var(--chip-bg); text-decoration: none; }
+.burden s.on { background: var(--c); }
+
+/* ---------- L1 layout ---------- */
+.flow3 { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,0.9fr) minmax(0,1.15fr) minmax(0,0.9fr) minmax(0,1fr); gap: clamp(6px, 1vw, 12px); align-items: center; }
+.gwcard { --c: var(--accent); border: 1px solid var(--node-bd-hot); border-radius: 14px; background: var(--node-bg-strong); padding: 10px; display: flex; flex-direction: column; gap: 8px; box-shadow: var(--shadow); }
+.gwfns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+.fn {
+  display: flex; align-items: center; gap: 6px; min-width: 0; text-align: left;
+  border: 1px solid var(--node-bd); border-radius: 9px; padding: 6px 7px;
+  background: var(--node-bg); color: var(--text); font-family: "Space Grotesk", sans-serif;
+  font-size: 0.66rem; font-weight: 600; line-height: 1.2;
+}
+.fn .pic { width: 14px; height: 14px; flex: none; color: var(--accent); }
+.planes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(10px, 1.6vw, 16px); margin-top: clamp(12px, 2vw, 18px); }
+.plane { border: 1px dashed var(--node-bd-hot); border-radius: 12px; padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+.perimnote {
+  display: flex; align-items: flex-start; gap: 8px; margin-top: clamp(10px, 1.6vw, 16px);
+  border: 1px solid var(--node-bd); border-radius: 11px; padding: 9px 11px; background: var(--chip-bg);
+  font-family: "DM Sans", sans-serif; font-size: clamp(0.66rem, 1.8vw, 0.76rem); color: var(--muted); line-height: 1.45;
+}
+.perimnote b { color: var(--text-strong); font-weight: 600; }
+.perimnote .pic { width: 17px; height: 17px; flex: none; color: var(--accent); margin-top: 1px; }
+
+/* ---------- L2 spine ---------- */
+.spine { display: flex; flex-direction: column; }
+.srow { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr); gap: clamp(8px, 1.4vw, 14px); align-items: center; }
+.srow .branch { display: flex; align-items: center; gap: 7px; min-width: 0; }
+.srow .branch .node { box-shadow: none; }
+.snum {
+  flex: none; display: inline-flex; align-items: center; justify-content: center;
+  width: 18px; height: 18px; border-radius: 6px; background: var(--tint-14);
+  color: var(--c); font-size: 0.6rem; font-weight: 700;
+}
+.node .nmrow { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; min-width: 0; }
+.node .nmrow .nm { min-width: 0; }
+.lane {
+  flex: none; font-size: 0.54rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--muted-soft); border: 1px solid var(--node-bd); border-radius: 5px; padding: 1px 5px;
+}
+.node.dec { border-style: dashed; }
+
+/* ---------- L3 ---------- */
+.topo { display: flex; flex-direction: column; gap: 0; }
+.trow { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(8px, 1.4vw, 14px); align-items: center; }
+.econ { margin-top: clamp(12px, 2vw, 18px); border: 1px solid var(--node-bd); border-radius: 12px; padding: 11px; background: var(--chip-bg); }
+.econ h3 { font-family: "Space Grotesk", sans-serif; font-size: 0.74rem; font-weight: 700; color: var(--text-strong); margin-bottom: 6px; }
+.vars { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 8px; }
+.var { font-family: "Space Grotesk", sans-serif; font-size: 0.63rem; border: 1px solid var(--node-bd); border-radius: 7px; padding: 3px 7px; color: var(--muted); background: var(--node-bg); }
+.var b { color: var(--accent); font-weight: 700; }
+.formula { font-family: "Space Grotesk", sans-serif; font-size: clamp(0.66rem, 1.8vw, 0.76rem); color: var(--text-strong); line-height: 1.9; overflow-x: auto; }
+.formula span { display: block; white-space: nowrap; }
+.econ p { font-family: "DM Sans", sans-serif; font-size: 0.68rem; color: var(--muted); line-height: 1.45; margin-top: 7px; }
+
+/* ---------- controls ---------- */
+.ctrls { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: clamp(10px, 1.6vw, 14px); }
+.ctrl {
+  display: inline-flex; align-items: center; gap: 6px;
+  border: 1px solid var(--node-bd); border-radius: 9px; padding: 5px 10px;
+  background: var(--node-bg); color: var(--muted); cursor: pointer;
+  font-family: "Space Grotesk", sans-serif; font-size: 0.68rem; font-weight: 600;
+  transition: border-color 180ms ease, color 180ms ease, background 180ms ease;
+}
+.ctrl .pic { width: 14px; height: 14px; }
+.ctrl:hover { color: var(--text-strong); border-color: var(--node-bd-hot); }
+.ctrl[aria-pressed="true"] { color: var(--text-strong); border-color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, var(--node-bg)); }
+
+/* ---------- ghost morph ---------- */
+.ghost {
+  position: fixed; z-index: 40; pointer-events: none; border-radius: 12px;
+  background: var(--ghost-bg); border: 1px solid var(--accent);
+  transition: transform 420ms cubic-bezier(.22,.61,.36,1), opacity 420ms ease;
+  transform-origin: top left;
+}
+
+/* ---------- footnote ---------- */
+.footnote { display: flex; flex-direction: column; gap: 7px; }
+.fn2 {
+  display: flex; align-items: flex-start; gap: 8px;
+  font-family: "DM Sans", sans-serif; font-size: clamp(0.66rem, 1.8vw, 0.76rem);
+  color: var(--muted); line-height: 1.45;
+}
+.fn2 b { color: var(--text-strong); font-weight: 600; }
+.fn2 .pic { width: 16px; height: 16px; flex: none; color: var(--accent); margin-top: 2px; }
+
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* ---------- responsive ---------- */
+@media (max-width: 760px) {
+  .body { grid-template-columns: minmax(0, 1fr); }
+  .minimap { position: static; flex-direction: column; }
+  .mmaxis { flex-direction: row; overflow-x: auto; gap: 5px; padding-bottom: 2px; }
+  .mm { flex: 0 0 auto; }
+  .mm .mmnm { display: none; }
+  .mmfoot { display: none; }
+  .axis { grid-template-columns: minmax(0, 1fr); }
+  .flow3 { grid-template-columns: minmax(0, 1fr); }
+  .flow3 .edge { flex-direction: row; padding-left: 14px; }
+  .planes { grid-template-columns: minmax(0, 1fr); }
+  .srow, .trow { grid-template-columns: minmax(0, 1fr); }
+  .srow .branch { padding-left: 14px; }
+  .gwfns { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 400px) {
+  .stage { padding: 10px; }
+  .node { padding: 8px; }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <header class="head">
+    <p class="eyebrow">Archetype B · drill-down with focus and context</p>
+    <h1>One architecture, four altitudes — descend into the position you actually chose</h1>
+    <p>Start with the <b>five deployment positions</b>. Click one and you get <b>its own</b> control plane, not a denser version of this picture. Click the gateway for the <b>request lifecycle that position produces</b>, then the backend for <b>what runs inside it</b>. Every edge is labelled with what crosses it.</p>
+  </header>
+
+  <div class="chrome">
+    <nav class="crumbs" id="crumbs" aria-label="Drill-down trail"></nav>
+    <button type="button" class="upbtn" id="upBtn" disabled>
+      <span class="pic" data-ic="exchange" aria-hidden="true"></span>
+      <span>Up one level</span><kbd>Esc</kbd>
+    </button>
+  </div>
+
+  <div class="body">
+    <main class="stage" id="stage" aria-live="polite"></main>
+
+    <aside class="minimap">
+      <p class="mmhead"><span class="pic" data-ic="radar" aria-hidden="true"></span>Landscape</p>
+      <div class="mmaxis" id="mmAxis"></div>
+      <p class="mmfoot" id="mmFoot"></p>
+    </aside>
+  </div>
+
+  <aside class="footnote">
+    <p class="fn2"><span class="pic" data-ic="gov" aria-hidden="true"></span><span><b>Residency is a constraint, not an optimisation.</b> At every level below, the allowed backend set is computed before capability and cost policy run. Selecting a model first and filtering later makes the residency decision by accident.</span></p>
+    <p class="fn2"><span class="pic" data-ic="scales" aria-hidden="true"></span><span><b>No break-even number appears anywhere in this diagram.</b> Level 3 gives you the cost structure with named variables; the values are yours to supply, from your own measured utilisation.</span></p>
+  </aside>
+
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (REDUCED) { document.body.classList.add('reduced'); }
+
+  /* ================= icons ================= */
+  var ICON_BASE = '../customs-entry-agent/flow-icons/';
+  var cache = {};
+  var load = function (n) {
+    return cache[n] || (cache[n] = fetch(ICON_BASE + n + '.svg')
+      .then(function (r) { return r.ok ? r.text() : Promise.reject(); })
+      .then(function (t) { return t.replace(/stroke="#232f3e"/g, 'stroke="currentColor"'); })
+      .catch(function () { return ''; }));
+  };
+  function paintIcons(root) {
+    (root || document).querySelectorAll('[data-ic]').forEach(function (slot) {
+      load(slot.dataset.ic).then(function (svg) { if (!slot.firstChild) { slot.innerHTML = svg; } });
+    });
+  }
+
+  /* ================= content model ================= */
+
+  var LINKS = [
+    { key: 'weights',  label: 'Weights',  icon: 'key' },
+    { key: 'prompts',  label: 'Prompts',  icon: 'exchange' },
+    { key: 'logs',     label: 'Logs',     icon: 'archive' },
+    { key: 'boundary', label: 'Boundary', icon: 'gavel' }
+  ];
+
+  var POS = [
+    {
+      id: 'P1', icon: 'cpu', name: 'Managed frontier API', burden: 1,
+      eg: 'Claude, GPT or Gemini on the public API.',
+      chain: { weights: 'vendor', prompts: 'vendor', logs: 'vendor', boundary: 'vendor' },
+      backend: { icon: 'cpu', nm: 'Frontier managed API', sub: 'Claude / GPT / Gemini · outside your perimeter' },
+      inside: false, residency: false, interior: 'vendor',
+      egress: 'redacted prompt + routing decision — crosses to the vendor',
+      l1dek: 'Every function still belongs at the choke point, but the model itself sits outside. The gateway is the last thing you own before the boundary.',
+      l2dek: 'Sensitivity classifies as public or internal, so no residency obligation fires. The allowed set stays wide and cost policy has room to work.',
+      l3dek: 'You cannot see inside a managed frontier API. What you can see is the contract surface — and that surface is the whole of your control.'
+    },
+    {
+      id: 'P2', icon: 'network', name: 'Managed open weights', burden: 2,
+      eg: 'Bedrock or Vertex open-weight catalogue.',
+      chain: { weights: 'shared', prompts: 'vendor', logs: 'vendor', boundary: 'vendor' },
+      backend: { icon: 'network', nm: 'Managed open weights', sub: 'Bedrock / Vertex catalogue · outside your perimeter' },
+      inside: false, residency: false, interior: 'vendor',
+      egress: 'redacted prompt + routing decision — crosses to the cloud provider',
+      l1dek: 'Same gateway, cheaper tokens, and an exit: the weights are open, so the same model can be lifted onto your own metal later without a rewrite.',
+      l2dek: 'Identical decision path to the frontier API — the cost policy simply lands on a different tier. The residency gate still runs first.',
+      l3dek: 'The weights are open but the runtime is not yours. The interior is still the provider’s; version pinning is the lever that matters most.'
+    },
+    {
+      id: 'P3', icon: 'gov', name: 'Sovereign-region managed', burden: 3,
+      eg: 'A sovereign cloud partition with in-region-resident operations.',
+      chain: { weights: 'vendor', prompts: 'vendor', logs: 'vendor', boundary: 'shared' },
+      backend: { icon: 'gov', nm: 'Sovereign-region backend', sub: 'Separate partition, in-region operations · vendor-operated' },
+      inside: false, residency: true, interior: 'vendor',
+      egress: 'redacted prompt + routing decision — stays inside the sovereign partition',
+      l1dek: 'The gateway looks the same; the policy controller does more work. The allowed backend set is now a jurisdiction filter that runs before anything else.',
+      l2dek: 'The residency gate fires. The candidate list is narrowed to in-partition backends, and an empty set is a refusal, not a downgrade.',
+      l3dek: 'Operationally still a vendor interior — what changed is who may lawfully reach it. The partition boundary is the artefact you are buying.'
+    },
+    {
+      id: 'P4', icon: 'building', name: 'Vendor appliance on your metal', burden: 4,
+      eg: 'A vendor model image air-gapped on your own GPU server.',
+      chain: { weights: 'shared', prompts: 'you', logs: 'you', boundary: 'you' },
+      backend: { icon: 'building', nm: 'Vendor appliance', sub: 'Licensed image on your hardware · inside your perimeter, air-gapped' },
+      inside: true, residency: true, interior: 'self',
+      egress: 'redacted prompt + routing decision — never leaves your perimeter',
+      l1dek: 'The backend moved inside the line. The gateway keeps every function, but egress no longer crosses a boundary — and there is no vendor link to fall back to.',
+      l2dek: 'The residency gate fires and the surviving set is in-perimeter only. Note what that does to the fallback re-check: there is nowhere else to fail over to.',
+      l3dek: 'You now own serving. The topology below is yours to run, and the cost structure is yours to fill in.'
+    },
+    {
+      id: 'P5', icon: 'shield', name: 'Self-hosted open weights', burden: 5,
+      eg: 'Your GPUs, your open weights, your serving stack.',
+      chain: { weights: 'you', prompts: 'you', logs: 'you', boundary: 'you' },
+      backend: { icon: 'shield', nm: 'Self-hosted cluster', sub: 'vLLM / SGLang on your GPUs · inside your perimeter' },
+      inside: true, residency: true, interior: 'self',
+      egress: 'redacted prompt + routing decision — never leaves your perimeter',
+      l1dek: 'Every link in the custody chain is yours, so the gateway is no longer a boundary guard — it is a fairness, budget and audit engine for your own capacity.',
+      l2dek: 'Residency is satisfied by construction, but the quota gate matters more: your capacity is finite and does not elastically absorb a runaway loop.',
+      l3dek: 'The full serving topology. Aggregated or disaggregated prefill and decode changes what scales on what — and what you pay for while idle.'
+    }
+  ];
+  var POSBY = {};
+  POS.forEach(function (p) { POSBY[p.id] = p; });
+
+  var CLIENTS = [
+    { icon: 'monitor',  nm: 'Internal copilot', sub: 'Staff-facing, SSO identity' },
+    { icon: 'monitor',  nm: 'Customer-facing assistant', sub: 'Public surface, hostile input' },
+    { icon: 'document', nm: 'Batch / document pipeline', sub: 'Bulk extraction, offline SLA' },
+    { icon: 'robot',    nm: 'Agent runtime', sub: 'Multi-step, tool-calling loops' }
+  ];
+
+  var GWFNS = [
+    { icon: 'split',  nm: 'Routing &amp; model selection' },
+    { icon: 'key',    nm: 'AuthN / AuthZ &amp; tenant identity' },
+    { icon: 'gauge',  nm: 'Quota, rate limit &amp; budget' },
+    { icon: 'eye',    nm: 'PII detection &amp; redaction' },
+    { icon: 'archive', nm: 'Semantic cache' },
+    { icon: 'ledger', nm: 'Audit log &amp; cost meter' }
+  ];
+
+  /* L2 steps, drawn from the request-lifecycle exhibit */
+  var STEP = {
+    n1:  { lane: 'Application', icon: 'monitor',  nm: 'Submit request', sub: 'prompt + tenant identity' },
+    n2:  { lane: 'Gateway',     icon: 'radar',    nm: 'Classify sensitivity', sub: 'public / internal / restricted' },
+    d1:  { lane: 'Policy',      icon: 'gov',      nm: 'Residency constraint applies?', sub: 'sensitivity class + tenant jurisdiction', dec: true },
+    n3:  { lane: 'Policy',      icon: 'barrier',  nm: 'Narrow allowed set', sub: 'in-boundary backends only' },
+    d2:  { lane: 'Policy',      icon: 'scales',   nm: 'Any allowed backend remains?', sub: 'size of the surviving set', dec: true },
+    d3:  { lane: 'Gateway',     icon: 'archive',  nm: 'Semantic cache hit?', sub: 'tenant-scoped lookup only', dec: true },
+    nc:  { lane: 'Gateway',     icon: 'archive',  nm: 'Serve cached completion', sub: 'no model call made' },
+    d4:  { lane: 'Gateway',     icon: 'gauge',    nm: 'Within quota / budget?', sub: 'counters only, no prompt', dec: true },
+    n5:  { lane: 'Gateway',     icon: 'split',    nm: 'Model tier selection', sub: 'from the surviving set only' },
+    n6:  { lane: 'Gateway',     icon: 'shield',   nm: 'Redact PII', sub: 'last point the raw text exists' },
+    n7:  { lane: 'Backend',     icon: 'cpu',      nm: 'Invoke backend', sub: 'chosen tier', drill: 'Open the interior' },
+    d5:  { lane: 'Backend',     icon: 'network',  nm: 'Backend healthy?', sub: 'inside error and latency budget', dec: true },
+    n8:  { lane: 'Backend',     icon: 'exchange', nm: 'Fallback tier', sub: 'candidate, not yet approved' },
+    d6:  { lane: 'Policy',      icon: 'gov',      nm: 'Fallback inside the same boundary?', sub: 'the prompt is held, not sent', dec: true },
+    n9:  { lane: 'Gateway',     icon: 'document', nm: 'Receive completion', sub: 'write to cache if cacheable' },
+    n10: { lane: 'Audit',       icon: 'coin',     nm: 'Record', sub: 'audit + cost line' },
+    n11: { lane: 'Application', icon: 'check',    nm: 'Completed', sub: 'response returned', tone: 'good' },
+    xa:  { lane: 'Policy',      icon: 'warning',  nm: 'Blocked by residency', sub: 'terminal exit A · fail closed', tone: 'warn' },
+    xb:  { lane: 'Gateway',     icon: 'coin',     nm: 'Over quota', sub: 'terminal exit B · pre-agreed behaviour', tone: 'warn' },
+    xc:  { lane: 'Policy',      icon: 'warning',  nm: 'Fallback blocked', sub: 'terminal exit C · fail closed', tone: 'warn' }
+  };
+
+  /* spine rows: [stepId, edgeLabelToNextStep, branch?] */
+  function spineFor(p) {
+    var rows = [];
+    rows.push(['n1', 'raw prompt + tenant identity']);
+    if (p.residency) {
+      rows.push(['n2', 'sensitivity class · restricted']);
+      rows.push(['d1', 'Yes · residency obligation', null]);
+      rows.push(['n3', 'filtered candidate list']);
+      rows.push(['d2', 'Yes · surviving allowed set', ['xa', 'No · empty set', 'warn']]);
+    } else {
+      rows.push(['n2', 'sensitivity class · public or internal']);
+      rows.push(['d1', 'No · full candidate set', ['n3', 'the branch this position does not take', 'soft']]);
+      rows.push(['d2', 'Yes · surviving allowed set', ['xa', 'No · empty set', 'warn']]);
+    }
+    rows.push(['d3', 'No · cache miss', ['nc', 'Yes · cached completion, no model call', 'soft']]);
+    rows.push(['d4', 'Yes · headroom remains', ['xb', 'No · envelope exhausted', 'warn']]);
+    rows.push(['n5', 'chosen tier + the policy that chose it']);
+    rows.push(['n6', 'redacted prompt']);
+    rows.push(['n7', 'response or error signal']);
+    rows.push(['d5', 'Yes · completion + usage', ['n8', 'No · error class, nominate fallback', 'warn']]);
+    rows.push(['n9', 'request hash + token counts']);
+    rows.push(['n10', 'completion + decision trail id']);
+    rows.push(['n11', null]);
+    return rows;
+  }
+
+  /* L3 self-host topology rows, both modes */
+  function topoRows(mode) {
+    var r = [
+      ['ingress', 'admitted request, TLS terminated', 'gate'],
+      ['gate', 'authorised, redacted prompt', mode === 'agg' ? 'infer' : 'prefill']
+    ];
+    if (mode === 'agg') {
+      r.push(['infer', 'batched forward passes', 'gpu']);
+    } else {
+      r.push(['prefill', 'KV cache handoff', 'decode']);
+      r.push(['decode', 'per-token memory-bandwidth reads', 'gpu']);
+    }
+    r.push(['gpu', 'tokens, latency percentiles, GPU utilisation', 'obs']);
+    return r;
+  }
+  var TOPO = {
+    store:   { icon: 'warehouse', nm: 'Weights store', sub: 'Model artifacts, versioned, checksummed' },
+    ingress: { icon: 'exchange',  nm: 'Ingress / load balancer', sub: 'TLS, routing, request admission' },
+    gate:    { icon: 'barrier',   nm: 'AI gateway', sub: 'Auth, quotas, model routing, redaction, audit' },
+    infer:   { icon: 'gears',     nm: 'Inference servers', sub: 'vLLM / SGLang · prefill and decode in one pool' },
+    prefill: { icon: 'split',     nm: 'Prefill tier', sub: 'Compute-bound, bursty · scales on queued prompt tokens' },
+    decode:  { icon: 'merge',     nm: 'Decode tier', sub: 'Memory-bandwidth-bound · scales on concurrent sequences' },
+    gpu:     { icon: 'cpu',       nm: 'GPU pool', sub: 'The line that bills whether or not it is busy' },
+    obs:     { icon: 'gauge',     nm: 'Observability + cost meter', sub: 'Collected from gateway, servers and GPU pool' }
+  };
+
+  var VENDOR_CONTROL = [
+    { icon: 'gov',      nm: 'Region / partition pin', sub: 'Where processing may lawfully happen' },
+    { icon: 'archive',  nm: 'Retention setting', sub: 'How long the vendor keeps request records' },
+    { icon: 'bookmark', nm: 'Model version pin', sub: 'Which snapshot answers, and when it moves' },
+    { icon: 'gavel',    nm: 'Legal instrument', sub: 'Processing terms and the jurisdiction over them' },
+    { icon: 'key',      nm: 'Key + entitlement scope', sub: 'Which tenant may call which model' }
+  ];
+  var VENDOR_INTERIOR = [
+    { icon: 'gears',  nm: 'Serving fleet', sub: 'Batching, scheduling and co-tenancy — not observable to you' },
+    { icon: 'cpu',    nm: 'Accelerator pool', sub: 'Hardware generation and capacity — not observable to you' },
+    { icon: 'radar',  nm: 'Vendor telemetry', sub: 'What the vendor measures about your traffic' }
+  ];
+
+  /* ================= chrome + state ================= */
+
+  var stage = document.getElementById('stage');
+  var crumbs = document.getElementById('crumbs');
+  var upBtn = document.getElementById('upBtn');
+  var mmAxis = document.getElementById('mmAxis');
+  var mmFoot = document.getElementById('mmFoot');
+
+  var trail = [{ level: 0, pos: null }];
+  var topoMode = 'agg';
+
+  function cur() { return trail[trail.length - 1]; }
+
+  var LEVEL_TITLE = {
+    0: 'Deployment landscape',
+    1: 'Control plane',
+    2: 'Request lifecycle',
+    3: 'Backend interior'
+  };
+  var LEVEL_ICON = { 0: 'radar', 1: 'network', 2: 'exchange', 3: 'gears' };
+
+  function crumbLabel(v) {
+    if (v.level === 0) { return 'Five positions'; }
+    var p = POSBY[v.pos];
+    if (v.level === 1) { return p.id + ' · control plane'; }
+    if (v.level === 2) { return p.id + ' · lifecycle'; }
+    return p.id + ' · interior';
+  }
+
+  function renderChrome() {
+    var html = '';
+    trail.forEach(function (v, i) {
+      var last = i === trail.length - 1;
+      if (i) { html += '<span class="sep" aria-hidden="true">›</span>'; }
+      html += '<button type="button" class="crumb" data-i="' + i + '"' +
+        (last ? ' aria-current="page"' : '') + '>' +
+        '<span class="pic" data-ic="' + LEVEL_ICON[v.level] + '" aria-hidden="true"></span>' +
+        '<span class="lv">L' + v.level + '</span>' + crumbLabel(v) + '</button>';
+    });
+    crumbs.innerHTML = html;
+    crumbs.querySelectorAll('.crumb').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var i = +b.dataset.i;
+        if (i === trail.length - 1) { return; }
+        goTo(trail.slice(0, i + 1), null, 'up');
+      });
+    });
+    upBtn.disabled = trail.length < 2;
+    paintIcons(crumbs);
+  }
+
+  function renderMinimap() {
+    var v = cur();
+    var html = '';
+    POS.forEach(function (p) {
+      html += '<button type="button" class="mm" data-p="' + p.id + '" style="--c: var(--' + p.id + ');"' +
+        ' aria-pressed="' + (v.pos === p.id) + '">' +
+        '<span class="pic" data-ic="' + p.icon + '" aria-hidden="true"></span>' +
+        '<span class="mmid">' + p.id + '</span>' +
+        '<span class="mmnm">' + p.name + '</span></button>';
+    });
+    mmAxis.innerHTML = html;
+    mmAxis.querySelectorAll('.mm').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var id = b.dataset.p;
+        var v2 = cur();
+        if (v2.pos === id && v2.level > 0) { return; }
+        var lvl = v2.level === 0 ? 1 : v2.level;
+        var next = trail.slice(0, 1);
+        for (var l = 1; l <= lvl; l++) { next.push({ level: l, pos: id }); }
+        goTo(next, b, 'lateral');
+      });
+    });
+    mmFoot.textContent = v.pos
+      ? 'Focused on ' + POSBY[v.pos].id + '. Click another position to move sideways at the same altitude.'
+      : 'No position focused yet. Click a card in the landscape, or a position here, to descend.';
+    paintIcons(mmAxis);
+  }
+
+  /* ================= view builders ================= */
+
+  function nodeHtml(o, opts) {
+    opts = opts || {};
+    var tag = opts.action ? 'button' : 'div';
+    var attrs = opts.action ? ' type="button" data-act="' + opts.action + '"' : '';
+    if (opts.data) { attrs += ' data-arg="' + opts.data + '"'; }
+    return '<' + tag + ' class="node' + (opts.cls ? ' ' + opts.cls : '') + '"' +
+      (opts.color ? ' style="--c: var(--' + opts.color + ');"' : '') + attrs + '>' +
+      '<span class="pic" data-ic="' + o.icon + '" aria-hidden="true"></span>' +
+      '<span class="tx">' +
+        (opts.lane || opts.num
+          ? '<span class="nmrow">' + (opts.num ? '<span class="snum">' + opts.num + '</span>' : '') +
+            '<span class="nm">' + o.nm + '</span>' +
+            (opts.lane ? '<span class="lane">' + opts.lane + '</span>' : '') + '</span>'
+          : '<span class="nm">' + o.nm + '</span>') +
+        '<span class="sub">' + o.sub + '</span>' +
+        (opts.drill ? '<span class="drill">' + opts.drill + ' ›</span>' : '') +
+      '</span></' + tag + '>';
+  }
+
+  function edgeHtml(label, tone, pulse) {
+    return '<div class="edge' + (tone ? ' ' + tone : '') + (pulse ? ' pulse' : '') + '">' +
+      '<span class="wire"><i></i></span>' +
+      (label ? '<span class="elabel">' + label + '</span><span class="wire"><i></i></span>' : '') +
+      '<span class="tip" aria-hidden="true">▸</span></div>';
+  }
+
+  function vedgeHtml(label, tone) {
+    return '<div class="vedge' + (tone ? ' ' + tone : '') + '">' +
+      '<span class="wire"></span>' +
+      '<span class="elabel">' + label + '</span></div>';
+  }
+
+  function viewL0() {
+    var html = '<div class="vhead"><span class="lvtag">Level 0</span>' +
+      '<h2 id="vTitle" tabindex="-1">Five deployment positions, one axis</h2></div>' +
+      '<p class="vdek">Open-versus-closed and self-host-versus-managed are two independent axes, not one. Each card shows the four-link <b>custody chain</b> — who holds the weights, who processes the prompts, who retains the logs, and whose legal boundary governs. <b>Click a position to descend into its own architecture.</b></p>' +
+      '<div class="axis">';
+    POS.forEach(function (p, i) {
+      var dots = '';
+      for (var d = 1; d <= 5; d++) { dots += '<s class="' + (d <= p.burden ? 'on' : '') + '"></s>'; }
+      var chain = '';
+      LINKS.forEach(function (l) {
+        var h = p.chain[l.key];
+        chain += '<span class="cl"><span class="pic" data-ic="' + l.icon + '" aria-hidden="true"></span>' +
+          '<span class="cln">' + l.label + '</span><span class="hb ' + h + '">' + h + '</span></span>';
+      });
+      html += '<button type="button" class="pos" data-act="descend" data-arg="' + p.id + '"' +
+        ' style="--c: var(--' + p.id + ');" aria-pressed="false">' +
+        '<span class="rank"><i>' + (i + 1) + '</i>' + p.id + '</span>' +
+        '<span class="pic" data-ic="' + p.icon + '" aria-hidden="true"></span>' +
+        '<span class="name">' + p.name + '</span>' +
+        '<span class="eg">' + p.eg + '</span>' +
+        '<span class="custody">' + chain + '</span>' +
+        '<span class="burden"><span>Burden</span>' + dots +
+        '<span class="sr">Operating burden ' + p.burden + ' of 5</span></span>' +
+        '<span class="drill">Open ' + p.id + '</span></button>';
+    });
+    html += '</div>';
+    return html;
+  }
+
+  function viewL1(p) {
+    var fns = '';
+    GWFNS.forEach(function (f) {
+      fns += '<span class="fn"><span class="pic" data-ic="' + f.icon + '" aria-hidden="true"></span>' + f.nm + '</span>';
+    });
+    var clients = '<div class="group"><p class="gtitle">Calling surfaces</p>';
+    CLIENTS.forEach(function (c) { clients += nodeHtml(c); });
+    clients += '</div>';
+
+    var gw = '<div class="gwcard" id="gwCard">' +
+      nodeHtml({ icon: 'barrier', nm: 'AI gateway', sub: 'The single choke point every model call passes through' },
+        { action: 'gateway', color: 'accent', drill: 'Open the request lifecycle', cls: '' }) +
+      '<div class="gwfns">' + fns + '</div></div>';
+
+    var back = '<div class="group"><p class="gtitle">' +
+      (p.inside ? 'Backend · inside your perimeter' : 'Backend · outside your perimeter') + '</p>' +
+      nodeHtml(p.backend, { action: 'backend', color: p.id, drill: 'Open the interior' }) +
+      '</div>';
+
+    var html = '<div class="vhead"><span class="lvtag">Level 1</span>' +
+      '<h2 id="vTitle" tabindex="-1">' + p.id + ' · ' + p.name + ' — control plane</h2></div>' +
+      '<p class="vdek">' + p.l1dek + '</p>' +
+      '<div class="flow3">' +
+        clients +
+        edgeHtml('prompt + tenant identity', '', true) +
+        gw +
+        edgeHtml(p.egress, p.inside ? 'good' : 'warn', true) +
+        back +
+      '</div>' +
+      '<div class="planes">' +
+        '<div class="plane"><p class="gtitle">Control plane → gateway</p>' +
+          nodeHtml({ icon: 'gov', nm: 'Policy &amp; residency controller', sub: 'Publishes the allowed backend set per workload' }, { color: 'accent-3' }) +
+          vedgeHtml('residency constraint + allowed backend set') +
+          nodeHtml({ icon: 'check', nm: 'Evaluation harness', sub: 'Scores candidate models against fixed task sets' }, { color: 'accent-3' }) +
+          vedgeHtml('quality scores feeding routing') +
+        '</div>' +
+        '<div class="plane"><p class="gtitle">Gateway → data and record plane</p>' +
+          nodeHtml({ icon: 'warehouse', nm: 'Retrieval / vector store', sub: 'One embedding and chunk store for the estate' }, { color: 'accent' }) +
+          vedgeHtml('embedding query ↔ retrieved chunks') +
+          nodeHtml({ icon: 'coin', nm: 'Cost meter', sub: 'Per-team, per-feature unit economics' }, { color: 'accent-2' }) +
+          vedgeHtml('token counts + cost per call') +
+          nodeHtml({ icon: 'archive', nm: 'Audit store (WORM)', sub: 'Write-once retention of request records' }, { color: 'accent' }) +
+          vedgeHtml('request record: hash, model, policy decision') +
+        '</div>' +
+      '</div>' +
+      '<p class="perimnote"><span class="pic" data-ic="' + (p.inside ? 'shield' : 'warning') + '" aria-hidden="true"></span>' +
+        '<span><b>Perimeter.</b> ' + (p.inside
+          ? 'The backend sits inside the line with the gateway, so the egress edge above never crosses a boundary. Availability has nowhere external to fall back to — that constraint reappears at Level 2.'
+          : 'The egress edge above crosses out of your perimeter. Everything to the left of it is yours; the completion that comes back was produced somewhere you cannot inspect — which is what Level 3 is about.') +
+        '</span></p>';
+    return html;
+  }
+
+  function viewL2(p) {
+    var rows = spineFor(p);
+    var html = '<div class="vhead"><span class="lvtag">Level 2</span>' +
+      '<h2 id="vTitle" tabindex="-1">' + p.id + ' · request lifecycle through the gateway</h2></div>' +
+      '<p class="vdek">' + p.l2dek + ' Branches to the right are the exits this path can take; <b>all three terminal exits fail closed</b>.</p>' +
+      '<div class="spine">';
+    var num = 0;
+    rows.forEach(function (r, i) {
+      var s = STEP[r[0]];
+      num += 1;
+      var branch = '';
+      if (r[2]) {
+        var bs = STEP[r[2][0]];
+        var tone = r[2][2] === 'warn' ? 'warn' : '';
+        branch = '<div class="branch">' + edgeHtml(r[2][1], tone, false) +
+          nodeHtml(bs, { cls: bs.tone === 'warn' ? 'warn' : (r[2][2] === 'soft' ? 'opaque' : ''), lane: bs.lane }) + '</div>';
+      }
+      html += '<div class="srow">' +
+        nodeHtml(s, {
+          num: num, lane: s.lane,
+          cls: (s.dec ? 'dec ' : '') + (s.tone === 'good' ? 'good' : ''),
+          action: r[0] === 'n7' ? 'backend' : null,
+          color: r[0] === 'n7' ? p.id : null,
+          drill: r[0] === 'n7' ? 'Open the interior' : null
+        }) + branch + '</div>';
+      if (r[1]) { html += '<div class="srow">' + vedgeHtml(r[1], i === rows.length - 2 ? 'good' : '') + '</div>'; }
+    });
+    html += '</div>' +
+      '<p class="perimnote"><span class="pic" data-ic="warning" aria-hidden="true"></span>' +
+      '<span><b>Your outage procedure is also a data-export procedure.</b> The fallback tier does not inherit the primary’s approval — the residency test is re-run against it. ' +
+      (p.inside
+        ? 'For ' + p.id + ' there is no compliant out-of-perimeter standby at all, so exit C is the honest answer under stress.'
+        : 'For ' + p.id + ' a healthy standby in another jurisdiction is still a refusal, not a rescue.') +
+      '</span></p>';
+    return html;
+  }
+
+  function viewL3Self(p) {
+    var rows = topoRows(topoMode);
+    var html = '<div class="vhead"><span class="lvtag">Level 3</span>' +
+      '<h2 id="vTitle" tabindex="-1">' + p.id + ' · inside the backend you operate</h2></div>' +
+      '<p class="vdek">' + p.l3dek + '</p>' +
+      '<div class="ctrls" role="group" aria-label="Serving topology">' +
+        '<button type="button" class="ctrl" data-act="topo" data-arg="agg" aria-pressed="' + (topoMode === 'agg') + '">' +
+          '<span class="pic" data-ic="gears" aria-hidden="true"></span>Aggregated</button>' +
+        '<button type="button" class="ctrl" data-act="topo" data-arg="dis" aria-pressed="' + (topoMode === 'dis') + '">' +
+          '<span class="pic" data-ic="split" aria-hidden="true"></span>Disaggregated prefill / decode</button>' +
+      '</div>' +
+      '<div class="topo">';
+    var servingTier = topoMode === 'agg' ? 'infer' : 'prefill';
+    rows.forEach(function (r) {
+      var branch = '';
+      if (r[0] === servingTier) {
+        branch = '<div class="branch">' + edgeHtml('pulls weights from — versioned, checksummed, never egresses', '', false) +
+          nodeHtml(TOPO.store, { color: 'accent' }) + '</div>';
+      }
+      html += '<div class="' + (branch ? 'trow' : 'srow') + '">' + nodeHtml(TOPO[r[0]], { color: p.id }) + branch + '</div>';
+      html += '<div class="srow">' + vedgeHtml(r[1]) + '</div>';
+    });
+    html += '<div class="srow">' + nodeHtml(TOPO.obs, { color: 'accent-2' }) + '</div>';
+    html += '</div>' +
+      '<div class="econ"><h3>Cost structure — you supply every value</h3>' +
+      '<div class="vars">' +
+        '<span class="var"><b>R</b> GPU price per hour</span>' +
+        '<span class="var"><b>N</b> GPUs in the pool</span>' +
+        '<span class="var"><b>H</b> hours in the billing period</span>' +
+        '<span class="var"><b>U</b> measured utilisation</span>' +
+        '<span class="var"><b>T</b> tokens served in the period</span>' +
+        '<span class="var"><b>A</b> managed price per million tokens</span>' +
+        '<span class="var"><b>F</b> platform engineering cost per period</span>' +
+      '</div>' +
+      '<div class="formula">' +
+        '<span>self-hosted cost = (R × N × H) + F</span>' +
+        '<span>managed cost = A × (T ÷ 1 million)</span>' +
+        '<span>effective self-hosted price per million tokens = ((R × N × H) + F) ÷ ((T ÷ 1 million) × U)</span>' +
+      '</div>' +
+      '<p>The <b>U</b> term is the one that decides the answer, and it is the one nobody measures. If you cannot show a measured utilisation figure from the last thirty days, this is a hypothesis, not a business case — which is why no break-even number is printed here.</p>' +
+      '</div>';
+    return html;
+  }
+
+  function viewL3Vendor(p) {
+    var ctrl = '<div class="group"><p class="gtitle">Your side of the boundary — the whole of your control</p>';
+    VENDOR_CONTROL.forEach(function (c) { ctrl += nodeHtml(c, { color: 'accent' }); });
+    ctrl += '</div>';
+    var inner = '<div class="group"><p class="gtitle">Vendor-operated interior — not observable to you</p>';
+    VENDOR_INTERIOR.forEach(function (c) { inner += nodeHtml(c, { cls: 'opaque', color: p.id }); });
+    inner += '</div>';
+
+    var html = '<div class="vhead"><span class="lvtag">Level 3</span>' +
+      '<h2 id="vTitle" tabindex="-1">' + p.id + ' · inside a backend you do not operate</h2></div>' +
+      '<p class="vdek">' + p.l3dek + '</p>' +
+      '<div class="flow3">' + ctrl +
+        edgeHtml('region, retention and version settings — control plane', '', true) +
+        '<div class="group"><p class="gtitle">' + (p.residency ? 'Sovereign partition boundary' : 'Vendor boundary') + '</p>' +
+          nodeHtml({ icon: p.residency ? 'gov' : 'barrier',
+                     nm: p.residency ? 'Sovereign partition' : 'Vendor boundary',
+                     sub: p.residency
+                       ? 'Separate partition, in-region-resident operations under local law'
+                       : 'Contractual and jurisdictional line your data crosses' },
+                   { color: p.id }) + '</div>' +
+        edgeHtml('redacted prompt over TLS → completion + usage counters', p.residency ? '' : 'warn', true) +
+        inner +
+      '</div>' +
+      '<div class="planes">' +
+        '<div class="plane"><p class="gtitle">What crosses back to you</p>' +
+          nodeHtml({ icon: 'document', nm: 'Completion', sub: 'Plus the model id that produced it' }, { color: 'accent' }) +
+          vedgeHtml('completion + model id') +
+          nodeHtml({ icon: 'coin', nm: 'Usage counters', sub: 'Prompt and completion tokens, billed' }, { color: 'accent-2' }) +
+          vedgeHtml('token counts → your cost meter') +
+          nodeHtml({ icon: 'ledger', nm: 'Invoice + service telemetry', sub: 'The vendor’s view of your traffic' }, { color: 'accent' }) +
+        '</div>' +
+        '<div class="plane"><p class="gtitle">What never crosses back</p>' +
+          nodeHtml({ icon: 'eye', nm: 'Batch composition and co-tenancy', sub: 'Whose requests share your forward pass' }, { cls: 'opaque' }) +
+          nodeHtml({ icon: 'bookmark', nm: 'Rollout timing', sub: 'When the snapshot behind your pin actually moves' }, { cls: 'opaque' }) +
+          nodeHtml({ icon: 'cpu', nm: 'Hardware generation', sub: 'What silicon your latency is a function of' }, { cls: 'opaque' }) +
+        '</div>' +
+      '</div>' +
+      '<p class="perimnote"><span class="pic" data-ic="scales" aria-hidden="true"></span>' +
+      '<span><b>The economics here are a price, not a cost structure.</b> You pay a published rate per million tokens; the utilisation risk sits with the vendor. That is the trade the left-hand column is buying — and it is why the cost comparison at ' +
+      (p.residency ? 'P4 and P5' : 'P5') + ' needs your own measured numbers, not a headline figure.</span></p>';
+    return html;
+  }
+
+  function buildView() {
+    var v = cur();
+    if (v.level === 0) { return viewL0(); }
+    var p = POSBY[v.pos];
+    if (v.level === 1) { return viewL1(p); }
+    if (v.level === 2) { return viewL2(p); }
+    return p.interior === 'self' ? viewL3Self(p) : viewL3Vendor(p);
+  }
+
+  /* ================= render + transition ================= */
+
+  var revealed = false;
+
+  function postSize() {
+    if (document.documentElement.dataset.embedded === 'true') {
+      window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+    }
+  }
+
+  function render(enter) {
+    var wrap = document.createElement('div');
+    wrap.className = 'view';
+    wrap.innerHTML = buildView();
+    stage.innerHTML = '';
+    stage.appendChild(wrap);
+    paintIcons(wrap);
+    bindStage();
+    renderChrome();
+    renderMinimap();
+
+    if (REDUCED || !enter || revealed) {
+      if (REDUCED) { wrap.classList.add('in'); }
+      else {
+        requestAnimationFrame(function () {
+          requestAnimationFrame(function () { wrap.classList.add('in'); postSize(); });
+        });
+      }
+    }
+    postSize();
+    requestAnimationFrame(postSize);
+    setTimeout(postSize, 460);
+    return wrap;
+  }
+
+  function morph(fromEl, dir, done) {
+    if (REDUCED || !fromEl) { done(); return; }
+    var a = fromEl.getBoundingClientRect();
+    var ghost = document.createElement('div');
+    ghost.className = 'ghost';
+    ghost.style.left = a.left + 'px';
+    ghost.style.top = a.top + 'px';
+    ghost.style.width = a.width + 'px';
+    ghost.style.height = a.height + 'px';
+    ghost.style.opacity = '0.9';
+    document.body.appendChild(ghost);
+    var b = stage.getBoundingClientRect();
+    requestAnimationFrame(function () {
+      var sx = Math.max(0.2, b.width / Math.max(1, a.width));
+      var sy = Math.max(0.2, b.height / Math.max(1, a.height));
+      if (dir === 'up') { sx = 0.6; sy = 0.6; }
+      ghost.style.transform = 'translate(' + (b.left - a.left) + 'px,' + (b.top - a.top) + 'px) scale(' + sx + ',' + sy + ')';
+      ghost.style.opacity = '0';
+    });
+    setTimeout(function () {
+      if (ghost.parentNode) { ghost.parentNode.removeChild(ghost); }
+    }, 440);
+    done();
+  }
+
+  function goTo(nextTrail, fromEl, dir) {
+    trail = nextTrail;
+    morph(fromEl, dir, function () {
+      var wrap = render(true);
+      if (!REDUCED) {
+        requestAnimationFrame(function () {
+          requestAnimationFrame(function () { wrap.classList.add('in'); postSize(); });
+        });
+      }
+      var h = stage.querySelector('#vTitle');
+      if (h && dir !== 'boot') { h.focus(); }
+    });
+  }
+
+  function descend(level, pos, fromEl) {
+    var next = trail.slice();
+    var v = cur();
+    if (v.level === 0) { next.push({ level: 1, pos: pos }); }
+    if (level === 2) { next.push({ level: 2, pos: pos }); }
+    if (level === 3) { next.push({ level: 3, pos: pos }); }
+    goTo(next, fromEl, 'down');
+  }
+
+  function up() {
+    if (trail.length < 2) { return; }
+    goTo(trail.slice(0, trail.length - 1), null, 'up');
+  }
+
+  function bindStage() {
+    stage.querySelectorAll('[data-act]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var act = b.dataset.act;
+        var arg = b.dataset.arg;
+        var v = cur();
+        if (act === 'descend') { descend(1, arg, b); return; }
+        if (act === 'gateway') { descend(2, v.pos, b); return; }
+        if (act === 'backend') { descend(3, v.pos, b); return; }
+        if (act === 'topo') {
+          topoMode = arg;
+          render(true);
+          var w = stage.querySelector('.view');
+          if (w && !REDUCED) {
+            requestAnimationFrame(function () {
+              requestAnimationFrame(function () { w.classList.add('in'); postSize(); });
+            });
+          }
+        }
+      });
+    });
+  }
+
+  upBtn.addEventListener('click', up);
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') { e.preventDefault(); up(); }
+  });
+
+  /* ================= boot ================= */
+
+  var first = render(false);
+  paintIcons(document);
+
+  function reveal() {
+    revealed = true;
+    first.classList.add('in');
+    postSize();
+  }
+  if (REDUCED) {
+    first.classList.add('in');
+    postSize();
+  } else if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) { reveal(); io.disconnect(); }
+      });
+    }, { threshold: 0.12 });
+    io.observe(stage);
+    setTimeout(function () { if (!revealed) { reveal(); } }, 2400);
+  } else {
+    reveal();
+  }
+
+  /* ================= autosize sender ================= */
+  if (document.documentElement.dataset.embedded === 'true') {
+    if ('ResizeObserver' in window) { new ResizeObserver(postSize).observe(document.body); }
+    window.addEventListener('load', postSize);
+    window.addEventListener('resize', postSize);
+    setTimeout(postSize, 400);
+  }
+})();
+</script>
+</body>
+</html>

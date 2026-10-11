@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Five Layers, As An Architecture</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+/* ---- Embed override: this scene autosizes, it must not be locked to viewport height ---- */
+:root[data-embedded="true"], :root[data-embedded="true"] body { height: auto; overflow: visible; }
+:root[data-embedded="true"] .shell { width: 100%; height: auto; padding: 14px 18px; }
+
+body { font-family: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif; }
+
+.shell { display: flex; flex-direction: column; gap: clamp(12px, 2vw, 18px); }
+
+.head h1 {
+  font-size: clamp(1.15rem, 2.6vw, 1.75rem);
+  color: var(--text-strong);
+  letter-spacing: -0.01em;
+  margin: 6px 0 4px;
+}
+.head p {
+  font-size: clamp(0.85rem, 1.5vw, 0.98rem);
+  color: var(--muted);
+  line-height: 1.5;
+  font-family: "DM Sans", sans-serif;
+}
+
+/* ---- Controls ---- */
+.controls { display: flex; flex-wrap: wrap; gap: clamp(8px, 1.4vw, 14px); align-items: flex-start; }
+.ctl {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: clamp(8px, 1.2vw, 12px);
+  box-shadow: var(--shadow-soft);
+  flex: 1 1 260px;
+  min-width: 0;
+}
+.ctl-label {
+  font-size: 0.63rem; font-weight: 700; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--muted-soft); margin-bottom: 8px;
+}
+.seg { display: flex; flex-wrap: wrap; gap: 6px; }
+.seg button {
+  font-family: inherit;
+  font-size: clamp(0.68rem, 1.15vw, 0.79rem);
+  font-weight: 600;
+  color: var(--muted);
+  background: color-mix(in srgb, var(--surface-strong) 70%, transparent);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, border-color 0.2s, transform 0.2s;
+}
+.seg button:hover { border-color: var(--border-strong); transform: translateY(-1px); }
+.seg button[aria-pressed="true"] {
+  color: var(--text-strong);
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+}
+.readout {
+  margin-top: 10px;
+  font-family: "DM Sans", sans-serif;
+  font-size: clamp(0.72rem, 1.25vw, 0.84rem);
+  color: var(--muted);
+  line-height: 1.45;
+}
+.readout b { color: var(--text-strong); font-weight: 700; }
+
+/* ---- Diagram grid ---- */
+.diagram {
+  position: relative;
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr) clamp(150px, 15vw, 196px) 58px;
+  gap: clamp(8px, 1vw, 14px);
+  align-items: stretch;
+}
+.arc-gutter, .loop-gutter { min-width: 0; }
+.bands { display: flex; flex-direction: column; gap: clamp(8px, 1.1vw, 12px); min-width: 0; position: relative; z-index: 2; }
+
+#edges { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; overflow: visible; }
+#edges .lbl {
+  font-family: "DM Sans", sans-serif;
+  font-size: 9.5px;
+  font-weight: 500;
+  fill: var(--muted);
+  paint-order: stroke;
+  stroke: var(--bg-mid);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+#edges .edge { fill: none; stroke-width: 1.6; opacity: 0.9; }
+#edges .arc {
+  fill: none; stroke: var(--accent-2); stroke-width: 2.2;
+  stroke-dasharray: 7 6; stroke-linecap: round;
+}
+#edges .arc-lbl { fill: var(--accent-2); font-weight: 700; font-size: 9.5px; }
+.march #edges .arc { animation: march 3.4s linear infinite; }
+@keyframes march { to { stroke-dashoffset: -78; } }
+
+.mk1 { fill: var(--L1); } .mk2 { fill: var(--L2); } .mk3 { fill: var(--L3); }
+.mk4 { fill: var(--L4); } .mk5 { fill: var(--L5); } .mkA { fill: var(--accent); }
+.mkArc { fill: var(--accent-2); }
+
+/* ---- Bands ---- */
+.band {
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--lc);
+  border-radius: 14px;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--lc) 13%, transparent), color-mix(in srgb, var(--surface) 92%, transparent) 46%, var(--surface));
+  box-shadow: var(--shadow-soft);
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.55s ease, transform 0.55s ease, border-color 0.2s;
+}
+.is-in .band { opacity: 1; transform: none; }
+.band.open { border-color: var(--lc); }
+.band-head {
+  width: 100%;
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: clamp(8px, 1.2vw, 14px);
+  background: none;
+  border: 0;
+  font-family: inherit;
+  color: inherit;
+  text-align: left;
+  padding: clamp(9px, 1.3vw, 14px) clamp(10px, 1.4vw, 16px);
+  cursor: pointer;
+}
+.band-head:hover .lname { color: var(--lc); }
+.lnum {
+  font-size: clamp(0.72rem, 1.3vw, 0.86rem);
+  font-weight: 700;
+  color: var(--lc);
+  letter-spacing: 0.06em;
+  min-width: 2.1em;
+}
+.pic {
+  width: clamp(22px, 2.6vw, 30px);
+  height: clamp(22px, 2.6vw, 30px);
+  color: var(--lc);
+  display: block;
+  flex: none;
+}
+.pic svg { width: 100%; height: 100%; }
+.pic svg * { stroke: currentColor; }
+.lname {
+  font-size: clamp(0.86rem, 1.6vw, 1.05rem);
+  font-weight: 700;
+  color: var(--text-strong);
+  transition: color 0.2s;
+  display: block;
+}
+.lsub {
+  font-family: "DM Sans", sans-serif;
+  font-size: clamp(0.7rem, 1.25vw, 0.81rem);
+  color: var(--muted);
+  margin-top: 2px;
+  display: block;
+}
+.meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+.tag {
+  font-size: 0.62rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+  border-radius: 999px; padding: 3px 8px;
+  border: 1px solid color-mix(in srgb, var(--lc) 42%, transparent);
+  color: var(--lc);
+  background: color-mix(in srgb, var(--lc) 10%, transparent);
+  white-space: nowrap;
+}
+.chev { color: var(--muted-soft); font-size: 0.8rem; transition: transform 0.25s; }
+.band.open .chev { transform: rotate(180deg); }
+
+.band-body { display: none; padding: 0 clamp(10px, 1.4vw, 16px) clamp(11px, 1.4vw, 15px) clamp(10px, 1.4vw, 16px); }
+.band.open .band-body { display: block; }
+.facts {
+  display: flex; flex-wrap: wrap; gap: 6px 14px;
+  font-family: "DM Sans", sans-serif;
+  font-size: clamp(0.7rem, 1.2vw, 0.8rem);
+  color: var(--muted);
+  padding-bottom: 9px;
+  margin-bottom: 9px;
+  border-bottom: 1px dashed var(--border);
+}
+.facts b { color: var(--text-strong); font-weight: 700; }
+.chips { display: flex; flex-direction: column; gap: 6px; list-style: none; }
+.chip {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 6px 9px;
+  background: color-mix(in srgb, var(--surface-strong) 76%, transparent);
+  font-family: "DM Sans", sans-serif;
+  font-size: clamp(0.71rem, 1.22vw, 0.82rem);
+  color: var(--text);
+  line-height: 1.35;
+  transition: border-color 0.25s, background 0.25s;
+}
+.chip .txt { flex: 1 1 160px; min-width: 0; overflow-wrap: anywhere; }
+.prov {
+  font-size: 0.6rem; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase;
+  border-radius: 999px; padding: 3px 8px; white-space: nowrap;
+}
+.chip[data-prov="build"] { border-color: color-mix(in srgb, var(--lc) 34%, transparent); }
+.chip[data-prov="build"] .prov {
+  color: var(--lc);
+  background: color-mix(in srgb, var(--lc) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--lc) 36%, transparent);
+}
+.chip[data-prov="platform"] {
+  border-color: color-mix(in srgb, var(--good) 40%, transparent);
+  background: color-mix(in srgb, var(--good) 9%, transparent);
+}
+.chip[data-prov="platform"] .prov {
+  color: var(--good);
+  background: color-mix(in srgb, var(--good) 15%, transparent);
+  border: 1px solid color-mix(in srgb, var(--good) 40%, transparent);
+}
+
+/* ---- Model column ---- */
+.model {
+  position: relative; z-index: 2;
+  border: 1px solid color-mix(in srgb, var(--accent) 42%, transparent);
+  border-radius: 16px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 15%, transparent), color-mix(in srgb, var(--surface) 94%, transparent));
+  box-shadow: var(--shadow-soft);
+  padding: clamp(10px, 1.4vw, 16px);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 8px; text-align: center;
+}
+.model .pic { color: var(--accent); width: clamp(30px, 3.4vw, 42px); height: clamp(30px, 3.4vw, 42px); }
+.model h2 {
+  font-size: clamp(0.82rem, 1.5vw, 0.98rem);
+  color: var(--text-strong);
+  letter-spacing: 0.02em;
+}
+.model p {
+  font-family: "DM Sans", sans-serif;
+  font-size: clamp(0.68rem, 1.18vw, 0.78rem);
+  color: var(--muted);
+  line-height: 1.45;
+}
+.model code { font-family: "DM Sans", monospace; color: var(--accent); }
+.model .xcut {
+  font-size: 0.6rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--accent);
+}
+.is-in .model { animation: pulse 1.5s ease 0.8s 1; }
+@keyframes pulse {
+  0% { box-shadow: var(--shadow-soft); }
+  45% { box-shadow: 0 0 0 10px color-mix(in srgb, var(--accent) 16%, transparent); }
+  100% { box-shadow: var(--shadow-soft); }
+}
+
+/* ---- Principle note + loop legend ---- */
+.principle {
+  border: 1px dashed color-mix(in srgb, var(--accent-2) 55%, transparent);
+  background: color-mix(in srgb, var(--accent-2) 9%, transparent);
+  border-radius: 14px;
+  padding: clamp(9px, 1.3vw, 14px) clamp(11px, 1.5vw, 16px);
+  font-family: "DM Sans", sans-serif;
+  font-size: clamp(0.75rem, 1.3vw, 0.87rem);
+  color: var(--text);
+  line-height: 1.5;
+}
+.principle b { color: var(--accent-2); font-weight: 700; }
+.loop-list { display: none; flex-wrap: wrap; gap: 6px 12px; margin-top: 10px; }
+.loop-list span {
+  font-family: "DM Sans", sans-serif;
+  font-size: 0.72rem; color: var(--muted);
+  border: 1px solid var(--border); border-radius: 999px; padding: 3px 9px;
+}
+
+@media (max-width: 760px) {
+  .diagram { grid-template-columns: minmax(0, 1fr); }
+  .arc-gutter, .loop-gutter { display: none; }
+  #edges { display: none; }
+  .loop-list { display: flex; }
+  .band-head { grid-template-columns: auto auto minmax(0, 1fr); }
+  .meta { grid-column: 1 / -1; justify-content: flex-start; }
+  .chev { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .band { opacity: 1; transform: none; transition: none; }
+  .is-in .model { animation: none; }
+  .march #edges .arc { animation: none; }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <header class="head">
+    <div class="eyebrow">Scene 4 &middot; Reference architecture &middot; Altitude L1</div>
+    <h1>The five layers, as an architecture</h1>
+    <p>Five bands, one cross-cutting model, and the feedback edge most diagrams leave out. Pick a configuration to see which components you build and which the platform hands you.</p>
+  </header>
+
+  <div class="controls">
+    <div class="ctl">
+      <div class="ctl-label">Configuration</div>
+      <div class="seg" role="group" aria-label="Harness configuration">
+        <button type="button" data-mode="self" aria-pressed="true">Self-hosted</button>
+        <button type="button" data-mode="anthropic" aria-pressed="false">Anthropic Managed Agents</button>
+        <button type="button" data-mode="ms" aria-pressed="false">MS Agent Framework Harness (GA)</button>
+      </div>
+      <p class="readout" id="readout" aria-live="polite"></p>
+    </div>
+    <div class="ctl">
+      <div class="ctl-label">Metaphor</div>
+      <div class="seg" role="group" aria-label="Metaphor for the five layers">
+        <button type="button" data-meta="body" aria-pressed="true">Body</button>
+        <button type="button" data-meta="kitchen" aria-pressed="false">Kitchen</button>
+        <button type="button" data-meta="car" aria-pressed="false">Car</button>
+      </div>
+      <p class="readout">Metaphors reskin the band subtitles only. The components never change.</p>
+    </div>
+  </div>
+
+  <div class="diagram" id="diagram">
+    <svg id="edges" aria-hidden="true" focusable="false"></svg>
+    <div class="arc-gutter"></div>
+    <div class="bands" id="bands"></div>
+    <aside class="model" id="model">
+      <span class="pic" data-ic="cpu" aria-hidden="true"></span>
+      <h2>The model</h2>
+      <div class="xcut">Cross-cutting</div>
+      <p>Reads the window L2 assembles, emits <code>tool_use</code> for L3, receives <code>tool_result</code> back. It is a component, not the system.</p>
+    </aside>
+    <div class="loop-gutter"></div>
+  </div>
+
+  <div class="principle">
+    <b>The principle arc &mdash; L4 back up to L1:</b> every caught mistake becomes a new mechanical rule. Verification that only fixes the run is wasted; verification that promotes a finding into a constraint compounds.
+    <div class="loop-list">
+      <span>L2 &rarr; Model &middot; context in</span>
+      <span>Model &rarr; L3 &middot; tool_use out</span>
+      <span>L3 &rarr; L2 &middot; tool_result back</span>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var LAYERS = [
+    {
+      id: 'L1', num: 'L1', name: 'Constraint', icon: 'barrier', owner: 'Architecture', rate: 'Slow',
+      verb: 'admits / denies',
+      meta: {
+        body: 'Skeleton &amp; reflexes &mdash; what the body physically cannot do',
+        kitchen: 'Health rules &amp; knife control &mdash; what is never allowed on the pass',
+        car: 'Chassis &amp; brakes &mdash; the shape you cannot drive out of'
+      },
+      comps: [
+        'Custom lint / ArchUnit rules',
+        'Tool allow-list &amp; scopes',
+        'Sandbox profile (gVisor / Seatbelt / microVM+vsock)',
+        'Budget &amp; per-file edit ceilings',
+        'Approval tiers'
+      ]
+    },
+    {
+      id: 'L2', num: 'L2', name: 'Context', icon: 'book', owner: 'Dev', rate: 'Medium',
+      verb: 'assembles the turn&rsquo;s window',
+      meta: {
+        body: 'Senses &amp; memory &mdash; what it can perceive right now',
+        kitchen: 'Recipe &amp; mise en place &mdash; everything laid out before service',
+        car: 'Mirrors &amp; instruments &mdash; what the driver can actually see'
+      },
+      comps: [
+        'Hand-written AGENTS.md (&lt;100 lines)',
+        'Progressive-disclosure module READMEs',
+        'Skills / retrieval loader',
+        'Runtime compaction + history persistence',
+        'Progress file'
+      ]
+    },
+    {
+      id: 'L3', num: 'L3', name: 'Execution', icon: 'gears', owner: 'Platform', rate: 'Medium',
+      verb: 'acts',
+      meta: {
+        body: 'Muscles &amp; hands &mdash; the part that actually moves things',
+        kitchen: 'Stove, pans &amp; hands &mdash; the cooking itself',
+        car: 'Engine &amp; wheels &mdash; where torque meets tarmac'
+      },
+      comps: [
+        'MCP client (2026-07-28 stateless core, Mcp-Method / Mcp-Name header routing)',
+        'tools/list cache (ttlMs + cacheScope)',
+        'Sandbox executor',
+        'Background subagent pool',
+        'Egress broker'
+      ]
+    },
+    {
+      id: 'L4', num: 'L4', name: 'Verification', icon: 'flask', owner: 'QA', rate: 'Fast',
+      verb: 'proves or rejects',
+      meta: {
+        body: 'Immune system &mdash; catches what got in and remembers it',
+        kitchen: 'Tasting spoon &amp; pass check &mdash; nothing leaves unchecked',
+        car: 'MOT test &mdash; pass or it does not go on the road'
+      },
+      comps: [
+        'Pre-stop hook running the real test command',
+        'Golden tests / evals',
+        'Diff review gate',
+        'MRTR input_required in-tool approval',
+        'Harness-config manifest pinned per eval run'
+      ]
+    },
+    {
+      id: 'L5', num: 'L5', name: 'Lifecycle', icon: 'gauge', owner: 'SRE', rate: 'Fast',
+      verb: 'keeps it alive and accountable',
+      meta: {
+        body: 'Heartbeat &amp; vital signs &mdash; the monitoring that keeps it alive',
+        kitchen: 'Service log &amp; rota &mdash; who cooked what, when, at what cost',
+        car: 'Service history &mdash; the record that makes it trustworthy'
+      },
+      comps: [
+        'Durable session log',
+        'Crash / resume',
+        'Loop &amp; cost detection',
+        'Named-human escalation',
+        'Run-record archive'
+      ]
+    }
+  ];
+
+  /* Component indices the PLATFORM provides, per configuration. */
+  var INHERIT = {
+    self:      { L1: [], L2: [], L3: [], L4: [], L5: [] },
+    anthropic: { L1: [], L2: [2, 3, 4], L3: [0, 1, 2, 3], L4: [], L5: [0, 1, 2, 3, 4] },
+    ms:        { L1: [4], L2: [3, 4], L3: [2], L4: [], L5: [0, 1, 2, 3, 4] }
+  };
+  var TOTAL = 25;
+
+  var state = { mode: 'self', meta: 'body', open: null };
+
+  var bandsEl = document.getElementById('bands');
+  var readoutEl = document.getElementById('readout');
+  var diagramEl = document.getElementById('diagram');
+  var svg = document.getElementById('edges');
+
+  /* ---------- icon loader (house standard) ---------- */
+  var ICON_BASE = '../customs-entry-agent/flow-icons/';
+  var cache = {};
+  var load = function (n) {
+    return cache[n] || (cache[n] = fetch(ICON_BASE + n + '.svg')
+      .then(function (r) { return r.ok ? r.text() : Promise.reject(); })
+      .then(function (t) { return t.replace(/stroke="#232f3e"/g, 'stroke="currentColor"'); })
+      .catch(function () { return ''; }));
+  };
+  function icons() {
+    document.querySelectorAll('[data-ic]').forEach(function (slot) {
+      load(slot.dataset.ic).then(function (s) { if (!slot.firstChild) { slot.innerHTML = s; } });
+    });
+  }
+
+  /* ---------- render ---------- */
+  function render() {
+    bandsEl.innerHTML = LAYERS.map(function (L, i) {
+      var inh = INHERIT[state.mode][L.id];
+      var open = state.open === L.id;
+      var chips = L.comps.map(function (c, ci) {
+        var plat = inh.indexOf(ci) !== -1;
+        return '<li class="chip" data-prov="' + (plat ? 'platform' : 'build') + '">' +
+          '<span class="txt">' + c + '</span>' +
+          '<span class="prov">' + (plat ? 'platform' : 'you build') + '</span></li>';
+      }).join('');
+      return '<section class="band' + (open ? ' open' : '') + '" id="band-' + L.id +
+        '" style="--lc: var(--' + L.id + '); transition-delay: ' + (REDUCED ? 0 : i * 120) + 'ms">' +
+        '<button type="button" class="band-head" data-band="' + L.id + '" aria-expanded="' + open +
+          '" aria-controls="body-' + L.id + '">' +
+          '<span class="lnum">' + L.num + '</span>' +
+          '<span class="pic" data-ic="' + L.icon + '" aria-hidden="true"></span>' +
+          '<span><span class="lname">' + L.name + '</span><span class="lsub">' + L.meta[state.meta] + '</span></span>' +
+          '<span class="meta"><span class="tag">Owner &middot; ' + L.owner + '</span>' +
+          '<span class="tag">Rate &middot; ' + L.rate + '</span><span class="chev" aria-hidden="true">&#9662;</span></span>' +
+        '</button>' +
+        '<div class="band-body" id="body-' + L.id + '">' +
+          '<div class="facts"><span>Owner <b>' + L.owner + '</b></span>' +
+          '<span>Rate of change <b>' + L.rate + '</b></span>' +
+          '<span>Into the loop it <b>' + L.verb + '</b></span></div>' +
+          '<ul class="chips">' + chips + '</ul>' +
+        '</div>' +
+      '</section>';
+    }).join('');
+
+    var n = 0;
+    Object.keys(INHERIT[state.mode]).forEach(function (k) { n += INHERIT[state.mode][k].length; });
+    readoutEl.innerHTML = '<b>' + n + ' of ' + TOTAL + '</b> components inherited &middot; ' +
+      'L1 and L4 remain yours in every configuration.';
+
+    bandsEl.querySelectorAll('[data-band]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        state.open = (state.open === b.dataset.band) ? null : b.dataset.band;
+        render();
+      });
+    });
+
+    icons();
+    requestAnimationFrame(draw);
+  }
+
+  /* ---------- SVG edges ---------- */
+  function px(a, b) { return Math.round(a - b); }
+  function marker(id, cls) {
+    return '<marker id="' + id + '" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto">' +
+      '<path class="' + cls + '" d="M0 0 L8 4 L0 8 Z"/></marker>';
+  }
+  function draw() {
+    var d = diagramEl.getBoundingClientRect();
+    if (!d.width) { return; }
+    if (window.innerWidth <= 760) { svg.innerHTML = ''; return; }
+    svg.setAttribute('viewBox', '0 0 ' + Math.round(d.width) + ' ' + Math.round(d.height));
+    svg.setAttribute('preserveAspectRatio', 'none');
+
+    var m = document.getElementById('model').getBoundingClientRect();
+    var mx = px(m.left, d.left), mr = px(m.right, d.left);
+    var my = px(m.top, d.top) + m.height / 2;
+
+    var defs = '<defs>';
+    ['mk1', 'mk2', 'mk3', 'mk4', 'mk5'].forEach(function (c, i) { defs += marker('ar' + (i + 1), c); });
+    defs += marker('arA', 'mkA') + marker('arB', 'mkA') + marker('arArc', 'mkArc') + '</defs>';
+
+    var parts = defs, rects = {};
+    LAYERS.forEach(function (L, i) {
+      var el = document.getElementById('band-' + L.id);
+      if (!el) { return; }
+      var r = el.getBoundingClientRect();
+      var y = px(r.top, d.top) + r.height / 2;
+      var x = px(r.right, d.left);
+      rects[L.id] = { x: x, y: y, left: px(r.left, d.left) };
+      var midx = (x + mx) / 2;
+      parts += '<path class="edge" d="M' + x + ' ' + y + ' C' + midx + ' ' + y + ' ' + midx + ' ' + my +
+        ' ' + (mx - 7) + ' ' + my + '" stroke="var(--' + L.id + ')" marker-end="url(#ar' + (i + 1) + ')"/>';
+      parts += '<text class="lbl" x="' + (x + 6) + '" y="' + (y - 5) + '">' + L.verb + '</text>';
+    });
+
+    /* Model loop, routed in the gutter to the right of the model column */
+    var g1 = mr + 15, g2 = mr + 31, g3 = mr + 47;
+    if (rects.L2 && rects.L3) {
+      parts += '<path class="edge" d="M' + (mr + 1) + ' ' + (my - 14) + ' H' + g1 + ' V' + rects.L2.y +
+        ' H' + (mr + 8) + '" stroke="var(--L2)" marker-end="url(#arA)" opacity="0.75"/>';
+      parts += '<text class="lbl" x="' + (g1 + 3) + '" y="' + (rects.L2.y - 6) + '">context in</text>';
+      parts += '<path class="edge" d="M' + (mr + 1) + ' ' + (my + 4) + ' H' + g2 + ' V' + rects.L3.y +
+        ' H' + (mr + 8) + '" stroke="var(--L3)" marker-end="url(#arB)" opacity="0.75"/>';
+      parts += '<text class="lbl" x="' + (g2 + 3) + '" y="' + (rects.L3.y - 6) + '">tool_use out</text>';
+      var ly = (rects.L2.y + rects.L3.y) / 2;
+      parts += '<path class="edge" d="M' + (mr + 2) + ' ' + (rects.L3.y + 12) + ' H' + g3 + ' V' + (rects.L2.y + 12) +
+        ' H' + (mr + 8) + '" stroke="var(--accent-3)" marker-end="url(#arA)" opacity="0.75"/>';
+      parts += '<text class="lbl" x="' + (g3 + 4) + '" y="' + ly + '" text-anchor="middle" transform="rotate(-90 ' +
+        (g3 + 4) + ' ' + ly + ')">tool_result back</text>';
+    }
+
+    /* The principle arc: L4 back up to L1 */
+    if (rects.L1 && rects.L4) {
+      var lx = rects.L1.left;
+      parts += '<path class="arc" d="M' + (lx - 4) + ' ' + rects.L4.y + ' C' + (lx - 44) + ' ' + rects.L4.y +
+        ' ' + (lx - 44) + ' ' + rects.L1.y + ' ' + (lx - 10) + ' ' + rects.L1.y + '" marker-end="url(#arArc)"/>';
+      var ay = (rects.L1.y + rects.L4.y) / 2, ax = lx - 30;
+      parts += '<text class="lbl arc-lbl" x="' + ax + '" y="' + ay + '" text-anchor="middle" transform="rotate(-90 ' +
+        ax + ' ' + ay + ')">every caught mistake becomes a new mechanical rule</text>';
+    }
+
+    svg.innerHTML = parts;
+  }
+
+  /* ---------- controls ---------- */
+  document.querySelectorAll('[data-mode]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      state.mode = b.dataset.mode;
+      document.querySelectorAll('[data-mode]').forEach(function (o) {
+        o.setAttribute('aria-pressed', String(o.dataset.mode === state.mode));
+      });
+      render();
+    });
+  });
+  document.querySelectorAll('[data-meta]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      state.meta = b.dataset.meta;
+      document.querySelectorAll('[data-meta]').forEach(function (o) {
+        o.setAttribute('aria-pressed', String(o.dataset.meta === state.meta));
+      });
+      render();
+    });
+  });
+
+  /* ---------- deep link ?layer=L1..L5 ---------- */
+  var want = (new URLSearchParams(window.location.search).get('layer') || '').toUpperCase();
+  if (/^L[1-5]$/.test(want)) { state.open = want; }
+
+  render();
+  icons();
+
+  if (state.open) {
+    setTimeout(function () {
+      var t = document.getElementById('band-' + state.open);
+      if (t) { t.scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth', block: 'center' }); }
+    }, 280);
+  }
+
+  /* ---------- animation gate ---------- */
+  function activate() {
+    document.body.classList.add('is-in');
+    if (!REDUCED) { document.body.classList.add('march'); }
+    requestAnimationFrame(draw);
+  }
+  if (REDUCED || !('IntersectionObserver' in window)) {
+    activate();
+  } else {
+    var io = new IntersectionObserver(function (es) {
+      es.forEach(function (e) { if (e.isIntersecting) { activate(); io.disconnect(); } });
+    }, { threshold: 0.15 });
+    io.observe(diagramEl);
+  }
+
+  window.addEventListener('resize', function () { requestAnimationFrame(draw); });
+  if ('ResizeObserver' in window) { new ResizeObserver(function () { draw(); }).observe(diagramEl); }
+  window.addEventListener('load', function () { requestAnimationFrame(draw); });
+  setTimeout(draw, 500);
+
+  /* ---------- autosize ---------- */
+  if (document.documentElement.dataset.embedded === 'true') {
+    var postSize = function () {
+      window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+    };
+    if ('ResizeObserver' in window) { new ResizeObserver(postSize).observe(document.body); }
+    window.addEventListener('load', postSize);
+    setTimeout(postSize, 400);
+  }
+})();
+</script>
+</body>
+</html>

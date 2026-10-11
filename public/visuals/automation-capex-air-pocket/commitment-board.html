@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The commitment board</title><script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+.shell { display: flex; flex-direction: column; gap: 12px; }
+:root[data-embedded="true"] .shell { padding: 14px clamp(14px, 2vw, 22px); }
+h1 { font-family: "Saira Condensed", sans-serif; font-weight: 700; font-size: clamp(1rem, 2.2vw, 1.25rem); text-transform: uppercase; letter-spacing: 0.02em; color: var(--g-ink); }
+.sub { font: 500 0.76rem/1.4 "Inter", sans-serif; color: var(--g-ink-3); margin-top: 2px; }
+
+.ctl { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.ctl button {
+  min-height: 34px; padding: 6px 12px; cursor: pointer; border-radius: 2px;
+  font: 600 0.64rem/1 "IBM Plex Mono", monospace; letter-spacing: 0.07em; text-transform: uppercase;
+  color: var(--g-accent-ink); background: transparent; border: 1px solid var(--g-accent-ink);
+}
+.ctl button:hover { background: color-mix(in srgb, var(--g-accent) 14%, transparent); }
+.ctl .hint { font: 500 0.68rem/1.3 "Inter", sans-serif; color: var(--g-ink-3); }
+
+/* shared horizon ruler: same 44px icon gutter as the rows so ticks align with bars */
+.ruler { display: grid; grid-template-columns: 44px 1fr; align-items: end; gap: 10px; }
+.ruler .r-name { font: 600 0.58rem/1.2 "IBM Plex Mono", monospace; letter-spacing: 0.08em; text-transform: uppercase; color: var(--g-ink-3); grid-column: 2; margin-bottom: 3px; }
+.ruler .r-ticks { grid-column: 2; display: flex; justify-content: space-between; border-bottom: 1px solid var(--g-rule-strong); padding-bottom: 2px; }
+.ruler .r-ticks span { font: 600 0.58rem "IBM Plex Mono", monospace; color: var(--g-ink-3); }
+
+.board { display: flex; flex-direction: column; gap: 8px; }
+.row {
+  display: grid; grid-template-columns: 44px 1fr; gap: 10px; align-items: start;
+  text-align: left; width: 100%; cursor: pointer; font-family: inherit;
+  border: 1px solid var(--g-rule); border-left: 3px solid var(--g-accent); border-radius: 2px;
+  background: var(--g-surface); padding: 10px 12px; box-shadow: var(--g-shadow);
+  opacity: 0.3; transform: translateY(6px); transition: opacity 500ms ease, transform 500ms ease;
+}
+.row.on { opacity: 1; transform: none; }
+.row.sub-lane { border-left-style: dashed; margin-left: 14px; background: var(--g-surface-2); }
+.row:focus-visible { outline: 2px solid var(--g-accent-ink); outline-offset: 2px; }
+
+.pic {
+  width: 40px; height: 40px; display: grid; place-items: center; margin-top: 2px;
+  background: var(--g-surface-2); border: 1.5px solid var(--g-rule-strong); border-radius: 2px;
+  color: var(--g-ink-3); transition: color 400ms, border-color 400ms;
+}
+.row.on .pic { color: var(--g-accent-ink); border-color: var(--g-accent-ink); }
+.pic svg { width: 26px; height: 26px; display: block; }
+.pic svg * { stroke: currentColor; }
+
+.main { min-width: 0; }
+.d-top { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.d-id { font: 600 0.66rem "IBM Plex Mono", monospace; letter-spacing: 0.12em; color: var(--g-accent-ink); text-transform: uppercase; }
+.d-name { font: 700 0.86rem "Inter", sans-serif; color: var(--g-ink); }
+.lamp { display: inline-flex; align-items: center; gap: 5px; font: 600 0.6rem "IBM Plex Mono", monospace; letter-spacing: 0.08em; text-transform: uppercase; color: var(--g-ink-3); margin-left: auto; }
+.lamp::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--g-rule-strong); flex: none; }
+
+.metric { display: flex; align-items: baseline; gap: 6px; margin-top: 5px; flex-wrap: wrap; }
+.m-ico { width: 15px; height: 15px; color: var(--g-accent-ink); align-self: center; }
+.m-ico svg { width: 15px; height: 15px; display: block; }
+.m-ico svg * { stroke: currentColor; }
+.m-val { font: 700 clamp(1.05rem, 2.4vw, 1.3rem)/1 "Saira Condensed", sans-serif; color: var(--g-accent-ink); letter-spacing: 0.02em; font-variant-numeric: tabular-nums; }
+.m-unit { font: 600 0.66rem "IBM Plex Mono", monospace; letter-spacing: 0.08em; text-transform: uppercase; color: var(--g-ink-2); }
+
+.h-wrap { display: flex; align-items: center; gap: 8px; margin-top: 7px; }
+.track { flex: 1; height: 8px; border: 1px solid var(--g-rule); border-radius: 2px; background: var(--g-bg); overflow: hidden; }
+.fill { display: block; height: 100%; width: 0; background: var(--g-accent); transition: width 900ms ease 250ms; }
+.fill.unstated { background: repeating-linear-gradient(-45deg, var(--g-rule-strong) 0 3px, transparent 3px 7px); }
+.row.on .fill { width: var(--w); }
+.h-label { font: 600 0.6rem "IBM Plex Mono", monospace; letter-spacing: 0.06em; text-transform: uppercase; color: var(--g-ink-3); white-space: nowrap; }
+
+.more { display: none; margin-top: 8px; border-left: 2px solid var(--g-accent); padding-left: 9px; }
+.row[aria-expanded="true"] .more { display: block; }
+.d-desc { font: 500 0.74rem/1.45 "Inter", sans-serif; color: var(--g-ink-2); }
+.d-meta { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 7px; }
+.stamp { font: 600 0.62rem "IBM Plex Mono", monospace; letter-spacing: 0.08em; text-transform: uppercase; color: var(--g-ink-3); border: 1px solid var(--g-rule-strong); border-radius: 2px; padding: 3px 6px; }
+
+.note { font: 500 0.72rem/1.5 "Inter", sans-serif; color: var(--g-ink-3); border-top: 1px solid var(--g-rule); padding-top: 10px; }
+
+@media (max-width: 620px) {
+  .row.sub-lane { margin-left: 0; }
+  .lamp { margin-left: 0; width: 100%; }
+  .h-label { white-space: normal; max-width: 40%; }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div>
+    <h1>The commitment board</h1>
+    <p class="sub">In-window automation capex commitments. Every disclosure lamp is dark: unit economics not published.</p>
+  </div>
+
+  <div class="ctl">
+    <button type="button" id="replay">Replay board</button>
+    <span class="hint">Tap a row for its program detail and source dates.</span>
+  </div>
+
+  <div class="ruler" aria-hidden="true">
+    <span class="r-name">Stated program horizon from announcement</span>
+    <span class="r-ticks"><span>0 yr</span><span>2</span><span>4</span><span>6</span><span>8+ yr</span></span>
+  </div>
+
+  <div class="board" id="board">
+    <button type="button" class="row" data-icon="robot" style="--w:12%" aria-expanded="false">
+      <span class="pic" data-pic aria-hidden="true"></span>
+      <span class="main">
+        <span class="d-top"><span class="d-id">D-01</span><span class="d-name">FedEx / Dexterity</span><span class="lamp">Unit economics: not published</span></span>
+        <span class="metric"><span class="m-val" data-count="20" data-suffix="+">0</span><span class="m-unit">US hubs targeted</span></span>
+        <span class="h-wrap"><span class="track"><span class="fill unstated"></span></span><span class="h-label">Horizon not stated</span></span>
+        <span class="more"><span class="d-desc">Mech dual-arm robot, Foresight model, trailer LOADING. Hagerstown hub live, target 20+ US hubs, thousands of dock doors.</span>
+          <span class="d-meta"><span class="stamp">Jul 30, 2026</span><span class="stamp">Loading</span></span></span>
+      </span>
+    </button>
+
+    <button type="button" class="row sub-lane" data-icon="truck" style="--w:12.5%" aria-expanded="false">
+      <span class="pic" data-pic aria-hidden="true"></span>
+      <span class="main">
+        <span class="d-top"><span class="d-id">D-02</span><span class="d-name">FedEx / Berkshire Grey</span><span class="lamp">Unit economics: not published</span></span>
+        <span class="metric"><span class="m-val">Feb 2026</span><span class="m-unit">separate unloading deal</span></span>
+        <span class="h-wrap"><span class="track"><span class="fill"></span></span><span class="h-label">First systems later in 2026</span></span>
+        <span class="more"><span class="d-desc">"Scoop" autonomous trailer UNLOADER. Separate deal, Feb 2026, first production systems later in 2026.</span>
+          <span class="d-meta"><span class="stamp">Feb 2026 deal</span><span class="stamp">Unloading</span></span></span>
+      </span>
+    </button>
+
+    <button type="button" class="row" data-icon="crane" style="--w:12.5%" aria-expanded="false">
+      <span class="pic" data-pic aria-hidden="true"></span>
+      <span class="main">
+        <span class="d-top"><span class="d-id">D-03</span><span class="d-name">Amazon</span><span class="lamp">Unit economics: not published</span></span>
+        <span class="metric"><span class="m-val" data-count="750000" data-suffix="+">0</span><span class="m-unit">robots, fleet to more than double</span></span>
+        <span class="h-wrap"><span class="track"><span class="fill"></span></span><span class="h-label">Double in 2026</span></span>
+        <span class="more"><span class="d-desc">Robotic-arm fleet to more than double in 2026, 750,000+ robots already touching 75%+ of orders.</span>
+          <span class="d-meta"><span class="stamp">2026</span><span class="stamp">Fleet</span></span></span>
+      </span>
+    </button>
+
+    <button type="button" class="row" data-icon="building" style="--w:25%" aria-expanded="false">
+      <span class="pic" data-pic aria-hidden="true"></span>
+      <span class="main">
+        <span class="d-top"><span class="d-id">D-04</span><span class="d-name">Amazon / Florida retrofit</span><span class="lamp">Unit economics: not published</span></span>
+        <span class="metric"><span class="m-ico" data-pic-inline="coin" aria-hidden="true"></span><span class="m-val" data-count="400" data-prefix="$" data-suffix="M">$0M</span><span class="m-unit">two-site rebuild</span></span>
+        <span class="h-wrap"><span class="track"><span class="fill"></span></span><span class="h-label">~2-year builds</span></span>
+        <span class="more"><span class="d-desc">$400M rebuilding Homestead (1.3M sq ft) and Port St. Lucie (1.0M sq ft), ~2-year builds, tentative 2028 reopen.</span>
+          <span class="d-meta"><span class="stamp">$400M</span><span class="stamp">Jul 2026</span></span></span>
+      </span>
+    </button>
+
+    <button type="button" class="row" data-icon="warehouse" style="--w:12%" aria-expanded="false">
+      <span class="pic" data-pic aria-hidden="true"></span>
+      <span class="main">
+        <span class="d-top"><span class="d-id">D-05</span><span class="d-name">Amazon / Georgetown TX</span><span class="lamp">Unit economics: not published</span></span>
+        <span class="metric"><span class="m-val" data-count="248687">0</span><span class="m-unit">sq ft, new build</span></span>
+        <span class="h-wrap"><span class="track"><span class="fill unstated"></span></span><span class="h-label">Horizon not stated</span></span>
+        <span class="more"><span class="d-desc">New 248,687 sq ft robotics sorting facility, groundbreaking August 2026.</span>
+          <span class="d-meta"><span class="stamp">248,687 sq ft</span><span class="stamp">Aug 2026</span></span></span>
+      </span>
+    </button>
+
+    <button type="button" class="row" data-icon="factory" style="--w:100%" aria-expanded="false">
+      <span class="pic" data-pic aria-hidden="true"></span>
+      <span class="main">
+        <span class="d-top"><span class="d-id">D-06</span><span class="d-name">Walmart / Symbotic</span><span class="lamp">Unit economics: not published</span></span>
+        <span class="metric"><span class="m-val" data-count="42">0</span><span class="m-unit">regional distribution centers</span></span>
+        <span class="h-wrap"><span class="track"><span class="fill"></span></span><span class="h-label">8+ years</span></span>
+        <span class="more"><span class="d-desc">Automated sortation retrofit across all 42 regional distribution centers, program horizon 8+ years from announcement.</span>
+          <span class="d-meta"><span class="stamp">42 RDCs</span><span class="stamp">~2030, approx.</span></span></span>
+      </span>
+    </button>
+  </div>
+
+  <p class="note">The FedEx loading program (D-01) and the Berkshire Grey unloading program (D-02) are separate contracts with separate vendors, shown as an offset sub-lane to prevent the merge error common in this week's coverage. Horizon bars compare stated timelines only, not spend. Dollar figures appear only where disclosed.</p>
+</div>
+<script>
+(() => {
+  const ICON_BASE = '../customs-entry-agent/flow-icons/';
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const board = document.getElementById('board');
+  const rows = Array.from(board.querySelectorAll('.row'));
+
+  /* Icons are shared line-art SVGs, fetched and inlined with the stroke
+     swapped to currentColor so they follow the row's theme colour. A failed
+     fetch leaves the slot empty and the text still carries the row. */
+  const inline = (slot, name) => {
+    fetch(ICON_BASE + name + '.svg')
+      .then((r) => (r.ok ? r.text() : Promise.reject()))
+      .then((t) => { slot.innerHTML = t.replace(/stroke="#232f3e"/g, 'stroke="currentColor"'); })
+      .catch(() => {});
+  };
+  rows.forEach((row) => inline(row.querySelector('[data-pic]'), row.dataset.icon));
+  document.querySelectorAll('[data-pic-inline]').forEach((s) => inline(s, s.dataset.picInline));
+
+  /* expand/collapse the program detail on tap or Enter */
+  rows.forEach((row) => {
+    row.addEventListener('click', () => {
+      row.setAttribute('aria-expanded', String(row.getAttribute('aria-expanded') !== 'true'));
+    });
+  });
+
+  /* Staged reveal down the board: each row lights, its headline figure
+     counts up, and its horizon bar grows (CSS width transition on .on).
+     rAF t0 comes from the first frame timestamp, never performance.now():
+     sandboxed iframes can disagree between the two clocks. */
+  const STEP = 420, COUNT = 900;
+  const counts = rows.map((r) => r.querySelector('[data-count]'));
+  const setVal = (el, v) => {
+    el.textContent = (el.dataset.prefix || '') + Math.round(v).toLocaleString('en-US') + (el.dataset.suffix || '');
+  };
+  let raf = 0;
+  const run = () => {
+    cancelAnimationFrame(raf);
+    rows.forEach((r) => r.classList.remove('on'));
+    counts.forEach((c) => { if (c) setVal(c, 0); });
+    if (reduced) {
+      rows.forEach((r) => r.classList.add('on'));
+      counts.forEach((c) => { if (c) setVal(c, +c.dataset.count); });
+      return;
+    }
+    void board.offsetWidth; /* flush the class removal so bar transitions restart */
+    const total = STEP * (rows.length - 1) + COUNT;
+    let t0 = null;
+    const step = (ts) => {
+      if (t0 === null) t0 = ts;
+      const t = ts - t0;
+      rows.forEach((r, i) => {
+        const lt = t - i * STEP;
+        if (lt < 0) return;
+        r.classList.add('on');
+        const c = counts[i];
+        if (c) {
+          const p = Math.min(1, lt / COUNT);
+          setVal(c, (1 - Math.pow(1 - p, 3)) * +c.dataset.count);
+        }
+      });
+      if (t < total) raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+  };
+
+  document.getElementById('replay').addEventListener('click', run);
+
+  /* threshold 0, not 0.2: the board can exceed a phone viewport, and a
+     fraction of a too-tall element never intersects. */
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting)) { io.disconnect(); run(); }
+    }, { threshold: 0 });
+    io.observe(board);
+  } else { run(); }
+
+  if (document.documentElement.dataset.embedded === 'true') {
+    const postSize = () => window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+    if ('ResizeObserver' in window) new ResizeObserver(postSize).observe(document.body);
+    window.addEventListener('load', postSize);
+    window.addEventListener('resize', postSize);
+  }
+})();
+</script>
+</body>
+</html>

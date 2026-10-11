@@ -4,10 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>The Chain Validator — watch a proxy decouple</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
 <script src="./_theme-bootstrap.js"></script>
 <link rel="stylesheet" href="./_theme.css">
 <style>
+:root[data-embedded="true"], :root[data-embedded="true"] body { height: auto; }
 .shell { display: flex; flex-direction: column; gap: clamp(8px,1.4vh,13px); justify-content: center; }
 .head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; }
 .head h1 { font-size: clamp(1.05rem,2vw,1.5rem); font-weight: 700; letter-spacing: -0.02em; color: var(--text-strong); }
@@ -17,8 +17,45 @@
   border: 1px solid var(--border-strong); background: var(--surface); color: var(--muted); transition: all .18s ease; }
 .lk:hover { color: var(--text); border-color: var(--accent); }
 .lk[aria-pressed="true"] { background: linear-gradient(135deg, var(--accent), var(--accent-3)); color: #fff; border-color: transparent; box-shadow: var(--shadow-soft); }
+
+/* Icon-led chain strip: proxy → validator → outcome. The wires ARE the arrows
+   the dashboard asserts, and their colour + travelling pulse encode the current
+   state of the correlation, so the figure reads with the text blurred. */
+.chain { display: flex; align-items: flex-start; gap: 6px; --wireC: var(--good);
+  border-radius: 14px; border: 1px solid var(--border); background: var(--surface); box-shadow: var(--shadow-soft); padding: 10px 12px 8px; }
+.stage { display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer;
+  background: transparent; border: 0; padding: 0; font-family: inherit; min-width: 62px; }
+.stage .pic { width: 36px; height: 36px; display: grid; place-items: center; border-radius: 10px;
+  background: var(--surface-strong); border: 1.5px solid var(--border-strong); color: var(--muted);
+  transition: color 300ms, border-color 300ms, box-shadow 300ms; }
+.stage .pic svg { width: 23px; height: 23px; display: block; }
+.stage .pic svg * { stroke: currentColor; }
+.stage .slab { font-size: 0.62rem; font-weight: 600; letter-spacing: 0.03em; color: var(--muted); text-align: center; line-height: 1.25; }
+.stage[aria-expanded="true"] .pic { color: var(--accent); border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent); }
+.wire { position: relative; flex: 1; height: 2px; margin-top: 17px; min-width: 18px; background: var(--wireC); transition: background 300ms; }
+.wire::after { content: ""; position: absolute; right: -1px; top: 50%; width: 7px; height: 7px;
+  border-top: 2px solid var(--wireC); border-right: 2px solid var(--wireC); transform: translateY(-50%) rotate(45deg); transform-origin: center; }
+.dot { position: absolute; top: 50%; left: 0; width: 7px; height: 7px; border-radius: 50%;
+  transform: translate(-50%,-50%); background: var(--wireC);
+  box-shadow: 0 0 7px color-mix(in srgb, var(--wireC) 70%, transparent); }
+.d1 { animation: travelA 1.8s linear infinite; }
+.d2 { animation: travelB 1.8s linear infinite; }
+@keyframes travelA { 0% { left: 0; opacity: 1; } 45% { left: 100%; opacity: 1; } 50%, 100% { left: 100%; opacity: 0; } }
+@keyframes travelB { 0%, 50% { left: 0; opacity: 0; } 55% { left: 0; opacity: 1; } 95% { left: 100%; opacity: 1; } 100% { left: 100%; opacity: 0; } }
+@keyframes travelBrev { 0%, 50% { left: 100%; opacity: 0; } 55% { left: 100%; opacity: 1; } 95% { left: 0; opacity: 1; } 100% { left: 0; opacity: 0; } }
+.chain.state-decay { --wireC: var(--accent-2); }
+.chain.state-break .w2, .chain.state-flip .w2 { --wireC: var(--warn); }
+.chain.state-break .w2 { background: repeating-linear-gradient(90deg, var(--warn) 0 5px, transparent 5px 10px); }
+.chain.state-break .d2 { animation: none; opacity: 0; }
+.chain.state-flip .d2 { animation-name: travelBrev; }
+.chain.state-flip .w2::after { right: auto; left: -1px; transform: translateY(-50%) rotate(-135deg); }
+.chain.state-break .stage[data-detail="validator"] .pic, .chain.state-flip .stage[data-detail="validator"] .pic { color: var(--warn); border-color: var(--warn); }
+.chain.state-decay .stage[data-detail="validator"] .pic { color: var(--accent-2); border-color: var(--accent-2); }
+.chain.state-break .stage[data-detail="outcome"] .pic, .chain.state-flip .stage[data-detail="outcome"] .pic { color: var(--muted-soft); border-style: dashed; }
+.stage-detail { font-size: 0.74rem; line-height: 1.45; color: var(--muted); border-left: 2px solid var(--accent); padding: 2px 0 2px 10px; }
+
 .chartwrap { border-radius: 14px; border: 1px solid var(--border); background: var(--surface); box-shadow: var(--shadow-soft); padding: 12px 14px 8px; }
-svg { width: 100%; height: auto; max-height: clamp(118px,19vh,158px); overflow: visible; display: block; }
+svg.plot { width: 100%; height: auto; max-height: clamp(118px,19vh,158px); overflow: visible; display: block; }
 .thresh { stroke: var(--warn); stroke-width: 0.22; stroke-dasharray: 0.9 0.9; }
 .zero { stroke: var(--muted-soft); stroke-width: 0.22; }
 .axis { stroke: var(--border-strong); stroke-width: 0.22; }
@@ -37,10 +74,15 @@ svg { width: 100%; height: auto; max-height: clamp(118px,19vh,158px); overflow: 
 .scrub input { width: 100%; accent-color: var(--accent); cursor: pointer; }
 .play { font: inherit; cursor: pointer; border-radius: 999px; padding: 6px 13px; font-size: 0.74rem; font-weight: 700; border: 1px solid var(--accent); background: transparent; color: var(--accent); white-space: nowrap; }
 .play:hover { background: var(--accent); color: #fff; }
-.alert { border-radius: 10px; padding: 8px 13px; font-size: 0.82rem; line-height: 1.4; border-left: 3px solid var(--c,var(--good)); background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow-soft); }
+.alert { display: grid; grid-template-columns: 30px 1fr; gap: 9px; align-items: start;
+  border-radius: 10px; padding: 8px 13px; font-size: 0.82rem; line-height: 1.4; border-left: 3px solid var(--c,var(--good)); background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow-soft); }
 .alert b { font-weight: 800; }
 .alert .state { font-size: 0.62rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--c); }
-@media (max-width: 560px){ .bottom { grid-template-columns: 1fr; gap: 8px; } }
+.alert .apic { width: 28px; height: 28px; margin-top: 2px; display: grid; place-items: center; color: var(--c, var(--good)); }
+.alert .apic svg { width: 24px; height: 24px; display: block; }
+.alert .apic svg * { stroke: currentColor; }
+@media (max-width: 560px){ .bottom { grid-template-columns: 1fr; gap: 8px; } .stage { min-width: 52px; } }
+@media (prefers-reduced-motion: reduce){ .dot { display: none; } }
 </style>
 </head>
 <body>
@@ -50,8 +92,22 @@ svg { width: 100%; height: auto; max-height: clamp(118px,19vh,158px); overflow: 
     <p>It watches each arrow's proxy-to-outcome correlation and alerts when it decays — or flips sign. Pick a link, scrub the weeks.</p>
   </div>
   <div class="links" id="links"></div>
+  <div class="chain state-holds" id="chain">
+    <button type="button" class="stage" data-icon="chart" data-detail="proxy" aria-expanded="false">
+      <span class="pic" data-pic aria-hidden="true"></span><span class="slab">Proxy metric</span>
+    </button>
+    <span class="wire w1" aria-hidden="true"><span class="dot d1"></span></span>
+    <button type="button" class="stage" data-icon="eye" data-detail="validator" aria-expanded="false">
+      <span class="pic" data-pic aria-hidden="true"></span><span class="slab">Chain validator</span>
+    </button>
+    <span class="wire w2" aria-hidden="true"><span class="dot d2"></span></span>
+    <button type="button" class="stage" data-icon="personcheck" data-detail="outcome" aria-expanded="false">
+      <span class="pic" data-pic aria-hidden="true"></span><span class="slab">Outcome truth</span>
+    </button>
+  </div>
+  <div class="stage-detail" id="stageDetail" hidden></div>
   <div class="chartwrap">
-    <svg viewBox="0 0 100 22" id="svg" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Proxy-to-outcome correlation over time">
+    <svg class="plot" viewBox="0 0 100 22" id="svg" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Proxy-to-outcome correlation over time">
       <rect class="danger" x="8" y="7.35" width="88" height="4.86"/>
       <rect class="flip" x="8" y="12.21" width="88" height="6.79"/>
       <line class="axis" x1="8" y1="2.5" x2="8" y2="19"/>
@@ -73,10 +129,11 @@ svg { width: 100%; height: auto; max-height: clamp(118px,19vh,158px); overflow: 
     </div>
     <button class="play" id="play" aria-pressed="false">▶ Play</button>
   </div>
-  <div class="alert" id="alert" aria-live="polite" style="--c:var(--good)"></div>
+  <div class="alert" id="alert" aria-live="polite" style="--c:var(--good)"><span class="apic" id="alertPic" aria-hidden="true"></span><div id="alertBody"></div></div>
 </main>
 
 <script>
+(() => {
 // correlation profiles ρ(week), weeks 0..12 ; y maps ρ[1..-0.7] to svg [4..48]
 const WK=12;
 const PROFILES = {
@@ -84,10 +141,40 @@ const PROFILES = {
   desktop: { label:'Output→UX · desktop', f:w=>0.78-0.004*w-0.02*Math.sin(w/2) }, // holds
   judge:   { label:'Judge→Human truth', f:w=>0.70-0.115*w },                 // crosses 0 → sign flip
 };
-let cur='mobile', week=0, playing=null;
+let cur='mobile', week=0, playing=false, raf=0;
+const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const X = w => 8 + (w/WK)*88;
 const Y = r => 2.5 + ((1-r)/1.7)*16.5;   // ρ=1→2.5, ρ=0.5→7.35, ρ=0→12.21, ρ=-0.7→19
 const rhoAt = w => Math.max(-0.7, Math.min(1, PROFILES[cur].f(w)));
+
+/* Shared line-art icons, fetched and inlined with the stroke swapped to
+   currentColor so each slot follows its state colour. A failed fetch leaves
+   the slot empty and the label still carries the stage. */
+const ICON_BASE = '../customs-entry-agent/flow-icons/';
+const ICONS = {};
+const loadIcon = (name) => ICONS[name] || (ICONS[name] = fetch(ICON_BASE + name + '.svg')
+  .then((r) => (r.ok ? r.text() : Promise.reject()))
+  .then((t) => t.replace(/stroke="#232f3e"/g, 'stroke="currentColor"'))
+  .catch(() => ''));
+document.querySelectorAll('.stage').forEach((st) => {
+  loadIcon(st.dataset.icon).then((t) => { st.querySelector('[data-pic]').innerHTML = t; });
+});
+
+/* tap a chain stage for what it is */
+const DETAILS = {
+  proxy: 'The number a team can move weekly, such as an output score or a judge rating. Cheap to read, easy to game.',
+  validator: 'Plane 4 recomputes the proxy-to-outcome correlation ρ each week and alerts when it decays below 0.5 or flips sign.',
+  outcome: 'The ground truth the business cares about, sampled less often, such as real UX quality or human judgment.',
+};
+const detailEl = document.getElementById('stageDetail');
+const stages = Array.from(document.querySelectorAll('.stage'));
+stages.forEach((st) => st.addEventListener('click', () => {
+  const open = st.getAttribute('aria-expanded') === 'true';
+  stages.forEach((s) => s.setAttribute('aria-expanded', 'false'));
+  st.setAttribute('aria-expanded', String(!open));
+  detailEl.hidden = open;
+  if (!open) detailEl.textContent = DETAILS[st.dataset.detail];
+}));
 
 const linksEl=document.getElementById('links');
 Object.entries(PROFILES).forEach(([k,p])=>{
@@ -113,26 +200,59 @@ function update(){
   document.getElementById('wkLbl').textContent=week;
   weekEl.value=week;
   const a=document.getElementById('alert');
-  let c,state,msg;
-  if(r<0){ c='var(--warn)'; state='⛔ Sign flip · surrogate paradox'; msg='The proxy now moves <b>opposite</b> the outcome. Optimizing it actively <b>harms</b> the business. The most dangerous failure — and invisible without this validator.'; }
-  else if(r<0.5){ c='var(--warn)'; state='✕ Chain break'; msg='Correlation fell below the alert threshold. The dashboard built on this arrow is <b>asserting a link that no longer holds</b>. Stop trusting the proxy; re-validate against ground truth.'; }
-  else if(r<0.62){ c='var(--accent-2)'; state='⚠ Decaying'; msg='The link is weakening. Goodhart pressure or distribution shift is eroding the proxy. Watch closely — it is trending toward a break.'; }
-  else { c='var(--good)'; state='✓ Chain holds'; msg='The proxy still tracks the outcome. The arrow on the dashboard is, for now, a <b>measured</b> claim rather than an asserted one.'; }
+  let c,state,msg,cls,icon;
+  if(r<0){ c='var(--warn)'; cls='state-flip'; icon='split'; state='⛔ Sign flip · surrogate paradox'; msg='The proxy now moves <b>opposite</b> the outcome. Optimizing it actively <b>harms</b> the business. The most dangerous failure — and invisible without this validator.'; }
+  else if(r<0.5){ c='var(--warn)'; cls='state-break'; icon='warning'; state='✕ Chain break'; msg='Correlation fell below the alert threshold. The dashboard built on this arrow is <b>asserting a link that no longer holds</b>. Stop trusting the proxy; re-validate against ground truth.'; }
+  else if(r<0.62){ c='var(--accent-2)'; cls='state-decay'; icon='gauge'; state='⚠ Decaying'; msg='The link is weakening. Goodhart pressure or distribution shift is eroding the proxy. Watch closely — it is trending toward a break.'; }
+  else { c='var(--good)'; cls='state-holds'; icon='check'; state='✓ Chain holds'; msg='The proxy still tracks the outcome. The arrow on the dashboard is, for now, a <b>measured</b> claim rather than an asserted one.'; }
   a.style.setProperty('--c',c);
-  a.innerHTML=`<span class="state">${state}</span><div>${msg}</div>`;
+  document.getElementById('alertBody').innerHTML=`<span class="state">${state}</span><div>${msg}</div>`;
+  loadIcon(icon).then((t)=>{ document.getElementById('alertPic').innerHTML=t; });
+  const chain=document.getElementById('chain');
+  chain.className='chain '+cls;
   document.getElementById('svg').setAttribute('aria-label',
     `${PROFILES[cur].label}. Week ${week}: proxy-to-outcome correlation ρ ${(r>=0?'+':'')+r.toFixed(2)}. State: ${state.replace(/^[^A-Za-z]+/,'')}.`);
 }
+/* Play doubles as the replay control. Weeks advance on a rAF clock whose t0 is
+   the FIRST frame timestamp, never performance.now(), because sandboxed iframes
+   can disagree between the two clocks. Reduced motion jumps straight to the
+   finished state instead of animating. */
 function play(){
   if(playing){ stop(); return; }
+  if(reduced){ week=WK; update(); return; }
   if(week>=WK) week=0;
+  playing=true;
   const b=document.getElementById('play'); b.textContent='❚❚ Pause'; b.setAttribute('aria-pressed','true');
-  playing=setInterval(()=>{ week++; update(); if(week>=WK) stop(); }, 360);
+  const startWeek=week; let t0=null;
+  const step=(ts)=>{
+    if(t0===null) t0=ts;
+    const w=Math.min(WK, startWeek+Math.floor((ts-t0)/360));
+    if(w!==week){ week=w; update(); }
+    if(week<WK && playing){ raf=requestAnimationFrame(step); } else { stop(); }
+  };
+  raf=requestAnimationFrame(step);
 }
-function stop(){ if(playing){ clearInterval(playing); playing=null; } const b=document.getElementById('play'); b.textContent='▶ Play'; b.setAttribute('aria-pressed','false'); }
+function stop(){ playing=false; cancelAnimationFrame(raf); const b=document.getElementById('play'); b.textContent='▶ Play'; b.setAttribute('aria-pressed','false'); }
 // pause auto-advance when the iframe/tab is hidden (avoids motion running offscreen)
 document.addEventListener('visibilitychange', ()=>{ if(document.hidden) stop(); });
 drawCurve(); update();
+
+/* Autoplay once when the figure first scrolls into view. threshold 0, not 0.2:
+   the figure can exceed a phone viewport, and a fraction of a too-tall element
+   never intersects. */
+if ('IntersectionObserver' in window) {
+  const io = new IntersectionObserver((entries) => {
+    if (entries.some((e) => e.isIntersecting)) { io.disconnect(); if(!playing && week===0) play(); }
+  }, { threshold: 0 });
+  io.observe(document.getElementById('chain'));
+} else { play(); }
+
+if (document.documentElement.dataset.embedded === 'true') {
+  const postSize = () => window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+  if ('ResizeObserver' in window) new ResizeObserver(postSize).observe(document.body);
+  window.addEventListener('load', postSize);
+}
+})();
 </script>
 </body>
 </html>

@@ -4,155 +4,288 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Open Questions — What the Red-Team Could Not Close</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="./_theme-bootstrap.js"></script>
 <link rel="stylesheet" href="./_theme.css">
 <style>
-/* Scene-specific: the honest tail. A genuinely balanced scale for the
-   AI-agent question, plus the gaps stated plainly. */
-:root {
-  --mono: var(--accent-3);
-  --micro: #a56cff;
-  --open: var(--L5);
-}
-
+/* Scene-specific: the honest tail, rebuilt icon-led. A balanced scale carries
+   the AI-agent question with merge/split pictograms on the pans, and each
+   unresolved gap is a dashed card led by its own icon. */
 .shell { display: flex; flex-direction: column; gap: 10px; }
-:root[data-embedded="true"] .shell {
-  display: flex; flex-direction: column; gap: clamp(6px, 1vh, 10px);
-  padding: clamp(10px, 1.5vh, 16px) clamp(14px, 2vw, 22px);
-}
+:root[data-embedded="true"] .shell { padding: clamp(10px, 1.5vh, 16px) clamp(14px, 2vw, 22px); }
+:root[data-embedded="true"], :root[data-embedded="true"] body { height: auto; }
 
 .head h1 {
-  font-family: "Space Grotesk", sans-serif; font-weight: 700;
-  font-size: clamp(1.05rem, 2.3vw, 1.45rem); letter-spacing: -0.02em; color: var(--text-strong);
+  font-family: "Space Grotesk", "Avenir Next", sans-serif; font-weight: 700;
+  font-size: clamp(1.0rem, 2.3vw, 1.35rem); letter-spacing: -0.02em; color: var(--text-strong);
 }
-:root[data-embedded="true"] .head h1 { font-size: clamp(0.92rem, 2.1vh, 1.2rem); }
 
-.grid { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 10px; flex: 1 1 auto; min-height: 0; }
-:root[data-embedded="true"] .grid { gap: clamp(6px, 0.9vw, 10px); }
+.ctl { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.ctl button {
+  min-height: 34px; padding: 6px 12px; cursor: pointer; border-radius: 8px;
+  font: 700 0.64rem/1 "Space Grotesk", monospace; letter-spacing: 0.07em; text-transform: uppercase;
+  color: var(--accent); background: transparent; border: 1px solid var(--accent);
+}
+.ctl button:hover { background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.ctl .hint { font: 500 0.68rem/1.3 "Avenir Next", "Segoe UI", sans-serif; color: var(--muted-soft); }
+
+.grid { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 10px; }
 
 /* Scale panel */
 .scale-panel {
   display: flex; flex-direction: column; border: 1px solid var(--border); border-radius: 16px;
-  background: var(--surface); box-shadow: var(--shadow-soft); padding: 12px 14px; min-height: 0;
+  background: var(--surface); box-shadow: var(--shadow-soft); padding: 12px 14px; min-width: 0;
 }
-:root[data-embedded="true"] .scale-panel { padding: clamp(7px, 1.1vh, 12px) clamp(9px, 1.3vw, 14px); }
 .scale-title {
-  font: 700 0.7rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.13em;
-  text-transform: uppercase; color: var(--open);
+  font: 700 0.7rem/1.35 "Space Grotesk", sans-serif; letter-spacing: 0.13em;
+  text-transform: uppercase; color: var(--warn);
 }
-:root[data-embedded="true"] .scale-title { font-size: clamp(0.69rem, 1.15vh, 0.72rem); }
-.scale-svg { flex: 1 1 auto; min-height: 0; width: 100%; margin-top: 4px; }
+.scale-svg { width: 100%; height: auto; aspect-ratio: 600 / 336; margin-top: 4px; }
 
 .beam-group { transform-origin: 300px 74px; animation: rock 7s ease-in-out infinite; }
 .beam { stroke: var(--text-strong); stroke-width: 4; stroke-linecap: round; }
 .chain { stroke: color-mix(in srgb, var(--text) 40%, transparent); stroke-width: 1.5; stroke-dasharray: 3 3; }
 .pan { rx: 12; stroke-width: 1.6; }
-.pan.mono { fill: color-mix(in srgb, var(--mono) 7%, var(--surface-strong)); stroke: var(--mono); }
-.pan.micro { fill: color-mix(in srgb, var(--micro) 7%, var(--surface-strong)); stroke: var(--micro); }
+.pan.mono { fill: color-mix(in srgb, var(--accent-3) 7%, var(--surface-strong)); stroke: var(--accent-3); }
+.pan.micro { fill: color-mix(in srgb, var(--accent-2) 7%, var(--surface-strong)); stroke: var(--accent-2); }
 .pan-label { font: 700 14px/1 "Space Grotesk", sans-serif; fill: var(--text-strong); }
-.pan-sub { font: 11.5px/1.3 "DM Sans", sans-serif; fill: var(--muted); }
+.pan-sub { font: 11.5px/1.3 "Avenir Next", "Segoe UI", sans-serif; fill: var(--muted); }
 .pillar { stroke: var(--text-strong); stroke-width: 4; stroke-linecap: round; }
 .fulcrum-tag {
   font: 700 12px/1 "Space Grotesk", sans-serif; letter-spacing: 0.1em;
-  text-transform: uppercase; fill: var(--open);
+  text-transform: uppercase; fill: var(--warn);
 }
 .base-box { fill: color-mix(in srgb, var(--good) 6%, var(--surface-strong)); stroke: var(--good); stroke-width: 1.5; rx: 10; }
 .base-title { font: 700 13.5px/1 "Space Grotesk", sans-serif; fill: var(--text-strong); }
-.base-sub { font: 11.5px/1.3 "DM Sans", sans-serif; fill: var(--muted); }
+.base-sub { font: 11.5px/1.3 "Avenir Next", "Segoe UI", sans-serif; fill: var(--muted); }
 
-/* Open item cards */
-.items { display: flex; flex-direction: column; gap: 8px; min-height: 0; justify-content: space-between; }
-:root[data-embedded="true"] .items { gap: clamp(4px, 0.7vh, 8px); }
+/* Icon badges inside the SVG. The camp badges are solid, the fulcrum badge is
+   dashed because the evidence there is the missing piece. */
+.svg-ico .bg { fill: var(--surface); stroke-width: 1.6; }
+.svg-ico.mono { color: var(--accent-3); } .svg-ico.mono .bg { stroke: var(--accent-3); }
+.svg-ico.micro { color: var(--accent-2); } .svg-ico.micro .bg { stroke: var(--accent-2); }
+.svg-ico.open { color: var(--warn); } .svg-ico.open .bg { stroke: var(--warn); stroke-dasharray: 4 3; }
+.svg-ico.agree { color: var(--good); } .svg-ico.agree .bg { stroke: var(--good); }
+.svg-ico svg * { stroke: currentColor; }
+
+/* Open item cards: real buttons, dashed unresolved treatment, icon tile leads */
+.items { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
 .item {
-  flex: 1 1 0; display: flex; flex-direction: column; justify-content: center; gap: 4px;
-  padding: 10px 13px; border-radius: 14px;
-  border: 1px dashed color-mix(in srgb, var(--open) 50%, var(--border));
-  background: color-mix(in srgb, var(--open) 4%, transparent);
-  opacity: 0; transform: translateY(6px); animation: rise .5s ease-out forwards;
+  display: grid; grid-template-columns: 44px minmax(0, 1fr); align-items: center; gap: 2px 10px;
+  padding: 10px 13px; border-radius: 14px; width: 100%; text-align: left; cursor: pointer;
+  border: 1px dashed color-mix(in srgb, var(--warn) 50%, var(--border));
+  background: color-mix(in srgb, var(--warn) 4%, transparent);
+  font-family: inherit; flex: 1 1 auto;
 }
-:root[data-embedded="true"] .item { padding: clamp(6px, 1vh, 10px) clamp(9px, 1.3vw, 13px); }
-.item-tag { font: 700 0.69rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.11em; text-transform: uppercase; color: var(--open); }
-.item-title { font: 700 0.8rem/1.2 "Space Grotesk", sans-serif; color: var(--text-strong); }
-.item-desc { font: 400 0.72rem/1.4 "DM Sans", sans-serif; color: var(--muted); }
-:root[data-embedded="true"] .item-tag { font-size: clamp(0.69rem, 1vh, 0.7rem); }
-:root[data-embedded="true"] .item-title { font-size: clamp(0.72rem, 1.4vh, 0.8rem); }
-:root[data-embedded="true"] .item-desc { font-size: clamp(0.7rem, 1.2vh, 0.72rem); }
+.item:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.item .pic {
+  grid-row: 1 / span 2; width: 38px; height: 38px; display: grid; place-items: center;
+  border: 1.5px dashed color-mix(in srgb, var(--warn) 60%, var(--border-strong));
+  border-radius: 10px; background: var(--surface); color: var(--warn);
+}
+.item .pic svg { width: 24px; height: 24px; display: block; }
+.item .pic svg * { stroke: currentColor; }
+.item-tag { font: 700 0.66rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.11em; text-transform: uppercase; color: var(--warn); }
+.item-title { font: 700 0.8rem/1.25 "Space Grotesk", sans-serif; color: var(--text-strong); }
+.item-desc {
+  grid-column: 2; display: none; margin-top: 4px;
+  font: 400 0.72rem/1.45 "Avenir Next", "Segoe UI", sans-serif; color: var(--muted);
+  border-left: 2px solid var(--warn); padding-left: 8px;
+}
+.item[aria-expanded="true"] .item-desc { display: block; }
+.item[aria-expanded="true"] { border-style: solid; }
+.item .cue { font: 500 0.62rem/1 "Avenir Next", "Segoe UI", sans-serif; color: var(--muted-soft); margin-left: 6px; }
+
+/* Staged reveal: only once JS arms the animation, so no-JS still shows all */
+.anim .draw { stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset 600ms ease-out; }
+.anim .draw.drawn { stroke-dashoffset: 0; }
+.anim .fadeg { opacity: 0; transition: opacity 450ms ease-out; }
+.anim .fadeg.lit { opacity: 1; }
+.anim .item { opacity: 0; transform: translateY(6px); transition: opacity 450ms ease-out, transform 450ms ease-out; }
+.anim .item.lit { opacity: 1; transform: none; }
 
 @keyframes rock { 0%, 100% { transform: rotate(-1.6deg); } 50% { transform: rotate(1.6deg); } }
-@keyframes rise { to { opacity: 1; transform: translateY(0); } }
 @media (prefers-reduced-motion: reduce) {
   .beam-group { animation: none; }
-  .item { animation: none; opacity: 1; transform: none; }
+  .anim .draw { stroke-dashoffset: 0; transition: none; }
+  .anim .fadeg, .anim .item { opacity: 1; transform: none; transition: none; }
 }
 @media (max-width: 760px) { .grid { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body>
-<div class="shell">
+<div class="shell" id="shell">
 
   <header class="head">
     <div class="eyebrow">The honest tail</div>
     <h1>What the red-team could not close</h1>
   </header>
 
+  <div class="ctl">
+    <button type="button" id="replay">Replay reveal</button>
+    <span class="hint">Tap a dashed card to open the discussion behind it.</span>
+  </div>
+
   <div class="grid">
 
     <div class="scale-panel">
-      <div class="scale-title">The AI-agent question · genuinely two-sided, empirically open</div>
-      <svg class="scale-svg" viewBox="0 0 600 330" preserveAspectRatio="xMidYMid meet" role="img"
+      <div class="scale-title">The AI-agent question &middot; genuinely two-sided, empirically open</div>
+      <svg class="scale-svg" viewBox="0 0 600 336" preserveAspectRatio="xMidYMid meet" role="img"
            aria-label="A balanced scale. One pan, led by Michael Nygard, argues agents reason better in a single well-modularized repo. The other, led by Chris Richardson, argues service boundaries are the guardrails agents need. The fulcrum is labeled zero direct studies, adjacent evidence only. Beneath the scale, both camps agree that enforced module boundaries help agents in either topology.">
         <g class="beam-group">
-          <line class="beam" x1="90" y1="74" x2="510" y2="74"/>
+          <line class="beam draw" pathLength="1" x1="90" y1="74" x2="510" y2="74"/>
           <line class="chain" x1="115" y1="74" x2="115" y2="112"/>
           <line class="chain" x1="485" y1="74" x2="485" y2="112"/>
-          <g>
+          <g class="fadeg" data-stage="1">
             <rect class="pan mono" x="20" y="112" width="190" height="86"/>
-            <text class="pan-label" x="115" y="140" text-anchor="middle">Whole-codebase camp</text>
-            <text class="pan-sub" x="115" y="160" text-anchor="middle">agents reason better in one</text>
-            <text class="pan-sub" x="115" y="174" text-anchor="middle">well-modularized repo</text>
-            <text class="pan-sub" x="115" y="188" text-anchor="middle">— Nygard, May 2026</text>
+            <g class="svg-ico mono" data-icon="merge" transform="translate(115,112)">
+              <rect class="bg" x="-14" y="-14" width="28" height="28" rx="7"/>
+            </g>
+            <text class="pan-label" x="115" y="144" text-anchor="middle">Whole-codebase camp</text>
+            <text class="pan-sub" x="115" y="162" text-anchor="middle">agents reason better in one</text>
+            <text class="pan-sub" x="115" y="176" text-anchor="middle">well-modularized repo</text>
+            <text class="pan-sub" x="115" y="190" text-anchor="middle">— Nygard, May 2026</text>
           </g>
-          <g>
+          <g class="fadeg" data-stage="2">
             <rect class="pan micro" x="390" y="112" width="190" height="86"/>
-            <text class="pan-label" x="485" y="140" text-anchor="middle">Bounded-services camp</text>
-            <text class="pan-sub" x="485" y="160" text-anchor="middle">service boundaries are the</text>
-            <text class="pan-sub" x="485" y="174" text-anchor="middle">guardrails agents need</text>
-            <text class="pan-sub" x="485" y="188" text-anchor="middle">— Richardson, Feb–May 2026</text>
+            <g class="svg-ico micro" data-icon="split" transform="translate(485,112)">
+              <rect class="bg" x="-14" y="-14" width="28" height="28" rx="7"/>
+            </g>
+            <text class="pan-label" x="485" y="144" text-anchor="middle">Bounded-services camp</text>
+            <text class="pan-sub" x="485" y="162" text-anchor="middle">service boundaries are the</text>
+            <text class="pan-sub" x="485" y="176" text-anchor="middle">guardrails agents need</text>
+            <text class="pan-sub" x="485" y="190" text-anchor="middle">— Richardson, Feb–May 2026</text>
           </g>
         </g>
-        <line class="pillar" x1="300" y1="74" x2="300" y2="240"/>
+        <line class="pillar draw" pathLength="1" x1="300" y1="74" x2="300" y2="246"/>
         <circle cx="300" cy="74" r="7" fill="var(--text-strong)"/>
-        <text class="fulcrum-tag" x="300" y="226" text-anchor="middle">Fulcrum: zero direct studies — adjacent only (mid-2026)</text>
-        <g>
-          <rect class="base-box" x="100" y="248" width="400" height="70"/>
-          <text class="base-title" x="300" y="270" text-anchor="middle">The one point both camps agree on</text>
-          <text class="base-sub" x="300" y="290" text-anchor="middle">enforced module boundaries (Modulith verification, Packwerk, ArchUnit)</text>
-          <text class="base-sub" x="300" y="306" text-anchor="middle">help agents in either topology</text>
+        <g class="fadeg" data-stage="3">
+          <g class="svg-ico open" data-icon="flask" transform="translate(300,150)">
+            <rect class="bg" x="-15" y="-15" width="30" height="30" rx="8"/>
+          </g>
+          <text class="fulcrum-tag" x="300" y="232" text-anchor="middle">Fulcrum: zero direct studies — adjacent only (mid-2026)</text>
+        </g>
+        <g class="fadeg" data-stage="4">
+          <rect class="base-box" x="100" y="252" width="400" height="70"/>
+          <g class="svg-ico agree" data-icon="check" transform="translate(300,252)">
+            <rect class="bg" x="-13" y="-13" width="26" height="26" rx="7"/>
+          </g>
+          <text class="base-title" x="300" y="280" text-anchor="middle">The one point both camps agree on</text>
+          <text class="base-sub" x="300" y="298" text-anchor="middle">enforced module boundaries (Modulith verification, Packwerk, ArchUnit)</text>
+          <text class="base-sub" x="300" y="312" text-anchor="middle">help agents in either topology</text>
         </g>
       </svg>
     </div>
 
-    <div class="items">
-      <div class="item" style="animation-delay:.15s">
-        <div class="item-tag">Gap 01</div>
-        <div class="item-title">Green-field preference is under-evidenced</div>
-        <div class="item-desc">Adyen, Stripe, and Shopify kept monoliths they already had. Meta's Threads is the nearest consequential green-field-ish case. For true green-field builds, the gates, not the proof cases, are the load-bearing guidance.</div>
-      </div>
-      <div class="item" style="animation-delay:.3s">
-        <div class="item-tag">Gap 02</div>
-        <div class="item-title">Production adoption is unmeasured</div>
-        <div class="item-desc">Every modality that once tracked it dropped the question or never asked it. Treat every future statistic in this space with Scene 4 suspicion.</div>
-      </div>
-      <div class="item" style="animation-delay:.45s">
-        <div class="item-tag">Re-sweep triggers</div>
-        <div class="item-title">When to re-run this research</div>
-        <div class="item-desc">ModulithBench publishing actual data, the InfoQ 2026 architecture trends report landing, DDD Europe 2026 talk publications, and any direct study of agent productivity versus architecture.</div>
-      </div>
+    <div class="items" id="items">
+      <button type="button" class="item" data-icon="crane" data-stage="5" aria-expanded="false">
+        <span class="pic" data-pic aria-hidden="true"></span>
+        <span class="item-tag">Gap 01<span class="cue">tap for detail</span></span>
+        <span class="item-title">Green-field preference is under-evidenced</span>
+        <span class="item-desc">Adyen, Stripe, and Shopify kept monoliths they already had. Meta's Threads is the nearest consequential green-field-ish case. For true green-field builds, the gates, not the proof cases, are the load-bearing guidance.</span>
+      </button>
+      <button type="button" class="item" data-icon="gauge" data-stage="6" aria-expanded="false">
+        <span class="pic" data-pic aria-hidden="true"></span>
+        <span class="item-tag">Gap 02<span class="cue">tap for detail</span></span>
+        <span class="item-title">Production adoption is unmeasured</span>
+        <span class="item-desc">Every modality that once tracked it dropped the question or never asked it. Treat every future statistic in this space with Scene 4 suspicion.</span>
+      </button>
+      <button type="button" class="item" data-icon="radar" data-stage="7" aria-expanded="false">
+        <span class="pic" data-pic aria-hidden="true"></span>
+        <span class="item-tag">Re-sweep triggers<span class="cue">tap for detail</span></span>
+        <span class="item-title">When to re-run this research</span>
+        <span class="item-desc">ModulithBench publishing actual data, the InfoQ 2026 architecture trends report landing, DDD Europe 2026 talk publications, and any direct study of agent productivity versus architecture.</span>
+      </button>
     </div>
 
   </div>
 
 </div>
+<script>
+(() => {
+  const ICON_BASE = '../customs-entry-agent/flow-icons/';
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const shell = document.getElementById('shell');
+  const items = Array.from(document.querySelectorAll('.item'));
+
+  /* Icons are shared line-art SVGs, fetched and inlined with the stroke
+     swapped to currentColor. A failed fetch leaves the slot empty and the
+     text still carries the element. */
+  const inline = (t) => t.replace(/stroke="#232f3e"/g, 'stroke="currentColor"');
+  items.forEach((item) => {
+    const slot = item.querySelector('[data-pic]');
+    fetch(ICON_BASE + item.dataset.icon + '.svg')
+      .then((r) => (r.ok ? r.text() : Promise.reject()))
+      .then((t) => { slot.innerHTML = inline(t); })
+      .catch(() => {});
+  });
+  /* Badges inside the scale SVG: the fetched icon becomes a nested <svg>
+     sized into the badge square. */
+  document.querySelectorAll('.svg-ico').forEach((g) => {
+    fetch(ICON_BASE + g.dataset.icon + '.svg')
+      .then((r) => (r.ok ? r.text() : Promise.reject()))
+      .then((t) => {
+        g.insertAdjacentHTML('beforeend', inline(t));
+        const s = g.querySelector('svg');
+        if (s) { s.setAttribute('x', -10); s.setAttribute('y', -10); s.setAttribute('width', 20); s.setAttribute('height', 20); }
+      })
+      .catch(() => {});
+  });
+
+  /* click to expand the discussion behind each open question */
+  items.forEach((item) => {
+    item.addEventListener('click', () => {
+      item.setAttribute('aria-expanded', String(item.getAttribute('aria-expanded') !== 'true'));
+    });
+  });
+
+  /* Staged reveal: the scale draws itself, then each camp lands, then the
+     open gaps light in sequence. rAF t0 comes from the first frame timestamp,
+     never performance.now(): sandboxed iframes can disagree between clocks. */
+  const staged = Array.from(document.querySelectorAll('[data-stage]'))
+    .sort((a, b) => Number(a.dataset.stage) - Number(b.dataset.stage));
+  const STEP = 320;
+  let raf = 0;
+  const run = () => {
+    cancelAnimationFrame(raf);
+    shell.classList.add('anim');
+    const draws = document.querySelectorAll('.draw');
+    if (reduced) {
+      draws.forEach((d) => d.classList.add('drawn'));
+      staged.forEach((el) => el.classList.add('lit'));
+      return;
+    }
+    draws.forEach((d) => d.classList.remove('drawn'));
+    staged.forEach((el) => el.classList.remove('lit'));
+    void shell.offsetWidth; /* flush so removed classes restart transitions */
+    const total = STEP * (staged.length + 2);
+    let t0 = null;
+    const step = (ts) => {
+      if (t0 === null) t0 = ts;
+      const t = ts - t0;
+      if (t >= 0) draws.forEach((d) => d.classList.add('drawn'));
+      staged.forEach((el, i) => { if (t >= 600 + i * STEP) el.classList.add('lit'); });
+      if (t < 600 + total) raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+  };
+
+  document.getElementById('replay').addEventListener('click', run);
+
+  /* threshold 0, not 0.2: this figure can exceed a phone viewport, and a
+     fraction of a too-tall element never reaches 0.2 visibility. */
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting)) { io.disconnect(); run(); }
+    }, { threshold: 0 });
+    io.observe(shell);
+  } else { run(); }
+
+  if (document.documentElement.dataset.embedded === 'true') {
+    const postSize = () => window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+    if ('ResizeObserver' in window) new ResizeObserver(postSize).observe(document.body);
+    window.addEventListener('load', postSize);
+  }
+})();
+</script>
 </body>
 </html>

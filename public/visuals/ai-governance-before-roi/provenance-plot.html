@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Eight studies, one evidence ladder</title>
+<script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+.shell { display:flex; flex-direction:column; gap:12px; }
+:root[data-embedded="true"] .shell { padding: 14px clamp(14px, 2vw, 22px); }
+.head h1 { font-family:"Fraunces",serif; font-weight:700; font-size:clamp(1rem,2.1vw,1.2rem); color:var(--text-strong); }
+.head p { font:400 0.78rem/1.5 "Source Sans 3",sans-serif; color:var(--muted); margin-top:3px; }
+
+.ctl { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.ctl button {
+  min-height:32px; padding:5px 12px; cursor:pointer;
+  font:600 0.62rem/1 "IBM Plex Mono",monospace; letter-spacing:0.07em; text-transform:uppercase;
+  color:var(--accent); background:transparent; border:1px solid var(--accent);
+}
+.ctl button:hover { background:color-mix(in srgb, var(--accent) 12%, transparent); }
+.ctl .hint { font:400 0.68rem/1.3 "Source Sans 3",sans-serif; color:var(--muted-soft); }
+
+/* legend doubles as the provenance filter: each rung of the ladder is a
+   pressable pictogram, not a colour swatch */
+.legend { display:flex; flex-wrap:wrap; gap:6px; }
+.legend button {
+  display:inline-flex; align-items:center; gap:6px; min-height:30px; padding:4px 9px; cursor:pointer;
+  font:600 0.6rem/1 "IBM Plex Mono",monospace; letter-spacing:0.05em; text-transform:uppercase;
+  color:var(--muted); background:var(--surface); border:1px solid var(--border-strong);
+}
+.legend button .lpic { width:16px; height:16px; display:grid; place-items:center; }
+.legend button .lpic svg { width:16px; height:16px; display:block; }
+.legend button .lpic svg * { stroke:currentColor; }
+.legend button[aria-pressed="true"] { color:var(--text-strong); border-color:var(--accent); }
+.legend button[aria-pressed="true"] .lpic { color:var(--accent); }
+.legend button:focus-visible { outline:2px solid var(--accent); outline-offset:1px; }
+
+.plot { position:relative; border:1px solid var(--border-strong); background:var(--surface); padding:10px 12px 6px; }
+.band { border-top:1px solid var(--border); padding:7px 0 9px; transition:opacity 250ms; }
+.band:first-child { border-top:0; }
+.band.dim { opacity:0.22; }
+.band-head { display:flex; justify-content:space-between; align-items:baseline; gap:8px; }
+.band-label { font:500 0.6rem "IBM Plex Mono",monospace; letter-spacing:0.08em; text-transform:uppercase; color:var(--muted); }
+.band.empty { background:repeating-linear-gradient(135deg, transparent 0 8px, color-mix(in srgb, var(--warn) 12%, transparent) 8px 9px); }
+.band.empty .band-label { color:var(--warn); }
+.band-note { font:500 0.6rem "IBM Plex Mono",monospace; letter-spacing:0.06em; color:var(--warn); opacity:0; transition:opacity 450ms; }
+.band.in .band-note { opacity:1; }
+.row { position:relative; margin-top:4px; }
+
+/* each claim is a positioned pictogram button: x is the headline %, one
+   lane per claim so nothing ever collides, even at 300px */
+.pt {
+  position:absolute; display:flex; align-items:center; gap:5px; padding:0; cursor:pointer;
+  background:transparent; border:0; font-family:inherit; text-align:left;
+}
+.pt .drop { display:flex; align-items:center; gap:5px; opacity:0; transform:translateY(-14px); transition:opacity 400ms, transform 400ms; }
+.pt.in .drop { opacity:1; transform:none; }
+.pt .pic {
+  width:22px; height:22px; flex:0 0 22px; display:grid; place-items:center;
+  background:var(--surface-strong); border:1.5px solid currentColor;
+  transition:box-shadow 200ms;
+}
+.pt .pic svg { width:15px; height:15px; display:block; }
+.pt .pic svg * { stroke:currentColor; }
+.pt.confirmed { color:var(--confirmed); }
+.pt.proposed { color:var(--proposed); }
+.pt.proposed .pic { border-style:dashed; background:transparent; }
+.pt.vendor { color:var(--vendor); }
+.pt .tag { font:500 0.58rem/1.2 "IBM Plex Mono",monospace; color:var(--muted); white-space:nowrap; }
+.pt .tag .pre { display:block; font-size:0.5rem; color:var(--warn); letter-spacing:0.05em; }
+.pt.dim { opacity:0.18; }
+.pt[aria-pressed="true"] .pic { box-shadow:0 0 0 3px color-mix(in srgb, currentColor 25%, transparent); }
+.pt:focus-visible { outline:2px solid var(--accent); outline-offset:1px; }
+.pt.side-left .drop { flex-direction:row-reverse; }
+
+.axis { display:flex; justify-content:space-between; font:500 0.58rem "IBM Plex Mono",monospace; color:var(--muted); border-top:1px solid var(--border-strong); padding-top:4px; margin-top:8px; }
+
+.key { display:flex; flex-wrap:wrap; gap:12px; font:400 0.7rem "Source Sans 3",sans-serif; color:var(--muted); }
+.key span { display:inline-flex; align-items:center; gap:5px; }
+.key i { width:9px; height:9px; border-radius:50%; }
+.key i.solid { background:var(--confirmed); }
+.key i.hollow { border:2px solid var(--proposed); background:transparent; }
+.key i.vendor { background:var(--vendor); }
+
+.detail {
+  min-height:34px; border:1px solid var(--border); border-left:3px solid var(--accent);
+  background:var(--surface); padding:7px 10px;
+  font:400 0.72rem/1.45 "Source Sans 3",sans-serif; color:var(--muted);
+}
+.detail b { color:var(--text-strong); font-weight:600; }
+
+@media (max-width:620px) {
+  .pt .tag { font-size:0.54rem; }
+  .legend button { padding:4px 7px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pt .drop, .band-note, .band { transition:none; }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="head">
+    <h1>Eight ROI studies, plotted by evidence strength</h1>
+    <p>They look convergent only because they are the same kind of weak evidence. The audited-disclosure band is empty.</p>
+  </div>
+
+  <div class="ctl">
+    <button type="button" id="replay">Replay drop</button>
+    <span class="hint">Tap a claim for its source. Legend filters by provenance.</span>
+  </div>
+
+  <div class="legend" id="legend" role="group" aria-label="Filter claims by provenance">
+    <button type="button" data-band="audited" aria-pressed="true"><span class="lpic" data-lpic="badge" aria-hidden="true"></span>Audited disclosure</button>
+    <button type="button" data-band="survey" aria-pressed="true"><span class="lpic" data-lpic="flask" aria-hidden="true"></span>Independent survey</button>
+    <button type="button" data-band="stated" aria-pressed="true"><span class="lpic" data-lpic="document" aria-hidden="true"></span>Stated-intent survey</button>
+    <button type="button" data-band="vendor" aria-pressed="true"><span class="lpic" data-lpic="megaphone" aria-hidden="true"></span>Vendor claim</button>
+  </div>
+
+  <div class="plot" role="group" aria-label="Scatter plot of eight AI ROI studies by headline percentage and evidence-strength band. The audited-disclosure band at top is empty. Capgemini and Google Cloud sit far right in the vendor/weak bands, contradicting the survey cluster on the left.">
+    <div class="band empty" data-band="audited">
+      <div class="band-head"><span class="band-label">Audited disclosure</span><span class="band-note">No observations</span></div>
+    </div>
+    <div class="band" data-band="survey">
+      <div class="band-head"><span class="band-label">Independent survey</span></div>
+      <div class="row" id="row-survey"></div>
+    </div>
+    <div class="band" data-band="stated">
+      <div class="band-head"><span class="band-label">Stated-intent survey</span></div>
+      <div class="row" id="row-stated"></div>
+    </div>
+    <div class="band" data-band="vendor">
+      <div class="band-head"><span class="band-label">Vendor claim</span></div>
+      <div class="row" id="row-vendor"></div>
+    </div>
+    <div class="axis"><span>0%</span><span>25%</span><span>50%</span><span>75%</span><span>100%</span></div>
+  </div>
+
+  <div class="key">
+    <span><i class="solid"></i>In-window</span>
+    <span><i class="hollow"></i>Pre-window (hollow)</span>
+    <span><i class="vendor"></i>Vendor claim</span>
+  </div>
+
+  <div class="detail" id="detail" aria-live="polite">Tap any claim icon for its source and date.</div>
+</div>
+<script>
+(() => {
+  const ICON_BASE = '../customs-entry-agent/flow-icons/';
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const BAND_ICON = { audited:'badge', survey:'flask', stated:'document', vendor:'megaphone' };
+  const BAND_NAME = { audited:'Audited disclosure', survey:'Independent survey', stated:'Stated-intent survey', vendor:'Vendor claim' };
+  const POINTS = {
+    survey: [
+      { label:'Gartner', pct:45, date:'2026-08-05', state:'confirmed' },
+      { label:'KPMG', pct:7, date:'2026-07', state:'confirmed' },
+    ],
+    stated: [
+      { label:'Sage', pct:10, date:'pre-2026', state:'confirmed' },
+      { label:'Stord', pct:7, date:'2026-08-01', state:'confirmed' },
+      { label:'Deloitte', pct:6, date:'2025 fieldwork', state:'confirmed' },
+      { label:'MIT', pct:5, date:'2025-08', state:'proposed', pre:true },
+      { label:'JLL', pct:5, date:'2025-10-28', state:'proposed', pre:true },
+    ],
+    vendor: [
+      { label:'Capgemini', pct:70, date:'open citation', state:'vendor' },
+      { label:'Google Cloud', pct:74, date:'2026', state:'vendor' },
+    ],
+  };
+  const LANE = 26;
+  const detail = document.getElementById('detail');
+  const pts = [];
+
+  /* Icons are the shared line-art set, fetched once per name and inlined
+     with the stroke swapped to currentColor. A failed fetch leaves the slot
+     empty and the tag text still carries the claim. */
+  const iconCache = {};
+  const getIcon = (name) => iconCache[name] || (iconCache[name] =
+    fetch(ICON_BASE + name + '.svg')
+      .then((r) => (r.ok ? r.text() : Promise.reject()))
+      .then((t) => t.replace(/stroke="#232f3e"/g, 'stroke="currentColor"'))
+      .catch(() => ''));
+  const fill = (slot, name) => { getIcon(name).then((t) => { slot.innerHTML = t; }); };
+
+  document.querySelectorAll('[data-lpic]').forEach((s) => fill(s, s.dataset.lpic));
+
+  Object.entries(POINTS).forEach(([bandId, list]) => {
+    const row = document.getElementById('row-' + bandId);
+    row.style.height = list.length * LANE + 'px';
+    list.forEach((p, i) => {
+      const el = document.createElement('button');
+      el.type = 'button';
+      el.className = 'pt ' + p.state + (p.pct > 55 ? ' side-left' : '');
+      el.style.left = p.pct + '%';
+      el.style.top = i * LANE + 'px';
+      el.style.transform = p.pct > 55 ? 'translateX(calc(-100% + 11px))' : 'translateX(-11px)';
+      el.setAttribute('aria-pressed', 'false');
+      el.setAttribute('aria-label', p.label + ' ' + p.pct + '%, ' + p.date + ', ' + BAND_NAME[bandId]);
+      el.innerHTML = '<span class="drop"><span class="pic" aria-hidden="true"></span>' +
+        '<span class="tag">' + p.label + ' ' + p.pct + '%' + (p.pre ? '<span class="pre">PRE-WINDOW</span>' : '') + '</span></span>';
+      fill(el.querySelector('.pic'), BAND_ICON[bandId]);
+      el.addEventListener('click', () => {
+        const on = el.getAttribute('aria-pressed') === 'true';
+        pts.forEach((q) => q.el.setAttribute('aria-pressed', 'false'));
+        el.setAttribute('aria-pressed', String(!on));
+        detail.innerHTML = on ? 'Tap any claim icon for its source and date.' :
+          '<b>' + p.label + ' · ' + p.pct + '%</b> · ' + BAND_NAME[bandId] + ' · ' + p.date +
+          (p.pre ? ' · pre-window evidence' : '');
+      });
+      row.appendChild(el);
+      pts.push({ el, bandId });
+    });
+  });
+
+  /* legend buttons filter by provenance band */
+  document.querySelectorAll('#legend button').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const on = btn.getAttribute('aria-pressed') === 'true';
+      btn.setAttribute('aria-pressed', String(!on));
+      const band = btn.dataset.band;
+      document.querySelector('.band[data-band="' + band + '"]').classList.toggle('dim', on);
+      pts.forEach((q) => { if (q.bandId === band) q.el.classList.toggle('dim', on); });
+    });
+  });
+
+  /* Staged drop: bands light strongest first, each claim icon falls into
+     its lane in sequence. rAF t0 comes from the first frame timestamp,
+     never performance.now(). */
+  const BAND_STEP = 550, PT_STEP = 110;
+  const bands = Array.from(document.querySelectorAll('.plot .band'));
+  const schedule = [];
+  bands.forEach((b, k) => {
+    schedule.push({ el:b, at:k * BAND_STEP });
+    Array.from(b.querySelectorAll('.pt')).forEach((p, i) => {
+      schedule.push({ el:p, at:k * BAND_STEP + 150 + i * PT_STEP });
+    });
+  });
+  let raf = 0;
+  const run = () => {
+    cancelAnimationFrame(raf);
+    schedule.forEach((s) => s.el.classList.remove('in'));
+    if (reduced) { schedule.forEach((s) => s.el.classList.add('in')); return; }
+    const total = schedule[schedule.length - 1].at + 500;
+    let t0 = null;
+    const step = (ts) => {
+      if (t0 === null) t0 = ts;
+      const t = ts - t0;
+      schedule.forEach((s) => { if (t >= s.at) s.el.classList.add('in'); });
+      if (t < total) raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+  };
+  document.getElementById('replay').addEventListener('click', run);
+
+  /* threshold 0, not 0.2: the plot can exceed a phone viewport, and a
+     fraction of a too-tall element never intersects. */
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting)) { io.disconnect(); run(); }
+    }, { threshold: 0 });
+    io.observe(document.querySelector('.plot'));
+  } else { run(); }
+
+  if (document.documentElement.dataset.embedded === 'true') {
+    const postSize = () => window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+    if ('ResizeObserver' in window) new ResizeObserver(postSize).observe(document.body);
+    window.addEventListener('load', postSize);
+    setTimeout(postSize, 60);
+  }
+})();
+</script>
+</body>
+</html>

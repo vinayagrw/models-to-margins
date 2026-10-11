@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Present the decision, and watch acceptance rise</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+/* Review screen anatomy. Annotated single-queue-item mock with clickable region
+   callouts: uncertainty header, banded risk, candidates, controlling GRI,
+   highlighted ruling passage, nearest prior, routing rule, disagreement path.
+   Reduced motion: everything visible, static. */
+
+.shell { display: flex; flex-direction: column; gap: 10px; }
+:root[data-embedded="true"] .shell { padding: 14px clamp(14px, 2vw, 22px); }
+
+.head h1 {
+  font-family: "Space Grotesk", sans-serif; font-weight: 700;
+  font-size: clamp(1.02rem, 2.2vw, 1.3rem); letter-spacing: -0.02em; color: var(--text-strong);
+}
+:root[data-embedded="true"] .head h1 { font-size: 1.02rem; }
+.head p { font: 500 0.72rem/1.4 "DM Sans", sans-serif; color: var(--muted); margin-top: 2px; }
+
+.wrap { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 10px; align-items: start; }
+
+.mock {
+  border: 1px solid var(--border-strong); border-radius: 12px; background: var(--surface);
+  box-shadow: var(--shadow-soft); padding: 11px 12px; display: flex; flex-direction: column; gap: 7px;
+}
+.mock button.region {
+  all: unset; cursor: pointer; display: block; border: 1px dashed transparent; border-radius: 7px; padding: 5px 6px;
+}
+.mock button.region:hover, .mock button.region:focus-visible { border-color: var(--accent-2); background: color-mix(in srgb, var(--accent-2) 8%, transparent); }
+.mock button.region[aria-pressed="true"] { border-color: var(--accent-2); background: color-mix(in srgb, var(--accent-2) 12%, transparent); }
+
+.r-header { font: 600 0.76rem/1.4 "DM Sans", sans-serif; color: var(--text); }
+.r-header b { color: var(--text-strong); }
+
+.r-band { display: flex; align-items: center; gap: 8px; }
+.r-band .chip { font: 700 0.66rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.06em; text-transform: uppercase; padding: 4px 9px; border-radius: 999px; background: var(--T1); color: #1a1408; }
+.r-band .n { font: 500 0.62rem/1 "IBM Plex Mono", monospace; color: var(--muted); }
+
+.r-candidates { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.cand { border: 1px solid var(--border); border-radius: 8px; padding: 6px 8px; }
+.cand.primary { border-color: var(--accent-2); }
+.cand code { font: 700 0.68rem/1 "IBM Plex Mono", monospace; color: var(--text-strong); }
+.cand span { display: block; font: 500 0.62rem/1.3 "DM Sans", sans-serif; color: var(--muted); margin-top: 2px; }
+
+.r-gri code { font: 600 0.66rem/1.3 "IBM Plex Mono", monospace; color: var(--accent-2); }
+
+.r-ruling { font: 500 0.7rem/1.5 "DM Sans", sans-serif; color: var(--text); }
+.r-ruling mark { background: color-mix(in srgb, var(--warn) 35%, transparent); color: var(--text-strong); padding: 0 2px; border-radius: 2px; }
+
+.r-prior span { font: 500 0.68rem/1.4 "DM Sans", sans-serif; color: var(--muted); }
+.r-prior code { font: 600 0.64rem/1.3 "IBM Plex Mono", monospace; color: var(--accent-3); }
+
+.r-route span { font: 500 0.68rem/1.4 "DM Sans", sans-serif; color: var(--muted); }
+
+.r-actions { display: flex; gap: 8px; }
+.r-actions .btn { flex: 1; text-align: center; font: 700 0.68rem/1 "Space Grotesk", sans-serif; padding: 8px; border-radius: 8px; border: 1px solid; }
+.r-actions .accept { border-color: var(--S-cleared); color: var(--S-cleared); }
+.r-actions .disagree { border-color: var(--accent); color: var(--accent); }
+
+.detail {
+  border: 1px solid var(--border); border-radius: 12px; background: var(--surface);
+  box-shadow: var(--shadow-soft); padding: 11px 13px; display: flex; flex-direction: column; gap: 6px;
+  min-height: 0;
+}
+.d-name {
+  font: 700 0.6rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--dc, var(--accent)); border: 1px solid color-mix(in srgb, var(--dc, var(--accent)) 45%, transparent);
+  border-radius: 999px; padding: 4px 10px; display: inline-block; width: fit-content;
+}
+.detail p { font: 500 0.76rem/1.55 "DM Sans", sans-serif; color: var(--text); }
+.detail p b { color: var(--text-strong); }
+
+@media (max-width: 760px) {
+  .wrap { grid-template-columns: minmax(0, 1fr); }
+  .r-candidates { grid-template-columns: minmax(0, 1fr); }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="head">
+    <h1>Present the decision, and watch acceptance rise</h1>
+    <p>Every element is a falsification test, not a justification. Click a region.</p>
+  </div>
+
+  <div class="wrap">
+    <div class="mock" role="group" aria-label="Annotated review screen for one queue item">
+      <button class="region" data-i="0" aria-pressed="true">
+        <div class="r-header">Entry 4471-B, line 3. <b>Uncertain between two HTS candidates</b>, 10-digit split at the last two digits.</div>
+      </button>
+      <button class="region" data-i="1" aria-pressed="false">
+        <div class="r-band"><span class="chip">Elevated risk</span><span class="n">$41,200 duty at risk</span></div>
+      </button>
+      <button class="region" data-i="2" aria-pressed="false">
+        <div class="r-candidates">
+          <div class="cand primary"><code>8471.30.0100</code><span>Portable ADP, primary candidate</span></div>
+          <div class="cand"><code>8471.41.0150</code><span>Non-portable ADP, competing candidate</span></div>
+        </div>
+      </button>
+      <button class="region" data-i="3" aria-pressed="false">
+        <div class="r-gri">Controlling: <code>GRI 1, note 5(A) to Chapter 84</code></div>
+      </button>
+      <button class="region" data-i="4" aria-pressed="false">
+        <div class="r-ruling">HQ H301122: "a unit is portable if <mark>it can operate on battery power for a meaningful period without external connection</mark>, and weighs under 10kg."</div>
+      </button>
+      <button class="region" data-i="5" aria-pressed="false">
+        <div class="r-prior"><span>Nearest prior: </span><code>Entry 4198-C</code><span>, same SKU family, decided 8471.30 on 2026-06-02.</span></div>
+      </button>
+      <button class="region" data-i="6" aria-pressed="false">
+        <div class="r-route"><span>Routed here because: 10-digit self-consistency split below threshold on a $41,200 line.</span></div>
+      </button>
+      <div class="r-actions">
+        <div class="btn accept">Accept, 8471.30</div>
+        <div class="btn disagree">Disagree</div>
+      </div>
+    </div>
+
+    <div class="detail" aria-live="polite">
+      <span class="d-name" id="d-name"></span>
+      <p id="d-text"></p>
+    </div>
+  </div>
+</div>
+<script>
+(() => {
+  const DATA = [
+    { name: 'Uncertainty header', color: 'var(--T1)', text: 'Stated in words, not a number: "uncertain between two candidates, 10-digit split." The header is the verification target, telling the reviewer exactly what to check first.' },
+    { name: 'Banded risk', color: 'var(--T1)', text: 'A named band, Elevated risk, with the duty-at-risk figure alongside it, not gating alone. The number is subordinate to the band, present but never the sole signal (hitl-patterns 4).' },
+    { name: 'Competing candidates', color: 'var(--accent-2)', text: 'Two candidates, not one code stated as fact. Seeing the alternative is what makes disagreement possible rather than theatrical.' },
+    { name: 'Controlling GRI', color: 'var(--accent-2)', text: 'The General Rule of Interpretation and chapter note actually deciding the split, cited by number so a broker can pull the text rather than trust the summary.' },
+    { name: 'Highlighted ruling passage', color: 'var(--warn)', text: 'The exact clause the classification turns on is highlighted inside the ruling, not just linked. Verification is a five-second read, not a document hunt.' },
+    { name: 'Nearest prior decision', color: 'var(--accent-3)', text: 'The most similar entry this desk has already decided, with its outcome and date. Consistency with precedent is a check the reviewer can make in one glance.' },
+    { name: 'Routing rule', color: 'var(--muted)', text: 'States plainly why this line reached a human: the self-consistency split against the threshold on a specific dollar figure. No black box, no bare score.' }
+  ];
+  const buttons = document.querySelectorAll('.region');
+  const render = (i) => {
+    const d = DATA[i];
+    document.getElementById('d-name').textContent = d.name;
+    document.getElementById('d-name').style.setProperty('--dc', d.color);
+    document.getElementById('d-text').innerHTML = d.text;
+  };
+  buttons.forEach((btn) => btn.addEventListener('click', () => {
+    buttons.forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
+    render(Number(btn.dataset.i));
+  }));
+  render(0);
+
+  if (document.documentElement.dataset.embedded === 'true') {
+    const postSize = () => window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+    if ('ResizeObserver' in window) new ResizeObserver(postSize).observe(document.body);
+    window.addEventListener('load', postSize);
+  }
+})();
+</script>
+</body>
+</html>

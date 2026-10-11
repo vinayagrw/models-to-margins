@@ -1,6 +1,8 @@
 /* Harness Engineering — shared theme tokens and base styles
-   Used by hero-equation, without-vs-with, evidence-chart, harness-explorer,
-   run-trace, failure-modes, invest-first, decision-lanes. */
+   Used by harness-context-map, without-vs-with, evidence-chart,
+   harness-reference-architecture, governed-run-controlflow,
+   harness-deployment-sequence, failure-modes, decision-lanes,
+   playbook-visual, vocabulary-visual. */
 
 :root,
 :root[data-theme="light"] {
@@ -32,7 +34,8 @@
   --warn: #c93d17;
   --good: #16825d;
 
-  /* 5-layer canonical colors (used in hero, explorer, failure-modes, invest-first) */
+  /* 5-layer canonical colors (used across the context map, reference
+     architecture, control flow, failure modes and playbook) */
   --L1: #b8520d;  /* Constraint    — orange */
   --L2: #077693;  /* Context       — cyan */
   --L3: #7d3bde;  /* Execution     — violet */

@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The lifecycle exit</title><script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+.shell { display: flex; flex-direction: column; gap: 12px; }
+:root[data-embedded="true"] .shell { padding: 14px clamp(14px, 2vw, 22px); }
+h1 { font-family: "Saira Condensed", sans-serif; font-weight: 700; font-size: clamp(1rem, 2.2vw, 1.25rem); text-transform: uppercase; letter-spacing: 0.02em; color: var(--g-ink); }
+.sub { font: 500 0.76rem/1.4 "Inter", sans-serif; color: var(--g-ink-3); margin-top: 2px; }
+
+.ctl { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.ctl button {
+  min-height: 34px; padding: 6px 12px; cursor: pointer; border-radius: 2px;
+  font: 600 0.64rem/1 "IBM Plex Mono", monospace; letter-spacing: 0.07em; text-transform: uppercase;
+  color: var(--g-accent-ink); background: transparent; border: 1px solid var(--g-accent-ink);
+}
+.ctl button:hover { background: color-mix(in srgb, var(--g-accent) 16%, transparent); }
+.ctl .hint { font: 500 0.68rem/1.3 "Inter", sans-serif; color: var(--g-ink-3); }
+
+/* Station line: a vertical spine carries the facility through its lifecycle,
+   and the headcount token rides it. The token IS the argument: it leaves the
+   line at the WARN filing, long before any layoff is coded to automation. */
+.stack { display: flex; flex-direction: column; border: 1px solid var(--g-rule-strong); border-radius: 2px; background: var(--g-surface); position: relative; }
+.band {
+  display: grid; grid-template-columns: 52px 1fr auto; align-items: center;
+  min-height: 58px; position: relative; cursor: pointer; text-align: left;
+  background: transparent; border: 0; width: 100%; font-family: inherit; padding: 0;
+}
+.band + .band { border-top: 1px solid var(--g-rule); }
+.band:focus-visible { outline: 2px solid var(--g-accent-ink); outline-offset: -2px; }
+
+.rail { position: relative; height: 100%; min-height: 58px; }
+.rail .spine { position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; background: var(--g-rule-strong); transform: translateX(-50%); }
+.band:first-child .rail .spine { top: 50%; }
+.band:last-child .rail .spine { bottom: 50%; }
+.pic {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%);
+  width: 34px; height: 34px; display: grid; place-items: center; border-radius: 2px;
+  background: var(--g-surface-2); border: 1.5px solid var(--g-rule-strong);
+  color: var(--g-ink-3); transition: color 300ms, border-color 300ms, box-shadow 300ms;
+}
+.pic svg { width: 22px; height: 22px; display: block; }
+.pic svg * { stroke: currentColor; }
+.band.lit .pic { color: var(--g-accent-ink); border-color: var(--g-accent-ink); box-shadow: 0 0 0 3px color-mix(in srgb, var(--g-accent) 22%, transparent); }
+.band.exit-stage.lit .pic { color: var(--g-caution); border-color: var(--g-caution); box-shadow: 0 0 0 3px color-mix(in srgb, var(--g-caution) 18%, transparent); }
+
+.band-info { padding: 8px 12px 8px 4px; min-width: 0; }
+.band-info .k { display: block; font: 600 0.6rem "IBM Plex Mono", monospace; letter-spacing: 0.1em; text-transform: uppercase; color: var(--g-ink-3); }
+.band-info b { display: block; font: 700 0.8rem/1.3 "Inter", sans-serif; color: var(--g-ink); }
+.band-info .fine { font: 500 0.68rem/1.4 "Inter", sans-serif; color: var(--g-ink-3); }
+.band-info .more {
+  display: none; margin-top: 5px; font: 500 0.7rem/1.45 "Inter", sans-serif; color: var(--g-ink-2);
+  border-left: 2px solid var(--g-accent); padding-left: 8px;
+}
+.band[aria-expanded="true"] .band-info .more { display: block; }
+.dual { display: flex; gap: 5px; margin-top: 4px; flex-wrap: wrap; }
+.dual span { font: 600 0.6rem "IBM Plex Mono", monospace; text-transform: uppercase; border-radius: 2px; padding: 3px 6px; letter-spacing: 0.06em; }
+.dual .temp { color: var(--g-info); border: 1px solid var(--g-info); }
+.dual .perm { color: var(--g-neg); border: 1px solid var(--g-neg); border-style: dashed; }
+
+/* the drop-off marker beside the WARN station */
+.drop {
+  justify-self: end; margin-right: 12px; display: flex; align-items: center; gap: 6px;
+  color: var(--g-ink-3); opacity: 0.45; transform: translateX(-8px);
+  transition: opacity 400ms, transform 400ms, color 400ms;
+}
+.drop .dpic { width: 26px; height: 26px; display: grid; place-items: center; }
+.drop .dpic svg { width: 22px; height: 22px; display: block; }
+.drop .dpic svg * { stroke: currentColor; }
+.drop .dtxt { font: 600 0.62rem/1.2 "IBM Plex Mono", monospace; letter-spacing: 0.05em; text-transform: uppercase; }
+.drop.hit { color: var(--g-neg); opacity: 1; transform: translateX(0); }
+
+/* the headcount token riding the spine */
+.packet {
+  position: absolute; left: 26px; top: 0; width: 10px; height: 10px; border-radius: 50%;
+  transform: translate(-50%,-50%); background: var(--g-accent);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--g-accent) 70%, transparent);
+  opacity: 0; pointer-events: none; z-index: 2;
+}
+/* the piece of the token that exits at the WARN station */
+.shed {
+  position: absolute; left: 26px; width: 8px; height: 8px; border-radius: 50%;
+  transform: translate(-50%,-50%); background: var(--g-neg);
+  opacity: 0; pointer-events: none; z-index: 2;
+  transition: opacity 500ms, left 500ms;
+}
+.shed.gone { opacity: 1; left: 46px; }
+
+.bg-chart { border: 1px solid var(--g-rule); border-radius: 2px; background: var(--g-surface); padding: 10px 12px; }
+.bg-chart svg { width: 100%; height: auto; display: block; }
+.axis-label { font: 500 0.6rem "IBM Plex Mono", monospace; fill: var(--g-ink-3); }
+.trend { stroke-dasharray: 330; stroke-dashoffset: 330; transition: stroke-dashoffset 900ms ease-out; }
+.bg-chart.drawn .trend { stroke-dashoffset: 0; }
+.note { font: 500 0.74rem/1.5 "Inter", sans-serif; color: var(--g-ink-2); }
+
+@media (max-width: 620px) {
+  .band { grid-template-columns: 44px 1fr; }
+  .rail { min-height: 64px; }
+  .drop { grid-column: 2; justify-self: start; margin: 0 0 8px 4px; transform: translateX(0); }
+  .packet, .shed { left: 22px; }
+  .shed.gone { left: 40px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .packet { display: none; }
+  .trend { transition: none; }
+  .drop, .shed { transition: none; }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div>
+    <h1>The lifecycle exit</h1>
+    <p class="sub">Headcount leaves through facility events, not layoff announcements coded to automation.</p>
+  </div>
+
+  <div class="ctl">
+    <button type="button" id="replay">Replay lifecycle</button>
+    <span class="hint">The token is the facility's headcount. Tap a stage for what happens there.</span>
+  </div>
+
+  <div class="stack" id="stack">
+    <div class="packet" id="packet" aria-hidden="true"></div>
+    <div class="shed" id="shed" aria-hidden="true"></div>
+
+    <button type="button" class="band" data-icon="factory" aria-expanded="false">
+      <span class="rail"><span class="spine" aria-hidden="true"></span><span class="pic" data-pic aria-hidden="true"></span></span>
+      <span class="band-info"><span class="k">Stage 1</span><b>Operating facility</b>
+        <span class="more">A staffed fulfillment site running at full headcount. Nothing in the aggregate employment data flags it yet.</span>
+      </span>
+    </button>
+
+    <button type="button" class="band exit-stage" data-icon="warning" aria-expanded="false">
+      <span class="rail"><span class="spine" aria-hidden="true"></span><span class="pic" data-pic aria-hidden="true"></span></span>
+      <span class="band-info"><span class="k">Stage 2</span><b>WARN filing, 1,110 workers</b>
+        <span class="fine">616 Homestead &middot; 494 Port St. Lucie</span>
+        <span class="dual"><span class="temp">Company: temporary</span><span class="perm">WARN: permanent</span></span>
+        <span class="more">This is the exit point. The company calls the closure temporary while the WARN filing itself codes the separations as permanent. Nowhere is the word automation attached.</span>
+      </span>
+      <span class="drop" id="drop"><span class="dpic" data-drop-pic aria-hidden="true"></span><span class="dtxt">1,110 out</span></span>
+    </button>
+
+    <button type="button" class="band" data-icon="gears" aria-expanded="false">
+      <span class="rail"><span class="spine" aria-hidden="true"></span><span class="pic" data-pic aria-hidden="true"></span></span>
+      <span class="band-info"><span class="k">Stage 3</span><b>Closed for retrofit</b><span class="fine">~2-year build</span>
+        <span class="more">The site goes dark for a roughly 2-year automation retrofit. The jobs are gone now, the machinery arrives later.</span>
+      </span>
+    </button>
+
+    <button type="button" class="band" data-icon="warehouse" aria-expanded="false">
+      <span class="rail"><span class="spine" aria-hidden="true"></span><span class="pic" data-pic aria-hidden="true"></span></span>
+      <span class="band-info"><span class="k">Stage 4</span><b>Reopens smaller</b><span class="fine">Tentative 2028</span>
+        <span class="more">The retrofitted facility is slated to reopen around 2028 with a smaller permanent headcount than it closed with.</span>
+      </span>
+    </button>
+  </div>
+
+  <div class="bg-chart" id="chart">
+    <p class="note" style="margin-bottom:6px"><b>Background: warehousing employment</b>, Mar 2022 peak to today</p>
+    <svg viewBox="0 0 360 90" role="img" aria-label="Line chart of warehousing employment declining from 1.94 million in March 2022 to 1.83 million today, down 34,700 year over year">
+      <line x1="10" y1="70" x2="350" y2="70" stroke="var(--g-rule-strong)" stroke-width="1"></line>
+      <polyline class="trend" points="20,15 340,62" fill="none" stroke="var(--g-caution)" stroke-width="2.5"></polyline>
+      <circle cx="20" cy="15" r="3.5" fill="var(--g-ink-3)"></circle>
+      <text x="20" y="10" class="axis-label">1.94M &middot; Mar 2022 peak</text>
+      <circle cx="340" cy="62" r="3.5" fill="var(--g-neg)"></circle>
+      <text x="255" y="80" class="axis-label" fill="var(--g-neg)">~1.83M today, &minus;34,700 y/y</text>
+    </svg>
+  </div>
+
+  <p class="note">The mechanism is facility lifecycle, not an AI-attributed layoff. That is why the aggregate line falls while no employer codes the removal as automation-driven.</p>
+</div>
+<script>
+(() => {
+  const ICON_BASE = '../customs-entry-agent/flow-icons/';
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const stack = document.getElementById('stack');
+  const packet = document.getElementById('packet');
+  const shed = document.getElementById('shed');
+  const drop = document.getElementById('drop');
+  const chart = document.getElementById('chart');
+  const bands = Array.from(stack.querySelectorAll('.band'));
+
+  /* Icons are shared line-art SVGs, fetched and inlined with the stroke
+     swapped to currentColor so they follow each slot's theme colour. A failed
+     fetch leaves the slot empty and the text still carries the row. */
+  const load = (slot, name) => fetch(ICON_BASE + name + '.svg')
+    .then((r) => (r.ok ? r.text() : Promise.reject()))
+    .then((t) => { slot.innerHTML = t.replace(/stroke="#232f3e"/g, 'stroke="currentColor"'); })
+    .catch(() => {});
+  bands.forEach((band) => load(band.querySelector('[data-pic]'), band.dataset.icon));
+  load(drop.querySelector('[data-drop-pic]'), 'trenddown');
+
+  /* expand/collapse stage detail on tap or Enter */
+  bands.forEach((band) => {
+    band.addEventListener('click', () => {
+      const open = band.getAttribute('aria-expanded') === 'true';
+      band.setAttribute('aria-expanded', String(!open));
+    });
+  });
+
+  /* The headcount token rides the spine through the four stages, lighting each
+     as it passes and shedding the 1,110 workers at the WARN station. rAF t0
+     comes from the first frame timestamp, never performance.now(): sandboxed
+     iframes can disagree between the two clocks. */
+  const DWELL = 700;
+  const finish = () => { drop.classList.add('hit'); chart.classList.add('drawn'); };
+  let raf = 0;
+  const run = () => {
+    cancelAnimationFrame(raf);
+    bands.forEach((b) => b.classList.remove('lit'));
+    drop.classList.remove('hit');
+    shed.classList.remove('gone');
+    chart.classList.remove('drawn');
+    if (reduced) { bands.forEach((b) => b.classList.add('lit')); finish(); return; }
+    const stackRect = stack.getBoundingClientRect();
+    const stops = bands.map((b) => {
+      const r = b.getBoundingClientRect();
+      return r.top - stackRect.top + r.height / 2;
+    });
+    const total = DWELL * stops.length;
+    packet.style.opacity = '1';
+    let t0 = null;
+    let shedDone = false;
+    const step = (ts) => {
+      if (t0 === null) t0 = ts;
+      const t = ts - t0;
+      const i = Math.min(stops.length - 1, Math.floor(t / DWELL));
+      const f = Math.min(1, (t - i * DWELL) / DWELL);
+      const from = i === 0 ? 0 : stops[i - 1];
+      const y = i === 0 ? stops[0] * f : from + (stops[i] - from) * f;
+      packet.style.top = y + 'px';
+      for (let k = 0; k < stops.length; k++) bands[k].classList.toggle('lit', y >= stops[k] - 4);
+      if (!shedDone && y >= stops[1] - 4) {
+        shedDone = true;
+        shed.style.top = stops[1] + 'px';
+        shed.classList.add('gone');
+        drop.classList.add('hit');
+        packet.style.width = '7px'; packet.style.height = '7px';
+      }
+      if (t < total) { raf = requestAnimationFrame(step); }
+      else {
+        packet.style.opacity = '0';
+        packet.style.width = '10px'; packet.style.height = '10px';
+        finish();
+      }
+    };
+    raf = requestAnimationFrame(step);
+  };
+
+  document.getElementById('replay').addEventListener('click', run);
+
+  /* threshold 0, not 0.2: the stack can exceed a phone viewport, and a
+     fraction of a too-tall element never intersects. */
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting)) { io.disconnect(); run(); }
+    }, { threshold: 0 });
+    io.observe(stack);
+  } else { run(); }
+
+  if (document.documentElement.dataset.embedded === 'true') {
+    const postSize = () => window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+    if ('ResizeObserver' in window) new ResizeObserver(postSize).observe(document.body);
+    window.addEventListener('load', postSize);
+    window.addEventListener('resize', postSize);
+  }
+})();
+</script>
+</body>
+</html>

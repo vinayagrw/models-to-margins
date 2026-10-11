@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The rulebook's own deadline slips</title>
+<script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+.shell { display:flex; flex-direction:column; gap:14px; }
+:root[data-embedded="true"] .shell { padding: 14px clamp(14px, 2vw, 22px); }
+.head h1 { font-family:"Fraunces",serif; font-weight:700; font-size:clamp(1rem,2.1vw,1.2rem); color:var(--text-strong); }
+.head p { font:400 0.78rem/1.5 "Source Sans 3",sans-serif; color:var(--muted); margin-top:3px; }
+
+.ctl { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.ctl button {
+  min-height:34px; padding:6px 12px; cursor:pointer;
+  font:600 0.64rem/1 "IBM Plex Mono",monospace; letter-spacing:0.07em; text-transform:uppercase;
+  color:var(--accent); background:transparent; border:1px solid var(--accent);
+}
+.ctl button:hover { background:color-mix(in srgb, var(--accent) 12%, transparent); }
+.ctl .hint { font:400 0.7rem/1.3 "Source Sans 3",sans-serif; color:var(--muted-soft); }
+
+.upper { border:1px solid var(--border-strong); background:var(--surface); padding:10px 12px 6px; }
+.row {
+  display:grid; grid-template-columns:40px 1fr; align-items:start; gap:0 8px;
+  width:100%; padding:8px 0; cursor:pointer; text-align:left;
+  background:transparent; border:0; font-family:inherit;
+}
+.row + .row { border-top:1px solid var(--border); }
+.row:focus-visible { outline:2px solid var(--accent); outline-offset:-2px; }
+.pic {
+  width:32px; height:32px; display:grid; place-items:center; margin-top:2px;
+  background:var(--surface-sunk); border:1.5px solid var(--border-strong);
+  color:var(--muted); transition:color 300ms, border-color 300ms;
+}
+.pic svg { width:20px; height:20px; display:block; }
+.pic svg * { stroke:currentColor; }
+.row.lit .pic { color:var(--warn); border-color:var(--warn); }
+.row.lit.hold .pic { color:var(--good); border-color:var(--good); }
+
+.rc { min-width:0; }
+.lbl { display:block; font:500 0.66rem "IBM Plex Mono",monospace; color:var(--text); margin-bottom:14px; }
+.track { position:relative; height:14px; }
+.rule { position:absolute; left:0; right:0; top:6px; height:2px; background:var(--border); }
+.bar { position:absolute; top:3px; height:8px; background:var(--accent-2); border-radius:2px; }
+.bar.firm { background:var(--accent); }
+.slip {
+  position:absolute; left:20%; top:3px; height:8px; visibility:hidden;
+  background:repeating-linear-gradient(45deg, var(--warn) 0 4px, transparent 4px 8px);
+  border:1px solid var(--warn);
+}
+.slip::after {
+  content:""; position:absolute; right:-7px; top:50%; transform:translateY(-50%);
+  border-left:7px solid var(--warn); border-top:5px solid transparent; border-bottom:5px solid transparent;
+}
+.slip-label {
+  position:absolute; top:-13px; transform:translateX(-100%); white-space:nowrap;
+  font:600 0.58rem "IBM Plex Mono",monospace; color:var(--warn);
+  opacity:0; transition:opacity 320ms;
+}
+.slip-label.on { opacity:1; }
+.anchor { position:absolute; left:20%; top:-3px; bottom:-3px; width:2px; background:var(--accent); }
+.held-chip {
+  position:absolute; left:calc(20% + 8px); top:-14px; white-space:nowrap;
+  font:600 0.58rem "IBM Plex Mono",monospace; color:var(--good);
+  opacity:0; transition:opacity 320ms;
+}
+.held-chip.on { opacity:1; }
+
+.more {
+  display:none; margin-top:6px; font:400 0.72rem/1.5 "Source Sans 3",sans-serif; color:var(--muted);
+  border-left:2px solid var(--accent); padding-left:8px;
+}
+.row[aria-expanded="true"] .more { display:block; }
+
+.axis { display:grid; grid-template-columns:40px 1fr; gap:0 8px; padding:2px 0 10px; }
+.axis .track { height:18px; }
+.axis .mark {
+  position:absolute; left:20%; top:0; transform:translateX(-50%);
+  display:flex; align-items:center; gap:4px;
+  font:500 0.58rem "IBM Plex Mono",monospace; color:var(--muted);
+}
+.axis .mark .ic { width:13px; height:13px; display:grid; place-items:center; color:var(--muted); }
+.axis .mark .ic svg { width:13px; height:13px; display:block; }
+.axis .mark .ic svg * { stroke:currentColor; }
+
+.caption { font:400 italic 0.8rem/1.5 "Fraunces",serif; color:var(--text-strong); border-top:2px solid var(--accent); border-bottom:2px solid var(--accent); padding:8px 0; text-align:center; }
+
+.lower { border:1px solid var(--border-strong); background:var(--surface); overflow-x:auto; }
+.lower table { width:100%; border-collapse:collapse; font-size:0.78rem; }
+.lower th { font:500 0.6rem "IBM Plex Mono",monospace; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-strong); background:var(--surface-sunk); text-align:left; padding:6px 10px; border-bottom:1px solid var(--border-strong); }
+.lower td { padding:6px 10px; border-bottom:1px solid var(--border); font-family:"Source Sans 3",sans-serif; color:var(--text); }
+.lower tbody tr:last-child td { border-bottom:0; }
+.jico { display:inline-grid; place-items:center; width:15px; height:15px; vertical-align:-3px; margin-right:6px; color:var(--muted); }
+.jico svg { width:15px; height:15px; display:block; }
+.jico svg * { stroke:currentColor; }
+.dir { font-family:"IBM Plex Mono",monospace; font-size:0.68rem; white-space:nowrap; }
+.dir.loose { color:var(--warn); }
+.dir.tight { color:var(--good); }
+
+@media (max-width:620px) {
+  .lbl { font-size:0.6rem; }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="head">
+    <h1>Two obligations slipped, five did not</h1>
+    <p>August 2, 2026 was the AI Act's biggest scheduled milestone. Most of it did not arrive on time.</p>
+  </div>
+
+  <div class="ctl">
+    <button type="button" id="replay">Replay slips</button>
+    <span class="hint">Hatched arrows are slippage. Tap a row for exact dates.</span>
+  </div>
+
+  <div class="upper" role="group" aria-label="Timeline showing EU AI Act obligations originally due August 2 2026. Annex III high-risk obligations slipped sixteen months to December 2027, and Annex I embedded-product obligations slipped twenty-four months to August 2028. Article 50 transparency, Article 4 literacy, GPAI enforcement, penalties, and a new Article 5 prohibition remained anchored at August 2 2026.">
+    <button type="button" class="row" data-icon="gov" data-pct="46" data-end="66" aria-expanded="false">
+      <span class="pic" aria-hidden="true"></span>
+      <span class="rc">
+        <span class="lbl">Annex III high-risk</span>
+        <span class="track" aria-hidden="true">
+          <span class="rule"></span>
+          <span class="bar" style="left:0%; width:20%"></span>
+          <span class="slip"></span>
+          <span class="slip-label" style="left:66%">+16 months</span>
+        </span>
+        <span class="more">Originally due Aug 2 2026 &rarr; now Dec 2027 &middot; +16 months &middot; deferred by the Digital Omnibus</span>
+      </span>
+    </button>
+    <button type="button" class="row" data-icon="factory" data-pct="68" data-end="88" aria-expanded="false">
+      <span class="pic" aria-hidden="true"></span>
+      <span class="rc">
+        <span class="lbl">Annex I embedded-product</span>
+        <span class="track" aria-hidden="true">
+          <span class="rule"></span>
+          <span class="bar" style="left:0%; width:20%"></span>
+          <span class="slip"></span>
+          <span class="slip-label" style="left:88%">+24 months</span>
+        </span>
+        <span class="more">Originally due Aug 2 2026 &rarr; now Aug 2028 &middot; +24 months &middot; deferred by the Digital Omnibus</span>
+      </span>
+    </button>
+    <button type="button" class="row hold" data-icon="scales" aria-expanded="false">
+      <span class="pic" aria-hidden="true"></span>
+      <span class="rc">
+        <span class="lbl">Art. 50, Art. 4, GPAI, penalties, new Art. 5</span>
+        <span class="track" aria-hidden="true">
+          <span class="rule"></span>
+          <span class="bar firm" style="left:0%; width:20%"></span>
+          <span class="anchor"></span>
+          <span class="held-chip">Held</span>
+        </span>
+        <span class="more">Anchored at Aug 2 2026 &middot; Article 50 transparency, Article 4 literacy, GPAI enforcement, penalties, and a new Article 5 prohibition arrived on time</span>
+      </span>
+    </button>
+    <div class="axis" aria-hidden="true">
+      <span></span>
+      <span class="track">
+        <span class="mark"><span class="ic" data-icon="calendar"></span>Aug 2 2026</span>
+      </span>
+    </div>
+  </div>
+
+  <p class="caption">Hardest obligations slipped. Transparency and literacy duties did not.</p>
+
+  <div class="lower">
+    <table>
+      <thead><tr><th>Jurisdiction</th><th>Status</th><th>Date</th><th>Direction</th></tr></thead>
+      <tbody>
+        <tr><td><span class="jico" data-icon="gov" aria-hidden="true"></span>EU</td><td>Annex III / I deferred by Digital Omnibus</td><td>Dec 2027 / Aug 2028</td><td class="dir loose">&darr; Loosening</td></tr>
+        <tr><td><span class="jico" data-icon="building" aria-hidden="true"></span>Colorado</td><td>Enforcement paused, narrowed to SB 26-189</td><td>Paused Apr 27 2026, effective Jan 1 2027</td><td class="dir loose">&darr; Loosening</td></tr>
+        <tr><td><span class="jico" data-icon="building" aria-hidden="true"></span>Texas</td><td>TRAIGA in effect</td><td>Since Jan 1 2026</td><td class="dir tight">&uarr; Tightening</td></tr>
+        <tr><td><span class="jico" data-icon="gov" aria-hidden="true"></span>US federal</td><td>Preemption pushed, not enacted</td><td>No statute in window</td><td class="dir loose">&darr; Loosening (pending)</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+<script>
+(() => {
+  const ICON_BASE = '../customs-entry-agent/flow-icons/';
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* Shared line-art icons, fetched and inlined with the stroke swapped to
+     currentColor so they follow each row's theme colour. A failed fetch
+     leaves the slot empty and the labels still carry the row. */
+  document.querySelectorAll('[data-icon]').forEach((el) => {
+    const slot = el.querySelector('.pic') || el.querySelector('.ic') || (el.matches('.pic,.ic,.jico') ? el : null);
+    if (!slot) return;
+    fetch(ICON_BASE + el.dataset.icon + '.svg')
+      .then((r) => (r.ok ? r.text() : Promise.reject()))
+      .then((t) => { slot.innerHTML = t.replace(/stroke="#232f3e"/g, 'stroke="currentColor"'); })
+      .catch(() => {});
+  });
+
+  const rows = Array.from(document.querySelectorAll('.row'));
+  rows.forEach((row) => {
+    row.addEventListener('click', () => {
+      const open = row.getAttribute('aria-expanded') === 'true';
+      row.setAttribute('aria-expanded', String(!open));
+    });
+  });
+
+  /* Staged slip animation: each hatched arrow grows from the Aug 2 2026
+     anchor to its deferred date in sequence, then the anchored row's Held
+     chip lights. rAF t0 comes from the first frame timestamp, never
+     performance.now(): sandboxed iframes can disagree between the clocks. */
+  const slips = rows.filter((r) => r.dataset.pct).map((r) => ({
+    row: r,
+    el: r.querySelector('.slip'),
+    label: r.querySelector('.slip-label'),
+    pct: parseFloat(r.dataset.pct)
+  }));
+  const holdRow = rows.find((r) => r.classList.contains('hold'));
+  const heldChip = holdRow.querySelector('.held-chip');
+  const DUR = 700, GAP = 850;
+  let raf = 0;
+
+  const reset = () => {
+    slips.forEach((s) => {
+      s.el.style.width = '0%'; s.el.style.visibility = 'hidden';
+      s.label.classList.remove('on'); s.row.classList.remove('lit');
+    });
+    holdRow.classList.remove('lit'); heldChip.classList.remove('on');
+  };
+  const finish = () => {
+    slips.forEach((s) => {
+      s.el.style.width = s.pct + '%'; s.el.style.visibility = 'visible';
+      s.label.classList.add('on'); s.row.classList.add('lit');
+    });
+    holdRow.classList.add('lit'); heldChip.classList.add('on');
+  };
+
+  const run = () => {
+    cancelAnimationFrame(raf);
+    reset();
+    if (reduced) { finish(); return; }
+    let t0 = null;
+    const total = slips.length * GAP + DUR;
+    const step = (ts) => {
+      if (t0 === null) t0 = ts;
+      const t = ts - t0;
+      slips.forEach((s, i) => {
+        const p = Math.max(0, Math.min(1, (t - i * GAP) / DUR));
+        if (p > 0) {
+          s.row.classList.add('lit');
+          s.el.style.visibility = 'visible';
+          s.el.style.width = (s.pct * p) + '%';
+          s.label.classList.toggle('on', p >= 1);
+        }
+      });
+      if (t >= slips.length * GAP) { holdRow.classList.add('lit'); heldChip.classList.add('on'); }
+      if (t < total) raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+  };
+
+  document.getElementById('replay').addEventListener('click', run);
+
+  /* threshold 0, not 0.2: this figure can exceed a phone viewport, and a
+     fraction of a too-tall element never reaches 0.2 intersection. */
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting)) { io.disconnect(); run(); }
+    }, { threshold: 0 });
+    io.observe(document.querySelector('.upper'));
+  } else { run(); }
+
+  if (document.documentElement.dataset.embedded === 'true') {
+    const postSize = () => window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+    if ('ResizeObserver' in window) new ResizeObserver(postSize).observe(document.body);
+    window.addEventListener('load', postSize);
+    setTimeout(postSize, 60);
+  }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,187 @@
+/* ============================================================================
+   Waybill exhibits — shared theme.
+   Token names and values mirror /styles/deep-dive-waybill.css so exhibits and
+   page chrome read as one document. Light is the carbonless top copy, dark is
+   the dock office after midnight.
+
+   Contrast contract, binding:
+     --carbon      FILL AND TEXT. 4.6:1 light, 5.9:1 dark.
+     --carbon-dim  FILL ONLY.
+     --ink-3       muted text, 4.5:1 minimum against --panel in both modes.
+   ========================================================================== */
+
+:root,
+:root[data-theme="light"] {
+  --stock-0: #eef3ef;
+  --stock-1: #e2ebe5;
+  --panel: #f8fbf9;
+  --panel-2: #edf3ef;
+  --rule: #9bb3a8;
+  --rule-strong: #6f8c7f;
+  --rule-faint: rgba(45, 74, 63, 0.10);
+  --ink: #14201b;
+  --ink-2: #3c4f46;
+  --ink-3: #5d7268;
+  --carbon: #a32b1e;
+  --carbon-dim: rgba(163, 43, 30, 0.10);
+  --on-carbon: #fff6f4;
+  --cleared: #1f6146;
+  --cleared-dim: rgba(31, 97, 70, 0.11);
+  --held: #8a5c0e;
+  --held-dim: rgba(138, 92, 14, 0.12);
+  --transit: #1f5679;
+  --transit-dim: rgba(31, 86, 121, 0.11);
+  --shadow: rgba(24, 48, 40, 0.20);
+
+  --display: "Oswald", "Arial Narrow", sans-serif;
+  --body-font: "Work Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "Roboto Mono", "IBM Plex Mono", ui-monospace, monospace;
+}
+
+/* A figure opened standalone before any script runs still needs a sane mode. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --stock-0: #101a1e;
+    --stock-1: #0b1317;
+    --panel: #16232a;
+    --panel-2: #1a2a31;
+    --rule: #33505c;
+    --rule-strong: #4d7484;
+    --rule-faint: rgba(150, 200, 220, 0.07);
+    --ink: #e6f0f2;
+    --ink-2: #b3c8cf;
+    --ink-3: #8ba4ad;
+    --carbon: #ff6a55;
+    --carbon-dim: rgba(255, 106, 85, 0.14);
+    --on-carbon: #24100c;
+    --cleared: #4fd39a;
+    --cleared-dim: rgba(79, 211, 154, 0.13);
+    --held: #e2a53c;
+    --held-dim: rgba(226, 165, 60, 0.14);
+    --transit: #6fb6e8;
+    --transit-dim: rgba(111, 182, 232, 0.13);
+    --shadow: rgba(0, 0, 0, 0.55);
+  }
+}
+
+:root[data-theme="dark"] {
+  --stock-0: #101a1e;
+  --stock-1: #0b1317;
+  --panel: #16232a;
+  --panel-2: #1a2a31;
+  --rule: #33505c;
+  --rule-strong: #4d7484;
+  --rule-faint: rgba(150, 200, 220, 0.07);
+  --ink: #e6f0f2;
+  --ink-2: #b3c8cf;
+  --ink-3: #8ba4ad;
+  --carbon: #ff6a55;
+  --carbon-dim: rgba(255, 106, 85, 0.14);
+  --on-carbon: #24100c;
+  --cleared: #4fd39a;
+  --cleared-dim: rgba(79, 211, 154, 0.13);
+  --held: #e2a53c;
+  --held-dim: rgba(226, 165, 60, 0.14);
+  --transit: #6fb6e8;
+  --transit-dim: rgba(111, 182, 232, 0.13);
+  --shadow: rgba(0, 0, 0, 0.55);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: linear-gradient(180deg, var(--stock-0), var(--stock-1));
+  color: var(--ink-2);
+  font-family: var(--body-font);
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Embedded: the host frame owns the height, so release the viewport lock or
+   document.body.scrollHeight is meaningless and autosize cannot work. */
+:root[data-embedded="true"],
+:root[data-embedded="true"] body { height: auto; }
+:root[data-embedded="true"] body { min-height: 0; background: transparent; }
+
+.shell {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: clamp(12px, 3vw, 20px);
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.head { display: flex; flex-direction: column; gap: 6px; }
+.head h1 {
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: clamp(1.02rem, 2.4vw, 1.3rem);
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+.head p {
+  font-size: clamp(0.82rem, 1.5vw, 0.9rem);
+  line-height: 1.5;
+  color: var(--ink-2);
+  max-width: 72ch;
+}
+
+.eyebrow {
+  font-family: var(--mono);
+  font-size: 0.64rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+/* Verdict stamps, the same six grades the page uses. */
+.stampline { display: flex; flex-wrap: wrap; gap: 6px; }
+.stamp {
+  display: inline-block;
+  padding: 2px 8px;
+  font-family: var(--mono);
+  font-size: 0.61rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border: 1px solid currentColor;
+  border-radius: 2px;
+}
+.stamp--confirmed { color: var(--cleared); background: var(--cleared-dim); }
+.stamp--vendor-claim { color: var(--held); background: var(--held-dim); }
+.stamp--proposed { color: var(--transit); background: var(--transit-dim); }
+.stamp--open { color: var(--carbon); background: var(--carbon-dim); }
+.stamp--hold { color: var(--carbon); background: var(--carbon-dim); border-style: double; border-width: 3px; }
+.stamp--illustrative { color: var(--ink-3); border-style: dashed; }
+
+.card {
+  padding: 12px 14px;
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+  color: var(--ink);
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  padding: 8px 12px;
+}
+button:hover { border-color: var(--carbon); color: var(--carbon); }
+
+:focus-visible {
+  outline: 2px solid var(--carbon);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+}

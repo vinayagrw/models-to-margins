@@ -1,0 +1,1080 @@
+/* ============================================================================
+   Waybill — bespoke "waybill" template for cross-border logistics deep-dives.
+   Every rule is scoped under .dd-waybill so nothing leaks to other pages.
+
+   Identity: the carbonless consignment note that travels stapled to the
+   freight. Light is the top copy — pale green-white NCR stock, teal rules,
+   black ink, red carbon impressions where a hand pressed through. Dark is the
+   same document read at the dock office after midnight: slate stock, pale ink,
+   the carbon marks kept red because that is the point of them.
+
+   Accessibility contract, binding:
+     --wb-carbon      FILL AND TEXT. 4.6:1 on light stock, 5.9:1 on dark.
+     --wb-carbon-dim  FILL ONLY. Never put text on it without --wb-ink.
+     --wb-ink-3       muted text. 4.5:1 minimum against --wb-panel, both modes.
+   The sprocket and rule textures never exceed 0.12 alpha, so they cannot
+   depress text contrast below the ratios above.
+   ========================================================================== */
+
+.dd-waybill.article-shell {
+  /* --- top copy (light) --- */
+  --wb-stock-0: #eef3ef;
+  --wb-stock-1: #e2ebe5;
+  --wb-panel: #f8fbf9;
+  --wb-panel-2: #edf3ef;
+  --wb-rule: #9bb3a8;
+  --wb-rule-strong: #6f8c7f;
+  --wb-rule-faint: rgba(45, 74, 63, 0.10);
+  --wb-ink: #14201b;
+  --wb-ink-2: #3c4f46;
+  --wb-ink-3: #5d7268;
+  --wb-carbon: #a32b1e;
+  --wb-carbon-dim: rgba(163, 43, 30, 0.10);
+  --wb-on-carbon: #fff6f4;
+  --wb-cleared: #1f6146;
+  --wb-cleared-dim: rgba(31, 97, 70, 0.11);
+  --wb-held: #8a5c0e;
+  --wb-held-dim: rgba(138, 92, 14, 0.12);
+  --wb-transit: #1f5679;
+  --wb-transit-dim: rgba(31, 86, 121, 0.11);
+  --wb-shadow: rgba(24, 48, 40, 0.20);
+
+  --wb-display: "Oswald", "Saira Condensed", "Arial Narrow", sans-serif;
+  --wb-body-font: "Work Sans", "Segoe UI", system-ui, sans-serif;
+  --wb-mono: "Roboto Mono", "IBM Plex Mono", ui-monospace, monospace;
+
+  --wb-rail: 232px;
+  --wb-stick: 96px;
+
+  position: relative;
+  color: var(--wb-ink);
+  font-family: var(--wb-body-font);
+  /* Sprocket margin down the left edge plus the faint form ruling, over the
+     stock gradient. Purely decorative, kept under 0.12 alpha. */
+  background:
+    repeating-linear-gradient(
+      180deg,
+      transparent 0 26px,
+      var(--wb-rule-faint) 26px 27px
+    ),
+    linear-gradient(180deg, var(--wb-stock-0), var(--wb-stock-1));
+  border: 1px solid var(--wb-rule);
+  border-radius: 2px;
+  box-shadow: 0 18px 50px -28px var(--wb-shadow);
+  padding: clamp(20px, 4vw, 46px);
+  margin-top: 8px;
+  /* clip, not hidden: clips decoration without creating a scroll container,
+     so the sticky chain index keeps pinning. */
+  overflow: clip;
+}
+
+/* The perforated tear strip down the left edge. Decoration only, and it is
+   aria-hidden by virtue of being a pseudo-element. */
+.dd-waybill.article-shell::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 14px;
+  background:
+    repeating-linear-gradient(
+      180deg,
+      transparent 0 9px,
+      var(--wb-rule-faint) 9px 15px
+    );
+  border-right: 1px dashed var(--wb-rule);
+  pointer-events: none;
+}
+
+/* ============================================================
+   Dock office after midnight (dark) — the site default mode.
+   ============================================================ */
+[data-theme="dark"] .dd-waybill.article-shell {
+  --wb-stock-0: #101a1e;
+  --wb-stock-1: #0b1317;
+  --wb-panel: #16232a;
+  --wb-panel-2: #1a2a31;
+  --wb-rule: #33505c;
+  --wb-rule-strong: #4d7484;
+  --wb-rule-faint: rgba(150, 200, 220, 0.07);
+  --wb-ink: #e6f0f2;
+  --wb-ink-2: #b3c8cf;
+  --wb-ink-3: #8ba4ad;
+  --wb-carbon: #ff6a55;
+  --wb-carbon-dim: rgba(255, 106, 85, 0.14);
+  --wb-on-carbon: #24100c;
+  --wb-cleared: #4fd39a;
+  --wb-cleared-dim: rgba(79, 211, 154, 0.13);
+  --wb-held: #e2a53c;
+  --wb-held-dim: rgba(226, 165, 60, 0.14);
+  --wb-transit: #6fb6e8;
+  --wb-transit-dim: rgba(111, 182, 232, 0.13);
+  --wb-shadow: rgba(0, 0, 0, 0.55);
+  box-shadow: 0 18px 54px -30px var(--wb-shadow);
+}
+
+/* ============================================================
+   Header — the waybill's own form block.
+   ============================================================ */
+.dd-waybill .wb-header {
+  position: relative;
+  padding-bottom: 22px;
+  margin-bottom: 26px;
+  border-bottom: 2px solid var(--wb-rule-strong);
+}
+
+.dd-waybill .wb-formline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+  font-family: var(--wb-mono);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--wb-ink-3);
+}
+
+.dd-waybill .wb-formline-tag {
+  padding: 3px 9px;
+  color: var(--wb-on-carbon);
+  background: var(--wb-carbon);
+  border-radius: 2px;
+}
+
+.dd-waybill .wb-formline-no { color: var(--wb-ink-2); }
+
+.dd-waybill .wb-formline-status {
+  margin-left: auto;
+  padding: 3px 9px;
+  color: var(--wb-cleared);
+  border: 1px solid currentColor;
+  border-radius: 2px;
+}
+
+.dd-waybill .wb-title {
+  margin: 0 0 10px;
+  font-family: var(--wb-display);
+  font-weight: 600;
+  font-size: clamp(1.9rem, 4.6vw, 3.1rem);
+  line-height: 1.06;
+  letter-spacing: -0.005em;
+  text-transform: uppercase;
+  color: var(--wb-ink);
+}
+
+.dd-waybill .wb-subtitle {
+  margin: 0 0 14px;
+  font-family: var(--wb-mono);
+  font-size: 0.86rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--wb-carbon);
+}
+
+.dd-waybill .wb-lead {
+  max-width: 100%;
+  margin: 0 0 18px;
+  font-size: clamp(1rem, 1.5vw, 1.12rem);
+  line-height: 1.62;
+  color: var(--wb-ink-2);
+}
+
+.dd-waybill .wb-coords {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  margin-bottom: 18px;
+  border: 1px solid var(--wb-rule);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.dd-waybill .wb-coords > span {
+  flex: 1 1 auto;
+  padding: 7px 12px;
+  font-family: var(--wb-mono);
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--wb-ink-3);
+  background: var(--wb-panel);
+  border-right: 1px solid var(--wb-rule-faint);
+}
+.dd-waybill .wb-coords > span:last-child { border-right: 0; }
+
+.dd-waybill .wb-header-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+/* Re-tint the global chrome so it belongs to this document. */
+.dd-waybill .back-link {
+  font-family: var(--wb-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--wb-carbon);
+}
+.dd-waybill .meta-pill {
+  font-family: var(--wb-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  color: var(--wb-ink-3);
+  background: var(--wb-panel);
+  border: 1px solid var(--wb-rule);
+  border-radius: 2px;
+}
+.dd-waybill .tag {
+  font-family: var(--wb-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--wb-ink-2);
+  background: transparent;
+  border: 1px dashed var(--wb-rule);
+  border-radius: 2px;
+}
+
+/* ============================================================
+   Layout + the chain index.
+   ============================================================ */
+.dd-waybill .wb-layout {
+  display: grid;
+  grid-template-columns: var(--wb-rail) minmax(0, 1fr);
+  gap: clamp(20px, 3.4vw, 44px);
+  align-items: start;
+}
+
+.dd-waybill .wb-spine-index {
+  position: sticky;
+  top: var(--wb-stick);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-right: 14px;
+  border-right: 1px solid var(--wb-rule-faint);
+  max-height: calc(100vh - var(--wb-stick) - 24px);
+  overflow-y: auto;
+}
+
+.dd-waybill .wb-index-link {
+  position: relative;
+  display: grid;
+  grid-template-columns: 26px minmax(0, 1fr);
+  gap: 9px;
+  align-items: baseline;
+  padding: 8px 8px 8px 0;
+  text-decoration: none;
+  border-bottom: 1px solid var(--wb-rule-faint);
+  transition: color 0.16s ease, background 0.16s ease;
+}
+.dd-waybill .wb-index-link:last-child { border-bottom: 0; }
+
+.dd-waybill .wb-index-no {
+  font-family: var(--wb-mono);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--wb-ink-3);
+}
+
+.dd-waybill .wb-index-label {
+  font-size: 0.82rem;
+  line-height: 1.34;
+  color: var(--wb-ink-2);
+}
+
+.dd-waybill .wb-index-link:hover .wb-index-label { color: var(--wb-ink); }
+
+/* Travelled legs get a struck-through number, the way a driver marks off a
+   route sheet. The active leg gets the carbon impression. */
+.dd-waybill .wb-index-link.is-done .wb-index-no {
+  color: var(--wb-cleared);
+  text-decoration: line-through;
+}
+.dd-waybill .wb-index-link.is-active {
+  background: var(--wb-carbon-dim);
+}
+.dd-waybill .wb-index-link.is-active .wb-index-no { color: var(--wb-carbon); }
+.dd-waybill .wb-index-link.is-active .wb-index-label {
+  color: var(--wb-ink);
+  font-weight: 600;
+}
+.dd-waybill .wb-index-link:focus-visible {
+  outline: 2px solid var(--wb-carbon);
+  outline-offset: 2px;
+}
+
+/* ============================================================
+   Typography reset — neutralize the global terminal aesthetic.
+   :where() keeps this at (0,2,0): above the global reset at (0,1,2),
+   below this sheet's own element rules at (0,2,1). Any custom class used
+   INSIDE the body must be styled at (0,3,0) via
+   .dd-waybill .article-body .the-class — see the component blocks below.
+   ============================================================ */
+.dd-waybill .article-body :where(:not(pre > code)) {
+  display: revert;
+  padding: revert;
+  border: revert;
+  border-radius: 0;
+  background: none;
+  font-family: var(--wb-body-font);
+  font-size: revert;
+  color: revert;
+}
+
+.dd-waybill .article-body {
+  max-width: 100%;
+  color: var(--wb-ink-2);
+  font-size: 1rem;
+  line-height: 1.72;
+}
+
+.dd-waybill .article-body > * { max-width: 100%; }
+
+.dd-waybill .article-body p { margin: 0 0 1.1em; }
+.dd-waybill .article-body strong { color: var(--wb-ink); font-weight: 600; }
+.dd-waybill .article-body em { font-style: italic; color: var(--wb-ink); }
+
+.dd-waybill .article-body a {
+  color: var(--wb-carbon);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-thickness: 1px;
+}
+.dd-waybill .article-body a:hover { text-decoration-thickness: 2px; }
+.dd-waybill .article-body a:focus-visible {
+  outline: 2px solid var(--wb-carbon);
+  outline-offset: 2px;
+}
+
+.dd-waybill .article-body ul,
+.dd-waybill .article-body ol {
+  margin: 0 0 1.2em;
+  padding-left: 1.3em;
+}
+.dd-waybill .article-body li { margin-bottom: 0.5em; }
+.dd-waybill .article-body ul li::marker { color: var(--wb-carbon); }
+.dd-waybill .article-body ol li::marker {
+  color: var(--wb-ink-3);
+  font-family: var(--wb-mono);
+  font-size: 0.86em;
+}
+
+/* Chapter heading — a form section divider with a carbon rule. */
+.dd-waybill .article-body h2 {
+  scroll-margin-top: calc(var(--wb-stick) + 18px);
+  position: relative;
+  margin: 2.6em 0 0.9em;
+  padding: 12px 0 10px;
+  font-family: var(--wb-display);
+  font-weight: 600;
+  font-size: clamp(1.28rem, 2.5vw, 1.68rem);
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  color: var(--wb-ink);
+  border-top: 2px solid var(--wb-rule-strong);
+  border-bottom: 1px solid var(--wb-rule-faint);
+  transition: border-color 0.2s ease;
+}
+.dd-waybill .article-body h2:first-child { margin-top: 0; }
+.dd-waybill .article-body h2.is-current { border-top-color: var(--wb-carbon); }
+
+.dd-waybill .article-body h3 {
+  margin: 2em 0 0.6em;
+  font-family: var(--wb-display);
+  font-weight: 500;
+  font-size: 1.1rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--wb-ink);
+}
+.dd-waybill .article-body h4 {
+  margin: 1.6em 0 0.5em;
+  font-family: var(--wb-mono);
+  font-weight: 600;
+  font-size: 0.78rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--wb-ink-3);
+}
+
+.dd-waybill .article-body code {
+  font-family: var(--wb-mono);
+  font-size: 0.88em;
+  color: var(--wb-ink);
+  background: var(--wb-panel-2);
+  border: 1px solid var(--wb-rule-faint);
+  border-radius: 2px;
+  padding: 1px 5px;
+}
+.dd-waybill .article-body pre {
+  margin: 0 0 1.3em;
+  padding: 14px 16px;
+  overflow-x: auto;
+  font-family: var(--wb-mono);
+  font-size: 0.82rem;
+  line-height: 1.6;
+  color: var(--wb-ink);
+  background: var(--wb-panel);
+  border: 1px solid var(--wb-rule);
+  border-left: 3px solid var(--wb-carbon);
+  border-radius: 2px;
+}
+.dd-waybill .article-body pre code {
+  padding: 0;
+  border: 0;
+  background: none;
+}
+
+/* ============================================================
+   Component — evidence chips. Same six grades the house uses.
+   ============================================================ */
+.dd-waybill .article-body .wb-chip {
+  display: inline-block;
+  padding: 2px 8px;
+  margin-right: 6px;
+  font-family: var(--wb-mono);
+  font-size: 0.63rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border: 1px solid currentColor;
+  border-radius: 2px;
+  vertical-align: 2px;
+}
+.dd-waybill .article-body .wb-chip--confirmed {
+  color: var(--wb-cleared);
+  background: var(--wb-cleared-dim);
+}
+.dd-waybill .article-body .wb-chip--vendor-claim {
+  color: var(--wb-held);
+  background: var(--wb-held-dim);
+}
+.dd-waybill .article-body .wb-chip--proposed {
+  color: var(--wb-transit);
+  background: var(--wb-transit-dim);
+}
+.dd-waybill .article-body .wb-chip--open {
+  color: var(--wb-carbon);
+  background: var(--wb-carbon-dim);
+}
+.dd-waybill .article-body .wb-chip--hold {
+  color: var(--wb-carbon);
+  background: var(--wb-carbon-dim);
+  border-style: double;
+  border-width: 3px;
+}
+.dd-waybill .article-body .wb-chip--illustrative {
+  color: var(--wb-ink-3);
+  border-style: dashed;
+}
+
+/* ============================================================
+   Component — the custody chain. This template's signature element.
+   One row per handoff: who holds it, what they know, what was lost.
+   ============================================================ */
+.dd-waybill .article-body .wb-chain {
+  margin: 0 0 1.6em;
+  padding: 0;
+  border-left: 2px solid var(--wb-rule);
+}
+
+.dd-waybill .article-body .wb-leg {
+  position: relative;
+  padding: 12px 0 16px 22px;
+  border-bottom: 1px dashed var(--wb-rule-faint);
+}
+.dd-waybill .article-body .wb-leg:last-child { border-bottom: 0; }
+
+/* The custody dot on the chain line. */
+.dd-waybill .article-body .wb-leg::before {
+  content: "";
+  position: absolute;
+  left: -6px;
+  top: 19px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--wb-panel);
+  border: 2px solid var(--wb-rule-strong);
+}
+.dd-waybill .article-body .wb-leg.is-loss::before {
+  background: var(--wb-carbon);
+  border-color: var(--wb-carbon);
+}
+
+.dd-waybill .article-body .wb-leg-who {
+  display: block;
+  margin-bottom: 3px;
+  font-family: var(--wb-mono);
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--wb-ink-3);
+}
+.dd-waybill .article-body .wb-leg-what {
+  display: block;
+  margin-bottom: 4px;
+  font-family: var(--wb-display);
+  font-size: 1.02rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: var(--wb-ink);
+}
+.dd-waybill .article-body .wb-leg-lost {
+  display: block;
+  padding-left: 10px;
+  border-left: 2px solid var(--wb-carbon);
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: var(--wb-ink-2);
+}
+.dd-waybill .article-body .wb-leg-cost {
+  display: inline-block;
+  margin-top: 6px;
+  font-family: var(--wb-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--wb-carbon);
+}
+
+/* ============================================================
+   Component — stat strip. Not in global.css; every template defines it.
+   ============================================================ */
+.dd-waybill .article-body .stat-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+  margin: 0 0 1.6em;
+}
+.dd-waybill .article-body .wb-stat {
+  padding: 12px 14px;
+  background: var(--wb-panel);
+  border: 1px solid var(--wb-rule);
+  border-top: 3px solid var(--wb-rule-strong);
+  border-radius: 2px;
+}
+.dd-waybill .article-body .wb-stat > b {
+  display: block;
+  font-family: var(--wb-display);
+  font-size: clamp(1.4rem, 3vw, 1.9rem);
+  font-weight: 600;
+  line-height: 1.1;
+  color: var(--wb-ink);
+}
+.dd-waybill .article-body .wb-stat > span {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: var(--wb-ink-3);
+}
+.dd-waybill .article-body .wb-stat.alert { border-top-color: var(--wb-carbon); }
+.dd-waybill .article-body .wb-stat.warn { border-top-color: var(--wb-held); }
+.dd-waybill .article-body .wb-stat.good { border-top-color: var(--wb-cleared); }
+
+/* ============================================================
+   Component — note panel, callouts, blockquote.
+   ============================================================ */
+.dd-waybill .article-body .note-panel {
+  margin: 0 0 1.5em;
+  padding: 14px 16px;
+  background: var(--wb-panel-2);
+  border: 1px dashed var(--wb-rule);
+  border-radius: 2px;
+  font-size: 0.9rem;
+  color: var(--wb-ink-2);
+}
+.dd-waybill .article-body .note-panel p { margin: 0 0 0.6em; }
+.dd-waybill .article-body .note-panel p:last-child { margin: 0; }
+
+.dd-waybill .article-body .callout {
+  margin: 0 0 1.5em;
+  padding: 14px 16px;
+  background: var(--wb-panel);
+  border: 1px solid var(--wb-rule);
+  border-left: 4px solid var(--wb-rule-strong);
+  border-radius: 2px;
+}
+.dd-waybill .article-body .callout > strong {
+  display: block;
+  margin-bottom: 6px;
+  font-family: var(--wb-mono);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--wb-ink-3);
+}
+.dd-waybill .article-body .callout p { margin: 0 0 0.6em; }
+.dd-waybill .article-body .callout p:last-child { margin: 0; }
+.dd-waybill .article-body .callout.alert {
+  border-left-color: var(--wb-carbon);
+  background: var(--wb-carbon-dim);
+}
+.dd-waybill .article-body .callout.alert > strong { color: var(--wb-carbon); }
+.dd-waybill .article-body .callout.warm {
+  border-left-color: var(--wb-held);
+  background: var(--wb-held-dim);
+}
+.dd-waybill .article-body .callout.warm > strong { color: var(--wb-held); }
+.dd-waybill .article-body .callout.green {
+  border-left-color: var(--wb-cleared);
+  background: var(--wb-cleared-dim);
+}
+.dd-waybill .article-body .callout.green > strong { color: var(--wb-cleared); }
+.dd-waybill .article-body .callout.neutral {
+  border-left-color: var(--wb-transit);
+  background: var(--wb-transit-dim);
+}
+.dd-waybill .article-body .callout.neutral > strong { color: var(--wb-transit); }
+
+.dd-waybill .article-body blockquote {
+  margin: 0 0 1.5em;
+  padding: 4px 0 4px 18px;
+  border-left: 3px solid var(--wb-carbon);
+  font-family: var(--wb-display);
+  font-size: 1.14rem;
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: 0.01em;
+  color: var(--wb-ink);
+}
+.dd-waybill .article-body blockquote p:last-child { margin: 0; }
+.dd-waybill .article-body blockquote cite {
+  display: block;
+  margin-top: 8px;
+  font-family: var(--wb-mono);
+  font-size: 0.72rem;
+  font-style: normal;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--wb-ink-3);
+}
+
+/* ============================================================
+   Component — tables. Wrapper is required at narrow widths, and the
+   wrapper is what scrolls, never the page.
+   ============================================================ */
+.dd-waybill .article-body .wb-table-scroll {
+  margin: 0 0 1.6em;
+  overflow-x: auto;
+  border: 1px solid var(--wb-rule);
+  border-radius: 2px;
+}
+.dd-waybill .article-body .wb-table-scroll:focus-visible {
+  outline: 2px solid var(--wb-carbon);
+  outline-offset: 2px;
+}
+.dd-waybill .article-body table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.86rem;
+}
+.dd-waybill .article-body caption {
+  padding: 9px 12px;
+  font-family: var(--wb-mono);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-align: left;
+  color: var(--wb-ink-3);
+  background: var(--wb-panel-2);
+  border-bottom: 1px solid var(--wb-rule);
+}
+.dd-waybill .article-body th,
+.dd-waybill .article-body td {
+  padding: 9px 12px;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--wb-rule-faint);
+}
+.dd-waybill .article-body th {
+  font-family: var(--wb-mono);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--wb-ink-3);
+  background: var(--wb-panel-2);
+  border-bottom: 1px solid var(--wb-rule);
+}
+.dd-waybill .article-body td { color: var(--wb-ink-2); }
+.dd-waybill .article-body tbody tr:nth-child(even) { background: var(--wb-panel); }
+.dd-waybill .article-body tbody tr:last-child td { border-bottom: 0; }
+
+/* ============================================================
+   Component — appendix plates.
+   ============================================================ */
+.dd-waybill .article-body details {
+  margin: 0 0 1.4em;
+  padding: 0;
+  background: var(--wb-panel);
+  border: 1px solid var(--wb-rule);
+  border-radius: 2px;
+}
+.dd-waybill .article-body details > summary {
+  padding: 11px 14px;
+  cursor: pointer;
+  font-family: var(--wb-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--wb-ink-2);
+  list-style: none;
+}
+.dd-waybill .article-body details > summary::-webkit-details-marker { display: none; }
+.dd-waybill .article-body details > summary::after {
+  content: "+";
+  float: right;
+  font-weight: 700;
+  color: var(--wb-carbon);
+}
+.dd-waybill .article-body details[open] > summary::after { content: "\2212"; }
+.dd-waybill .article-body details[open] > summary {
+  border-bottom: 1px solid var(--wb-rule);
+}
+.dd-waybill .article-body details > *:not(summary) {
+  margin-left: 14px;
+  margin-right: 14px;
+}
+.dd-waybill .article-body details > *:not(summary):first-of-type { margin-top: 12px; }
+.dd-waybill .article-body details > *:last-child { margin-bottom: 12px; }
+.dd-waybill .article-body details .wb-table-scroll {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+/* ============================================================
+   Figures.
+   ============================================================ */
+.dd-waybill .article-body .visual-frame {
+  position: relative;
+  margin: 0 0 1.6em;
+  padding-top: 26px;
+  background: var(--wb-panel);
+  border: 1px solid var(--wb-rule);
+  border-radius: 2px;
+  overflow: hidden;
+}
+/* The exhibit head strip. Its 26px height is added to padding-top above; if
+   you change one, change both. */
+.dd-waybill .article-body .visual-frame::before {
+  content: "Exhibit " counter(figure);
+  counter-increment: figure;
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  font-family: var(--wb-mono);
+  font-size: 0.63rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--wb-ink-3);
+  background: var(--wb-panel-2);
+  border-bottom: 1px solid var(--wb-rule-faint);
+}
+.dd-waybill .article-body { counter-reset: figure; }
+.dd-waybill .article-body .visual-frame iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+/* The plain claim sentence that precedes every figure. */
+.dd-waybill .article-body .wb-fig-claim {
+  margin: 0 0 0.6em;
+  padding-left: 10px;
+  border-left: 2px solid var(--wb-carbon);
+  font-size: 0.94rem;
+  font-weight: 500;
+  line-height: 1.5;
+  color: var(--wb-ink);
+}
+
+/* ============================================================
+   Motion. The entry animation is gated on .wb-loaded, added by the spine
+   script. Without that class the header would stay invisible, so the
+   reduce block below must also neutralise the initial state.
+   ============================================================ */
+@media (prefers-reduced-motion: no-preference) {
+  .dd-waybill .wb-title,
+  .dd-waybill .wb-subtitle,
+  .dd-waybill .wb-lead {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  .dd-waybill.wb-loaded .wb-title,
+  .dd-waybill.wb-loaded .wb-subtitle,
+  .dd-waybill.wb-loaded .wb-lead {
+    animation: wb-rise 0.5s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+  }
+  .dd-waybill.wb-loaded .wb-subtitle { animation-delay: 0.06s; }
+  .dd-waybill.wb-loaded .wb-lead { animation-delay: 0.12s; }
+}
+
+@keyframes wb-rise {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dd-waybill .wb-title,
+  .dd-waybill .wb-subtitle,
+  .dd-waybill .wb-lead {
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
+  .dd-waybill .wb-index-link { transition: none; }
+  .dd-waybill .article-body h2 { transition: none; }
+}
+
+/* ============================================================
+   Responsive. The house ladder is 960 / 860 / 720 / 560. At 720 the site
+   header goes static, so the sticky offset must go to zero.
+   ============================================================ */
+@media (max-width: 960px) {
+  .dd-waybill .wb-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 18px;
+  }
+  .dd-waybill .wb-spine-index {
+    flex-direction: row;
+    gap: 6px;
+    max-height: none;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 0 0 8px;
+    border-right: 0;
+    border-bottom: 1px solid var(--wb-rule-faint);
+    scrollbar-width: thin;
+  }
+  .dd-waybill .wb-index-link {
+    flex: 0 0 auto;
+    grid-template-columns: auto auto;
+    gap: 6px;
+    align-items: center;
+    padding: 7px 11px;
+    border: 1px solid var(--wb-rule);
+    border-radius: 2px;
+    white-space: nowrap;
+  }
+  .dd-waybill .wb-index-label { font-size: 0.76rem; }
+}
+
+@media (max-width: 860px) {
+  .dd-waybill .article-body .stat-strip {
+    grid-template-columns: repeat(auto-fit, minmax(128px, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .dd-waybill.article-shell {
+    --wb-stick: 0px;
+    padding: clamp(16px, 4vw, 24px);
+  }
+  .dd-waybill .wb-coords { flex-direction: column; }
+  .dd-waybill .wb-coords > span {
+    border-right: 0;
+    border-bottom: 1px solid var(--wb-rule-faint);
+  }
+  .dd-waybill .wb-coords > span:last-child { border-bottom: 0; }
+  .dd-waybill .wb-formline-status { margin-left: 0; }
+}
+
+@media (max-width: 560px) {
+  .dd-waybill.article-shell::before { display: none; }
+  .dd-waybill .article-body .wb-leg { padding-left: 16px; }
+  .dd-waybill .article-body .stat-strip { grid-template-columns: 1fr 1fr; }
+}
+
+/* ============================================================
+   Addendum — component families the private-vs-public deep-dive brings
+   with it from the default article shell. Without these they fall
+   through to global.css and render in the site palette inside the
+   waybill, which reads as two designs stacked. Re-tokenised here to
+   --wb-*, mirroring the .wb-stat / .note-panel treatment above.
+   ============================================================ */
+
+/* --- signal grid: the four opening claims --------------------- */
+.dd-waybill .article-body .signal-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 10px;
+  margin: 0 0 1.6em;
+}
+.dd-waybill .article-body .signal-card {
+  padding: 14px 16px;
+  background: var(--wb-panel);
+  border: 1px solid var(--wb-rule);
+  border-left: 3px solid var(--wb-carbon);
+  border-radius: 4px;
+}
+.dd-waybill .article-body .signal-label {
+  display: block;
+  margin-bottom: 6px;
+  font-family: var(--wb-mono);
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--wb-carbon);
+}
+.dd-waybill .article-body .signal-card > strong {
+  display: block;
+  font-family: var(--wb-display);
+  font-size: 1.02rem;
+  line-height: 1.25;
+  color: var(--wb-ink);
+}
+.dd-waybill .article-body .signal-card p {
+  margin: 6px 0 0;
+  font-size: 0.87rem;
+  line-height: 1.55;
+  color: var(--wb-ink-2);
+}
+
+/* --- reading map: the scene index above the body -------------- */
+.dd-waybill .article-body .reading-map {
+  margin: 0 0 1.6em;
+  padding: 14px 16px;
+  background: var(--wb-panel-2);
+  border: 1px solid var(--wb-rule);
+  border-radius: 4px;
+}
+.dd-waybill .article-body .reading-map-label {
+  margin: 0 0 10px;
+  font-family: var(--wb-mono);
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--wb-ink-3);
+}
+.dd-waybill .article-body .reading-map-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 8px;
+}
+.dd-waybill .article-body .reading-link {
+  display: block;
+  padding: 9px 11px;
+  background: var(--wb-panel);
+  border: 1px solid var(--wb-rule);
+  border-radius: 3px;
+  text-decoration: none;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.dd-waybill .article-body .reading-link:hover,
+.dd-waybill .article-body .reading-link:focus-visible {
+  border-color: var(--wb-carbon);
+  background: var(--wb-carbon-dim);
+}
+.dd-waybill .article-body .reading-link > strong {
+  display: block;
+  font-family: var(--wb-display);
+  font-size: 0.9rem;
+  color: var(--wb-ink);
+}
+.dd-waybill .article-body .reading-link > span {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.79rem;
+  line-height: 1.45;
+  color: var(--wb-ink-3);
+}
+
+/* --- thesis grid: the three-up argument cards ----------------- */
+.dd-waybill .article-body .thesis-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 10px;
+  margin: 0 0 1.6em;
+}
+.dd-waybill .article-body .thesis-card {
+  padding: 14px 16px;
+  background: var(--wb-panel);
+  border: 1px solid var(--wb-rule);
+  border-top: 3px solid var(--wb-cleared);
+  border-radius: 4px;
+}
+.dd-waybill .article-body .thesis-card > em {
+  display: block;
+  margin-bottom: 6px;
+  font-family: var(--wb-mono);
+  font-style: normal;
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--wb-cleared);
+}
+.dd-waybill .article-body .thesis-card > strong {
+  display: block;
+  font-family: var(--wb-display);
+  font-size: 1rem;
+  line-height: 1.25;
+  color: var(--wb-ink);
+}
+.dd-waybill .article-body .thesis-card p {
+  margin: 6px 0 0;
+  font-size: 0.87rem;
+  line-height: 1.55;
+  color: var(--wb-ink-2);
+}
+
+/* --- action grid: the closing "when not to" cards ------------- */
+.dd-waybill .article-body .action-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 10px;
+  margin: 0 0 1.6em;
+}
+.dd-waybill .article-body .action-card {
+  padding: 12px 14px;
+  background: var(--wb-panel-2);
+  border: 1px solid var(--wb-rule);
+  border-radius: 4px;
+}
+.dd-waybill .article-body .action-card > strong {
+  display: block;
+  font-family: var(--wb-display);
+  font-size: 0.94rem;
+  color: var(--wb-ink);
+}
+.dd-waybill .article-body .action-card p {
+  margin: 5px 0 0;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--wb-ink-2);
+}
+/* The last card is the bottom line, not another case. Lamp it amber. */
+.dd-waybill .article-body .action-card:last-child {
+  border-left: 3px solid var(--wb-held);
+}
+
+@media (max-width: 720px) {
+  .dd-waybill .article-body .signal-grid,
+  .dd-waybill .article-body .thesis-grid,
+  .dd-waybill .article-body .reading-map-grid,
+  .dd-waybill .article-body .action-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

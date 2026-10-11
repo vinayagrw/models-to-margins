@@ -4,20 +4,21 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>The 2026 AI Evidence Board — Claims, Measurements, Institutions</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="./_theme-bootstrap.js"></script>
 <link rel="stylesheet" href="./_theme.css">
 <style>
 /* Scene-specific: three-lane evidence board for the AI question.
    Lane 1 stamps the essay discourse, lane 2 shows what 2026 actually
-   measured, lane 3 shows the institutional vocabulary migration. */
+   measured, lane 3 shows the institutional vocabulary migration.
+   Local lane colours are derived from theme tokens only. */
 :root {
   --mono: var(--accent-3);
-  --micro: #a56cff;
+  --micro: color-mix(in srgb, var(--accent) 45%, var(--accent-2));
   --reject: var(--warn);
   --adjacent: var(--accent);
   --inst: var(--accent-2);
 }
+:root[data-embedded="true"], :root[data-embedded="true"] body { height: auto; }
 
 .shell { display: flex; flex-direction: column; gap: 10px; }
 :root[data-embedded="true"] .shell {
@@ -33,23 +34,54 @@
 :root[data-embedded="true"] .head h1 { font-size: clamp(0.92rem, 2.1vh, 1.2rem); }
 :root[data-embedded="true"] .head p { font-size: clamp(0.72rem, 1.4vh, 0.82rem); }
 
-.lane { display: flex; flex-direction: column; gap: 7px; }
+/* controls: replay plus lane filter */
+.ctl { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.ctl button {
+  min-height: 32px; padding: 5px 10px; cursor: pointer; border-radius: 8px;
+  font: 700 0.64rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--muted); background: var(--surface); border: 1px solid var(--border-strong);
+}
+.ctl button:hover { color: var(--text-strong); }
+.ctl button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.ctl button[aria-pressed="true"] { color: var(--accent); border-color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, transparent); }
+.ctl #replay { color: var(--accent); border-color: var(--accent); }
+
+.lane { display: flex; flex-direction: column; gap: 7px; transition: opacity 250ms; }
+.lane.dim { opacity: 0.28; }
 .lane-title {
   font: 700 0.7rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.13em;
   text-transform: uppercase; color: var(--lc, var(--muted));
 }
 :root[data-embedded="true"] .lane-title { font-size: clamp(0.69rem, 1.15vh, 0.72rem); }
 
+/* shared icon slot: the pictogram carries the row even with text blurred */
+.pic {
+  flex: 0 0 auto; width: 30px; height: 30px; display: grid; place-items: center;
+  border-radius: 8px; border: 1.5px solid color-mix(in srgb, var(--ic, var(--muted)) 55%, var(--border));
+  color: var(--ic, var(--muted)); background: color-mix(in srgb, var(--ic, var(--muted)) 6%, transparent);
+}
+.pic svg { width: 20px; height: 20px; display: block; }
+.pic svg * { stroke: currentColor; }
+
+/* staged pin-up: items rise onto the board in sequence */
+.pin { opacity: 0; transform: translateY(8px); transition: opacity 320ms ease, transform 320ms ease; }
+.pin.pinned { opacity: 1; transform: none; }
+
 /* ---- Lane 1: the claims ---- */
 .poles { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 8px; }
 .pole { display: flex; flex-direction: column; gap: 6px; border-radius: 14px; padding: 9px 10px;
   border: 1px solid color-mix(in srgb, var(--pc) 35%, var(--border));
   background: color-mix(in srgb, var(--pc) 4%, var(--surface)); }
+.pole-head { display: flex; align-items: center; gap: 7px; --ic: var(--pc); }
+.pole-head .pic { width: 26px; height: 26px; }
+.pole-head .pic svg { width: 17px; height: 17px; }
 .pole-name { font: 700 0.74rem/1.15 "Space Grotesk", sans-serif; color: var(--pc); text-transform: uppercase; letter-spacing: 0.1em; }
 .essay {
-  display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 8px; align-items: center;
+  display: grid; grid-template-columns: auto minmax(0,1fr) auto; gap: 8px; align-items: center;
   padding: 7px 10px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface);
+  width: 100%; text-align: left; cursor: pointer; font-family: inherit;
 }
+.essay:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .essay-name { font: 700 0.76rem/1.25 "Space Grotesk", sans-serif; color: var(--text-strong); }
 .essay-name small { font: 500 0.69rem/1 "DM Sans", sans-serif; color: var(--muted); letter-spacing: 0.02em; }
 .essay-desc { font: 400 0.7rem/1.35 "DM Sans", sans-serif; color: var(--muted); margin-top: 2px; }
@@ -60,27 +92,30 @@
   font: 700 0.69rem/1.15 "Space Grotesk", sans-serif; letter-spacing: 0.1em; text-transform: uppercase;
   color: var(--sc); border: 2px solid var(--sc); border-radius: 6px;
   padding: 5px 8px; transform: rotate(-8deg) scale(2.2); opacity: 0;
-  animation: thump .35s cubic-bezier(.2,1.6,.4,1) forwards;
   white-space: nowrap; text-align: center;
 }
+.pinned .stamp { animation: thump .35s cubic-bezier(.2,1.6,.4,1) forwards; }
 :root[data-embedded="true"] .stamp { font-size: clamp(0.69rem, 1.1vh, 0.7rem); padding: clamp(4px, 0.7vh, 5px) clamp(6px, 0.9vw, 8px); }
 
 .errata { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 8px; }
 .erratum {
-  display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 8px; align-items: center;
+  display: grid; grid-template-columns: auto minmax(0,1fr) auto; gap: 8px; align-items: center;
   padding: 8px 11px; border-radius: 12px;
   border: 1px dashed color-mix(in srgb, var(--reject) 50%, var(--border));
   background: color-mix(in srgb, var(--reject) 4%, transparent);
+  width: 100%; text-align: left; cursor: pointer; font-family: inherit;
 }
+.erratum:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .erratum .essay-name { color: var(--text-strong); }
 
 /* ---- Lane 2: the measurements ---- */
 .metrics { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 8px; }
 .metric {
-  position: relative; display: flex; flex-direction: column; gap: 3px;
+  position: relative; display: flex; flex-direction: column; gap: 3px; --ic: var(--adjacent);
   padding: 9px 11px 8px; border-radius: 12px;
   border: 1px solid color-mix(in srgb, var(--adjacent) 30%, var(--border)); background: var(--surface);
 }
+.metric-top { display: flex; align-items: center; gap: 8px; }
 .metric-num { font: 700 clamp(0.95rem, 2vw, 1.25rem)/1.05 "Space Grotesk", sans-serif; color: var(--text-strong); letter-spacing: -0.02em; }
 .metric-num em { font-style: normal; color: var(--adjacent); }
 .metric-label { font: 700 0.72rem/1.25 "Space Grotesk", sans-serif; color: var(--text-strong); }
@@ -94,7 +129,7 @@
 :root[data-embedded="true"] .metric-src { font-size: clamp(0.69rem, 1.1vh, 0.69rem); }
 
 .counterweight {
-  display: grid; grid-template-columns: auto minmax(0,1fr); gap: 10px; align-items: center;
+  display: grid; grid-template-columns: auto auto minmax(0,1fr); gap: 10px; align-items: center; --ic: var(--good);
   padding: 8px 11px; border-radius: 12px;
   border: 1px solid color-mix(in srgb, var(--good) 45%, var(--border));
   background: color-mix(in srgb, var(--good) 5%, var(--surface));
@@ -111,11 +146,15 @@
 /* ---- Lane 3: the institutions ---- */
 .timeline { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap: 8px; }
 .tl-node {
-  position: relative; display: flex; flex-direction: column; gap: 3px;
+  position: relative; display: flex; flex-direction: column; gap: 3px; --ic: var(--inst);
   padding: 8px 10px; border-radius: 12px;
   border: 1px solid color-mix(in srgb, var(--inst) 32%, var(--border)); background: var(--surface);
 }
 .tl-node.absent { border-style: dashed; background: transparent; }
+.tl-node.absent .pic { border-style: dashed; }
+.tl-top { display: flex; align-items: center; gap: 7px; }
+.tl-top .pic { width: 26px; height: 26px; }
+.tl-top .pic svg { width: 17px; height: 17px; }
 .tl-month { font: 700 0.69rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.12em; text-transform: uppercase; color: var(--inst); }
 .tl-name { font: 700 0.74rem/1.25 "Space Grotesk", sans-serif; color: var(--text-strong); }
 .tl-desc { font: 400 0.69rem/1.35 "DM Sans", sans-serif; color: var(--muted); }
@@ -124,7 +163,7 @@
 
 /* ---- Verdict strip ---- */
 .verdict-strip {
-  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap; --ic: var(--accent);
   padding: 10px 14px; border-radius: 12px;
   border: 1.5px solid color-mix(in srgb, var(--accent) 55%, var(--border));
   background: color-mix(in srgb, var(--accent) 6%, var(--surface));
@@ -137,17 +176,21 @@
 
 @keyframes thump { to { opacity: 1; transform: rotate(-8deg) scale(1); } }
 @media (prefers-reduced-motion: reduce) {
-  .stamp { animation: none; opacity: 1; transform: rotate(-8deg) scale(1); }
+  .pin { opacity: 1; transform: none; transition: none; }
+  .stamp, .pinned .stamp { animation: none; opacity: 1; transform: rotate(-8deg) scale(1); }
 }
 
 @media (max-width: 760px) {
   .poles, .errata, .metrics, .timeline { grid-template-columns: 1fr; }
   .metric-tag { margin-top: 2px; }
 }
-/* True phones: stamps and numbers carry the message; the fine print
-   lives in the page's data table. */
+/* True phones: stamps, icons and numbers carry the message; the fine
+   print lives in the page's data table. Tapping an entry re-reveals it. */
 @media (max-width: 560px) {
   .essay-desc, .tl-desc, .head p { display: none; }
+  .essay.open .essay-desc { display: block; }
+  .counterweight { grid-template-columns: auto minmax(0,1fr); }
+  .counterweight .cw-tag { grid-column: 2; justify-self: start; }
 }
 </style>
 </head>
@@ -160,130 +203,230 @@
     <p>Every entry below was published in 2026 and date-verified against its primary source. The lanes are ranked by how hard they are to fake.</p>
   </header>
 
-  <section class="lane" style="--lc: var(--reject)" aria-label="Lane one: the claims, all argument and no data">
+  <div class="ctl" role="group" aria-label="Board controls">
+    <button type="button" id="replay">Replay pin-up</button>
+    <button type="button" class="flt" data-lane="all" aria-pressed="true">All lanes</button>
+    <button type="button" class="flt" data-lane="claims" aria-pressed="false">Claims</button>
+    <button type="button" class="flt" data-lane="measured" aria-pressed="false">Measured</button>
+    <button type="button" class="flt" data-lane="institutions" aria-pressed="false">Institutions</button>
+  </div>
+
+  <section class="lane" data-lane="claims" style="--lc: var(--reject)" aria-label="Lane one: the claims, all argument and no data">
     <div class="lane-title">Lane 1 · The claims — every one an argument, none a measurement</div>
     <div class="poles">
       <div class="pole" style="--pc: var(--mono)">
-        <div class="pole-name">Pulls monolith-ward</div>
-        <div class="essay">
-          <div><div class="essay-name">Nygard, "AI Versus Microservices" <small>· May 9</small></div>
-          <div class="essay-desc">The heavyweight: AI leverage concentrates where the whole system is in view.</div></div>
-          <div class="stamp" style="--sc: var(--reject); animation-delay:.4s">Argument<br>no data</div>
-        </div>
-        <div class="essay">
-          <div><div class="essay-name">Lacerda, "Death of Microservices" <small>· Feb 14</small></div>
-          <div class="essay-desc">Microservices managed human cognitive limits; large-context AI removes the rationale. Carries an unsourced "1000×" latency figure.</div></div>
-          <div class="stamp" style="--sc: var(--reject); animation-delay:.55s">Argument<br>no data</div>
-        </div>
-        <div class="essay">
-          <div><div class="essay-name">ModulithBench proposal (Mysore) <small>· May 14</small></div>
-          <div class="essay-desc">The only attempt at a head-to-head benchmark — self-described proposal, "measurements still in progress".</div></div>
-          <div class="stamp" style="--sc: var(--reject); animation-delay:.7s">Proposal<br>no data yet</div>
-        </div>
+        <div class="pole-head"><span class="pic" data-icon="merge" aria-hidden="true"></span>
+        <div class="pole-name">Pulls monolith-ward</div></div>
+        <button type="button" class="essay pin" data-icon="megaphone" style="--ic: var(--mono)">
+          <span class="pic" aria-hidden="true"></span>
+          <span><span class="essay-name">Nygard, "AI Versus Microservices" <small>· May 9</small></span>
+          <span class="essay-desc">The heavyweight: AI leverage concentrates where the whole system is in view.</span></span>
+          <span class="stamp" style="--sc: var(--reject)">Argument<br>no data</span>
+        </button>
+        <button type="button" class="essay pin" data-icon="megaphone" style="--ic: var(--mono)">
+          <span class="pic" aria-hidden="true"></span>
+          <span><span class="essay-name">Lacerda, "Death of Microservices" <small>· Feb 14</small></span>
+          <span class="essay-desc">Microservices managed human cognitive limits; large-context AI removes the rationale. Carries an unsourced "1000×" latency figure.</span></span>
+          <span class="stamp" style="--sc: var(--reject)">Argument<br>no data</span>
+        </button>
+        <button type="button" class="essay pin" data-icon="flask" style="--ic: var(--mono)">
+          <span class="pic" aria-hidden="true"></span>
+          <span><span class="essay-name">ModulithBench proposal (Mysore) <small>· May 14</small></span>
+          <span class="essay-desc">The only attempt at a head-to-head benchmark — self-described proposal, "measurements still in progress".</span></span>
+          <span class="stamp" style="--sc: var(--reject)">Proposal<br>no data yet</span>
+        </button>
       </div>
       <div class="pole" style="--pc: var(--micro)">
-        <div class="pole-name">Pulls services-ward</div>
-        <div class="essay">
-          <div><div class="essay-name">Richardson, microservices.io series <small>· Feb–May</small></div>
-          <div class="essay-desc">The other heavyweight, across five posts: service boundaries are exactly the guardrails coding agents need.</div></div>
-          <div class="stamp" style="--sc: var(--reject); animation-delay:.4s">Argument<br>no data</div>
-        </div>
-        <div class="essay">
-          <div><div class="essay-name">Nordic APIs panel <small>· Mar 17</small></div>
-          <div class="essay-desc">Four named experts: small per-service codebases fit context windows and bound agent blast radius.</div></div>
-          <div class="stamp" style="--sc: var(--reject); animation-delay:.55s">Argument<br>no data</div>
-        </div>
-        <div class="essay">
-          <div><div class="essay-name">Spectro Cloud, monorepo case <small>· Jan 16</small></div>
-          <div class="essay-desc">Filed here with a caveat: argues single-repo context for AI — repository shape, not deployment shape.</div></div>
-          <div class="stamp" style="--sc: var(--reject); animation-delay:.7s">Argument<br>no data</div>
-        </div>
+        <div class="pole-head"><span class="pic" data-icon="split" aria-hidden="true"></span>
+        <div class="pole-name">Pulls services-ward</div></div>
+        <button type="button" class="essay pin" data-icon="megaphone" style="--ic: var(--micro)">
+          <span class="pic" aria-hidden="true"></span>
+          <span><span class="essay-name">Richardson, microservices.io series <small>· Feb–May</small></span>
+          <span class="essay-desc">The other heavyweight, across five posts: service boundaries are exactly the guardrails coding agents need.</span></span>
+          <span class="stamp" style="--sc: var(--reject)">Argument<br>no data</span>
+        </button>
+        <button type="button" class="essay pin" data-icon="person" style="--ic: var(--micro)">
+          <span class="pic" aria-hidden="true"></span>
+          <span><span class="essay-name">Nordic APIs panel <small>· Mar 17</small></span>
+          <span class="essay-desc">Four named experts: small per-service codebases fit context windows and bound agent blast radius.</span></span>
+          <span class="stamp" style="--sc: var(--reject)">Argument<br>no data</span>
+        </button>
+        <button type="button" class="essay pin" data-icon="archive" style="--ic: var(--micro)">
+          <span class="pic" aria-hidden="true"></span>
+          <span><span class="essay-name">Spectro Cloud, monorepo case <small>· Jan 16</small></span>
+          <span class="essay-desc">Filed here with a caveat: argues single-repo context for AI — repository shape, not deployment shape.</span></span>
+          <span class="stamp" style="--sc: var(--reject)">Argument<br>no data</span>
+        </button>
       </div>
     </div>
     <div class="errata">
-      <div class="erratum">
-        <div><div class="essay-name">The category error, thrice <small>· Jan 20 / Feb 26 / Jun 17</small></div>
-        <div class="essay-desc">"AI agents are the new microservices" essays decompose <em>agents</em>, not your codebase. Different question, same vocabulary.</div></div>
-        <div class="stamp" style="--sc: var(--reject); animation-delay:.85s">Category<br>error</div>
-      </div>
-      <div class="erratum">
-        <div><div class="essay-name">The Scene 4 loop, still running</div>
-        <div class="essay-desc">Search snippets in this sweep asserted a "QCon 2026 monolith renaissance keynote" and a "CNCF 42% consolidation" stat. Neither exists in the fetched pages.</div></div>
-        <div class="stamp" style="--sc: var(--reject); animation-delay:1s">Hallucinated</div>
-      </div>
+      <button type="button" class="erratum pin" data-icon="exchange" style="--ic: var(--reject)">
+        <span class="pic" aria-hidden="true"></span>
+        <span><span class="essay-name">The category error, thrice <small>· Jan 20 / Feb 26 / Jun 17</small></span>
+        <span class="essay-desc">"AI agents are the new microservices" essays decompose <em>agents</em>, not your codebase. Different question, same vocabulary.</span></span>
+        <span class="stamp" style="--sc: var(--reject)">Category<br>error</span>
+      </button>
+      <button type="button" class="erratum pin" data-icon="warning" style="--ic: var(--reject)">
+        <span class="pic" aria-hidden="true"></span>
+        <span><span class="essay-name">The Scene 4 loop, still running</span>
+        <span class="essay-desc">Search snippets in this sweep asserted a "QCon 2026 monolith renaissance keynote" and a "CNCF 42% consolidation" stat. Neither exists in the fetched pages.</span></span>
+        <span class="stamp" style="--sc: var(--reject)">Hallucinated</span>
+      </button>
     </div>
   </section>
 
-  <section class="lane" style="--lc: var(--adjacent)" aria-label="Lane two: what 2026 actually measured — adjacent evidence only">
+  <section class="lane" data-lane="measured" style="--lc: var(--adjacent)" aria-label="Lane two: what 2026 actually measured — adjacent evidence only">
     <div class="lane-title">Lane 2 · The measurements — real numbers, none of them the direct comparison</div>
     <div class="metrics">
-      <div class="metric">
-        <div class="metric-num">91.3% <em>→</em> 15.3%</div>
+      <div class="metric pin" data-icon="trenddown">
+        <div class="metric-top"><span class="pic" aria-hidden="true"></span>
+        <div class="metric-num">91.3% <em>→</em> 15.3%</div></div>
         <div class="metric-label">Agent pass rate collapses with repo size</div>
         <div class="metric-src">Under 10K LOC vs over 50K LOC · RepoMod-Bench, arXiv, Feb 26</div>
         <div class="metric-tag">Adjacent</div>
       </div>
-      <div class="metric">
-        <div class="metric-num">Integration <em>width</em></div>
+      <div class="metric pin" data-icon="network">
+        <div class="metric-top"><span class="pic" aria-hidden="true"></span>
+        <div class="metric-num">Integration <em>width</em></div></div>
         <div class="metric-label">Cross-component coupling is the primary agent bottleneck</div>
         <div class="metric-src">Repo-level reasoning benchmark · ACL 2026, arXiv, Jan 7</div>
         <div class="metric-tag">Adjacent</div>
       </div>
-      <div class="metric">
-        <div class="metric-num">≤ <em>23.7%</em></div>
+      <div class="metric pin" data-icon="gears">
+        <div class="metric-top"><span class="pic" aria-hidden="true"></span>
+        <div class="metric-num">≤ <em>23.7%</em></div></div>
         <div class="metric-label">Best agent pass rate generating microservice repos; half the failures are cross-file consistency</div>
         <div class="metric-src">RepoGenesis, arXiv, Jan 20</div>
         <div class="metric-tag">Adjacent</div>
       </div>
-      <div class="metric">
-        <div class="metric-num">33–44% <em>fewer</em></div>
+      <div class="metric pin" data-icon="document">
+        <div class="metric-top"><span class="pic" aria-hidden="true"></span>
+        <div class="metric-num">33–44% <em>fewer</em></div></div>
         <div class="metric-label">Navigation steps when agents get formal architecture descriptors</div>
         <div class="metric-src">p = 0.009 · arXiv, Apr 11</div>
         <div class="metric-tag">Adjacent</div>
       </div>
     </div>
-    <div class="counterweight">
+    <div class="counterweight pin" data-icon="scales">
+      <span class="pic" aria-hidden="true"></span>
       <div class="cw-tag">Null result</div>
       <div class="cw-text"><strong>The honest counterweight:</strong> the one controlled minimal-pair study (code cleanliness, May 19) found completion rates <strong>unchanged</strong> — only 7–8% fewer tokens and 34% fewer file revisits. Structure differences do not automatically move the outcome needle.</div>
     </div>
   </section>
 
-  <section class="lane" style="--lc: var(--inst)" aria-label="Lane three: institutional signals, January to June 2026">
+  <section class="lane" data-lane="institutions" style="--lc: var(--inst)" aria-label="Lane three: institutional signals, January to June 2026">
     <div class="lane-title">Lane 3 · The institutions — the topology debate went missing</div>
     <div class="timeline">
-      <div class="tl-node">
-        <div class="tl-month">Feb · upd. Apr 22</div>
+      <div class="tl-node pin" data-icon="chart">
+        <div class="tl-top"><span class="pic" aria-hidden="true"></span>
+        <div class="tl-month">Feb · upd. Apr 22</div></div>
         <div class="tl-name">DORA ROI report</div>
         <div class="tl-desc">AI as amplifier of seven org capabilities. Cites Stanford research: uplift often 10% or less on complex legacy vs 35–40% greenfield. Topology unmentioned.</div>
       </div>
-      <div class="tl-node">
-        <div class="tl-month">Mar</div>
+      <div class="tl-node pin" data-icon="building">
+        <div class="tl-top"><span class="pic" aria-hidden="true"></span>
+        <div class="tl-month">Mar</div></div>
         <div class="tl-name">QCon London AI track</div>
         <div class="tl-desc">"Architecture in the Age of AI" = MCP, context engineering, agent authz. Not service granularity.</div>
       </div>
-      <div class="tl-node">
-        <div class="tl-month">Apr 15</div>
+      <div class="tl-node pin" data-icon="radar">
+        <div class="tl-top"><span class="pic" aria-hidden="true"></span>
+        <div class="tl-month">Apr 15</div></div>
         <div class="tl-name">Radar Vol. 34</div>
         <div class="tl-desc">"Codebase cognitive debt" on Hold; "agent topologies alongside team topologies". The only monoliths warned against are monolithic <em>agents</em>.</div>
       </div>
-      <div class="tl-node">
-        <div class="tl-month">May 27</div>
+      <div class="tl-node pin" data-icon="gauge">
+        <div class="tl-top"><span class="pic" aria-hidden="true"></span>
+        <div class="tl-month">May 27</div></div>
         <div class="tl-name">AWS Transform ARA</div>
         <div class="tl-desc">Agent-readiness scored across five pillars, "Agent-Ready" to "Not Agent-Integrable". Boundaries as a billable property.</div>
       </div>
-      <div class="tl-node absent">
-        <div class="tl-month">Apr — missing</div>
+      <div class="tl-node absent pin" data-icon="calendar">
+        <div class="tl-top"><span class="pic" aria-hidden="true"></span>
+        <div class="tl-month">Apr — missing</div></div>
         <div class="tl-name">InfoQ A&amp;D trends 2026</div>
         <div class="tl-desc">The annual April report had not appeared by July. Absence noted, re-checked on landing.</div>
       </div>
     </div>
   </section>
 
-  <div class="verdict-strip">
+  <div class="verdict-strip pin" data-icon="gavel">
+    <span class="pic" aria-hidden="true"></span>
     <span class="v-label">2026 verdict</span>
     <span class="v-text">Boundaries, not topology. Every lane rewards small navigable contexts and enforced seams in either shape — and the direct head-to-head study still does not exist.</span>
   </div>
 
 </div>
+<script>
+(() => {
+  const ICON_BASE = '../customs-entry-agent/flow-icons/';
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* Icons are shared line-art SVGs; fetched and inlined with the stroke
+     swapped to currentColor so they follow each card's lane colour. A failed
+     fetch leaves the slot empty and the text still carries the entry. */
+  document.querySelectorAll('[data-icon]').forEach((el) => {
+    const slot = el.classList.contains('pic') ? el : el.querySelector('.pic');
+    if (!slot) return;
+    fetch(ICON_BASE + el.dataset.icon + '.svg')
+      .then((r) => (r.ok ? r.text() : Promise.reject()))
+      .then((t) => { slot.innerHTML = t.replace(/stroke="#232f3e"/g, 'stroke="currentColor"'); })
+      .catch(() => {});
+  });
+
+  /* Staged pin-up: each entry rises onto the board in DOM order and its
+     stamp thumps as it lands. rAF t0 comes from the first frame timestamp,
+     never performance.now(): sandboxed iframes can disagree between clocks. */
+  const items = Array.from(document.querySelectorAll('.pin'));
+  const STEP = 150;
+  let raf = 0;
+  const run = () => {
+    cancelAnimationFrame(raf);
+    items.forEach((el) => el.classList.remove('pinned'));
+    if (reduced) { items.forEach((el) => el.classList.add('pinned')); return; }
+    let t0 = null;
+    const step = (ts) => {
+      if (t0 === null) t0 = ts;
+      const n = Math.min(items.length, Math.floor((ts - t0) / STEP) + 1);
+      for (let i = 0; i < n; i++) items[i].classList.add('pinned');
+      if (n < items.length) raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+  };
+  document.getElementById('replay').addEventListener('click', run);
+
+  /* Lane filter: focus one lane, dim the rest. The verdict stays lit. */
+  const flts = Array.from(document.querySelectorAll('.flt'));
+  const lanes = Array.from(document.querySelectorAll('.lane[data-lane]'));
+  flts.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      flts.forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
+      const pick = btn.dataset.lane;
+      lanes.forEach((l) => l.classList.toggle('dim', pick !== 'all' && l.dataset.lane !== pick));
+    });
+  });
+
+  /* On narrow phones descriptions are hidden by CSS; tapping an entry
+     re-reveals its own fine print. */
+  document.querySelectorAll('.essay, .erratum').forEach((el) => {
+    el.addEventListener('click', () => el.classList.toggle('open'));
+  });
+
+  /* threshold 0, not 0.2: the board is taller than a phone viewport, and a
+     0.2 visible fraction of a too-tall element never intersects. */
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting)) { io.disconnect(); run(); }
+    }, { threshold: 0 });
+    io.observe(document.querySelector('.shell'));
+  } else { run(); }
+
+  if (document.documentElement.dataset.embedded === 'true') {
+    const postSize = () => window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+    if ('ResizeObserver' in window) new ResizeObserver(postSize).observe(document.body);
+    window.addEventListener('load', postSize);
+  }
+})();
+</script>
 </body>
 </html>

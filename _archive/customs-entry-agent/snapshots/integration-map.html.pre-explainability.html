@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Integration map &middot; every external system, with its contract</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<link rel="stylesheet" href="./stencil.css">
+<style>
+  :root[data-embedded="true"] .head h1 { font-size: 1.02rem; }
+  body { background: transparent; }
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="head">
+    <h1 id="h-title">Integration map</h1>
+    <p id="h-intro"></p>
+    <div class="stampline"><span class="stamp stamp--confirmed">Contracts from the design doc, &sect;19</span></div>
+  </div>
+
+  <div class="bar" id="scenbar" hidden><span class="lbl">Direction</span></div>
+
+  <div class="bar" id="ctlbar">
+    <span class="lbl">Flow</span>
+    <button id="b-play" aria-pressed="false">Play</button>
+    <button id="b-all">Show all</button>
+    <span class="lbl" style="margin-left:8px">View</span>
+    <button id="b-fit">Fit</button>
+    <button id="b-full" aria-pressed="false">Fullscreen</button>
+    <span class="cam">
+      <button id="b-out" aria-label="Zoom out">&minus;</button>
+      <button id="b-in" aria-label="Zoom in">+</button>
+    </span>
+    <span class="hint" style="margin-left:6px">Drag to pan &middot; wheel or pinch to zoom</span>
+  </div>
+
+  <div class="stage" id="stage" tabindex="0" role="application" aria-label="Integration map, pan and zoom">
+    <div class="fsbar" id="fsbar"></div>
+    <div class="world" id="world">
+      <div class="diagram" id="diagram">
+        <svg class="wires" id="svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" aria-hidden="true"></svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="narr" id="narr">
+    <span class="num" id="n-num">All steps</span>
+    <span class="cap" id="n-cap"></span>
+  </div>
+  <div class="bar scrub" id="scrub"><span class="lbl">Step</span></div>
+
+  <div class="legend" id="legend"></div>
+
+  <div class="card" id="card" hidden>
+    <button class="x" id="card-x" aria-label="Close">&times;</button>
+    <h3><span class="ci" id="card-ic"></span><span id="card-nm"></span></h3>
+    <div class="svc" id="card-sv"></div>
+    <p id="card-ds"></p>
+    <div class="where" id="card-wh"></div>
+  </div>
+</div>
+
+<script>
+/* ============================================================================
+ * The only authored block. Everything else is the shared stencil engine.
+ * The detail card carries each integration's contract: transport, cadence,
+ * idempotency key, and what happens when it fails. The failure semantics are
+ * the design — every one of these has a happy path and only some have a safe
+ * unhappy one.
+ * ==========================================================================*/
+window.STENCIL = {
+  title: 'Integration map &middot; every external system, with its contract',
+  intro: 'Ten external systems, ten contracts. Click any one for its transport, cadence, idempotency key and failure semantics. Pick a direction to narrow the drawing to that side of the boundary.',
+  iconBase: './flow-icons/',
+  scenarioLabel: 'Direction',
+  outsideLabel: 'Outside the platform boundary.',
+
+  types: {
+    comm:  { color: '#8a5a10',         label: 'Inbound commercial data' },
+    auth:  { color: '#7aa116',         label: 'Read-only authority feed' },
+    file:  { color: 'var(--ink)',      label: 'Filing and response' },
+    exp:   { color: 'var(--accent-2)', label: 'Customer-facing export' },
+    block: { color: '#dd3522',         label: 'Route that does not exist', dash: true, blocked: true }
+  },
+
+  nodes: {
+    erp:    { ic: 'building',  sv: 'In &middot; S3 drop / SFTP / REST', nm: 'Importer ERP / TMS', ds: 'Product master, parties and orders. Transport: S3 drop, SFTP or REST. Cadence: nightly full plus event-driven delta. Idempotency: upsert on tenant, supplier, part number, source version. On failure: stale is acceptable, silently stale is not — a missed sync raises an alarm, because a product master quietly six weeks old poisons every Tier 0 recall.' },
+    email:  { ic: 'envelope',  sv: 'In &middot; Amazon SES',            nm: 'Supplier email',     ds: 'Invoices, packing lists and certificates. Transport: SES receipt rules to S3 to EventBridge. Cadence: continuous. Idempotency: content hash of the attachment set. On failure: an unparseable document goes to an intake exception queue, human-visible within minutes, never silently dropped — a dropped document is an invisible missed deadline.' },
+    edi:    { ic: 'exchange',  sv: 'In &middot; B2B Data Interchange',  nm: 'EDI / AS2 partners', ds: 'X12 from forwarders and carriers. Transport: AWS B2B Data Interchange over AS2. Cadence: continuous. Idempotency: interchange control number. On failure: MDN handling per partner agreement. Managed AS2 avoids running a VAN, and a partner who requires a certified interconnect flips that decision.' },
+
+    fr:     { ic: 'document',  sv: 'In &middot; public JSON API',       nm: 'Federal Register',   ds: 'Proclamations and notices. Cadence: daily poll. Idempotency: document number. On failure: a miss is staleness, not an error, so the alarm fires at 24 hours without a successful poll. The July 2026 Section 338 proclamations arrived through this feed with a month of notice, and that is the generous case.' },
+    csms:   { ic: 'megaphone', sv: 'In &middot; bulletin subscription', nm: 'CBP CSMS',           ds: 'Operational guidance, parsed. Cadence: daily. Idempotency: message number. On failure: the same staleness contract. CSMS is where operational guidance lands first, often before the legal text is easy to act on.' },
+    hts:    { ic: 'table',     sv: 'In &middot; revision export',       nm: 'USITC HTS',          ds: 'The tariff schedule itself. Cadence: per revision plus a weekly check. Idempotency: revision id and file hash. On failure: a new revision creates a new pinned rulebook version, never an in-place edit, and every decision records exactly which revision it used.' },
+    cross:  { ic: 'book',      sv: 'In &middot; bulk fetch',            nm: 'CBP CROSS rulings',  ds: 'The rulings corpus, embedded to pgvector. Cadence: weekly. Idempotency: ruling number. On failure: the corpus version bumps on each refresh, so a classification citing HQ H123456 records which corpus version that ruling came from.' },
+
+    intake: { ic: 'inbox',     sv: 'Boundary',                          nm: 'Intake and normalisation', ds: 'Quarantine parse and entity resolution. Everything inbound converges here before anything downstream reads it, which is what makes one sandbox sufficient.' },
+    core:   { ic: 'cpu',       sv: 'Core',                              nm: 'Decisioning and gate',     ds: 'Router, workers, validators, calibrated confidence and the review queue. The only component that decides anything.' },
+    watch:  { ic: 'radar',     sv: 'Watcher',                           nm: 'Rulebook watcher',         ds: 'One Lambda per feed, each with its own staleness alarm. A single cron job would let one feed fail invisibly, which is the failure this design is most afraid of.' },
+    corpus: { ic: 'archive',   sv: 'Pinned corpus',                     nm: 'Rulebook versions',        ds: 'Hashed, promoted like code, and cited by every decision. It lives in a separate shared-services account because production must not be able to write its own authorities.' },
+    abi:    { ic: 'transmit',  sv: 'Filing',                            nm: 'ABI adapter',              ds: "Deterministic, contains no model, and transmits under the broker's certified filer code. The component that talks to CBP cannot improvise." },
+
+    cbp:    { ic: 'gov',       sv: 'Out + async responses',             nm: 'CBP ACE via ABI',    ds: 'The filing itself, and everything CBP sends back. Cadence: per entry. Idempotency: entry number and filer code. On failure: never auto-resubmit — a reject returns to the review queue with the CBP reason rendered, because a rejected filing is a compliance event, not a retryable HTTP call. CF-28 and CF-29 arrive out of band through the ACE portal and are ingested as their own feed with their own staleness contract.' },
+    pga:    { ic: 'badge',     sv: 'Out &middot; within the transmission', nm: 'PGA message sets', ds: 'FDA, USDA, EPA and friends. Cadence: per entry when applicable. Idempotency: same as the entry. On failure: MAY PROCEED, NOTICE and HOLD are reconciled, and a HOLD is an operational event rather than an error. Each agency is effectively a separate integration, one epic each, prioritised by the customer&rsquo;s commodity mix.' },
+    bi:     { ic: 'chart',     sv: 'Out &middot; S3 Parquet + Athena',  nm: 'Customer BI and exposure', ds: 'What changed, what it costs, per change event. Cadence: per change event. Idempotency: none, because the export is a projection rather than a transaction. On failure: a stale export is visible in the dashboard&rsquo;s own timestamp. This is the Wave 1 deliverable: when a rulebook change lands, the customer sees which SKUs are exposed and what it costs before anything refiles.' }
+  },
+
+  /* Columns are the boundary crossing: outside on the left, the platform in the
+     middle, outside again on the right. Rows separate commercial data from
+     authority data, because they have opposite trust properties. */
+  layout: {
+    erp: [0, 1], email: [0, 2], edi: [0, 3],
+    fr: [0, 4], csms: [0, 5], hts: [1, 4], cross: [1, 5],
+    intake: [3, 2], core: [4, 2], watch: [3, 4], corpus: [4, 4], abi: [5, 2],
+    cbp: [6, 1], pga: [6, 2], bi: [6, 4]
+  },
+
+  /* Grey frames are outside the platform, coloured frames are inside it. That
+     one rule does more work than any label: the boundary is visible before a
+     single word is read. */
+  groups: [
+    { id: 'comm',  cls: 'plain',   label: 'Customer and partner systems', pad: 18, head: 25, nodes: ['erp', 'email', 'edi'] },
+    { id: 'auth',  cls: 'plain',   label: 'Authority feeds &middot; read only, never written to', pad: 18, head: 25, nodes: ['fr', 'csms', 'hts', 'cross'] },
+    { id: 'plat',  cls: 'cloud',   label: 'The platform', pad: 22, head: 30, nodes: [], kids: ['run', 'know'] },
+    { id: 'run',   cls: 'vpc',     label: 'Per-entry path', pad: 15, head: 23, nodes: ['intake', 'core', 'abi'] },
+    { id: 'know',  cls: 'account', label: 'Rulebook plane &middot; separate account', pad: 15, head: 23, nodes: ['watch', 'corpus'] },
+    { id: 'gover', cls: 'plain',   label: 'Government', pad: 18, head: 25, nodes: ['cbp', 'pga'] },
+    { id: 'cust',  cls: 'plain',   label: 'Back to the customer', pad: 18, head: 25, nodes: ['bi'] }
+  ],
+
+  edges: [
+    { f: 'erp',    t: 'intake', ty: 'comm', s: 1, n: 1 },
+    { f: 'email',  t: 'intake', ty: 'comm', s: 1, n: 2 },
+    { f: 'edi',    t: 'intake', ty: 'comm', s: 1, n: 3 },
+    { f: 'intake', t: 'core',   ty: 'comm', s: 2, n: 4 },
+
+    { f: 'fr',     t: 'watch',  ty: 'auth', s: 3, n: 5 },
+    { f: 'csms',   t: 'watch',  ty: 'auth', s: 3 },
+    { f: 'hts',    t: 'watch',  ty: 'auth', s: 3 },
+    { f: 'cross',  t: 'corpus', ty: 'auth', s: 3 },
+    { f: 'watch',  t: 'corpus', ty: 'auth', s: 4, n: 6 },
+    { f: 'corpus', t: 'core',   ty: 'auth', s: 5, n: 7 },
+    { f: 'core',   t: 'corpus', ty: 'block', s: 0 },
+
+    { f: 'core',   t: 'abi',    ty: 'file', s: 6, n: 8 },
+    { f: 'abi',    t: 'cbp',    ty: 'file', s: 7, n: 9 },
+    { f: 'abi',    t: 'pga',    ty: 'file', s: 7 },
+    { f: 'cbp',    t: 'core',   ty: 'file', s: 8, n: 10 },
+
+    { f: 'watch',  t: 'bi',     ty: 'exp',  s: 9, n: 11 }
+  ],
+
+  steps: [
+    'Three inbound commercial paths, one landing zone. Idempotency differs per path — upsert keys for the ERP, a content hash for email, the interchange control number for EDI — because each source repeats itself in a different way and none of them can be trusted not to.',
+    'Everything crosses the boundary through intake, so quarantine parsing and entity resolution happen in exactly one place. A second intake path is a second sandbox to get right.',
+    'Four read-only authority feeds, one Lambda each, each with its own staleness alarm at 24 hours without a successful poll. A single cron job would let one feed fail invisibly, and a feed that stops returning results looks exactly like a quiet week.',
+    'Each refresh mints a new pinned, hashed rulebook version rather than editing one in place. Versions are promoted like code, so what the system believed on a given date is a fact you can retrieve rather than reconstruct.',
+    'Decisions read the corpus and record the exact version they used. The dashed route is the one that does not exist: the corpus lives in a separate shared-services account, so production can read its authorities and cannot write them.',
+    'The filing service is deterministic and contains no model. Whatever the decisioning side concluded, the thing that transmits to CBP cannot improvise its way into a false declaration.',
+    'One transmission carries the entry and the PGA record sets inside it, under the broker&rsquo;s certified filer code. Each agency is effectively a separate integration with its own epic, prioritised by the customer&rsquo;s commodity mix.',
+    'Responses come back over the same connection, asynchronously. A reject is never auto-resubmitted — it returns to the review queue with the CBP reason rendered, because a rejected filing is a compliance event rather than a retryable HTTP call.',
+    'The export the customer actually asks for: when a rulebook change lands, which SKUs are exposed and what it costs, before anything refiles. This is the Wave 1 deliverable and it files nothing, so it cannot mis-file anything.'
+  ],
+
+  scenarios: [
+    { id: 'in', label: 'Inbound', steps: [1, 2, 3, 4, 5],
+      ds: 'What comes in, and on what terms. Commercial data is untrusted and sandboxed. Authority data is read-only and versioned. The two are kept apart because they have opposite trust properties.' },
+    { id: 'out', label: 'Outbound', steps: [6, 7, 8, 9],
+      ds: 'What leaves, and what comes back. Exactly one path out, deterministic and model-free, so whatever the decisioning side concluded, nothing improvises at the moment of transmission. What returns is a compliance event, never a retry.' },
+    { id: 'rule', label: 'The rulebook plane', steps: [3, 4, 5, 9],
+      ds: 'The half of the system that files nothing. Four feeds, one versioned corpus, and a read-only path into decisioning — plus the exposure report, which is the first thing worth shipping.' }
+  ],
+
+  dwell: 4600,
+  allLabel: 'All integrations'
+};
+</script>
+<script src="./stencil-engine.js"></script>
+</body>
+</html>

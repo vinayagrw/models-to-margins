@@ -8,257 +8,379 @@
 <script src="./_theme-bootstrap.js"></script>
 <link rel="stylesheet" href="./_theme.css">
 <style>
-/* Scene-specific: Without vs With split-screen */
-body {
-  background:
-    radial-gradient(circle at 12% 18%, rgba(255, 119, 108, 0.08), transparent 32%),
-    radial-gradient(circle at 88% 80%, rgba(78, 218, 181, 0.10), transparent 32%),
-    linear-gradient(180deg, var(--bg-start) 0%, var(--bg-mid) 48%, var(--bg-end) 100%);
-}
-/* Embed mode: shell flex column; panels fill, scene + bullets + takeaway scale */
-:root[data-embedded="true"] .shell {
-  display: flex; flex-direction: column;
-  gap: clamp(6px, 1vh, 12px); min-height: 0;
-  padding: clamp(10px, 1.6vh, 18px) clamp(14px, 2vw, 22px);
-}
-:root[data-embedded="true"] .head { margin-bottom: 0; }
-:root[data-embedded="true"] .head h1 { font-size: clamp(1rem, 2.2vh, 1.5rem); }
-:root[data-embedded="true"] .head p { font-size: clamp(0.78rem, 1.4vh, 0.92rem); margin-top: 4px; }
-:root[data-embedded="true"] .split {
-  flex: 1; min-height: 0; align-items: stretch;
-  gap: clamp(8px, 1.4vw, 16px);
-}
-:root[data-embedded="true"] .panel {
-  padding: clamp(12px, 1.6vh, 18px) clamp(12px, 1.4vw, 18px);
-  gap: clamp(8px, 1.4vh, 16px);
-  /* Stack tight from top; bullets list grows to fill any slack */
-  justify-content: flex-start;
-}
-:root[data-embedded="true"] .scene {
-  /* Scene grows with available height instead of fixed 130-180px */
-  height: clamp(120px, 22vh, 220px); flex-shrink: 0;
-}
-:root[data-embedded="true"] .bullets {
-  /* Bullets fill the panel — each <li> takes equal share of available height */
-  flex: 1; min-height: 0;
-  display: grid; grid-auto-rows: 1fr;
-  gap: clamp(6px, 1vh, 12px);
-}
-:root[data-embedded="true"] .bullets li {
-  font-size: clamp(0.86rem, 1.5vh, 1rem); line-height: 1.4;
-  align-items: center;
-}
-:root[data-embedded="true"] .takeaway {
-  font-size: clamp(0.78rem, 1.3vh, 0.9rem);
-  padding: clamp(8px, 1.2vh, 12px) clamp(10px, 1.2vw, 14px);
-  margin-top: 0;
-}
+/* Scene 2 — one task, run twice: harness off vs harness on */
+:root[data-embedded="true"], :root[data-embedded="true"] body { height: auto; overflow: visible; }
+:root[data-embedded="true"] .shell { width: 100%; height: auto; padding: 14px 18px; }
 
-.head { text-align: center; margin-bottom: 20px; }
+.shell { display: flex; flex-direction: column; gap: clamp(12px, 1.8vw, 18px); }
+.head { text-align: center; }
 .head h1 {
   font-family: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif; font-weight: 800;
-  font-size: clamp(1.4rem, 2.4vw, 1.95rem); line-height: 1.18;
+  font-size: clamp(1.25rem, 2.4vw, 1.95rem); line-height: 1.18;
   letter-spacing: -0.01em; color: var(--text-strong); margin-top: 6px;
 }
-.head p { margin-top: 8px; color: var(--muted); font-size: 0.96rem; }
-.split { display: grid; grid-template-columns: 1fr auto 1fr; gap: 16px; align-items: stretch; }
-.divider { width: 1px; min-height: 100%; background: linear-gradient(180deg, transparent, var(--border-strong), transparent); position: relative; }
-.divider::after {
-  content: "VS"; position: absolute; top: 50%; left: 50%;
-  transform: translate(-50%, -50%);
-  background: var(--surface-strong); border: 1px solid var(--border);
-  border-radius: 999px; padding: 6px 14px;
-  font-family: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif; font-size: 0.78rem; font-weight: 700;
-  letter-spacing: 0.18em; color: var(--text-strong);
-}
-.panel {
-  border-radius: 24px; padding: 22px;
-  border: 1px solid var(--border); background: var(--surface);
-  box-shadow: var(--shadow);
-  display: flex; flex-direction: column; gap: 14px;
-}
-.panel-without {
-  background: linear-gradient(180deg, color-mix(in srgb, var(--warn) 8%, transparent), transparent 40%), var(--surface);
-  border-color: color-mix(in srgb, var(--warn) 26%, var(--border));
-}
-.panel-with {
-  background: linear-gradient(180deg, color-mix(in srgb, var(--good) 10%, transparent), transparent 40%), var(--surface);
-  border-color: color-mix(in srgb, var(--good) 26%, var(--border));
-}
-.panel-head { display: flex; align-items: center; gap: 12px; }
-.panel-tag {
-  font-size: 0.7rem; font-weight: 700; letter-spacing: 0.16em;
-  text-transform: uppercase;
-  padding: 4px 10px; border-radius: 999px;
-}
-.panel-without .panel-tag { color: var(--warn); background: color-mix(in srgb, var(--warn) 16%, transparent); }
-.panel-with .panel-tag { color: var(--good); background: color-mix(in srgb, var(--good) 16%, transparent); }
-.panel-title {
-  font-family: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif; font-weight: 700;
-  font-size: 1.18rem; color: var(--text-strong); letter-spacing: -0.005em;
-}
-.scene {
-  position: relative; height: 200px;
-  border-radius: 18px;
-  background: color-mix(in srgb, var(--surface-strong) 90%, transparent);
-  border: 1px solid var(--border);
-  overflow: hidden;
-}
-.scene svg { width: 100%; height: 100%; display: block; }
-@keyframes wobble {
-  0%, 100% { transform: translateX(0) rotate(0); }
-  25% { transform: translateX(-12px) rotate(-3deg); }
-  75% { transform: translateX(12px) rotate(3deg); }
-}
-@keyframes drive { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(8px); } }
-.brain-loose { animation: wobble 5s ease-in-out infinite; transform-origin: 50% 50%; transform-box: fill-box; }
-.brain-vehicle { animation: drive 6s ease-in-out infinite; transform-origin: 50% 50%; transform-box: fill-box; }
-@media (prefers-reduced-motion: reduce) {
-  .brain-loose, .brain-vehicle { animation: none !important; }
-}
-.bullets { list-style: none; display: grid; gap: 8px; }
-.bullets li {
-  display: grid; grid-template-columns: 22px minmax(0, 1fr);
-  gap: 10px; align-items: start;
-  font-size: 0.92rem; line-height: 1.45; color: var(--text);
-}
-.bullets li::before {
-  content: ""; width: 14px; height: 14px; border-radius: 4px; margin-top: 4px;
-  background: var(--bullet-c); border: 1px solid color-mix(in srgb, var(--bullet-c) 60%, transparent);
-}
-.panel-without .bullets li { --bullet-c: var(--warn); }
-.panel-with .bullets li { --bullet-c: var(--good); }
-.bullets strong { color: var(--text-strong); }
-.takeaway {
-  margin-top: auto; padding: 10px 14px; border-radius: 14px;
-  font-size: 0.86rem; line-height: 1.45;
-  border: 1px solid var(--border-strong);
+.head h1 em { font-style: normal; color: var(--good); }
+.head p { margin: 8px auto 0; color: var(--muted); font-size: clamp(0.82rem, 1.4vw, 0.96rem); line-height: 1.5; }
+
+.task {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
+  gap: 10px; padding: 10px 14px; border-radius: 14px;
+  border: 1px dashed var(--border-strong);
   background: color-mix(in srgb, var(--surface-strong) 70%, transparent);
+  font-size: clamp(0.8rem, 1.3vw, 0.92rem); color: var(--text);
 }
-.takeaway strong { display: block; margin-bottom: 2px; color: var(--text-strong); }
-.panel-without .takeaway { border-left: 3px solid var(--warn); }
-.panel-with .takeaway { border-left: 3px solid var(--good); }
-@media (max-width: 880px) {
-  .split { grid-template-columns: 1fr; }
-  .divider { width: auto; min-height: auto; height: 1px;
-    background: linear-gradient(90deg, transparent, var(--border-strong), transparent); }
-  .divider::after { top: 50%; transform: translate(-50%, -50%); }
-  .scene { height: 160px; }
+.task .pic { width: 22px; height: 22px; color: var(--accent); flex: none; }
+.task strong { color: var(--text-strong); }
+
+.controls { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; align-items: center; }
+button { font-family: inherit; cursor: pointer; }
+.btn {
+  border-radius: 999px; border: 1px solid var(--border-strong);
+  background: var(--surface); color: var(--text);
+  padding: 7px 14px; font-size: clamp(0.74rem, 1.2vw, 0.84rem); font-weight: 600;
+  transition: background 160ms ease, border-color 160ms ease, color 160ms ease;
+}
+.btn:hover { border-color: var(--accent); color: var(--text-strong); }
+.btn[aria-pressed="true"] {
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+  border-color: var(--accent); color: var(--text-strong);
 }
 
-/* Embed: size to content and report it, the parent autosizes the frame. */
-:root[data-embedded="true"], :root[data-embedded="true"] body { height: auto; }
-:root[data-embedded="true"] .shell { height: auto; }
+.rail { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
+.step {
+  position: relative; display: flex; flex-direction: column; align-items: center; gap: 5px;
+  padding: 9px 4px 8px; border-radius: 14px; text-align: center;
+  border: 1px solid var(--border); background: var(--surface);
+  color: var(--muted); font-size: clamp(0.58rem, 1vw, 0.72rem); font-weight: 600;
+  line-height: 1.2; transition: transform 200ms ease, border-color 200ms ease, background 200ms ease, color 200ms ease;
+}
+.step .pic { width: clamp(18px, 2.4vw, 24px); height: clamp(18px, 2.4vw, 24px); }
+.step .n { font-size: 0.6rem; letter-spacing: 0.14em; color: var(--muted-soft); }
+.step[aria-pressed="true"] {
+  border-color: var(--accent); color: var(--text-strong);
+  background: color-mix(in srgb, var(--accent) 14%, var(--surface));
+  transform: translateY(-2px);
+}
+.step.done { color: var(--text); border-color: color-mix(in srgb, var(--accent) 30%, var(--border)); }
+
+.runs { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(10px, 1.6vw, 16px); align-items: stretch; }
+.run {
+  border-radius: 20px; padding: clamp(12px, 1.6vw, 18px);
+  border: 1px solid var(--border); background: var(--surface); box-shadow: var(--shadow-soft);
+  display: flex; flex-direction: column; gap: 10px;
+}
+.run-off {
+  border-color: color-mix(in srgb, var(--warn) 30%, var(--border));
+  background: linear-gradient(180deg, color-mix(in srgb, var(--warn) 8%, transparent), transparent 42%), var(--surface);
+}
+.run-on {
+  border-color: color-mix(in srgb, var(--good) 30%, var(--border));
+  background: linear-gradient(180deg, color-mix(in srgb, var(--good) 10%, transparent), transparent 42%), var(--surface);
+}
+.run-head { display: flex; align-items: center; gap: 10px; }
+.run-head .pic { width: 26px; height: 26px; flex: none; }
+.run-off .run-head .pic { color: var(--warn); }
+.run-on .run-head .pic { color: var(--good); }
+.run-tag {
+  font-size: 0.64rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase;
+  padding: 3px 9px; border-radius: 999px;
+}
+.run-off .run-tag { color: var(--warn); background: color-mix(in srgb, var(--warn) 16%, transparent); }
+.run-on .run-tag { color: var(--good); background: color-mix(in srgb, var(--good) 16%, transparent); }
+.run-title {
+  font-family: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif; font-weight: 700;
+  font-size: clamp(0.9rem, 1.5vw, 1.08rem); color: var(--text-strong);
+}
+
+.card {
+  position: relative; overflow: hidden;
+  display: grid; grid-template-columns: clamp(30px, 4vw, 40px) minmax(0, 1fr); gap: 12px; align-items: start;
+  padding: clamp(11px, 1.5vw, 15px); border-radius: 16px;
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--surface-strong) 78%, transparent);
+  min-height: clamp(96px, 13vw, 128px);
+}
+.card::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--accent) 22%, transparent), transparent);
+  transform: translateX(-110%); opacity: 0;
+}
+.card.sweep::after { animation: sweep 620ms ease-out; }
+@keyframes sweep { 0% { transform: translateX(-110%); opacity: 1; } 100% { transform: translateX(110%); opacity: 0; } }
+.card .pic { width: 100%; aspect-ratio: 1; }
+.run-off .card .pic { color: var(--warn); }
+.run-on .card .pic { color: var(--good); }
+.card h3 {
+  font-family: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif;
+  font-size: clamp(0.8rem, 1.3vw, 0.94rem); color: var(--text-strong); font-weight: 700; line-height: 1.25;
+}
+.card p { margin-top: 5px; font-size: clamp(0.76rem, 1.25vw, 0.88rem); line-height: 1.45; color: var(--text); }
+
+.layer {
+  display: inline-flex; align-items: center; gap: 7px; align-self: flex-start;
+  padding: 4px 10px; border-radius: 999px;
+  font-size: clamp(0.64rem, 1.1vw, 0.74rem); font-weight: 700; letter-spacing: 0.08em;
+  border: 1px solid color-mix(in srgb, var(--lc) 45%, transparent);
+  color: var(--lc); background: color-mix(in srgb, var(--lc) 12%, transparent);
+  transition: box-shadow 240ms ease, transform 240ms ease;
+}
+.layer .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--lc); flex: none; }
+.layer[data-none="true"] { --lc: var(--muted-soft); font-weight: 600; letter-spacing: 0.02em; }
+:root.hl .layer:not([data-none="true"]) {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--lc) 26%, transparent);
+  transform: translateY(-1px);
+}
+
+.meter { margin-top: auto; display: grid; gap: 5px; }
+.meter-top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.meter-label {
+  font-size: 0.62rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted);
+}
+.meter-val { font-size: clamp(0.72rem, 1.2vw, 0.84rem); font-weight: 700; color: var(--text-strong); }
+.track { height: 9px; border-radius: 999px; background: color-mix(in srgb, var(--border-strong) 60%, transparent); overflow: hidden; }
+.fill { height: 100%; width: 0%; border-radius: 999px; transition: width 520ms cubic-bezier(.4,.1,.2,1); }
+.run-off .fill { background: linear-gradient(90deg, color-mix(in srgb, var(--warn) 55%, transparent), var(--warn)); }
+.run-on .fill { background: linear-gradient(90deg, color-mix(in srgb, var(--good) 55%, transparent), var(--good)); }
+
+.foot {
+  padding: clamp(10px, 1.5vw, 15px) clamp(12px, 1.8vw, 18px); border-radius: 16px;
+  border: 1px solid var(--border-strong); background: var(--surface-strong);
+  font-size: clamp(0.8rem, 1.3vw, 0.92rem); line-height: 1.5; color: var(--text);
+}
+.foot strong { color: var(--text-strong); }
+.pic svg { width: 100%; height: 100%; }
+.pic svg * { stroke: currentColor; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+.reveal { opacity: 0; transform: translateY(10px); }
+:root.io .reveal { transition: opacity 460ms ease, transform 460ms ease; }
+.reveal.in { opacity: 1; transform: none; }
+
+@media (max-width: 760px) {
+  .runs { grid-template-columns: 1fr; }
+  .rail { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .card.sweep::after { animation: none; }
+  .fill { transition: none; }
+  .reveal { opacity: 1; transform: none; transition: none; }
+  .step { transition: none; }
+}
 </style>
 </head>
 <body>
 <main class="shell">
   <header class="head">
-    <span class="eyebrow" style="color: var(--warn)">Why bother — same brain, two outcomes</span>
-    <h1>A model alone is fluent. A model inside a harness is <em>useful</em>.</h1>
-    <p>Same reasoning power. Different outcome. The harness is what turns plausible into provable.</p>
+    <span class="eyebrow" style="color: var(--warn)">Scene 2 · Harness off vs harness on</span>
+    <h1>Same brain, two outcomes — <em>replay the same run</em>.</h1>
+    <p>One task, executed twice by the same model. Step through it and watch where the two runs come apart.</p>
   </header>
-  <div class="split">
-    <section class="panel panel-without" aria-label="Without a harness">
-      <div class="panel-head">
-        <span class="panel-tag">Without</span>
-        <h2 class="panel-title">A powerful brain in a jar</h2>
+
+  <div class="task reveal">
+    <span class="pic" data-ic="bug" aria-hidden="true"></span>
+    <span>The task: <strong>“Fix the failing checkout test.”</strong></span>
+  </div>
+
+  <div class="controls">
+    <button type="button" class="btn" id="prev">◀ Prev</button>
+    <button type="button" class="btn" id="play" aria-pressed="false">Play ▶</button>
+    <button type="button" class="btn" id="next">Next ▶</button>
+    <button type="button" class="btn" id="hl" aria-pressed="false">Show which layer intervened</button>
+  </div>
+
+  <div class="rail" id="rail" role="group" aria-label="Run steps"></div>
+
+  <div class="runs">
+    <section class="run run-off reveal" aria-label="Run one, harness off">
+      <div class="run-head">
+        <span class="pic" data-ic="robot" aria-hidden="true"></span>
+        <span class="run-tag">Harness off</span>
+        <span class="run-title">Model alone</span>
       </div>
-      <div class="scene" aria-hidden="true">
-        <svg viewBox="0 0 400 200">
-          <defs>
-            <radialGradient id="brainGlow" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stop-color="rgba(255,119,108,0.32)"/>
-              <stop offset="100%" stop-color="rgba(255,119,108,0)"/>
-            </radialGradient>
-          </defs>
-          <circle cx="200" cy="100" r="92" fill="url(#brainGlow)"/>
-          <path d="M 30 60 Q 120 72 200 60" fill="none" stroke="currentColor" stroke-opacity="0.18" stroke-width="1.4" stroke-dasharray="3 6"/>
-          <path d="M 30 100 Q 120 90 200 100" fill="none" stroke="currentColor" stroke-opacity="0.16" stroke-width="1.4" stroke-dasharray="3 6"/>
-          <path d="M 30 140 Q 120 132 200 140" fill="none" stroke="currentColor" stroke-opacity="0.18" stroke-width="1.4" stroke-dasharray="3 6"/>
-          <path d="M 200 60 Q 280 48 370 60" fill="none" stroke="currentColor" stroke-opacity="0.18" stroke-width="1.4" stroke-dasharray="3 6"/>
-          <path d="M 200 140 Q 280 152 370 140" fill="none" stroke="currentColor" stroke-opacity="0.18" stroke-width="1.4" stroke-dasharray="3 6"/>
-          <g class="brain-loose">
-            <circle cx="200" cy="100" r="42" fill="rgba(255,119,108,0.14)" stroke="var(--warn)" stroke-width="1.6"/>
-            <text x="200" y="106" text-anchor="middle" font-family="Syne, sans-serif" font-size="20" font-weight="800" fill="var(--text-strong)">brain</text>
-          </g>
-          <text x="50" y="40" font-family="Space Grotesk, sans-serif" font-size="11" fill="var(--muted)" letter-spacing="2">DRIFT</text>
-          <text x="320" y="40" font-family="Space Grotesk, sans-serif" font-size="11" fill="var(--muted)" letter-spacing="2">LOOP</text>
-          <text x="50" y="180" font-family="Space Grotesk, sans-serif" font-size="11" fill="var(--muted)" letter-spacing="2">REPEAT</text>
-          <text x="320" y="180" font-family="Space Grotesk, sans-serif" font-size="11" fill="var(--muted)" letter-spacing="2">BLUFF</text>
-        </svg>
+      <div class="card" id="cardOff">
+        <span class="pic" data-ic="warning" aria-hidden="true"></span>
+        <div><h3 id="offTitle"></h3><p id="offText"></p></div>
       </div>
-      <ul class="bullets">
-        <li><span><strong>No steering.</strong> The task drifts; the run keeps going past the bounded goal.</span></li>
-        <li><span><strong>No brakes.</strong> Low confidence becomes more output, not a pause or escalation.</span></li>
-        <li><span><strong>No dashboard.</strong> Nobody sees what already ran, what failed, what's still open.</span></li>
-        <li><span><strong>No guardrails.</strong> Tool reach is implied; blast radius is anyone's guess.</span></li>
-        <li><span><strong>No review stop.</strong> Output sounds finished even when nothing was verified.</span></li>
-      </ul>
-      <div class="takeaway">
-        <strong>What you ship</strong>
-        Demos that look great in the room and break in production. The model is not the problem; the missing harness is.
+      <span class="layer" id="offLayer" data-none="true"><span class="dot"></span><span>No layer — nothing intervenes</span></span>
+      <div class="meter">
+        <div class="meter-top">
+          <span class="meter-label">Blast radius</span>
+          <span class="meter-val" id="offVal"></span>
+        </div>
+        <div class="track"><div class="fill" id="offFill"></div></div>
       </div>
     </section>
 
-    <div class="divider" aria-hidden="true"></div>
-
-    <section class="panel panel-with" aria-label="With a harness">
-      <div class="panel-head">
-        <span class="panel-tag">With</span>
-        <h2 class="panel-title">The brain inside a vehicle</h2>
+    <section class="run run-on reveal" aria-label="Run two, harness on">
+      <div class="run-head">
+        <span class="pic" data-ic="shield" aria-hidden="true"></span>
+        <span class="run-tag">Harness on</span>
+        <span class="run-title">Same model, governed</span>
       </div>
-      <div class="scene" aria-hidden="true">
-        <svg viewBox="0 0 400 200">
-          <defs>
-            <linearGradient id="vehicleBody" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stop-color="rgba(78,218,181,0.18)"/>
-              <stop offset="100%" stop-color="rgba(34,211,238,0.14)"/>
-            </linearGradient>
-          </defs>
-          <line x1="20" y1="170" x2="380" y2="170" stroke="currentColor" stroke-opacity="0.20" stroke-width="2"/>
-          <line x1="40" y1="170" x2="80" y2="170" stroke="var(--good)" stroke-width="2"/>
-          <line x1="160" y1="170" x2="200" y2="170" stroke="var(--good)" stroke-width="2"/>
-          <line x1="280" y1="170" x2="320" y2="170" stroke="var(--good)" stroke-width="2"/>
-          <g class="brain-vehicle">
-            <rect x="60" y="60" width="280" height="100" rx="22" fill="url(#vehicleBody)" stroke="var(--good)" stroke-width="1.6"/>
-            <circle cx="200" cy="110" r="32" fill="rgba(34,211,238,0.16)" stroke="var(--accent)" stroke-width="1.6"/>
-            <text x="200" y="116" text-anchor="middle" font-family="Syne, sans-serif" font-size="16" font-weight="800" fill="var(--text-strong)">brain</text>
-            <circle cx="106" cy="110" r="14" fill="none" stroke="var(--good)" stroke-width="1.6"/>
-            <circle cx="106" cy="110" r="3" fill="var(--good)"/>
-            <line x1="92" y1="110" x2="120" y2="110" stroke="var(--good)" stroke-width="1.4"/>
-            <line x1="106" y1="96" x2="106" y2="124" stroke="var(--good)" stroke-width="1.4"/>
-            <text x="106" y="148" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-size="9" fill="var(--muted)" letter-spacing="1.6">STEER</text>
-            <rect x="280" y="98" width="22" height="22" rx="4" fill="none" stroke="var(--warn)" stroke-width="1.6"/>
-            <text x="291" y="113" text-anchor="middle" font-family="Syne, sans-serif" font-size="10" font-weight="800" fill="var(--warn)">!</text>
-            <text x="291" y="148" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-size="9" fill="var(--muted)" letter-spacing="1.6">BRAKE</text>
-            <circle cx="100" cy="170" r="14" fill="var(--surface-strong)" stroke="currentColor" stroke-opacity="0.4" stroke-width="1.4"/>
-            <circle cx="300" cy="170" r="14" fill="var(--surface-strong)" stroke="currentColor" stroke-opacity="0.4" stroke-width="1.4"/>
-          </g>
-          <text x="200" y="44" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-size="11" fill="var(--accent)" letter-spacing="2">GOVERNED VEHICLE</text>
-        </svg>
+      <div class="card" id="cardOn">
+        <span class="pic" data-ic="check" aria-hidden="true"></span>
+        <div><h3 id="onTitle"></h3><p id="onText"></p></div>
       </div>
-      <ul class="bullets">
-        <li><span><strong>L1 Constraint</strong> = lane markings. The agent cannot leave the road.</span></li>
-        <li><span><strong>L2 Context</strong> = dashboard. Only the gauges that matter are visible.</span></li>
-        <li><span><strong>L3 Execution</strong> = steering, gears, pedals. Bounded action surface.</span></li>
-        <li><span><strong>L4 Verification</strong> = airbags + ABS. Failure surfaces loudly, success is silent.</span></li>
-        <li><span><strong>L5 Lifecycle</strong> = battery, alternator, service plan. Survives crashes and wear.</span></li>
-      </ul>
-      <div class="takeaway">
-        <strong>What you ship</strong>
-        Production-grade work, repeatable, traceable, and recoverable. Same brain — now it can drive.
+      <span class="layer" id="onLayer"><span class="dot"></span><span></span></span>
+      <div class="meter">
+        <div class="meter-top">
+          <span class="meter-label">Evidence collected</span>
+          <span class="meter-val" id="onVal"></span>
+        </div>
+        <div class="track"><div class="fill" id="onFill"></div></div>
       </div>
     </section>
+  </div>
+
+  <p class="sr" role="status" aria-live="polite" id="live"></p>
+
+  <div class="foot reveal">
+    <strong>Nothing about the model changed between these runs</strong> — every difference you just watched is something the harness did.
   </div>
 </main>
 <script>
 (() => {
-  /* Report content height so the parent frame hugs the content. */
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const root = document.documentElement;
+  if (!reduced) root.classList.add('io');
+
+  const STEPS = [
+    { n: 'Read the task', icon: 'book',
+      off: { t: 'Starts immediately', p: 'No repo context loaded. It begins editing on the strength of the sentence alone.', ic: 'robot' },
+      on:  { t: 'Loads the ground truth', p: 'L2 pulls the module README and the actual failing test output before a single token of plan.', ic: 'book', layer: 'L2', name: 'L2 Context' },
+      offM: 4, onM: 14 },
+    { n: 'Choose an approach', icon: 'split',
+      off: { t: 'Guesses at the cause', p: 'A plausible-sounding theory about the cart total, never checked against a run.', ic: 'warning' },
+      on:  { t: 'Reproduces first', p: 'L2 requires the failure be observed before it is explained. The theory now has a witness.', ic: 'flask', layer: 'L2', name: 'L2 Context' },
+      offM: 12, onM: 28 },
+    { n: 'Edit files', icon: 'document',
+      off: { t: '14 files, 5 modules', p: 'The guess spreads. Unrelated modules are “tidied” on the way past.', ic: 'trenddown' },
+      on:  { t: '2 files touched', p: 'L1 edit ceiling caps the blast radius. The change stays where the failure is.', ic: 'barrier', layer: 'L1', name: 'L1 Constraint' },
+      offM: 66, onM: 42 },
+    { n: 'Run a command', icon: 'cpu',
+      off: { t: 'Destructive command, unchallenged', p: 'A reset that wipes local state runs because nothing exists to say no.', ic: 'warning' },
+      on:  { t: 'Denied at the boundary', p: 'L1 environmental controls refuse it outright. No prompt, no human interrupted, no damage.', ic: 'lock', layer: 'L1', name: 'L1 Constraint' },
+      offM: 84, onM: 56 },
+    { n: 'Check the result', icon: 'gauge',
+      off: { t: 'No verification', p: 'It declares success. Nothing ran. The claim and the code have never met.', ic: 'eye' },
+      on:  { t: 'Pre-stop hook runs the real test', p: 'L4 executes the actual command before the turn may end — and it fails.', ic: 'checklist', layer: 'L4', name: 'L4 Verification' },
+      offM: 92, onM: 70 },
+    { n: 'React to failure', icon: 'exchange',
+      off: { t: 'Nothing to react to', p: 'It never looked, so there is no failure in its world to respond to.', ic: 'trenddown' },
+      on:  { t: 'Failure fed back as a turn', p: 'L3 returns the output into the loop under a retry cap. Second attempt passes.', ic: 'gears', layer: 'L3', name: 'L3 Execution' },
+      offM: 96, onM: 86 },
+    { n: 'Finish', icon: 'stamp',
+      off: { t: 'Confident summary, broken build', p: 'A clean write-up, a red pipeline, and no record of what was touched.', ic: 'warning' },
+      on:  { t: 'Evidence bundle, human approves', p: 'L5 packages diff, test output and transcript hash. A named person accepts it.', ic: 'personcheck', layer: 'L5', name: 'L5 Lifecycle' },
+      offM: 100, onM: 100 }
+  ];
+
+  let idx = 0, timer = null;
+
+  const rail = document.getElementById('rail');
+  STEPS.forEach((s, i) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'step'; b.setAttribute('aria-pressed', 'false');
+    b.innerHTML = '<span class="n">STEP ' + (i + 1) + '</span><span class="pic" data-ic="' + s.icon + '" aria-hidden="true"></span><span>' + s.n + '</span>';
+    b.addEventListener('click', () => { stop(); go(i); });
+    rail.appendChild(b);
+  });
+
+  const ICON_BASE = '../customs-entry-agent/flow-icons/';
+  const cache = {};
+  const load = (n) => cache[n] || (cache[n] = fetch(ICON_BASE + n + '.svg')
+    .then((r) => (r.ok ? r.text() : Promise.reject()))
+    .then((t) => t.replace(/stroke="#232f3e"/g, 'stroke="currentColor"')).catch(() => ''));
+  const paint = () => {
+    document.querySelectorAll('[data-ic]').forEach((slot) => {
+      load(slot.dataset.ic).then((svg) => { if (!slot.firstChild) slot.innerHTML = svg; });
+    });
+  };
+  paint();
+
+  const $ = (id) => document.getElementById(id);
+  const cardOff = $('cardOff'), cardOn = $('cardOn');
+
+  function setIcon(card, name) {
+    const slot = card.querySelector('[data-ic]');
+    if (slot.dataset.ic !== name) { slot.dataset.ic = name; slot.innerHTML = ''; }
+    load(name).then((svg) => { if (!slot.firstChild) slot.innerHTML = svg; });
+  }
+
+  function go(i) {
+    idx = (i + STEPS.length) % STEPS.length;
+    const s = STEPS[idx];
+    $('offTitle').textContent = s.off.t; $('offText').textContent = s.off.p;
+    $('onTitle').textContent = s.on.t;   $('onText').textContent = s.on.p;
+    setIcon(cardOff, s.off.ic); setIcon(cardOn, s.on.ic);
+
+    const onLayer = $('onLayer');
+    onLayer.style.setProperty('--lc', 'var(--' + s.on.layer + ')');
+    onLayer.lastElementChild.textContent = s.on.name + ' acted here';
+
+    $('offFill').style.width = s.offM + '%';
+    $('onFill').style.width = s.onM + '%';
+    $('offVal').textContent = s.offM + '% · ' + (idx < 2 ? '0 files' : '14 files across 5 modules');
+    $('onVal').textContent = s.onM + '% · ' + (idx < 4 ? '2 files, scoped' : 'diff + test output' + (idx === 6 ? ' + transcript hash' : ''));
+
+    [...rail.children].forEach((b, j) => {
+      b.setAttribute('aria-pressed', j === idx ? 'true' : 'false');
+      b.classList.toggle('done', j < idx);
+    });
+
+    if (!reduced) {
+      [cardOff, cardOn].forEach((c) => { c.classList.remove('sweep'); void c.offsetWidth; c.classList.add('sweep'); });
+    }
+    $('live').textContent = 'Step ' + (idx + 1) + ' of 7, ' + s.n + '. Harness off: ' + s.off.t + '. Harness on: ' + s.on.t + '.';
+  }
+
+  function stop() {
+    if (timer) { clearInterval(timer); timer = null; }
+    $('play').setAttribute('aria-pressed', 'false');
+    $('play').textContent = 'Play ▶';
+  }
+  $('play').addEventListener('click', () => {
+    if (timer) { stop(); return; }
+    $('play').setAttribute('aria-pressed', 'true');
+    $('play').textContent = 'Pause ▮▮';
+    timer = setInterval(() => {
+      if (idx === STEPS.length - 1) { stop(); return; }
+      go(idx + 1);
+    }, 2200);
+  });
+  $('prev').addEventListener('click', () => { stop(); go(idx - 1); });
+  $('next').addEventListener('click', () => { stop(); go(idx + 1); });
+
+  const hl = $('hl');
+  hl.addEventListener('click', () => {
+    const on = hl.getAttribute('aria-pressed') !== 'true';
+    hl.setAttribute('aria-pressed', on ? 'true' : 'false');
+    root.classList.toggle('hl', on);
+  });
+
+  go(0);
+
+  const reveals = [...document.querySelectorAll('.reveal')];
+  if (reduced || !('IntersectionObserver' in window)) {
+    reveals.forEach((el) => el.classList.add('in'));
+  } else {
+    const io = new IntersectionObserver((es) => {
+      es.forEach((e) => {
+        if (!e.isIntersecting) return;
+        const i = reveals.indexOf(e.target);
+        setTimeout(() => e.target.classList.add('in'), i * 90);
+        io.unobserve(e.target);
+      });
+    }, { threshold: 0.15 });
+    reveals.forEach((el) => io.observe(el));
+    setTimeout(() => reveals.forEach((el) => el.classList.add('in')), 2000);
+  }
+
   if (document.documentElement.dataset.embedded === 'true') {
     const postSize = () => window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
     if ('ResizeObserver' in window) new ResizeObserver(postSize).observe(document.body);
     window.addEventListener('load', postSize);
+    setTimeout(postSize, 400);
   }
 })();
 </script>

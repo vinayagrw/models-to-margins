@@ -9,16 +9,16 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
 // Slides — kept here so the deck markup stays declarative and adding a slide
 // is one line. `tone` drives the color of the side-dot indicator.
 const slides = [
-  { id: 'equation',     label: '1 · Equation',         visual: 'hero-equation.html',   eyebrow: 'The one-line idea',           title: 'Agent = Model + Harness',                                  tone: 'cyan'   },
-  { id: 'without-with', label: '2 · Without / With',    visual: 'without-vs-with.html', eyebrow: 'Same brain, two outcomes',    title: 'A model alone is fluent. Inside a harness, useful.',       tone: 'orange' },
-  { id: 'evidence',     label: '3 · Why now',           visual: 'evidence-chart.html',  eyebrow: 'Hard evidence — 2026',        title: 'Same model, different harness. Same conclusion.',          tone: 'cyan'   },
-  { id: 'layers',       label: '4 · 5 layers',          visual: 'harness-explorer.html',eyebrow: 'The framework spine',         title: 'Five layers, five owners, five rates of change.',          tone: 'violet' },
-  { id: 'run',          label: '5 · One run',           visual: 'run-trace.html',       eyebrow: 'A real agent run',            title: '9 steps in 3 acts — Prepare, Execute, Govern.',            tone: 'jade'   },
-  { id: 'failures',     label: '6 · Failure modes',     visual: 'failure-modes.html',   eyebrow: 'When the harness is missing', title: '9 failures, mapped to the layer that prevents each.',      tone: 'red'    },
-  { id: 'invest',       label: '7 · Where to invest',   visual: 'invest-first.html',    eyebrow: 'Action — start Monday',       title: 'Pick the layer with the highest marginal return.',         tone: 'jade'   },
-  { id: 'lanes',        label: '8 · Decision lanes',    visual: 'decision-lanes.html',  eyebrow: 'Pick the right lane',         title: 'Agentic vs deterministic vs human authority.',             tone: 'amber'  },
-  { id: 'playbook',     label: '9 · Playbook',          visual: 'playbook-visual.html', eyebrow: 'Implementation patterns',     title: 'One min-viable move per layer. Ship this sprint.',         tone: 'cyan'   },
-  { id: 'closer',       label: '10 · Vocab + Sources',  visual: 'vocabulary-visual.html', eyebrow: 'The Agentic Principle',     title: 'Engineer every mistake out, forever.',                     tone: 'orange' }
+  { id: 'context',      label: '1 · Context map',      visual: 'harness-context-map.html',            eyebrow: 'Altitude L0 — where the model sits', title: 'Nine neighbours, nine labelled edges, three trust frames.', tone: 'cyan'   },
+  { id: 'without-with', label: '2 · Without / With',   visual: 'without-vs-with.html',                eyebrow: 'Same brain, two outcomes',           title: 'A model alone is fluent. Inside a harness, useful.',        tone: 'orange' },
+  { id: 'evidence',     label: '3 · Why now',          visual: 'evidence-chart.html',                 eyebrow: 'The evidence, and its asterisk',     title: 'Same model, different harness. Same conclusion.',           tone: 'cyan'   },
+  { id: 'layers',       label: '4 · Reference arch',   visual: 'harness-reference-architecture.html', eyebrow: 'Altitude L1 — the framework spine',  title: 'Five layers, named components, build vs inherit.',          tone: 'violet' },
+  { id: 'run',          label: '5 · One governed run', visual: 'governed-run-controlflow.html',       eyebrow: 'Altitude L2 — control flow',         title: 'Swimlanes, decisions, loops and four terminal states.',     tone: 'jade'   },
+  { id: 'deployment',   label: '6 · Deployment + wire',visual: 'harness-deployment-sequence.html',    eyebrow: 'Altitude L3 — what you stand up',    title: 'Three trust zones, and the headers on the wire.',           tone: 'cyan'   },
+  { id: 'failures',     label: '7 · Failure modes',    visual: 'failure-modes.html',                  eyebrow: 'When the harness is missing',        title: '9 failures, mapped to the layer that prevents each.',       tone: 'red'    },
+  { id: 'lanes',        label: '8 · Decision lanes',   visual: 'decision-lanes.html',                 eyebrow: 'Pick the right lane',                title: 'Agentic vs deterministic vs human authority.',              tone: 'amber'  },
+  { id: 'playbook',     label: '9 · Playbook',         visual: 'playbook-visual.html',                eyebrow: 'Implementation patterns',            title: 'One min-viable move per layer. Ship this sprint.',          tone: 'jade'   },
+  { id: 'closer',       label: '10 · Vocabulary', visual: 'vocabulary-visual.html',              eyebrow: 'The Agentic Principle',              title: 'Engineer every mistake out, forever.',                      tone: 'orange' }
 ];
 ---
 <!doctype html>

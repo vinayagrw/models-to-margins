@@ -2,7 +2,7 @@
 title: Private AI vs Public AI
 summary: Open models are becoming controllable infrastructure, closed models remain premium managed services, and hybrid model routing is the practical enterprise pattern.
 pubDate: 2026-04-05
-updatedDate: 2026-04-05
+updatedDate: 2026-08-25
 featured: false
 listed: true
 industry: AI platform strategy
@@ -24,6 +24,21 @@ readTime: 12 min read
 supportingVisualPath: /visuals/model-strategy/private-ai-vs-public-ai-architecture.html
 supportingVisualLabel: View the private AI control plane
 --- 
+
+## What Changed Since This Was Written
+
+This brief was written on 5 April 2026 and refreshed on 25 August 2026. The argument held; several of the facts did not. The full corrected version, with the architecture underneath it, is the companion deep dive: [Private AI vs Public AI — The Architecture, Not the Argument](/deep-dives/private-vs-public-ai-architecture).
+
+Eight things below are now out of date, and are corrected there, with dates:
+
+- **The reference open families moved on.** GLM-5.2 (MIT, 13 Jun 2026), Kimi K2.7 Code (12 Jun), Kimi K3 weights (27 Jul), and DeepSeek-V4-Flash (MIT, 31 Jul — 284B total / 13B active, 1M context) all post-date the table below. Llama is no longer the reference open family in current roundups.
+- **The capability gap nearly closed at the top.** Kimi K3 Max scored 60 on the Artificial Analysis Intelligence Index against Claude Opus 5 at 61 (2 Aug 2026). The three-model average still favours closed by roughly 7.6 points.
+- **Every price below is void.** Claude Opus 5 launched at $5/$25 (24 Jul 2026); Sonnet 5 was fixed at $2/$10 permanently, cancelling the planned September rise (11 Aug 2026); OpenAI cut GPT-5.6 Luna by about 80% to roughly $0.20/$1.20 (30 Jul 2026).
+- **"Smaller is strictly weaker" no longer holds.** DeepSeek reports its 13B-active V4-Flash beating its own trillion-scale V4-Pro on nine agent benchmarks.
+- **EU AI Act GPAI and Article 50 duties are enforceable** as of 2 August 2026, with a transition to 2 December 2026 for synthetic-content marking. High-risk obligations slipped to 2 December 2027 (Annex III) and 2 August 2028 (Annex I).
+- **Frontier closed models now run on your own metal.** Air-gapped Gemini on a single eight-GPU server via Google Distributed Cloud; Microsoft Foundry Local and M365 Local; and the AWS European Sovereign Cloud has been live since 15 January 2026.
+- **"Open weights" no longer means self-hosting.** Bedrock's managed open-weight catalogue makes the two independent choices.
+- **Llama's licence needs checking, not assuming.** Its custom community licence carries a multimodal grant that excludes developers established in the EU. Qwen3+ is Apache 2.0; DeepSeek and GLM-5.2 are MIT.
 
 ## Why This Matters Now
 
@@ -129,17 +144,3 @@ The best AI organizations will use both intentionally:
 The future is not one model strategy.
 
 It is a **portfolio strategy**.
-
-## Source Links
-
-- [Google Gemma 4 announcement](https://blog.google/innovation-and-ai/technology/developers-tools/gemma-4/)
-- [Qwen3](https://qwenlm.github.io/blog/qwen3/)
-- [Together AI pricing](https://www.together.ai/pricing)
-- [Introducing gpt-oss](https://openai.com/index/introducing-gpt-oss/)
-- [Mistral models](https://docs.mistral.ai/getting-started/models/)
-- [IBM Granite 4.0](https://www.ibm.com/new/announcements/ibm-granite-4-0-hyper-efficient-high-performance-hybrid-models)
-- [Meta Llama models](https://huggingface.co/meta-llama)
-- [McKinsey: Open source technology in the age of AI](https://www.mckinsey.com/~/media/mckinsey/business%20functions/quantumblack/our%20insights/open%20source%20technology%20in%20the%20age%20of%20ai/open-source-technology-in-the-age-of-ai_final.pdf)
-- [OpenRouter State of AI 2025](https://openrouter.ai/state-of-ai)
-- [Vertex AI pricing](https://cloud.google.com/vertex-ai/generative-ai/pricing)
-- [OpenAI API pricing](https://openai.com/api/pricing/)

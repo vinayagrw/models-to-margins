@@ -1,0 +1,211 @@
+/* Taiwan Incident, Generalized — shared theme tokens and base styles.
+   Family identity mirrors the page's "sitrep / after-action review binder"
+   template: light = photocopied report paper, dark = ops console.
+   Zero border-radius, olive/slate structural accents, signal red capped to
+   disputed/gap states only. Used by every visual under
+   /visuals/taiwan-incident-generalized/. Mechanism copied verbatim from the
+   customs-entry-agent family; only the token values are reskinned. */
+
+:root,
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  /* Background gradient stops (photocopied report paper) */
+  --bg-start: #f6f4ee;
+  --bg-mid: #f4f2ec;
+  --bg-end: #ece8dc;
+
+  /* Text. Light values are tuned to hold WCAG AA (4.5:1) for small text
+     over --surface composited on --bg-mid. */
+  --text: #1e211c;
+  --text-strong: #14170f;
+  --muted: rgba(30, 33, 28, 0.74);
+  --muted-soft: rgba(30, 33, 28, 0.60);
+
+  /* Surface */
+  --surface: rgba(235, 232, 223, 0.88);
+  --surface-strong: rgba(244, 242, 236, 0.96);
+  --border: rgba(30, 33, 28, 0.16);
+  --border-strong: rgba(30, 33, 28, 0.30);
+
+  /* Accent palette: olive structural, slate secondary, signal red (capped) */
+  --accent: #4e5a3a;
+  --accent-2: #3c4a55;
+  --accent-3: #1f5a52;
+
+  /* Status */
+  --warn: #8a5a11;
+  --good: #1f5a52;
+  --signal: #a32219;
+
+  /* Evidence-chip palette (reported / corroborated / disputed / inference / proposed) */
+  --T0: #1f5a52; /* corroborated — teal */
+  --T1: #8a5a11; /* reported — amber */
+  --T2: #a32219; /* disputed — signal red */
+
+  /* Control-plane / status palette (matrix cells, architecture bands) */
+  --S-lodged: #3c4a55;  /* observe — slate */
+  --S-review: #8a5a11;  /* partial — amber */
+  --S-hold: #a32219;    /* absent / gap — signal red */
+  --S-cleared: #4e5a3a; /* covered / proposed — olive */
+
+  /* Shadow: kept at zero per restraint rule 5 (no depth via shadow) */
+  --shadow: none;
+  --shadow-soft: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg-start: #14171a;
+    --bg-mid: #14171a;
+    --bg-end: #101316;
+    --text: #e6e9e3;
+    --text-strong: #ffffff;
+    --muted: rgba(230, 233, 227, 0.68);
+    --muted-soft: rgba(230, 233, 227, 0.55);
+    --surface: rgba(27, 31, 35, 0.88);
+    --surface-strong: rgba(35, 40, 45, 0.96);
+    --border: rgba(230, 233, 227, 0.14);
+    --border-strong: rgba(230, 233, 227, 0.28);
+    --accent: #a8bc84;
+    --accent-2: #8fb0c4;
+    --accent-3: #6fcbb8;
+    --warn: #e7b45c;
+    --good: #6fcbb8;
+    --signal: #f2695c;
+    --T0: #6fcbb8;
+    --T1: #e7b45c;
+    --T2: #f2695c;
+    --S-lodged: #8fb0c4;
+    --S-review: #e7b45c;
+    --S-hold: #f2695c;
+    --S-cleared: #a8bc84;
+    --shadow: none;
+    --shadow-soft: none;
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg-start: #14171a;
+  --bg-mid: #14171a;
+  --bg-end: #101316;
+  --text: #e6e9e3;
+  --text-strong: #ffffff;
+  --muted: rgba(230, 233, 227, 0.68);
+  --muted-soft: rgba(230, 233, 227, 0.55);
+  --surface: rgba(27, 31, 35, 0.88);
+  --surface-strong: rgba(35, 40, 45, 0.96);
+  --border: rgba(230, 233, 227, 0.14);
+  --border-strong: rgba(230, 233, 227, 0.28);
+  --accent: #a8bc84;
+  --accent-2: #8fb0c4;
+  --accent-3: #6fcbb8;
+  --warn: #e7b45c;
+  --good: #6fcbb8;
+  --signal: #f2695c;
+  --T0: #6fcbb8;
+  --T1: #e7b45c;
+  --T2: #f2695c;
+  --S-lodged: #8fb0c4;
+  --S-review: #e7b45c;
+  --S-hold: #f2695c;
+  --S-cleared: #a8bc84;
+  --shadow: none;
+  --shadow-soft: none;
+}
+
+/* Reset */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* Base body */
+body {
+  min-height: 100vh;
+  background: linear-gradient(180deg, var(--bg-start) 0%, var(--bg-mid) 48%, var(--bg-end) 100%);
+  font-family: "IBM Plex Sans", -apple-system, "Segoe UI", system-ui, sans-serif;
+  color: var(--text);
+}
+
+/* Embed mode (?embed=1) — visual is loaded inside an iframe.
+   Every visual in this family autosizes: size to content, report the height
+   via postMessage({type:'m2m:frame-size'}), and the parent hugs the content.
+   Never lock to viewport height — no stretched, half-empty panels. */
+:root[data-embedded="true"],
+:root[data-embedded="true"] body {
+  height: auto;
+}
+:root[data-embedded="true"] body {
+  min-height: 0;
+}
+
+/* Shared shell layout */
+.shell {
+  width: min(calc(100% - 32px), 1280px);
+  margin: 0 auto;
+  padding: 20px 0 28px;
+}
+:root[data-embedded="true"] .shell {
+  width: 100%;
+  height: auto;
+  padding: 14px 18px;
+  /* Each visual's own .shell rule sets display + grid/flex template. */
+}
+
+/* Keyboard focus: explicit high-visibility ring on every interactive element */
+button:focus-visible,
+a:focus-visible,
+summary:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Shared typography utilities */
+.eyebrow {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+/* Evidence chip — shared across the family for verdict labels. Mirrors the
+   article-page .sr-chip states exactly: reported / corroborated / disputed /
+   inference / proposed. Glyph + word, never colour alone. */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.62rem;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: 1px solid currentColor;
+  border-radius: 2px;
+  padding: 3px 7px;
+  white-space: nowrap;
+}
+.chip--reported { color: var(--T1); }
+.chip--reported::before { content: "\25A3 "; }
+.chip--corroborated { color: var(--T0); border-width: 2px; }
+.chip--corroborated::before { content: "\25C6 "; }
+.chip--disputed { color: var(--T2); border-width: 2px; }
+.chip--disputed::before { content: "\2715 "; }
+.chip--inference { color: var(--accent-2); border-style: dashed; }
+.chip--inference::before { content: "\25C7 "; }
+.chip--proposed { color: var(--accent); border-style: dotted; }
+.chip--proposed::before { content: "\25C8 "; }
+/* display: inline-flex above would defeat the hidden attribute, re-assert it */
+.chip[hidden] { display: none; }
+
+/* Respect the reader's motion preference: rebuilt figures animate, so the
+   whole family collapses motion to a single frame when asked. Scripted
+   animation (rAF token travel, count-ups) must ALSO check this query and
+   jump to the finished state. */
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+}

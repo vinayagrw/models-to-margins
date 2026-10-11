@@ -38,12 +38,18 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
   <body>
     <a class="skip-link" href="#main-content">Skip to content</a>
     <SiteHeader currentPath={currentPath} />
-    <main class="site-shell" id="main-content">
+    <main class="site-shell" id="main-content" tabindex="-1">
       <slot />
     </main>
     <footer class="site-shell site-footer">
       <div class="footer-grid">
         <span>Models to Margins</span>
+        <nav class="footer-nav" aria-label="Footer">
+          <a href="/">Home</a>
+          <a href="/briefs">Brief</a>
+          <a href="/deep-dives">Deep Dives</a>
+          <a href="/rss.xml">RSS</a>
+        </nav>
       </div>
     </footer>
     <script is:inline>

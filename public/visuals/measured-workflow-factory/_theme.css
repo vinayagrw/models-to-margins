@@ -1,0 +1,104 @@
+/* Measured Workflow Factory - shared theme tokens and base styles.
+   Family identity mirrors the page's "ledger" template:
+   light = manila bond paper with stamp inks, dark = the night-audit desk.
+   Used by every visual under /visuals/measured-workflow-factory/. */
+
+:root,
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg: #ffffff; --surface: #f6f8fb; --surface-strong: #ffffff;
+  --text: #0e1a2b; --muted: #3a4960; --muted-soft: #66758c;
+  --border: rgba(28, 46, 84, 0.16); --border-strong: #d6dce7;
+  --stamp: #1f4fd8; --stamp-dim: rgba(31, 79, 216, 0.09);
+  --clear: #15803d; --clear-dim: rgba(21, 128, 61, 0.10);
+  --hold: #b45309; --hold-dim: rgba(180, 83, 9, 0.10);
+  --seal: #0b7a75; --seal-dim: rgba(11, 122, 117, 0.10);
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #121b2e; --surface: #0f1727; --surface-strong: #18233a;
+  --text: #eaf0fa; --muted: #b9c5da; --muted-soft: #8795ad;
+  --border: rgba(140, 165, 215, 0.20); --border-strong: #263450;
+  --stamp: #6ea0ff; --stamp-dim: rgba(110, 160, 255, 0.13);
+  --clear: #4ade80; --clear-dim: rgba(74, 222, 128, 0.12);
+  --hold: #f0b45a; --hold-dim: rgba(240, 180, 90, 0.13);
+  --seal: #3fd0c4; --seal-dim: rgba(63, 208, 196, 0.12);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  min-height: 100vh;
+  background: var(--bg);
+  font-family: "Public Sans", "Segoe UI", system-ui, sans-serif;
+  color: var(--text);
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+/* Embed mode (?embed=1): size to content and report the height to the host
+   via postMessage({type:'m2m:frame-size'}). Never lock to viewport height. */
+:root[data-embedded="true"],
+:root[data-embedded="true"] body { height: auto; }
+:root[data-embedded="true"] body { min-height: 0; }
+
+.shell {
+  width: min(calc(100% - 32px), 1180px);
+  margin: 0 auto;
+  padding: 28px 0 36px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+:root[data-embedded="true"] .shell {
+  width: 100%;
+  padding: 16px clamp(14px, 2.4vw, 24px) 20px;
+}
+
+button:focus-visible,
+a:focus-visible { outline: 2px solid var(--seal); outline-offset: 2px; }
+
+.head h1 {
+  font-family: "Public Sans", "Segoe UI", system-ui, sans-serif; letter-spacing: -0.015em;
+  font-weight: 700;
+  font-size: clamp(1.05rem, 2.2vw, 1.3rem);
+  line-height: 1.25;
+}
+.head p { font-size: 0.86rem; line-height: 1.5; color: var(--muted); margin-top: 4px; max-width: 70ch; }
+
+.mono {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* Evidence stamp, matching the article's .ld-stamp vocabulary. */
+.stamp {
+  display: inline-block;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.62rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border: 1.5px solid currentColor;
+  border-radius: 3px;
+  padding: 3px 6px;
+  white-space: nowrap;
+}
+.stamp--confirmed { color: var(--clear); }
+.stamp--proposed { color: var(--seal); }
+.stamp--open { color: var(--hold); }
+.stamp--vendor-claim { color: var(--stamp); }
+
+/* Diagram icons: 80px minimum, stroke follows the node colour. */
+.icon { width: 80px; height: 80px; display: block; flex: none; }
+.icon * { fill: none; stroke: currentColor; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+
+.foot { font-size: 0.76rem; line-height: 1.5; color: var(--muted-soft); }
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+}

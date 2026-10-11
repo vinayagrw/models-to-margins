@@ -11,54 +11,16 @@
 /* Scene-specific: 9 failure modes mapped to 5 layers */
 body {
   background:
-    radial-gradient(circle at 12% 14%, rgba(255, 119, 108, 0.10), transparent 30%),
-    radial-gradient(circle at 86% 88%, rgba(34, 211, 238, 0.08), transparent 32%),
+    radial-gradient(circle at 12% 14%, color-mix(in srgb, var(--warn) 12%, transparent), transparent 30%),
+    radial-gradient(circle at 86% 88%, color-mix(in srgb, var(--accent) 10%, transparent), transparent 32%),
     linear-gradient(180deg, var(--bg-start) 0%, var(--bg-mid) 48%, var(--bg-end) 100%);
 }
-/* Embed mode: 9-cell grid + detail panel, fluid sizing fills iframe naturally */
-:root[data-embedded="true"] .shell {
-  display: grid; grid-template-rows: auto 1fr;
-  gap: clamp(6px, 1vh, 12px); min-height: 0;
-  padding: clamp(10px, 1.6vh, 18px) clamp(14px, 2vw, 22px);
-}
-:root[data-embedded="true"] .head { margin-bottom: 0; gap: 10px; }
-:root[data-embedded="true"] .head h1 { font-size: clamp(1rem, 2.2vh, 1.5rem); }
-:root[data-embedded="true"] .head p { font-size: clamp(0.78rem, 1.4vh, 0.92rem); max-width: none; }
-:root[data-embedded="true"] .legend-pill {
-  font-size: clamp(0.66rem, 1vh, 0.74rem); padding: 3px 9px;
-}
-:root[data-embedded="true"] .body { gap: clamp(8px, 1.2vw, 14px); min-height: 0; align-items: stretch; }
-:root[data-embedded="true"] .grid {
-  gap: clamp(6px, 0.9vh, 10px);
-  /* 3 rows; each row sized to content with minimum, no forced stretch */
-  grid-template-rows: repeat(3, minmax(0, 1fr));
-  align-content: stretch;
-}
-:root[data-embedded="true"] .cell {
-  padding: clamp(8px, 1.4vh, 14px) clamp(10px, 1vw, 14px);
-  min-height: 0;
-  gap: clamp(4px, 0.6vh, 8px);
-}
-:root[data-embedded="true"] .cell-icon {
-  width: clamp(26px, 3.5vh, 34px); height: clamp(26px, 3.5vh, 34px);
-  border-radius: 8px;
-}
-:root[data-embedded="true"] .cell-name { font-size: clamp(0.82rem, 1.4vh, 0.96rem); }
-:root[data-embedded="true"] .cell-tagline {
-  font-size: clamp(0.7rem, 1.15vh, 0.8rem); line-height: 1.35;
-}
-:root[data-embedded="true"] .cell-layer { font-size: clamp(0.6rem, 0.95vh, 0.7rem); letter-spacing: 0.1em; }
-:root[data-embedded="true"] .detail {
-  padding: clamp(12px, 2vh, 18px) clamp(14px, 1.4vw, 18px);
-  min-height: 0; gap: clamp(8px, 1.2vh, 14px); position: static;
-  display: flex; flex-direction: column; justify-content: center;
-}
-:root[data-embedded="true"] .detail-title { font-size: clamp(1.05rem, 2vh, 1.35rem); }
-:root[data-embedded="true"] .detail-symptom, :root[data-embedded="true"] .detail-prevent {
-  font-size: clamp(0.78rem, 1.3vh, 0.9rem);
-  padding: clamp(8px, 1.2vh, 14px) clamp(10px, 1.2vw, 14px);
-  line-height: 1.45;
-}
+/* Embed mode: size to content and report it; the parent autosizes the frame.
+   Overrides the family theme's viewport lock, which would clip this scene. */
+:root[data-embedded="true"], :root[data-embedded="true"] body { height: auto; overflow: visible; }
+:root[data-embedded="true"] .shell { width: 100%; height: auto; padding: 14px 18px; }
+:root[data-embedded="true"] .head { gap: 12px; }
+:root[data-embedded="true"] .head p { max-width: none; }
 
 .head { margin-bottom: 18px; display: grid; grid-template-columns: minmax(0, 2fr) auto; gap: 16px; align-items: end; }
 .head .eyebrow { color: var(--warn); }
@@ -67,15 +29,22 @@ body {
   font-size: clamp(1.4rem, 2.4vw, 1.95rem); line-height: 1.18;
   letter-spacing: -0.01em; color: var(--text-strong); margin-top: 6px;
 }
-.head p { margin-top: 8px; color: var(--muted); font-size: 0.95rem; max-width: 64ch; }
+.head p { margin-top: 8px; color: var(--muted); font-size: 0.95rem; }
 .legend { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .legend-pill {
   display: inline-flex; align-items: center; gap: 6px;
   font-size: 0.74rem; font-weight: 600; letter-spacing: 0.04em;
   padding: 5px 11px; border-radius: 999px;
   border: 1px solid var(--border); background: var(--surface);
+  color: var(--text);
 }
 .legend-pill::before { content: ""; width: 10px; height: 10px; border-radius: 3px; background: var(--c); }
+.legend-count {
+  font-family: "DM Sans", sans-serif; font-weight: 800;
+  font-size: 0.7rem; color: var(--c);
+  background: color-mix(in srgb, var(--c) 16%, transparent);
+  border-radius: 999px; padding: 1px 7px; margin-left: 2px;
+}
 .body { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(320px, 1fr); gap: 18px; align-items: start; }
 .grid {
   display: grid; gap: 10px;
@@ -85,12 +54,18 @@ body {
   appearance: none; text-align: left; font: inherit; color: var(--text);
   border: 1px solid var(--border); background: var(--surface-strong);
   border-radius: 16px; padding: 14px;
-  cursor: pointer; transition: 180ms ease;
+  cursor: pointer; transition: opacity 420ms ease, transform 420ms ease, border-color 180ms ease, box-shadow 180ms ease, background 180ms ease;
   position: relative; overflow: hidden;
   display: flex; flex-direction: column; gap: 8px;
   min-height: 140px;
+  opacity: 0; transform: translateY(12px);
 }
-.cell:hover { transform: translateY(-2px); border-color: var(--c); }
+.cell::before {
+  content: ""; position: absolute; inset: 0 0 auto 0; height: 3px;
+  background: var(--c);
+}
+.cell.is-in { opacity: 1; transform: none; }
+.cell.is-in:hover { transform: translateY(-2px); border-color: var(--c); }
 .cell:focus-visible { outline: 2px solid var(--c); outline-offset: 2px; }
 .cell[aria-selected="true"] {
   border-color: var(--c);
@@ -102,8 +77,10 @@ body {
   display: grid; place-items: center;
   background: color-mix(in srgb, var(--c) 18%, transparent);
   color: var(--c);
-  font-family: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif; font-weight: 800;
 }
+.pic { width: 22px; height: 22px; display: block; color: inherit; }
+.pic svg { width: 100%; height: 100%; }
+.pic svg * { stroke: currentColor; }
 .cell-name {
   font-family: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif; font-weight: 700;
   font-size: 0.98rem; color: var(--text-strong); letter-spacing: -0.005em;
@@ -123,6 +100,7 @@ body {
   display: flex; flex-direction: column; gap: 14px;
   min-height: 360px;
 }
+:root[data-embedded="true"] .detail { position: static; }
 .detail-tag {
   display: inline-flex; align-items: center; gap: 8px;
   font-size: 0.72rem; font-weight: 700; letter-spacing: 0.16em;
@@ -147,6 +125,22 @@ body {
   font-size: 0.92rem; line-height: 1.5;
 }
 .detail-prevent strong { display: block; margin-bottom: 4px; color: var(--text-strong); font-size: 0.74rem; letter-spacing: 0.14em; text-transform: uppercase; }
+.detail-link {
+  margin-top: auto;
+  display: inline-flex; align-items: center; gap: 8px;
+  align-self: flex-start;
+  font-size: 0.82rem; font-weight: 700; letter-spacing: 0.01em;
+  text-decoration: none; color: var(--detail-c, var(--accent));
+  border: 1px solid color-mix(in srgb, var(--detail-c, var(--accent)) 46%, transparent);
+  background: color-mix(in srgb, var(--detail-c, var(--accent)) 10%, transparent);
+  padding: 9px 14px; border-radius: 999px;
+  transition: background 160ms ease, border-color 160ms ease;
+}
+.detail-link:hover {
+  background: color-mix(in srgb, var(--detail-c, var(--accent)) 20%, transparent);
+  border-color: var(--detail-c, var(--accent));
+}
+.detail-link .pic { width: 16px; height: 16px; }
 @media (max-width: 900px) {
   .body { grid-template-columns: 1fr; }
   .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -156,10 +150,10 @@ body {
 @media (max-width: 520px) {
   .grid { grid-template-columns: 1fr; }
 }
-
-/* Embed: size to content and report it, the parent autosizes the frame. */
-:root[data-embedded="true"], :root[data-embedded="true"] body { height: auto; }
-:root[data-embedded="true"] .shell { height: auto; }
+@media (prefers-reduced-motion: reduce) {
+  .cell { opacity: 1; transform: none; transition: none; }
+  .cell.is-in:hover { transform: none; }
+}
 </style>
 </head>
 <body>
@@ -168,15 +162,9 @@ body {
     <div>
       <span class="eyebrow">When the harness is missing</span>
       <h1>9 failure modes — and which layer would have prevented each.</h1>
-      <p>Tap any failure to see the symptom you'd see in production and the layer that should have caught it. Most teams fight the symptoms; the harness fights the root cause.</p>
+      <p>Tap any failure to see the symptom you'd see in production and the layer that should have caught it. Most teams fight the symptoms; the harness fights the root cause. Each tile is tinted by its owning layer, and the counts below show where the failures concentrate.</p>
     </div>
-    <div class="legend" aria-label="Layer colors">
-      <span class="legend-pill" style="--c: var(--L1)">L1 Constraint</span>
-      <span class="legend-pill" style="--c: var(--L2)">L2 Context</span>
-      <span class="legend-pill" style="--c: var(--L3)">L3 Execution</span>
-      <span class="legend-pill" style="--c: var(--L4)">L4 Verification</span>
-      <span class="legend-pill" style="--c: var(--L5)">L5 Lifecycle</span>
-    </div>
+    <div class="legend" id="legend" aria-label="Failures per layer"></div>
   </header>
 
   <div class="body">
@@ -192,65 +180,105 @@ body {
         <strong>Layer that prevents it</strong>
         <span id="detailPrevent">L5 Lifecycle: per-file edit caps, cost ceilings, and named-human escalation when budgets trip. (LangChain's LoopDetectionMiddleware is the public reference pattern.)</span>
       </div>
+      <a class="detail-link" id="detailLink" href="/visuals/harness-engineering/harness-reference-architecture.html?layer=L5">
+        <span class="pic" data-ic="network" aria-hidden="true"></span>
+        <span id="detailLinkText">Open L5 Lifecycle in the reference architecture</span>
+      </a>
     </aside>
   </div>
 </main>
 <script>
 (() => {
+  const embedded = document.documentElement.dataset.embedded === 'true';
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
   const failures = [
-    { id: 'doom-loop', name: 'Doom loop', icon: '∞', layer: 'L5', color: 'var(--L5)',
+    { id: 'doom-loop', name: 'Doom loop', icon: 'exchange', layer: 'L5', color: 'var(--L5)',
       tagline: 'Infinite retry burning thousands overnight.',
       symptom: 'An agent retries the same failing edit thousands of times overnight, burning a $4k bill before a human looks.',
       prevent: 'L5 Lifecycle: per-file edit caps, cost ceilings, and named-human escalation when budgets trip. (LangChain\'s LoopDetectionMiddleware is the public reference pattern.)' },
-    { id: 'context-rot', name: 'Context rot', icon: '↘', layer: 'L2', color: 'var(--L2)',
+    { id: 'context-rot', name: 'Context rot', icon: 'trenddown', layer: 'L2', color: 'var(--L2)',
       tagline: 'Goal drifts as session grows.',
       symptom: 'Two hours into a long-running session, the agent stops referencing the original ticket and follows whatever was in the last tool output.',
       prevent: 'L2 Context: progress files as durable scratchpads, periodic re-anchoring of the bounded goal, and progressive disclosure so old tool output gets summarized out.' },
-    { id: 'dumb-zone', name: 'The dumb zone', icon: '⚙', layer: 'L3', color: 'var(--L3)',
+    { id: 'dumb-zone', name: 'The dumb zone', icon: 'gears', layer: 'L3', color: 'var(--L3)',
       tagline: 'More tokens on tools than work.',
       symptom: 'Trace shows the model spending 70% of its tokens reasoning about which tool to call, leaving little budget for the actual task.',
       prevent: 'L3 Execution: dynamic tool scoping per task type. Vercel d0 went from 80 to 100 percent success by removing 80% of available tools.' },
-    { id: 'silent-failure', name: 'Silent failure', icon: '!', layer: 'L4', color: 'var(--L4)',
+    { id: 'silent-failure', name: 'Silent failure', icon: 'bug', layer: 'L4', color: 'var(--L4)',
       tagline: 'Output looks great, nothing was checked.',
       symptom: 'PR merges cleanly, the agent declares success, then a failing test surfaces in nightly CI two days later.',
       prevent: 'L4 Verification: pre-stop hooks running formatters, type checks, and tests before the agent finishes a step. Success silent, failure loud.' },
-    { id: 'shadow-agent', name: 'Shadow agent', icon: '👁', layer: 'L1', color: 'var(--L1)',
+    { id: 'shadow-agent', name: 'Shadow agent', icon: 'eye', layer: 'L1', color: 'var(--L1)',
       tagline: 'Nobody knows it exists or what it can touch.',
       symptom: 'An engineer wires up an agent against production secrets via a personal API key. No one in security knows it exists until something breaks.',
       prevent: 'L1 Constraint + L5 Lifecycle: agent registry, identity binding, and structural rules that prevent unscoped credentials from reaching agents.' },
-    { id: 'context-overflow', name: 'Context overflow', icon: '▣', layer: 'L2', color: 'var(--L2)',
+    { id: 'context-overflow', name: 'Context overflow', icon: 'archive', layer: 'L2', color: 'var(--L2)',
       tagline: 'Task definition buried under tool noise.',
       symptom: 'After loading 12 files and 4 tool outputs, the original task instruction is no longer in the model\'s effective attention window.',
       prevent: 'L2 Context: tighter retrieval, summarization passes, and a "what is this task?" anchor that the harness re-injects on every turn.' },
-    { id: 'checkpoint-loss', name: 'Checkpoint loss', icon: '↺', layer: 'L5', color: 'var(--L5)',
+    { id: 'checkpoint-loss', name: 'Checkpoint loss', icon: 'clock', layer: 'L5', color: 'var(--L5)',
       tagline: 'Crash means start from zero.',
       symptom: 'A 40-minute run dies mid-step. The next attempt restarts from scratch and reruns expensive tool calls already paid for.',
       prevent: 'L5 Lifecycle: durable session log outside the model context. wake(sessionId) fetches the last good event and resumes — what Anthropic Managed Agents virtualizes.' },
-    { id: 'tool-misuse', name: 'Tool misuse', icon: '✗', layer: 'L3', color: 'var(--L3)',
+    { id: 'tool-misuse', name: 'Tool misuse', icon: 'warning', layer: 'L3', color: 'var(--L3)',
       tagline: 'Right tool, wrong way.',
       symptom: 'The agent calls a billing API with the customer\'s ID instead of the merchant\'s, refunds the wrong account, doesn\'t notice.',
       prevent: 'L3 Execution + L4 Verification: typed tool contracts, sandboxed dry-runs, and a verification step before any side-effecting call.' },
-    { id: 'policy-violation', name: 'Policy violation', icon: '◇', layer: 'L1', color: 'var(--L1)',
+    { id: 'policy-violation', name: 'Policy violation', icon: 'gavel', layer: 'L1', color: 'var(--L1)',
       tagline: 'Crossed a line the agent never knew about.',
       symptom: 'The agent generates code that imports a banned dependency, or reaches across a forbidden module boundary, because the rule lived only in a wiki.',
       prevent: 'L1 Constraint: ArchUnit-style structural tests + custom linters with actionable Fix: messages. Mechanical enforcement, no LLM reading wikis.' }
   ];
 
   const grid = document.getElementById('grid');
+  const legend = document.getElementById('legend');
   const detail = document.getElementById('detail');
   const detailTag = document.getElementById('detailTag');
   const detailTitle = document.getElementById('detailTitle');
   const detailSymptom = document.getElementById('detailSymptom');
   const detailPrevent = document.getElementById('detailPrevent');
+  const detailLink = document.getElementById('detailLink');
+  const detailLinkText = document.getElementById('detailLinkText');
 
   const layerNames = { L1: 'L1 Constraint', L2: 'L2 Context', L3: 'L3 Execution', L4: 'L4 Verification', L5: 'L5 Lifecycle' };
+  const ARCH = '/visuals/harness-engineering/harness-reference-architecture.html';
 
+  /* ---------- house icon loader ---------- */
+  const ICON_BASE = '../customs-entry-agent/flow-icons/';
+  const cache = {};
+  const load = (n) => cache[n] || (cache[n] = fetch(ICON_BASE + n + '.svg')
+    .then((r) => (r.ok ? r.text() : Promise.reject()))
+    .then((t) => t.replace(/stroke="#232f3e"/g, 'stroke="currentColor"')).catch(() => ''));
+  const paintIcons = () => {
+    document.querySelectorAll('[data-ic]').forEach((slot) => {
+      load(slot.dataset.ic).then((svg) => { if (!slot.firstChild) slot.innerHTML = svg; });
+    });
+  };
+
+  /* ---------- legend with per-layer counts ---------- */
+  Object.keys(layerNames).forEach((key) => {
+    const n = failures.filter((f) => f.layer === key).length;
+    const pill = document.createElement('span');
+    pill.className = 'legend-pill';
+    pill.style.setProperty('--c', 'var(--' + key + ')');
+    pill.innerHTML = layerNames[key] + '<span class="legend-count">' + n + '</span>';
+    legend.appendChild(pill);
+  });
+
+  /* ---------- detail panel ---------- */
   const showFailure = (f) => {
     detail.style.setProperty('--detail-c', f.color);
-    detailTag.textContent = `${layerNames[f.layer]} prevents this`;
+    detailTag.textContent = layerNames[f.layer] + ' prevents this';
     detailTitle.textContent = f.name;
     detailSymptom.textContent = f.symptom;
     detailPrevent.textContent = f.prevent;
+    detailLink.href = ARCH + '?layer=' + f.layer;
+    detailLinkText.textContent = 'Open ' + layerNames[f.layer] + ' in the reference architecture';
+    if (embedded) {
+      detailLink.setAttribute('target', '_blank');
+      detailLink.setAttribute('rel', 'noopener');
+    }
     document.querySelectorAll('.cell').forEach((c) => c.setAttribute('aria-selected', String(c.dataset.id === f.id)));
   };
 
@@ -259,20 +287,39 @@ body {
     cell.className = 'cell';
     cell.type = 'button';
     cell.dataset.id = f.id;
+    cell.dataset.idx = String(idx);
     cell.setAttribute('role', 'tab');
     cell.setAttribute('aria-selected', idx === 0 ? 'true' : 'false');
     cell.style.setProperty('--c', f.color);
-    cell.innerHTML = `
-      <div class="cell-icon" aria-hidden="true">${f.icon}</div>
-      <div class="cell-name">${f.name}</div>
-      <div class="cell-tagline">${f.tagline}</div>
-      <div class="cell-layer">${layerNames[f.layer]}</div>
-    `;
+    cell.innerHTML =
+      '<div class="cell-icon"><span class="pic" data-ic="' + f.icon + '" aria-hidden="true"></span></div>' +
+      '<div class="cell-name">' + f.name + '</div>' +
+      '<div class="cell-tagline">' + f.tagline + '</div>' +
+      '<div class="cell-layer">' + layerNames[f.layer] + '</div>';
     cell.addEventListener('click', () => showFailure(f));
     grid.appendChild(cell);
   });
 
+  paintIcons();
   showFailure(failures[0]);
+
+  /* ---------- IO-gated staggered entry ---------- */
+  const cells = Array.from(document.querySelectorAll('.cell'));
+  const revealAll = () => cells.forEach((c) => c.classList.add('is-in'));
+  if (reduced || !('IntersectionObserver' in window)) {
+    revealAll();
+  } else {
+    const io = new IntersectionObserver((entries, obs) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        obs.unobserve(entry.target);
+        const i = Number(entry.target.dataset.idx || 0);
+        setTimeout(() => entry.target.classList.add('is-in'), i * 70);
+      });
+    }, { threshold: 0.01, rootMargin: '0px 0px -5% 0px' });
+    cells.forEach((c) => io.observe(c));
+    setTimeout(revealAll, 2600);
+  }
 })();
 </script>
 <script>
@@ -282,6 +329,7 @@ body {
     const postSize = () => window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
     if ('ResizeObserver' in window) new ResizeObserver(postSize).observe(document.body);
     window.addEventListener('load', postSize);
+    setTimeout(postSize, 400);
   }
 })();
 </script>

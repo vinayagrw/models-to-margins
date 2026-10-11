@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What Serving Actually Looks Like</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+body {
+  background:
+    radial-gradient(circle at 78% 8%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 34%),
+    radial-gradient(circle at 8% 92%, color-mix(in srgb, var(--accent-2) 12%, transparent), transparent 34%),
+    linear-gradient(180deg, var(--bg-start) 0%, var(--bg-mid) 48%, var(--bg-end) 100%);
+}
+.shell { display: flex; flex-direction: column; gap: clamp(12px, 1.8vw, 20px); }
+:root[data-embedded="true"] .shell { padding: clamp(10px, 1.8vw, 18px) clamp(12px, 2vw, 22px); }
+
+.head { display: flex; flex-direction: column; gap: 6px; }
+.head h1 {
+  font-size: clamp(1.15rem, 3.4vw, 1.72rem);
+  font-weight: 700; letter-spacing: -0.01em; color: var(--text-strong); line-height: 1.15;
+}
+.head p {
+  font-family: "DM Sans", "Segoe UI", sans-serif;
+  font-size: clamp(0.82rem, 2.2vw, 0.95rem); color: var(--muted); line-height: 1.5;
+}
+
+.card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: clamp(12px, 2vw, 18px); box-shadow: var(--shadow-soft);
+  padding: clamp(12px, 2.2vw, 20px);
+}
+
+/* ---- mode toggle ---- */
+.modes { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: clamp(10px, 1.8vw, 16px); }
+.modes .lbl {
+  font-size: clamp(0.62rem, 1.7vw, 0.7rem); font-weight: 700; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--muted-soft); margin-right: 4px;
+}
+.mode {
+  font-family: inherit; cursor: pointer;
+  font-size: clamp(0.74rem, 2vw, 0.86rem); font-weight: 600;
+  padding: 8px clamp(10px, 2.4vw, 15px); border-radius: 999px;
+  border: 1px solid var(--border-strong); background: transparent; color: var(--muted);
+  transition: background 220ms ease, color 220ms ease, border-color 220ms ease;
+}
+.mode:hover { border-color: var(--accent); color: var(--text); }
+.mode[aria-pressed="true"] {
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  border-color: var(--accent); color: var(--text-strong);
+}
+
+/* ---- topology ---- */
+.topo { position: relative; }
+.wires { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+.wire { fill: none; stroke: var(--border-strong); stroke-width: 1.7; stroke-linecap: round; }
+.wire.accent { stroke: var(--accent); stroke-width: 2.1; }
+.wire.soft { stroke: color-mix(in srgb, var(--muted) 55%, transparent); stroke-dasharray: 4 5; }
+.wire.kv { stroke: var(--accent-2); stroke-width: 2.4; }
+.wlabel {
+  font-family: "Space Grotesk", sans-serif; font-size: 10px; font-weight: 700;
+  letter-spacing: 0.06em; fill: var(--accent-2); text-anchor: middle;
+}
+.packet { fill: var(--accent); opacity: 0; }
+
+.grid {
+  position: relative; z-index: 1;
+  display: grid; gap: clamp(10px, 1.8vw, 20px);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-areas:
+    ".      .      store  ."
+    "ingress gate  infer  gpu"
+    ".      obs    obs    .";
+  align-items: stretch;
+}
+.n-ingress { grid-area: ingress; } .n-gate { grid-area: gate; }
+.n-store { grid-area: store; } .n-gpu { grid-area: gpu; }
+.n-obs { grid-area: obs; }
+.tierwrap { grid-area: infer; display: flex; flex-direction: column; gap: clamp(10px, 1.6vw, 18px); }
+
+.node {
+  background: var(--surface-strong); border: 1px solid var(--border);
+  border-radius: 13px; padding: clamp(9px, 1.6vw, 13px);
+  display: flex; flex-direction: column; gap: 6px;
+  box-shadow: var(--shadow-soft);
+  opacity: 0; transform: translateY(10px);
+  transition: opacity 460ms ease, transform 460ms ease, border-color 260ms ease, background 260ms ease;
+}
+.topo.on .node { opacity: 1; transform: none; }
+.node.hot { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 9%, var(--surface-strong)); }
+.node.warm { border-color: var(--accent-2); background: color-mix(in srgb, var(--accent-2) 9%, var(--surface-strong)); }
+.node.dim { border-style: dashed; }
+.node[hidden] { display: none; }
+
+.nhead { display: flex; align-items: center; gap: 8px; }
+.pic { width: clamp(20px, 3.6vw, 26px); height: clamp(20px, 3.6vw, 26px); flex: none; color: var(--accent); }
+.node.warm .pic { color: var(--accent-2); }
+.node.dim .pic { color: var(--muted); }
+.pic svg { width: 100%; height: 100%; }
+.pic svg * { stroke: currentColor; }
+.ntitle { font-size: clamp(0.76rem, 2vw, 0.9rem); font-weight: 700; color: var(--text-strong); line-height: 1.2; }
+.nsub {
+  font-family: "DM Sans", sans-serif; font-size: clamp(0.66rem, 1.75vw, 0.76rem);
+  color: var(--muted-soft); line-height: 1.35;
+}
+.ntag {
+  align-self: flex-start; font-size: clamp(0.58rem, 1.55vw, 0.65rem); font-weight: 700;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 3px 7px; border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 14%, transparent); color: var(--text);
+}
+.node.warm .ntag { background: color-mix(in srgb, var(--accent-2) 16%, transparent); }
+
+.readout {
+  margin-top: clamp(10px, 1.8vw, 16px);
+  border-left: 3px solid var(--accent); border-radius: 0 10px 10px 0;
+  background: color-mix(in srgb, var(--accent) 7%, transparent);
+  padding: clamp(9px, 1.6vw, 13px) clamp(11px, 1.8vw, 15px);
+  font-family: "DM Sans", sans-serif; font-size: clamp(0.76rem, 2vw, 0.87rem);
+  color: var(--text); line-height: 1.55;
+}
+.readout b { color: var(--text-strong); }
+.readout .src {
+  display: block; margin-top: 6px;
+  font-size: clamp(0.68rem, 1.75vw, 0.76rem); color: var(--muted-soft);
+}
+
+/* ---- calculator ---- */
+.calc-head { display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline; justify-content: space-between; margin-bottom: clamp(8px, 1.6vw, 14px); }
+.calc-head h2 { font-size: clamp(0.95rem, 2.6vw, 1.15rem); color: var(--text-strong); font-weight: 700; }
+.calc-head .note { font-family: "DM Sans", sans-serif; font-size: clamp(0.7rem, 1.8vw, 0.78rem); color: var(--muted-soft); }
+
+.fields { display: grid; gap: clamp(9px, 1.6vw, 14px); grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.field { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.field label { font-size: clamp(0.68rem, 1.8vw, 0.77rem); font-weight: 700; color: var(--text); }
+.field input {
+  font-family: "Space Grotesk", sans-serif; font-size: clamp(0.82rem, 2.1vw, 0.95rem);
+  width: 100%; min-width: 0; padding: 8px 10px; border-radius: 9px;
+  border: 1px solid var(--border-strong); background: var(--surface-strong); color: var(--text-strong);
+}
+.field input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.field .help { font-family: "DM Sans", sans-serif; font-size: clamp(0.63rem, 1.65vw, 0.71rem); color: var(--muted-soft); line-height: 1.35; }
+.field .range-row { display: flex; align-items: center; gap: 8px; }
+.field input[type="range"] { padding: 0; accent-color: var(--accent); border: 0; background: transparent; }
+.util-val { font-size: clamp(0.8rem, 2vw, 0.92rem); font-weight: 700; color: var(--text-strong); min-width: 3.4em; text-align: right; }
+
+.outs { display: grid; gap: clamp(9px, 1.6vw, 14px); grid-template-columns: repeat(4, minmax(0, 1fr)); margin-top: clamp(11px, 2vw, 18px); }
+.out {
+  border: 1px solid var(--border); border-radius: 12px; background: var(--surface-strong);
+  padding: clamp(9px, 1.6vw, 13px); display: flex; flex-direction: column; gap: 4px; min-width: 0;
+}
+.out .k { font-size: clamp(0.6rem, 1.6vw, 0.68rem); font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted-soft); }
+.out .v { font-size: clamp(1rem, 3.2vw, 1.5rem); font-weight: 700; color: var(--text-strong); line-height: 1.1; overflow-wrap: anywhere; }
+.out .u { font-family: "DM Sans", sans-serif; font-size: clamp(0.64rem, 1.7vw, 0.72rem); color: var(--muted-soft); }
+.out.empty .v { color: var(--muted-soft); font-size: clamp(0.78rem, 2vw, 0.9rem); font-weight: 600; }
+.out.delta.good { border-color: var(--good); background: color-mix(in srgb, var(--good) 9%, var(--surface-strong)); }
+.out.delta.bad { border-color: var(--warn); background: color-mix(in srgb, var(--warn) 9%, var(--surface-strong)); }
+
+.formula {
+  margin-top: clamp(10px, 1.8vw, 16px); border: 1px dashed var(--border-strong); border-radius: 11px;
+  padding: clamp(9px, 1.6vw, 13px); background: color-mix(in srgb, var(--accent) 4%, transparent);
+  font-family: "DM Sans", sans-serif; font-size: clamp(0.7rem, 1.85vw, 0.8rem); color: var(--muted); line-height: 1.7;
+}
+.formula code {
+  font-family: "Space Grotesk", monospace; color: var(--text-strong); font-weight: 600;
+  background: color-mix(in srgb, var(--border-strong) 45%, transparent); padding: 1px 5px; border-radius: 5px;
+  overflow-wrap: anywhere;
+}
+.formula .row { display: block; }
+
+.caveat {
+  border: 1px solid var(--warn); border-left-width: 4px; border-radius: 0 12px 12px 0;
+  background: color-mix(in srgb, var(--warn) 8%, transparent);
+  padding: clamp(10px, 1.8vw, 15px);
+  display: flex; gap: 10px; align-items: flex-start;
+}
+.caveat .pic { color: var(--warn); }
+.caveat p { font-family: "DM Sans", sans-serif; font-size: clamp(0.76rem, 2vw, 0.88rem); color: var(--text); line-height: 1.55; }
+.caveat b { color: var(--text-strong); }
+.caveat .sub { display: block; margin-top: 6px; color: var(--muted); font-size: clamp(0.7rem, 1.8vw, 0.79rem); }
+
+.refuse {
+  font-family: "DM Sans", sans-serif; font-size: clamp(0.7rem, 1.85vw, 0.8rem);
+  color: var(--muted-soft); line-height: 1.6;
+}
+.refuse b { color: var(--text); }
+
+@media (max-width: 900px) {
+  .fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .outs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 760px) {
+  .wires { display: none; }
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "ingress" "gate" "store" "infer" "gpu" "obs";
+  }
+  .fields, .outs { grid-template-columns: minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .node { transition: none !important; opacity: 1; transform: none; }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <header class="head">
+    <span class="eyebrow">Leg 5 · Self-hosted topology · Altitude L3</span>
+    <h1>What serving actually looks like</h1>
+    <p>The boxes you actually operate when you self-host — and a cost model you fill in yourself, because we will not publish a break-even number we cannot stand behind.</p>
+  </header>
+
+  <section class="card">
+    <div class="modes" role="group" aria-label="Serving topology mode">
+      <span class="lbl">Serving mode</span>
+      <button type="button" class="mode" data-mode="agg" aria-pressed="true">Aggregated serving</button>
+      <button type="button" class="mode" data-mode="dis" aria-pressed="false">Disaggregated prefill / decode</button>
+    </div>
+
+    <div class="topo" id="topo">
+      <svg class="wires" id="wires" aria-hidden="true" focusable="false"></svg>
+      <div class="grid">
+
+        <div class="node n-store dim" id="n-store" data-i="0">
+          <div class="nhead"><span class="pic" data-ic="warehouse" aria-hidden="true"></span><span class="ntitle">Weights store</span></div>
+          <p class="nsub">Model artifacts, versioned, checksummed</p>
+        </div>
+
+        <div class="node n-ingress" id="n-ingress" data-i="1">
+          <div class="nhead"><span class="pic" data-ic="exchange" aria-hidden="true"></span><span class="ntitle">Ingress / load balancer</span></div>
+          <p class="nsub">TLS, routing, request admission</p>
+        </div>
+
+        <div class="node n-gate" id="n-gate" data-i="2">
+          <div class="nhead"><span class="pic" data-ic="barrier" aria-hidden="true"></span><span class="ntitle">AI gateway</span></div>
+          <p class="nsub">Auth, quotas, model routing, redaction, audit</p>
+        </div>
+
+        <div class="tierwrap">
+          <div class="node hot" id="n-infer" data-i="3">
+            <div class="nhead"><span class="pic" data-ic="gears" aria-hidden="true"></span><span class="ntitle">Inference servers</span></div>
+            <p class="nsub">vLLM / SGLang</p>
+            <span class="ntag" id="infer-tag">Prefill + decode in one pool</span>
+          </div>
+          <div class="node hot" id="n-prefill" data-i="3" hidden>
+            <div class="nhead"><span class="pic" data-ic="split" aria-hidden="true"></span><span class="ntitle">Prefill tier</span></div>
+            <p class="nsub">vLLM / SGLang · compute-bound, bursty · scales on queued prompt tokens</p>
+            <span class="ntag">Scales on input burst</span>
+          </div>
+          <div class="node warm" id="n-decode" data-i="4" hidden>
+            <div class="nhead"><span class="pic" data-ic="merge" aria-hidden="true"></span><span class="ntitle">Decode tier</span></div>
+            <p class="nsub">vLLM / SGLang · memory-bandwidth-bound, long-running · scales on concurrent sequences</p>
+            <span class="ntag">Scales on live sessions</span>
+          </div>
+        </div>
+
+        <div class="node n-gpu" id="n-gpu" data-i="5">
+          <div class="nhead"><span class="pic" data-ic="cpu" aria-hidden="true"></span><span class="ntitle">GPU pool</span></div>
+          <p class="nsub">The line that bills whether or not it is busy</p>
+        </div>
+
+        <div class="node n-obs dim" id="n-obs" data-i="6">
+          <div class="nhead"><span class="pic" data-ic="gauge" aria-hidden="true"></span><span class="ntitle">Observability + cost meter</span></div>
+          <p class="nsub">Tokens, latency percentiles, GPU utilisation, cost per request — collected from gateway, inference servers and GPU pool</p>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="readout" id="readout" aria-live="polite"></div>
+  </section>
+
+  <section class="card">
+    <div class="calc-head">
+      <h2>Your cost structure, your numbers</h2>
+      <span class="note">Everything starts blank on purpose. We supply the arithmetic; you supply the figures.</span>
+    </div>
+
+    <p class="refuse" style="margin-bottom: 12px;">
+      We publish no break-even token volume and no GPU hourly rate. <b>Every published break-even we could trace ran back to a vendor-adjacent source</b>, and the largest single input — GPU $/hour — is directly contradicted across sources: 2026 figures disagree on whether rentals rose or fell, and quoted B200 rates span roughly a factor of two. A number built on that input would look precise and mean nothing.
+    </p>
+
+    <div class="fields">
+      <div class="field">
+        <label for="f-rate">GPU $/hour</label>
+        <input type="number" id="f-rate" min="0" step="0.01" placeholder="your quote">
+        <span class="help">Your live quote this week, not a published constant.</span>
+      </div>
+      <div class="field">
+        <label for="f-gpus">Number of GPUs</label>
+        <input type="number" id="f-gpus" min="0" step="1" placeholder="count">
+        <span class="help">What you actually reserve, including idle standby.</span>
+      </div>
+      <div class="field">
+        <label for="f-util">Utilisation %</label>
+        <div class="range-row">
+          <input type="range" id="f-util" min="0" max="100" step="1" value="0">
+          <span class="util-val" id="util-val" aria-hidden="true">0%</span>
+        </div>
+        <span class="help">Measured, not assumed. Zero means "not yet measured".</span>
+      </div>
+      <div class="field">
+        <label for="f-tokens">Tokens per month (millions)</label>
+        <input type="number" id="f-tokens" min="0" step="1" placeholder="millions">
+        <span class="help">Blended input + output, real traffic.</span>
+      </div>
+      <div class="field">
+        <label for="f-api">Managed API $/M tokens (blended in + out)</label>
+        <input type="number" id="f-api" min="0" step="0.01" placeholder="your blended rate">
+        <span class="help">From your own invoice, at your own in/out mix.</span>
+      </div>
+      <div class="field">
+        <label for="f-fte">Platform engineering FTE cost per month</label>
+        <input type="number" id="f-fte" min="0" step="100" placeholder="fully loaded">
+        <span class="help">The line most models omit.</span>
+      </div>
+    </div>
+
+    <div class="outs" aria-live="polite">
+      <div class="out empty" id="o-self"><span class="k">Self-host / month</span><span class="v" data-v>Enter your figures</span><span class="u">GPU spend + platform FTE</span></div>
+      <div class="out empty" id="o-unit"><span class="k">Effective self-host $/M tokens</span><span class="v" data-v>Enter your figures</span><span class="u">At the utilisation you stated</span></div>
+      <div class="out empty" id="o-api"><span class="k">Managed / month</span><span class="v" data-v>Enter your figures</span><span class="u">Tokens × your blended rate</span></div>
+      <div class="out empty delta" id="o-diff"><span class="k">Difference</span><span class="v" data-v>Enter your figures</span><span class="u" id="o-diff-u">Managed minus self-host</span></div>
+    </div>
+
+    <div class="formula">
+      <span class="row">Self-host monthly = <code>GPUs × $/hour × 730</code> + <code>FTE $/month</code></span>
+      <span class="row">Effective $/M tokens = <code>self-host monthly ÷ (tokens_M × utilisation%)</code> — you pay for the whole hour, you only serve the busy part of it</span>
+      <span class="row">Managed monthly = <code>tokens_M × $/M</code></span>
+      <span class="row">Difference = <code>managed monthly − self-host monthly</code></span>
+      <span class="row" style="color: var(--text);">This output is only as good as the inputs you supplied. It is arithmetic, not a recommendation, and it carries none of our judgement about your workload.</span>
+    </div>
+  </section>
+
+  <section class="card caveat">
+    <span class="pic" data-ic="warning" aria-hidden="true"></span>
+    <p>
+      <b>Utilisation is the variable that decides this, and it is the one most often assumed rather than measured.</b>
+      Idle GPUs bill at full rate. A spiky workload loses on this trade regardless of the token price.
+      <span class="sub">If you cannot show a measured utilisation figure from the last thirty days, the calculator above is a hypothesis, not a business case.</span>
+    </p>
+  </section>
+
+</div>
+
+<script>
+(function () {
+  'use strict';
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- icons ---------- */
+  var ICON_BASE = '../customs-entry-agent/flow-icons/';
+  var cache = {};
+  var load = function (n) {
+    return cache[n] || (cache[n] = fetch(ICON_BASE + n + '.svg')
+      .then(function (r) { return r.ok ? r.text() : Promise.reject(); })
+      .then(function (t) { return t.replace(/stroke="#232f3e"/g, 'stroke="currentColor"'); })
+      .catch(function () { return ''; }));
+  };
+  document.querySelectorAll('[data-ic]').forEach(function (slot) {
+    load(slot.dataset.ic).then(function (svg) { if (!slot.firstChild) { slot.innerHTML = svg; } });
+  });
+
+  /* ---------- topology ---------- */
+  var SVGNS = 'http://www.w3.org/2000/svg';
+  var topo = document.getElementById('topo');
+  var wires = document.getElementById('wires');
+  var readout = document.getElementById('readout');
+  var mode = 'agg';
+  var packet = null;
+  var packetPath = null;
+  var rafId = 0;
+
+  var el = function (id) { return document.getElementById(id); };
+  var nodes = {
+    store: el('n-store'), ingress: el('n-ingress'), gate: el('n-gate'),
+    infer: el('n-infer'), prefill: el('n-prefill'), decode: el('n-decode'),
+    gpu: el('n-gpu'), obs: el('n-obs')
+  };
+
+  function rect(node) {
+    var a = node.getBoundingClientRect();
+    var b = topo.getBoundingClientRect();
+    return { x: a.left - b.left, y: a.top - b.top, w: a.width, h: a.height };
+  }
+  function side(r, s) {
+    if (s === 'r') return [r.x + r.w, r.y + r.h / 2];
+    if (s === 'l') return [r.x, r.y + r.h / 2];
+    if (s === 't') return [r.x + r.w / 2, r.y];
+    return [r.x + r.w / 2, r.y + r.h];
+  }
+  function curve(p, q, horiz) {
+    if (horiz) {
+      var dx = Math.max(18, Math.abs(q[0] - p[0]) * 0.45);
+      return 'M' + p[0] + ',' + p[1] + ' C' + (p[0] + dx) + ',' + p[1] + ' ' + (q[0] - dx) + ',' + q[1] + ' ' + q[0] + ',' + q[1];
+    }
+    var dy = Math.max(14, Math.abs(q[1] - p[1]) * 0.5);
+    return 'M' + p[0] + ',' + p[1] + ' C' + p[0] + ',' + (p[1] + dy) + ' ' + q[0] + ',' + (q[1] - dy) + ' ' + q[0] + ',' + q[1];
+  }
+
+  function visible(n) { return n && !n.hasAttribute('hidden') && n.offsetParent !== null; }
+
+  function edges() {
+    var out = [];
+    var add = function (a, sa, b, sb, cls, horiz, label) {
+      if (!visible(a) || !visible(b)) return;
+      out.push({ d: curve(side(rect(a), sa), side(rect(b), sb), horiz), cls: cls, label: label });
+    };
+    add(nodes.ingress, 'r', nodes.gate, 'l', 'accent', true);
+    if (mode === 'agg') {
+      add(nodes.gate, 'r', nodes.infer, 'l', 'accent', true);
+      add(nodes.infer, 'r', nodes.gpu, 'l', 'accent', true);
+      add(nodes.store, 'b', nodes.infer, 't', 'soft', false);
+      add(nodes.infer, 'b', nodes.obs, 't', 'soft', false);
+    } else {
+      add(nodes.gate, 'r', nodes.prefill, 'l', 'accent', true);
+      add(nodes.prefill, 'b', nodes.decode, 't', 'kv', false, 'KV cache handoff');
+      add(nodes.prefill, 'r', nodes.gpu, 'l', '', true);
+      add(nodes.decode, 'r', nodes.gpu, 'l', 'accent', true);
+      add(nodes.store, 'b', nodes.prefill, 't', 'soft', false);
+      add(nodes.decode, 'b', nodes.obs, 't', 'soft', false);
+    }
+    add(nodes.gate, 'b', nodes.obs, 't', 'soft', false);
+    add(nodes.gpu, 'b', nodes.obs, 't', 'soft', false);
+    return out;
+  }
+
+  function travelPath() {
+    var chain = mode === 'agg'
+      ? [nodes.ingress, nodes.gate, nodes.infer, nodes.gpu]
+      : [nodes.ingress, nodes.gate, nodes.prefill, nodes.gpu];
+    var pts = chain.filter(visible).map(function (n) {
+      var r = rect(n);
+      return [r.x + r.w / 2, r.y + r.h / 2];
+    });
+    if (pts.length < 2) return '';
+    return pts.map(function (p, i) { return (i ? 'L' : 'M') + p[0] + ',' + p[1]; }).join(' ');
+  }
+
+  function draw(animate) {
+    var b = topo.getBoundingClientRect();
+    if (!b.width) return;
+    wires.setAttribute('viewBox', '0 0 ' + b.width + ' ' + b.height);
+    while (wires.firstChild) { wires.removeChild(wires.firstChild); }
+
+    edges().forEach(function (e) {
+      var p = document.createElementNS(SVGNS, 'path');
+      p.setAttribute('class', 'wire ' + e.cls);
+      p.setAttribute('d', e.d);
+      wires.appendChild(p);
+      if (animate && !reduce) {
+        var len = p.getTotalLength();
+        p.style.strokeDasharray = len + ' ' + len;
+        p.style.strokeDashoffset = len;
+        requestAnimationFrame(function () {
+          p.style.transition = 'stroke-dashoffset 620ms ease';
+          p.style.strokeDashoffset = '0';
+        });
+      }
+      if (e.label) {
+        var mid = p.getPointAtLength(p.getTotalLength() / 2);
+        var t = document.createElementNS(SVGNS, 'text');
+        t.setAttribute('class', 'wlabel');
+        t.setAttribute('x', mid.x);
+        t.setAttribute('y', mid.y - 5);
+        t.textContent = e.label;
+        wires.appendChild(t);
+      }
+    });
+
+    packetPath = document.createElementNS(SVGNS, 'path');
+    packetPath.setAttribute('d', travelPath());
+    packetPath.setAttribute('fill', 'none');
+    packetPath.setAttribute('stroke', 'none');
+    wires.appendChild(packetPath);
+
+    packet = document.createElementNS(SVGNS, 'circle');
+    packet.setAttribute('class', 'packet');
+    packet.setAttribute('r', '5');
+    wires.appendChild(packet);
+  }
+
+  function runPacket() {
+    if (reduce || !packet || !packetPath) return;
+    var d = packetPath.getAttribute('d');
+    if (!d) return;
+    var len = packetPath.getTotalLength();
+    if (!len) return;
+    var start = 0;
+    cancelAnimationFrame(rafId);
+    var step = function (ts) {
+      if (!start) start = ts;
+      var t = (ts - start) / 2400;
+      if (t >= 1) { packet.setAttribute('opacity', '0'); start = 0; rafId = requestAnimationFrame(step); return; }
+      var f = t < 0.5 ? t / 0.5 : 1 - (t - 0.5) / 0.5;
+      var pt = packetPath.getPointAtLength(len * f);
+      packet.setAttribute('cx', pt.x);
+      packet.setAttribute('cy', pt.y);
+      packet.setAttribute('opacity', '0.9');
+      rafId = requestAnimationFrame(step);
+    };
+    rafId = requestAnimationFrame(step);
+  }
+
+  var COPY = {
+    agg: 'One homogeneous pool of inference servers handles both phases of every request: the <b>prefill</b> of the prompt and the token-by-token <b>decode</b>. Simple to run, one autoscaling signal, one failure domain — and the two phases fight each other for the same GPUs.',
+    dis: 'The pool splits. Prefill is compute-bound and bursty; decode is memory-bandwidth-bound and long-running, so the two tiers scale on different signals and the KV cache moves between them over a dedicated handoff. <b>First-class since SGLang 0.5.12, 16 May 2026.</b> For agentic workloads — long prompts, short outputs — the prefill tier dominates, and sizing it separately is where the throughput is.'
+  };
+  var SRC = {
+    agg: 'Mechanism, not benchmark: nothing here is a throughput claim.',
+    dis: 'We quote no throughput multiplier. Published gains come from vendor-cited optimums on specific benchmark configurations, not production averages — the mechanism above is the part that transfers to your cluster.'
+  };
+
+  function setMode(next, animate) {
+    mode = next;
+    document.querySelectorAll('.mode').forEach(function (b) {
+      b.setAttribute('aria-pressed', String(b.dataset.mode === next));
+    });
+    var agg = next === 'agg';
+    nodes.infer.hidden = !agg;
+    nodes.prefill.hidden = agg;
+    nodes.decode.hidden = agg;
+    readout.innerHTML = COPY[next] + '<span class="src">' + SRC[next] + '</span>';
+    requestAnimationFrame(function () {
+      draw(animate);
+      if (animate) { runPacket(); }
+    });
+  }
+
+  document.querySelectorAll('.mode').forEach(function (b) {
+    b.addEventListener('click', function () { setMode(b.dataset.mode, !reduce); });
+  });
+
+  function reveal() {
+    if (reduce) {
+      topo.classList.add('on');
+      draw(false);
+      return;
+    }
+    document.querySelectorAll('.node').forEach(function (n) {
+      n.style.transitionDelay = (parseInt(n.dataset.i || '0', 10) * 120) + 'ms';
+    });
+    topo.classList.add('on');
+    setTimeout(function () {
+      document.querySelectorAll('.node').forEach(function (n) { n.style.transitionDelay = '0ms'; });
+      draw(true);
+      setTimeout(runPacket, 700);
+    }, 900);
+  }
+
+  setMode('agg', false);
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) { io.disconnect(); reveal(); }
+      });
+    }, { threshold: 0.2 });
+    io.observe(topo);
+  } else {
+    reveal();
+  }
+  window.addEventListener('resize', function () { draw(false); });
+  if ('ResizeObserver' in window) { new ResizeObserver(function () { draw(false); }).observe(topo); }
+
+  /* ---------- calculator ---------- */
+  var HOURS = 730;
+  var fRate = el('f-rate'), fGpus = el('f-gpus'), fUtil = el('f-util'),
+      fTokens = el('f-tokens'), fApi = el('f-api'), fFte = el('f-fte');
+  var utilVal = el('util-val');
+  var outs = {
+    self: el('o-self'), unit: el('o-unit'), api: el('o-api'), diff: el('o-diff')
+  };
+  var timers = {};
+
+  function num(input) {
+    var raw = String(input.value).trim();
+    if (raw === '') return null;
+    var v = parseFloat(raw);
+    if (!isFinite(v) || v < 0) return null;
+    return v;
+  }
+  function money(v) {
+    var abs = Math.abs(v);
+    var dp = abs >= 100 ? 0 : (abs >= 1 ? 2 : 4);
+    return '$' + v.toLocaleString('en-US', { minimumFractionDigits: dp, maximumFractionDigits: dp });
+  }
+
+  function setEmpty(box) {
+    clearTimeout(timers[box.id]);
+    cancelAnimationFrame(box._raf || 0);
+    box.classList.add('empty');
+    box.classList.remove('good', 'bad');
+    box.querySelector('[data-v]').textContent = 'Enter your figures';
+    box._cur = 0;
+  }
+
+  function setValue(box, target, fmt) {
+    box.classList.remove('empty');
+    var node = box.querySelector('[data-v]');
+    var from = typeof box._cur === 'number' ? box._cur : 0;
+    box._cur = target;
+    if (reduce) { node.textContent = fmt(target); return; }
+    cancelAnimationFrame(box._raf || 0);
+    clearTimeout(timers[box.id]);
+    var t0 = 0;
+    var dur = 520;
+    var step = function (ts) {
+      if (!t0) t0 = ts;
+      var p = Math.min(1, (ts - t0) / dur);
+      var e = 1 - Math.pow(1 - p, 3);
+      node.textContent = fmt(from + (target - from) * e);
+      if (p < 1) { box._raf = requestAnimationFrame(step); }
+      else { node.textContent = fmt(target); }
+    };
+    box._raf = requestAnimationFrame(step);
+    /* settle fallback: snap the final value even if rAF is throttled */
+    timers[box.id] = setTimeout(function () {
+      cancelAnimationFrame(box._raf || 0);
+      node.textContent = fmt(target);
+    }, dur + 260);
+  }
+
+  function recompute() {
+    var rate = num(fRate), gpus = num(fGpus), tokens = num(fTokens),
+        api = num(fApi), fte = num(fFte);
+    var util = parseFloat(fUtil.value);
+    if (!isFinite(util)) util = 0;
+    utilVal.textContent = util + '%';
+
+    var selfMonthly = null;
+    if (rate !== null && gpus !== null) {
+      selfMonthly = gpus * rate * HOURS + (fte === null ? 0 : fte);
+    }
+
+    if (selfMonthly === null || !isFinite(selfMonthly)) { setEmpty(outs.self); }
+    else { setValue(outs.self, selfMonthly, money); }
+
+    var served = (tokens !== null && util > 0) ? tokens * (util / 100) : 0;
+    if (selfMonthly === null || served <= 0 || !isFinite(selfMonthly / served)) { setEmpty(outs.unit); }
+    else { setValue(outs.unit, selfMonthly / served, money); }
+
+    var managed = (tokens !== null && api !== null) ? tokens * api : null;
+    if (managed === null || !isFinite(managed)) { setEmpty(outs.api); }
+    else { setValue(outs.api, managed, money); }
+
+    if (managed === null || selfMonthly === null || !isFinite(managed - selfMonthly)) {
+      setEmpty(outs.diff);
+      el('o-diff-u').textContent = 'Managed minus self-host';
+    } else {
+      var d = managed - selfMonthly;
+      setValue(outs.diff, d, money);
+      outs.diff.classList.toggle('good', d > 0);
+      outs.diff.classList.toggle('bad', d < 0);
+      el('o-diff-u').textContent = d > 0
+        ? 'Self-host cheaper by this, on your inputs'
+        : (d < 0 ? 'Managed cheaper by this, on your inputs' : 'Level, on your inputs');
+    }
+  }
+
+  [fRate, fGpus, fTokens, fApi, fFte, fUtil].forEach(function (i) {
+    i.addEventListener('input', recompute);
+    i.addEventListener('change', recompute);
+  });
+  recompute();
+
+  /* ---------- autosize ---------- */
+  if (document.documentElement.dataset.embedded === 'true') {
+    var postSize = function () {
+      window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+    };
+    if ('ResizeObserver' in window) { new ResizeObserver(postSize).observe(document.body); }
+    window.addEventListener('load', postSize);
+    setTimeout(postSize, 400);
+  }
+})();
+</script>
+</body>
+</html>

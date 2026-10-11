@@ -4,143 +4,133 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Twelve Years in One Arc — 2014 to 2026</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="./_theme-bootstrap.js"></script>
 <link rel="stylesheet" href="./_theme.css">
 <style>
 /* Scene-specific: dialectic pendulum. The discourse swings from the
-   microservices pole to the monolith pole, then settles at equilibrium. */
+   microservices pole to the monolith pole, then settles at equilibrium.
+   Rebuilt icon-led: an icon rail carries the six eras, a token walks the
+   spine, and a swing axis up top re-enacts the damped swing. */
 :root {
-  --mono: var(--accent-3);
-  --micro: #a56cff;
+  --mono-pole: var(--accent-3);
+  --micro-pole: var(--accent);
   --reframe: var(--accent-2);
 }
+:root[data-embedded="true"], :root[data-embedded="true"] body { height: auto; }
 
 .shell { display: flex; flex-direction: column; gap: 12px; }
-:root[data-embedded="true"] .shell {
-  display: flex; flex-direction: column; gap: clamp(6px, 1vh, 12px);
-  padding: clamp(10px, 1.6vh, 16px) clamp(14px, 2vw, 22px);
-}
+:root[data-embedded="true"] .shell { padding: 14px clamp(14px, 2vw, 22px); }
 
-.head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.head .eyebrow {
+  font: 600 0.62rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--muted-soft);
+}
 .head h1 {
   font-family: "Space Grotesk", sans-serif; font-weight: 700;
-  font-size: clamp(1.1rem, 2.4vw, 1.5rem); letter-spacing: -0.02em; color: var(--text-strong);
+  font-size: clamp(1.02rem, 2.4vw, 1.4rem); letter-spacing: -0.02em; color: var(--text-strong);
+  margin-top: 3px;
 }
-.head .legend { display: flex; gap: 14px; font-family: "DM Sans", sans-serif; font-size: 0.74rem; color: var(--muted); }
-.head .legend span { display: flex; align-items: center; gap: 6px; }
-.head .legend i { width: 10px; height: 10px; border-radius: 3px; }
-:root[data-embedded="true"] .head h1 { font-size: clamp(0.95rem, 2.2vh, 1.25rem); }
-:root[data-embedded="true"] .head .legend { font-size: clamp(0.69rem, 1.3vh, 0.74rem); }
+.legend { display: flex; gap: 14px; flex-wrap: wrap; font-family: "DM Sans", sans-serif; font-size: 0.72rem; color: var(--muted); margin-top: 6px; }
+.legend span { display: flex; align-items: center; gap: 6px; }
+.legend i { width: 10px; height: 10px; border-radius: 3px; }
 
-/* Stage */
-.stage {
-  position: relative; flex: 1 1 auto; min-height: 0;
-  border: 1px solid var(--border); border-radius: 20px; overflow: hidden;
-  background: var(--surface); box-shadow: var(--shadow-soft);
-  aspect-ratio: 1600 / 660;
+.ctl { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.ctl button {
+  min-height: 34px; padding: 6px 12px; cursor: pointer; border-radius: 8px;
+  font: 600 0.64rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.07em; text-transform: uppercase;
+  color: var(--accent); background: transparent; border: 1px solid var(--accent);
 }
-:root[data-embedded="true"] .stage { aspect-ratio: auto; }
+.ctl button:hover { background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.ctl .hint { font: 500 0.68rem/1.3 "DM Sans", sans-serif; color: var(--muted-soft); }
 
-/* Pole bands */
-.pole { position: absolute; left: 0; right: 0; pointer-events: none; }
-.pole.micro { top: 0; height: 45%; background: linear-gradient(180deg, color-mix(in srgb, var(--micro) 7%, transparent), transparent 80%); }
-.pole.mono { top: 45%; bottom: 0; background: linear-gradient(0deg, color-mix(in srgb, var(--mono) 7%, transparent), transparent 80%); }
-.pole-label {
-  position: absolute; font: 700 0.7rem/1 "Space Grotesk", sans-serif;
-  letter-spacing: 0.16em; text-transform: uppercase; pointer-events: none;
+/* Swing axis: micro pole on the left, mono pole on the right, the dashed
+   equilibrium mark where the swing finally settles. The marker re-enacts
+   the damped swing as the token walks the eras below. */
+.axis { border: 1px solid var(--border-strong); border-radius: 12px; background: var(--surface); padding: 10px 12px 12px; box-shadow: var(--shadow-soft); }
+.axis-labels { display: flex; justify-content: space-between; gap: 8px; }
+.axis-labels b {
+  font: 700 0.6rem/1.2 "Space Grotesk", sans-serif; letter-spacing: 0.12em; text-transform: uppercase;
 }
-.pole-label.micro { top: 4.5%; right: 1.6%; color: color-mix(in srgb, var(--micro) 80%, var(--text)); }
-.pole-label.mono { bottom: 4.5%; right: 1.6%; color: color-mix(in srgb, var(--mono) 80%, var(--text)); }
-:root[data-embedded="true"] .pole-label { font-size: clamp(0.69rem, 1.15vh, 0.7rem); }
+.axis-labels b.micro { color: var(--micro-pole); }
+.axis-labels b.mono { color: var(--mono-pole); text-align: right; }
+.track { position: relative; height: 10px; margin-top: 8px; border-radius: 5px;
+  background: linear-gradient(90deg,
+    color-mix(in srgb, var(--micro-pole) 22%, var(--heat-empty)),
+    var(--heat-empty) 45%,
+    color-mix(in srgb, var(--mono-pole) 22%, var(--heat-empty)));
+  border: 1px solid var(--border);
+}
+.track .eq { position: absolute; top: -5px; bottom: -5px; left: 45%; width: 0; border-left: 1.5px dashed var(--reframe); }
+.track .marker {
+  position: absolute; top: 50%; left: 45%; width: 16px; height: 16px; border-radius: 50%;
+  transform: translate(-50%, -50%); background: var(--reframe);
+  border: 2.5px solid var(--surface-strong);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--reframe) 30%, transparent);
+  transition: left 550ms cubic-bezier(.4,0,.2,1), background 300ms, box-shadow 300ms;
+}
+.axis-readout { margin-top: 9px; font: 500 0.68rem/1.35 "DM Sans", sans-serif; color: var(--muted); }
+.axis-readout b { color: var(--text-strong); font-weight: 700; font-family: "Space Grotesk", sans-serif; }
+.eq-label { font: 700 0.58rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.12em; text-transform: uppercase; color: var(--reframe); margin-top: 8px; text-align: center; }
 
-/* Equilibrium line */
-.equilibrium {
-  position: absolute; left: 0; right: 0; top: 45%; height: 0;
-  border-top: 1.5px dashed color-mix(in srgb, var(--reframe) 55%, transparent);
-  pointer-events: none;
+/* Era stack: icon rail carries the spine, the token rides it. */
+.stack { display: flex; flex-direction: column; border: 1px solid var(--border-strong); border-radius: 12px; overflow: hidden; position: relative; background: var(--surface); }
+.band {
+  display: grid; grid-template-columns: 52px 1fr; align-items: center;
+  min-height: 58px; position: relative; cursor: pointer; text-align: left;
+  background: transparent; border: 0; width: 100%; font-family: inherit; padding: 0;
 }
-.equilibrium-label {
-  position: absolute; top: 41%; left: 1.6%;
-  font: 700 0.7rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.14em;
-  text-transform: uppercase; color: var(--reframe); pointer-events: none;
-}
-:root[data-embedded="true"] .equilibrium-label { font-size: clamp(0.69rem, 1.1vh, 0.7rem); }
+.band + .band { border-top: 1px solid var(--border); }
+.band:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.band[aria-pressed="true"] { background: color-mix(in srgb, var(--c) 7%, transparent); }
 
-/* Swing path */
-.swing { position: absolute; inset: 0; width: 100%; height: 100%; }
-.swing-path {
-  fill: none; stroke: color-mix(in srgb, var(--text) 45%, transparent);
-  stroke-width: 2.5; stroke-linecap: round; stroke-dasharray: 2400;
-  stroke-dashoffset: 2400; animation: draw 2.4s ease-out forwards .2s;
-  vector-effect: non-scaling-stroke;
+.rail { position: relative; height: 100%; min-height: 58px; }
+.rail .spine {
+  position: absolute; left: 50%; top: 0; bottom: 0; width: 2px;
+  background: var(--border-strong); transform: translateX(-50%);
 }
+.band:first-child .rail .spine { top: 50%; }
+.band:last-child .rail .spine { bottom: 50%; }
+.pic {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%);
+  width: 34px; height: 34px; display: grid; place-items: center; border-radius: 9px;
+  background: var(--surface-strong); border: 1.5px solid var(--border-strong);
+  color: var(--muted); transition: color 300ms, border-color 300ms, box-shadow 300ms;
+}
+.pic svg { width: 22px; height: 22px; display: block; }
+.pic svg * { stroke: currentColor; }
+.band.lit .pic { color: var(--c); border-color: var(--c); box-shadow: 0 0 0 3px color-mix(in srgb, var(--c) 18%, transparent); }
 
-/* Beat dots */
-.dot {
-  position: absolute; width: 15px; height: 15px; border-radius: 50%;
-  transform: translate(-50%, -50%); border: 2.5px solid var(--surface-strong);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--c) 35%, transparent);
-  background: var(--c); opacity: 0; animation: pop .4s ease-out forwards;
-}
-
-/* Beat cards */
-.beat {
-  position: absolute; width: 13.8%; min-width: 128px;
-  padding: 9px 11px; border-radius: 12px;
-  border: 1px solid color-mix(in srgb, var(--c) 40%, var(--border));
-  background: var(--surface-strong); box-shadow: var(--shadow-soft);
-  opacity: 0; transform: translateY(8px); animation: rise .5s ease-out forwards;
-}
+.band-info { padding: 9px 12px 9px 4px; min-width: 0; }
 .beat-date {
-  font: 700 0.7rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.12em;
+  font: 700 0.66rem/1.2 "Space Grotesk", sans-serif; letter-spacing: 0.1em;
   text-transform: uppercase; color: var(--c);
 }
 .beat-title {
-  font: 700 0.82rem/1.15 "Space Grotesk", sans-serif; letter-spacing: -0.01em;
-  color: var(--text-strong); margin-top: 4px;
+  font: 700 0.8rem/1.2 "Space Grotesk", sans-serif; letter-spacing: -0.01em;
+  color: var(--text-strong); margin-top: 2px;
 }
-.beat-desc { font: 400 0.72rem/1.35 "DM Sans", sans-serif; color: var(--muted); margin-top: 4px; }
-:root[data-embedded="true"] .beat { padding: clamp(5px, 1vh, 9px) clamp(7px, 1.1vw, 11px); min-width: 0; }
-:root[data-embedded="true"] .beat-date { font-size: clamp(0.69rem, 1.05vh, 0.7rem); }
-:root[data-embedded="true"] .beat-title { font-size: clamp(0.72rem, 1.4vh, 0.82rem); }
-:root[data-embedded="true"] .beat-desc { font-size: clamp(0.7rem, 1.15vh, 0.72rem); }
-.beat.reframe { border-width: 1.5px; background: color-mix(in srgb, var(--reframe) 8%, var(--surface-strong)); }
+.beat-desc { font: 400 0.72rem/1.4 "DM Sans", sans-serif; color: var(--muted); margin-top: 3px; }
+.band.reframe-band { background: color-mix(in srgb, var(--reframe) 6%, transparent); }
 
-/* Takeaway strip */
-.takeaway {
-  display: flex; align-items: center; gap: 10px; justify-content: center;
-  font-family: "DM Sans", sans-serif; font-size: 0.8rem; color: var(--muted); text-align: center;
+/* the token riding the spine (positioned over the whole stack) */
+.packet {
+  position: absolute; left: 26px; top: 0; width: 10px; height: 10px; border-radius: 50%;
+  transform: translate(-50%,-50%); background: var(--accent);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--accent) 70%, transparent);
+  opacity: 0; pointer-events: none; z-index: 2;
 }
+
+.takeaway { font: 400 0.76rem/1.5 "DM Sans", sans-serif; color: var(--muted); text-align: center; }
 .takeaway strong { color: var(--text-strong); font-family: "Space Grotesk", sans-serif; }
-:root[data-embedded="true"] .takeaway { font-size: clamp(0.72rem, 1.4vh, 0.8rem); }
 
-@keyframes draw { to { stroke-dashoffset: 0; } }
-@keyframes pop { to { opacity: 1; } }
-@keyframes rise { to { opacity: 1; transform: translateY(0); } }
+@media (max-width: 620px) {
+  .band { grid-template-columns: 44px 1fr; }
+  .rail { min-height: 64px; }
+  .axis-labels b { font-size: 0.56rem; }
+}
 @media (prefers-reduced-motion: reduce) {
-  .swing-path { animation: none; stroke-dashoffset: 0; }
-  .dot, .beat { animation: none; opacity: 1; transform: translateY(0); }
-}
-@media (max-width: 720px) {
-  .beat { min-width: 108px; }
-  .beat-desc { display: none; }
-}
-
-/* Small screens: absolutely-positioned beat cards pile up, so the stage
-   becomes a plain vertical timeline list. */
-@media (max-width: 760px) {
-  .stage, :root[data-embedded="true"] .stage {
-    aspect-ratio: auto; display: flex; flex-direction: column; gap: 7px;
-    padding: 12px; flex: 1 1 auto; min-height: 0;
-  }
-  .pole, .pole-label, .equilibrium, .equilibrium-label, .swing, .dot { display: none; }
-  .beat {
-    position: static; width: auto; min-width: 0;
-    opacity: 1; transform: none; animation: none;
-    border-left: 3px solid var(--c);
-  }
-  .beat-desc { display: block; }
+  .packet { display: none; }
+  .track .marker { transition: none; }
 }
 </style>
 </head>
@@ -148,70 +138,198 @@
 <div class="shell">
 
   <header class="head">
-    <div>
-      <div class="eyebrow">2014 → 2026 · One damped swing</div>
-      <h1>Twelve years of discourse, settling at equilibrium</h1>
-    </div>
+    <div class="eyebrow">2014 → 2026 · One damped swing</div>
+    <h1>Twelve years of discourse, settling at equilibrium</h1>
     <div class="legend">
-      <span><i style="background:var(--micro)"></i>Microservices pole</span>
-      <span><i style="background:var(--mono)"></i>Monolith pole</span>
+      <span><i style="background:var(--micro-pole)"></i>Microservices pole</span>
+      <span><i style="background:var(--mono-pole)"></i>Monolith pole</span>
       <span><i style="background:var(--reframe)"></i>The reframe</span>
     </div>
   </header>
 
-  <div class="stage" role="img" aria-label="A damped pendulum timeline from 2014 to 2026. The discourse starts at the microservices pole in 2014, swings hard to the monolith pole through 2015 to 2025, and settles at equilibrium in 2026: forces, not stages.">
-    <div class="pole micro"></div>
-    <div class="pole mono"></div>
-    <div class="pole-label micro">The microservices pole</div>
-    <div class="pole-label mono">The monolith pole</div>
-    <div class="equilibrium"></div>
-    <div class="equilibrium-label">Equilibrium · forces decide</div>
+  <div class="ctl">
+    <button type="button" id="replay">Replay swing</button>
+    <span class="hint">The dot walks the eras. Tap one to see where the discourse sat.</span>
+  </div>
 
-    <svg class="swing" viewBox="0 0 1000 500" preserveAspectRatio="none" aria-hidden="true">
-      <path class="swing-path" d="M 70 55 C 120 55, 170 320, 220 320 S 330 375, 380 375 S 510 355, 560 355 S 690 310, 740 310 S 870 225, 920 225"/>
-    </svg>
+  <div class="axis" role="img" aria-label="A damped pendulum axis from the microservices pole on the left to the monolith pole on the right. The discourse starts at the microservices pole in 2014, swings hard to the monolith pole through 2015 to 2025, and settles at equilibrium in 2026: forces, not stages.">
+    <div class="axis-labels">
+      <b class="micro">The microservices pole</b>
+      <b class="mono">The monolith pole</b>
+    </div>
+    <div class="track">
+      <span class="eq" aria-hidden="true"></span>
+      <span class="marker" id="marker" aria-hidden="true"></span>
+    </div>
+    <div class="eq-label">Equilibrium · forces decide</div>
+    <p class="axis-readout" id="readout" aria-live="polite"><b>2026 · The reframe</b> · settled at equilibrium</p>
+  </div>
 
-    <div class="dot" style="--c:var(--micro); left:7%;  top:11%; animation-delay:.35s"></div>
-    <div class="dot" style="--c:var(--mono);  left:22%; top:64%; animation-delay:.7s"></div>
-    <div class="dot" style="--c:var(--mono);  left:38%; top:75%; animation-delay:1.05s"></div>
-    <div class="dot" style="--c:var(--mono);  left:56%; top:71%; animation-delay:1.4s"></div>
-    <div class="dot" style="--c:var(--mono);  left:74%; top:62%; animation-delay:1.75s"></div>
-    <div class="dot" style="--c:var(--reframe); left:92%; top:45%; animation-delay:2.1s"></div>
+  <div class="stack" id="stack">
+    <div class="packet" id="packet" aria-hidden="true"></div>
 
-    <div class="beat" style="--c:var(--micro); left:8.5%; top:5%; animation-delay:.45s">
-      <div class="beat-date">2014 · Definition</div>
-      <div class="beat-title">Lewis &amp; Fowler define microservices</div>
-      <div class="beat-desc">Business-capability alignment, independent deployability, decentralized data.</div>
-    </div>
-    <div class="beat" style="--c:var(--mono); left:15.5%; top:70%; animation-delay:.8s">
-      <div class="beat-date">2015 · First correction</div>
-      <div class="beat-title">Fowler: MonolithFirst</div>
-      <div class="beat-desc">"Don't even consider microservices unless the system is too complex as a monolith."</div>
-    </div>
-    <div class="beat" style="--c:var(--mono); left:32.5%; top:79%; animation-delay:1.15s">
-      <div class="beat-date">2019–2020 · Backlash</div>
-      <div class="beat-title">The reversals begin</div>
-      <div class="beat-desc">Hightower: "monoliths are the future." Segment folds 100+ services into one. Istio consolidates istiod.</div>
-    </div>
-    <div class="beat" style="--c:var(--mono); left:50.5%; top:76%; animation-delay:1.5s">
-      <div class="beat-date">2023 · Flashpoint</div>
-      <div class="beat-title">Prime Video goes viral, misread</div>
-      <div class="beat-desc">Spring Modulith hits 1.0 GA. Thoughtworks names fading "microservice envy."</div>
-    </div>
-    <div class="beat" style="--c:var(--mono); left:66.5%; top:67%; animation-delay:1.85s">
-      <div class="beat-date">2024–2025 · New consensus</div>
-      <div class="beat-title">"Not the default"</div>
-      <div class="beat-desc">InfoQ: modular monolith at early majority. Threads ships on Instagram's monolith. Newman at QCon: not the default.</div>
-    </div>
-    <div class="beat reframe" style="--c:var(--reframe); left:83.5%; top:53%; animation-delay:2.2s">
-      <div class="beat-date">2026 · The reframe</div>
-      <div class="beat-title">The question was wrong</div>
-      <div class="beat-desc">Neither shape is a stage. There is no "first." Only forces, present or absent.</div>
-    </div>
+    <button type="button" class="band" data-icon="split" data-lean="11" style="--c:var(--micro-pole)" aria-pressed="false">
+      <span class="rail"><span class="spine" aria-hidden="true"></span><span class="pic" data-pic aria-hidden="true"></span></span>
+      <span class="band-info">
+        <span class="beat-date">2014 · Definition</span>
+        <span class="beat-title">Lewis &amp; Fowler define microservices</span>
+        <span class="beat-desc">Business-capability alignment, independent deployability, decentralized data.</span>
+      </span>
+    </button>
+
+    <button type="button" class="band" data-icon="merge" data-lean="64" style="--c:var(--mono-pole)" aria-pressed="false">
+      <span class="rail"><span class="spine" aria-hidden="true"></span><span class="pic" data-pic aria-hidden="true"></span></span>
+      <span class="band-info">
+        <span class="beat-date">2015 · First correction</span>
+        <span class="beat-title">Fowler: MonolithFirst</span>
+        <span class="beat-desc">"Don't even consider microservices unless the system is too complex as a monolith."</span>
+      </span>
+    </button>
+
+    <button type="button" class="band" data-icon="trenddown" data-lean="75" style="--c:var(--mono-pole)" aria-pressed="false">
+      <span class="rail"><span class="spine" aria-hidden="true"></span><span class="pic" data-pic aria-hidden="true"></span></span>
+      <span class="band-info">
+        <span class="beat-date">2019–2020 · Backlash</span>
+        <span class="beat-title">The reversals begin</span>
+        <span class="beat-desc">Hightower: "monoliths are the future." Segment folds 100+ services into one. Istio consolidates istiod.</span>
+      </span>
+    </button>
+
+    <button type="button" class="band" data-icon="megaphone" data-lean="71" style="--c:var(--mono-pole)" aria-pressed="false">
+      <span class="rail"><span class="spine" aria-hidden="true"></span><span class="pic" data-pic aria-hidden="true"></span></span>
+      <span class="band-info">
+        <span class="beat-date">2023 · Flashpoint</span>
+        <span class="beat-title">Prime Video goes viral, misread</span>
+        <span class="beat-desc">Spring Modulith hits 1.0 GA. Thoughtworks names fading "microservice envy."</span>
+      </span>
+    </button>
+
+    <button type="button" class="band" data-icon="scales" data-lean="62" style="--c:var(--mono-pole)" aria-pressed="false">
+      <span class="rail"><span class="spine" aria-hidden="true"></span><span class="pic" data-pic aria-hidden="true"></span></span>
+      <span class="band-info">
+        <span class="beat-date">2024–2025 · New consensus</span>
+        <span class="beat-title">"Not the default"</span>
+        <span class="beat-desc">InfoQ: modular monolith at early majority. Threads ships on Instagram's monolith. Newman at QCon: not the default.</span>
+      </span>
+    </button>
+
+    <button type="button" class="band reframe-band" data-icon="exchange" data-lean="45" style="--c:var(--reframe)" aria-pressed="false">
+      <span class="rail"><span class="spine" aria-hidden="true"></span><span class="pic" data-pic aria-hidden="true"></span></span>
+      <span class="band-info">
+        <span class="beat-date">2026 · The reframe</span>
+        <span class="beat-title">The question was wrong</span>
+        <span class="beat-desc">Neither shape is a stage. There is no "first." Only forces, present or absent.</span>
+      </span>
+    </button>
   </div>
 
   <p class="takeaway">Read it as a dialectic: <strong>2014 said microservices</strong>, <strong>2015–2025 said monolith first</strong>, <strong>2026 says there is no "first"</strong>.</p>
 
 </div>
+<script>
+(() => {
+  const ICON_BASE = '../customs-entry-agent/flow-icons/';
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const stack = document.getElementById('stack');
+  const packet = document.getElementById('packet');
+  const marker = document.getElementById('marker');
+  const readout = document.getElementById('readout');
+  const bands = Array.from(stack.querySelectorAll('.band'));
+
+  /* Icons are shared line-art SVGs; fetched and inlined with the stroke
+     swapped to currentColor so they follow each era's pole colour. A failed
+     fetch leaves the slot empty and the text still carries the row. */
+  bands.forEach((band) => {
+    const slot = band.querySelector('[data-pic]');
+    fetch(ICON_BASE + band.dataset.icon + '.svg')
+      .then((r) => (r.ok ? r.text() : Promise.reject()))
+      .then((t) => { slot.innerHTML = t.replace(/stroke="#232f3e"/g, 'stroke="currentColor"'); })
+      .catch(() => {});
+  });
+
+  /* Move the axis marker to an era's swing position and tint it. */
+  const setMarker = (band) => {
+    const c = getComputedStyle(band).getPropertyValue('--c').trim() || 'var(--accent)';
+    marker.style.left = band.dataset.lean + '%';
+    marker.style.background = c;
+    marker.style.boxShadow = '0 0 0 3px color-mix(in srgb, ' + c + ' 30%, transparent)';
+    const date = band.querySelector('.beat-date').textContent;
+    const title = band.querySelector('.beat-title').textContent;
+    readout.innerHTML = '<b></b> · ';
+    readout.querySelector('b').textContent = date;
+    readout.append(title);
+  };
+
+  /* tap or Enter selects an era: the marker jumps to where the discourse sat */
+  bands.forEach((band) => {
+    band.addEventListener('click', () => {
+      bands.forEach((b) => b.setAttribute('aria-pressed', String(b === band)));
+      band.classList.add('lit');
+      setMarker(band);
+    });
+  });
+
+  /* The token rides the spine top to bottom, lighting each era as it passes
+     while the axis marker re-enacts the damped swing. rAF t0 comes from the
+     first frame timestamp, never performance.now(): sandboxed iframes can
+     disagree between the two clocks. */
+  const DWELL = 700;
+  let raf = 0;
+  let last = -1;
+  const finish = () => {
+    bands.forEach((b) => b.classList.add('lit'));
+    setMarker(bands[bands.length - 1]);
+  };
+  const run = () => {
+    cancelAnimationFrame(raf);
+    bands.forEach((b) => { b.classList.remove('lit'); b.setAttribute('aria-pressed', 'false'); });
+    if (reduced) { finish(); return; }
+    last = -1;
+    const stackRect = stack.getBoundingClientRect();
+    const stops = bands.map((b) => {
+      const r = b.getBoundingClientRect();
+      return r.top - stackRect.top + r.height / 2;
+    });
+    const total = DWELL * stops.length;
+    packet.style.opacity = '1';
+    let t0 = null;
+    const step = (ts) => {
+      if (t0 === null) t0 = ts;
+      const t = ts - t0;
+      const i = Math.min(stops.length - 1, Math.floor(t / DWELL));
+      const f = Math.min(1, (t - i * DWELL) / DWELL);
+      const from = i === 0 ? 0 : stops[i - 1];
+      const y = i === 0 ? stops[0] * f : from + (stops[i] - from) * f;
+      packet.style.top = y + 'px';
+      for (let k = 0; k < stops.length; k++) {
+        if (y >= stops[k] - 4 && !bands[k].classList.contains('lit')) {
+          bands[k].classList.add('lit');
+          if (k > last) { last = k; setMarker(bands[k]); }
+        }
+      }
+      if (t < total) { raf = requestAnimationFrame(step); }
+      else { packet.style.opacity = '0'; }
+    };
+    raf = requestAnimationFrame(step);
+  };
+
+  document.getElementById('replay').addEventListener('click', run);
+
+  /* threshold 0, not 0.2: the stack can exceed a phone viewport, and a
+     fraction of a too-tall element never intersects. */
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting)) { io.disconnect(); run(); }
+    }, { threshold: 0 });
+    io.observe(stack);
+  } else { run(); }
+
+  if (document.documentElement.dataset.embedded === 'true') {
+    const postSize = () => window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+    if ('ResizeObserver' in window) new ResizeObserver(postSize).observe(document.body);
+    window.addEventListener('load', postSize);
+  }
+})();
+</script>
 </body>
 </html>

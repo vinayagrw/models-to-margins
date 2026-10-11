@@ -4,29 +4,28 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Microservices vs Modular Monolith — Architecture Morph</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="./_theme-bootstrap.js"></script>
 <link rel="stylesheet" href="./_theme.css">
 <style>
-/* Scene-specific: architecture morph.
-   Same four capabilities, two runtime shapes. Toggle morphs between them. */
+/* Scene-specific: architecture morph, rebuilt icon-led.
+   Same four capabilities, two runtime shapes. The toggle morphs between them,
+   pictograms carry what each block is, and tapping a capability tracks it
+   through the shape change. */
 :root {
   --mono: var(--accent-3);
-  --micro: #a56cff;
-  --data: var(--L5);
+  --micro: var(--accent);
+  --data: var(--accent-2);
   --ease-morph: cubic-bezier(.65,.05,.28,1);
 }
 
 .shell { display: flex; flex-direction: column; gap: 14px; }
-:root[data-embedded="true"] .shell {
-  display: flex; flex-direction: column;
-  gap: clamp(8px, 1.2vh, 14px);
-  padding: clamp(10px, 1.6vh, 16px) clamp(14px, 2vw, 22px);
-}
+:root[data-embedded="true"] .shell { padding: 14px clamp(14px, 2vw, 22px); gap: 12px; }
+/* autosize embed: the parent iframe follows the content height */
+:root[data-embedded="true"], :root[data-embedded="true"] body { height: auto; }
 
 .head { text-align: center; }
 .head h1 {
-  font-family: "Space Grotesk", sans-serif; font-weight: 700;
+  font-family: "Space Grotesk", "Avenir Next", sans-serif; font-weight: 700;
   font-size: clamp(1.2rem, 2.6vw, 1.7rem); letter-spacing: -0.02em;
   color: var(--text-strong); margin-top: 6px;
 }
@@ -42,15 +41,15 @@
   box-shadow: var(--shadow-soft);
 }
 .toggle-btn {
-  position: relative; z-index: 2; padding: 10px 22px; border: none; background: transparent;
-  color: var(--muted); font: 700 0.82rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.03em;
+  position: relative; z-index: 2; padding: 10px 18px; border: none; background: transparent;
+  color: var(--muted); font: 700 0.82rem/1 "Space Grotesk", "Avenir Next", sans-serif; letter-spacing: 0.03em;
   cursor: pointer; border-radius: 999px; transition: color .35s ease;
   display: flex; align-items: center; gap: 9px; min-height: 44px;
 }
 .toggle-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-:root[data-embedded="true"] .toggle-btn { padding: clamp(6px, 1.2vh, 10px) clamp(14px, 2vw, 22px); font-size: clamp(0.72rem, 1.4vh, 0.82rem); }
-.toggle-btn .dot { width: 9px; height: 9px; border-radius: 50%; background: currentColor; opacity: .45; transition: opacity .3s; }
-.toggle-btn.active .dot { opacity: 1; }
+.toggle-btn .tico { width: 18px; height: 18px; display: grid; place-items: center; opacity: .5; transition: opacity .3s; }
+.toggle-btn .tico svg { width: 18px; height: 18px; display: block; }
+.toggle-btn.active .tico { opacity: 1; }
 .toggle-btn[data-state="mono"].active { color: var(--mono); }
 .toggle-btn[data-state="micro"].active { color: var(--micro); }
 .toggle-slider {
@@ -66,12 +65,21 @@
   border-color: color-mix(in srgb, var(--micro) 45%, transparent);
 }
 
+/* Replay + hint row */
+.ctl { display: flex; justify-content: center; align-items: center; gap: 10px; flex-wrap: wrap; }
+.ctl button {
+  min-height: 34px; padding: 6px 12px; cursor: pointer; border-radius: 8px;
+  font: 700 0.64rem/1 "Space Grotesk", monospace; letter-spacing: 0.07em; text-transform: uppercase;
+  color: var(--accent); background: transparent; border: 1px solid var(--accent);
+}
+.ctl button:hover { background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.ctl .hint { font: 500 0.68rem/1.3 "Avenir Next", "Segoe UI", sans-serif; color: var(--muted-soft); }
+
 /* Stage */
 .stage {
   position: relative; border: 1px solid var(--border); border-radius: 20px;
   background: var(--surface); box-shadow: var(--shadow-soft); padding: 8px; overflow: hidden;
 }
-:root[data-embedded="true"] .stage { flex: 1 1 auto; min-height: 0; display: flex; }
 .stage::before {
   content: ""; position: absolute; inset: 0; pointer-events: none;
   background-image:
@@ -81,17 +89,18 @@
   mask-image: radial-gradient(ellipse 80% 70% at center, black, transparent);
 }
 .morph-svg { width: 100%; height: auto; display: block; position: relative; z-index: 1; }
-:root[data-embedded="true"] .morph-svg { height: 100%; width: 100%; }
 
 /* SVG text */
 .band-rect { fill: color-mix(in srgb, var(--text) 2.5%, transparent); stroke: var(--border); }
 .band-label {
-  fill: var(--accent); font: 700 13px/1 "Space Grotesk", sans-serif;
+  fill: var(--accent); font: 700 13px/1 "Space Grotesk", "Avenir Next", sans-serif;
   letter-spacing: 0.14em; text-transform: uppercase;
 }
 .static-node .frame { fill: var(--surface-strong); stroke: var(--border-strong); stroke-width: 1.2; rx: 10; }
-.static-node .label { fill: var(--text-strong); font: 700 16px/1 "Space Grotesk", sans-serif; }
-.static-node .sub { fill: var(--muted); font: 12.5px/1 "DM Sans", sans-serif; }
+.static-node .label { fill: var(--text-strong); font: 700 16px/1 "Space Grotesk", "Avenir Next", sans-serif; }
+.static-node .sub { fill: var(--muted); font: 12.5px/1 "DM Sans", "Segoe UI", sans-serif; }
+.s-ico { color: var(--muted); }
+.s-ico svg * { stroke: currentColor; }
 
 /* Morphing groups */
 .morph { transition: transform .9s var(--ease-morph), opacity .55s ease; }
@@ -102,28 +111,40 @@
   stroke-width: 2; stroke-dasharray: 8 6;
 }
 .runtime-label {
-  fill: color-mix(in srgb, var(--mono) 75%, var(--text)); font: 700 12.5px/1 "Space Grotesk", sans-serif;
+  fill: color-mix(in srgb, var(--mono) 75%, var(--text)); font: 700 12.5px/1 "Space Grotesk", "Avenir Next", sans-serif;
   letter-spacing: 0.14em; text-transform: uppercase;
 }
+.runtime-ico { color: color-mix(in srgb, var(--mono) 75%, var(--text)); }
 .wrap[data-state="mono"] .runtime-container { opacity: 1; transform: translate(0,0); }
 .wrap[data-state="micro"] .runtime-container { opacity: 0; transform: translate(0,-20px); }
 
+.node { cursor: pointer; }
 .node .node-rect {
   fill: var(--surface-strong); stroke-width: 1.8; rx: 14;
-  transition: stroke .9s var(--ease-morph), fill .9s var(--ease-morph);
+  transition: stroke .9s var(--ease-morph), fill .9s var(--ease-morph), stroke-width .3s ease;
 }
 .wrap[data-state="mono"] .node .node-rect { stroke: var(--mono); fill: color-mix(in srgb, var(--mono) 7%, var(--surface-strong)); }
 .wrap[data-state="micro"] .node .node-rect { stroke: var(--micro); fill: color-mix(in srgb, var(--micro) 7%, var(--surface-strong)); }
 .node .node-tag {
-  font: 700 11.5px/1 "Space Grotesk", sans-serif; letter-spacing: 0.12em; text-transform: uppercase;
+  font: 700 11.5px/1 "Space Grotesk", "Avenir Next", sans-serif; letter-spacing: 0.12em; text-transform: uppercase;
   transition: fill .9s var(--ease-morph);
 }
 .wrap[data-state="mono"] .node .node-tag { fill: var(--mono); }
 .wrap[data-state="micro"] .node .node-tag { fill: var(--micro); }
-.node .node-label { fill: var(--text-strong); font: 700 20px/1 "Space Grotesk", sans-serif; letter-spacing: -0.02em; }
-.node .node-desc { fill: var(--muted); font: 13px/1.35 "DM Sans", sans-serif; }
+.node .node-label { fill: var(--text-strong); font: 700 20px/1 "Space Grotesk", "Avenir Next", sans-serif; letter-spacing: -0.02em; }
+.node .node-desc { fill: var(--muted); font: 13px/1.35 "DM Sans", "Segoe UI", sans-serif; }
+.node .nico { transition: color .9s var(--ease-morph); }
+.wrap[data-state="mono"] .node .nico { color: var(--mono); }
+.wrap[data-state="micro"] .node .nico { color: var(--micro); }
 .node .pulse { fill: var(--micro); opacity: 0; transition: opacity .55s ease; }
 .wrap[data-state="micro"] .node .pulse { opacity: 1; animation: pulse 2s ease-in-out infinite; }
+
+/* Tracking: tap a capability to follow it through the morph */
+.node:focus-visible { outline: none; }
+.node:focus-visible .node-rect, .node.tracked .node-rect { stroke-width: 4; }
+.wrap.tracking .node:not(.tracked) { opacity: .45; }
+.wrap[data-state="micro"].tracking .micro-db:not(.tracked) { opacity: .35; }
+.micro-db.tracked .db-rect { stroke: var(--data); stroke-width: 2.4; }
 
 /* Node positions — monolith 2x2 grid vs microservices 1x4 row */
 .wrap[data-state="mono"] .node[data-id="orders"]   { transform: translate(410px,290px); }
@@ -137,18 +158,18 @@
 
 /* Shared database (monolith only) */
 .shared-db .db-rect { fill: color-mix(in srgb, var(--data) 6%, var(--surface-strong)); stroke: var(--data); stroke-width: 1.6; rx: 14; }
-.shared-db .db-label { fill: var(--text-strong); font: 700 15px/1 "Space Grotesk", sans-serif; letter-spacing: -0.02em; }
-.shared-db .db-tag { fill: var(--data); font: 700 11.5px/1 "Space Grotesk", sans-serif; letter-spacing: 0.12em; text-transform: uppercase; }
-.shared-db .db-desc { fill: var(--muted); font: 12.5px/1.35 "DM Sans", sans-serif; }
+.shared-db .db-label { fill: var(--text-strong); font: 700 15px/1 "Space Grotesk", "Avenir Next", sans-serif; letter-spacing: -0.02em; }
+.shared-db .db-tag { fill: var(--data); font: 700 11.5px/1 "Space Grotesk", "Avenir Next", sans-serif; letter-spacing: 0.12em; text-transform: uppercase; }
+.shared-db .db-desc { fill: var(--muted); font: 12.5px/1.35 "DM Sans", "Segoe UI", sans-serif; }
 .db-ellipse { fill: none; stroke: color-mix(in srgb, var(--data) 65%, transparent); }
 .db-body { fill: color-mix(in srgb, var(--data) 14%, transparent); stroke: color-mix(in srgb, var(--data) 65%, transparent); stroke-width: 1.3; }
 .wrap[data-state="mono"] .shared-db { opacity: 1; transform: translate(450px,560px); }
 .wrap[data-state="micro"] .shared-db { opacity: 0; transform: translate(450px,600px); }
 
 /* Per-service databases (microservices only) */
-.micro-db .db-rect { fill: color-mix(in srgb, var(--data) 4%, var(--surface-strong)); stroke: color-mix(in srgb, var(--data) 55%, transparent); stroke-width: 1.2; rx: 10; }
-.micro-db .db-tag { fill: var(--text-strong); font: 700 12px/1 "Space Grotesk", sans-serif; }
-.micro-db .db-label { fill: var(--muted); font: 11.5px/1 "DM Sans", sans-serif; }
+.micro-db .db-rect { fill: color-mix(in srgb, var(--data) 4%, var(--surface-strong)); stroke: color-mix(in srgb, var(--data) 55%, transparent); stroke-width: 1.2; rx: 10; transition: stroke .3s ease, stroke-width .3s ease; }
+.micro-db .db-tag { fill: var(--text-strong); font: 700 12px/1 "Space Grotesk", "Avenir Next", sans-serif; }
+.micro-db .db-label { fill: var(--muted); font: 11.5px/1 "DM Sans", "Segoe UI", sans-serif; }
 .wrap[data-state="mono"] .micro-db { opacity: 0; }
 .wrap[data-state="micro"] .micro-db { opacity: 1; }
 .wrap[data-state="mono"] .micro-db[data-id="db-orders"]   { transform: translate(110px,380px); }
@@ -165,9 +186,10 @@
   fill: color-mix(in srgb, var(--micro) 5%, transparent);
   stroke: var(--micro); stroke-width: 1.6; stroke-dasharray: 10 6; rx: 14;
 }
-.event-broker .broker-label { fill: var(--text-strong); font: 700 15px/1 "Space Grotesk", sans-serif; letter-spacing: -0.02em; }
-.event-broker .broker-tag { fill: var(--micro); font: 700 11.5px/1 "Space Grotesk", sans-serif; letter-spacing: 0.14em; text-transform: uppercase; }
-.event-broker .broker-desc { fill: var(--muted); font: 12.5px/1.35 "DM Sans", sans-serif; }
+.event-broker .broker-label { fill: var(--text-strong); font: 700 15px/1 "Space Grotesk", "Avenir Next", sans-serif; letter-spacing: -0.02em; }
+.event-broker .broker-tag { fill: var(--micro); font: 700 11.5px/1 "Space Grotesk", "Avenir Next", sans-serif; letter-spacing: 0.14em; text-transform: uppercase; }
+.event-broker .broker-desc { fill: var(--muted); font: 12.5px/1.35 "DM Sans", "Segoe UI", sans-serif; }
+.event-broker .b-ico { color: var(--micro); }
 .wrap[data-state="mono"] .event-broker { opacity: 0; transform: translate(100px,540px); }
 .wrap[data-state="micro"] .event-broker { opacity: 1; transform: translate(100px,520px); }
 
@@ -181,30 +203,21 @@
 .wrap[data-state="micro"] .micro-line { opacity: 1; animation: dash 3s linear infinite; }
 
 /* Count readout under the stage */
-.readout {
-  display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;
-}
+.readout { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
 .readout-item {
-  display: flex; align-items: baseline; gap: 7px;
+  display: flex; align-items: center; gap: 8px;
   padding: 8px 14px; border-radius: 12px; border: 1px solid var(--border);
-  background: var(--surface); font-family: "Space Grotesk", sans-serif;
+  background: var(--surface); font-family: "Space Grotesk", "Avenir Next", sans-serif;
 }
-:root[data-embedded="true"] .readout-item { padding: clamp(4px, 0.9vh, 8px) clamp(9px, 1.4vw, 14px); }
-.readout-value {
-  font-weight: 700; font-size: 1.05rem; letter-spacing: -0.01em;
-  transition: color .55s ease;
-}
-:root[data-embedded="true"] .readout-value { font-size: clamp(0.85rem, 1.7vh, 1.05rem); }
+.r-ico { width: 17px; height: 17px; color: var(--muted); flex: none; }
+.r-ico svg { width: 17px; height: 17px; display: block; }
+.readout-value { font-weight: 700; font-size: 1.05rem; letter-spacing: -0.01em; transition: color .55s ease; }
 .readout-label { color: var(--muted); font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; }
-:root[data-embedded="true"] .readout-label { font-size: clamp(0.69rem, 1.2vh, 0.72rem); }
 .wrap[data-state="mono"] .readout-value { color: var(--mono); }
 .wrap[data-state="micro"] .readout-value { color: var(--micro); }
 
 /* Forces strip — the actual decision inputs */
-.forces {
-  display: grid; grid-template-columns: auto repeat(4, minmax(0,1fr)); gap: 10px; align-items: stretch;
-}
-:root[data-embedded="true"] .forces { gap: clamp(6px, 1vw, 10px); }
+.forces { display: grid; grid-template-columns: auto repeat(4, minmax(0,1fr)); gap: 10px; align-items: stretch; }
 .forces-intro {
   display: flex; flex-direction: column; justify-content: center;
   padding: 10px 14px; border-radius: 12px;
@@ -212,25 +225,23 @@
   border: 1px solid color-mix(in srgb, var(--accent-2) 40%, transparent);
   max-width: 190px;
 }
-.forces-intro strong { font-family: "Space Grotesk", sans-serif; font-size: 0.78rem; color: var(--text-strong); letter-spacing: 0.02em; }
-.forces-intro span { color: var(--muted); font-family: "DM Sans", sans-serif; font-size: 0.7rem; line-height: 1.35; margin-top: 3px; }
-.force {
-  padding: 10px 12px; border-radius: 12px; border: 1px solid var(--border);
-  background: var(--surface);
-}
-:root[data-embedded="true"] .force, :root[data-embedded="true"] .forces-intro { padding: clamp(6px, 1vh, 10px) clamp(8px, 1.2vw, 12px); }
-.force strong {
-  display: block; font-family: "Space Grotesk", sans-serif; font-size: 0.76rem;
+.forces-intro strong, .force strong {
+  display: flex; align-items: center; gap: 6px;
+  font-family: "Space Grotesk", "Avenir Next", sans-serif; font-size: 0.78rem;
   color: var(--text-strong); letter-spacing: 0.02em;
 }
-.force span { display: block; color: var(--muted); font-family: "DM Sans", sans-serif; font-size: 0.7rem; line-height: 1.35; margin-top: 3px; }
-:root[data-embedded="true"] .force strong, :root[data-embedded="true"] .forces-intro strong { font-size: clamp(0.7rem, 1.3vh, 0.76rem); }
-:root[data-embedded="true"] .force span, :root[data-embedded="true"] .forces-intro span { font-size: clamp(0.69rem, 1.15vh, 0.72rem); }
+.forces-intro span { color: var(--muted); font-family: "DM Sans", "Segoe UI", sans-serif; font-size: 0.7rem; line-height: 1.35; margin-top: 3px; }
+.force { padding: 10px 12px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface); }
+.force strong { font-size: 0.76rem; }
+.force span { display: block; color: var(--muted); font-family: "DM Sans", "Segoe UI", sans-serif; font-size: 0.7rem; line-height: 1.35; margin-top: 3px; }
+.f-ico { width: 15px; height: 15px; color: var(--accent); flex: none; }
+.forces-intro .f-ico { color: var(--accent-2); }
+.f-ico svg { width: 15px; height: 15px; display: block; }
 
 @keyframes pulse { 0%,100% { r: 4; opacity: .7; } 50% { r: 6; opacity: 1; } }
 @keyframes dash { from { stroke-dashoffset: 0; } to { stroke-dashoffset: -36; } }
 @media (prefers-reduced-motion: reduce) {
-  .morph, .toggle-slider, .node .node-rect, .node .node-tag { transition-duration: 0.01s !important; }
+  .morph, .toggle-slider, .node .node-rect, .node .node-tag, .node .nico { transition-duration: 0.01s !important; }
   .mono-line, .micro-line, .node .pulse { animation: none !important; }
 }
 
@@ -238,10 +249,14 @@
   .forces { grid-template-columns: 1fr 1fr; }
   .forces-intro { max-width: none; grid-column: 1 / -1; }
 }
+@media (max-width: 420px) {
+  .toggle-btn { padding: 8px 10px; font-size: 0.7rem; gap: 6px; }
+  .toggle-btn .tico, .toggle-btn .tico svg { width: 15px; height: 15px; }
+}
 
 /* Small screens: the 1600-wide SVG scales its text below legibility (~3px),
    so swap it for a stacked HTML rendering of the same two shapes. */
-/* both selectors needed: the embedded .stage flex rule outranks a bare class */
+/* both selectors needed: an embedded .stage rule can outrank a bare class */
 .stage-mobile, :root[data-embedded="true"] .stage-mobile { display: none; }
 @media (max-width: 760px) {
   .stage-desktop, :root[data-embedded="true"] .stage-desktop { display: none; }
@@ -249,8 +264,11 @@
     display: flex; flex-direction: column; gap: 8px; padding: 12px;
     flex: 0 0 auto; overflow: visible;
   }
+  .m-ico { width: 16px; height: 16px; flex: none; display: inline-grid; place-items: center; vertical-align: -3px; }
+  .m-ico svg { width: 16px; height: 16px; display: block; }
   .m-band {
-    font: 700 0.7rem/1.3 "Space Grotesk", sans-serif; letter-spacing: 0.1em;
+    display: flex; align-items: center; justify-content: center; gap: 7px;
+    font: 700 0.7rem/1.3 "Space Grotesk", "Avenir Next", sans-serif; letter-spacing: 0.1em;
     text-transform: uppercase; color: var(--accent); text-align: center;
     border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px;
     background: color-mix(in srgb, var(--text) 2.5%, transparent);
@@ -264,42 +282,50 @@
     border-radius: 14px; background: color-mix(in srgb, var(--mono) 5%, transparent);
   }
   .m-runtime-label {
-    font: 700 0.7rem/1.3 "Space Grotesk", sans-serif; letter-spacing: 0.08em;
+    display: flex; align-items: center; justify-content: center; gap: 7px;
+    font: 700 0.7rem/1.3 "Space Grotesk", "Avenir Next", sans-serif; letter-spacing: 0.08em;
     text-transform: uppercase; color: color-mix(in srgb, var(--mono) 75%, var(--text)); text-align: center;
   }
   .m-caps { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
   .m-cap {
-    font: 700 0.85rem/1.2 "Space Grotesk", sans-serif; color: var(--text-strong);
+    display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer;
+    font: 700 0.85rem/1.2 "Space Grotesk", "Avenir Next", sans-serif; color: var(--text-strong);
     text-align: center; padding: 11px 8px; border-radius: 10px;
     border: 1.5px solid var(--mono); background: color-mix(in srgb, var(--mono) 7%, var(--surface-strong));
   }
+  .m-cap .m-ico { color: var(--mono); }
   .m-db {
-    font: 700 0.74rem/1.35 "Space Grotesk", sans-serif; color: var(--text-strong); text-align: center;
+    font: 700 0.74rem/1.35 "Space Grotesk", "Avenir Next", sans-serif; color: var(--text-strong); text-align: center;
     padding: 9px 10px; border-radius: 10px;
     border: 1.5px solid var(--data); background: color-mix(in srgb, var(--data) 6%, var(--surface-strong));
   }
-  .m-db span { display: block; font: 400 0.7rem/1.35 "DM Sans", sans-serif; color: var(--muted); margin-top: 2px; }
+  .m-db span { display: block; font: 400 0.7rem/1.35 "DM Sans", "Segoe UI", sans-serif; color: var(--muted); margin-top: 2px; }
   .m-services { display: flex; flex-direction: column; gap: 6px; }
   .m-svc {
-    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    display: flex; align-items: center; gap: 8px; cursor: pointer; width: 100%;
     padding: 9px 12px; border-radius: 10px;
     border: 1.5px solid var(--micro); background: color-mix(in srgb, var(--micro) 7%, var(--surface-strong));
-    font: 700 0.85rem/1.2 "Space Grotesk", sans-serif; color: var(--text-strong);
+    font: 700 0.85rem/1.2 "Space Grotesk", "Avenir Next", sans-serif; color: var(--text-strong);
   }
+  .m-svc .m-ico { color: var(--micro); }
   .m-svc small {
-    font: 700 0.7rem/1 "Space Grotesk", sans-serif; letter-spacing: 0.06em; text-transform: uppercase;
+    margin-left: auto;
+    font: 700 0.7rem/1 "Space Grotesk", "Avenir Next", sans-serif; letter-spacing: 0.06em; text-transform: uppercase;
     color: var(--data); border: 1px solid color-mix(in srgb, var(--data) 55%, transparent);
     border-radius: 99px; padding: 4px 8px; white-space: nowrap;
   }
+  .m-cap[aria-pressed="true"], .m-svc[aria-pressed="true"] { border-width: 3px; }
+  .wrap.tracking .m-cap[aria-pressed="false"], .wrap.tracking .m-svc[aria-pressed="false"] { opacity: .5; }
   .m-broker {
     padding: 9px 10px; border-radius: 10px; text-align: center;
     border: 1.5px dashed var(--micro); background: color-mix(in srgb, var(--micro) 5%, transparent);
   }
   .m-broker-label {
-    font: 700 0.7rem/1.3 "Space Grotesk", sans-serif; letter-spacing: 0.08em;
+    display: flex; align-items: center; justify-content: center; gap: 7px;
+    font: 700 0.7rem/1.3 "Space Grotesk", "Avenir Next", sans-serif; letter-spacing: 0.08em;
     text-transform: uppercase; color: var(--micro);
   }
-  .m-broker span { display: block; font: 400 0.7rem/1.35 "DM Sans", sans-serif; color: var(--muted); margin-top: 2px; }
+  .m-broker span { display: block; font: 400 0.7rem/1.35 "DM Sans", "Segoe UI", sans-serif; color: var(--muted); margin-top: 2px; }
 }
 </style>
 </head>
@@ -316,16 +342,21 @@
     <div class="toggle" role="tablist" aria-label="Architecture shape">
       <div class="toggle-slider"></div>
       <button class="toggle-btn active" data-state="mono" role="tab" aria-selected="true">
-        <span class="dot"></span>Modular Monolith
+        <span class="tico" data-icon="merge" aria-hidden="true"></span>Modular Monolith
       </button>
       <button class="toggle-btn" data-state="micro" role="tab" aria-selected="false">
-        <span class="dot"></span>Microservices
+        <span class="tico" data-icon="split" aria-hidden="true"></span>Microservices
       </button>
     </div>
   </div>
 
+  <div class="ctl">
+    <button type="button" id="replay">Replay morph</button>
+    <span class="hint">Tap a capability to track it through the morph</span>
+  </div>
+
   <div class="stage stage-desktop">
-    <svg class="morph-svg" viewBox="0 0 1600 790" preserveAspectRatio="xMidYMid meet" role="img"
+    <svg class="morph-svg" viewBox="0 0 1600 790" preserveAspectRatio="xMidYMid meet"
          aria-label="Animated architecture morph between a modular monolith and microservices. The same four capabilities rearrange from one process with a shared database into four services with their own databases and an event broker.">
 
       <!-- STATIC: shared edge and control plane -->
@@ -336,21 +367,25 @@
           <rect class="frame" width="320" height="40" rx="10"/>
           <text class="label" x="16" y="18">API Gateway / WAF</text>
           <text class="sub" x="16" y="32">Traffic entry &amp; routing</text>
+          <g class="s-ico" data-icon="network" data-size="22" transform="translate(284,9)" aria-hidden="true"></g>
         </g>
         <g class="static-node" transform="translate(460,54)">
           <rect class="frame" width="320" height="40" rx="10"/>
           <text class="label" x="16" y="18">Identity &amp; access</text>
           <text class="sub" x="16" y="32">AuthN / AuthZ / tokens</text>
+          <g class="s-ico" data-icon="key" data-size="22" transform="translate(284,9)" aria-hidden="true"></g>
         </g>
         <g class="static-node" transform="translate(820,54)">
           <rect class="frame" width="320" height="40" rx="10"/>
           <text class="label" x="16" y="18">Policy &amp; governance</text>
           <text class="sub" x="16" y="32">Guardrails &amp; audit</text>
+          <g class="s-ico" data-icon="gavel" data-size="22" transform="translate(284,9)" aria-hidden="true"></g>
         </g>
         <g class="static-node" transform="translate(1180,54)">
           <rect class="frame" width="320" height="40" rx="10"/>
           <text class="label" x="16" y="18">CI/CD &amp; observability</text>
           <text class="sub" x="16" y="32">Platform engineering</text>
+          <g class="s-ico" data-icon="monitor" data-size="22" transform="translate(284,9)" aria-hidden="true"></g>
         </g>
       </g>
 
@@ -358,6 +393,7 @@
       <g class="morph runtime-container">
         <rect class="runtime-box" x="370" y="240" width="620" height="300" rx="22"/>
         <text class="runtime-label" x="390" y="264">Single process boundary · one deployable</text>
+        <g class="runtime-ico" data-icon="merge" data-size="30" transform="translate(944,250)" aria-hidden="true"></g>
       </g>
 
       <!-- MORPH: connection lines -->
@@ -379,37 +415,41 @@
         <path class="micro-line" d="M 1330 470 L 1330 520"/>
       </g>
 
-      <!-- MORPH: the four capabilities -->
-      <g class="morph node" data-id="orders">
+      <!-- MORPH: the four capabilities (tap to track one through the morph) -->
+      <g class="morph node" data-id="orders" tabindex="0" role="button" aria-pressed="false" aria-label="Orders. Order flow, pricing, cart, checkout. Tap to track through the morph.">
         <rect class="node-rect" width="240" height="100"/>
         <text class="node-tag" x="20" y="26">Capability</text>
         <text class="node-label" x="20" y="52">Orders</text>
         <text class="node-desc" x="20" y="72">Order flow, pricing,</text>
         <text class="node-desc" x="20" y="86">cart, checkout.</text>
+        <g class="nico" data-icon="inbox" data-size="38" transform="translate(184,42)" aria-hidden="true"></g>
         <circle class="pulse" cx="222" cy="18" r="4"/>
       </g>
-      <g class="morph node" data-id="billing">
+      <g class="morph node" data-id="billing" tabindex="0" role="button" aria-pressed="false" aria-label="Billing. Invoicing, payments, revenue capture. Tap to track through the morph.">
         <rect class="node-rect" width="240" height="100"/>
         <text class="node-tag" x="20" y="26">Capability</text>
         <text class="node-label" x="20" y="52">Billing</text>
         <text class="node-desc" x="20" y="72">Invoicing, payments,</text>
         <text class="node-desc" x="20" y="86">revenue capture.</text>
+        <g class="nico" data-icon="coin" data-size="38" transform="translate(184,42)" aria-hidden="true"></g>
         <circle class="pulse" cx="222" cy="18" r="4"/>
       </g>
-      <g class="morph node" data-id="risk">
+      <g class="morph node" data-id="risk" tabindex="0" role="button" aria-pressed="false" aria-label="Risk. Fraud scoring, compliance checks. Tap to track through the morph.">
         <rect class="node-rect" width="240" height="100"/>
         <text class="node-tag" x="20" y="26">Capability</text>
         <text class="node-label" x="20" y="52">Risk</text>
         <text class="node-desc" x="20" y="72">Fraud scoring,</text>
         <text class="node-desc" x="20" y="86">compliance checks.</text>
+        <g class="nico" data-icon="shield" data-size="38" transform="translate(184,42)" aria-hidden="true"></g>
         <circle class="pulse" cx="222" cy="18" r="4"/>
       </g>
-      <g class="morph node" data-id="accounts">
+      <g class="morph node" data-id="accounts" tabindex="0" role="button" aria-pressed="false" aria-label="Accounts. Customer profiles, KYC state. Tap to track through the morph.">
         <rect class="node-rect" width="240" height="100"/>
         <text class="node-tag" x="20" y="26">Capability</text>
         <text class="node-label" x="20" y="52">Accounts</text>
         <text class="node-desc" x="20" y="72">Customer profiles,</text>
         <text class="node-desc" x="20" y="86">KYC state.</text>
+        <g class="nico" data-icon="personcheck" data-size="38" transform="translate(184,42)" aria-hidden="true"></g>
         <circle class="pulse" cx="222" cy="18" r="4"/>
       </g>
 
@@ -475,6 +515,7 @@
         <text class="broker-tag" x="24" y="28">Integration layer</text>
         <text class="broker-label" x="24" y="50">Event broker / message bus</text>
         <text class="broker-desc" x="420" y="44">Primary cross-service coordination · events carry integration, replay, and consistency obligations</text>
+        <g class="b-ico" data-icon="transmit" data-size="34" transform="translate(1344,18)" aria-hidden="true"></g>
       </g>
 
       <!-- STATIC: downstream -->
@@ -485,78 +526,111 @@
           <rect class="frame" width="320" height="40" rx="10"/>
           <text class="label" x="16" y="18">ERP</text>
           <text class="sub" x="16" y="32">Back-office ledgers</text>
+          <g class="s-ico" data-icon="ledger" data-size="22" transform="translate(284,9)" aria-hidden="true"></g>
         </g>
         <g class="static-node" transform="translate(460,674)">
           <rect class="frame" width="320" height="40" rx="10"/>
           <text class="label" x="16" y="18">CRM</text>
           <text class="sub" x="16" y="32">Customer lifecycle</text>
+          <g class="s-ico" data-icon="person" data-size="22" transform="translate(284,9)" aria-hidden="true"></g>
         </g>
         <g class="static-node" transform="translate(820,674)">
           <rect class="frame" width="320" height="40" rx="10"/>
           <text class="label" x="16" y="18">Payment network</text>
           <text class="sub" x="16" y="32">Settlement rails</text>
+          <g class="s-ico" data-icon="exchange" data-size="22" transform="translate(284,9)" aria-hidden="true"></g>
         </g>
         <g class="static-node" transform="translate(1180,674)">
           <rect class="frame" width="320" height="40" rx="10"/>
           <text class="label" x="16" y="18">Reporting &amp; BI</text>
           <text class="sub" x="16" y="32">Analytics &amp; compliance</text>
+          <g class="s-ico" data-icon="chart" data-size="22" transform="translate(284,9)" aria-hidden="true"></g>
         </g>
       </g>
     </svg>
   </div>
 
   <div class="stage stage-mobile">
-    <div class="m-band">Shared edge &amp; control plane · identical in both shapes</div>
+    <div class="m-band"><span class="m-ico" data-icon="network" aria-hidden="true"></span>Shared edge &amp; control plane · identical in both shapes</div>
     <div class="m-view m-mono">
       <div class="m-runtime">
-        <div class="m-runtime-label">Single process boundary · one deployable</div>
+        <div class="m-runtime-label"><span class="m-ico" data-icon="merge" aria-hidden="true"></span>Single process boundary · one deployable</div>
         <div class="m-caps">
-          <div class="m-cap">Orders</div>
-          <div class="m-cap">Billing</div>
-          <div class="m-cap">Risk</div>
-          <div class="m-cap">Accounts</div>
+          <button type="button" class="m-cap" data-track="orders" aria-pressed="false"><span class="m-ico" data-icon="inbox" aria-hidden="true"></span>Orders</button>
+          <button type="button" class="m-cap" data-track="billing" aria-pressed="false"><span class="m-ico" data-icon="coin" aria-hidden="true"></span>Billing</button>
+          <button type="button" class="m-cap" data-track="risk" aria-pressed="false"><span class="m-ico" data-icon="shield" aria-hidden="true"></span>Risk</button>
+          <button type="button" class="m-cap" data-track="accounts" aria-pressed="false"><span class="m-ico" data-icon="personcheck" aria-hidden="true"></span>Accounts</button>
         </div>
         <div class="m-db">Shared database · module-owned schemas<span>one transaction boundary, discipline in the codebase</span></div>
       </div>
     </div>
     <div class="m-view m-micro">
       <div class="m-services">
-        <div class="m-svc">Orders <small>own DB</small></div>
-        <div class="m-svc">Billing <small>own DB</small></div>
-        <div class="m-svc">Risk <small>own DB</small></div>
-        <div class="m-svc">Accounts <small>own DB</small></div>
+        <button type="button" class="m-svc" data-track="orders" aria-pressed="false"><span class="m-ico" data-icon="inbox" aria-hidden="true"></span>Orders <small>own DB</small></button>
+        <button type="button" class="m-svc" data-track="billing" aria-pressed="false"><span class="m-ico" data-icon="coin" aria-hidden="true"></span>Billing <small>own DB</small></button>
+        <button type="button" class="m-svc" data-track="risk" aria-pressed="false"><span class="m-ico" data-icon="shield" aria-hidden="true"></span>Risk <small>own DB</small></button>
+        <button type="button" class="m-svc" data-track="accounts" aria-pressed="false"><span class="m-ico" data-icon="personcheck" aria-hidden="true"></span>Accounts <small>own DB</small></button>
       </div>
       <div class="m-broker">
-        <div class="m-broker-label">Event broker / message bus</div>
+        <div class="m-broker-label"><span class="m-ico" data-icon="transmit" aria-hidden="true"></span>Event broker / message bus</div>
         <span>primary cross-service coordination</span>
       </div>
     </div>
-    <div class="m-band">Downstream enterprise systems · identical in both shapes</div>
+    <div class="m-band"><span class="m-ico" data-icon="building" aria-hidden="true"></span>Downstream enterprise systems · identical in both shapes</div>
   </div>
 
   <div class="readout" aria-live="polite">
-    <div class="readout-item"><span class="readout-value" id="deployables">1</span><span class="readout-label">deployable(s)</span></div>
-    <div class="readout-item"><span class="readout-value" id="databases">1 shared</span><span class="readout-label">database(s)</span></div>
-    <div class="readout-item"><span class="readout-value" id="coordination">In-process calls</span><span class="readout-label">coordination</span></div>
+    <div class="readout-item"><span class="r-ico" data-icon="factory" aria-hidden="true"></span><span class="readout-value" id="deployables">1</span><span class="readout-label">deployable(s)</span></div>
+    <div class="readout-item"><span class="r-ico" data-icon="warehouse" aria-hidden="true"></span><span class="readout-value" id="databases">1 shared</span><span class="readout-label">database(s)</span></div>
+    <div class="readout-item"><span class="r-ico" data-icon="exchange" aria-hidden="true"></span><span class="readout-value" id="coordination">In-process calls</span><span class="readout-label">coordination</span></div>
   </div>
 
   <div class="forces">
     <div class="forces-intro">
-      <strong>Forces choose the shape</strong>
+      <strong><span class="f-ico" data-icon="split" aria-hidden="true"></span>Forces choose the shape</strong>
       <span>Not a maturity stage. Not a graduation.</span>
     </div>
-    <div class="force"><strong>Consistency</strong><span>Does it share a transaction boundary?</span></div>
-    <div class="force"><strong>Latency budget</strong><span>Can the hot path afford network hops?</span></div>
-    <div class="force"><strong>Compliance boundary</strong><span>Where does audit scope actually end?</span></div>
-    <div class="force"><strong>Team topology</strong><span>Is there a durable owning team per piece?</span></div>
+    <div class="force"><strong><span class="f-ico" data-icon="scales" aria-hidden="true"></span>Consistency</strong><span>Does it share a transaction boundary?</span></div>
+    <div class="force"><strong><span class="f-ico" data-icon="gauge" aria-hidden="true"></span>Latency budget</strong><span>Can the hot path afford network hops?</span></div>
+    <div class="force"><strong><span class="f-ico" data-icon="gov" aria-hidden="true"></span>Compliance boundary</strong><span>Where does audit scope actually end?</span></div>
+    <div class="force"><strong><span class="f-ico" data-icon="person" aria-hidden="true"></span>Team topology</strong><span>Is there a durable owning team per piece?</span></div>
   </div>
 
 </div>
 
 <script>
 (() => {
+  const ICON_BASE = '../customs-entry-agent/flow-icons/';
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const wrap = document.getElementById('wrap');
   const buttons = document.querySelectorAll('.toggle-btn');
+
+  /* Icons are shared line-art SVGs, fetched once each and inlined with the
+     stroke swapped to currentColor. Slots inside the big SVG get an explicit
+     width/height (a nested svg without one fills the whole viewport). A failed
+     fetch leaves the slot empty and the text still carries the block. */
+  const iconCache = new Map();
+  const loadIcon = (name) => {
+    if (!iconCache.has(name)) {
+      iconCache.set(name, fetch(ICON_BASE + name + '.svg')
+        .then((r) => (r.ok ? r.text() : Promise.reject()))
+        .then((t) => t.replace(/stroke="#232f3e"/g, 'stroke="currentColor"'))
+        .catch(() => ''));
+    }
+    return iconCache.get(name);
+  };
+  document.querySelectorAll('[data-icon]').forEach((slot) => {
+    loadIcon(slot.dataset.icon).then((t) => {
+      if (!t) return;
+      if (slot instanceof SVGElement) {
+        const s = slot.dataset.size || '24';
+        t = t.replace('<svg ', '<svg width="' + s + '" height="' + s + '" ');
+      }
+      slot.innerHTML = t;
+    });
+  });
+
+  /* State toggle (kept from the original) */
   const readouts = {
     deployables: document.getElementById('deployables'),
     databases: document.getElementById('databases'),
@@ -566,7 +640,6 @@
     mono: { deployables: '1', databases: '1 shared', coordination: 'In-process calls' },
     micro: { deployables: '4+', databases: '4 owned', coordination: 'APIs + events' },
   };
-
   const setState = (state) => {
     wrap.dataset.state = state;
     buttons.forEach((b) => {
@@ -576,14 +649,76 @@
     });
     Object.entries(copy[state]).forEach(([key, value]) => { readouts[key].textContent = value; });
   };
-
-  buttons.forEach((btn) => btn.addEventListener('click', () => setState(btn.dataset.state)));
+  buttons.forEach((btn) => btn.addEventListener('click', () => { cancelIntro(); setState(btn.dataset.state); }));
   document.addEventListener('keydown', (e) => {
     if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
       e.preventDefault();
+      cancelIntro();
       setState(wrap.dataset.state === 'mono' ? 'micro' : 'mono');
     }
   });
+
+  /* Track a capability through the morph: tap highlights that node and its
+     service-owned database in both shapes, dimming the rest. */
+  const trackables = document.querySelectorAll('.node[data-id], [data-track]');
+  const setTrack = (id) => {
+    const current = wrap.dataset.track === id ? '' : id;
+    if (current) { wrap.dataset.track = current; } else { delete wrap.dataset.track; }
+    wrap.classList.toggle('tracking', Boolean(current));
+    document.querySelectorAll('.node[data-id], .micro-db[data-id]').forEach((el) => {
+      const eid = el.dataset.id.replace(/^db-/, '');
+      el.classList.toggle('tracked', Boolean(current) && eid === current);
+      if (el.classList.contains('node')) el.setAttribute('aria-pressed', String(Boolean(current) && eid === current));
+    });
+    document.querySelectorAll('[data-track]').forEach((el) => {
+      el.setAttribute('aria-pressed', String(Boolean(current) && el.dataset.track === current));
+    });
+  };
+  trackables.forEach((el) => {
+    const id = el.dataset.track || el.dataset.id;
+    el.addEventListener('click', () => setTrack(id));
+    el.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setTrack(id); }
+    });
+  });
+
+  /* Intro: play the morph once so the shape change is seen, not imagined.
+     Timeline runs on rAF with t0 from the FIRST frame timestamp, never
+     performance.now(): sandboxed iframes can disagree between the two clocks.
+     Reduced motion skips it, the figure already rests in a complete state. */
+  const STEPS = [[700, 'micro'], [2800, 'mono']];
+  let raf = 0;
+  const cancelIntro = () => { if (raf) { cancelAnimationFrame(raf); raf = 0; } };
+  const run = () => {
+    cancelIntro();
+    if (reduced) { setState('mono'); return; }
+    setState('mono');
+    let t0 = null;
+    let next = 0;
+    const step = (ts) => {
+      if (t0 === null) t0 = ts;
+      const t = ts - t0;
+      while (next < STEPS.length && t >= STEPS[next][0]) { setState(STEPS[next][1]); next += 1; }
+      if (next < STEPS.length) { raf = requestAnimationFrame(step); } else { raf = 0; }
+    };
+    raf = requestAnimationFrame(step);
+  };
+  document.getElementById('replay').addEventListener('click', run);
+
+  /* threshold 0, not 0.2: the figure can exceed a phone viewport, and a
+     fraction of a too-tall element never intersects. */
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting)) { io.disconnect(); run(); }
+    }, { threshold: 0 });
+    io.observe(wrap);
+  } else { run(); }
+
+  if (document.documentElement.dataset.embedded === 'true') {
+    const postSize = () => window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+    if ('ResizeObserver' in window) new ResizeObserver(postSize).observe(document.body);
+    window.addEventListener('load', postSize);
+  }
 })();
 </script>
 </body>

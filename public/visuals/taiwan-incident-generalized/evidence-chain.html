@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Where the evidence actually comes from</title>
+<script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+.shell { display: flex; flex-direction: column; gap: 12px; }
+:root[data-embedded="true"] .shell { padding: 14px clamp(14px, 2vw, 22px); }
+
+.head h1 {
+  font-family: "Archivo", sans-serif; font-weight: 700;
+  font-size: clamp(1.0rem, 2.2vw, 1.26rem); letter-spacing: -0.01em; color: var(--text-strong);
+}
+.head p { font: 500 0.76rem/1.4 "IBM Plex Sans", sans-serif; color: var(--muted); margin-top: 3px; }
+
+.ctl { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.ctl button {
+  min-height: 34px; padding: 6px 12px; cursor: pointer;
+  font: 600 0.64rem/1 "IBM Plex Mono", monospace; letter-spacing: 0.07em; text-transform: uppercase;
+  color: var(--accent); background: transparent; border: 1px solid var(--accent);
+}
+.ctl button:hover { background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.ctl .hint { font: 500 0.68rem/1.3 "IBM Plex Sans", sans-serif; color: var(--muted-soft); }
+button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* graph is the measuring frame: the SVG wire overlay is anchored to it, so
+   popups/lines can never extend the document scrollWidth */
+.graph { position: relative; border: 1px solid var(--border-strong); background: var(--surface); padding: 16px; }
+.wires { position: absolute; inset: 0; pointer-events: none; z-index: 1; }
+.wire { stroke: var(--accent); stroke-width: 1.5; fill: none; opacity: 0.65; }
+.pkt { fill: var(--accent); opacity: 0; }
+
+.node { cursor: pointer; text-align: left; font-family: inherit; background: transparent; border: 0; padding: 0; }
+.node .pic { display: grid; place-items: center; color: var(--muted); flex: none; }
+.node .pic svg { display: block; }
+.node .pic svg * { stroke: currentColor; }
+
+.root {
+  display: flex; gap: 10px; align-items: center; margin: 0 auto; max-width: 260px; width: 100%;
+  border: 2px solid var(--accent); background: var(--surface-strong); padding: 10px 12px; position: relative; z-index: 2;
+}
+.root .pic { width: 34px; height: 34px; color: var(--accent); }
+.root .pic svg { width: 24px; height: 24px; }
+.root b { display: block; font: 700 0.78rem/1.3 "Archivo", sans-serif; color: var(--text-strong); }
+.root span { display: block; font: 500 0.66rem/1.4 "IBM Plex Mono", monospace; color: var(--muted); margin-top: 3px; }
+
+.fan-label {
+  font: 600 0.66rem/1.3 "IBM Plex Mono", monospace; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--muted); margin: 26px 0 8px; text-align: center;
+}
+.fan-row { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; position: relative; z-index: 2; }
+.repub {
+  display: inline-flex; align-items: center; gap: 6px;
+  font: 500 0.68rem/1.3 "IBM Plex Sans", sans-serif; color: var(--muted);
+  border: 1px solid var(--border); padding: 4px 9px; background: var(--surface);
+  transition: color 300ms, border-color 300ms;
+}
+.repub .pic { width: 14px; height: 14px; }
+.repub .pic svg { width: 14px; height: 14px; }
+.repub.lit { color: var(--text-strong); border-color: var(--accent); }
+.repub.lit .pic { color: var(--accent); }
+.node[aria-pressed="true"] { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+.hair { height: 1px; width: 100%; background: var(--border-strong); margin: 16px 0 10px; }
+.legs-label { font: 600 0.66rem/1.3 "IBM Plex Mono", monospace; letter-spacing: 0.08em; text-transform: uppercase; color: var(--T0); margin-bottom: 8px; }
+.legs { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; }
+.leg {
+  border: 2px solid var(--T0); background: var(--surface-strong); padding: 10px 12px;
+  display: block; width: 100%; transition: box-shadow 300ms;
+}
+.leg.lit { box-shadow: 0 0 0 3px color-mix(in srgb, var(--T0) 18%, transparent); }
+.leg .leg-head { display: flex; align-items: center; gap: 8px; }
+.leg .pic { width: 26px; height: 26px; color: var(--T0); }
+.leg .pic svg { width: 20px; height: 20px; }
+.leg b { font: 700 0.74rem/1.3 "Archivo", sans-serif; color: var(--T0); }
+.leg span.body { display: block; font: 500 0.68rem/1.45 "IBM Plex Sans", sans-serif; color: var(--text); margin-top: 4px; }
+.leg .tag { display: inline-block; margin-top: 6px; font: 600 0.6rem/1 "IBM Plex Mono", monospace; letter-spacing: 0.08em; text-transform: uppercase; color: var(--T0); }
+
+.counter {
+  display: inline-block; margin-top: 12px;
+  font: 600 0.68rem/1.3 "IBM Plex Mono", monospace; letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--text-strong); border: 1px solid var(--border-strong); padding: 6px 10px;
+  background: var(--surface-strong);
+}
+
+/* shared detail strip, in normal flow so it never widens the page */
+.detail { border-left: 2px solid var(--accent); padding: 6px 10px; font: 500 0.72rem/1.5 "IBM Plex Sans", sans-serif; color: var(--text); background: color-mix(in srgb, var(--accent) 6%, transparent); }
+.detail b { color: var(--text-strong); font-weight: 600; }
+.detail[hidden] { display: none; }
+
+.caption { font: 500 0.72rem/1.5 "IBM Plex Sans", sans-serif; color: var(--muted); }
+.caption b { color: var(--text-strong); font-weight: 600; }
+
+@media (max-width: 620px) { .legs { grid-template-columns: 1fr; } }
+@media (prefers-reduced-motion: reduce) { .pkt { display: none; } }
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="head">
+    <h1>One root, a wide but thin fan, two independent legs</h1>
+    <p>Republication breadth is not corroboration depth.</p>
+  </div>
+
+  <div class="ctl">
+    <button type="button" id="replay">Replay spread</button>
+    <span class="hint">Lines draw as the story spreads. Tap any node for what it adds evidentially.</span>
+  </div>
+
+  <div class="graph" id="graph">
+    <svg class="wires" id="wires" aria-hidden="true"></svg>
+
+    <button type="button" class="node root" id="root" aria-pressed="false"
+      data-detail="<b>Financial Times</b> adds the origin. Every specific count in the fan enters the record here, sourced to Dream's own investigation.">
+      <span class="pic" data-icon="document" aria-hidden="true"></span>
+      <span><b>Financial Times</b><span>Aug 12, 2026 &middot; citing Dream</span></span>
+    </button>
+
+    <div class="fan-label">Republished / expanded by</div>
+    <div class="fan-row" id="fanRow">
+      <button type="button" class="node repub" aria-pressed="false"><span class="pic" data-icon="megaphone" aria-hidden="true"></span>CNN Business</button>
+      <button type="button" class="node repub" aria-pressed="false"><span class="pic" data-icon="megaphone" aria-hidden="true"></span>The Register</button>
+      <button type="button" class="node repub" aria-pressed="false"><span class="pic" data-icon="megaphone" aria-hidden="true"></span>CyberScoop</button>
+      <button type="button" class="node repub" aria-pressed="false"><span class="pic" data-icon="megaphone" aria-hidden="true"></span>TechRadar Pro</button>
+      <button type="button" class="node repub" aria-pressed="false"><span class="pic" data-icon="megaphone" aria-hidden="true"></span>Tom's Hardware</button>
+      <button type="button" class="node repub" aria-pressed="false"><span class="pic" data-icon="megaphone" aria-hidden="true"></span>TechTimes</button>
+      <button type="button" class="node repub" aria-pressed="false"><span class="pic" data-icon="megaphone" aria-hidden="true"></span>Slashdot</button>
+      <button type="button" class="node repub" aria-pressed="false"><span class="pic" data-icon="megaphone" aria-hidden="true"></span>Security Affairs</button>
+    </div>
+
+    <div class="hair" aria-hidden="true"></div>
+    <div class="legs-label">Independent origins</div>
+
+    <div class="legs">
+      <button type="button" class="node leg" aria-pressed="false"
+        data-detail="<b>MODA</b> adds an independent origin. It confirms AI-assisted activity from its own vantage, calls it hybrid, and does not adopt Dream's figures.">
+        <span class="leg-head"><span class="pic" data-icon="gov" aria-hidden="true"></span><b>MODA confirmation</b></span>
+        <span class="body">Taiwan's Ministry of Digital Affairs independently confirms AI-assisted activity, but calls it hybrid and does not adopt Dream's figures.</span>
+        <span class="tag">Independent origin</span>
+      </button>
+      <button type="button" class="node leg" aria-pressed="false"
+        data-detail="<b>Unit 42</b> adds an adjacent independent origin. Its Jul 30 disclosure is a different incident with confirmed forensic detail, so it corroborates the class, not the counts.">
+        <span class="leg-head"><span class="pic" data-icon="flask" aria-hidden="true"></span><b>Unit 42 research</b></span>
+        <span class="body">Palo Alto Networks discloses a different DeepSeek-on-Hermes campaign, Jul 30, with confirmed forensic detail.</span>
+        <span class="tag">Independent origin, different incident</span>
+      </button>
+    </div>
+
+    <span class="counter">Independent origins: 1 (incident) + 2 (adjacent)</span>
+  </div>
+
+  <div class="detail" id="detail" hidden aria-live="polite"></div>
+
+  <p class="caption">The republication fan is <b>wide but thin</b>: every outlet in it traces back to the same one investigation. The two legs below the line are the only nodes that reach the story from somewhere else entirely, and neither of them confirms Dream's specific counts.</p>
+</div>
+<script>
+(() => {
+  const ICON_BASE = '../customs-entry-agent/flow-icons/';
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const graph = document.getElementById('graph');
+  const wires = document.getElementById('wires');
+  const root = document.getElementById('root');
+  const chips = Array.from(document.querySelectorAll('#fanRow .repub'));
+  const legs = Array.from(document.querySelectorAll('.leg'));
+  const detail = document.getElementById('detail');
+
+  /* Shared line-art icons, fetched once per name and inlined with the stroke
+     swapped to currentColor. A failed fetch leaves the slot empty. */
+  const slots = Array.from(document.querySelectorAll('[data-icon]'));
+  new Set(slots.map((s) => s.dataset.icon)).forEach((name) => {
+    fetch(ICON_BASE + name + '.svg')
+      .then((r) => (r.ok ? r.text() : Promise.reject()))
+      .then((t) => {
+        const art = t.replace(/stroke="#232f3e"/g, 'stroke="currentColor"');
+        slots.forEach((s) => { if (s.dataset.icon === name) s.innerHTML = art; });
+      })
+      .catch(() => {});
+  });
+
+  /* click any node for what it adds evidentially */
+  const nodes = [root, ...chips, ...legs];
+  nodes.forEach((node) => {
+    node.addEventListener('click', () => {
+      const on = node.getAttribute('aria-pressed') === 'true';
+      nodes.forEach((n) => n.setAttribute('aria-pressed', 'false'));
+      if (on) { detail.hidden = true; return; }
+      node.setAttribute('aria-pressed', 'true');
+      detail.innerHTML = node.dataset.detail ||
+        ('<b>' + node.textContent.trim() + '</b> adds reach, not evidence. The retelling traces back to the same single FT investigation.');
+      detail.hidden = false;
+    });
+  });
+
+  /* Wires are measured from the live DOM rects so the fan survives any wrap
+     of the chip row. One curve per chip, root bottom to chip top. */
+  const NS = 'http://www.w3.org/2000/svg';
+  const paths = chips.map(() => { const p = document.createElementNS(NS, 'path'); p.setAttribute('class', 'wire'); wires.appendChild(p); return p; });
+  const pkts = chips.map(() => { const c = document.createElementNS(NS, 'circle'); c.setAttribute('class', 'pkt'); c.setAttribute('r', '3.5'); wires.appendChild(c); return c; });
+  const measure = () => {
+    const g = graph.getBoundingClientRect();
+    wires.setAttribute('viewBox', '0 0 ' + g.width + ' ' + g.height);
+    const rr = root.getBoundingClientRect();
+    const x0 = rr.left - g.left + rr.width / 2, y0 = rr.bottom - g.top;
+    return chips.map((c, i) => {
+      const cr = c.getBoundingClientRect();
+      const x1 = cr.left - g.left + cr.width / 2, y1 = cr.top - g.top;
+      paths[i].setAttribute('d', 'M ' + x0 + ' ' + y0 + ' C ' + x0 + ' ' + (y0 + 18) + ', ' + x1 + ' ' + (y1 - 18) + ', ' + x1 + ' ' + y1);
+      return paths[i].getTotalLength();
+    });
+  };
+  const finish = () => {
+    measure();
+    paths.forEach((p) => { p.style.strokeDasharray = 'none'; p.style.strokeDashoffset = '0'; });
+    pkts.forEach((c) => { c.style.opacity = '0'; });
+    chips.forEach((c) => c.classList.add('lit'));
+    legs.forEach((l) => l.classList.add('lit'));
+  };
+
+  const DRAW = 420, STAG = 90, TRAV = 520, PSTAG = 70;
+  let raf = 0, done = false;
+  const run = () => {
+    cancelAnimationFrame(raf);
+    done = false;
+    if (reduced) { done = true; finish(); return; }
+    chips.forEach((c) => c.classList.remove('lit'));
+    legs.forEach((l) => l.classList.remove('lit'));
+    const lens = measure();
+    paths.forEach((p, i) => { p.style.strokeDasharray = lens[i]; p.style.strokeDashoffset = lens[i]; });
+    const drawEnd = STAG * (chips.length - 1) + DRAW;
+    const travEnd = drawEnd + PSTAG * (chips.length - 1) + TRAV;
+    const total = travEnd + 2 * 260;
+    /* t0 is the first rAF timestamp, never performance.now(): sandboxed
+       iframes can disagree between the two clocks. */
+    let t0 = null;
+    const step = (ts) => {
+      if (t0 === null) t0 = ts;
+      const t = ts - t0;
+      paths.forEach((p, i) => {
+        const f = Math.max(0, Math.min(1, (t - i * STAG) / DRAW));
+        p.style.strokeDashoffset = lens[i] * (1 - f);
+      });
+      pkts.forEach((c, i) => {
+        const f = (t - drawEnd - i * PSTAG) / TRAV;
+        if (f <= 0 || f >= 1) { c.style.opacity = '0'; if (f >= 1) chips[i].classList.add('lit'); return; }
+        const pt = paths[i].getPointAtLength(lens[i] * f);
+        c.setAttribute('cx', pt.x); c.setAttribute('cy', pt.y); c.style.opacity = '1';
+      });
+      legs.forEach((l, i) => { if (t >= travEnd + i * 260) l.classList.add('lit'); });
+      if (t < total) { raf = requestAnimationFrame(step); } else { done = true; }
+    };
+    raf = requestAnimationFrame(step);
+  };
+
+  document.getElementById('replay').addEventListener('click', run);
+  /* keep the measured wires honest when the chip row rewraps */
+  window.addEventListener('resize', () => { if (done || reduced) finish(); });
+
+  /* threshold 0, not 0.2: the graph can exceed a phone viewport, and a
+     fraction of a too-tall element never intersects. */
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting)) { io.disconnect(); run(); }
+    }, { threshold: 0 });
+    io.observe(graph);
+  } else { run(); }
+
+  if (document.documentElement.dataset.embedded === 'true') {
+    const postSize = () => window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+    if ('ResizeObserver' in window) new ResizeObserver(postSize).observe(document.body);
+    window.addEventListener('load', postSize);
+    window.addEventListener('resize', postSize);
+  }
+})();
+</script>
+</body>
+</html>

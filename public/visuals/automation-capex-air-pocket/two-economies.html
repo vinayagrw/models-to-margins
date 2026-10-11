@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Two freight economies</title><script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+.shell { display: flex; flex-direction: column; gap: 12px; }
+:root[data-embedded="true"] .shell { padding: 14px clamp(14px, 2vw, 22px); }
+h1 { font-family: "Saira Condensed", sans-serif; font-weight: 700; font-size: clamp(1rem, 2.2vw, 1.25rem); text-transform: uppercase; letter-spacing: 0.02em; color: var(--g-ink); }
+.sub { font: 500 0.76rem/1.4 "Inter", sans-serif; color: var(--g-ink-3); margin-top: 2px; }
+
+.ctl { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.ctl button {
+  min-height: 32px; padding: 6px 14px; cursor: pointer; border: 0; border-radius: 2px;
+  font: 700 0.64rem/1 "IBM Plex Mono", monospace; letter-spacing: 0.08em; text-transform: uppercase;
+  background: var(--g-accent); color: var(--g-on-accent);
+}
+.ctl button:hover { filter: brightness(1.05); }
+.ctl button:focus-visible { outline: 2px solid var(--g-rule-strong); outline-offset: 2px; }
+.ctl .hint { font: 500 0.68rem/1.3 "Inter", sans-serif; color: var(--g-ink-3); }
+
+/* The split: industrial lane above, consumer lane below, the divergence chart
+   between them. Icons carry each lane, lines draw the split. */
+.panel { border: 1px solid var(--g-rule); border-radius: 2px; background: var(--g-surface); overflow: hidden; }
+.lane {
+  display: grid; grid-template-columns: auto 1fr; gap: 12px; align-items: center;
+  width: 100%; padding: 10px 12px; cursor: pointer; text-align: left;
+  background: var(--g-surface-2); border: 0; font-family: inherit;
+  border-left: 3px solid var(--g-rule-strong); transition: border-color 300ms;
+}
+.lane + .chart, .chart + .lane { border-top: 1px solid var(--g-rule); }
+.lane:focus-visible { outline: 2px solid var(--g-rule-strong); outline-offset: -2px; }
+.icons { display: flex; gap: 6px; }
+.pic {
+  width: 34px; height: 34px; display: grid; place-items: center; border-radius: 2px;
+  background: var(--g-surface); border: 1.5px solid var(--g-rule-strong);
+  color: var(--g-ink-3); transition: color 300ms, border-color 300ms;
+}
+.pic svg { width: 22px; height: 22px; display: block; }
+.pic svg * { stroke: currentColor; }
+.lane.pos.lit { border-left-color: var(--g-pos); }
+.lane.neg.lit { border-left-color: var(--g-neg); }
+.lane.pos.lit .pic { color: var(--g-pos); border-color: var(--g-pos); }
+.lane.neg.lit .pic { color: var(--g-neg); border-color: var(--g-neg); }
+.lane-body { min-width: 0; }
+.lane-body b { display: block; font: 600 0.78rem/1.3 "Inter", sans-serif; color: var(--g-ink); }
+.lane-body .stat { display: block; margin-top: 2px; font: 600 0.7rem/1.4 "IBM Plex Mono", monospace; color: var(--g-ink-2); }
+.lane.pos .stat .num { color: var(--g-pos); }
+.lane.neg .stat .num { color: var(--g-neg); }
+.lane-body .more {
+  display: none; margin-top: 6px; font: 500 0.72rem/1.5 "Inter", sans-serif; color: var(--g-ink-2);
+  border-left: 2px solid var(--g-rule-strong); padding-left: 8px;
+}
+.lane[aria-expanded="true"] .lane-body .more { display: block; }
+
+.chart { padding: 10px 12px; background: var(--g-surface); }
+.chart svg { width: 100%; height: auto; display: block; }
+.dot { opacity: 0; transition: opacity 300ms; }
+.dot.on { opacity: 1; }
+
+.band { border: 1px dashed var(--g-caution); border-radius: 2px; background: color-mix(in srgb, var(--g-caution) 8%, transparent); padding: 10px 12px; margin-top: 4px; }
+.band h3 { font: 600 0.66rem "IBM Plex Mono", monospace; letter-spacing: 0.1em; text-transform: uppercase; color: var(--g-caution); margin-bottom: 6px; }
+.band-row { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; font: 500 0.76rem/1.4 "Inter", sans-serif; color: var(--g-ink-2); padding: 4px 0; border-top: 1px solid var(--g-rule); }
+.band-row:first-of-type { border-top: 0; }
+.band-row b { color: var(--g-ink); font-family: "IBM Plex Mono", monospace; }
+.note { font: 500 0.74rem/1.5 "Inter", sans-serif; color: var(--g-ink-2); }
+
+@media (max-width: 620px) {
+  .lane { grid-template-columns: 1fr; gap: 8px; }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div>
+    <h1>Two freight economies, opposite directions</h1>
+    <p class="sub">Consumer freight softens while industrial freight strengthens, in the same market, at the same time.</p>
+  </div>
+
+  <div class="ctl">
+    <button type="button" id="replay">Replay split</button>
+    <span class="hint">Tap a lane for its underlying numbers.</span>
+  </div>
+
+  <div class="panel">
+    <button type="button" class="lane pos" data-lane="ind" aria-expanded="false">
+      <span class="icons" aria-hidden="true">
+        <span class="pic" data-icon="factory"></span>
+        <span class="pic" data-icon="crane"></span>
+        <span class="pic" data-icon="cpu"></span>
+      </span>
+      <span class="lane-body">
+        <b>Industrial (LTL, ISM, DHL)</b>
+        <span class="stat">DHL: <span class="num" data-target="30" data-decimals="0" data-prefix="~" data-suffix="%">~30%</span> operating-profit growth (audited)</span>
+        <span class="more">The AI-capex side of the market. The one audited anchor here is DHL's operating result, and LTL and ISM readings sit on the same side of the ledger. The audited figure confirms the direction of the split, not its magnitude.</span>
+      </span>
+    </button>
+
+    <div class="chart">
+      <svg viewBox="0 0 360 130" role="img" aria-label="Two indexed lines leaving a common origin and diverging, industrial freight rising toward the lane above and consumer freight falling toward the lane below">
+        <line x1="10" y1="65" x2="350" y2="65" stroke="var(--g-rule-strong)" stroke-width="1"></line>
+        <polyline id="line-ind" points="20,60 130,50 240,32 340,15" fill="none" stroke="var(--g-pos)" stroke-width="2.5"></polyline>
+        <polyline id="line-con" points="20,60 130,68 240,80 340,95" fill="none" stroke="var(--g-neg)" stroke-width="2.5"></polyline>
+        <circle class="dot" id="dot-ind" cx="340" cy="15" r="4" fill="var(--g-pos)"></circle>
+        <circle class="dot" id="dot-con" cx="340" cy="95" r="4" fill="var(--g-neg)"></circle>
+      </svg>
+    </div>
+
+    <button type="button" class="lane neg" data-lane="con" aria-expanded="false">
+      <span class="icons" aria-hidden="true">
+        <span class="pic" data-icon="person"></span>
+        <span class="pic" data-icon="coin"></span>
+        <span class="pic" data-icon="truck"></span>
+      </span>
+      <span class="lane-body">
+        <b>Consumer (nonstore, TEU)</b>
+        <span class="stat">Nonstore <span class="num" data-target="2.2" data-decimals="1" data-prefix="&minus;" data-suffix="%">&minus;2.2%</span> m/m, TEU <span class="num" data-target="4.2" data-decimals="1" data-prefix="&minus;" data-suffix="%">&minus;4.2%</span> y/y</span>
+        <span class="more">The ordinary consumer side. Nonstore retail is down 2.2% month over month and the TEU container series is down 4.2% year over year. Both series soften while the industrial lane strengthens, in the same months.</span>
+      </span>
+    </button>
+  </div>
+
+  <div class="band">
+    <h3>Estimate band &middot; data-center freight, quarantined</h3>
+    <div class="band-row"><span>JOC via IA Insights, 2026&ndash;2030 (24&rarr;110 GW)</span><b>~8.6M truckloads</b></div>
+    <div class="band-row"><span>FreightWaves SONAR, 2026&ndash;2031</span><b>~18.9M truckloads</b></div>
+  </div>
+  <p class="note">Different windows, different scope, both analyst estimates on top of a projection. Directional only, never a planning input on this page. What DHL's audited result independently confirms is the direction, not the magnitude.</p>
+</div>
+<script>
+(() => {
+  const ICON_BASE = '../customs-entry-agent/flow-icons/';
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const lanes = Array.from(document.querySelectorAll('.lane'));
+  const lines = [document.getElementById('line-ind'), document.getElementById('line-con')];
+  const dots = [document.getElementById('dot-ind'), document.getElementById('dot-con')];
+  const nums = Array.from(document.querySelectorAll('.num'));
+
+  /* Icons are shared line-art SVGs, fetched and inlined with the stroke
+     swapped to currentColor so they follow the lane's theme colour. A failed
+     fetch leaves the slot empty and the text still carries the lane. */
+  document.querySelectorAll('[data-icon]').forEach((slot) => {
+    fetch(ICON_BASE + slot.dataset.icon + '.svg')
+      .then((r) => (r.ok ? r.text() : Promise.reject()))
+      .then((t) => { slot.innerHTML = t.replace(/stroke="#232f3e"/g, 'stroke="currentColor"'); })
+      .catch(() => {});
+  });
+
+  /* expand/collapse the underlying numbers on tap or Enter */
+  lanes.forEach((lane) => {
+    lane.addEventListener('click', () => {
+      const open = lane.getAttribute('aria-expanded') === 'true';
+      lane.setAttribute('aria-expanded', String(!open));
+    });
+  });
+
+  const fmt = (el, v) => {
+    const d = Number(el.dataset.decimals);
+    el.textContent = el.dataset.prefix + v.toFixed(d) + el.dataset.suffix;
+  };
+  const finish = () => {
+    lines.forEach((l) => { l.style.strokeDasharray = 'none'; l.style.strokeDashoffset = '0'; });
+    dots.forEach((d) => d.classList.add('on'));
+    nums.forEach((n) => fmt(n, Number(n.dataset.target)));
+    lanes.forEach((l) => l.classList.add('lit'));
+  };
+
+  /* The two lines draw on from the shared origin while the lane stats count
+     up. rAF t0 comes from the first frame timestamp, never performance.now():
+     sandboxed iframes can disagree between the two clocks. */
+  const DRAW = 1000, COUNT_START = 400, COUNT_END = 1400;
+  let raf = 0;
+  const run = () => {
+    cancelAnimationFrame(raf);
+    if (reduced) { finish(); return; }
+    lanes.forEach((l) => l.classList.remove('lit'));
+    dots.forEach((d) => d.classList.remove('on'));
+    const lens = lines.map((l) => l.getTotalLength());
+    lines.forEach((l, i) => { l.style.strokeDasharray = String(lens[i]); l.style.strokeDashoffset = String(lens[i]); });
+    nums.forEach((n) => fmt(n, 0));
+    let t0 = null;
+    const step = (ts) => {
+      if (t0 === null) t0 = ts;
+      const t = ts - t0;
+      const p = Math.min(1, t / DRAW);
+      const ease = 1 - Math.pow(1 - p, 3);
+      lines.forEach((l, i) => { l.style.strokeDashoffset = String(lens[i] * (1 - ease)); });
+      if (p >= 1) dots.forEach((d) => d.classList.add('on'));
+      if (t > 500) lanes.forEach((l) => l.classList.add('lit'));
+      const q = Math.min(1, Math.max(0, (t - COUNT_START) / (COUNT_END - COUNT_START)));
+      const qe = 1 - Math.pow(1 - q, 3);
+      nums.forEach((n) => fmt(n, Number(n.dataset.target) * qe));
+      if (t < COUNT_END) raf = requestAnimationFrame(step);
+      else finish();
+    };
+    raf = requestAnimationFrame(step);
+  };
+
+  document.getElementById('replay').addEventListener('click', run);
+
+  /* threshold 0, not 0.2: the figure can exceed a phone viewport, and a
+     fraction of a too-tall element never intersects. */
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting)) { io.disconnect(); run(); }
+    }, { threshold: 0 });
+    io.observe(document.querySelector('.panel'));
+  } else { run(); }
+
+  if (document.documentElement.dataset.embedded === 'true') {
+    const postSize = () => window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+    if ('ResizeObserver' in window) new ResizeObserver(postSize).observe(document.body);
+    window.addEventListener('load', postSize);
+    window.addEventListener('resize', postSize);
+  }
+})();
+</script>
+</body>
+</html>

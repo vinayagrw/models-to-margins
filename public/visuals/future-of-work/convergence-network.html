@@ -53,74 +53,76 @@
         --tooltip-shadow: 0 8px 24px rgba(0,0,0,0.5); --label-bg: rgba(15,23,42,0.85);
       }
     }
-    html, body { width: 100%; height: 100%; overflow: hidden; background: var(--bg); font-family: system-ui, -apple-system, sans-serif; color: var(--text); }
+    html, body { width: 100%; background: var(--bg); font-family: system-ui, -apple-system, sans-serif; color: var(--text); }
+    body { overflow-x: hidden; }
     html[data-embedded="true"] body { background: transparent; }
-    svg { width: 100%; height: 100%; }
-    .node-group { cursor: pointer; }
+    :root[data-embedded="true"], :root[data-embedded="true"] body { height: auto; }
+    .stage { position: relative; width: 100%; max-width: 720px; margin: 0 auto; }
+    .stage svg { display: block; width: 100%; height: auto; aspect-ratio: 600 / 440; }
+    .node-group { cursor: pointer; outline: none; }
     .node-group:hover circle { filter: brightness(1.2); }
+    .node-group:focus-visible circle:first-of-type { stroke: var(--text); stroke-width: 1.5; }
     .edge { transition: opacity 200ms ease, stroke-width 200ms ease; }
     .edge-label { font-size: 9px; fill: var(--muted); pointer-events: none; }
     .node-label { font-size: 11px; font-weight: 600; fill: var(--text); text-anchor: middle; pointer-events: none; }
     .dimmed { opacity: 0.08; }
-    .tooltip-box { pointer-events: none; }
-    .tooltip-box rect { fill: var(--tooltip-bg); stroke: var(--tooltip-border); rx: 8; }
-    .tooltip-box text { fill: var(--text); font-size: 10px; }
-    .tooltip-box .tt-title { font-weight: 700; font-size: 11px; }
 
-    /* Auto-play tour */
-    .tour-controls {
-      display: flex; align-items: center; justify-content: center;
-      gap: 8px; margin-top: 8px;
-      position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%);
-    }
+    /* Controls: real buttons in normal flow so they never overlap the graph */
+    .tour-controls { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 8px; padding: 8px 12px 12px; }
     .tour-btn {
       background: none; border: 1px solid var(--edge-color);
       color: var(--muted); font-size: 0.66rem; font-weight: 600;
-      padding: 3px 10px; border-radius: 10px; cursor: pointer;
-      letter-spacing: 0.04em; transition: all 0.18s;
+      padding: 4px 10px; border-radius: 10px; cursor: pointer;
+      letter-spacing: 0.04em; transition: all 0.18s; min-height: 26px;
+      font-family: inherit;
     }
     .tour-btn:hover, .tour-btn.active { color: var(--text); border-color: var(--text); }
+    .tour-btn:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
     .tour-pips { display: flex; gap: 4px; }
     .tour-pip { width: 18px; height: 3px; border-radius: 2px; background: var(--edge-color); transition: background 0.3s; }
 
     .tour-card {
-      position: absolute; left: 12px; bottom: 40px;
-      width: 210px; padding: 12px 14px; border-radius: 12px;
+      position: absolute; left: 12px; bottom: 8px;
+      width: 210px; max-width: calc(100% - 24px); padding: 12px 14px; border-radius: 12px;
       background: var(--tooltip-bg); border: 1px solid var(--tooltip-border);
       box-shadow: var(--tooltip-shadow); backdrop-filter: blur(14px);
-      opacity: 0; transform: translateY(6px);
-      transition: opacity 0.35s ease, transform 0.35s ease;
+      opacity: 0; transform: translateY(6px); visibility: hidden;
+      transition: opacity 0.35s ease, transform 0.35s ease, visibility 0.35s;
       pointer-events: none; z-index: 10;
     }
-    .tour-card.visible { opacity: 1; transform: translateY(0); }
+    .tour-card.visible { opacity: 1; transform: translateY(0); visibility: visible; }
     .tour-card-label {
       display: inline-block; padding: 2px 8px; border-radius: 6px;
       font-size: 0.6rem; font-weight: 700; letter-spacing: 0.08em;
       text-transform: uppercase; margin-bottom: 6px;
-      background: var(--convergence-bg); color: var(--muted);
+      background: var(--edge-color); color: var(--muted);
     }
     .tour-card-title { font-size: 0.82rem; font-weight: 700; margin-bottom: 4px; }
     .tour-card-desc { font-size: 0.7rem; color: var(--muted); line-height: 1.4; }
+    @media (prefers-reduced-motion: reduce) {
+      .edge, .tour-card, .tour-pip, .tour-btn { transition: none; }
+    }
   </style>
 </head>
 <body>
-  <div style="position:relative;width:100%;height:100%">
-  <svg id="svg" viewBox="0 0 600 420" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Sector convergence network showing connections between five workforce sectors" style="width:100%;height:calc(100% - 28px)"></svg>
-  <div class="tour-card" id="tour-card"></div>
-  <div class="tour-controls">
-    <button class="tour-btn" id="tour-btn">&#9654; Tour</button>
-    <div class="tour-pips" id="tour-pips"></div>
+  <div class="stage">
+    <svg id="svg" viewBox="0 0 600 440" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Sector convergence network showing connections between five workforce sectors"></svg>
+    <div class="tour-card" id="tour-card"></div>
   </div>
+  <div class="tour-controls">
+    <button type="button" class="tour-btn" id="replay-btn">&#8635; Replay</button>
+    <button type="button" class="tour-btn" id="tour-btn">&#9654; Tour</button>
+    <div class="tour-pips" id="tour-pips"></div>
   </div>
   <script>
     const NODES = [
-      { id: 'healthcare', label: 'Healthcare', color: { light: '#16825d', dark: '#22c07a' }, score: 4.37 },
-      { id: 'ai', label: 'AI Infra', color: { light: '#2563eb', dark: '#60a5fa' }, score: 4.43 },
-      { id: 'cyber', label: 'Cybersecurity', color: { light: '#7c3aed', dark: '#a78bfa' }, score: 4.0 },
-      { id: 'grid', label: 'Electrification', color: { light: '#b8860b', dark: '#fbbf24' }, score: 4.5 },
-      { id: 'mfg', label: 'Manufacturing', color: { light: '#be185d', dark: '#f472b6' }, score: 4.13 },
+      { id: 'healthcare', label: 'Healthcare', icon: 'personcheck', color: { light: '#16825d', dark: '#22c07a' }, score: 4.37 },
+      { id: 'ai', label: 'AI Infra', icon: 'cpu', color: { light: '#2563eb', dark: '#60a5fa' }, score: 4.43 },
+      { id: 'cyber', label: 'Cybersecurity', icon: 'shield', color: { light: '#7c3aed', dark: '#a78bfa' }, score: 4.0 },
+      { id: 'grid', label: 'Electrification', icon: 'transmit', color: { light: '#b8860b', dark: '#fbbf24' }, score: 4.5 },
+      { id: 'mfg', label: 'Manufacturing', icon: 'factory', color: { light: '#be185d', dark: '#f472b6' }, score: 4.13 },
       // Excluded sector — rendered dimmed to show it was evaluated
-      { id: 'finance', label: 'Finance', color: { light: '#94a3b8', dark: '#64748b' }, score: 2.8, excluded: true }
+      { id: 'finance', label: 'Finance', icon: 'coin', color: { light: '#94a3b8', dark: '#64748b' }, score: 2.8, excluded: true }
     ];
 
     const EDGES = [
@@ -133,7 +135,19 @@
       { from: 'finance', to: 'cyber', label: 'Fin x Sec', strength: 1, desc: 'RegTech, compliance architecture, AML/KYC investigation', excluded: true }
     ];
 
-    const CX = 300, CY = 200, R = 140;
+    const CX = 300, CY = 210, R = 140;
+    const ICON_BASE = '../customs-entry-agent/flow-icons/', ICONS = {};
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    /* Shared line-art icons, fetched and inlined with the stroke swapped to
+       currentColor so each pictogram takes its node's colour. A failed fetch
+       leaves the slot empty and the label still carries the node. */
+    NODES.forEach((n) => {
+      fetch(ICON_BASE + n.icon + '.svg')
+        .then((r) => (r.ok ? r.text() : Promise.reject()))
+        .then((t) => { ICONS[n.icon] = t.replace(/stroke="#232f3e"/g, 'stroke="currentColor"'); window.__rebuild(); })
+        .catch(() => {});
+    });
 
     // Hexagon positions (top-center start, clockwise) — 5 ranked + 1 excluded
     function nodePositions() {
@@ -146,9 +160,12 @@
 
     function isDark() { return document.documentElement.dataset.theme === 'dark' || (!document.documentElement.dataset.theme && window.matchMedia('(prefers-color-scheme: dark)').matches); }
 
-    let activeNode = null;
+    let activeNode = null, pinnedNode = null, introDone = reduced, building = false;
 
     window.__rebuild = function() {
+      building = true;
+      // innerHTML wipes keyboard focus, so remember which node held it
+      const focusId = document.activeElement && document.activeElement.dataset ? document.activeElement.dataset.id : null;
       const dark = isDark();
       const nodes = nodePositions();
       const nodeMap = Object.fromEntries(nodes.map(n => [n.id, n]));
@@ -156,7 +173,7 @@
 
       let html = '<defs><filter id="glow"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>';
 
-      // Edges
+      // Edges: ranked edges draw on via stroke-dashoffset until the intro has run
       EDGES.forEach((e, i) => {
         const a = nodeMap[e.from], b = nodeMap[e.to];
         const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
@@ -166,11 +183,14 @@
         const sw = isExcluded ? 1 : e.strength * 1.5 + (active ? 1 : 0);
         const c1 = dark ? a.color.dark : a.color.light;
         const c2 = dark ? b.color.dark : b.color.light;
-        const dashAttr = isExcluded ? ' stroke-dasharray="4 3"' : '';
+        const L = Math.hypot(b.x - a.x, b.y - a.y);
+        const animate = !isExcluded && !introDone;
+        const dashAttr = isExcluded ? ' stroke-dasharray="4 3"'
+          : animate ? ` data-anim data-len="${L.toFixed(1)}" data-c="${c2}" stroke-dasharray="${L.toFixed(1)}" stroke-dashoffset="${L.toFixed(1)}"` : '';
         const edgeOpacity = isExcluded ? 0.25 : 0.5;
         html += `<line class="edge ${dimmed ? 'dimmed' : ''}" data-from="${e.from}" data-to="${e.to}" x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="url(#eg${i})" stroke-width="${sw}" stroke-linecap="round"${dashAttr}/>`;
         html += `<linearGradient id="eg${i}" x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" gradientUnits="userSpaceOnUse"><stop stop-color="${c1}" stop-opacity="${edgeOpacity}"/><stop offset="1" stop-color="${c2}" stop-opacity="${edgeOpacity}"/></linearGradient>`;
-        if (!dimmed) {
+        if (!dimmed && introDone) {
           // edge label background
           const labelW = e.label.length * 5.5 + 12;
           html += `<rect x="${mx - labelW/2}" y="${my - 8}" width="${labelW}" height="16" rx="8" fill="var(--label-bg)" opacity="0.9"/>`;
@@ -178,7 +198,7 @@
         }
       });
 
-      // Nodes
+      // Nodes: each carries its pictogram inside the disc
       nodes.forEach(n => {
         const c = dark ? n.color.dark : n.color.light;
         const dimmed = activeNode && activeNode !== n.id;
@@ -186,26 +206,115 @@
         // Node radius: proportional to score (range ~3.0–5.0), min 18px
         const r = isExcluded ? 14 : 18 + (n.score - 3.9) * 8;
         const nodeOp = isExcluded ? 0.3 : 0.85;
-        html += `<g class="node-group ${dimmed ? 'dimmed' : ''}" data-id="${n.id}" tabindex="0" onmouseenter="window.__highlight('${n.id}')" onmouseleave="window.__highlight(null)" onfocus="window.__highlight('${n.id}')" onblur="window.__highlight(null)">`;
+        html += `<g class="node-group ${dimmed ? 'dimmed' : ''}" data-id="${n.id}" tabindex="0" role="button" aria-pressed="${pinnedNode === n.id}" aria-label="${n.label}, score ${n.score}">`;
         if (isExcluded) {
           html += `<circle cx="${n.x}" cy="${n.y}" r="${r}" fill="none" stroke="${c}" stroke-width="1.5" stroke-dasharray="3 2" opacity="0.4"/>`;
         } else {
           html += `<circle cx="${n.x}" cy="${n.y}" r="${r + 4}" fill="${c}" opacity="0.15" filter="url(#glow)"/>`;
           html += `<circle cx="${n.x}" cy="${n.y}" r="${r}" fill="${c}" opacity="${nodeOp}"/>`;
         }
+        const ic = ICONS[n.icon];
+        if (ic) {
+          const s = isExcluded ? 15 : Math.round(r * 1.05);
+          const iconColor = isExcluded ? c : (dark ? '#0b1120' : '#ffffff');
+          const iconOp = isExcluded ? 0.55 : 0.95;
+          html += `<g style="color:${iconColor}" opacity="${iconOp}" pointer-events="none">` +
+            ic.replace('<svg ', `<svg x="${(n.x - s / 2).toFixed(1)}" y="${(n.y - s / 2).toFixed(1)}" width="${s}" height="${s}" `) + '</g>';
+        }
         html += `<text class="node-label" x="${n.x}" y="${n.y > CY ? n.y + r + 16 : n.y - r - 8}" fill="var(--text)" ${isExcluded ? 'opacity="0.4" font-style="italic"' : ''}>${n.label}</text>`;
         html += `</g>`;
       });
 
+      html += '<circle class="pulse" r="5" opacity="0" filter="url(#glow)" pointer-events="none"/>';
       svg.innerHTML = html;
+      if (focusId) svg.querySelector(`.node-group[data-id="${focusId}"]`)?.focus({ preventScroll: true });
+      building = false;
     };
 
-    window.__highlight = function(id) {
+    window.__highlight = function(id, fromHover) {
+      if (building) return;
+      if (fromHover && pinnedNode) return;
+      if (activeNode === id) return;
       activeNode = id;
       window.__rebuild();
     };
 
     window.__rebuild();
+
+    /* Intro: each ranked edge draws on in sequence and a pulse rides the
+       drawing tip. t0 comes from the FIRST rAF timestamp, never
+       performance.now(): sandboxed iframes can disagree between the clocks. */
+    const svgEl = document.getElementById('svg');
+    const DUR = 520;
+    let raf = 0;
+    function runIntro() {
+      cancelAnimationFrame(raf);
+      if (reduced) { introDone = true; window.__rebuild(); return; }
+      introDone = false;
+      window.__rebuild();
+      let t0 = null;
+      const step = (ts) => {
+        if (t0 === null) t0 = ts;
+        const t = ts - t0;
+        // re-query each frame: hover or theme changes rebuild the SVG mid-run
+        const els = svgEl.querySelectorAll('[data-anim]');
+        const pulse = svgEl.querySelector('.pulse');
+        let allDone = els.length > 0;
+        els.forEach((el, i) => {
+          const L = +el.dataset.len;
+          const f = Math.min(1, Math.max(0, (t - i * DUR) / DUR));
+          el.style.strokeDashoffset = String(L * (1 - f));
+          if (f < 1) allDone = false;
+          if (pulse && f > 0 && f < 1) {
+            const x1 = +el.getAttribute('x1'), y1 = +el.getAttribute('y1');
+            pulse.setAttribute('cx', x1 + (+el.getAttribute('x2') - x1) * f);
+            pulse.setAttribute('cy', y1 + (+el.getAttribute('y2') - y1) * f);
+            pulse.setAttribute('fill', el.dataset.c);
+            pulse.setAttribute('opacity', '0.9');
+          }
+        });
+        if (!allDone) { raf = requestAnimationFrame(step); }
+        else { introDone = true; window.__rebuild(); }
+      };
+      raf = requestAnimationFrame(step);
+    }
+
+    document.getElementById('replay-btn').addEventListener('click', () => { stopCTour(); hideNodeCard(); runIntro(); });
+
+    /* threshold 0, not 0.2: the figure can exceed a phone viewport, and a
+       fraction of a too-tall element never reaches 0.2 visibility. */
+    if ('IntersectionObserver' in window) {
+      const io = new IntersectionObserver((entries) => { if (entries.some((e) => e.isIntersecting)) { io.disconnect(); runIntro(); } }, { threshold: 0 });
+      io.observe(svgEl);
+    } else { runIntro(); }
+
+    // ── Node interaction: hover previews, click or Enter pins and opens a card ──
+    const cTourCard = document.getElementById('tour-card');
+    function hideNodeCard() { cTourCard.classList.remove('visible'); }
+    function showNodeCard(n) {
+      const c = isDark() ? n.color.dark : n.color.light;
+      const zones = EDGES.filter(e => e.from === n.id || e.to === n.id).map(e => e.label).join(', ');
+      const note = n.excluded ? ' · evaluated and screened out' : '';
+      cTourCard.innerHTML = `
+        <div class="tour-card-label">Sector</div>
+        <div class="tour-card-title" style="color:${c}">${n.label}</div>
+        <div class="tour-card-desc">Score ${n.score}${note} · zones: ${zones}</div>
+      `;
+      cTourCard.classList.add('visible');
+    }
+    function toggleNode(id) {
+      stopCTour();
+      pinnedNode = pinnedNode === id ? null : id;
+      activeNode = pinnedNode;
+      window.__rebuild();
+      if (pinnedNode) showNodeCard(NODES.find(n => n.id === pinnedNode)); else hideNodeCard();
+    }
+    svgEl.addEventListener('mouseover', (e) => { const g = e.target.closest('.node-group'); if (g) window.__highlight(g.dataset.id, true); });
+    svgEl.addEventListener('mouseout', (e) => { const g = e.target.closest('.node-group'); if (g && !(e.relatedTarget && g.contains(e.relatedTarget))) window.__highlight(null, true); });
+    svgEl.addEventListener('focusin', (e) => { const g = e.target.closest('.node-group'); if (g) window.__highlight(g.dataset.id, true); });
+    svgEl.addEventListener('focusout', (e) => { if (e.target.closest('.node-group')) window.__highlight(null, true); });
+    svgEl.addEventListener('click', (e) => { const g = e.target.closest('.node-group'); if (g) toggleNode(g.dataset.id); });
+    svgEl.addEventListener('keydown', (e) => { if (e.key !== 'Enter' && e.key !== ' ') return; const g = e.target.closest('.node-group'); if (g) { e.preventDefault(); toggleNode(g.dataset.id); } });
 
     // ── Auto-play tour for convergence zones ──
     // Cycles through each edge (convergence zone), highlighting both connected nodes
@@ -213,26 +322,19 @@
     const TOUR_MS = 4000;
     let cTourTimer = null, cTourIdx = -1, cTourActive = false;
 
-    const cTourBtn = document.getElementById('tour-btn');
-    const cTourPips = document.getElementById('tour-pips');
-    const cTourCard = document.getElementById('tour-card');
-
-    function isDarkNow() { return document.documentElement.dataset.theme === 'dark' || (!document.documentElement.dataset.theme && window.matchMedia('(prefers-color-scheme: dark)').matches); }
+    const cTourBtn = document.getElementById('tour-btn'), cTourPips = document.getElementById('tour-pips');
 
     function buildCTourPips() {
       cTourPips.innerHTML = TOUR_EDGES.map((e, i) => {
-        const active = cTourIdx === i;
-        const dark = isDarkNow();
-        const fromNode = NODES.find(n => n.id === e.from);
-        const c = active && fromNode ? (dark ? fromNode.color.dark : fromNode.color.light) : '';
+        const active = cTourIdx === i, fromNode = NODES.find(n => n.id === e.from);
+        const c = active && fromNode ? (isDark() ? fromNode.color.dark : fromNode.color.light) : '';
         return `<div class="tour-pip" style="${active ? 'background:'+c : ''}"></div>`;
       }).join('');
     }
 
     function showCTourCard(edge) {
-      const dark = isDarkNow();
-      const fromNode = NODES.find(n => n.id === edge.from);
-      const toNode = NODES.find(n => n.id === edge.to);
+      const dark = isDark();
+      const fromNode = NODES.find(n => n.id === edge.from), toNode = NODES.find(n => n.id === edge.to);
       const c1 = fromNode ? (dark ? fromNode.color.dark : fromNode.color.light) : '#999';
       const c2 = toNode ? (dark ? toNode.color.dark : toNode.color.light) : '#999';
       cTourCard.innerHTML = `
@@ -255,46 +357,43 @@
 
     function startCTour() {
       if (cTourActive) { stopCTour(); return; }
-      cTourActive = true;
-      cTourBtn.textContent = '\u23F8 Pause';
-      cTourBtn.classList.add('active');
-      cTourIdx = -1;
+      pinnedNode = null; cTourActive = true; cTourIdx = -1;
+      cTourBtn.textContent = '⏸ Pause'; cTourBtn.classList.add('active'); cTourBtn.setAttribute('aria-pressed', 'true');
       cTourStep();
       cTourTimer = setInterval(cTourStep, TOUR_MS);
     }
 
     function stopCTour() {
-      cTourActive = false;
-      clearInterval(cTourTimer);
-      cTourTimer = null;
-      cTourBtn.textContent = '\u25B6 Tour';
-      cTourBtn.classList.remove('active');
+      if (!cTourActive) return;
+      cTourActive = false; clearInterval(cTourTimer); cTourTimer = null;
+      cTourBtn.textContent = '▶ Tour'; cTourBtn.classList.remove('active'); cTourBtn.setAttribute('aria-pressed', 'false');
       cTourCard.classList.remove('visible');
-      activeNode = null;
-      cTourIdx = -1;
+      activeNode = null; cTourIdx = -1;
       buildCTourPips();
       window.__rebuild();
     }
 
     cTourBtn.addEventListener('click', startCTour);
+    cTourBtn.setAttribute('aria-pressed', 'false');
 
     // Pause on SVG hover, resume on leave
-    document.getElementById('svg').addEventListener('mouseenter', () => {
-      if (cTourActive) { clearInterval(cTourTimer); cTourTimer = null; }
-    });
-    document.getElementById('svg').addEventListener('mouseleave', () => {
-      if (cTourActive && !cTourTimer) { cTourTimer = setInterval(cTourStep, TOUR_MS); }
-    });
+    svgEl.addEventListener('mouseenter', () => { if (cTourActive) { clearInterval(cTourTimer); cTourTimer = null; } });
+    svgEl.addEventListener('mouseleave', () => { if (cTourActive && !cTourTimer) { cTourTimer = setInterval(cTourStep, TOUR_MS); } });
 
     buildCTourPips();
 
-    // Auto-start after 2s if no interaction
+    // Auto-start after the intro settles, if no interaction and motion is allowed
     let cUserInteracted = false;
     const cInteractionEvents = ['click', 'touchstart', 'mousemove'];
     function cMarkInteraction() { cUserInteracted = true; cInteractionEvents.forEach(e => document.removeEventListener(e, cMarkInteraction)); }
     cInteractionEvents.forEach(e => document.addEventListener(e, cMarkInteraction, { passive: true }));
-    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-    setTimeout(() => { if (!cUserInteracted && !reducedMotion.matches) startCTour(); }, 2500);
+    setTimeout(() => { if (!cUserInteracted && !reduced) startCTour(); }, 4500);
+
+    if (document.documentElement.dataset.embedded === 'true') {
+      const postSize = () => window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+      if ('ResizeObserver' in window) new ResizeObserver(postSize).observe(document.body);
+      window.addEventListener('load', postSize);
+    }
   </script>
 </body>
 </html>

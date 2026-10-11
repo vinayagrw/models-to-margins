@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The desk that cannot audit itself</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+/* Vigilance instruments. A countermeasures board (agreement-rate drift, seeded
+   known-error probes, structured uncertainty display, override-reason quality)
+   each stamped by evidence status, plus two sourced tiles: prevalence collapse
+   and automation-bias flip rate. Reduced motion: everything visible, static. */
+
+.shell { display: flex; flex-direction: column; gap: 10px; }
+:root[data-embedded="true"] .shell { padding: 14px clamp(14px, 2vw, 22px); }
+
+.head h1 {
+  font-family: "Space Grotesk", sans-serif; font-weight: 700;
+  font-size: clamp(1.02rem, 2.2vw, 1.3rem); letter-spacing: -0.02em; color: var(--text-strong);
+}
+:root[data-embedded="true"] .head h1 { font-size: 1.02rem; }
+.head p { font: 500 0.72rem/1.4 "DM Sans", sans-serif; color: var(--muted); margin-top: 2px; }
+
+.tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.tile { border: 1px solid var(--border); border-radius: 10px; background: var(--surface); padding: 9px 11px; }
+.tile .num { font: 700 1.15rem/1.1 "IBM Plex Mono", monospace; color: var(--tc); display: block; }
+.tile .num small { font-size: 0.7rem; font-weight: 600; color: var(--muted); }
+.tile span.d { display: block; font: 500 0.66rem/1.45 "DM Sans", sans-serif; color: var(--muted); margin-top: 3px; }
+
+.board { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.card {
+  border: 1px solid var(--border); border-left: 3px solid var(--cc); border-radius: 10px;
+  background: var(--surface); padding: 9px 11px; display: flex; flex-direction: column; gap: 4px;
+}
+.card .top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.card b { font: 700 0.72rem/1.25 "Space Grotesk", sans-serif; color: var(--text-strong); }
+.card p { font: 500 0.68rem/1.45 "DM Sans", sans-serif; color: var(--muted); }
+
+@media (max-width: 760px) {
+  .head h1 { font-size: 1rem; }
+  .tiles, .board { grid-template-columns: minmax(0, 1fr); }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="head">
+    <h1>The desk that cannot audit itself</h1>
+    <p>If the agent is good, genuine errors become rare, and no screen catches what nobody sees.</p>
+  </div>
+
+  <div class="tiles">
+    <div class="tile" style="--tc: var(--accent)">
+      <span class="num"><span data-count="0.58" data-dec="2">0.00</span><small> → </small><span data-count="0.40" data-dec="2">0.00</span></span>
+      <span class="d">reviewer hit rate as error prevalence falls from 50% to 10 percent, the low-prevalence collapse that makes rare errors the hardest to catch</span>
+    </div>
+    <div class="tile" style="--tc: var(--warn)">
+      <span class="num"><span data-count="7" data-dec="0">0</span>%</span>
+      <span class="d">measured automation-bias rate, AI advice flipping an initially correct human judgement; time pressure raised severity, not frequency</span>
+    </div>
+  </div>
+
+  <div class="board" role="group" aria-label="Countermeasures, stamped by evidence status">
+    <div class="card" style="--cc: var(--warn)">
+      <div class="top"><b>Seeded known-error probes</b><span class="stamp stamp--open">Open</span></div>
+      <p>Deliberate errors injected at a controlled, low prevalence into the routine lane, the only known way to keep detection alive once genuine errors go rare. Prevalence rate itself is a proposed 0.2% figure, not yet validated.</p>
+    </div>
+    <div class="card" style="--cc: var(--warn)">
+      <div class="top"><b>Agreement-rate drift monitor</b><span class="stamp stamp--open">Open</span></div>
+      <p>Tracks accept rate over time per reviewer and per field. A rising trend alone is not proof of vigilance loss, so this instrument flags for investigation, it does not score performance.</p>
+    </div>
+    <div class="card" style="--cc: var(--good)">
+      <div class="top"><b>Structured uncertainty display</b><span class="stamp stamp--confirmed">Confirmed</span></div>
+      <p>Banded risk name plus a subordinate number, never a bare score alone. Directly evidenced by the calibration research in Chapter 3, the one piece of this board resting on measured desk-level data.</p>
+    </div>
+    <div class="card" style="--cc: var(--warn)">
+      <div class="top"><b>Override-reason quality check</b><span class="stamp stamp--open">Open</span></div>
+      <p>Free-text and templated override reasons are periodically sampled for whether they show actual reasoning versus a rubber-stamped label, since the reason field is a legal record, not telemetry alone.</p>
+    </div>
+  </div>
+
+  <div class="card" style="--cc: var(--accent)">
+    <div class="top"><b>What agreement rate alone must never be</b><span class="stamp stamp--hold">Hold</span></div>
+    <p>A high accept rate is consistent with both a good model and a reviewer who stopped looking. None of the four instruments above is sufficient alone, and agreement rate by itself is never the success metric.</p>
+  </div>
+</div>
+<script>
+(() => {
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const runCounts = () => {
+    document.querySelectorAll('[data-count]').forEach((node) => {
+      const target = parseFloat(node.dataset.count);
+      const dec = Number(node.dataset.dec);
+      if (reduce) { node.textContent = target.toFixed(dec); return; }
+      const dur = 900;
+      let t0 = null, done = false;
+      const finish = () => { if (!done) { done = true; node.textContent = target.toFixed(dec); } };
+      const step = (ts) => {
+        if (done) return;
+        if (t0 === null) t0 = ts;
+        const p = Math.min(1, (ts - t0) / dur);
+        const eased = 1 - Math.pow(1 - p, 3);
+        node.textContent = (target * eased).toFixed(dec);
+        if (p < 1) requestAnimationFrame(step); else finish();
+      };
+      requestAnimationFrame(step);
+      setTimeout(finish, dur + 300);
+    });
+  };
+  const shell = document.querySelector('.shell');
+  let counted = false;
+  const start = () => { if (!counted) { counted = true; runCounts(); } };
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((en) => { if (en.isIntersecting) { start(); io.disconnect(); } });
+    }, { threshold: 0.2 });
+    io.observe(shell);
+  } else { start(); }
+
+  if (document.documentElement.dataset.embedded === 'true') {
+    const postSize = () => window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+    if ('ResizeObserver' in window) new ResizeObserver(postSize).observe(document.body);
+    window.addEventListener('load', postSize);
+  }
+})();
+</script>
+</body>
+</html>

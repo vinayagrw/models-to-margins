@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The disclosure gap</title><script src="./_theme-bootstrap.js"></script>
+<link rel="stylesheet" href="./_theme.css">
+<style>
+.shell { display: flex; flex-direction: column; gap: 12px; }
+:root[data-embedded="true"] .shell { padding: 14px clamp(14px, 2vw, 22px); }
+h1 { font-family: "Saira Condensed", sans-serif; font-weight: 700; font-size: clamp(1rem, 2.2vw, 1.25rem); text-transform: uppercase; letter-spacing: 0.02em; color: var(--g-ink); }
+.sub { font: 500 0.76rem/1.4 "Inter", sans-serif; color: var(--g-ink-3); margin-top: 2px; }
+
+.ctl { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.ctl button {
+  min-height: 32px; padding: 6px 14px; cursor: pointer; border: 0; border-radius: 2px;
+  font: 600 0.64rem/1 "IBM Plex Mono", monospace; letter-spacing: 0.1em; text-transform: uppercase;
+  background: var(--g-accent); color: var(--g-on-accent);
+}
+.ctl .hint { font: 500 0.68rem/1.3 "Inter", sans-serif; color: var(--g-ink-3); }
+
+/* the board: said column, hazard-tape gap, unsaid column */
+.board { display: grid; grid-template-columns: 1fr 44px 1fr; gap: 10px; align-items: stretch; }
+.col { border: 1px solid var(--g-rule); border-radius: 2px; background: var(--g-surface); padding: 10px 12px; min-width: 0; }
+.col-h { display: flex; align-items: center; gap: 8px; margin-bottom: 9px; }
+.col-h h2 { font: 600 0.68rem "IBM Plex Mono", monospace; letter-spacing: 0.12em; text-transform: uppercase; }
+.col.yes .col-h { color: var(--g-pos); }
+.col.no .col-h { color: var(--g-neg); }
+.pic { width: 26px; height: 26px; display: grid; place-items: center; flex: none; }
+.pic svg { width: 100%; height: 100%; display: block; }
+.pic svg * { stroke: currentColor; }
+
+.row { display: grid; grid-template-columns: 26px 1fr; gap: 8px; align-items: start; padding: 5px 0; opacity: 0.25; transition: opacity 420ms; }
+.row.on { opacity: 1; }
+.row .pic { width: 22px; height: 22px; margin-top: 1px; color: var(--g-ink-3); transition: color 420ms; }
+.col.yes .row.on .pic { color: var(--g-pos); }
+.col.no .row.on .pic { color: var(--g-neg); }
+.row .lbl { font: 500 0.76rem/1.35 "Inter", sans-serif; color: var(--g-ink-2); }
+.track { display: block; margin-top: 4px; height: 6px; border-radius: 2px; background: var(--g-surface-2); overflow: hidden; }
+.col.no .track { background: transparent; border: 1px dashed var(--g-rule-strong); }
+.fill { display: block; height: 100%; transform: scaleX(0); transform-origin: left; transition: transform 520ms ease-out; }
+.col.yes .fill { background: var(--g-pos); }
+.col.no .fill { background: repeating-linear-gradient(-45deg, color-mix(in srgb, var(--g-neg) 55%, transparent) 0 4px, transparent 4px 8px); }
+.row.on .fill { transform: scaleX(1); }
+
+/* the gap itself: hazard tape with a warning marker, opens as the unsaid column lands */
+.gapcell { display: flex; flex-direction: column; align-items: center; gap: 6px; justify-content: center; }
+.tape { flex: 1; width: 10px; border-radius: 2px; background: repeating-linear-gradient(-45deg, var(--g-accent) 0 6px, transparent 6px 12px); opacity: 0.15; transform: scaleY(0.2); transition: opacity 600ms, transform 600ms; }
+.gapcell .pic { width: 26px; height: 26px; border-radius: 2px; background: var(--g-surface-2); color: var(--g-ink-3); padding: 3px; transition: background 600ms, color 600ms; }
+.gapcell.on .tape { opacity: 1; transform: scaleY(1); }
+.gapcell.on .pic { background: var(--g-accent); color: var(--g-on-accent); }
+
+.section-label { font: 600 0.66rem "IBM Plex Mono", monospace; letter-spacing: 0.12em; text-transform: uppercase; color: var(--g-ink-3); margin-bottom: 7px; }
+.studies { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 8px; }
+.study {
+  border: 1px solid var(--g-rule); border-radius: 2px; background: var(--g-surface-2);
+  padding: 8px 10px; text-align: center; cursor: pointer; font-family: inherit;
+  transition: opacity 250ms, border-color 250ms;
+}
+.study .pic { width: 18px; height: 18px; margin: 0 auto 3px; color: var(--g-caution); }
+.study b { display: block; font: 600 1.1rem "IBM Plex Mono", monospace; color: var(--g-caution); }
+.study .sl { font: 500 0.66rem/1.3 "Inter", sans-serif; color: var(--g-ink-3); display: block; margin-top: 2px; }
+.studies.focused .study[aria-pressed="false"] { opacity: 0.3; }
+.study[aria-pressed="true"] { border-color: var(--g-accent-ink); background: var(--g-surface); }
+
+.outlier {
+  border: 1px solid var(--g-rule); border-left: 3px solid var(--g-pos); border-radius: 2px;
+  background: var(--g-surface); padding: 10px 12px; text-align: left; cursor: pointer;
+  font-family: inherit; width: 100%;
+}
+.outlier .o-head { display: flex; align-items: center; gap: 8px; }
+.outlier .pic { width: 22px; height: 22px; color: var(--g-pos); }
+.outlier b { font: 700 0.8rem "Inter", sans-serif; color: var(--g-pos); }
+.o-body { display: block; font: 500 0.76rem/1.5 "Inter", sans-serif; color: var(--g-ink-2); margin-top: 4px; }
+.o-stats { display: none; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 8px; margin-top: 9px; padding-top: 9px; border-top: 1px dashed var(--g-rule); }
+.outlier[aria-expanded="true"] .o-stats { display: grid; }
+.o-stat b { display: block; font: 600 0.95rem "IBM Plex Mono", monospace; color: var(--g-pos); }
+.o-stat span { font: 500 0.62rem/1.3 "Inter", sans-serif; color: var(--g-ink-3); display: block; margin-top: 2px; }
+.o-cue { font: 600 0.6rem "IBM Plex Mono", monospace; letter-spacing: 0.1em; text-transform: uppercase; color: var(--g-accent-ink); margin-left: auto; flex: none; }
+
+@media (max-width: 620px) {
+  .board { grid-template-columns: 1fr; }
+  .gapcell { flex-direction: row; }
+  .tape { width: auto; height: 10px; align-self: center; transform: scaleX(0.2); }
+  .gapcell.on .tape { transform: scaleX(1); }
+  .studies { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .o-stats { grid-template-columns: repeat(2, minmax(0,1fr)); }
+}
+@media (max-width: 340px) { .studies { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="shell">
+  <div>
+    <h1>The disclosure gap</h1>
+    <p class="sub">What operators said, and what none of them said, across FedEx, Amazon, and GXO in the searched window.</p>
+  </div>
+  <div class="ctl">
+    <button type="button" id="replay">Replay</button>
+    <span class="hint">Green bars fill for what was said. Tap a study to isolate it, tap UPS for its audited numbers.</span>
+  </div>
+  <div class="board" id="board">
+    <div class="col yes">
+      <div class="col-h"><span class="pic" data-icon="megaphone" aria-hidden="true"></span><h2>Disclosed</h2></div>
+      <div class="row" data-icon="truck"><span class="pic" aria-hidden="true"></span><span class="lbl">Fleet counts and targets<span class="track"><span class="fill"></span></span></span></div>
+      <div class="row" data-icon="building"><span class="pic" aria-hidden="true"></span><span class="lbl">Site and hub counts<span class="track"><span class="fill"></span></span></span></div>
+      <div class="row" data-icon="warehouse"><span class="pic" aria-hidden="true"></span><span class="lbl">Square footage of facilities<span class="track"><span class="fill"></span></span></span></div>
+      <div class="row" data-icon="crane"><span class="pic" aria-hidden="true"></span><span class="lbl">Retrofit capex totals<span class="track"><span class="fill"></span></span></span></div>
+    </div>
+    <div class="gapcell" id="gapcell" aria-hidden="true">
+      <span class="tape"></span><span class="pic" data-icon="warning"></span><span class="tape"></span>
+    </div>
+    <div class="col no">
+      <div class="col-h"><span class="pic" data-icon="eye" aria-hidden="true"></span><h2>Not disclosed</h2></div>
+      <div class="row" data-icon="coin"><span class="pic" aria-hidden="true"></span><span class="lbl">Cost per trailer<span class="track"><span class="fill"></span></span></span></div>
+      <div class="row" data-icon="gauge"><span class="pic" aria-hidden="true"></span><span class="lbl">Throughput delta<span class="track"><span class="fill"></span></span></span></div>
+      <div class="row" data-icon="person"><span class="pic" aria-hidden="true"></span><span class="lbl">Injury-rate delta<span class="track"><span class="fill"></span></span></span></div>
+      <div class="row" data-icon="ledger"><span class="pic" aria-hidden="true"></span><span class="lbl">Facility-level P&amp;L<span class="track"><span class="fill"></span></span></span></div>
+    </div>
+  </div>
+  <div>
+    <p class="section-label">Six independent measurement-gap confirmations</p>
+    <div class="studies" id="studies"></div>
+  </div>
+  <button type="button" class="outlier" id="outlier" aria-expanded="false" data-icon="stamp">
+    <span class="o-head"><span class="pic" aria-hidden="true"></span><b>UPS &middot; the one disclosed bridge, and it is not AI</b><span class="o-cue" id="ocue">Numbers +</span></span>
+    <span class="o-body">68.5% of volume through automated buildings at ~28% lower cost, $1.2B realized of a $3B network-reconfiguration program. Conveyance automation, fully audited, the standard AI automation has not met anywhere in this window.</span>
+    <span class="o-stats">
+      <span class="o-stat"><b data-count="68.5" data-dec="1" data-suffix="%">0%</b><span>volume through automated buildings</span></span>
+      <span class="o-stat"><b data-count="28" data-prefix="~" data-suffix="%">~0%</b><span>lower cost</span></span>
+      <span class="o-stat"><b data-count="1.2" data-dec="1" data-prefix="$" data-suffix="B">$0B</b><span>realized</span></span>
+      <span class="o-stat"><b data-count="3" data-prefix="$" data-suffix="B">$0B</b><span>program total</span></span>
+    </span>
+  </button>
+</div>
+<script>
+(() => {
+  const ICON_BASE = '../customs-entry-agent/flow-icons/';
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const studies = [
+    { v: '55%', n: 55, l: 'Gartner: CSCOs cannot measure AI ROI' },
+    { v: '95%', n: 95, l: 'MIT: pilots with no P&L impact' },
+    { v: '5%', n: 5, l: 'JLL: at stated goal (88% pilot)' },
+    { v: '7%', n: 7, l: 'Stord: scaled (88% adopted)' },
+    { v: '6%', n: 6, l: 'Deloitte: ROI inside a year' },
+    { v: '~10%', n: 10, p: '~', l: 'Sage: live in production' }
+  ];
+  const grid = document.getElementById('studies');
+  studies.forEach((s) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'study'; b.setAttribute('aria-pressed', 'false');
+    b.dataset.icon = 'flask';
+    const esc = (t) => t.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+    b.innerHTML = `<span class="pic" aria-hidden="true"></span><b data-count="${s.n}" data-prefix="${s.p || ''}" data-suffix="%">${(s.p || '') + '0%'}</b><span class="sl">${esc(s.l)}</span>`;
+    grid.appendChild(b);
+  });
+
+  /* Shared line-art icons, fetched and inlined with the stroke swapped to
+     currentColor so each slot follows its element's theme colour. A failed
+     fetch leaves the slot empty and the text still carries the item. */
+  document.querySelectorAll('[data-icon]').forEach((host) => {
+    const slot = host.classList.contains('pic') ? host : host.querySelector('.pic');
+    fetch(ICON_BASE + host.dataset.icon + '.svg')
+      .then((r) => (r.ok ? r.text() : Promise.reject()))
+      .then((t) => { slot.innerHTML = t.replace(/stroke="#232f3e"/g, 'stroke="currentColor"'); })
+      .catch(() => {});
+  });
+
+  const fmt = (el, val) => {
+    const dec = Number(el.dataset.dec || 0);
+    el.textContent = (el.dataset.prefix || '') + val.toFixed(dec) + (el.dataset.suffix || '');
+  };
+  const setCounts = (scope, p) => {
+    scope.querySelectorAll('[data-count]').forEach((el) => fmt(el, Number(el.dataset.count) * p));
+  };
+  const ease = (p) => 1 - Math.pow(1 - p, 3);
+
+  const yesRows = document.querySelectorAll('.col.yes .row');
+  const noRows = document.querySelectorAll('.col.no .row');
+  const gapcell = document.getElementById('gapcell');
+  const outlier = document.getElementById('outlier');
+  const cue = document.getElementById('ocue');
+  let raf = 0;
+
+  /* One rAF timeline: said bars fill in sequence, the hazard tape opens the
+     gap, the unsaid column lands, then the six study numbers count up.
+     t0 comes from the first frame timestamp, never performance.now(). */
+  const run = () => {
+    cancelAnimationFrame(raf);
+    document.querySelectorAll('.row.on, .gapcell.on').forEach((el) => el.classList.remove('on'));
+    if (reduced) {
+      yesRows.forEach((r) => r.classList.add('on'));
+      noRows.forEach((r) => r.classList.add('on'));
+      gapcell.classList.add('on');
+      setCounts(grid, 1); setCounts(outlier, 1);
+      return;
+    }
+    setCounts(grid, 0);
+    const C0 = 2500, C1 = 3500;
+    let t0 = null;
+    const step = (ts) => {
+      if (t0 === null) t0 = ts;
+      const t = ts - t0;
+      yesRows.forEach((r, i) => { if (t >= i * 250) r.classList.add('on'); });
+      if (t >= 1150) gapcell.classList.add('on');
+      noRows.forEach((r, i) => { if (t >= 1500 + i * 250) r.classList.add('on'); });
+      if (t >= C0) setCounts(grid, ease(Math.min(1, (t - C0) / (C1 - C0))));
+      if (t < C1) raf = requestAnimationFrame(step);
+      else setCounts(grid, 1);
+    };
+    raf = requestAnimationFrame(step);
+  };
+
+  document.getElementById('replay').addEventListener('click', run);
+
+  /* Tap a study to isolate it, tap again to release. One at a time. */
+  grid.addEventListener('click', (e) => {
+    const card = e.target.closest('.study');
+    if (!card) return;
+    const on = card.getAttribute('aria-pressed') === 'true';
+    grid.querySelectorAll('.study').forEach((b) => b.setAttribute('aria-pressed', 'false'));
+    card.setAttribute('aria-pressed', String(!on));
+    grid.classList.toggle('focused', !on);
+  });
+
+  /* Tap the UPS card to unfold its audited numbers with a count-up. */
+  outlier.addEventListener('click', () => {
+    const open = outlier.getAttribute('aria-expanded') === 'true';
+    outlier.setAttribute('aria-expanded', String(!open));
+    cue.textContent = open ? 'Numbers +' : 'Numbers −';
+    if (open) return;
+    if (reduced) { setCounts(outlier, 1); return; }
+    let t0 = null;
+    const step = (ts) => {
+      if (t0 === null) t0 = ts;
+      const p = Math.min(1, (ts - t0) / 700);
+      setCounts(outlier, ease(p));
+      if (p < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  });
+
+  /* Autoplay once on first visibility. threshold 0, not 0.2: this figure is
+     taller than a phone viewport, so a 0.2 visible fraction never happens. */
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting)) { io.disconnect(); run(); }
+    }, { threshold: 0 });
+    io.observe(document.getElementById('board'));
+  } else { run(); }
+
+  if (document.documentElement.dataset.embedded === 'true') {
+    const postSize = () => window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+    if ('ResizeObserver' in window) new ResizeObserver(postSize).observe(document.body);
+    window.addEventListener('load', postSize);
+    window.addEventListener('resize', postSize);
+  }
+})();
+</script>
+</body>
+</html>

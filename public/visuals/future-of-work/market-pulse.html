@@ -63,27 +63,49 @@
       }
     }
 
-    html, body { width: 100%; height: 100%; overflow: hidden; background: var(--bg); font-family: system-ui, -apple-system, sans-serif; color: var(--text); }
+    html, body { width: 100%; background: var(--bg); font-family: system-ui, -apple-system, sans-serif; color: var(--text); }
     html[data-embedded="true"] body { background: transparent; }
+    :root[data-embedded="true"], :root[data-embedded="true"] body { height: auto; }
 
-    .container { width: 100%; height: 100%; display: flex; flex-direction: column; padding: 16px 20px; gap: 14px; }
+    .container { width: 100%; display: flex; flex-direction: column; padding: 16px 20px; gap: 14px; }
 
+    .top-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
     .section-title {
       font-size: 10px; font-weight: 600; letter-spacing: 0.14em;
       text-transform: uppercase; color: var(--muted); margin-bottom: 2px;
     }
-
-    /* Payroll bars */
-    .bars { display: flex; flex-direction: column; gap: 8px; flex: 1; justify-content: center; }
-    .bar-row { display: flex; align-items: center; gap: 10px; }
-    .bar-label { width: 110px; font-size: 12px; font-weight: 500; color: var(--text); text-align: right; flex-shrink: 0; }
-    .bar-track { flex: 1; height: 28px; background: var(--bar-bg); border-radius: 14px; position: relative; overflow: hidden; }
-    .bar-fill {
-      height: 100%; border-radius: 14px; width: 0;
-      transition: width 1s cubic-bezier(0.22, 1, 0.36, 1);
-      display: flex; align-items: center; justify-content: flex-end; padding-right: 10px;
-      font-size: 13px; font-weight: 700; color: #fff; min-width: 0;
+    .replay {
+      font: 600 10px/1 system-ui, -apple-system, sans-serif; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--signal-accent2); background: transparent; border: 1px solid var(--signal-accent2);
+      border-radius: 999px; padding: 6px 12px; min-height: 30px; cursor: pointer;
     }
+    .replay:hover { background: color-mix(in srgb, var(--signal-accent2) 12%, transparent); }
+    .replay:focus-visible, .bar-row:focus-visible, .signal-tile:focus-visible { outline: 2px solid var(--signal-accent2); outline-offset: 2px; }
+    .hint { font-size: 10px; color: var(--muted); }
+
+    /* Payroll bars: icon-led rows, each expands to its source line */
+    .bars { display: flex; flex-direction: column; gap: 8px; }
+    .bar-row {
+      display: grid; grid-template-columns: 34px 1fr; column-gap: 10px; align-items: center;
+      background: transparent; border: 0; width: 100%; text-align: left;
+      font-family: inherit; color: inherit; cursor: pointer; padding: 0;
+    }
+    .row-icon {
+      width: 30px; height: 30px; display: grid; place-items: center;
+      border: 1.5px solid var(--card-border); border-radius: 9px; background: var(--card-bg);
+      opacity: 0; transform: scale(0.7); transition: opacity 0.4s ease, transform 0.4s ease, color 0.4s ease, border-color 0.4s ease;
+    }
+    .row-icon svg { width: 20px; height: 20px; display: block; }
+    .row-icon svg * { stroke: currentColor; }
+    .bar-row.animated .row-icon { opacity: 1; transform: scale(1); border-color: currentColor; }
+    .bar-row.healthcare .row-icon { color: var(--green); }
+    .bar-row.construction .row-icon { color: var(--gold); }
+    .bar-row.transport .row-icon { color: var(--blue); }
+    .bar-row.social .row-icon { color: var(--purple); }
+    .bar-main { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .bar-label { width: 104px; font-size: 12px; font-weight: 500; color: var(--text); text-align: right; flex-shrink: 0; }
+    .bar-track { flex: 1; height: 28px; background: var(--bar-bg); border-radius: 14px; position: relative; overflow: hidden; min-width: 0; }
+    .bar-fill { height: 100%; border-radius: 14px; width: 0; transition: width 1s cubic-bezier(0.22, 1, 0.36, 1); }
     .bar-fill.healthcare { background: linear-gradient(90deg, var(--green), color-mix(in srgb, var(--green) 80%, #fff)); }
     .bar-fill.construction { background: linear-gradient(90deg, var(--gold), color-mix(in srgb, var(--gold) 80%, #fff)); }
     .bar-fill.transport { background: linear-gradient(90deg, var(--blue), color-mix(in srgb, var(--blue) 80%, #fff)); }
@@ -91,128 +113,245 @@
     .bar-value {
       position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
       font-size: 13px; font-weight: 700; color: var(--text); opacity: 0;
-      transition: opacity 0.4s ease 0.8s;
+      transition: opacity 0.4s ease;
     }
     .bar-row.animated .bar-value { opacity: 1; }
-    .bar-row.animated .bar-fill .bar-inner-value { opacity: 1; }
+    .src {
+      display: none; grid-column: 2; font-size: 10px; color: var(--muted);
+      border-left: 2px solid var(--signal-accent2); padding-left: 8px; margin-top: 4px;
+    }
+    .bar-row[aria-expanded="true"] .src, .signal-tile[aria-expanded="true"] .src { display: block; }
 
-    /* Signal tiles */
+    /* Signal tiles: icon-led, staged reveal, count-up figures */
     .signals { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
     .signal-tile {
       background: var(--card-bg); border: 1px solid var(--card-border);
       border-radius: 14px; padding: 12px 14px; text-align: center;
       display: flex; flex-direction: column; align-items: center; gap: 4px;
+      font-family: inherit; color: inherit; cursor: pointer; width: 100%;
+      opacity: 0; transform: translateY(8px);
+      transition: opacity 0.45s ease, transform 0.45s ease;
     }
-    .signal-icon { width: 28px; height: 28px; margin-bottom: 2px; }
+    .signal-tile.animated { opacity: 1; transform: translateY(0); }
+    .signal-icon { width: 30px; height: 30px; display: grid; place-items: center; margin-bottom: 2px; }
+    .signal-icon svg { width: 26px; height: 26px; display: block; }
+    .signal-icon svg * { stroke: currentColor; }
+    .signal-tile.green-tile .signal-icon { color: var(--arrow-up); }
+    .signal-tile.gold-tile .signal-icon { color: var(--trend-color); }
+    .signal-tile.blue-tile .signal-icon { color: var(--signal-accent2); }
     .signal-big { font-size: 20px; font-weight: 800; line-height: 1.1; }
     .signal-big.green { color: var(--signal-accent); }
     .signal-big.gold { color: var(--trend-color); }
     .signal-big.blue { color: var(--signal-accent2); }
     .signal-desc { font-size: 10px; color: var(--muted); line-height: 1.35; }
+    .signal-tile .src { grid-column: auto; }
 
-    /* Divider */
     .divider { height: 1px; background: var(--card-border); margin: 0 10px; }
 
-    @media (max-width: 420px) {
-      .bar-label { width: 80px; font-size: 11px; }
+    @media (max-width: 620px) {
       .signals { grid-template-columns: 1fr; }
-      .signal-tile { flex-direction: row; text-align: left; gap: 10px; padding: 10px; }
+      .signal-tile { flex-direction: row; flex-wrap: wrap; text-align: left; gap: 10px; padding: 10px; }
       .signal-icon { margin-bottom: 0; }
+      .signal-tile .src { flex-basis: 100%; }
+    }
+    @media (max-width: 420px) {
+      .container { padding: 14px 12px; }
+      .bar-main { flex-wrap: wrap; gap: 4px; }
+      .bar-label { width: auto; text-align: left; font-size: 11px; }
+      .bar-track { flex-basis: 100%; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .bar-fill, .row-icon, .signal-tile, .bar-value { transition: none; }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <div class="section-title">March 2026 Payroll Gains</div>
+    <div class="top-row">
+      <div>
+        <div class="section-title">March 2026 Payroll Gains</div>
+        <span class="hint">Tap any row or tile for its source</span>
+      </div>
+      <button type="button" class="replay" id="replay">Replay</button>
+    </div>
+
     <div class="bars" id="bars">
-      <div class="bar-row" data-value="76000" data-pct="100">
-        <span class="bar-label">Healthcare</span>
-        <div class="bar-track">
-          <div class="bar-fill healthcare"></div>
-          <span class="bar-value">+76,000</span>
-        </div>
-      </div>
-      <div class="bar-row" data-value="26000" data-pct="34.2">
-        <span class="bar-label">Construction</span>
-        <div class="bar-track">
-          <div class="bar-fill construction"></div>
-          <span class="bar-value">+26,000</span>
-        </div>
-      </div>
-      <div class="bar-row" data-value="21000" data-pct="27.6">
-        <span class="bar-label">Transportation</span>
-        <div class="bar-track">
-          <div class="bar-fill transport"></div>
-          <span class="bar-value">+21,000</span>
-        </div>
-      </div>
-      <div class="bar-row" data-value="14000" data-pct="18.4">
-        <span class="bar-label">Social Assistance</span>
-        <div class="bar-track">
-          <div class="bar-fill social"></div>
-          <span class="bar-value">+14,000</span>
-        </div>
-      </div>
+      <button type="button" class="bar-row healthcare" data-icon="flask" data-count="76000" data-prefix="+" aria-expanded="false">
+        <span class="row-icon" data-pic aria-hidden="true"></span>
+        <span class="bar-main">
+          <span class="bar-label">Healthcare</span>
+          <span class="bar-track"><span class="bar-fill healthcare" data-pct="100"></span><span class="bar-value">+76,000</span></span>
+        </span>
+        <span class="src">Source: BLS Employment Situation, Apr. 3, 2026</span>
+      </button>
+      <button type="button" class="bar-row construction" data-icon="crane" data-count="26000" data-prefix="+" aria-expanded="false">
+        <span class="row-icon" data-pic aria-hidden="true"></span>
+        <span class="bar-main">
+          <span class="bar-label">Construction</span>
+          <span class="bar-track"><span class="bar-fill construction" data-pct="34.2"></span><span class="bar-value">+26,000</span></span>
+        </span>
+        <span class="src">Source: BLS Employment Situation, Apr. 3, 2026</span>
+      </button>
+      <button type="button" class="bar-row transport" data-icon="truck" data-count="21000" data-prefix="+" aria-expanded="false">
+        <span class="row-icon" data-pic aria-hidden="true"></span>
+        <span class="bar-main">
+          <span class="bar-label">Transportation</span>
+          <span class="bar-track"><span class="bar-fill transport" data-pct="27.6"></span><span class="bar-value">+21,000</span></span>
+        </span>
+        <span class="src">Source: BLS Employment Situation, Apr. 3, 2026</span>
+      </button>
+      <button type="button" class="bar-row social" data-icon="person" data-count="14000" data-prefix="+" aria-expanded="false">
+        <span class="row-icon" data-pic aria-hidden="true"></span>
+        <span class="bar-main">
+          <span class="bar-label">Social Assistance</span>
+          <span class="bar-track"><span class="bar-fill social" data-pct="18.4"></span><span class="bar-value">+14,000</span></span>
+        </span>
+        <span class="src">Source: BLS Employment Situation, Apr. 3, 2026</span>
+      </button>
     </div>
 
     <div class="divider"></div>
 
     <div class="section-title">Key Signals</div>
-    <div class="signals">
-      <div class="signal-tile">
-        <svg class="signal-icon" viewBox="0 0 28 28" fill="none">
-          <path d="M14 22V8M14 8l-5 5M14 8l5 5" stroke="var(--arrow-up)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        <span class="signal-big green" id="azure-val">+39%</span>
+    <div class="signals" id="signals">
+      <button type="button" class="signal-tile green-tile" data-icon="chart" aria-expanded="false">
+        <span class="signal-icon" data-pic aria-hidden="true"></span>
+        <span class="signal-big green" data-count="39" data-prefix="+" data-suffix="%">+39%</span>
         <span class="signal-desc">Azure revenue YoY — FY26 Q2</span>
-      </div>
-      <div class="signal-tile">
-        <svg class="signal-icon" viewBox="0 0 28 28" fill="none">
-          <path d="M3 20 L8 16 L13 18 L18 10 L25 6" stroke="var(--trend-color)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-          <circle cx="25" cy="6" r="2.5" fill="var(--trend-color)">
-            <animate attributeName="r" values="2.5;3.5;2.5" dur="2s" repeatCount="indefinite"/>
-          </circle>
-        </svg>
-        <span class="signal-big gold">3.6%</span>
+        <span class="src">Source: Microsoft FY26 Q2 earnings, Jan. 29, 2026</span>
+      </button>
+      <button type="button" class="signal-tile gold-tile" data-icon="transmit" aria-expanded="false">
+        <span class="signal-icon" data-pic aria-hidden="true"></span>
+        <span class="signal-big gold" data-count="3.6" data-decimals="1" data-suffix="%">3.6%</span>
         <span class="signal-desc">Annual electricity demand growth — strongest since 2000</span>
-      </div>
-      <div class="signal-tile">
-        <svg class="signal-icon" viewBox="0 0 28 28" fill="none">
-          <rect x="3" y="18" width="5" height="7" rx="1.5" fill="var(--signal-accent2)" opacity="0.5"/>
-          <rect x="11" y="12" width="5" height="13" rx="1.5" fill="var(--signal-accent2)" opacity="0.7"/>
-          <rect x="19" y="5" width="5" height="20" rx="1.5" fill="var(--signal-accent2)"/>
-        </svg>
-        <span class="signal-big blue">3 Clocks</span>
+        <span class="src">Source: IEA Electricity 2026, Feb. 6, 2026</span>
+      </button>
+      <button type="button" class="signal-tile blue-tile" data-icon="clock" aria-expanded="false">
+        <span class="signal-icon" data-pic aria-hidden="true"></span>
+        <span class="signal-big blue" data-count="3" data-suffix=" Clocks">3 Clocks</span>
         <span class="signal-desc">Hiring, bottlenecks, and buildouts move on different timelines</span>
-      </div>
+        <span class="src">Source: editorial synthesis of BLS, Microsoft, and IEA signals</span>
+      </button>
     </div>
   </div>
 
   <script>
-    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const rows = document.querySelectorAll('.bar-row');
+    (() => {
+      const ICON_BASE = '../customs-entry-agent/flow-icons/';
+      const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const rows = Array.from(document.querySelectorAll('.bar-row'));
+      const tiles = Array.from(document.querySelectorAll('.signal-tile'));
+      const items = rows.concat(tiles);
 
-    function animateBars() {
-      rows.forEach((row, i) => {
-        const fill = row.querySelector('.bar-fill');
-        const pct = parseFloat(row.dataset.pct);
-        const delay = prefersReduced ? 0 : i * 150;
-        setTimeout(() => {
-          fill.style.width = pct + '%';
-          row.classList.add('animated');
-        }, delay + 200);
+      /* Shared line-art icons are fetched and inlined with the stroke swapped
+         to currentColor so they follow each row's accent colour. A failed
+         fetch leaves the slot empty and the label still carries the row. */
+      items.forEach((item) => {
+        const slot = item.querySelector('[data-pic]');
+        fetch(ICON_BASE + item.dataset.icon + '.svg')
+          .then((r) => (r.ok ? r.text() : Promise.reject()))
+          .then((t) => { slot.innerHTML = t.replace(/stroke="#232f3e"/g, 'stroke="currentColor"'); })
+          .catch(() => {});
       });
-    }
 
-    // Use IntersectionObserver for lazy animation
-    if ('IntersectionObserver' in window) {
-      const obs = new IntersectionObserver(([entry]) => {
-        if (entry.isIntersecting) { animateBars(); obs.disconnect(); }
-      }, { threshold: 0.3 });
-      obs.observe(document.getElementById('bars'));
-    } else {
-      setTimeout(animateBars, 200);
-    }
+      /* Tap or Enter reveals the item's source line */
+      items.forEach((item) => {
+        item.addEventListener('click', () => {
+          const open = item.getAttribute('aria-expanded') === 'true';
+          item.setAttribute('aria-expanded', String(!open));
+        });
+      });
+
+      const fmt = (el, v) => {
+        const dec = parseInt(el.dataset.decimals || '0', 10);
+        const num = dec ? v.toFixed(dec) : Math.round(v).toLocaleString('en-US');
+        el.textContent = (el.dataset.prefix || '') + num + (el.dataset.suffix || '');
+      };
+
+      /* rAF count-up. t0 comes from the first frame timestamp, never
+         performance.now(): sandboxed iframes can disagree between the clocks. */
+      const counters = [];
+      const countUp = (el, delay) => {
+        const target = parseFloat(el.dataset.count);
+        const DUR = 900;
+        let t0 = null;
+        const step = (ts) => {
+          if (t0 === null) t0 = ts;
+          const t = ts - t0 - delay;
+          if (t < 0) { counters.push(requestAnimationFrame(step)); return; }
+          const f = Math.min(1, t / DUR);
+          fmt(el, target * (1 - Math.pow(1 - f, 3)));
+          if (f < 1) counters.push(requestAnimationFrame(step));
+        };
+        counters.push(requestAnimationFrame(step));
+      };
+
+      let timers = [];
+      const finishNow = () => {
+        rows.forEach((row) => {
+          row.classList.add('animated');
+          row.querySelector('.bar-fill').style.width = row.querySelector('.bar-fill').dataset.pct + '%';
+          fmt(row.querySelector('.bar-value'), parseFloat(row.dataset.count));
+        });
+        tiles.forEach((tile) => {
+          tile.classList.add('animated');
+          fmt(tile.querySelector('.signal-big'), parseFloat(tile.querySelector('.signal-big').dataset.count));
+        });
+      };
+
+      const reset = () => {
+        timers.forEach(clearTimeout); timers = [];
+        counters.forEach(cancelAnimationFrame); counters.length = 0;
+        rows.forEach((row) => {
+          row.classList.remove('animated');
+          const fill = row.querySelector('.bar-fill');
+          fill.style.transition = 'none'; fill.style.width = '0';
+          void fill.offsetWidth; fill.style.transition = '';
+          fmt(row.querySelector('.bar-value'), 0);
+        });
+        tiles.forEach((tile) => {
+          tile.classList.remove('animated');
+          fmt(tile.querySelector('.signal-big'), 0);
+        });
+      };
+
+      const run = () => {
+        if (prefersReduced) { finishNow(); return; }
+        reset();
+        rows.forEach((row, i) => {
+          const delay = 200 + i * 150;
+          timers.push(setTimeout(() => {
+            row.querySelector('.bar-fill').style.width = row.querySelector('.bar-fill').dataset.pct + '%';
+            row.classList.add('animated');
+          }, delay));
+          countUp(row.querySelector('.bar-value'), delay);
+        });
+        tiles.forEach((tile, i) => {
+          const delay = 900 + i * 200;
+          timers.push(setTimeout(() => tile.classList.add('animated'), delay));
+          countUp(tile.querySelector('.signal-big'), delay);
+        });
+      };
+
+      document.getElementById('replay').addEventListener('click', run);
+
+      /* threshold 0, not 0.2: the figure can exceed a phone viewport, and a
+         fraction of a too-tall element never intersects. */
+      if ('IntersectionObserver' in window) {
+        const obs = new IntersectionObserver((entries) => {
+          if (entries.some((e) => e.isIntersecting)) { obs.disconnect(); run(); }
+        }, { threshold: 0 });
+        obs.observe(document.getElementById('bars'));
+      } else {
+        run();
+      }
+
+      if (document.documentElement.dataset.embedded === 'true') {
+        const postSize = () => window.parent.postMessage({ type: 'm2m:frame-size', height: document.body.scrollHeight }, '*');
+        if ('ResizeObserver' in window) new ResizeObserver(postSize).observe(document.body);
+        window.addEventListener('load', postSize);
+      }
+    })();
   </script>
 </body>
 </html>
