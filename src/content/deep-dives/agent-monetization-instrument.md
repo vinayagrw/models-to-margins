@@ -219,7 +219,7 @@ featured: false
 </div>
 </details>
 <div class="ami-panel ami-s2-fit" id="ami-fit" data-fit>
-<div class="ami-s2-rhead"><p class="ami-cap">Fit map: which model fits</p><span class="ami-tag" data-k="judge">Judgement</span></div>
+<div class="ami-s2-rhead"><p class="ami-cap">Fit map: which pricing model fits</p><span class="ami-tag" data-k="judge">Judgement</span></div>
 <div class="ami-s2-fq">
 <div class="ami-s2-fqr"><span class="ami-s2-lab" id="ami-fq1">Both sides can count a finished task</span><span class="ami-s2-yn" role="group" aria-labelledby="ami-fq1"><button type="button" class="ami-pill" data-fq="1" data-a="1" aria-pressed="true">Yes</button><button type="button" class="ami-pill" data-fq="1" data-a="0" aria-pressed="false">No</button></span></div>
 <div class="ami-s2-fqr"><span class="ami-s2-lab" id="ami-fq2">The agent finishes with no human step</span><span class="ami-s2-yn" role="group" aria-labelledby="ami-fq2"><button type="button" class="ami-pill" data-fq="2" data-a="1" aria-pressed="true">Yes</button><button type="button" class="ami-pill" data-fq="2" data-a="0" aria-pressed="false">No</button></span></div>
