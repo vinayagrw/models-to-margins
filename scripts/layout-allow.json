@@ -1,0 +1,6 @@
+{
+  "/deep-dives/agentic-payouts-desk": {
+    "sceneAllow": "build=arch|builder+rail=b:1.9",
+    "why": "Round 36: the owner chose a fitted full map with no inner scroll, so the Architecture screen may reach 1.9 viewports at 1440. builder+rail=b covers the builder reader, whose build screen opens on that tab."
+  }
+}

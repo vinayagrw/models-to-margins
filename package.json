@@ -8,6 +8,8 @@
     "build": "astro build",
     "preview": "astro preview",
     "check": "astro check",
+    "check:layout": "node scripts/layout-check.mjs",
+    "check:layout:payouts": "node scripts/layout-check.mjs /deep-dives/agentic-payouts-desk --root=.pdd \"--scene=section[id^=pdd-]\" --readers=buyer,builder,strategy \"--states=build=who,build=loss,build=flow,build=int,build=plan,build=verdict,build=arch&arch=today,build=arch&arch=year1,build=arch&arch=target,rail=b\"",
     "test": "node --test"
   },
   "dependencies": {

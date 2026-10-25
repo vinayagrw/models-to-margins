@@ -63,6 +63,9 @@
 
 | Experience | Route | Format | What it demonstrates |
 |---|---|---|---|
+| Decide, Don't Chat | `/deep-dives/decide-dont-chat` | interactive deep dive (`ddc` and `dcr` kits) | Where each agent step should run: code owns money, small models decide, big models take the hard cases, APIs before screens, and a person signs anything you cannot undo. Featured on the home page |
+| When AI agents pay suppliers: the B2B payouts desk | `/deep-dives/agentic-payouts-desk` | interactive deep dive (`pdd` kit) | Six screens for three seats: where AI earns a place, how agent payments get built, the money path, a rail chooser and the rules timeline. Old payout URLs redirect here |
+| Which layer answers which question | `/deep-dives/knowledge-layer` | interactive deep dive (`klg` kit) | Opens on routing: four questions sent to the store that owns each one, a sorter of ten questions and six stores, a replay of three faults, cost and a store chooser |
 | The Margin Reckoning — AI-Led SDLC | `/briefs/ai-led-sdlc` | custom live brief | Kinetic ledger weighing AI output volume against stalled margin across an 8-scene governed SDLC, with a river-flow review gate and cost-of-inaction heat matrix |
 | Token Mission Control 2026 | `/briefs/token-optimization-2026` | custom live brief | Live atlas of token economics for agentic coding — context pruning, model routing, and budget controls that keep AI work from runaway spend |
 | Where AI Margin Actually Accrues | `/briefs/operator-grade-intelligence-engine` | custom live brief | Scroll-editorial operating board on why durable AI value sticks to proprietary data, workflow queues, and execution rails over thin copilots |
@@ -302,7 +305,9 @@ This repo deploys as a Cloudflare **Worker with Static Assets** (served on `*.wo
 | Entry point | `main = "worker.js"` in `wrangler.toml` |
 | Static assets | `[assets] directory = "./dist"`, binding `ASSETS` |
 | KV | `ANALYTICS` namespace binding (persistent visitor events) |
-| Build + deploy | `npm run build` then `npx wrangler deploy` |
+| Normal deploy | Push to `main`. The Cloudflare build connected to this repo builds and deploys it |
+| Manual fallback | `npm run build` then `npx wrangler deploy` |
+| Layout gate | `npm run check:layout -- <url> --readers=buyer,builder,strategy`, and `npm run check:layout:payouts` for the payouts desk |
 
 > [!WARNING]
 > Do not add `pages_build_output_dir` to `wrangler.toml` or deploy this repo through the Pages pipeline — the `/api/*` routes live in `worker.js`, and a Pages deploy would silently drop them.

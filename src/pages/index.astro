@@ -19,7 +19,22 @@ const showBriefs = isPageVisible('/briefs');
 const showDeepDives = isPageVisible('/deep-dives');
 
 const featuredBrief = briefs.find((entry) => entry.data.featured) ?? briefs[0];
+const FEATURED_DEEP_DIVE_ID = 'decide-dont-chat';
 const featuredDeepDive = deepDives.find((entry) => entry.data.featured) ?? deepDives[0];
+const deepDiveHook =
+  featuredDeepDive?.id === FEATURED_DEEP_DIVE_ID
+    ? {
+        story: 'Stop asking a chatbot to run your business.',
+        subline:
+          'Code owns money. Small models decide. Big models take the hard cases. APIs before screens. A person on anything you cannot undo.',
+        model: 'Claude Opus 4.8, OSWorld-Verified vs OSWorld 2.0',
+        tag: 'verified 2026',
+        bars: [
+          { label: 'Short tasks', bench: 'OSWorld-Verified', value: 83.4 },
+          { label: 'Long workflows', bench: 'OSWorld 2.0', value: 20.6 }
+        ]
+      }
+    : undefined;
 
 const featuredPanels = [
   showBriefs && featuredBrief
@@ -39,7 +54,8 @@ const featuredPanels = [
         title: featuredDeepDive.data.title,
         summary: featuredDeepDive.data.summary,
         href: getDeepDiveHref(featuredDeepDive.id),
-        cta: 'Open deep dive'
+        cta: 'Open deep dive',
+        hook: deepDiveHook
       }
     : undefined
 ].filter(Boolean);
@@ -86,7 +102,35 @@ const heroLinks = [
             <span class={panel.kickerClass}>{panel.kicker}</span>
             <div class="section-block featured-card__body">
               <h2>{panel.title}</h2>
-              <p>{panel.summary}</p>
+              {panel.hook ? (
+                <>
+                  <p class="hook-story">{panel.hook.story}</p>
+                  <p>{panel.hook.subline}</p>
+                  <figure
+                    class="hook-stat"
+                    role="img"
+                    aria-label={`Claude Opus 4.8: ${panel.hook.bars.map((b) => `${b.label} ${b.value}% success on ${b.bench}`).join(', ')}. Evidence: ${panel.hook.tag}.`}
+                  >
+                    {panel.hook.bars.map((bar) => (
+                      <div class="hook-bar" aria-hidden="true">
+                        <div class="hook-bar__head">
+                          <span class="hook-bar__label">{bar.label}</span>
+                          <span class="hook-bar__value" data-count={bar.value}>{bar.value.toFixed(1)}%</span>
+                        </div>
+                        <div class="hook-bar__track">
+                          <span class="hook-bar__fill" style={`--w:${bar.value}%`}></span>
+                        </div>
+                      </div>
+                    ))}
+                    <figcaption aria-hidden="true">
+                      <span>{panel.hook.model}</span>
+                      <span class="hook-tag">{panel.hook.tag}</span>
+                    </figcaption>
+                  </figure>
+                </>
+              ) : (
+                <p>{panel.summary}</p>
+              )}
             </div>
             <div class="cta-row">
               <a class="button secondary" href={panel.href}>{panel.cta}</a>
@@ -145,3 +189,109 @@ const heroLinks = [
     </section>
   )}
 </BaseLayout>
+
+<style>
+  .featured-card__body {
+    align-content: start;
+  }
+  .hook-story {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--text);
+    text-wrap: balance;
+  }
+  .hook-stat {
+    margin: 4px 0 0;
+    display: grid;
+    gap: 12px;
+    padding: 16px;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: var(--surface-muted);
+  }
+  .hook-bar { display: grid; gap: 6px; }
+  .hook-bar__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    font-size: 0.95rem;
+  }
+  .hook-bar__label { color: var(--muted); }
+  .hook-bar__value {
+    font-weight: 700;
+    font-size: 1.35rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--text);
+  }
+  .hook-bar__track {
+    height: 12px;
+    border-radius: 999px;
+    background: var(--line);
+    overflow: hidden;
+  }
+  .hook-bar__fill {
+    display: block;
+    height: 100%;
+    width: var(--w);
+    border-radius: inherit;
+    background: var(--accent);
+    transform-origin: left center;
+  }
+  .hook-stat.is-armed .hook-bar__fill { transform: scaleX(0); }
+  .hook-stat.is-live .hook-bar__fill {
+    transform: scaleX(1);
+    transition: transform 1100ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+  .hook-stat figcaption {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.875rem;
+    color: var(--muted);
+  }
+  .hook-tag {
+    padding: 2px 10px;
+    border-radius: 999px;
+    background: var(--tag-bg);
+    color: var(--text);
+    font-weight: 600;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hook-stat.is-armed .hook-bar__fill,
+    .hook-stat.is-live .hook-bar__fill { transform: none; transition: none; }
+  }
+</style>
+
+<script>
+  const stats = document.querySelectorAll<HTMLElement>('.hook-stat');
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!reduce && 'IntersectionObserver' in window) {
+    const dur = 1100;
+    const run = (stat: HTMLElement) => {
+      stat.classList.add('is-live');
+      stat.querySelectorAll<HTMLElement>('[data-count]').forEach((el) => {
+        const target = Number(el.dataset.count);
+        const settle = () => { el.textContent = `${target.toFixed(1)}%`; };
+        const start = performance.now();
+        const tick = (now: number) => {
+          const t = Math.min(1, (now - start) / dur);
+          el.textContent = `${(target * (1 - Math.pow(1 - t, 3))).toFixed(1)}%`;
+          if (t < 1) requestAnimationFrame(tick); else settle();
+        };
+        el.textContent = '0.0%';
+        requestAnimationFrame(tick);
+        window.setTimeout(settle, dur + 300);
+      });
+    };
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) { io.unobserve(entry.target); run(entry.target as HTMLElement); }
+      });
+    }, { threshold: 0.4 });
+    stats.forEach((stat) => { stat.classList.add('is-armed'); io.observe(stat); });
+  }
+</script>
