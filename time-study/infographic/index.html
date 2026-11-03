@@ -1,0 +1,526 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Where Saved Time Goes</title>
+<style>
+:root{--bg:#f6f4ef;--card:#fff;--ink:#16181d;--mute:#5d6470;--line:#e2ded5;--paid:#d9543f;--home:#7a5cc4;--travel:#e3a21a;--free:#1f9e89;--rest:#9aa7b8;--school:#b5651d;--ai:#0f6fff;--q:#7d848f;--mark:#5d6470}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#111317;--card:#1a1d23;--ink:#eef0f3;--mute:#a3aab5;--line:#2c3038;--rest:#5b6676;--q:#8a919c;--mark:#a3aab5;--ai:#4d94ff}}
+:root[data-theme="dark"]{--bg:#111317;--card:#1a1d23;--ink:#eef0f3;--mute:#a3aab5;--line:#2c3038;--rest:#5b6676;--q:#8a919c;--mark:#a3aab5;--ai:#4d94ff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:1120px;margin:0 auto;padding:0 16px 48px}
+section{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:28px;margin:20px 0}
+h1{font-size:clamp(30px,5vw,52px);line-height:1.05;margin:8px 0 6px;letter-spacing:-.02em}
+h2{font-size:clamp(22px,3vw,30px);margin:0 0 4px;display:flex;align-items:center;gap:14px}
+h2 svg{width:64px;height:64px;flex:none}
+.sub{color:var(--mute);margin:0 0 18px;font-size:15px}
+.k{font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
+.grid{display:grid;grid-template-columns:1.1fr 1fr;gap:28px;align-items:center}
+@media (max-width:760px){.grid{grid-template-columns:1fr}section{padding:20px}}
+svg text{fill:var(--ink)}
+.big{font-size:clamp(56px,9vw,104px);font-weight:800;line-height:1;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.unit{font-size:18px;color:var(--mute);font-weight:600;letter-spacing:0;word-spacing:.15em}
+.bar{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.bar div{max-width:1120px;margin:0 auto;padding:10px 16px;display:flex;gap:14px;align-items:center}
+.bar input{flex:1;accent-color:var(--paid)}
+button{font:inherit;font-weight:700;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:8px 16px;cursor:pointer}
+button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+#yr{font-weight:800;font-size:22px;min-width:64px;text-align:right;font-variant-numeric:tabular-nums}
+.legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.legend button{display:flex;align-items:center;gap:8px;padding:6px 12px;font-size:14px}
+.sw{width:12px;height:12px;border-radius:3px;display:inline-block}
+.drawer{margin-top:12px;padding:14px 16px;border-radius:12px;background:var(--bg);border:1px solid var(--line);font-size:15px;min-height:52px}
+.ages{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+@media (max-width:760px){.ages{grid-template-columns:repeat(2,1fr)}}
+.age{border:1px solid var(--line);border-radius:14px;padding:16px;cursor:pointer;text-align:center}
+.age.on{outline:3px solid var(--free)}
+.age b{display:block;font-size:34px;font-variant-numeric:tabular-nums}
+.stat{display:flex;gap:16px;flex-wrap:wrap}
+.stat>div{flex:1 1 180px;border:1px solid var(--line);border-radius:14px;padding:16px}
+.stat b{font-size:40px;display:block;font-variant-numeric:tabular-nums}
+.band{transition:height .5s,y .5s,opacity .3s}
+.dim .band:not(.hot){opacity:.25}
+.flow{stroke-dasharray:6 8;animation:fl 1.2s linear infinite}
+@keyframes fl{to{stroke-dashoffset:-28}}
+.q{font-size:clamp(22px,3vw,30px);font-weight:800;text-align:center;padding:12px}
+@media (prefers-reduced-motion:reduce){.flow{animation:none}.band{transition:none}}
+section{scroll-margin-top:64px}
+.you-in{display:flex;gap:20px;flex-wrap:wrap;font-weight:700}
+.you-in input{width:72px;font:inherit;padding:6px 8px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+.rings{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:18px 0 6px}
+.rings div{text-align:center;font-weight:700}
+.chips button[aria-pressed="true"]{outline:3px solid var(--ai)}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+@media (max-width:760px){.rings{grid-template-columns:repeat(2,1fr)}.cards{grid-template-columns:1fr}}
+.card{perspective:900px;height:230px;cursor:pointer;border:0;padding:0;background:none;color:inherit;font:inherit}
+.card .in{position:relative;height:100%;transition:transform .6s;transform-style:preserve-3d}
+.card.f .in{transform:rotateY(180deg)}
+.card .fa{position:absolute;inset:0;backface-visibility:hidden;border:1px solid var(--line);border-radius:14px;padding:16px;background:var(--card);display:flex;flex-direction:column;justify-content:center;align-items:center;gap:6px;text-align:center}
+.card .bk{transform:rotateY(180deg)}
+.card .fa b{font-size:24px}
+@media (prefers-reduced-motion:reduce){.card .in{transition:none}}
+.chip{border:1px dashed var(--line);border-radius:999px;padding:6px 14px;font-size:14px}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 14px}.tag{font-size:12px;font-weight:700;border-radius:999px;padding:3px 10px;border:1px solid var(--line);color:var(--mute)}.tag.ev{border-color:var(--ink);color:var(--ink)}
+.hero-ico{width:88px;height:88px}
+main,section,.grid>*{min-width:0}.age[aria-pressed="true"]{background:var(--card);color:var(--ink)}.cw{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+:focus-visible{outline:3px solid var(--ai);outline-offset:2px}
+.age{background:var(--card);color:inherit;font:inherit;width:100%}
+.choices{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.choices button{border-radius:14px;padding:16px}
+.bk .unit{color:var(--ink)}
+@media (max-width:760px){.cw svg{min-width:620px}.cw svg text{font-size:19px}.choices{grid-template-columns:1fr}.bar div{gap:8px}.big{font-size:56px}}
+.qd{stroke-dasharray:8 8;animation:fl 1.2s linear infinite}
+.qlane{cursor:pointer;transition:opacity .3s}.qlane[aria-pressed="true"] .qs{stroke-width:6}
+@media (prefers-reduced-motion:reduce){.qd{animation:none}.qlane{transition:none}}
+html.story .bar,html.story main{display:none}html.story body{background:var(--bg);overflow:hidden}
+#stage{display:none}html.story #stage{display:block;position:fixed;left:0;top:0;width:1080px;height:1350px;background:var(--bg)}
+:root[data-embedded="true"] main{padding:0}:root[data-embedded="true"] section{margin:12px 0}:root[data-embedded="true"] body{background:transparent}
+</style>
+</head>
+<body>
+<svg style="display:none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true">
+<!-- Gradient isometric icon sprite. Role colours come from CSS variables set by iso-roles.css.
+     Faces are filled with var() colours and blended by fixed gradient masks, so one symbol takes any role.
+     Do not hide this sprite with display:none or the masks and gradients stop rendering. -->
+<defs>
+<linearGradient id="g-top" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#000"/></linearGradient>
+<linearGradient id="g-left" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".9"/><stop offset="1" stop-color="#fff" stop-opacity=".1"/></linearGradient>
+<linearGradient id="g-right" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#000" stop-opacity=".05"/><stop offset="1" stop-color="#000" stop-opacity=".35"/></linearGradient>
+<radialGradient id="g-shadow"><stop offset="0" stop-color="#000" stop-opacity=".35"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
+<mask id="m-top" maskContentUnits="userSpaceOnUse"><rect x="16" y="14" width="88" height="52" fill="url(#g-top)"/></mask>
+<linearGradient id="g-shine" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".35"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/></linearGradient>
+</defs>
+<symbol id="i-claim-837" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/><path d="M9 12h6M9 16h4"/><circle cx="16" cy="17" r=".6" fill="currentColor"/></g></symbol>
+<symbol id="i-remit-835" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/><circle cx="15" cy="15.5" r=".6" fill="currentColor"/></g></symbol>
+<symbol id="i-scrub" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14l6-6 6 6-4 4H8z"/><path d="M10 8l3-3 6 6-3 3"/><path d="M4 21h9"/><circle cx="19" cy="18" r=".8" fill="currentColor"/></g></symbol>
+<symbol id="i-submit" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-7-6 17-3-7z"/><path d="M12 14l9-10"/></g></symbol>
+<symbol id="i-approve" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l3 3 5-6"/></g></symbol>
+<symbol id="i-deploy" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c4 2 5 6 4 11h-8C7 9 8 5 12 3z"/><circle cx="12" cy="9" r="1.5"/><path d="M8 14l-3 3h4M16 14l3 3h-4M10 19l2 2 2-2"/></g></symbol>
+<symbol id="i-canary" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 13h6"/><path d="M9 13l8-6M9 13l8 6"/><path d="M14 5h3v3M14 21h3v-3"/><path d="M19 10l-4 4"/><circle cx="15.5" cy="10.5" r=".8"/><circle cx="19" cy="13.5" r=".8"/></g></symbol>
+<symbol id="i-rollback" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4v6h6"/><path d="M4.5 10A8 8 0 1 1 6 17.5"/><circle cx="12" cy="12" r="1" fill="currentColor"/></g></symbol>
+<symbol id="i-replay" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.3-5.7"/><path d="M20 3v4h-4"/><path d="M10 9l5 3-5 3z"/></g></symbol>
+<symbol id="i-rule-registry" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M4 9h16M4 14h16M9 4v16"/><circle cx="14.5" cy="17" r=".6" fill="currentColor"/></g></symbol>
+<symbol id="i-rule-brick" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9h18v10H3z"/><path d="M3 14h18M9 9v5M15 14v5"/><path d="M7 9V6h4v3M13 9V6h4v3"/></g></symbol>
+<symbol id="i-sdk" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6l-5 6 5 6M16 6l5 6-5 6"/><path d="M13.5 5l-3 14"/></g></symbol>
+<symbol id="i-webhook" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="17" r="2.5"/><circle cx="18" cy="17" r="2.5"/><circle cx="12" cy="6" r="2.5"/><path d="M10.7 8.2L7.3 14.8M13.3 8.2l3.4 6.6M8.5 17h7"/></g></symbol>
+<symbol id="i-mcp" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="6" height="8" rx="1.5"/><rect x="15" y="8" width="6" height="8" rx="1.5"/><path d="M9 12h6"/><path d="M12 4v4M12 16v4"/><circle cx="12" cy="12" r="1" fill="currentColor"/></g></symbol>
+<symbol id="i-cds-hooks" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v9a4 4 0 0 0 8 0V9"/><path d="M13 6l3 3 3-3"/><path d="M5 21h14"/><circle cx="8" cy="3" r=".6" fill="currentColor"/></g></symbol>
+<symbol id="i-gateway" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V9l8-6 8 6v12"/><path d="M9 21v-7h6v7"/><circle cx="12" cy="9" r="1" fill="currentColor"/></g></symbol>
+<symbol id="i-roadmap" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/><path d="M9 4v14M15 6v14"/><circle cx="18" cy="9" r=".8" fill="currentColor"/></g></symbol>
+<symbol id="i-model" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M4 7.5l8 4.5 8-4.5M12 12v9"/></g></symbol>
+<symbol id="i-llm-drafter" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l1-4L16 5l3 3L8 19z"/><path d="M14 7l3 3"/><path d="M19 15l.7 1.5L21 17l-1.3.6L19 19l-.7-1.4L17 17l1.3-.5z"/></g></symbol>
+<symbol id="i-pattern-miner" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="6"/><path d="M14.5 14.5L20 20"/><path d="M7 11l2-2 2 2 2-2"/></g></symbol>
+<symbol id="i-drift" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17c3 0 4-10 7-10s3 6 5 6 3-4 6-4"/><path d="M3 20h18" stroke-dasharray="2 3"/><circle cx="21" cy="9" r=".8" fill="currentColor"/></g></symbol>
+<symbol id="i-explain" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.5 10.9c.4.3.5.7.5 1.1h6c0-.4.1-.8.5-1.1A6 6 0 0 0 12 3z"/><path d="M12 7v4"/><circle cx="12" cy="13" r=".1" fill="currentColor"/></g></symbol>
+<symbol id="i-eval" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 1.8 3h10.4a2 2 0 0 0 1.8-3l-5-9V3"/><path d="M7.5 15h9"/><circle cx="11" cy="18" r=".6" fill="currentColor"/></g></symbol>
+<symbol id="i-agent" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="8" width="14" height="11" rx="3"/><path d="M12 4v4"/><circle cx="12" cy="3.5" r="1"/><circle cx="9.5" cy="13" r="1" fill="currentColor"/><circle cx="14.5" cy="13" r="1" fill="currentColor"/><path d="M10 16.5h4"/></g></symbol>
+<symbol id="i-fhir" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21C6 17 3 13 3 9a4.5 4.5 0 0 1 9-1 4.5 4.5 0 0 1 9 1c0 4-3 8-9 12z"/><path d="M7 12h3l1.5-3 2 5 1.5-2h2"/></g></symbol>
+<symbol id="i-event-stream" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h12M3 12h18M3 17h9"/><circle cx="18" cy="7" r="1.5"/><circle cx="15" cy="17" r="1.5"/></g></symbol>
+<symbol id="i-lake" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6"/><path d="M7 13c1.5 1 3.5 1 5 0s3.5-1 5 0"/></g></symbol>
+<symbol id="i-sql" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="7" ry="2.5"/><path d="M5 5v14c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5V5"/><path d="M5 12c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5"/><circle cx="16" cy="18" r=".6" fill="currentColor"/></g></symbol>
+<symbol id="i-cache" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L5 13h6l-1 9 8-11h-6z"/></g></symbol>
+<symbol id="i-vault" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="15" rx="2"/><circle cx="12" cy="11.5" r="3.5"/><path d="M12 8v1.5M15.5 11.5H14M6 19v2M18 19v2"/></g></symbol>
+<symbol id="i-monitor" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M6 11h3l2-3 2 5 2-2h3"/><path d="M9 20h6M12 16v4"/></g></symbol>
+<symbol id="i-cloud" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 18a4 4 0 0 1-.5-8A6 6 0 0 1 18 9a4.5 4.5 0 0 1-.5 9z"/><circle cx="12" cy="14" r=".8" fill="currentColor"/></g></symbol>
+<symbol id="i-kubernetes" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5l8 4v9l-8 6-8-6v-9z"/><circle cx="12" cy="12" r="3"/><path d="M12 5v4M12 15v4M6 9l3.4 2M18 9l-3.4 2"/></g></symbol>
+<symbol id="i-network" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="2"/><circle cx="5" cy="19" r="2"/><circle cx="19" cy="19" r="2"/><circle cx="12" cy="13" r="1.2" fill="currentColor"/><path d="M12 7v5M6.5 17.5l4.5-3.5M17.5 17.5L13 14"/></g></symbol>
+<symbol id="i-kpi" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7"/><path d="M3 20h18"/><circle cx="20" cy="7" r="1" fill="currentColor"/></g></symbol>
+<symbol id="i-measure" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15L15 4l5 5L9 20z"/><path d="M8 11l2 2M11 8l2 2M14 5l1 1M5 14l1 1"/></g></symbol>
+<symbol id="i-ehr" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M6 10h3l1.5-3 3 6 1.5-3h3"/><path d="M9 20h6M12 16v4"/></g></symbol>
+<symbol id="i-pm" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><path d="M14 12.5h-3a1.25 1.25 0 0 0 0 2.5h2a1.25 1.25 0 0 1 0 2.5h-3M12 11.5v7.5"/></g></symbol>
+<symbol id="i-clearinghouse" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-6 9 6"/><path d="M5 10v9M9.7 10v9M14.3 10v9M19 10v9"/><path d="M3 21h18"/></g></symbol>
+<symbol id="i-payer" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V8l6-4 6 4v13"/><path d="M15 12h6v9"/><path d="M7 10h4M7 14h4M7 18h4"/><path d="M2 21h20"/></g></symbol>
+<symbol id="i-analyst" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="3"/><path d="M3 20a6 6 0 0 1 12 0"/><path d="M16 14l2-3 2 2 2-4"/></g></symbol>
+<symbol id="i-coder" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="7" r="3.5"/><path d="M3 21a7 7 0 0 1 11-5.7"/><path d="M17 15l-2 2.5 2 2.5M20 15l2 2.5-2 2.5"/></g></symbol>
+<symbol id="i-executive" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7" r="3.5"/><path d="M5 21a7 7 0 0 1 14 0"/><path d="M12 14l-1.3 2 1.3 3 1.3-3z"/></g></symbol>
+<symbol id="i-policy-doc" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18H6z"/><path d="M9 7h6M9 10h6"/><path d="M12 13l3 1.2v1.8c0 1.8-1.3 2.8-3 3.5-1.7-.7-3-1.7-3-3.5v-1.8z"/></g></symbol>
+<symbol id="i-hcc-evidence" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h10l4 4v14H5z"/><circle cx="11" cy="12" r="3"/><path d="M13.2 14.2L16 17"/><path d="M15 3v4h4"/></g></symbol>
+<symbol id="i-denial" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/></g></symbol>
+<symbol id="i-appeal" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l3 3v15H6z"/><path d="M12 16V9M9 12l3-3 3 3"/></g></symbol>
+<symbol id="i-risk" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l9.5 17h-19z"/><path d="M12 10v4"/><circle cx="12" cy="17" r=".8" fill="currentColor"/></g></symbol>
+<symbol id="i-security" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><rect x="9" y="11" width="6" height="5" rx="1"/><path d="M10 11V9.5a2 2 0 0 1 4 0V11"/></g></symbol>
+<symbol id="i-cross" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7l10 10M17 7L7 17"/><circle cx="12" cy="12" r="10" stroke-dasharray="3 3"/></g></symbol>
+</svg>
+<div class="bar"><div><button id="play" type="button" aria-pressed="false">Replay</button><input id="scrub" type="range" min="1870" max="2050" value="2050" aria-label="Year"><span id="yr" aria-live="off">2050</span></div></div>
+<main>
+
+<section id="s1">
+<div class="grid">
+<div>
+<svg class="hero-ico" aria-hidden="true"><use href="#i-drift"/></svg>
+<div class="k">AI saves minutes</div>
+<h1>History shows where saved hours go.</h1>
+<p class="sub">US paid hours per worker, every day of the year, weekends included.</p>
+<div class="tags"><span class="tag">US, per worker</span><span class="tag ev">Measured</span></div>
+<div class="big"><span id="h1v">8.5</span><span class="unit"> h a day</span></div>
+<div style="margin-top:10px;font-size:20px"><b id="h1s">0.0</b> <span class="unit">fewer paid hours since 1870</span></div>
+</div>
+<svg id="ring" viewBox="0 0 320 320" role="img" aria-label="24 hour ring with paid work share"></svg>
+</div>
+</section>
+
+
+<section id="s2">
+<h2><svg><use href="#i-measure"/></svg>An adult's 24 hours</h2>
+<p class="sub">US adult 18 to 64, average day. Tap a band.</p>
+<div class="tags"><span class="tag">US, per adult</span><span class="tag ev">Estimate</span></div>
+<div class="cw"><svg id="day" viewBox="0 0 900 300" role="img" aria-label="Stacked day by year"></svg></div>
+<div class="legend" id="leg"></div>
+<div class="drawer" id="dr" aria-live="polite">Tap a band to see how it changed.</div>
+</section>
+
+<section id="s3">
+<h2><svg><use href="#i-kpi"/></svg>The fall, then the stall</h2>
+<p class="sub">Paid hours a day, every day of the year. Dots are data points.</p>
+<div class="tags"><span class="tag" id="lbasis">US, per worker</span><span class="tag ev" id="lev">Measured</span></div>
+<div style="display:flex;gap:8px;margin-bottom:10px"><button class="vw" data-v="w" aria-pressed="true">Per worker</button><button class="vw" data-v="a" aria-pressed="false">Per adult</button></div>
+<div class="cw"><svg id="line" viewBox="0 0 900 320" role="img" aria-label="Paid hours line"></svg></div>
+</section>
+
+<section id="drv">
+<h2><svg><use href="#i-policy-doc"/></svg>What drove the fall</h2>
+<p class="sub">Author view, top to bottom. Tap a marker.</p>
+<div class="tags"><span class="tag">US</span><span class="tag ev">Opinion</span></div>
+<div class="cw"><svg id="tl" viewBox="0 0 900 250" role="img" aria-label="Drivers timeline"></svg></div>
+<div class="drawer" id="tdr" aria-live="polite">Tap a marker.</div>
+</section>
+
+<section id="s4">
+<h2><svg><use href="#i-analyst"/></svg>Who got the time</h2>
+<p class="sub">Change per day, 1900 to 2005. Tap an age group.</p>
+<div class="tags"><span class="tag">US, per person</span><span class="tag ev">Measured</span></div>
+<div class="ages" id="ages"></div>
+<div class="drawer" id="adr" aria-live="polite"></div>
+</section>
+
+<section id="life">
+<h2><svg><use href="#i-explain"/></svg>A life in years</h2>
+<p class="sub">US life expectancy, school and retirement.</p>
+<div class="tags"><span class="tag">US, per person</span><span class="tag ev">Measured</span></div>
+<div class="cw"><svg id="lb" viewBox="0 0 900 300" role="img" aria-label="Life in years bars"></svg></div>
+</section>
+
+<section id="s5">
+<h2><svg><use href="#i-agent"/></svg>AI saves minutes now</h2>
+<div class="tags"><span class="tag">US and UK</span><span class="tag ev">Measured</span><span class="tag ev">Self report</span></div>
+<p class="k">US leisure a day, 6 more minutes in 20 years</p>
+<div class="cw"><svg id="scr" viewBox="0 0 900 120" role="img" aria-label="Leisure and screens"></svg></div>
+<p class="sub">Reported savings, 2025 and 2026.</p>
+<div class="stat">
+<div><b>26 min</b><span class="unit">a day, UK civil servants</span></div>
+<div><b>19 min</b><span class="unit">a day, UK DWP routine tasks</span></div>
+<div><b>42%</b><span class="unit">say over an hour a day</span></div>
+</div>
+<p class="k" style="margin-top:24px">Where users expect it to go</p>
+<div class="cw"><svg id="flow" viewBox="0 0 900 260" role="img" aria-label="Where saved AI time goes"></svg></div>
+</section>
+
+<section id="loop-s">
+<h2><svg><use href="#i-replay"/></svg>The refill loop</h2>
+<p class="sub">A saved hour rarely stays free. Tap a step.</p>
+<div class="tags"><span class="tag">US</span><span class="tag ev">Measured</span></div>
+<div class="cw"><svg id="loop" viewBox="0 -36 900 372" role="img" aria-label="Refill loop"></svg></div>
+<div class="drawer" id="ldr" aria-live="polite">Tap a step.</div>
+</section>
+<section id="fiveq">
+<h2><svg><use href="#i-eval"/></svg>Five questions, one gap</h2>
+<p class="sub">A number for today. Nothing follows the saved hour further. Tap a lane.</p>
+<div class="tags"><span class="tag">US and Denmark</span><span class="tag ev">Measured</span><span class="tag ev">Self report</span></div>
+<div class="cw"><svg id="fq" viewBox="0 0 900 400" role="group" aria-label="Five open questions by year"></svg></div>
+<div class="drawer" id="fqd" aria-live="polite">Tap a lane.</div>
+</section>
+<section id="pdx">
+<h2><svg><use href="#i-risk"/></svg>Three paradoxes</h2>
+<p class="sub">Tap a card to flip it.</p>
+<div class="tags"><span class="tag">US</span><span class="tag ev">Measured</span></div>
+<div class="cards" id="cards"></div>
+</section>
+
+
+<section id="s6">
+<h2><svg><use href="#i-roadmap"/></svg>The next 25 years</h2>
+<p class="sub">BCG scenarios to 2050. World paid hours a day per worker.</p>
+<div class="tags"><span class="tag">World, per worker</span><span class="tag ev">Scenario</span><span class="tag ev">Opinion</span></div>
+<div class="cw"><svg id="fan" viewBox="0 0 900 300" role="img" aria-label="Scenario fan to 2050"></svg></div>
+<div class="legend"><span class="chip"><b>World today</b> 5.8h</span><span class="chip"><b>US 2023</b> 4.9h</span><span class="chip"><b>BCG 2050</b> 4.4 to 5.7h, scenarios</span><span class="chip"><b>Jamie Dimon</b> developed world, 3.5 day week in 20 to 40 years, opinion</span></div>
+<p class="sub" style="margin-top:8px">Scenarios and opinion, not forecasts.</p>
+</section>
+<section id="you">
+<h2><svg><use href="#i-executive"/></svg>Your own day</h2>
+<p class="sub">Set your workday. Then spend the saved minutes.</p>
+<div class="tags"><span class="tag">US, per worker</span><span class="tag ev">Illustration</span></div>
+<div class="you-in"><label>Paid work <input id="yh" type="number" min="0" max="24" step="0.5" value="8"> h on a workday</label><label>AI saves <input id="ym" type="number" min="0" max="240" step="5" value="30"> min a day</label></div>
+<div class="rings" id="rings"></div>
+<div class="legend" id="chips"></div>
+</section>
+<section id="end">
+<h2><svg><use href="#i-approve"/></svg>Who owns the saved hour?</h2>
+<p class="sub">Three choices. Tap one.</p>
+<div class="choices" id="ch3"><button type="button" aria-pressed="false" data-t="Count it as output. Set a target for the extra work and track it.">Capture as output</button><button type="button" aria-pressed="false" data-t="Give it back as time off. Make it a rule, not a hope.">Give it back</button><button type="button" aria-pressed="false" data-t="Do nothing. History says the loop refills it with new tasks.">Let it leak</button></div>
+<div class="drawer" id="cdr" aria-live="polite">Tap a choice.</div>
+</section>
+</main>
+
+<svg id="stage" viewBox="0 0 1080 1350" aria-hidden="true"></svg>
+<script>
+(function(){
+var D={"paid_work":{"unit":"hours/week","basis":"US, average adult aged 18-64, hours per week (168-hour week, all days averaged)","past":{"1820":{"v":45,"tag":"Estimate"},"1870":{"v":38,"tag":"Estimate"},"1900":{"v":36,"tag":"Estimate"},"1930":{"v":27,"tag":"Estimate"},"1965":{"v":27,"tag":"Estimate"},"2000":{"v":28,"tag":"Estimate"},"2024":{"v":30,"tag":"Estimate"}},"future":{"slow":{"2027":29.9,"2029":29.9,"2031":29.1,"2036":27.3,"2041":23.9,"2051":21.7,"2076":18.7},"base":{"2027":29.9,"2029":29.9,"2031":29.1,"2036":26.2,"2041":24.4,"2051":22.4,"2076":16.9},"fast":{"2027":29.9,"2029":29.9,"2031":29.9,"2036":29.9,"2041":29.9,"2051":29.9,"2076":null},"energy":{"2027":29.9,"2029":29.9,"2031":29.9,"2036":29.1,"2041":26.2,"2051":24.4,"2076":22.4}},"future_tag":"Projection"},"home_work_and_care":{"unit":"hours/week","basis":"US, average adult aged 18-64, hours per week (168-hour week, all days averaged)","past":{"1820":{"v":27,"tag":"Estimate"},"1870":{"v":26,"tag":"Estimate"},"1900":{"v":25,"tag":"Estimate"},"1930":{"v":25,"tag":"Estimate"},"1965":{"v":26,"tag":"Estimate"},"2000":{"v":23,"tag":"Estimate"},"2024":{"v":22,"tag":"Estimate"}},"future":{},"future_tag":"No projection: 17-horizons.json gives no number for this variable"},"travel":{"unit":"hours/week","basis":"US, average adult aged 18-64, hours per week (168-hour week, all days averaged), commute plus errands and other trips","past":{"1820":{"v":6,"tag":"Estimate"},"1870":{"v":6,"tag":"Estimate"},"1900":{"v":6,"tag":"Estimate"},"1930":{"v":7,"tag":"Estimate"},"1965":{"v":6,"tag":"Estimate"},"2000":{"v":8,"tag":"Estimate"},"2024":{"v":8,"tag":"Estimate"}},"future":{},"future_tag":"No projection: 17-horizons.json gives no number for this variable"},"free_time":{"unit":"hours/week","basis":"US, average adult aged 18-64, hours per week (168-hour week, all days averaged)","past":{"1820":{"v":16,"tag":"Estimate"},"1870":{"v":23,"tag":"Estimate"},"1900":{"v":26,"tag":"Estimate"},"1930":{"v":34,"tag":"Estimate"},"1965":{"v":34,"tag":"Estimate"},"2000":{"v":34,"tag":"Estimate"},"2024":{"v":33,"tag":"Estimate"}},"future":{"slow":{"2027":33,"2029":33,"2031":33.7,"2036":35.2,"2041":38.2,"2051":40.1,"2076":42.7},"base":{"2027":33,"2029":33,"2031":33.8,"2036":36.2,"2041":37.8,"2051":39.4,"2076":44.2},"fast":{"2027":33,"2029":33,"2031":33,"2036":33,"2041":33,"2051":33,"2076":null},"energy":{"2027":33,"2029":33,"2031":33,"2036":33.8,"2041":36.2,"2051":37.8,"2076":39.4}},"future_tag":"Projection"}};
+var H=[[1870,3096],[1900,2938],[1929,2316],[1950,2022],[1970,1931],[1990,1836],[2010,1773],[2023,1789]];
+var NS="http://www.w3.org/2000/svg";
+function el(t,a,p){var e=document.createElementNS(NS,t);for(var k in a){var v=a[k];if(typeof v=="string"&&v.indexOf("var(")==0)e.style.setProperty(k,v);else e.setAttribute(k,v)}if(p)p.appendChild(e);return e}
+function lerp(pts,x){if(x<=pts[0][0])return pts[0][1];for(var i=1;i<pts.length;i++)if(x<=pts[i][0]){var a=pts[i-1],b=pts[i];return a[1]+(b[1]-a[1])*(x-a[0])/(b[0]-a[0])}return pts[pts.length-1][1]}
+function ser(k){return Object.keys(D[k].past).map(function(y){return[+y,D[k].past[y].v/7]})}
+var reduce=matchMedia("(prefers-reduced-motion:reduce)").matches;
+function c(v){return "var("+v+")"}
+
+/* year clock */
+var subs=[],year=2050,timer=null,scrub=document.getElementById("scrub"),yr=document.getElementById("yr"),pb=document.getElementById("play");
+function set(y){year=y;scrub.value=y;yr.firstChild.data=Math.round(y);subs.forEach(function(f){f(y)})}
+scrub.addEventListener("input",function(){stop();set(+scrub.value)});
+function stop(){if(timer){cancelAnimationFrame(timer);timer=null}pb.setAttribute("aria-pressed","false");pb.firstChild.data="Replay"}
+pb.addEventListener("click",function(){if(timer)return stop();if(reduce)return set(2050);set(1870);pb.setAttribute("aria-pressed","true");pb.firstChild.data="Pause";var t0=null,y0=year;function step(t){if(!t0)t0=t;var y=Math.min(2050,y0+(t-t0)/50);set(y);if(y<2050)timer=requestAnimationFrame(step);else stop()}timer=requestAnimationFrame(step)});
+
+/* 1 ring */
+(function(){var s=document.getElementById("ring"),cx=160,cy=160,r=120;
+el("circle",{cx:cx,cy:cy,r:r,fill:"none",stroke:c("--line"),"stroke-width":34},s);
+var arc=el("path",{fill:"none",stroke:c("--paid"),"stroke-width":34,"stroke-linecap":"butt"},s);
+for(var i=0;i<24;i+=6){var a=i/24*2*Math.PI-Math.PI/2;var t=el("text",{x:cx+Math.cos(a)*(r+30),y:cy+Math.sin(a)*(r+30)+5,"text-anchor":"middle","font-size":14,"font-weight":700},s);t.textContent=i+"h"}
+var lab=el("text",{x:cx,y:cy+8,"text-anchor":"middle","font-size":20,"font-weight":800},s);lab.textContent="24h day";
+var v=document.getElementById("h1v"),sv=document.getElementById("h1s");
+function f(y){var y2=Math.min(y,2023),h=lerp(H,y2)/365,a=h/24*2*Math.PI;var x=cx+Math.cos(a-Math.PI/2)*r,yy=cy+Math.sin(a-Math.PI/2)*r;
+arc.setAttribute("d","M"+cx+" "+(cy-r)+" A"+r+" "+r+" 0 0 1 "+x.toFixed(1)+" "+yy.toFixed(1));v.firstChild.data=h.toFixed(1);sv.firstChild.data=(3096/365-h).toFixed(1)}
+subs.push(f);f(1870)})();
+
+/* 2 day stack */
+var B=[["paid_work","Paid work","--paid"],["home_work_and_care","Home and care","--home"],["travel","Travel","--travel"],["free_time","Free time","--free"]];
+var NOTE={paid_work:"About 5.4 h a day in 1870, 4.3 h in 2024, per adult. Women's paid hours rose as men's fell.",home_work_and_care:"About 3.7 h a day in 1870, 3.1 h in 2024. Appliances arrived but housework held for decades.",travel:"Still about an hour a day. Faster transport bought distance, not time.",free_time:"From about 3.3 h a day in 1870 to 4.7 h in 2024. Most of it now goes to screens.",rest:"Sleep, eating and self care fill the rest of the 24 hours."};
+(function(){var s=document.getElementById("day"),yrs=[1820,1870,1900,1930,1965,2000,2024],W=900,top=10,Ht=250,bw=86,gap=(W-40-bw*yrs.length)/(yrs.length-1);
+var cols=[],leg=document.getElementById("leg"),dr=document.getElementById("dr");
+yrs.forEach(function(y,i){var x=20+i*(bw+gap),acc=0,g=el("g",{},s);
+B.concat([["rest","Sleep and self care","--rest"]]).forEach(function(b){var h=b[0]=="rest"?24-acc:lerp(ser(b[0]),y);var rh=h/24*Ht;
+var r=el("rect",{class:"band",x:x,y:top+Ht-acc/24*Ht-rh,width:bw,height:rh,rx:4,fill:c(b[2]),"data-k":b[0]},g);r.style.cursor="pointer";
+r.addEventListener("click",function(){pick(b[0],b[1])});acc+=h});
+var t=el("text",{x:x+bw/2,y:top+Ht+28,"text-anchor":"middle","font-size":15,"font-weight":700},s);t.textContent=y;cols.push([y,g])});
+B.concat([["rest","Sleep and self care","--rest"]]).forEach(function(b){var bt=document.createElement("button");bt.innerHTML='<span class="sw" style="background:'+c(b[2])+'"></span>'+b[1];bt.onclick=function(){pick(b[0],b[1])};leg.appendChild(bt)});
+function pick(k,n){s.classList.add("dim");s.querySelectorAll(".band").forEach(function(r){r.classList.toggle("hot",r.getAttribute("data-k")==k)});dr.innerHTML="<b>"+n+".</b> "+NOTE[k]}
+subs.push(function(y){cols.forEach(function(p){p[1].style.opacity=p[0]<=y+0.5?1:.455})});
+})();
+
+/* 3 line */
+(function(){var s=document.getElementById("line"),L=60,R=880,T=20,Bt=280,x=function(y){return L+(y-1820)/(2030-1820)*(R-L)},yv=function(h){return Bt-h/10*(Bt-T)};
+for(var h=0;h<=10;h+=2){el("line",{x1:L,x2:R,y1:yv(h),y2:yv(h),stroke:c("--line")},s);var t=el("text",{x:L-10,y:yv(h)+5,"text-anchor":"end","font-size":14},s);t.textContent=h+"h"}
+[1850,1900,1950,2000].forEach(function(y){var t=el("text",{x:x(y),y:Bt+28,"text-anchor":"middle","font-size":14},s);t.textContent=y});
+el("rect",{x:x(1980),y:T,width:x(2024)-x(1980),height:Bt-T,fill:c("--paid"),opacity:.08},s);
+var st=el("text",{x:x(2002),y:T+22,"text-anchor":"middle","font-size":15,"font-weight":800},s);st.textContent="The stall";
+var W=H.map(function(p){return[p[0],p[1]/365]}),A=ser("paid_work");
+var p=el("path",{fill:"none",stroke:c("--paid"),"stroke-width":4,"stroke-linejoin":"round"},s),dot=el("circle",{r:8,fill:c("--paid")},s);
+var cur=W;function d(P){return P.map(function(q,i){return(i?"L":"M")+x(q[0]).toFixed(1)+" "+yv(q[1]).toFixed(1)}).join("")}
+var dots=el("g",{},s);function draw(){p.setAttribute("d",d(cur));p.setAttribute("stroke-dasharray",cur==A?"8 6":"");dots.textContent="";cur.forEach(function(q){el("circle",{cx:x(q[0]),cy:yv(q[1]),r:4,fill:c("--paid")},dots)});s.appendChild(dot);document.getElementById("lbasis").textContent=cur==A?"US, per adult":"US, per worker";document.getElementById("lev").textContent=cur==A?"Estimate":"Measured";upd(year)}
+function upd(y){var yy=Math.max(cur[0][0],Math.min(y,cur[cur.length-1][0]));dot.setAttribute("cx",x(yy));dot.setAttribute("cy",yv(lerp(cur,yy)))}
+document.querySelectorAll(".vw").forEach(function(b){b.onclick=function(){document.querySelectorAll(".vw").forEach(function(o){o.setAttribute("aria-pressed",o==b)});cur=b.dataset.v=="w"?W:A;draw()}});
+subs.push(upd);draw()})();
+
+/* 4 ages */
+(function(){var A=[["Teens 14 to 17","-2.5h","paid work","Paid work fell about 2.5 h a day. School rose by the same."],["Ages 25 to 54","0h","leisure","Same leisure as 1900. Women's paid hours rose as men's fell."],["Ages 65 and up","+2h","leisure","About 2 h a day more leisure. Longer lives, longer retirement."],["Everyone 14 and up","+40 min","leisure","About 40 minutes a day more leisure on average."]];
+var w=document.getElementById("ages"),dr=document.getElementById("adr");
+A.forEach(function(a,i){var d=document.createElement("button");d.type="button";d.className="age";d.innerHTML='<span class="k">'+a[0]+'</span><b>'+a[1]+'</b><span class="unit">'+a[2]+'</span>';
+d.onclick=function(){w.querySelectorAll(".age").forEach(function(o){o.classList.remove("on");o.setAttribute("aria-pressed","false")});d.classList.add("on");d.setAttribute("aria-pressed","true");dr.firstChild?dr.firstChild.data=a[3]:dr.textContent=a[3]};w.appendChild(d)});
+w.firstChild.click()})();
+
+/* 5 flow */
+(function(){var s=document.getElementById("flow"),F=[["Other job tasks",85,"--ai"],["Breaks or leisure",9,"--free"],["Not measured",6,"--q"]];
+var src=el("rect",{x:20,y:90,width:150,height:80,rx:12,fill:c("--ai")},s),t=el("text",{x:95,y:136,"text-anchor":"middle","font-size":17,"font-weight":800},s);t.textContent="Saved hour";t.style.fill="#fff";
+var y0=20;F.forEach(function(f){var stub=f[0]=="Not measured",h=stub?24:f[1]*1.9,ym=y0+h/2;
+el("path",{d:"M170 130 C 420 130, 420 "+ym+", 640 "+ym,fill:"none",stroke:c(f[2]),"stroke-width":stub?2:f[1]*1.9*0.5,"stroke-dasharray":stub?"6 6":"","class":stub?"":"flow"},s);
+el("rect",{x:640,y:y0,width:16,height:h,rx:4,fill:stub?"none":c(f[2]),stroke:c(f[2]),"stroke-dasharray":stub?"4 4":""},s);
+var t=el("text",{x:668,y:ym+6,"font-size":16,"font-weight":700},s);t.textContent=(f[0]=="Not measured"?"?":(f[1]==9?"under 10":f[1])+"%")+"  "+f[0];y0+=h+14});s.setAttribute("viewBox","0 0 900 "+(y0+10))})();
+
+/* 6 fan */
+(function(){var s=document.getElementById("fan"),L=60,R=880,T=20,Bt=250,x=function(y){return L+(y-2025)/25*(R-L)},yv=function(h){return Bt-h/7*(Bt-T)};
+[0,1,2,3,4,5,6,7].forEach(function(h){el("line",{x1:L,x2:R,y1:yv(h),y2:yv(h),stroke:c("--line")},s);var t=el("text",{x:L-10,y:yv(h)+5,"text-anchor":"end","font-size":14},s);t.textContent=h+"h"});
+[2025,2030,2040,2050].forEach(function(y){var t=el("text",{x:x(y),y:Bt+28,"text-anchor":"middle","font-size":14},s);t.textContent=y});
+var fan=el("path",{fill:c("--ai"),opacity:.18},s),hi=el("path",{fill:"none",stroke:c("--ai"),"stroke-width":3},s),lo=el("path",{fill:"none",stroke:c("--ai"),"stroke-width":3,"stroke-dasharray":"6 6"},s);
+var lt=el("text",{"font-size":15,"font-weight":800},s),ht=el("text",{"font-size":15,"font-weight":800},s);
+el("circle",{cx:x(2025),cy:yv(5.8),r:8,fill:c("--ai")},s);var b=el("text",{x:x(2025)+12,y:yv(5.8)-12,"font-size":15,"font-weight":800},s);b.textContent="World 5.8h";el("circle",{cx:x(2025),cy:yv(4.9),r:7,fill:"none",stroke:c("--ink"),"stroke-width":2},s);var u=el("text",{x:x(2025)+12,y:yv(4.9)+20,"font-size":15,"font-weight":800},s);u.textContent="US 4.9h";
+function f(y){var e=y<2025?2050:Math.min(2050,y),k=(e-2025)/25,a=5.8+(5.7-5.8)*k,z=5.8+(4.4-5.8)*k;
+fan.setAttribute("d","M"+x(2025)+" "+yv(5.8)+" L"+x(e)+" "+yv(a)+" L"+x(e)+" "+yv(z)+"Z");
+hi.setAttribute("d","M"+x(2025)+" "+yv(5.8)+" L"+x(e)+" "+yv(a));lo.setAttribute("d","M"+x(2025)+" "+yv(5.8)+" L"+x(e)+" "+yv(z));
+lt.setAttribute("x",Math.min(x(e)+8,R-60));lt.setAttribute("y",yv(z)+6);lt.textContent=z.toFixed(1)+"h";ht.setAttribute("x",Math.min(x(e)+8,R-60));ht.setAttribute("y",yv(a)+6);ht.textContent=a.toFixed(1)+"h";
+s.style.opacity=y<2025?.35:1}
+subs.push(f);f(2050)})();
+
+/* your own day */
+(function(){var R=document.getElementById("rings"),yh=document.getElementById("yh"),ym=document.getElementById("ym"),ch=document.getElementById("chips");ch.classList.add("chips");
+var SP=[["More work","--paid"],["Family","--home"],["Rest","--free"],["Learning","--school"]],pick=2;
+function ring(label,parts){var d=document.createElement("div"),s=el("svg",{viewBox:"0 0 120 120",role:"img","aria-label":label},d),a0=-Math.PI/2;
+el("circle",{cx:60,cy:60,r:44,fill:"none",stroke:c("--line"),"stroke-width":16},s);
+parts.forEach(function(p){if(p[0]<=0)return;var a1=a0+Math.min(p[0],23.99)/24*2*Math.PI,L=a1-a0>Math.PI?1:0;
+el("path",{d:"M"+(60+44*Math.cos(a0))+" "+(60+44*Math.sin(a0))+" A44 44 0 "+L+" 1 "+(60+44*Math.cos(a1))+" "+(60+44*Math.sin(a1)),fill:"none",stroke:c(p[1]),"stroke-width":16},s);a0=a1});
+var t=el("text",{x:60,y:66,"text-anchor":"middle","font-size":18,"font-weight":800},s);t.textContent=parts[0][0].toFixed(1)+"h";
+d.appendChild(document.createTextNode(label));return d}
+function draw(){var h=Math.max(0,Math.min(24,+yh.value||0)),m=Math.max(0,Math.min(240,+ym.value||0));yh.value=h;ym.value=m;R.textContent="";
+R.appendChild(ring("US workday 2023",[[7.8,"--paid"]]));
+R.appendChild(ring("You today",[[h,"--paid"]]));
+var after=pick==0?[[h,"--paid"]]:[[h-m/60,"--paid"],[m/60,SP[pick][1]]];R.appendChild(ring("You with AI",after))}
+SP.forEach(function(p,i){var b=document.createElement("button");b.innerHTML='<span class="sw" style="background:'+c(p[1])+'"></span>'+p[0];b.setAttribute("aria-pressed",i==pick);
+b.onclick=function(){pick=i;ch.querySelectorAll("button").forEach(function(o,j){o.setAttribute("aria-pressed",j==i)});draw()};ch.appendChild(b)});
+yh.addEventListener("input",draw);ym.addEventListener("input",draw);draw()})();
+
+/* drivers timeline */
+(function(){var s=document.getElementById("tl"),L=150,Rr=880,x=function(y){return L+(y-1820)/(2030-1820)*(Rr-L)},dr=document.getElementById("tdr");
+var lanes=[["Growth and pay","--paid"],["Machines","--home"],["Laws and unions","--school"]];
+var M=[[0,1870,1930,"Rising pay let workers buy shorter weeks. Over 80 percent of US economic historians credit growth and wages for the fall before 1930."],
+[1,1900,1970,"Appliances spread, yet full time housework rose from about 52 to 56 hours a week."],
+[2,1938,0,"The 1938 US act set a 44 hour week. Workers already averaged 37.3."]],G=[];
+lanes.forEach(function(l,i){var y=50+i*65;el("line",{x1:L,x2:Rr,y1:y,y2:y,stroke:c("--line"),"stroke-width":2},s);var t=el("text",{x:10,y:y+5,"font-size":15,"font-weight":700},s);t.textContent=(i+1)+". "+l[0]});
+[1850,1900,1950,2000].forEach(function(y){var t=el("text",{x:x(y),y:235,"text-anchor":"middle","font-size":14},s);t.textContent=y});
+M.forEach(function(m){var y=50+m[0]*65,col=c("--mark"),g=el("g",{tabindex:0,role:"button"},s);g.style.cursor="pointer";
+if(m[2])el("rect",{x:x(m[1]),y:y-12,width:x(m[2])-x(m[1]),height:24,rx:12,fill:col},g);else el("circle",{cx:x(m[1]),cy:y,r:13,fill:col},g);
+var t=el("text",{x:x(m[1]),y:y-20,"font-size":13,"font-weight":700},g);t.textContent=m[1];
+g.setAttribute("aria-label",m[1]+" marker");g.onclick=g.onkeydown=function(e){if(e.type=="keydown"){if(e.key!="Enter"&&e.key!=" ")return;e.preventDefault()}dr.firstChild.data=m[3]};G.push([m[1],g])});
+subs.push(function(y){G.forEach(function(p){p[1].style.opacity=p[0]<=y?1:.45})})})();
+
+/* life in years */
+(function(){var s=document.getElementById("lb"),Y=[[1900,49.3,6.4,0],[1930,59.6,7.9,0],[1965,70.3,10.4,0],[2000,76.8,13.1,18.2],[2024,79.3,13.3,18.6]],L=80,Rr=880,sc=function(v){return v/85*(Rr-L)},B=[];
+[0,20,40,60,80].forEach(function(v){var t=el("text",{x:L+sc(v),y:292,"text-anchor":"middle","font-size":13},s);t.textContent=v+"y"});
+Y.forEach(function(r,i){var y=14+i*54,g=el("g",{},s),t=el("text",{x:L-12,y:y+24,"text-anchor":"end","font-size":15,"font-weight":700},s);t.textContent=r[0];
+var a=el("rect",{x:L,y:y,width:sc(r[2]),height:36,rx:6,fill:c("--school")},g),b=el("rect",{x:L+sc(r[2]),y:y,width:sc(r[1]-r[2]-r[3]),height:36,fill:c("--rest")},g);if(r[3])el("rect",{x:L+sc(r[1]-r[3]),y:y,width:sc(r[3]),height:36,rx:6,fill:c("--free")},g);
+var v=el("text",{x:L+sc(r[1])+8,y:y+24,"font-size":15,"font-weight":800},g);v.textContent=Math.round(r[1])+"y"+(r[3]?"":"  retirement no data");B.push([r[0],g])});
+var lg=document.createElement("div");lg.className="legend";[["School","--school"],["Rest of life","--rest"],["Retirement","--free"]].forEach(function(k){var e=document.createElement("span");e.style.cssText="display:flex;gap:8px;align-items:center;font-size:14px;font-weight:700";e.innerHTML='<span class="sw" style="background:'+c(k[1])+'"></span>'+k[0];lg.appendChild(e)});s.after(lg);
+subs.push(function(y){B.forEach(function(p){p[1].style.opacity=p[0]<=y+0.5?1:.45})})})();
+
+/* paradoxes */
+(function(){var w=document.getElementById("cards"),P=[["Appliances","Should cut housework","52h","56h","a week, 1920s to late 1960s"],["Faster travel","Should cut commutes","1h","1h","a day, flat for decades"],["AI at work","Should free evenings","+3h","","more work a week, high AI exposure"]];
+P.forEach(function(p){var b=document.createElement("button");b.className="card";b.setAttribute("aria-label",p[0]+", flip");
+b.innerHTML='<div class="in"><div class="fa"><span class="k">The promise</span><b>'+p[0]+'</b><span class="unit">'+p[1]+'</span></div><div class="fa bk"><span class="k">What happened</span><b style="font-size:40px">'+p[2]+(p[3]?' to '+p[3]:'')+'</b><span class="unit">'+p[4]+'</span></div></div>';
+b.setAttribute("aria-pressed","false");b.onclick=function(){var f=b.classList.toggle("f");b.setAttribute("aria-pressed",f);b.querySelector(".fa").setAttribute("aria-hidden",f);b.querySelector(".bk").setAttribute("aria-hidden",!f)};w.appendChild(b)})})();
+
+/* choices */
+(function(){var w=document.getElementById("ch3"),d=document.getElementById("cdr");w.querySelectorAll("button").forEach(function(b){b.onclick=function(){w.querySelectorAll("button").forEach(function(o){o.setAttribute("aria-pressed",o==b)});d.textContent=b.dataset.t}})})();
+/* embed and theme */
+(function(){var r=document.documentElement;if(new URLSearchParams(location.search).get("embed")==="1")r.dataset.embedded="true";
+addEventListener("message",function(ev){if(ev.origin!==location.origin)return;var m=ev.data||{};if((m.type==="theme"||m.type==="m2m:set-theme")&&(m.theme==="light"||m.theme==="dark"))r.dataset.theme=m.theme})})();
+/* refill loop */
+(function(){var s=document.getElementById("loop"),cx=450,cy=165,r=115,dr=document.getElementById("ldr");
+var N=[["Demand grows","--paid","Faster transport bought distance. Travel still takes about an hour a day."],["Standards rise","--home","Appliances arrived. Full time housework rose from about 52 to 56 hours a week."],["New tasks","--ai","After ChatGPT, high AI exposure went with about 3 more work hours a week."]];
+el("circle",{cx:cx,cy:cy,r:r,fill:"none",stroke:c("--line"),"stroke-width":10},s);
+el("circle",{class:"flow",cx:cx,cy:cy,r:r,fill:"none",stroke:c("--mute"),"stroke-width":2},s);
+N.forEach(function(n,i){var a=-Math.PI/2+i*2*Math.PI/3,x=cx+Math.cos(a)*r,y=cy+Math.sin(a)*r,g=el("g",{tabindex:0,role:"button"},s);g.style.cursor="pointer";
+el("circle",{cx:x,cy:y,r:34,fill:c("--mark")},g);var t=el("text",{x:x+(i==0?0:i==1?48:-48),y:y+(i==0?-46:6),"text-anchor":i==0?"middle":i==1?"start":"end","font-size":16,"font-weight":800},g);t.textContent=n[0];
+g.setAttribute("aria-label",n[0]);g.onclick=g.onkeydown=function(e){if(e.type=="keydown"){if(e.key!="Enter"&&e.key!=" ")return;e.preventDefault()}dr.firstChild.data=n[2]}});
+var dot=el("circle",{r:14,fill:c("--free"),stroke:c("--card"),"stroke-width":3},s),lab=el("text",{x:cx,y:cy+6,"text-anchor":"middle","font-size":17,"font-weight":800},s);lab.textContent="Saved hour";
+
+function f(y){var p=(y-1870)/45,a=-Math.PI/2+p*2*Math.PI,k=Math.max(.3,1-Math.floor(p)*.17);
+dot.setAttribute("cx",cx+Math.cos(a)*r);dot.setAttribute("cy",cy+Math.sin(a)*r);dot.setAttribute("r",(14*k).toFixed(1))}
+subs.push(f);f(2050)})();
+
+/* five questions */
+var FQ=[["Saved time refills?",1930,2026,"85% to work","85% of Danish AI users say the saving goes to other job tasks, by self report, 2026.","Saved minutes that refill, counted by diary or logs.","Humlum and Vestergaard, NBER. A Korean worker survey."],
+["Why the stall?",1980,2013,"+4.5h a week","US free time rose 4.5 h a week from 1965 to 2013.","How much each cause carries. Any official US figure for 2050.","St. Louis Fed, September 2026. World Inequality Lab."],
+["Where it goes?",2005,2023,"+3h work a week","AI exposed US workers logged about 3 more work hours a week after ChatGPT.","A diary study that follows the same workers' saved AI hours.","Jiang and co-authors, NBER 33536. US BLS."],
+["Savings in output?",2025,2026,"2.1% of hours","Self reported saving is 2.1% of all US work hours, none tied to output.","The same workers timed with and without AI.","Bick, Blandin and Deming tracker. Atlanta and Richmond Fed."],
+["Who keeps it?",2026,2026,"under 2% change","Danish AI users saw no change in pay or hours above 2%, two years on.","The customer's share. Any deal turning savings into shorter hours.","Korinek and co-authors. A union AI deal tracker."]];
+(function(){var s=document.getElementById("fq"),dr=document.getElementById("fqd"),L=40,Rr=850,x=function(y){return L+(y-1870)/180*(Rr-L)},Ls=[];
+[1870,1930,1990,2050].forEach(function(y){var t=el("text",{x:x(y),y:392,"text-anchor":"middle","font-size":14},s);t.textContent=y});
+FQ.forEach(function(q,i){var y=58+i*70,g=el("g",{class:"qlane",tabindex:0,role:"button","aria-pressed":"false","aria-label":q[0]+" "+q[3]},s);
+el("rect",{x:0,y:y-44,width:900,height:64,fill:"transparent"},g);
+var t=el("text",{x:L,y:y-14,"font-size":16,"font-weight":800},g);t.textContent=q[0];
+var sl=el("line",{class:"qs",x1:x(q[1]),x2:x(q[1]),y1:y,y2:y,stroke:c("--ai"),"stroke-width":4,"stroke-linecap":"round"},g);
+el("circle",{cx:x(q[1]),cy:y,r:6,fill:c("--ai")},g);
+var dl=el("line",{class:"qd",x1:x(q[2]),x2:Rr-16,y1:y,y2:y,stroke:c("--q"),"stroke-width":3},g);
+var m=el("circle",{cx:x(q[2]),cy:y,r:7,fill:c("--ai")},g);
+var ch=el("text",{x:x(q[2])-12,y:y-14,"text-anchor":"end","font-size":15,"font-weight":700},g);ch.textContent=q[3]||"no number";ch.style.fill=c("--ai");
+var e=el("circle",{cx:Rr,cy:y,r:15,fill:c("--card"),stroke:c("--q"),"stroke-width":3},g),qt=el("text",{x:Rr,y:y+6,"text-anchor":"middle","font-size":17,"font-weight":800},g);qt.textContent="?";
+g.onclick=g.onkeydown=function(ev){if(ev.type=="keydown"){if(ev.key!="Enter"&&ev.key!=" ")return;ev.preventDefault()}Ls.forEach(function(o){o.g.setAttribute("aria-pressed",o.g==g)});
+dr.innerHTML="<b>Known.</b> "+q[4]+"<br><b>Not measured.</b> "+q[5]+"<br><b>Who is on it.</b> "+q[6]};
+Ls.push({q:q,g:g,sl:sl,dl:dl,m:m,ch:ch,e:e,qt:qt})});
+subs.push(function(y){Ls.forEach(function(o){var q=o.q,on=y>=q[1],done=y>=q[2];o.g.style.opacity=on?1:.18;o.sl.setAttribute("x2",x(Math.max(q[1],Math.min(y,q[2]))));
+[o.m,o.ch].forEach(function(n){n.style.opacity=done?1:0});o.dl.style.opacity=done?1:0;o.dl.setAttribute("x2",done?x(Math.min(Math.max(y,q[2]),2050))-16:x(q[2]));[o.e,o.qt].forEach(function(n){n.style.opacity=y>=2049?1:.25})})})})();
+
+/* story mode */
+(function(){if(new URLSearchParams(location.search).get("story")!=="1")return;document.documentElement.classList.add("story");document.documentElement.setAttribute("data-theme","light");
+var S=document.getElementById("stage");function T(x,y,str,fs,o,p){var t=el("text",{x:x,y:y,"font-size":fs,"font-weight":o&&o.w||800,"text-anchor":o&&o.a||"middle"},p||S);t.textContent=str;if(o&&o.f)t.style.fill=o.f;return t}
+function ez(u){u=Math.max(0,Math.min(1,u));return u<.5?2*u*u:1-Math.pow(-2*u+2,2)/2}
+function cl(u){return Math.max(0,Math.min(1,u))}
+var W=H.map(function(q){return[q[0],q[1]/365]});
+function hook(g,u,t){T(540,250,"Where does a",96,0,g);T(540,355,"saved hour go?",96,0,g);
+T(270,620,"8.5h",176,{f:c("--paid")},g);T(540,600,"to",64,{f:c("--mute"),w:700},g);T(810,620,"4.9h",176,{f:c("--paid")},g);
+T(540,730,"US paid hours a day",52,{w:800},g);T(540,795,"1870 to 2023, weekends included",40,{w:700,f:c("--mute")},g);
+var L=150,R=930,x=function(y){return L+(y-1870)/153*(R-L)},yv=function(h){return 1190-(h-4)/5*300},d="";
+W.forEach(function(q,i){d+=(i?"L":"M")+x(q[0]).toFixed(1)+" "+yv(q[1]).toFixed(1)});
+el("path",{d:d,fill:"none",stroke:c("--paid"),"stroke-width":12,"stroke-linejoin":"round","stroke-linecap":"round"},g);
+el("circle",{cx:x(1870),cy:yv(W[0][1]),r:18,fill:c("--paid")},g);var pr=.5+.5*Math.sin(t*5);
+el("circle",{cx:x(2023),cy:yv(4.9),r:20+14*pr,fill:c("--paid"),opacity:.25},g);el("circle",{cx:x(2023),cy:yv(4.9),r:18,fill:c("--paid")},g);
+T(x(1870),1250,"1870",40,{w:700,f:c("--mute")},g);T(x(2023),1250,"2023",40,{w:700,f:c("--mute")},g)}
+var PL=170,PR=1000,PT=300,PB=1120,px=function(y){return PL+(y-1870)/153*(PR-PL)},py=function(h){return PB-h/10*(PB-PT)};
+function hours(g,ye,st){[0,5,10].forEach(function(h){el("line",{x1:PL,x2:PR,y1:py(h),y2:py(h),stroke:c("--line"),"stroke-width":3},g);T(PL-20,py(h)+14,h+"h",40,{a:"end",w:700,f:c("--mute")},g)});
+[[1870,"middle"],[1970,"middle"],[2023,"end"]].forEach(function(q){T(q[0]==2023?PR:px(q[0]),PB+60,q[0],40,{w:700,f:c("--mute"),a:q[1]},g)});
+if(st>0){var sg=el("g",{},g);sg.style.opacity=st;el("rect",{x:px(1980),y:PT,width:px(2023)-px(1980),height:PB-PT,fill:c("--paid"),opacity:.16,rx:14},sg);T(px(2001.5)-60,py(2.4),"Flat since about 1980",44,{f:c("--paid")},sg)}
+var d="";W.forEach(function(q){if(q[0]<=ye)d+=(d?"L":"M")+px(q[0]).toFixed(1)+" "+py(q[1]).toFixed(1)});var v=lerp(W,ye);d+="L"+px(ye).toFixed(1)+" "+py(v).toFixed(1);
+el("path",{d:d,fill:"none",stroke:c("--paid"),"stroke-width":12,"stroke-linejoin":"round","stroke-linecap":"round"},g);el("circle",{cx:px(ye),cy:py(v),r:20,fill:c("--paid")},g);
+T(PR,PT+120,v.toFixed(1)+"h",128,{a:"end",f:c("--paid")},g);T(PR,PT+175,"paid, a day",40,{a:"end",w:700,f:c("--mute")},g);T(PR,PT+222,Math.round(ye),40,{a:"end",w:800,f:c("--ink")},g)}
+function loopB(g,u,t){var cx=540,cy=690,r=290,N=[["Demand grows","--paid"],["Standards rise","--home"],["New tasks","--ai"]];
+el("circle",{cx:cx,cy:cy,r:r,fill:"none",stroke:c("--mute"),"stroke-width":10,"stroke-dasharray":"30 22","stroke-dashoffset":(-t*90).toFixed(1)},g);
+N.forEach(function(n,i){var a=-Math.PI/2+i*2*Math.PI/3,x=cx+Math.cos(a)*r,y=cy+Math.sin(a)*r,o=.2+.8*ez((u-.08-i*.18)/.15);
+var k=el("g",{},g);k.style.opacity=o;el("circle",{cx:x,cy:y,r:62,fill:c(n[1])},k);T(i==0?x:i==1?x+40:x-40,i==0?y-90:y+150,n[0],48,{f:c(n[1])},k)});
+var a=-Math.PI/2+t*2*Math.PI/2.4;el("circle",{cx:cx+Math.cos(a)*r,cy:cy+Math.sin(a)*r,r:34,fill:c("--free"),stroke:c("--bg"),"stroke-width":8},g);
+T(cx,cy-10,"Saved hour",60,{f:c("--free")},g);T(cx,cy+50,"comes back",40,{w:700,f:c("--mute")},g);T(cx,cy+100,"as more work",40,{w:700,f:c("--mute")},g)}
+function freeB(g,u){var L=240,sc=function(h){return h/6*560},p=ez(u/.45);T(L,310,"US leisure, hours a day",40,{a:"start",w:700,f:c("--mute")},g);
+[[2005,5.1,0],[2025,5.2,.62]].forEach(function(r,i){var y=370+i*290,w=sc(r[1]*p);T(L-24,y+108,r[0],48,{a:"end",f:c("--mute")},g);el("rect",{x:L,y:y,width:Math.max(1,w),height:180,rx:20,fill:c("--free")},g);
+T(L+w+20,y+124,(r[1]*p).toFixed(1)+"h",96,{a:"start",f:c("--free")},g);
+if(r[2]){var q=ez((u-.45)/.3);if(q>0){el("rect",{x:L,y:y,width:sc(r[1]*r[2])*q,height:180,rx:20,fill:c("--ai")},g);var s=T(L+30,y+110,"screens",48,{a:"start",f:"#fff"},g);s.style.opacity=q}}});
+var q=ez((u-.55)/.25),bg=el("g",{},g);bg.style.opacity=q;T(540,1110,"about "+Math.round(62*q)+"%",104,{f:c("--ai")},bg);T(540,1180,"of free time is screens",44,{f:c("--ink")},bg)}
+function futB(g,u){var L=170,R=760,Tp=300,B=900,x=function(y){return L+(y-2025)/25*(R-L)},yv=function(h){return B-h/7*(B-Tp)},k=ez(u/.6),e=2025+25*k,a=5.8-.1*k,z=5.8-1.4*k;
+[0,7].forEach(function(h){el("line",{x1:L,x2:R,y1:yv(h),y2:yv(h),stroke:c("--line"),"stroke-width":3},g);T(L-20,yv(h)+14,h+"h",40,{a:"end",w:700,f:c("--mute")},g)});
+T(x(2025),B+60,"2025",40,{w:700,f:c("--mute")},g);T(x(2050),B+60,"2050",40,{w:700,f:c("--mute")},g);
+el("path",{d:"M"+x(2025)+" "+yv(5.8)+" L"+x(e)+" "+yv(a)+" L"+x(e)+" "+yv(z)+"Z",fill:c("--ai"),opacity:.22},g);
+el("path",{d:"M"+x(2025)+" "+yv(5.8)+" L"+x(e)+" "+yv(a)+"M"+x(2025)+" "+yv(5.8)+" L"+x(e)+" "+yv(z),fill:"none",stroke:c("--ai"),"stroke-width":10,"stroke-dasharray":"22 14","stroke-linecap":"round"},g);
+el("circle",{cx:x(2025),cy:yv(5.8),r:20,fill:c("--ai")},g);T(x(2025)-10,yv(5.8)-60,"5.8h",96,{a:"start",f:c("--ai")},g);
+var eo=ez((k-.35)/.3);T(x(e)+24,yv(a)+10,a.toFixed(1)+"h",96,{a:"start",f:c("--ai")},g).style.opacity=eo;T(x(e)+24,yv(z)+70,z.toFixed(1)+"h",96,{a:"start",f:c("--ai")},g).style.opacity=eo;
+T(L,B+120,"Paid hours a day, per worker, world",40,{a:"start",w:700,f:c("--mute")},g);
+var cg=el("g",{},g);cg.style.opacity=ez((u-.55)/.2);el("rect",{x:60,y:1070,width:960,height:84,rx:42,fill:c("--ai"),opacity:.12},cg);T(540,1126,"BCG range: Scenario",44,{f:c("--ai")},cg);
+el("rect",{x:60,y:1170,width:960,height:84,rx:42,fill:"none",stroke:c("--ink"),"stroke-width":3,"stroke-dasharray":"12 10"},cg);T(540,1226,"Dimon, 3.5 day week: Opinion",44,0,cg)}
+function fqB(g,u,t){var L=60,Rr=920,x=function(y){return L+(y-1870)/180*(Rr-L)},k=ez(u/.45);
+FQ.forEach(function(q,i){var y=300+i*172,ye=q[1]+(q[2]-q[1])*k,ly=y+52;T(L,y,q[0],40,{a:"start",w:800},g);
+var ch=T(1030,y,q[3],44,{a:"end",f:c("--ai")},g);ch.style.opacity=ez((u-.1-i*.08)/.15);
+el("line",{x1:L,x2:Rr,y1:ly,y2:ly,stroke:c("--line"),"stroke-width":4},g);
+el("line",{x1:x(q[1]),x2:x(ye)+.1,y1:ly,y2:ly,stroke:c("--ai"),"stroke-width":14,"stroke-linecap":"round"},g);el("circle",{cx:x(q[1]),cy:ly,r:14,fill:c("--ai")},g);
+if(k>=1){el("line",{x1:x(q[2])+18,x2:982,y1:ly,y2:ly,stroke:c("--q"),"stroke-width":7,"stroke-dasharray":"16 14","stroke-dashoffset":(-t*60).toFixed(1)},g)}
+el("circle",{cx:1012,cy:ly,r:30,fill:c("--bg"),stroke:c("--q"),"stroke-width":5},g);T(1012,ly+15,"?",42,{f:c("--q")},g)});
+T(x(1870),1210,"1870",40,{a:"start",w:700,f:c("--mute")},g);T(x(2050),1210,"2050",40,{a:"end",w:700,f:c("--mute")},g)}
+function endB(g,u,t){var x0=250,x1=830,cy=780,r=170,len=2*(x1-x0)+2*Math.PI*r;
+var d="M"+x0+" "+(cy-r)+" L"+x1+" "+(cy-r)+" A"+r+" "+r+" 0 0 1 "+x1+" "+(cy+r)+" L"+x0+" "+(cy+r)+" A"+r+" "+r+" 0 0 1 "+x0+" "+(cy-r)+"Z";
+el("path",{d:d,fill:"none",stroke:c("--line"),"stroke-width":40},g);var p=el("path",{d:d,fill:"none",stroke:c("--paid"),"stroke-width":14,"stroke-dasharray":"34 26","stroke-dashoffset":(-t*150).toFixed(1)},g);
+var pt=p.getPointAtLength(((t*300)%len+len)%len);el("circle",{cx:pt.x,cy:pt.y,r:36,fill:c("--free"),stroke:c("--bg"),"stroke-width":8},g);
+T(540,cy-10,"Saved hour",60,{f:c("--free")},g);T(540,cy+50,"goes round again",40,{w:700,f:c("--mute")},g);
+T(540,1110,"Count it. Then choose",52,{f:c("--ai")},g);T(540,1175,"who keeps it.",52,{f:c("--ai")},g)}
+var B=[{d:2.5,f:hook},{d:3,cap:"Paid hours fell",f:function(g,u){hours(g,1870+100*ez(u/.85),0)}},
+{d:2.6,cap:"Then hours stalled",cont:1,f:function(g,u){hours(g,1970+53*ez(u/.6),ez((u-.15)/.3))}},
+{d:3,cap:"Saved time gets refilled",f:loopB},{d:3,cap:"Free time went to screens",f:freeB},{d:3,cap:"2050 is a guess",f:futB},
+{d:3,cap:"Nobody tracks the saved hour",f:fqB},{d:4,cap:"Free time, or a",cap2:"faster treadmill?",f:endB}],TR=.4,TOT=0;B.forEach(function(b){b.s=TOT;TOT+=b.d});window.__storyLen=TOT;
+function capT(g,b){if(b.cap2){T(540,190,b.cap,80,0,g);T(540,285,b.cap2,80,0,g)}else if(b.cap)T(540,195,b.cap,56,0,g)}
+function body(g,i,u,t,o,dx){var bg=el("g",{transform:"translate("+dx.toFixed(1)+" 0)"},g);bg.style.opacity=o;capT(bg,B[i]);B[i].f(bg,u,t);return bg}
+window.storyAt=function(t){t=Math.max(0,Math.min(TOT-.001,t));S.textContent="";var b=0;while(b<B.length-1&&t>=B[b+1].s)b++;var lt=t-B[b].s,u=lt/B[b].d,g=el("g",{},S);
+el("rect",{x:0,y:0,width:1080,height:1350,fill:c("--bg")},g);
+if(b>0&&lt<TR){var e=ez(lt/TR);if(B[b].cont){B[b].f(el("g",{},g),u,t);var a=el("g",{},g);a.style.opacity=1-e;capT(a,B[b-1]);var n=el("g",{transform:"translate(0 "+(30*(1-e)).toFixed(1)+")"},g);n.style.opacity=e;capT(n,B[b])}
+else{body(g,b-1,1,t,1-e,-90*e);body(g,b,u,t,e,90*(1-e))}}else body(g,b,u,t,1,0);
+if(t>TOT-TR){var e2=ez((t-TOT+TR)/TR),ov=el("g",{},g);ov.style.opacity=e2;el("rect",{x:0,y:0,width:1080,height:1350,fill:c("--bg")},ov);B[0].f(ov,0,0)}
+el("rect",{x:0,y:0,width:1080,height:84,fill:c("--ink")},g);el("rect",{x:0,y:84,width:1080,height:6,fill:c("--paid")},g);T(540,56,"Time spent vs time saved",36,{f:c("--bg")},g);
+var sw=(1000-7*10)/8;B.forEach(function(q,i){var x=40+i*(sw+10);el("rect",{x:x,y:1304,width:sw,height:14,rx:7,fill:c("--line")},g);var f=i<b?1:i==b?cl(u):0;if(t>TOT-TR)f=1;if(f>0)el("rect",{x:x,y:1304,width:sw*f,height:14,rx:7,fill:c("--ink")},g)});return b};
+var t0=null;function loop(ts){if(!t0)t0=ts;if(!window.__storyHold)storyAt(((ts-t0)/1000)%TOT);requestAnimationFrame(loop)}if(reduce)storyAt(0);else requestAnimationFrame(loop)})();
+
+/* screens in leisure */
+(function(){var s=document.getElementById("scr"),L=110,W=760,sc=function(h){return h/6*W};
+[[2005,5.1,0],[2025,5.2,.62]].forEach(function(r,i){var y=10+i*56,t=el("text",{x:L-14,y:y+27,"text-anchor":"end","font-size":16,"font-weight":800},s);t.textContent=r[0];
+el("rect",{x:L,y:y,width:sc(r[1]),height:40,rx:8,fill:c("--free")},s);
+if(r[2]){var b=el("rect",{class:"band",x:L,y:y,width:0,height:40,rx:8,fill:c("--ai")},s);setTimeout(function(){b.setAttribute("width",sc(r[1]*r[2]))},reduce?0:600);
+var q=el("text",{x:L+12,y:y+26,"font-size":15,"font-weight":800},s);q.textContent="about 62% screens";q.style.fill="#fff"}
+var v=el("text",{x:L+sc(r[1])+10,y:y+27,"font-size":16,"font-weight":800},s);v.textContent=r[1]+"h"})})();
+
+set(2050);
+})();
+</script>
+</body>
+</html>

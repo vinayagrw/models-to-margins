@@ -1,0 +1,119 @@
+---
+/* The river of weeks: a fixed 3D background for the time study brief.
+   Each era is one 168-hour week, stacked by activity, receding into depth.
+   Past 2024 only paid work and free time have scenarios, drawn as wireframes.
+   Saved-hour particles flow from each era, most into output, few into free time.
+   Data: src/data/time-study/core-series.json (copy of time-study/research/24-core-series.json).
+   Shares the What Breaks boot (scene3d.ts). Off on phones, reduced motion, no WebGL and print. */
+import core from '../../data/time-study/core-series.json';
+const C: any = core;
+const PAST = ['1820', '1870', '1900', '1930', '1965', '2000', '2024'];
+const FUT = ['2036', '2051', '2076'];
+const v = (k: string, y: string) => C[k].past[y]?.v ?? 0;
+const past = PAST.map((y) => { const p = v('paid_work', y), h = v('home_work_and_care', y), t = v('travel', y), f = v('free_time', y); return { y, p, h, t, f, r: 168 - p - h - t - f }; });
+const fut = FUT.map((y) => ({ y, p: C.paid_work.future.base?.[y] ?? null, f: C.free_time.future.base?.[y] ?? null }));
+const data = JSON.stringify({ past, fut });
+---
+<div class="time-river" aria-hidden="true"><canvas class="time-river__canvas"></canvas></div>
+<script type="application/json" id="time-river-data" set:html={data}></script>
+
+<style>
+  .time-river { position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0; transition: opacity 1.2s ease; }
+  .time-river.is-on { opacity: 1; }
+  .time-river__canvas { width: 100%; height: 100%; display: block; }
+  @media print { .time-river { display: none; } }
+</style>
+
+<script>
+  import { can3d, startNear, makeWorld, runLoop } from '../deep-dive/what-breaks/scene3d';
+  const box = document.querySelector('.time-river') as HTMLElement | null;
+  if (box && can3d()) {
+    const D = JSON.parse((document.getElementById('time-river-data') as HTMLElement).textContent || '{}');
+    const canvas = box.querySelector('canvas') as HTMLCanvasElement;
+    // Round 16: the embedded study posts its year clock. The camera follows that year for
+    // 4 s after the last message, then returns to the page scroll. Registered before the
+    // scene boots so an early message is kept.
+    let yearV: number | null = null, yearAt = 0;
+    const frame = document.getElementById('time-study-frame') as HTMLIFrameElement | null;
+    addEventListener('message', (ev) => {
+      if (ev.origin !== location.origin || (frame && ev.source !== frame.contentWindow)) return;
+      const d: any = ev.data || {};
+      if (d.type === 'm2m:year' && typeof d.year === 'number') { yearV = d.year; yearAt = performance.now(); }
+    });
+    startNear(box, (THREE) => {
+      const dark = () => document.documentElement.getAttribute('data-theme') === 'dark';
+      const world = makeWorld(THREE, canvas, box);
+      const { R, S, cam } = world;
+      // activity colours, the study page's tokens per theme
+      const PAL = { dark: { p: 0x6fa8e8, h: 0xb98ad6, t: 0xf08a4b, f: 0x5ccb8a, r: 0x6a7684, out: 0xf0c060, gate: 0x9fd8ff, floor: 0x86abdd, fog: 0x0b0f17, den: 0.03, op: 0.32, eo: 0.5 },
+        light: { p: 0x2f6fb3, h: 0x8e4db0, t: 0xc2571a, f: 0x2e9e5b, r: 0x9aa3ae, out: 0xa8740a, gate: 0x2f6fb3, floor: 0x2f6fb3, fog: 0xeef2f6, den: 0.022, op: 0.22, eo: 0.7 } };
+      const COL: any = { p: 'p', h: 'h', t: 't', f: 'f', r: 'r' };
+      const mats: { m: any; e: any; k: string; wire: boolean }[] = [];
+      const GAP = 7, U = 6 / 168; // world units per hour
+      const slab = (x: number, y0: number, hrs: number, z: number, col: string, wire: boolean) => {
+        const h = Math.max(0.02, hrs * U), geo = new THREE.BoxGeometry(2.6, h, 1.4);
+        const mm = new THREE.MeshStandardMaterial({ emissiveIntensity: 0.25, transparent: true, roughness: 0.5 }), em = new THREE.LineBasicMaterial({ transparent: true });
+        const m = new THREE.Mesh(geo, mm); m.position.set(x, y0 + h / 2, z); S.add(m);
+        m.add(new THREE.LineSegments(new THREE.EdgesGeometry(geo), em)); mats.push({ m: mm, e: em, k: col as any, wire });
+        return y0 + h;
+      };
+      const zs: number[] = [];
+      D.past.forEach((e: any, i: number) => {
+        const z = -i * GAP; zs.push(z); let y = 0;
+        y = slab(0, y, e.p, z, COL.p, false); y = slab(0, y, e.h, z, COL.h, false); y = slab(0, y, e.t, z, COL.t, false); y = slab(0, y, e.f, z, COL.f, false); slab(0, y, e.r, z, COL.r, false);
+      });
+      // today gate
+      const zT = zs[zs.length - 1] - GAP / 2;
+      const gate = new THREE.Mesh(new THREE.PlaneGeometry(5, 7.5), new THREE.MeshBasicMaterial({ transparent: true, opacity: 0.08, side: THREE.DoubleSide }));
+      gate.position.set(0, 3.4, zT); S.add(gate);
+      gate.add(new THREE.LineSegments(new THREE.EdgesGeometry(gate.geometry), new THREE.LineBasicMaterial({ transparent: true, opacity: 0.6 })));
+      // scenario ghosts: paid and free only
+      D.fut.forEach((e: any, i: number) => {
+        const z = zT - (i + 0.5) * GAP; zs.push(z);
+        if (e.p != null) slab(0, 0, e.p, z, COL.p, true);
+        if (e.f != null) slab(0, e.p != null ? e.p * U : 0, e.f, z, COL.f, true);
+      });
+      // river floor
+      const zEnd = zs[zs.length - 1];
+      const floor = new THREE.Mesh(new THREE.PlaneGeometry(3.6, -zEnd + 14), new THREE.MeshBasicMaterial({ transparent: true, opacity: 0.07 }));
+      floor.rotation.x = -Math.PI / 2; floor.position.set(0, -0.02, zEnd / 2 + 2); S.add(floor);
+      // saved-hour particles: about 1 in 7 reaches free time, the rest becomes output
+      const N = 110, geo = new THREE.SphereGeometry(0.04, 8, 6);
+      const out = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0.55 });
+      const free = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0.8 });
+      const P: any[] = [];
+      for (let i = 0; i < N; i++) {
+        const toFree = i % 7 === 0, m = new THREE.Mesh(geo, toFree ? free : out);
+        m.userData = { e: i % (D.past.length - 1), t: Math.random(), s: 0.0016 + Math.random() * 0.0018, free: toFree, j: Math.random() * 2 - 1 };
+        S.add(m); P.push(m);
+      }
+      const place = (m: any) => {
+        const u = m.userData, z0 = zs[u.e], z1 = zs[u.e + 1], z = z0 + (z1 - z0) * u.t;
+        if (u.free) m.position.set(-1.6 - u.t * 0.6, 4.3 - u.t * 0.8 + u.j * 0.1, z);
+        else m.position.set(1.6 + u.t * (2.2 + u.j), 2.2 + u.t * (2.6 + u.j), z); // output fans up and out
+      };
+      // camera follows page scroll from 1820 to 2076
+      let target = 0, cur = 0;
+      const prog = () => { const h = document.documentElement, m = h.scrollHeight - h.clientHeight; target = m > 0 ? h.scrollTop / m : 0; };
+      addEventListener('scroll', prog, { passive: true }); prog(); cur = target;
+      const paint = () => { const c: any = PAL[dark() ? 'dark' : 'light'];
+        S.fog.color.set(c.fog); S.fog.density = c.den;
+        mats.forEach((x) => { x.m.color.set(c[x.k]); x.m.emissive.set(c[x.k]); x.m.opacity = x.wire ? 0.06 : c.op; x.e.color.set(c[x.k]); x.e.opacity = x.wire ? 0.8 : c.eo; });
+        gate.material.color.set(c.gate); (gate.children[0] as any).material.color.set(c.gate); floor.material.color.set(c.floor); out.color.set(c.out); free.color.set(c.f);
+        box.classList.add('is-on'); };
+      paint(); addEventListener('m2m:themechange', paint);
+      // year to river depth: the ten eras in order, past then scenario ghosts
+      const YK = [1820, 1870, 1900, 1930, 1965, 2000, 2024, 2036, 2051, 2076];
+      const zOf = (y: number) => { let i = 0; while (i + 1 < YK.length && YK[i + 1] <= y) i++; const j = Math.min(i + 1, YK.length - 1), f = YK[j] > YK[i] ? Math.min(1, Math.max(0, (y - YK[i]) / (YK[j] - YK[i]))) : 0; return zs[i] + (zs[j] - zs[i]) * f; };
+      runLoop(box, (now) => {
+        const hold = yearV != null && now - yearAt < 4000;
+        const t = hold ? Math.min(1, Math.max(0, zOf(yearV as number) / (zEnd - 4))) : target;
+        cur += (t - cur) * (hold ? 0.12 : 0.05);
+        const z = 9 + (zEnd - 4) * cur, sway = Math.sin(now / 6000) * 0.6;
+        cam.position.set(6.5 + sway, 6.2, z); cam.lookAt(0, 2.4, z - 9);
+        P.forEach((m) => { m.userData.t += m.userData.s; if (m.userData.t > 1) m.userData.t = 0; place(m); });
+        R.render(S, cam);
+      });
+    }, () => box.remove());
+  } else box?.remove();
+</script>

@@ -1,0 +1,273 @@
+---
+import { getEntry } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import EntryMeta from '../../components/EntryMeta.astro';
+import BackLink from '../../components/BackLink.astro';
+import TimeRiver from '../../components/briefs/TimeRiver.astro';
+
+const entry = await getEntry('briefs', 'time-spent-vs-time-saved');
+
+if (!entry) {
+  throw new Error('Expected the time-spent-vs-time-saved brief to exist in the briefs collection.');
+}
+
+const visualPath = entry.data.supportingVisualPath ?? '/visuals/time-study/index.html';
+---
+
+<BaseLayout
+  title={`${entry.data.title} | Models to Margins`}
+  description={entry.data.summary}
+  currentPath="/briefs"
+>
+  <TimeRiver />
+  <article class="time-brief-host">
+    <header class="time-brief-host__hero">
+      <span class="time-brief-host__eyebrow">Interactive Brief</span>
+      <h1 class="time-brief-host__title">{entry.data.title}</h1>
+      <p class="time-brief-host__summary">{entry.data.summary}</p>
+      <BackLink href="/briefs" label="Back to Brief" />
+      <EntryMeta
+        date={entry.data.pubDate}
+        primary={entry.data.industry}
+        readTime={entry.data.readTime}
+      />
+      {entry.data.lens?.length ? (
+        <div class="time-brief-host__pills" aria-label="Brief lenses">
+          {entry.data.lens.map((lens) => (
+            <span class="time-brief-host__pill">{lens}</span>
+          ))}
+        </div>
+      ) : null}
+    </header>
+
+    <div class="time-brief-host__views" role="group" aria-label="Brief view">
+      <button type="button" class="time-brief-host__view" data-view="full" aria-pressed="true">Full study</button>
+      <button type="button" class="time-brief-host__view" data-view="visual" aria-pressed="false">Visual version</button>
+    </div>
+
+    <div class="time-brief-host__stage">
+      <iframe
+        id="time-study-frame"
+        src={`${visualPath}?embed=1`}
+        data-full={`${visualPath}?embed=1`}
+        data-visual="/visuals/time-study/infographic/index.html?embed=1"
+        title="Time Spent vs Time Saved"
+        loading="eager"
+       sandbox="allow-scripts allow-same-origin"></iframe>
+    </div>
+  </article>
+
+  <script>
+    (() => {
+      const frame = document.getElementById('time-study-frame');
+
+      const syncTheme = () => {
+        if (!frame?.contentWindow) return;
+        frame.style.colorScheme = window.__m2mGetTheme?.() ?? 'light';
+        frame.contentWindow.postMessage(
+          { type: 'm2m:set-theme', theme: window.__m2mGetTheme?.() ?? 'light' },
+          window.location.origin
+        );
+      };
+
+      frame?.addEventListener('load', syncTheme);
+      window.addEventListener('m2m:themechange', syncTheme);
+      syncTheme();
+
+      // Let the BROWSER own the scroll: grow the iframe to its content height so the
+      // whole page scrolls as one document (no inner iframe scrollbar). Same-origin embed.
+      // Measure the BODY box, never the root scroll area: documentElement.scrollHeight is
+      // never smaller than the frame itself, so a frame sized from it can grow but never
+      // shrink, and every font swap, closed drawer or resize leaves a blank band (round 16).
+      const sizeToContent = () => {
+        try {
+          const doc = frame?.contentDocument;
+          const body = doc?.body;
+          if (!doc || !body) return;
+          const cs = doc.defaultView.getComputedStyle(body);
+          const h = Math.ceil(
+            body.getBoundingClientRect().height +
+              (parseFloat(cs.marginTop) || 0) +
+              (parseFloat(cs.marginBottom) || 0)
+          );
+          if (h > 0 && Math.abs(h - frame.offsetHeight) > 1) frame.style.height = h + 'px';
+        } catch (_) {
+          /* cross-origin fallback: keep the CSS height */
+        }
+      };
+
+      let ro;
+      const watch = () => {
+        sizeToContent();
+        // re-measure after fonts, count-ups, and any late layout settle
+        setTimeout(sizeToContent, 300);
+        setTimeout(sizeToContent, 1200);
+        try {
+          const doc = frame.contentDocument;
+          if (doc?.body && window.ResizeObserver) {
+            ro?.disconnect();
+            ro = new ResizeObserver(sizeToContent);
+            ro.observe(doc.body);
+          }
+        } catch (_) {
+          /* cross-origin: ResizeObserver unavailable on the frame doc */
+        }
+      };
+
+      frame?.addEventListener('load', watch);
+      // This is a module script, so the frame may have finished loading before it ran.
+      // Without this the frame would stay at 100vh and scroll inside itself.
+      try {
+        const doc = frame?.contentDocument;
+        if (doc && doc.readyState === 'complete' && doc.location.href !== 'about:blank' && doc.body) watch();
+      } catch (_) {
+        /* cross-origin */
+      }
+      window.addEventListener('resize', sizeToContent);
+
+      // Full study or Visual version: swap the frame source, keep the choice in the URL hash.
+      const views = document.querySelectorAll('.time-brief-host__view');
+      const show = (view) => {
+        const next = view === 'visual' ? frame?.dataset.visual : frame?.dataset.full;
+        views.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.view === view)));
+        if (frame && next && !frame.src.endsWith(next)) frame.src = next;
+      };
+      views.forEach((b) =>
+        b.addEventListener('click', () => {
+          show(b.dataset.view);
+          history.replaceState(null, '', b.dataset.view === 'visual' ? '#visual' : location.pathname);
+        })
+      );
+      if (location.hash === '#visual') show('visual');
+    })();
+  </script>
+
+  <style>
+    .time-brief-host {
+      position: relative;
+      z-index: 1;
+      margin-top: 4px;
+      display: grid;
+      gap: clamp(18px, 2.2vw, 26px);
+    }
+
+    .time-brief-host__hero {
+      /* a readable panel over the 3D river */
+      padding: clamp(18px, 2.4vw, 28px);
+      border-radius: 28px;
+      background: color-mix(in srgb, var(--bg-start) 86%, transparent);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      display: grid;
+      gap: 14px;
+      justify-items: start;
+    }
+
+    .time-brief-host__eyebrow {
+      display: inline-flex;
+      align-items: center;
+      min-height: 1.9rem;
+      padding: 0.28rem 0.72rem;
+      border-radius: 999px;
+      border: 1px solid color-mix(in srgb, var(--line) 80%, transparent);
+      background: color-mix(in srgb, var(--accent-cyan, var(--accent)) 12%, transparent);
+      color: var(--accent-cyan, var(--accent));
+      font-size: 0.78rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    :global(html[data-theme='light']) .time-brief-host__eyebrow {
+      color: color-mix(in srgb, var(--accent-cyan, var(--accent)) 55%, var(--text));
+    }
+
+    .time-brief-host__title {
+      margin: 0;
+      max-width: none;
+      text-wrap: balance;
+    }
+
+    .time-brief-host__summary {
+      margin: 0;
+      /* fill the full container width (override the hero's justify-items:start)
+         so lines run all the way to the right and wrap into the fewest rows */
+      justify-self: stretch;
+      max-width: 100%;
+      color: var(--muted);
+      line-height: 1.62;
+      text-wrap: pretty;
+    }
+
+    .time-brief-host__pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 2px;
+    }
+
+    .time-brief-host__pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 2.3rem;
+      padding: 0.45rem 0.85rem;
+      border-radius: 999px;
+      border: 1px solid color-mix(in srgb, var(--line) 82%, transparent);
+      background: color-mix(in srgb, var(--surface-soft) 76%, transparent);
+      color: var(--text);
+      font-size: 0.92rem;
+      line-height: 1.35;
+    }
+
+    .time-brief-host__views {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .time-brief-host__view {
+      min-height: 2.75rem;
+      padding: 0.5rem 1.1rem;
+      border-radius: 999px;
+      border: 1px solid color-mix(in srgb, var(--line) 82%, transparent);
+      background: color-mix(in srgb, var(--surface-soft) 76%, transparent);
+      color: var(--text);
+      font: inherit;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .time-brief-host__view[aria-pressed='true'] {
+      background: var(--text);
+      color: var(--bg-start);
+    }
+
+    .time-brief-host__view:focus-visible {
+      outline: 3px solid var(--accent-cyan, var(--accent));
+      outline-offset: 2px;
+    }
+
+    .time-brief-host__stage {
+      overflow: hidden;
+      border-radius: 28px;
+      border: 1px solid color-mix(in srgb, var(--line) 82%, transparent);
+      background: transparent;
+      box-shadow: var(--shadow);
+    }
+
+    .time-brief-host__stage iframe {
+      display: block;
+      width: 100%;
+      /* fallback before JS sizes the frame to its content height; the BROWSER owns the scroll.
+         No min-height: reserved height would hide a failed measurement as blank space. */
+      height: 100vh;
+      border: 0;
+      background: transparent;
+    }
+
+    @media (max-width: 720px) {
+      .time-brief-host__stage {
+        border-radius: 22px;
+      }
+    }
+  </style>
+</BaseLayout>

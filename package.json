@@ -10,10 +10,12 @@
     "check": "astro check",
     "check:layout": "node scripts/layout-check.mjs",
     "check:layout:payouts": "node scripts/layout-check.mjs /deep-dives/agentic-payouts-desk --root=.pdd \"--scene=section[id^=pdd-]\" --readers=buyer,builder,strategy \"--states=build=who,build=loss,build=flow,build=int,build=plan,build=verdict,build=arch&arch=today,build=arch&arch=year1,build=arch&arch=target,rail=b\"",
+    "check:layout:time-study": "node scripts/layout-check.mjs /visuals/time-study/index.html --root=body --scene=section",
     "test": "node --test"
   },
   "dependencies": {
     "@astrojs/rss": "^4.0.19",
-    "astro": "^6.0.0"
+    "astro": "^6.0.0",
+    "three": "0.169.0"
   }
 }
