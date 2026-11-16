@@ -1,0 +1,688 @@
+{
+ "S": {
+  "1": {
+   "fix": "A separate checker keeps only claims backed by a quoted sentence from a page it opened.",
+   "own": "Vendor and buyer",
+   "first": "Turn on citations and a link check, then hand-check 20 claims.",
+   "eff": "Medium",
+   "mat": "Parts sold, full checker custom",
+   "ev": "m",
+   "evl": "A link check cut dead or invented links to under 1%",
+   "b": [
+    "P1",
+    "P9"
+   ],
+   "quick": {
+    "fix": "Name one checker per team who opens every cited link and confirms the page holds the sentence.",
+    "who": "Team heads and HR",
+    "effort": "2 hours to set up, then about 2 hours a week per checker",
+    "limit": "It samples claims and misses wrong claims that carry no citation.",
+    "replaced_by": [
+     "P1",
+     "P9"
+    ],
+    "when": "Hand checks pass about 50 claims a week, or more than 1 in 20 fail",
+    "ev": "verified",
+    "src": [
+     "Q-S01",
+     "Q-S02",
+     "Q-S03"
+    ]
+   }
+  },
+  "2": {
+   "fix": "Log every failed search, blocked page and cut text, show it above the answer, and never deliver a report with no opened source.",
+   "own": "Vendor and buyer",
+   "first": "Ask for the searches run, pages opened and what failed. Reject reports with no sources.",
+   "eff": "Low",
+   "mat": "Early product",
+   "ev": "n",
+   "evl": "Not measured yet",
+   "b": [
+    "P3"
+   ],
+   "quick": {
+    "fix": "Reject reports with no opened sources and flag every API response carrying a search error code.",
+    "who": "Platform and architecture",
+    "effort": "4 hours to add the flag and the rejection rule",
+    "limit": "A search that finds nothing returns an empty list, not an error.",
+    "replaced_by": [
+     "P3"
+    ],
+    "when": "Flagged errors pass about 20 a week",
+    "ev": "vendor",
+    "src": [
+     "Q-S04",
+     "Q-S05",
+     "Q-S06"
+    ]
+   }
+  },
+  "3": {
+   "fix": "Split the question into parts and stop only when each part has evidence or a plain \"not found\".",
+   "own": "Vendor and buyer",
+   "first": "Ask for the plan first, plus a list of what was looked for and not found.",
+   "eff": "Medium",
+   "mat": "Research, with planning sold",
+   "ev": "m",
+   "evl": "Forcing full coverage lifted accuracy 2.7 to 8.2 points in a lab test",
+   "b": [
+    "P2"
+   ],
+   "quick": {
+    "fix": "Use deep research and edit the shown plan so every sub-question is listed before it starts.",
+    "who": "Team heads and HR",
+    "effort": "1 hour to brief the team, then 5 to 10 minutes per question",
+    "limit": "The tool can still stop early on one sub-question and reports no misses.",
+    "replaced_by": [
+     "P2"
+    ],
+    "when": "Research moves to an API workflow, or more than 10 reports a week",
+    "ev": "vendor",
+    "src": [
+     "Q-S07",
+     "Q-S08"
+    ]
+   }
+  },
+  "4": {
+   "fix": "Use a list of trusted primary sites for high-stakes work, and label every source.",
+   "own": "Buyer",
+   "first": "Write a 20 to 50 site list for one workflow.",
+   "eff": "Low",
+   "mat": "Generally available",
+   "ev": "m",
+   "evl": "Not measured yet",
+   "b": [
+    "P2",
+    "P9"
+   ],
+   "quick": {
+    "fix": "Load a 20 to 50 site allow list in ChatGPT Manage sites, Claude Console or allowed_domains.",
+    "who": "Platform and architecture",
+    "effort": "4 to 8 hours to build and load one list",
+    "limit": "A planted page on an allowed site still gets through.",
+    "replaced_by": [
+     "P2",
+     "P9"
+    ],
+    "when": "A second workflow needs its own list, or lists need monthly review",
+    "ev": "vendor",
+    "src": [
+     "Q-S09",
+     "Q-S10",
+     "Q-S11",
+     "Q-S12"
+    ]
+   }
+  },
+  "5": {
+   "fix": "Put today's date in the request, fetch fresh pages, and tell the model when old evidence stopped applying.",
+   "own": "Vendor and buyer",
+   "first": "Add \"as of today\" and source dates to price, rule and people questions.",
+   "eff": "Low",
+   "mat": "Generally available",
+   "ev": "m",
+   "evl": "Larger models switched almost perfectly when told evidence had expired",
+   "b": [
+    "P2"
+   ],
+   "quick": {
+    "fix": "Add an organization instruction to state today's date and the source date beside every changing fact.",
+    "who": "Platform and architecture",
+    "effort": "2 to 4 hours",
+    "limit": "page_age is the site update date, and an instruction may not always be followed.",
+    "replaced_by": [
+     "P2"
+    ],
+    "when": "An audit sample still finds undated figures in client work",
+    "ev": "vendor",
+    "src": [
+     "Q-S13",
+     "Q-S14",
+     "Q-S15",
+     "Q-S16"
+    ]
+   }
+  },
+  "6": {
+   "fix": "Cite only pages that were opened, and report any text that was cut.",
+   "own": "Buyer",
+   "first": "Log whether each cited page was opened, and block those that were not.",
+   "eff": "Medium",
+   "mat": "Early product",
+   "ev": "m",
+   "evl": "Opened pages were stale 1.3% of the time, snippets 6.4%",
+   "b": [
+    "P1",
+    "P3"
+   ],
+   "quick": {
+    "fix": "Keep only citations whose URL shows an open_page action, or fetch with citations turned on.",
+    "who": "Platform and architecture",
+    "effort": "1 to 2 developer days",
+    "limit": "Chat products give no such switch.",
+    "replaced_by": [
+     "P1",
+     "P3"
+    ],
+    "when": "More than one workflow needs the opened-page rule",
+    "ev": "vendor",
+    "src": [
+     "Q-S17",
+     "Q-S18",
+     "Q-S19"
+    ]
+   }
+  },
+  "7": {
+   "fix": "Name each blocked page, then route to your own copy, a licensed source, a file reader or a browser tool.",
+   "own": "Buyer",
+   "first": "Test whether each team's top 10 sources open, and set a route for the rest.",
+   "eff": "High",
+   "mat": "Error codes sold, paid access early",
+   "ev": "n",
+   "evl": "Not measured beyond one case of our own",
+   "b": [
+    "P3"
+   ],
+   "quick": {
+    "fix": "Run the team's top 10 sources through the tool, note failures, and route those to file upload.",
+    "who": "Team heads and HR",
+    "effort": "2 to 3 hours per team",
+    "limit": "A one-time test, and it does not solve unlicensed paywalled sources.",
+    "replaced_by": [
+     "P3"
+    ],
+    "when": "Fetch errors need weekly counting by source",
+    "ev": "vendor",
+    "src": [
+     "Q-S20",
+     "Q-S21",
+     "Q-S22"
+    ]
+   }
+  },
+  "8": {
+   "fix": "List the question's assumptions and check each one before searching.",
+   "own": "Vendor and buyer",
+   "first": "Add \"list and check my assumptions first\" to research prompts.",
+   "eff": "Medium",
+   "mat": "Research",
+   "ev": "m",
+   "evl": "A plain prompt gave the same gain as the full check",
+   "b": [
+    "P2",
+    "P9"
+   ],
+   "quick": {
+    "fix": "Add an organization instruction to list a question's assumptions and mark any it could not confirm.",
+    "who": "Platform and architecture",
+    "effort": "1 hour plus 2 hours of testing",
+    "limit": "A premise-check instruction can make the model dispute sound premises too.",
+    "replaced_by": [
+     "P2",
+     "P9"
+    ],
+    "when": "False flags waste more reviewer time than the premises they catch",
+    "ev": "vendor",
+    "src": [
+     "Q-S16",
+     "Q-S23",
+     "Q-S31"
+    ]
+   }
+  },
+  "9": {
+   "fix": "Require a dated primary source for changing facts, with an expiry date.",
+   "own": "Vendor and buyer",
+   "first": "Require a dated primary source for prices, rules and office holders.",
+   "eff": "Medium",
+   "mat": "Research",
+   "ev": "m",
+   "evl": "Measured in lab tests only",
+   "b": [
+    "P1",
+    "P2"
+   ],
+   "quick": {
+    "fix": "Force a search on every API call with tool_choice required, and instruct Claude to cite a dated source.",
+    "who": "Platform and architecture",
+    "effort": "2 to 4 hours",
+    "limit": "Forcing a search does not stop the model trusting a wrong page.",
+    "replaced_by": [
+     "P1",
+     "P2"
+    ],
+    "when": "Changing facts appear in more than one client deliverable a week",
+    "ev": "vendor",
+    "src": [
+     "Q-S24",
+     "Q-S16",
+     "Q-S03"
+    ]
+   }
+  },
+  "10": {
+   "fix": "Keep page text away from any model that can act, and ask before actions that follow web content.",
+   "own": "Vendor and buyer",
+   "first": "Remove email, payment and file access from browsing agents, and turn on approvals.",
+   "eff": "High",
+   "mat": "Filters sold, isolation in research",
+   "ev": "m",
+   "evl": "Attacks got through 12.8% of the time, against 73.1% without",
+   "b": [
+    "P4"
+   ],
+   "quick": {
+    "fix": "Turn off or allowlist Claude in Chrome, and put staff with email or payment access in Lockdown Mode.",
+    "who": "Security",
+    "effort": "2 to 4 hours",
+    "limit": "Read-only search can still be steered, and one permissive ChatGPT role restores access.",
+    "replaced_by": [
+     "P4"
+    ],
+    "when": "Any browsing agent needs to act on email, payments or files",
+    "ev": "vendor",
+    "src": [
+     "Q-S25",
+     "Q-S26",
+     "Q-S27",
+     "Q-S28",
+     "Q-S29",
+     "Q-S30"
+    ]
+   }
+  }
+ },
+ "F": {
+  "1": {
+   "own": "Team heads, with the CIO",
+   "first": "Name one person per team who opens every cited source and figure before AI work leaves the company.",
+   "eff": "Medium",
+   "mat": "Generally available",
+   "ev": "m",
+   "evl": "Grounded legal tools were wrong less often. The human check is not measured",
+   "b": [
+    "P1",
+    "P9",
+    "P10"
+   ],
+   "quick": {
+    "fix": "Name one checker per team who opens every cited source and figure and logs each check.",
+    "who": "Team heads and HR",
+    "effort": "2 hours to set up, then about 10 minutes per document",
+    "limit": "Errors in claims that carry no citation, and checker fatigue at volume.",
+    "replaced_by": [
+     "P1",
+     "P9"
+    ],
+    "when": "The sheet shows more documents than checkers can open in a week",
+    "ev": "verified",
+    "src": [
+     "Q-F01"
+    ]
+   }
+  },
+  "2": {
+   "own": "Security lead and CIO",
+   "first": "Turn sandboxes on by policy and give each agent its own low-privilege login.",
+   "eff": "Medium",
+   "mat": "Generally available, often off by default",
+   "ev": "v",
+   "evl": "Vendor's own test only",
+   "b": [
+    "P4",
+    "P9"
+   ],
+   "quick": {
+    "fix": "Block the skip-all-approvals mode in Claude Code's managed settings, and keep the Codex workspace-write sandbox.",
+    "who": "Security",
+    "effort": "4 hours",
+    "limit": "Agents' own false reports of success, and agents outside these two tools.",
+    "replaced_by": [
+     "P4",
+     "P9"
+    ],
+    "when": "More than one agent tool is in use, or agents run unattended",
+    "ev": "vendor",
+    "src": [
+     "Q-F02",
+     "Q-F03",
+     "Q-F04"
+    ]
+   }
+  },
+  "3": {
+   "own": "CIO and security lead",
+   "first": "Pick one approved AI tool with no-training terms and turn on data-loss controls.",
+   "eff": "Medium",
+   "mat": "Generally available, some parts in preview",
+   "ev": "v",
+   "evl": "Vendor survey, not cause and effect",
+   "b": [
+    "P5"
+   ],
+   "quick": {
+    "fix": "Name one licensed enterprise tool for company data, confirm its no-training default, and turn on Purview DLP for Copilot.",
+    "who": "Security",
+    "effort": "6 hours",
+    "limit": "Staff who paste into personal accounts, and files uploaded straight into a Copilot prompt.",
+    "replaced_by": [
+     "P5"
+    ],
+    "when": "A second AI tool is requested, or a leak is found outside the named tool",
+    "ev": "vendor",
+    "src": [
+     "Q-F05",
+     "Q-F06",
+     "Q-F07"
+    ]
+   }
+  },
+  "4": {
+   "own": "Security lead, with procurement",
+   "first": "Allow only listed tool servers, and close agents' network access by default.",
+   "eff": "Medium",
+   "mat": "Mixed",
+   "ev": "v",
+   "evl": "Vendor's own test. Adaptive attacks beat most filters",
+   "b": [
+    "P4"
+   ],
+   "quick": {
+    "fix": "Set allowedMcpServers with allowManagedMcpServersOnly true in Claude Code, and review the Copilot MCP policy.",
+    "who": "Security",
+    "effort": "4 hours",
+    "limit": "Hidden instructions inside approved servers or in pages and files the agent reads.",
+    "replaced_by": [
+     "P4"
+    ],
+    "when": "The approved list passes about ten servers, or a second agent tool needs it",
+    "ev": "vendor",
+    "src": [
+     "Q-F08",
+     "Q-F09"
+    ]
+   }
+  },
+  "5": {
+   "own": "Finance lead",
+   "first": "Write the value measure, cost measure and stop rule before the next pilot starts.",
+   "eff": "Medium",
+   "mat": "Meters sold, value standards early",
+   "ev": "v",
+   "evl": "Analyst survey, a link not proof",
+   "b": [
+    "P8"
+   ],
+   "quick": {
+    "fix": "Before the next pilot, write one page naming a cost owner, value measure, cost measure and stop date.",
+    "who": "Finance",
+    "effort": "3 hours per pilot",
+    "limit": "Benefits that are hard to price, and pilots already running with no baseline.",
+    "replaced_by": [
+     "P8"
+    ],
+    "when": "More than three pilots run at once, or a renewal needs the numbers",
+    "ev": "verified",
+    "src": [
+     "Q-F10"
+    ]
+   }
+  },
+  "6": {
+   "own": "Platform lead, with procurement",
+   "first": "Pin the model version in every production use and keep a list of retirement dates.",
+   "eff": "Low to medium",
+   "mat": "Generally available",
+   "ev": "m",
+   "evl": "Model updates broke 24.7% to 47.2% of right answers in a lab test",
+   "b": [
+    "P6",
+    "P7",
+    "P10"
+   ],
+   "quick": {
+    "fix": "Pin the exact model ID, set Azure deployments to NoAutoUpgrade, and list each retirement date.",
+    "who": "Platform and architecture",
+    "effort": "4 hours",
+    "limit": "Chat apps where users cannot pin a model, and behaviour changes inside a pinned snapshot.",
+    "replaced_by": [
+     "P6",
+     "P7",
+     "P10"
+    ],
+    "when": "A pinned model is within 90 days of retirement",
+    "ev": "vendor",
+    "src": [
+     "Q-F11",
+     "Q-F12",
+     "Q-F13"
+    ]
+   }
+  },
+  "7": {
+   "own": "Finance lead and procurement",
+   "first": "Set hard spend caps per person, team and agent.",
+   "eff": "Low",
+   "mat": "Generally available",
+   "ev": "n",
+   "evl": "Not measured yet",
+   "b": [
+    "P6",
+    "P7",
+    "P8"
+   ],
+   "quick": {
+    "fix": "Set a hard monthly spend limit per OpenAI project and per user limits in Claude Enterprise.",
+    "who": "Finance",
+    "effort": "2 hours",
+    "limit": "Seat plans with fixed allowances that run out early, and cost per task.",
+    "replaced_by": [
+     "P6",
+     "P7",
+     "P8"
+    ],
+    "when": "Spend spans more than two vendors, or limits are hit monthly",
+    "ev": "vendor",
+    "src": [
+     "Q-F14",
+     "Q-F15"
+    ]
+   }
+  },
+  "8": {
+   "own": "Mostly the vendor",
+   "first": "Test your chatbot with anti-agreement instructions, and route crisis talk to people.",
+   "eff": "High for vendors",
+   "mat": "Partly available",
+   "ev": "m",
+   "evl": "Cut agreement with delusions by 73.8% in simulated chats",
+   "b": [
+    "P9",
+    "P10"
+   ],
+   "quick": {
+    "fix": "Add a shared custom instruction to say plainly when it disagrees, then spot-check ten answers a week.",
+    "who": "Team heads and HR",
+    "effort": "2 hours, then 30 minutes a week",
+    "limit": "Crisis conversations, which need a human route, and a model that ignores the instruction.",
+    "replaced_by": [
+     "P9",
+     "P10"
+    ],
+    "when": "The bot faces customers or vulnerable users",
+    "ev": "vendor",
+    "src": [
+     "Q-F16"
+    ]
+   }
+  },
+  "9": {
+   "own": "CIO and security lead",
+   "first": "List every agent in one register and rehearse switching one off.",
+   "eff": "Medium",
+   "mat": "Registers sold, standards early",
+   "ev": "n",
+   "evl": "Not measured yet",
+   "b": [
+    "P4",
+    "P5"
+   ],
+   "quick": {
+    "fix": "Export the Microsoft 365 Agent Registry into a register with an owner per agent, then rehearse Block.",
+    "who": "Security",
+    "effort": "4 hours",
+    "limit": "Agents built outside Microsoft 365, such as coding agents, scripts and other vendors.",
+    "replaced_by": [
+     "P4",
+     "P5"
+    ],
+    "when": "Agents exist on more than one platform",
+    "ev": "vendor",
+    "src": [
+     "Q-F17"
+    ]
+   }
+  },
+  "10": {
+   "own": "Team heads and HR",
+   "first": "Track changes per reviewer and cap incoming AI-written changes.",
+   "eff": "High",
+   "mat": "Tools sold, role design in research",
+   "ev": "v",
+   "evl": "Two studies disagree",
+   "b": [
+    "P8",
+    "P9"
+   ],
+   "quick": {
+    "fix": "Restrict pull request creation to collaborators on busy repos, and track reviews per reviewer weekly.",
+    "who": "Platform and architecture",
+    "effort": "2 hours",
+    "limit": "Internal AI-written changes from staff, who are collaborators already.",
+    "replaced_by": [
+     "P8",
+     "P9"
+    ],
+    "when": "Reviews per person rise for two months in a row",
+    "ev": "vendor",
+    "src": [
+     "Q-F18"
+    ]
+   }
+  },
+  "11": {
+   "own": "Platform lead",
+   "first": "Put hard rules in tool settings, not in the prompt.",
+   "eff": "Medium",
+   "mat": "Generally available",
+   "ev": "m",
+   "evl": "A recap won back about half of a 34-point drop in a lab test",
+   "b": [
+    "P4"
+   ],
+   "quick": {
+    "fix": "Move the three must-not rules from CLAUDE.md into Claude Code deny rules or a PreToolUse hook.",
+    "who": "Platform and architecture",
+    "effort": "3 hours",
+    "limit": "Lost decisions and facts in long chats, which are not rules.",
+    "replaced_by": [
+     "P4"
+    ],
+    "when": "The same rules are needed across several agent tools",
+    "ev": "vendor",
+    "src": [
+     "Q-F19",
+     "Q-F02"
+    ]
+   }
+  },
+  "12": {
+   "own": "Platform lead and procurement",
+   "first": "Route AI calls through a gateway with a tested fallback to a second provider.",
+   "eff": "Medium",
+   "mat": "Generally available",
+   "ev": "n",
+   "evl": "Not measured yet",
+   "b": [
+    "P6",
+    "P7"
+   ],
+   "quick": {
+    "fix": "Subscribe the on-call channel to vendor status pages and switch Bedrock to a cross-Region inference profile.",
+    "who": "Platform and architecture",
+    "effort": "3 hours",
+    "limit": "A full outage at one vendor, since there is no second provider.",
+    "replaced_by": [
+     "P6",
+     "P7"
+    ],
+    "when": "After the first outage that stops a business process",
+    "ev": "vendor",
+    "src": [
+     "Q-F20",
+     "Q-F21"
+    ]
+   }
+  },
+  "13": {
+   "own": "Mostly the vendor",
+   "first": "Test models on your own harmless but sensitive prompts before choosing filter levels.",
+   "eff": "Medium",
+   "mat": "Generally available",
+   "ev": "v",
+   "evl": "Vendor's own test only",
+   "b": [
+    "P6",
+    "P10"
+   ],
+   "quick": {
+    "fix": "Run 20 harmless but sensitive prompts before release and adjust Gemini safety settings only where needed.",
+    "who": "Platform and architecture",
+    "effort": "4 hours",
+    "limit": "Filters you cannot set, such as those in chat apps, and harmful requests that still pass.",
+    "replaced_by": [
+     "P6",
+     "P10"
+    ],
+    "when": "More than one model or filter is in use",
+    "ev": "vendor",
+    "src": [
+     "Q-F22"
+    ]
+   }
+  },
+  "14": {
+   "own": "CIO and procurement",
+   "first": "At the next renewal, add export, notice and no-silent-renewal terms.",
+   "eff": "Medium to high",
+   "mat": "Gateways sold, export weak",
+   "ev": "n",
+   "evl": "Not measured yet",
+   "b": [
+    "P5",
+    "P6",
+    "P7"
+   ],
+   "quick": {
+    "fix": "At renewal, send a contract letter asking for portability, knowledge transfer, clear licence terms and price transparency.",
+    "who": "Procurement and legal",
+    "effort": "6 hours",
+    "limit": "Prompts tuned to one model, which no contract can move.",
+    "replaced_by": [
+     "P5",
+     "P6",
+     "P7"
+    ],
+    "when": "The first renewal that the letter reaches",
+    "ev": "verified",
+    "src": [
+     "Q-F23",
+     "Q-F24"
+    ]
+   }
+  }
+ }
+}

@@ -2,7 +2,7 @@
 
 ## Canonical Repo
 
-- Work only in `C:\Users\viagr\Documents\Vinay\git\models-to-margins`
+- Work only in the `models-to-margins` git checkout (the folder that holds this file)
 - Do not edit the older copy under `C:\Users\viagr\Documents\Personal\models-to-margins`
 - Treat `https://models-to-margins.vinayagrw.workers.dev` as the current canonical public hostname
 - Keep internal links, raw-visual paths, iframe sources, and back links root-relative unless a task explicitly requires an absolute URL
@@ -63,6 +63,15 @@
 - Do not add public CTAs from app surfaces to `/visuals/procurement-ai/command-center.html`.
 - Standalone raw assets must link back to their owning brief or deep dive, never to a visual index.
 
+### Time study brief
+
+- `/briefs/time-spent-vs-time-saved` hosts `public/visuals/time-study/index.html?embed=1` with the AI-Led SDLC header and a size-to-content iframe. Source of the page is `time-study/index.html`, copy it over and keep the embed lines (back link, theme listener, embedded CSS).
+- `src/components/briefs/TimeRiver.astro` is the 3D background, the river of weeks. Data is `src/data/time-study/core-series.json` (copy of `time-study/research/24-core-series.json`). It uses the What Breaks boot in `scene3d.ts`, follows the site theme (palette swapped in place on `m2m:themechange`), and is off on phones, reduced motion, no WebGL and print. The frame is transparent, so the host sets the iframe `colorScheme` to the site theme, or Chrome paints it white. The brief header and every embedded `section` sit on a blurred panel (`--bg-start` 86% on the host, `--bg` 86% in the frame) so text clears 4.5:1 over the river. Measured 2026-10-27 on the built site with headless Chrome (software WebGL): start about 0.2 s, 60 fps while scrolling, reduced motion leaves no canvas. Contrast is checked by hiding text, screenshotting and sampling the background behind each text box.
+- Round 14 (2026-11-01) added the section "Where the law set the hours" (`section#law`, built by the viz7 script and `<style id="viz7">` in both copies). Every number on it traces to a Verified line in `time-study/research/30-policy-*.md` (the deep research notes and report, ledger in design doc section 24). Chart labels are DOM, not SVG text, so the layout gate measures them at 14px. Gate command: `LAYOUT_BASE=<static server> node scripts/layout-check.mjs /index.html --root='#law' --scene='section#law' --only=law --widths=375,1024,1440 --themes=light,dark`.
+- Round 15 (2026-11-01) is the whole-page pass (`<style id="r15">` and the r15 script in both copies, design doc section 25): 14px text floor including a runtime fit for SVG text, 42px tap targets, balanced headings, lone charts capped at 680px wide and neighbouring charts paired, swipe rows for long card grids on phones, prose in drawers. Whole-page gate: `npm run check:layout:time-study` (`--root=body --scene=section` on `/visuals/time-study/index.html`), 0 faults on 2026-11-01. The owner chose a page allowance over folding sections: `scripts/layout-allow.json` carries a `pageAllow` of 18 viewports at 1440 and 20 at 1024 for this page, with the reason, and the gate prints it at the top of the run (`--page-allow=1440:18,1024:20` does the same by hand). Adding a section means a cut elsewhere or a raised allowance written into design doc section 25. Do not add new SVG `<text>` smaller than 12 units, and keep new sections inside the r15 rules (the fit runs on every DOM change).
+- Round 16 (2026-11-01, design doc section 26): one shared year clock, `window.YearClock` (first script block in both copies), drives every chart in view from 1820 to 2076. Rules for anything bound to it: subscribe with the element that must be in view, change attributes and inline styles only while it plays (never rebuild DOM), update text through `firstChild.data`, no new timers (the clock owns the one `requestAnimationFrame` loop), and keep `active` false until the reader plays or scrubs so load states do not change. The r15 fit is skipped while `html[data-clock]` is set. Scrub surfaces use `YearClock.scrub(el, toYear)` and get `touch-action: pan-y`. The brief host (`time-spent-vs-time-saved.astro`) sizes the frame from the body box, never from the root scroll area, which can grow but never shrink. The river listens for `m2m:year` from the frame. New section `#forces` (force map) is built by the r16 forces block from the strength table in `time-study/reports/Forces on the saved hour.md`, notes in `time-study/research/31-forces-*.md`.
+- Round 17 (2026-11-01, design doc section 27) made Travel visible on the hero: a band thinner than 18 units gets a dot and leader in its own colour plus a DOM tag (`span.htag`, 14px, positioned by viewBox percentages over `div.hwrap`, hidden while the play clip has not reached it), every band is `.hband[data-k]` and lights up with its legend entry on hover or tap (`#herosvg[data-focus]`), and the `#hwake` chip ("Waking hours") drops Sleep and self and rescales the stack to 96 hours over a 500 ms tween that holds `html[data-clock="tween"]` so the r15 fit stays quiet, then dispatches `yc:pause`. `#wake=1` in the hash turns the view on for the gate (`--states=wake=1`). The hero card is a flex container, so anything wrapping its svg needs `flex:0 0 100%`.
+
 ## Do Not Regress
 
 - Do not reintroduce wrapped visual routes for governed procurement.
@@ -86,7 +95,7 @@
   - signal or thesis cards near the top
   - reading map / jump links
   - callouts for core thesis and framing
-  - collapsible `details/summary` sections for long ranked sections or source appendices
+  - collapsible `details/summary` sections for long ranked sections
   - styled grids for decision frameworks such as durable vs hype or learn / build / invest / avoid
 - Keep the prose factual and high-signal, but use design structure to improve navigation and scanability.
 - Reuse the shared article shell and shared CSS vocabulary; do not build one-off page-specific article layouts unless the page is intentionally immersive.
@@ -108,8 +117,25 @@
   - `.stack-list`
   - `.visual-frame` with `style="--vf-h:<px>"` for inline iframes
 - Keep section summaries and jump links useful, not decorative.
-- Long source sections should use collapsible blocks to keep the main reading flow clean.
+- Sources never appear on a page or in the UI (owner decision, 2026-10-23, applies to all future pages). Every source, footnote and numbered source list lives only in the page's design doc under `docs/` (its source ledger). On the page, each stat carries a short evidence tag instead: `verified 2026`, `vendor` or `illustrative`.
 - For named principles, keep visible terminology consistent across the markdown and every embedded visual. The harness-engineering deep dive uses "The Agentic Principle" everywhere visible to the reader; CSS class names that reference an older term are kept for stability but visible text never reintroduces it.
+
+### Operations floor (What Breaks in AI)
+
+- Main page (round 11, 2026-10-27, owner pick): `/deep-dives/what-breaks-in-ai`. `template: cinematic` in the frontmatter makes the `cinematic` branch of `src/pages/deep-dives/[slug].astro` render the compact header (eyebrow, title, summary, back link, chips), then the Markdown body (the note panel only), then `src/components/deep-dive/WhatBreaksFloor.astro` inside `article.wb-page.wbf-page`. The page is indexed. Class prefix `wbf-`.
+- The floor is a flat facilities schematic: stations on a belt drawn only from `arch_view.json` flows, each problem flagged at the first station whose block is in its `sol.json` list (the catch rule), a step-through with a drag scrubber, drawers for stations, blocks and problems, a Full map overlay, the search pipeline strip, the All parts by zone grid, the board wall (Hidden harm filter, objections card, dated events) and the team lanes.
+- Hash states: `view=floor|zones`, `map=target|week` (Full map overlay), `open=<station, block or problem id>`, `arch=interim`, `play=1..12`, `cell=<row>-<col>`. Hash jumps use `behavior: 'instant'`, because the site scrolls smoothly by default and two smooth jumps cancel each other.
+- Hero 3D (rounds 10i to 10l): the only 3D on the page is a dimmed scene of the four layer slabs and flowing dots behind the page header (`.wb-head`), from `what-breaks/scene3d.ts` (`can3d`, `startNear`, `makeWorld`, `runLoop`, `project`, `camEase`, `layerScene`, three.js pinned `0.169.0`, loaded only near view). Once it boots, the header gets `.wbf-hero3d.is-3d`. At 1024 and wider that adds a band of `clamp(220px, 28vh, 300px)` under the text, the camera fits itself to the slab stack (8 box corners projected, 16px spare, view offset into the band) on boot and resize, and the mask keeps only the text block clear. Below 1024 the scene is masked to the right of the summary. Phones under 768px, reduced motion, print and no WebGL get the plain header with no band and no reserved height.
+- All text is DOM, never drawn in a canvas. Any panel that sits over 3D needs `background: var(--spanel); backdrop-filter: blur(10px)` or a mask that keeps the text clear, or labels and blocks bleed through and read as overlapping text (round 9 lesson).
+- The floor is dark in both site themes (owner decision, 2026-10-26). The page shell around it follows the theme.
+- Charts never use scaled SVG `<text>`. The gate measures it as small text under 14px. Axis and month labels go in a DOM row under the chart.
+- Quick fixes this week come from the `quick` object on each problem in `drafts/deep/sol.json` (fact-checked in V11). Every quick fix names the target blocks that replace it. Never add a quick fix without an opened page and a V-check row.
+- Data comes from `src/data/what-breaks/*.json`, copied there by `drafts/deep/gen_site.py`. Edit the data or the generator, never the copies. `what-breaks/model.ts` shapes it once (catch data, frontier scores out of 9, hero numbers in `arch.json` `hero` with their own `ev`). Icon tones live in `what-breaks/iso-tones.css`. Hide the sprite with a zero-size box, never `display:none`.
+- Every headline number has its own `ev` in `drafts/deep/data.json` (`verified`, `vendor`, `unverified`), decided from the V9 fact check. The page renders that tag and never the source description. Never hard-code `verified`.
+- Gate: `LAYOUT_BASE=http://localhost:8733 node scripts/layout-check.mjs /deep-dives/what-breaks-in-ai --root=.wbf-page --scene='.wbf-view' --states=view=floor,arch=interim,open=check,open=P4,open=S1,open=F9,cell=2-3,play=1,play=6,play=7,play=12,open=S3,view=zones,map=target,map=week,open=S10 --widths=375,1024,1440 --themes=light,dark` against a static server on `dist` (`python3 -m http.server 8733 -d dist --bind 127.0.0.1`). The gate's headless Chrome has WebGL, so the hero band is measured. If one run comes back unstyled, restart the server and rerun.
+- Screenshots of the hero 3D: run Chrome with `--use-angle=swiftshader --enable-unsafe-swiftshader --ignore-gpu-blocklist`, wait 3.5 s after load, capture.
+- Astro compiler gotcha: a multi-line template literal in the frontmatter whose `${}` holds nested backticks closes the frontmatter early, and the whole template then compiles as text. Keep frontmatter templates on one line or concatenate strings.
+- Archive: the cinematic stage (`WhatBreaksStage.astro`), its `/present` deck, sample C (`WhatBreaksLiving.astro`, `sample-c.astro`) and the sample D shell are kept as files only in `archive/what-breaks-in-ai/` (outside `src`, not built, old URLs 404). Its README lists each file, and `model-before-r11.ts` holds the model before round 11 pruned the stage-only fields.
 
 ### Optional slide-deck sub-route
 
@@ -178,14 +204,14 @@ This section captures the active AI-led-SDLC content line so the next brief or d
   - Do not switch this host back to a pinned-viewport / iframe-owns-scroll model (that reverses an explicit product decision and reintroduces the double scrollbar).
 - Hero summary on the host stretches to full container width (`justify-self:stretch; max-width:100%; text-wrap:pretty`) so it wraps into the fewest lines instead of a narrow column — the hero grid is `justify-items:start`, so any prose that should run full-width needs the `justify-self:stretch` override.
 - Companion LinkedIn assets:
-  - `public/content/linkedin-the-margin-reckoning-post.md` — the developed "house" post (the voice/quality bar).
-  - `public/content/linkedin-the-margin-reckoning-options.md` — five alternate post shapes (short / story-led / CFO / concede-then-deny / counter-metric-led) for different audiences and posting moments.
-  - `public/content/linkedin-post-playbook.md` — writing rules (refreshed for 2026 distribution: interest-graph, dwell time, ≥15-word comment weight, saves, and the link/first-comment penalty). Now also carries reusable hook frameworks — **Concede-then-deny** ("AI genuinely accelerates three things. None of them is the margin.") and **Story-specificity beats the stat**.
+  - `docs/linkedin/posts/linkedin-the-margin-reckoning-post.md` — the developed "house" post (the voice/quality bar).
+  - `docs/linkedin/posts/linkedin-the-margin-reckoning-options.md` — five alternate post shapes (short / story-led / CFO / concede-then-deny / counter-metric-led) for different audiences and posting moments.
+  - `docs/linkedin/playbook.md` — writing rules (refreshed for 2026 distribution: interest-graph, dwell time, ≥15-word comment weight, saves, and the link/first-comment penalty). Now also carries reusable hook frameworks — **Concede-then-deny** ("AI genuinely accelerates three things. None of them is the margin.") and **Story-specificity beats the stat**.
 
 ### Source policy for this content line
 - **2026-dated sources only, with METR (2025) as the single deliberately-labelled exception** (the only published randomised trial on the question).
-- Widely-cited figures that lack a 2026 primary (e.g. the MIT ~95% pilot-failure stat) are **named inline as context, not added to the numbered source list.**
-- Interactive-panel magnitudes are labelled **illustrative**; cited hero/stat numbers must match the source they footnote (e.g. Faros hero = epics +66% / throughput +34%, not illustrative figures).
+- Widely-cited figures that lack a 2026 primary (e.g. the MIT ~95% pilot-failure stat) are **named inline as context, not added to the design doc's source ledger.**
+- Interactive-panel magnitudes are labelled **illustrative**; cited hero/stat numbers must match their source in the design doc ledger (e.g. Faros hero = epics +66% / throughput +34%, not illustrative figures).
 - Canonical 2026 source set already vetted: NVIDIA *State of AI 2026* (88% feel revenue lift / small-minority P&L), Deloitte *State of AI in the Enterprise 2026*, DORA *ROI of AI-Assisted Software Development 2026.01* (~39% Y1 ROI, 8-month payback, J-curve), Stack Overflow *Closing the AI trust gap, Feb 2026* (trust ~40%→29%, 66% fixing almost-right code), Faros *AI Engineering Report 2026 — Acceleration Whiplash* (22k devs; review time ~+200%; 31% more code ships unreviewed; churn +861%), plus METR 2025 (~19% slower vs. expectation).
 - **METR currency caveat (verified June 2026):** the "~19% slower" figure is the *2025* RCT and is now stale. METR's own early-2026 continuation (posts 2026-02-24 and 2026-05-11) narrowed the measured effect to ~−4% (CI −15% to +9%, not statistically significant) and concluded AI "likely provides productivity benefits." Do **not** state "~19% slower" as the current magnitude in new content. The durable, defensible claim is the **perception-vs-measurement gap** (developers' felt speedup ran ahead of the measured result in both cohorts) — anchor on that, not the size. `linkedin-...-options.md` Option 7 is the corrected reference build; Options 1–6 and the brief's perception-gap scene keep the 2025 figure but must be read as historical/2025-labelled.
 
@@ -198,7 +224,7 @@ This section captures the active AI-led-SDLC content line so the next brief or d
 - **Interactive decision/story patterns**: shipped as scene 14 (*The AI Dilemma* — meter-based pick-a-path) and scene 15 (*The Translation Story* — code-walkthrough storyline) of the brief; both are reusable patterns for future briefs (style cue from thegreatmodernization.pages.dev's interactive storyline).
 
 ### Editorial cues carried forward
-- Keep the credibility layer (footnote `sup.fn` markers → numbered source list + glossary links) on any brief making quantified claims.
+- Keep the credibility layer in the design doc: every quantified claim on a page maps to a row in the doc's source ledger. Pages show evidence tags and glossary links, not footnote markers or source lists. Existing published pages keep their current source lists unless a task asks to remove them.
 - Keep the exec scannability layer (TL;DR band, dot-nav, counter-metric pairs) — it is what makes these briefs CFO-readable.
 - Interactive scene controls must carry real a11y wiring. Tabbed walkthroughs (e.g. scene 15's code story) use `role="tab"`/`role="tablist"` triggers paired to `role="tabpanel"` panels via matching `id` ↔ `aria-controls` ↔ `aria-labelledby`, with `tabindex="0"` on panels and `aria-selected` tracking the active tab. Animated count-ups and width fills must guarantee final values even if rAF is throttled — every rAF tween needs a `setTimeout(settle, dur+~300ms)` fallback (the canonical `runCount` pattern), so a reader who scrolls away mid-animation still lands on the true number.
 - New `.reveal` / `[data-count]` / `[data-w]` elements auto-wire into the existing IntersectionObserver; new scenes only need a unique `id` and a matching `NAV` entry to join the dot-nav. Scene order in the DOM must match the `NAV` array order.
@@ -210,7 +236,26 @@ This section captures the active AI-led-SDLC content line so the next brief or d
 
 ## Validation
 
-- Run `npm run build` from `C:\Users\viagr\Documents\Vinay\git\models-to-margins` before closing the task
+- Run `npm run build` from the repo root before closing the task
+- If the change touches any page layout, run the layout gate (see Layout Gate) on the rendered page and fix every fault before closing the task
 - If the change touches theme, metadata, routing, visibility, or raw visuals, verify the affected pages after the build
 - If the change touches visibility, verify `/admin/visibility` and any affected discovery surfaces after the build
 - If the change touches long-form Markdown content, inspect the built HTML for malformed list rendering, broken `details/summary` blocks, or encoding artifacts
+
+## Layout Gate
+
+No page is done until `scripts/layout-check.mjs` passes on the rendered, assembled page. Checking sideways overflow and font size alone is not enough.
+
+- Command (dev server running): `npm run check:layout -- <path> --root=<page root selector> --scene='<scene selector>' --readers=<list>`
+- It runs at 375, 1024 and 1440 wide, light and dark, once per reader.
+- Interactive states are measured too: pass `--states=<hash part>,<hash part>` so every step, tab or opened drawer is checked, not only the first view.
+- Exceptions: a budget may be raised only where the owner asked for it, and only in `scripts/layout-allow.json`, keyed by page path with a reason. The gate applies it for every caller and prints it at the top of the run. For the payouts desk, run `npm run check:layout:payouts`.
+- Budgets:
+  - Line breaks: last line of a heading or label at least 20% of its box. Labels under 8 words on at most 2 lines. No mid-word breaks. No line that starts with a full stop or comma. Headings `text-wrap: balance`, body `text-wrap: pretty`.
+  - Empty space: a panel over 220px tall is at most 35% empty at the bottom or right. Content uses at least 60% of the width at 1024 and above. Cards in a row within 25% of each other in height.
+  - Length: a screen is at most 1.5 viewports at 1440, 2.5 at 1024 and 4 at 375. A page is at most 9, 14 and 22 viewports. At most 1,800 visible words per reader.
+  - Crowding: text at least 8px from edges, no overlapping text, tap targets 42px, text 14px, no sideways overflow.
+- Design to pass: one shared grid and fixed card sizes, one main visual per screen, detail in drawers or `details` blocks, no reserved `min-height` for content that may not appear.
+- Anyone who builds or fixes one screen runs the gate on that screen before handing back.
+- A review finding that adds content must name what it removes, so the page stays inside the budgets.
+- If a rule gives a false positive, fix the rule in the script and say so. Do not ignore the report.

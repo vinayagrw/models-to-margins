@@ -1,0 +1,374 @@
+<section class="acx-scene" id="acx-s1" aria-labelledby="acx-s1-h">
+  <header class="acx-head"><span class="acx-num">01</span><h2 id="acx-s1-h">The stack, and how money moves through it</h2>
+    <p class="acx-dek" data-for="leader">Every agent payment crosses the same layers. Pick a use case, then trace a path.</p>
+    <p class="acx-dek" data-for="architect">Protocols on the layers they cover, styled by status, with each flow hop traced.</p></header>
+  <div class="s1-ctl-row">
+    <div class="s1-ctl"><span class="s1-lab" id="acx-s1-ul">Use case</span><div class="acx-seg" role="group" aria-labelledby="acx-s1-ul" data-s1-seg="use"></div></div>
+    <div class="s1-ctl"><span class="s1-lab" id="acx-s1-fl">Path</span><div class="acx-seg" role="group" aria-labelledby="acx-s1-fl" data-s1-seg="flow"></div></div>
+  </div>
+  <div class="acx-split s1-split">
+    <div class="acx-card s1-stage">
+      <div class="s1-scroll">
+        <div class="s1-grid">
+          <div class="s1-tpl s1-heads">
+            <div class="s1-legend" aria-hidden="true"></div>
+          </div>
+          <div class="s1-tpl s1-lane">
+            <div class="s1-lkey"><a class="acx-btn s1-out" href="/deep-dives/agentic-payouts-desk">Supplier payouts <span aria-hidden="true">&rarr;</span></a></div>
+            <div class="s1-arcs"></div>
+          </div>
+          <div class="s1-rows"></div>
+        </div>
+      </div>
+      <div class="s1-tip" role="tooltip" id="acx-s1-tip" hidden></div>
+    </div>
+    <aside class="acx-card acx-panel s1-panel" aria-label="Payment path and protocol detail">
+      <div class="s1-path">
+        <p class="acx-k s1-path-k"></p>
+        <ol class="s1-steps"></ol>
+      </div>
+      <div class="s1-drawer" aria-live="polite"></div>
+    </aside>
+  </div>
+</section>
+<style id="acx-s1-css">
+#acx-s1 .s1-ctl-row{display:flex; flex-wrap:wrap; align-items:center; gap:12px 22px; margin:0 0 16px}
+#acx-s1 .s1-ctl{display:flex; align-items:center; gap:10px; flex-wrap:wrap; min-width:0}
+#acx-s1 .s1-lab{font-family:var(--acx-mono); font-size:14px; color:var(--acx-ink3); text-transform:uppercase; letter-spacing:.05em}
+#acx-s1 .s1-out{background:transparent; padding:0 14px; border-style:dashed; color:var(--acx-ink2); font-weight:500}
+#acx-s1 .s1-out:hover{color:var(--acx-accent); border-color:var(--acx-accent)}
+#acx-s1 .s1-split{grid-template-columns:minmax(0,1fr)}
+@media (min-width:1400px){ #acx-s1 .s1-split{grid-template-columns:minmax(0,1fr) 300px} }
+#acx-s1 .s1-stage{position:relative; padding:14px 14px 16px; min-width:0}
+#acx-s1 .s1-scroll{overflow-x:auto; overscroll-behavior-x:contain}
+#acx-s1 .s1-grid{--nc:236px; --cw:88px; position:relative}
+#acx-s1 .s1-tpl{display:grid; grid-template-columns:var(--nc) repeat(var(--n,7), var(--cw)); align-items:center}
+
+/* column heads: the layers of the stack */
+#acx-s1 .s1-heads{align-items:end}
+#acx-s1 .s1-legend{align-self:center; display:grid; grid-template-columns:auto auto; gap:6px 14px; justify-content:start; padding:0 8px 0 12px}
+#acx-s1 .s1-key{display:flex; align-items:center; gap:7px; font-size:14px; color:var(--acx-ink2); white-space:nowrap}
+#acx-s1 .s1-key i{flex:none; display:block; width:22px; height:12px; border-radius:3px}
+#acx-s1 .s1-head{position:relative; display:flex; flex-direction:column; align-items:center; gap:0; width:var(--cw); min-height:42px; padding:0 0 6px; border:0; background:none; cursor:pointer; text-align:center; border-radius:10px}
+#acx-s1 .s1-head::after{content:""; position:absolute; left:22px; right:22px; bottom:0; height:3px; border-radius:2px; background:var(--lc, var(--acx-line2))}
+#acx-s1 .s1-head[aria-pressed="true"]{outline:2px solid var(--acx-accent); outline-offset:-1px}
+#acx-s1 .s1-hl{display:block; margin:0 -3px; font-size:14px; line-height:1.2; font-weight:600; color:var(--acx-ink); text-wrap:balance}
+#acx-s1 .s1-hc{display:block; font-family:var(--acx-mono); font-size:14px; line-height:1.2; color:var(--acx-ink3); padding-top:2px}
+
+/* flow lane */
+#acx-s1 .s1-lane{margin:4px 0 2px}
+#acx-s1 .s1-lkey{display:flex; align-items:center; gap:8px; padding:0 8px 0 12px; font-size:14px; color:var(--acx-ink2)}
+#acx-s1 .s1-arcs{grid-column:2 / -1; height:76px}
+#acx-s1 .s1-arcs svg{display:block; overflow:visible}
+#acx-s1 .s1-base{stroke:var(--acx-line2); stroke-width:1}
+#acx-s1 .s1-arc{fill:none; stroke:var(--acx-accent); stroke-width:2; stroke-linecap:round}
+#acx-s1 .s1-skip{fill:var(--acx-panel); stroke:var(--acx-line2); stroke-width:1.5}
+#acx-s1 .s1-badge circle{fill:var(--acx-accent); stroke:var(--acx-panel); stroke-width:2}
+#acx-s1 .s1-badge text{fill:var(--acx-on-accent); font-family:var(--acx-mono); font-size:14px; font-weight:600}
+#acx-s1 .s1-badge.is-hot circle{fill:var(--acx-ink)}
+#acx-s1 .s1-badge.is-hot text{fill:var(--acx-bg)}
+
+/* protocol rows */
+#acx-s1 .s1-grp + .s1-grp{margin-top:6px; padding-top:4px; border-top:1px solid var(--acx-line)}
+#acx-s1 .s1-gl{font-family:var(--acx-mono); font-size:14px; line-height:1.2; color:var(--acx-ink3); text-transform:uppercase; letter-spacing:.05em; padding:4px 0 2px 16px; width:max-content}
+#acx-s1 .s1-grp.is-quiet .s1-nm{font-weight:500; color:var(--acx-ink2)}
+#acx-s1 .s1-grp.is-quiet .s1-cell.on i{height:12px}
+#acx-s1 .s1-row{width:100%; min-height:42px; margin:0; padding:0; border:0; background:transparent; color:inherit; text-align:left; cursor:pointer; border-radius:10px; position:relative; transition:opacity .25s ease}
+#acx-s1 .s1-row:hover{background:color-mix(in srgb, var(--acx-sunk) 70%, transparent)}
+#acx-s1 .s1-row:focus-visible{outline:2px solid var(--acx-accent); outline-offset:-2px}
+#acx-s1 .s1-row[aria-pressed="true"]{outline:2px solid var(--acx-accent); outline-offset:-2px}
+#acx-s1 .s1-name{position:relative; display:flex; align-items:center; gap:8px; padding:0 10px 0 16px; min-width:0; align-self:stretch}
+#acx-s1 .s1-row.is-path .s1-name::before{content:""; position:absolute; left:5px; top:12px; bottom:12px; width:4px; border-radius:2px; background:var(--acx-accent)}
+#acx-s1 .s1-nm{flex:1 1 auto; min-width:0; font-size:15px; font-weight:600; line-height:1.15; color:var(--acx-ink)}
+#acx-s1 .s1-name .acx-chip{flex:none}
+#acx-s1 .s1-cell{display:flex; align-items:center; justify-content:center; height:100%}
+#acx-s1 .s1-cell i{display:block; width:6px; height:6px; border-radius:50%; background:var(--acx-line)}
+#acx-s1 .s1-cell.on i{width:62px; height:16px; border-radius:4px; box-sizing:border-box}
+#acx-s1 .s1-row.is-dim{opacity:.42}
+#acx-s1 .s1-row.is-fade{opacity:.28}
+
+/* status glyphs: colour plus fill shape, so status never rests on colour alone */
+#acx-s1 [data-m="Live"] .on i, #acx-s1 .s1-key[data-m="Live"] i{background:var(--acx-live)}
+#acx-s1 [data-m="Pilot"] .on i, #acx-s1 .s1-key[data-m="Pilot"] i{background:linear-gradient(90deg, var(--acx-pilot) 0 50%, transparent 50%); box-shadow:inset 0 0 0 2px var(--acx-pilot)}
+#acx-s1 [data-m="Spec"] .on i, #acx-s1 .s1-key[data-m="Spec"] i{background:transparent; box-shadow:inset 0 0 0 2px var(--acx-spec)}
+#acx-s1 [data-m="Unsettled"] .on i, #acx-s1 .s1-key[data-m="Unsettled"] i{background:transparent; border:2px dashed var(--acx-unset)}
+#acx-s1 [data-m="Absent"] .on i, #acx-s1 .s1-key[data-m="Absent"] i{background:transparent; box-shadow:inset 0 0 0 1px var(--acx-ink3)}
+#acx-s1 .s1-key i{box-sizing:border-box}
+#acx-s1 .s1-key-path i{width:4px; height:16px; border-radius:2px; background:var(--acx-accent)}
+
+/* layer tooltip */
+#acx-s1 .s1-tip{position:absolute; z-index:5; width:250px; padding:10px 12px; border-radius:var(--acx-r-sm); background:var(--acx-ink); color:var(--acx-bg); font-size:14px; line-height:1.4; box-shadow:var(--acx-shadow); pointer-events:none}
+
+/* panel: steps then the protocol drawer */
+#acx-s1 .s1-panel{gap:16px}
+#acx-s1 .s1-steps{list-style:none; margin:6px 0 0; padding:0; display:flex; flex-direction:column; gap:0}
+#acx-s1 .s1-step{display:grid; grid-template-columns:24px 1fr; gap:10px; align-items:start; padding:2px 0; border-radius:8px}
+#acx-s1 .s1-step-n{display:grid; place-items:center; width:24px; height:24px; border-radius:50%; background:var(--acx-accent); color:var(--acx-on-accent); font-family:var(--acx-mono); font-size:14px; line-height:1}
+#acx-s1 .s1-step p{font-size:14px; line-height:1.3; color:var(--acx-ink2); text-wrap:balance}
+#acx-s1 .s1-step b{color:var(--acx-ink); font-weight:600}
+#acx-s1 .s1-step.is-hot .s1-step-n{background:var(--acx-ink); color:var(--acx-bg)}
+#acx-s1 .s1-drawer{display:flex; flex-direction:column; gap:12px; border-top:1px solid var(--acx-line); padding-top:14px}
+#acx-s1 .s1-dh{display:flex; align-items:center; gap:12px}
+#acx-s1 .s1-dh h3{font-size:20px; line-height:1.2}
+#acx-s1 .s1-kt{font-family:var(--acx-mono); font-size:14px; font-weight:500; color:var(--acx-ink3); text-transform:uppercase; letter-spacing:.05em; margin-left:6px}
+#acx-s1 .s1-full{font-size:14px; line-height:1.4; color:var(--acx-ink3); text-wrap:balance; margin-top:-4px}
+#acx-s1 .s1-stat{display:flex; flex-direction:column; gap:2px}
+#acx-s1 .s1-su{display:grid; grid-template-columns:minmax(0,1fr) auto; gap:0 10px; align-items:center; padding:3px 10px; border-radius:var(--acx-r-sm); border:1px solid transparent}
+#acx-s1 .s1-su.is-on{border-color:var(--acx-line2); background:var(--acx-sunk); padding:8px 10px}
+#acx-s1 .s1-su-n{font-size:14px; line-height:1.3; color:var(--acx-ink2)}
+#acx-s1 .s1-su-m{grid-column:1 / -1; display:flex; flex-wrap:wrap; gap:4px 10px; font-family:var(--acx-mono); font-size:14px; color:var(--acx-ink3)}
+#acx-s1 .s1-line{font-size:15px; line-height:1.45; color:var(--acx-ink); text-wrap:balance}
+#acx-s1 .s1-gap{padding-left:12px; border-left:3px solid var(--acx-pain)}
+#acx-s1 .s1-gap p{font-size:15px; line-height:1.4; color:var(--acx-ink2); text-wrap:balance}
+#acx-s1 .s1-params{display:grid; grid-template-columns:minmax(0,1fr); gap:0; margin:0}
+#acx-s1 .s1-params dt{font-size:14px; line-height:1.3; color:var(--acx-ink3); margin-top:7px}
+#acx-s1 .s1-params dt:first-child{margin-top:0}
+#acx-s1 .s1-params dd{margin:0; font-size:15px; line-height:1.3; color:var(--acx-ink); text-wrap:balance}
+
+@media (min-width:700px) and (max-width:1399px){
+  #acx-s1 .s1-panel{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.9fr); gap:16px 24px; align-items:start}
+  #acx-s1 .s1-params{grid-template-columns:150px minmax(0,1fr); gap:6px 14px}
+  #acx-s1 .s1-params dt{margin-top:0}
+  #acx-s1 .s1-drawer{border-top:0; padding-top:0; border-left:1px solid var(--acx-line); padding-left:22px}
+}
+@media (max-width:699px){
+  #acx-s1 .s1-grid{--nc:132px}
+  #acx-s1 .acx-seg{border-radius:20px}
+  #acx-s1 .acx-seg button{padding:0 10px}
+  #acx-s1 .s1-stage::after{content:""; position:absolute; top:14px; bottom:16px; right:14px; width:18px; pointer-events:none; background:linear-gradient(90deg, transparent, var(--acx-panel))}
+  #acx-s1 .s1-legend{grid-template-columns:auto; padding-left:8px}
+  #acx-s1 .s1-legend, #acx-s1 .s1-lkey, #acx-s1 .s1-name{position:sticky; left:0; z-index:2; background:var(--acx-panel)}
+  #acx-s1 .s1-legend{align-self:stretch; align-content:center; padding-top:10px; padding-bottom:10px}
+  #acx-s1 .s1-lkey{align-self:stretch}
+  #acx-s1 .s1-row{min-height:48px}
+  #acx-s1 .s1-name{padding:0 8px 0 14px}
+  #acx-s1 .s1-row.is-path .s1-name::before{left:4px}
+  #acx-s1 .s1-nm{font-size:14px}
+  #acx-s1 .s1-name .acx-chip{display:none}
+}
+@media (min-width:700px) and (max-width:1399px){
+  #acx-s1 .s1-su{grid-template-columns:minmax(0,1fr) auto auto}
+  #acx-s1 .s1-su .acx-chip{grid-column:3; grid-row:1}
+  #acx-s1 .s1-su-m{grid-column:2; grid-row:1}
+}
+@media (min-width:1400px){
+  #acx-s1 .s1-line{font-size:14px}
+  #acx-s1 .s1-panel{gap:12px}
+  #acx-s1 .s1-drawer{gap:10px; padding-top:12px}
+}
+</style>
+<script>ACX.scene('s1', function (el, A) {
+  'use strict';
+  var D = A.data || {};
+  var L = D.layers || [], U = D.usecases || [], P = D.protocols || [], F = D.flows || [];
+  var PM = {}; (D.params || []).forEach(function (p) { PM[p.id] = p; });
+  var LI = {}; L.forEach(function (l, i) { LI[l.id] = i; });
+  var RANK = { Live: 0, Pilot: 1, Spec: 2, Unsettled: 3, Absent: 4 };
+  var STATUSES = ['Live', 'Pilot', 'Spec', 'Unsettled', 'Absent'];
+  var KIND_ORDER = ['commerce', 'trust', 'payment', 'rail'];
+  var PARAMS = { leader: ['P1', 'P4', 'P6', 'P7', 'P9'], architect: ['P3', 'P4', 'P5', 'P11', 'P12'] };
+  var esc = A.esc;
+  var $ = function (s) { return el.querySelector(s); };
+  var grid = $('.s1-grid'), heads = $('.s1-heads'), rowsEl = $('.s1-rows'), arcsEl = $('.s1-arcs');
+  var stepsEl = $('.s1-steps'), pathK = $('.s1-path-k'), drawer = $('.s1-drawer'), tip = $('.s1-tip'), stage = $('.s1-stage');
+  grid.style.setProperty('--n', L.length || 1);
+
+  function has(list, id) { return list.some(function (x) { return x.id === id; }); }
+  function stat(p, u) { var s = (p.status || {})[u]; return s && s.m ? s : { m: 'Absent' }; }
+  function defaultP(u) {
+    var best = null, br = 99;
+    P.forEach(function (p) { var r = RANK[stat(p, u).m]; if (r === undefined) r = 5; if (r < br) { br = r; best = p; } });
+    return best ? best.id : (P[0] && P[0].id);
+  }
+  var st = {
+    use: has(U, A.get('use')) ? A.get('use') : (U[0] && U[0].id),
+    flow: has(F, A.get('flow')) ? A.get('flow') : (F[0] && F[0].id),
+    p: null, pSet: false, layer: null
+  };
+  if (has(P, A.get('p'))) { st.p = A.get('p'); st.pSet = true; } else st.p = defaultP(st.use);
+
+  /* segmented controls */
+  function seg(k, items) {
+    var box = el.querySelector('[data-s1-seg="' + k + '"]');
+    box.innerHTML = items.map(function (it) { return '<button type="button" data-v="' + esc(it.id) + '" aria-pressed="false">' + esc(it.name) + '</button>'; }).join('');
+    box.addEventListener('click', function (e) { var b = e.target.closest('button[data-v]'); if (b) A.set(k, b.dataset.v); });
+    return box;
+  }
+  var segUse = seg('use', U), segFlow = seg('flow', F);
+  function pressSeg(box, v) { box.querySelectorAll('button').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.v === v)); }); }
+
+  /* legend */
+  $('.s1-legend').innerHTML = STATUSES.map(function (m) { return '<span class="s1-key" data-m="' + m + '"><i></i>' + m + '</span>'; }).join('') +
+    '<span class="s1-key s1-key-path"><i></i>On path</span>';
+
+  /* layer heads */
+  heads.insertAdjacentHTML('beforeend', L.map(function (l) {
+    var n = String(l.id).replace(/\D/g, '');
+    return '<button type="button" class="s1-head" data-l="' + esc(l.id) + '" aria-pressed="false" aria-describedby="acx-s1-tip" style="--lc:var(--acx-l' + n + ')">' +
+      A.icon(l.icon, l.tone, 'hero') + '<span class="s1-hc">' + esc(l.id) + '</span><span class="s1-hl">' + esc(l.name) + '</span></button>';
+  }).join(''));
+
+  /* protocol rows grouped by kind */
+  /* protocols that carry a payment first, enablers (trust kind, MCP, A2A) after as a quieter group */
+  function isEnabler(p) { return (p.kind === 'trust' && p.id !== 'ap2') || p.id === 'mcp' || p.id === 'a2a'; }
+  var kinds = KIND_ORDER.filter(function (k) { return P.some(function (p) { return p.kind === k; }); });
+  P.forEach(function (p) { if (kinds.indexOf(p.kind) < 0) kinds.push(p.kind); });
+  var groups = [{ id: 'pay', items: [] }, { id: 'en', items: [], quiet: true }];
+  kinds.forEach(function (k) { P.forEach(function (p) { if (p.kind === k) groups[isEnabler(p) ? 1 : 0].items.push(p); }); });
+  rowsEl.innerHTML = groups.filter(function (g) { return g.items.length; }).map(function (g) {
+    return '<div class="s1-grp' + (g.quiet ? ' is-quiet' : '') + '">' + (g.quiet ? '<p class="s1-gl">Enablers, no payment</p>' : '') + g.items.map(function (p) {
+      var on = {}; (p.layers || []).forEach(function (x) { on[x] = 1; });
+      return '<button type="button" class="s1-row s1-tpl" data-p="' + esc(p.id) + '" aria-pressed="false">' +
+        '<span class="s1-name"><span class="s1-nm">' + esc(p.name) + '</span><span class="s1-chip"></span></span>' +
+        L.map(function (l) { return '<span class="s1-cell' + (on[l.id] ? ' on' : '') + '" aria-hidden="true"><i></i></span>'; }).join('') +
+        '<span class="acx-sr"> covers ' + esc((p.layers || []).join(', ')) + '</span></button>';
+    }).join('') + '</div>';
+  }).join('');
+  var rowEls = [].slice.call(rowsEl.querySelectorAll('.s1-row'));
+  rowsEl.addEventListener('click', function (e) {
+    var b = e.target.closest('.s1-row'); if (!b) return;
+    st.pSet = true; A.set('p', b.dataset.p);
+  });
+
+  /* layer heads: hover or focus shows the layer line, click pins a layer and fades protocols that skip it */
+  function layerText(l) { return A.reader === 'architect' ? (l.arch || l.one) : (l.one || l.arch); }
+  function showTip(btn) {
+    var l = L[LI[btn.dataset.l]]; if (!l) return;
+    tip.textContent = layerText(l);
+    tip.hidden = false;
+    var sr = stage.getBoundingClientRect(), br = btn.getBoundingClientRect();
+    var x = br.left - sr.left + br.width / 2 - 125;
+    x = Math.max(8, Math.min(x, sr.width - 258));
+    tip.style.left = x + 'px'; tip.style.top = (br.bottom - sr.top + 6) + 'px';
+  }
+  function hideTip() { if (st.layer) { var b = heads.querySelector('[data-l="' + st.layer + '"]'); if (b) { showTip(b); return; } } tip.hidden = true; }
+  heads.addEventListener('pointerover', function (e) { var b = e.target.closest('.s1-head'); if (b) showTip(b); });
+  heads.addEventListener('pointerout', function (e) { var b = e.target.closest('.s1-head'); if (b && !b.contains(e.relatedTarget)) hideTip(); });
+  heads.addEventListener('focusin', function (e) { var b = e.target.closest('.s1-head'); if (b) showTip(b); });
+  heads.addEventListener('focusout', hideTip);
+  heads.addEventListener('click', function (e) {
+    var b = e.target.closest('.s1-head'); if (!b) return;
+    st.layer = st.layer === b.dataset.l ? null : b.dataset.l;
+    paintRows(); if (st.layer) showTip(b); else tip.hidden = true;
+  });
+  el.querySelector('.s1-scroll').addEventListener('scroll', function () { tip.hidden = true; }, { passive: true });
+
+  function paintRows() {
+    var flow = F.filter(function (f) { return f.id === st.flow; })[0];
+    rowEls.forEach(function (r) {
+      var p = P.filter(function (x) { return x.id === r.dataset.p; })[0];
+      var s = stat(p, st.use);
+      r.dataset.m = s.m;
+      r.querySelector('.s1-chip').innerHTML = A.chip(s.m);
+      r.classList.toggle('is-dim', s.m === 'Absent');
+      r.classList.toggle('is-fade', !!st.layer && (p.layers || []).indexOf(st.layer) < 0);
+      r.classList.toggle('is-path', !!flow && p.flow === flow.id);
+      r.setAttribute('aria-pressed', String(p.id === st.p));
+      r.setAttribute('aria-label', p.name + ', ' + s.m + ' for ' + useName(st.use) + ', covers ' + (p.layers || []).join(' ') + (flow && p.flow === flow.id ? ', on the ' + flow.name + ' path' : ''));
+    });
+    heads.querySelectorAll('.s1-head').forEach(function (h) { h.setAttribute('aria-pressed', String(h.dataset.l === st.layer)); });
+  }
+  function useName(u) { var x = U.filter(function (y) { return y.id === u; })[0]; return x ? x.name : u; }
+
+  /* the payment path: an arc diagram over the layer columns, rightward hops above, backward hops below */
+  var CW = 88, BY = 39, R = 11;
+  function arcsSvg(flow) {
+    var steps = (flow && flow.steps) || [], n = L.length, W = n * CW;
+    var at = {}; steps.forEach(function (s, i) { (at[s.layer] = at[s.layer] || []).push(i); });
+    var pos = steps.map(function (s, i) {
+      var li = LI[s.layer]; if (li === undefined) return null;
+      var list = at[s.layer], k = list.indexOf(i), off = (k - (list.length - 1) / 2) * (2 * R + 4);
+      return { x: li * CW + CW / 2 + off, y: BY };
+    });
+    var out = '<svg width="' + W + '" height="76" viewBox="0 0 ' + W + ' 76" role="img" aria-label="' + esc((flow ? flow.name : '') + ' path across the layers') + '">';
+    out += '<line class="s1-base" x1="' + (CW / 2) + '" y1="' + BY + '" x2="' + (W - CW / 2) + '" y2="' + BY + '"/>';
+    L.forEach(function (l, i) { if (!at[l.id]) out += '<circle class="s1-skip" cx="' + (i * CW + CW / 2) + '" cy="' + BY + '" r="5"/>'; });
+    for (var i = 1; i < pos.length; i++) {
+      var a = pos[i - 1], b = pos[i]; if (!a || !b) continue;
+      var dx = b.x - a.x, span = Math.abs(dx) / CW;
+      var ry = Math.min(30, 13 + span * 4), rx = Math.max(Math.abs(dx) / 2, 1);
+      var d = 'M' + a.x.toFixed(1) + ' ' + a.y + ' A' + rx.toFixed(1) + ' ' + ry.toFixed(1) + ' 0 0 1 ' + b.x.toFixed(1) + ' ' + b.y;
+      out += '<path class="s1-arc" data-i="' + i + '" d="' + d + '"/>';
+    }
+    pos.forEach(function (p, i) {
+      if (!p) return;
+      out += '<g class="s1-badge" data-i="' + i + '"><title>' + esc((i + 1) + ' ' + steps[i].actor + ': ' + steps[i].msg) + '</title><circle cx="' + p.x.toFixed(1) + '" cy="' + p.y + '" r="' + R + '"/>' +
+        '<text x="' + p.x.toFixed(1) + '" y="' + (p.y + 5) + '" text-anchor="middle">' + (i + 1) + '</text></g>';
+    });
+    return out + '</svg>';
+  }
+  var played = false;
+  function animateArcs() {
+    if (A.still || !arcsEl.animate) return;
+    var svg = arcsEl.querySelector('svg'); if (!svg) return;
+    var STEP = 200;
+    svg.querySelectorAll('.s1-badge').forEach(function (g) {
+      var i = +g.dataset.i;
+      g.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 220, delay: i * STEP, easing: 'ease-out', fill: 'backwards' });
+    });
+    svg.querySelectorAll('.s1-arc').forEach(function (p) {
+      var i = +p.dataset.i, len = p.getTotalLength ? p.getTotalLength() : 200;
+      p.animate([{ strokeDasharray: len + ' ' + len, strokeDashoffset: len }, { strokeDasharray: len + ' ' + len, strokeDashoffset: 0 }],
+        { duration: STEP + 40, delay: (i - 1) * STEP + 120, easing: 'ease-in-out', fill: 'backwards' });
+    });
+  }
+  function paintFlow(animate) {
+    var flow = F.filter(function (f) { return f.id === st.flow; })[0];
+    arcsEl.innerHTML = arcsSvg(flow);
+    pathK.textContent = flow ? flow.name : '';
+    stepsEl.innerHTML = ((flow && flow.steps) || []).map(function (s, i) {
+      return '<li class="s1-step" data-i="' + i + '"><span class="s1-step-n" aria-hidden="true">' + (i + 1) + '</span><p><b>' + esc(s.actor) + '</b> ' + esc(s.msg) + '</p></li>';
+    }).join('');
+    if (animate) animateArcs();
+  }
+  stepsEl.addEventListener('pointerover', function (e) { hot(e.target.closest('.s1-step')); });
+  stepsEl.addEventListener('pointerleave', function () { hot(null); });
+  arcsEl.addEventListener('pointerover', function (e) { hot(e.target.closest('.s1-badge')); });
+  arcsEl.addEventListener('pointerleave', function () { hot(null); });
+  function hot(node) {
+    var i = node ? node.dataset.i : null;
+    el.querySelectorAll('.s1-badge, .s1-step').forEach(function (x) { x.classList.toggle('is-hot', x.dataset.i === i); });
+  }
+
+  /* drawer */
+  function paintDrawer() {
+    var p = P.filter(function (x) { return x.id === st.p; })[0]; if (!p) { drawer.innerHTML = ''; return; }
+    var arch = A.reader === 'architect';
+    var stats = U.map(function (u) {
+      var s = stat(p, u.id);
+      var meta = (s.as_of ? '<span>' + esc(s.as_of) + '</span>' : '') + (s.ev ? A.ev(s.ev) : '');
+      return '<div class="s1-su' + (u.id === st.use ? ' is-on' : '') + '"><span class="s1-su-n">' + esc(u.name) + '</span>' + A.chip(s.m) +
+        (meta ? '<span class="s1-su-m">' + meta + '</span>' : '') + '</div>';
+    }).join('');
+    var params = (PARAMS[arch ? 'architect' : 'leader']).filter(function (k) { return p.params && p.params[k]; }).map(function (k) {
+      return '<dt>' + esc(PM[k] ? PM[k].name : k) + '</dt><dd>' + esc(p.params[k]) + '</dd>';
+    }).join('');
+    drawer.innerHTML =
+      '<div class="s1-dh">' + A.icon(p.icon, p.tone) + '<h3>' + esc(p.name) + (p.kind ? ' <span class="s1-kt">' + esc(p.kind) + '</span>' : '') + '</h3></div>' +
+      '<p class="s1-full">' + esc(p.full || '') + (p.owner ? '. ' + esc(p.owner) : '') + '</p>' +
+      '<div class="s1-stat" role="list" aria-label="Status by use case">' + stats + '</div>' +
+      '<p class="s1-line">' + esc(arch ? (p.arch || p.one) : (p.one || p.arch)) + '</p>' +
+      (p.gaps ? '<div class="s1-gap"><span class="acx-sr">Gaps: </span><p>' + esc(p.gaps) + '</p></div>' : '') +
+      (params ? '<dl class="s1-params">' + params + '</dl>' : '');
+  }
+
+  function render() {
+    pressSeg(segUse, st.use); pressSeg(segFlow, st.flow);
+    paintRows(); paintDrawer();
+  }
+
+  A.on('use', function (v) { if (!has(U, v) || v === st.use) return; st.use = v; if (!st.pSet) st.p = defaultP(v); render(); });
+  A.on('flow', function (v) { if (!has(F, v) || v === st.flow) return; st.flow = v; pressSeg(segFlow, v); paintRows(); paintFlow(true); });
+  A.on('p', function (v) { if (!has(P, v)) return; st.p = v; st.pSet = true; paintRows(); paintDrawer(); });
+  A.onReader(function () { paintDrawer(); if (!tip.hidden) hideTip(); });
+
+  paintFlow(false);
+  render();
+  /* play the path once when the scene first comes into view */
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (es) {
+      es.forEach(function (e) { if (e.isIntersecting && !played) { played = true; animateArcs(); io.disconnect(); } });
+    }, { threshold: 0.25 });
+    io.observe(arcsEl);
+  }
+});</script>

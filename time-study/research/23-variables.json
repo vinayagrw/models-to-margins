@@ -1,0 +1,278 @@
+{
+ "life_expectancy_US": {
+  "unit": "years",
+  "source_url": "https://ourworldindata.org/grapher/life-expectancy.csv?csvType=filtered&country=USA~GBR",
+  "note": "US series starts 1880, so 1820 and 1870 blank",
+  "values": {
+   "1900": {
+    "value": 49.3,
+    "tag": "Plausible",
+    "note": "OWID year 1901, near year"
+   },
+   "1930": {
+    "value": 59.6,
+    "tag": "Verified",
+    "note": ""
+   },
+   "1965": {
+    "value": 70.25,
+    "tag": "Verified",
+    "note": ""
+   },
+   "2000": {
+    "value": 76.81,
+    "tag": "Verified",
+    "note": ""
+   },
+   "2024": {
+    "value": 79.3,
+    "tag": "Plausible",
+    "note": "OWID latest 2023, near year"
+   }
+  }
+ },
+ "life_expectancy_UK": {
+  "unit": "years",
+  "source_url": "https://ourworldindata.org/grapher/life-expectancy.csv?csvType=filtered&country=USA~GBR",
+  "note": "OWID labels this United Kingdom, early years are England and Wales",
+  "values": {
+   "1820": {
+    "value": 40.84,
+    "tag": "Plausible",
+    "note": "OWID year 1818, near year"
+   },
+   "1870": {
+    "value": 40.61,
+    "tag": "Verified",
+    "note": ""
+   },
+   "1900": {
+    "value": 45.62,
+    "tag": "Verified",
+    "note": ""
+   },
+   "1930": {
+    "value": 60.77,
+    "tag": "Verified",
+    "note": ""
+   },
+   "1965": {
+    "value": 71.52,
+    "tag": "Verified",
+    "note": ""
+   },
+   "2000": {
+    "value": 77.85,
+    "tag": "Verified",
+    "note": ""
+   },
+   "2024": {
+    "value": 81.3,
+    "tag": "Plausible",
+    "note": "OWID latest 2023, near year"
+   }
+  }
+ },
+ "schooling_years_US": {
+  "unit": "mean years",
+  "source_url": "https://ourworldindata.org/grapher/mean-years-of-schooling-long-run.csv?country=USA~GBR",
+  "note": "",
+  "values": {
+   "1870": {
+    "value": 4.26,
+    "tag": "Verified",
+    "note": ""
+   },
+   "1900": {
+    "value": 6.38,
+    "tag": "Verified",
+    "note": ""
+   },
+   "1930": {
+    "value": 7.9,
+    "tag": "Verified",
+    "note": ""
+   },
+   "1965": {
+    "value": 10.42,
+    "tag": "Verified",
+    "note": ""
+   },
+   "2000": {
+    "value": 13.1,
+    "tag": "Verified",
+    "note": ""
+   },
+   "2024": {
+    "value": 13.32,
+    "tag": "Plausible",
+    "note": "OWID latest 2020, near year"
+   }
+  }
+ },
+ "schooling_years_UK": {
+  "unit": "mean years",
+  "source_url": "https://ourworldindata.org/grapher/mean-years-of-schooling-long-run.csv?country=USA~GBR",
+  "note": "",
+  "values": {
+   "1870": {
+    "value": 0.92,
+    "tag": "Verified",
+    "note": ""
+   },
+   "1900": {
+    "value": 2.55,
+    "tag": "Verified",
+    "note": ""
+   },
+   "1930": {
+    "value": 5.42,
+    "tag": "Verified",
+    "note": ""
+   },
+   "1965": {
+    "value": 7.65,
+    "tag": "Verified",
+    "note": ""
+   },
+   "2000": {
+    "value": 9.97,
+    "tag": "Verified",
+    "note": ""
+   },
+   "2024": {
+    "value": 12.9,
+    "tag": "Plausible",
+    "note": "OWID latest 2020, near year"
+   }
+  }
+ },
+ "retirement_years_US_men": {
+  "unit": "expected years in retirement",
+  "source_url": "https://conversableeconomist.com/2023/02/01/retirement-ages-some-international-comparisons/",
+  "note": "Blog citing OECD, OECD page returned 403. 1970 value 12.8. OECD avg 1970 men 11, women 15",
+  "values": {
+   "2000": {
+    "value": 18.2,
+    "tag": "Plausible",
+    "note": ""
+   },
+   "2024": {
+    "value": 18.6,
+    "tag": "Plausible",
+    "note": "2020 value"
+   }
+  }
+ },
+ "sleep_US": {
+  "unit": "hours/week",
+  "source_url": "https://www.bls.gov/news.release/atus.t01.htm",
+  "note": "1965 sleep not separated in Aguiar-Hurst tables",
+  "values": {
+   "2024": {
+    "value": 63.2,
+    "tag": "Plausible",
+    "note": "ATUS 2025, 9.03 h/day x7. Figure checked, but ATUS 2025, ages 15+"
+   }
+  }
+ },
+ "sleep_eat_personal_care_US": {
+  "unit": "hours/week",
+  "source_url": "https://www.bostonfed.org/economic/wp/wp2006/wp0602.pdf",
+  "note": "Derived from two printed rows",
+  "values": {
+   "1965": {
+    "value": 71.64,
+    "tag": "Verified",
+    "note": "Leisure Measure 2 minus 1, Table 3"
+   },
+   "2000": {
+    "value": 71.84,
+    "tag": "Plausible",
+    "note": "2003 value (102.68-31.04 1965, 107.49-35.65 2003), near year"
+   }
+  }
+ },
+ "personal_care_incl_sleep_US": {
+  "unit": "hours/week",
+  "source_url": "https://www.bls.gov/news.release/atus.t01.htm",
+  "note": "",
+  "values": {
+   "2024": {
+    "value": 68.6,
+    "tag": "Plausible",
+    "note": "ATUS 2025, 9.80 h/day x7. Figure checked, but ATUS 2025, ages 15+"
+   }
+  }
+ },
+ "eating_drinking_US": {
+  "unit": "hours/week",
+  "source_url": "https://www.bls.gov/news.release/atus.t01.htm",
+  "note": "",
+  "values": {
+   "2024": {
+    "value": 8.47,
+    "tag": "Plausible",
+    "note": "ATUS 2025, 1.21 h/day x7. Figure checked, but ATUS 2025, ages 15+"
+   }
+  }
+ },
+ "tv_watching_US": {
+  "unit": "hours/week",
+  "source_url": "https://www.bls.gov/news.release/atus.t01.htm",
+  "note": "1965 Robinson-Godbey figure not found in an opened source",
+  "values": {
+   "2024": {
+    "value": 18.27,
+    "tag": "Plausible",
+    "note": "ATUS 2025, 2.61 h/day x7. Figure checked, but ATUS 2025, ages 15+"
+   }
+  }
+ },
+ "shopping_obtaining_goods_services_US": {
+  "unit": "hours/week",
+  "source_url": "https://www.bostonfed.org/economic/wp/wp2006/wp0602.pdf",
+  "note": "2024 row from https://www.bls.gov/news.release/atus.t01.htm",
+  "values": {
+   "1965": {
+    "value": 6.09,
+    "tag": "Verified",
+    "note": "Table 2"
+   },
+   "2000": {
+    "value": 5.27,
+    "tag": "Plausible",
+    "note": "2003 value 5.27, near year"
+   },
+   "2024": {
+    "value": 4.83,
+    "tag": "Plausible",
+    "note": "ATUS 2025 purchasing goods and services 0.69 h/day x7. Figure checked, but ATUS 2025, ages 15+"
+   }
+  }
+ },
+ "household_admin_US": {
+  "unit": "hours/week",
+  "source_url": "https://www.bls.gov/news.release/atus.t01.htm",
+  "note": "",
+  "values": {
+   "2024": {
+    "value": 1.19,
+    "tag": "Plausible",
+    "note": "ATUS 2025 household management 0.17 h/day x7. Figure checked, but ATUS 2025, ages 15+"
+   }
+  }
+ },
+ "elder_care_nonhousehold_adults_US": {
+  "unit": "hours/week",
+  "source_url": "https://www.bls.gov/news.release/atus.t01.htm",
+  "note": "Household-adult care not split out in table 1",
+  "values": {
+   "2024": {
+    "value": 0.49,
+    "tag": "Plausible",
+    "note": "ATUS 2025 0.07 h/day x7. Figure checked, but ATUS 2025, ages 15+"
+   }
+  }
+ }
+}

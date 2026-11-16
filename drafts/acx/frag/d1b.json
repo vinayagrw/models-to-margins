@@ -1,0 +1,720 @@
+{
+ "configurator": {
+  "inputs": [
+   {
+    "id": "use",
+    "label": "Use case",
+    "options": [
+     {
+      "v": "C",
+      "label": "Consumer checkout"
+     },
+     {
+      "v": "B",
+      "label": "B2B procurement"
+     },
+     {
+      "v": "M",
+      "label": "Machine pay per call"
+     },
+     {
+      "v": "P",
+      "label": "Payouts, linked page"
+     }
+    ]
+   },
+   {
+    "id": "payer",
+    "label": "Payer type",
+    "options": [
+     {
+      "v": "consumer",
+      "label": "Consumer"
+     },
+     {
+      "v": "business",
+      "label": "Business"
+     },
+     {
+      "v": "wallet",
+      "label": "Agent owned wallet"
+     }
+    ]
+   },
+   {
+    "id": "rail",
+    "label": "Rail",
+    "options": [
+     {
+      "v": "card",
+      "label": "Card network"
+     },
+     {
+      "v": "a2a",
+      "label": "Bank account to account"
+     },
+     {
+      "v": "stable",
+      "label": "Stablecoin on chain"
+     },
+     {
+      "v": "ln",
+      "label": "Lightning"
+     }
+    ]
+   },
+   {
+    "id": "human",
+    "label": "Human present",
+    "options": [
+     {
+      "v": "present",
+      "label": "Present at payment"
+     },
+     {
+      "v": "delegated",
+      "label": "Away, delegated"
+     },
+     {
+      "v": "machine",
+      "label": "Machine to machine"
+     }
+    ]
+   },
+   {
+    "id": "juris",
+    "label": "Jurisdiction",
+    "options": [
+     {
+      "v": "US",
+      "label": "United States"
+     },
+     {
+      "v": "EU",
+      "label": "European Union"
+     },
+     {
+      "v": "UK",
+      "label": "United Kingdom"
+     },
+     {
+      "v": "IN",
+      "label": "India"
+     },
+     {
+      "v": "SG",
+      "label": "Singapore"
+     }
+    ]
+   }
+  ],
+  "build": [
+   {
+    "if": {
+     "use": [
+      "C",
+      "B",
+      "M"
+     ]
+    },
+    "must": "Verify agent signatures at the edge with trust tiers",
+    "why": "Signed or registered agents earn trust tiers. Unsigned browsers pay under normal card scoring.",
+    "layer": "L3"
+   },
+   {
+    "if": {
+     "use": [
+      "C",
+      "B",
+      "M"
+     ]
+    },
+    "must": "Write the evidence record before every payment call",
+    "why": "A dispute without the mandate, cart and agent proof is lost by default.",
+    "layer": "L7"
+   },
+   {
+    "if": {
+     "use": [
+      "C",
+      "B",
+      "M"
+     ]
+    },
+    "must": "Delete evidence after the rail's longest dispute window",
+    "why": "Data protection limits storage. Your privacy lead owns the retention rule.",
+    "layer": "L7"
+   },
+   {
+    "if": {
+     "use": [
+      "C",
+      "B",
+      "M"
+     ]
+    },
+    "must": "Idempotency key on every checkout and payment call",
+    "why": "Agents retry on timeout, and a retry must never charge twice.",
+    "layer": "L6"
+   },
+   {
+    "if": {
+     "use": [
+      "C",
+      "B"
+     ]
+    },
+    "must": "Tag every agent order with the agent platform id",
+    "why": "Your own agent order share is the trigger for building more.",
+    "layer": "L6"
+   },
+   {
+    "if": {
+     "use": [
+      "C",
+      "B"
+     ],
+     "rail": [
+      "card"
+     ]
+    },
+    "must": "Accept agentic network tokens through your existing PSP",
+    "why": "Live agent checkout already runs on Visa and Mastercard tokens.",
+    "layer": "L4"
+   },
+   {
+    "if": {
+     "use": [
+      "C"
+     ],
+     "rail": [
+      "card"
+     ]
+    },
+    "must": "Score unsigned agent payments as ordinary card not present sales",
+    "why": "Stored cards hide the agent from the issuer. Do not refuse them.",
+    "layer": "L3"
+   },
+   {
+    "if": {
+     "use": [
+      "C"
+     ]
+    },
+    "must": "UCP adapter once agent orders pass our proposed 3% threshold",
+    "why": "The only checkout protocol live in 90 days. A UCP adapter is a checkout state machine.",
+    "layer": "L1",
+    "ev": "illustrative"
+   },
+   {
+    "if": {
+     "use": [
+      "C"
+     ]
+    },
+    "must": "Verify signed order webhooks, one HMAC secret per platform",
+    "why": "ACP signs with HMAC-SHA256, UCP with RFC 9421. Check timestamps too.",
+    "layer": "L6"
+   },
+   {
+    "if": {
+     "use": [
+      "C",
+      "B"
+     ]
+    },
+    "must": "Discovery surface with feed, capability file and MCP server",
+    "why": "An agent cannot buy what it cannot find.",
+    "layer": "L1"
+   },
+   {
+    "if": {
+     "use": [
+      "C"
+     ],
+     "human": [
+      "present"
+     ]
+    },
+    "must": "Buyer confirms total and payment method before checkout completes",
+    "why": "A bot signature or a ready status is not buyer permission.",
+    "layer": "L2"
+   },
+   {
+    "if": {
+     "human": [
+      "delegated"
+     ]
+    },
+    "must": "Mandate verifier that cannot call the PSP",
+    "why": "Checks the cart against the authority record. Spend caps across merchants sit buyer side.",
+    "layer": "L2"
+   },
+   {
+    "if": {
+     "human": [
+      "delegated"
+     ]
+    },
+    "must": "Record what you served and ask for the mandate context",
+    "why": "The agent platform holds what the agent saw before signing. Signatures can sit on manipulation.",
+    "layer": "L2"
+   },
+   {
+    "if": {
+     "human": [
+      "delegated"
+     ],
+     "juris": [
+      "EU"
+     ]
+    },
+    "must": "Strong customer authentication when the agent mandate is set up",
+    "why": "SCA applies at set up. Visa's live EU flow uses a passkey, no signed mandate.",
+    "layer": "L2"
+   },
+   {
+    "if": {
+     "juris": [
+      "IN"
+     ]
+    },
+    "must": "Multi factor check per payment or a bank held limit",
+    "why": "Indian rules need multiple factors per payment, and UPI Reserve Pay holds approved limits.",
+    "layer": "L2"
+   },
+   {
+    "if": {
+     "rail": [
+      "stable",
+      "ln"
+     ]
+    },
+    "must": "Published refund terms and a refund by agreement flow",
+    "why": "On chain payments are final and x402 defines no refund or dispute process.",
+    "layer": "L7"
+   },
+   {
+    "if": {
+     "use": [
+      "M"
+     ]
+    },
+    "must": "One HTTP 402 responder that speaks x402 and MPP",
+    "why": "Both are live for machine pay per call and share the same shape.",
+    "layer": "L5"
+   },
+   {
+    "if": {
+     "use": [
+      "M"
+     ]
+    },
+    "must": "Settle through a facilitator, never hold prepaid agent balances",
+    "why": "Prepaid agent balances may be stored value that needs a licence.",
+    "layer": "L6"
+   },
+   {
+    "if": {
+     "use": [
+      "M"
+     ]
+    },
+    "must": "Settle and serve each paid call as one atomic step",
+    "why": "Research shows paid but denied and unpaid service attacks on x402.",
+    "layer": "L6"
+   },
+   {
+    "if": {
+     "payer": [
+      "wallet"
+     ]
+    },
+    "must": "Hard per agent budget enforced outside the model",
+    "why": "Older x402 clients let a hostile server set the amount with no cap.",
+    "layer": "L2"
+   },
+   {
+    "if": {
+     "use": [
+      "M"
+     ],
+     "rail": [
+      "card"
+     ]
+    },
+    "must": "Meter calls and charge the card in batches",
+    "why": "Card token minimums make sub dollar calls uneconomic one by one.",
+    "layer": "L5"
+   },
+   {
+    "if": {
+     "use": [
+      "B"
+     ]
+    },
+    "must": "Register the buying agent and validate the supplier",
+    "why": "The live Visa, BILL and Billtrust pilot pays invoices through a registered agent.",
+    "layer": "L3"
+   },
+   {
+    "if": {
+     "use": [
+      "B"
+     ]
+    },
+    "must": "Buyer side platform enforces the human set spend limit",
+    "why": "Spend caps across suppliers live with the buyer's platform or the network.",
+    "layer": "L2"
+   },
+   {
+    "if": {
+     "use": [
+      "B"
+     ],
+     "rail": [
+      "card"
+     ],
+     "juris": [
+      "EU",
+      "UK"
+     ]
+    },
+    "must": "Strong customer authentication on business card payments unless exempt",
+    "why": "SCA can apply to B2B card payments in the EU and UK unless an exemption applies.",
+    "layer": "L2"
+   },
+   {
+    "if": {
+     "use": [
+      "B"
+     ],
+     "juris": [
+      "US"
+     ],
+     "rail": [
+      "a2a",
+      "stable"
+     ]
+    },
+    "must": "Agreed security procedure that covers agent originated payment orders",
+    "why": "UCC 4A binds the business for bank transfers. Whether it covers stablecoins is open.",
+    "layer": "L7"
+   },
+   {
+    "if": {
+     "payer": [
+      "consumer"
+     ],
+     "rail": [
+      "card"
+     ]
+    },
+    "must": "Written terms for agent mistakes that are not fraud",
+    "why": "Visa makes cardholders answer for enrolled agents, but disputes still use human reason codes.",
+    "layer": "L7"
+   },
+   {
+    "if": {
+     "juris": [
+      "UK"
+     ]
+    },
+    "must": "Own the outcomes of every agent your business deploys",
+    "why": "UK competition guidance makes a business responsible for what its agent does.",
+    "layer": "L7"
+   },
+   {
+    "if": {
+     "juris": [
+      "SG"
+     ]
+    },
+    "must": "Review AI risk controls for each agent in production",
+    "why": "MAS guidelines ask firms to review controls as agentic AI spreads.",
+    "layer": "L7"
+   },
+   {
+    "if": {
+     "use": [
+      "P"
+     ]
+    },
+    "must": "Follow the payouts desk design on the linked page",
+    "why": "Payouts use different rails and rules, covered on their own page.",
+    "layer": "L5"
+   }
+  ]
+ },
+ "patterns": [
+  {
+   "id": "token",
+   "name": "Network token",
+   "icon": "i-vault",
+   "tone": "teal",
+   "best_for": "Human present consumer checkout on card rails",
+   "breaks_on": "Wrong item at the right price, fake merchants, sub dollar calls",
+   "latency": "One token request, no agentic figure published",
+   "liability": "Issuer holds token fraud. Visa cardholders answer for enrolled agents",
+   "one": "The agent pays with a scoped token and never sees the card.",
+   "arch": "Network or PSP token bound to merchant, amount and expiry. Charged on card rails with chargebacks intact. Limits cap loss but prove nothing about intent."
+  },
+  {
+   "id": "mandate",
+   "name": "Signed mandate",
+   "icon": "i-policy-doc",
+   "tone": "violet",
+   "best_for": "Delegated, recurring and B2B purchases needing proof",
+   "breaks_on": "Valid signatures over manipulated context, and no live money yet",
+   "latency": "Signing at setup, millisecond checks per payment",
+   "liability": "Evidence only, dispute resolution left out of scope",
+   "one": "The user signs what the agent may buy, and the proof travels.",
+   "arch": "The user signs open mandates with limits, and the agent key signs closed cart mandates inside them, as SD-JWT. A verifier checks scope, expiry and replay before payment."
+  },
+  {
+   "id": "h402",
+   "name": "HTTP 402 pay per call",
+   "icon": "i-event-stream",
+   "tone": "amber",
+   "best_for": "API, data and content priced per call",
+   "breaks_on": "Paid but denied outcomes, missing spend caps, no protocol refund path",
+   "latency": "One extra round trip, sub second settlement target",
+   "liability": "Payer carries the loss unless the seller agrees to refund",
+   "one": "The server asks for payment, the agent pays and retries.",
+   "arch": "Server returns 402 with a price. Wallet signs within a cap, client retries, server verifies, serves, then settles. Serve and settle must be atomic."
+  },
+  {
+   "id": "agent",
+   "name": "Registered agent",
+   "icon": "i-security",
+   "tone": "slate",
+   "best_for": "Agentic browsers and bot triage at the merchant edge",
+   "breaks_on": "Proves the tool not the human, and tags not converged",
+   "latency": "One signature check per request, keys cached",
+   "liability": "Unchanged. Cloudflare says the site pays when users dispute",
+   "one": "The agent signs every request so merchants can tell it from a bot.",
+   "arch": "HTTP signatures checked against a network or well known key directory, with expiry, plus a nonce where the network requires one. The edge then assigns a trust tier."
+  },
+  {
+   "id": "vcard",
+   "name": "Single use virtual card",
+   "icon": "i-payer",
+   "tone": "coral",
+   "best_for": "Interim agent spend where merchants take no agentic token",
+   "breaks_on": "Issuer sees a card, not an agent. Networks call it a bridge",
+   "latency": "One card request on the buyer side",
+   "liability": "Card rules for a human cardholder, plus program terms",
+   "one": "The agent gets a card number for one purchase or budget.",
+   "arch": "An issuing program mints a scoped card for the agent. The merchant sees a normal card payment. Limits live in the program, not a mandate."
+  },
+  {
+   "id": "browser",
+   "name": "Unrecognised agent, stored card",
+   "icon": "i-risk",
+   "tone": "red",
+   "best_for": "Nothing by design. It happens, so handle it",
+   "breaks_on": "Stored cards hide the agent, so issuer agent controls never apply",
+   "latency": "None added",
+   "liability": "Normal card rules, as if the cardholder paid",
+   "one": "An agentic browser pays with a saved card, and nobody sees an agent.",
+   "arch": "The browser fills the normal checkout with the user's saved card. Score it as ordinary card not present, step up new merchants, tag suspected agent orders."
+  }
+ ],
+ "tree": [
+  {
+   "id": "u1",
+   "q": "Paying out to people or suppliers?",
+   "yes": "payouts",
+   "no": "u2"
+  },
+  {
+   "id": "u2",
+   "q": "Is a machine paying per call?",
+   "yes": "q3",
+   "no": "q0"
+  },
+  {
+   "id": "q0",
+   "q": "Does the agent present an agentic token or a mandate?",
+   "yes": "q2",
+   "no": "browser"
+  },
+  {
+   "id": "q2",
+   "q": "Is the payer a business?",
+   "yes": "q4",
+   "no": "q1"
+  },
+  {
+   "id": "q1",
+   "q": "Is the human present at payment?",
+   "yes": "q5",
+   "no": "q6"
+  },
+  {
+   "id": "q3",
+   "q": "Is the amount under the card floor?",
+   "yes": "h402",
+   "no": "h402+token"
+  },
+  {
+   "id": "q4",
+   "q": "Is the chosen rail final?",
+   "yes": "mandate+agent",
+   "no": "agent+token+mandate"
+  },
+  {
+   "id": "q5",
+   "q": "Does the agent platform keep you as merchant of record?",
+   "yes": "agent+token",
+   "no": "token"
+  },
+  {
+   "id": "q6",
+   "q": "Does a regulator require strong customer authentication?",
+   "yes": "q7",
+   "no": "token+mandate"
+  },
+  {
+   "id": "q7",
+   "q": "Can the agent present a signed mandate with SCA at setup?",
+   "yes": "mandate+token",
+   "no": "agent+token"
+  }
+ ],
+ "criteria": [
+  {
+   "name": "Where your buyers' agents already are",
+   "weight": 20,
+   "why": "A surface nobody's agent uses earns nothing, however good it is.",
+   "ev": "illustrative"
+  },
+  {
+   "name": "Rail fit for ticket size and finality",
+   "weight": 20,
+   "why": "Card fees kill sub dollar sales, and final rails need a refund promise.",
+   "ev": "illustrative"
+  },
+  {
+   "name": "Fraud and identity exposure",
+   "weight": 15,
+   "why": "Identity and fraud risk is the top barrier merchants name in surveys.",
+   "ev": "illustrative"
+  },
+  {
+   "name": "Integration cost and PSP support",
+   "weight": 15,
+   "why": "Most merchants adopt through their PSP, and adapters cost per breaking release.",
+   "ev": "illustrative"
+  },
+  {
+   "name": "Data and catalog readiness",
+   "weight": 10,
+   "why": "Data readiness is the next barrier merchants name. Agents need readable catalogs.",
+   "ev": "illustrative"
+  },
+  {
+   "name": "Maturity for your use case",
+   "weight": 10,
+   "why": "Live beats Pilot beats Spec, but early movers win placement.",
+   "ev": "illustrative"
+  },
+  {
+   "name": "Openness of governance and lock in",
+   "weight": 10,
+   "why": "A foundation governed spec is safer than one company's roadmap.",
+   "ev": "illustrative"
+  },
+  {
+   "name": "Liability clarity, a gate",
+   "weight": 0,
+   "gate": true,
+   "why": "A route launches only once someone is named to carry the loss.",
+   "ev": "illustrative"
+  }
+ ],
+ "arch": {
+  "components": [
+   {
+    "id": "idv",
+    "name": "Agent identity verifier",
+    "icon": "i-security",
+    "tone": "red",
+    "persona": "Ravi",
+    "one": "Checks signed requests and registrations, then gives each agent a trust tier."
+   },
+   {
+    "id": "disc",
+    "name": "Discovery surface",
+    "icon": "i-network",
+    "tone": "slate",
+    "persona": "Hana",
+    "one": "Product feed, capability file and MCP server so agents can find you."
+   },
+   {
+    "id": "adapt",
+    "name": "Protocol adapters",
+    "icon": "i-sdk",
+    "tone": "teal",
+    "persona": "Maya",
+    "one": "Map each protocol into the canonical model, verify webhooks, never rewrite signed artifacts."
+   },
+   {
+    "id": "mandv",
+    "name": "Mandate verifier",
+    "icon": "i-policy-doc",
+    "tone": "violet",
+    "persona": "Kofi",
+    "one": "Checks the cart against the authority record and writes evidence. Cannot move money."
+   },
+   {
+    "id": "policy",
+    "name": "Policy and risk engine",
+    "icon": "i-risk",
+    "tone": "coral",
+    "persona": "Ravi",
+    "one": "Velocity caps at this merchant, agent cohort scoring, step up thresholds and jurisdiction rules."
+   },
+   {
+    "id": "canon",
+    "name": "Canonical order and payment model",
+    "icon": "i-sql",
+    "tone": "teal",
+    "persona": "Maya",
+    "one": "One schema for cart, credential and a thin authority record with the signed original."
+   },
+   {
+    "id": "orch",
+    "name": "Payment orchestrator",
+    "icon": "i-gateway",
+    "tone": "amber",
+    "persona": "Sam",
+    "one": "Calls the PSP or stablecoin facilitator with idempotency keys and never holds card numbers."
+   },
+   {
+    "id": "evid",
+    "name": "Evidence store",
+    "icon": "i-hcc-evidence",
+    "tone": "violet",
+    "persona": "Noor",
+    "one": "Append only record of mandate, cart and agent proof, deleted after the dispute window."
+   },
+   {
+    "id": "events",
+    "name": "Order events and reconciliation",
+    "icon": "i-webhook",
+    "tone": "slate",
+    "persona": "Maya",
+    "one": "Sends order updates, tags every agent order and reconciles to the ledger."
+   },
+   {
+    "id": "dispute",
+    "name": "Refund and dispute service",
+    "icon": "i-appeal",
+    "tone": "amber",
+    "persona": "Hana",
+    "one": "Maps evidence to network dispute responses and runs refunds on final rails."
+   }
+  ]
+ }
+}

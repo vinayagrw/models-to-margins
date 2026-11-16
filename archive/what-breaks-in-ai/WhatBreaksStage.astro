@@ -1,0 +1,680 @@
+---
+/* The cinematic stage for What Breaks in AI. One dark 3D stage (three.js, loaded only
+   when near view) sits behind the scene text. Every scene also has a still frame built
+   from DOM, which is what prints, what reduced-motion readers get, what phones get, and
+   what shows when WebGL is off. All text is DOM so the layout gate and screen readers can
+   see it. Data comes from src/data/what-breaks/*.json, copied by drafts/deep/gen_site.py, and is
+   shaped once for every page by what-breaks/model.ts. */
+import { sprite, view, LAYERS, BLOCKS, STEPS, ALWAYS, PLAYS, LAYER_TONE, layerOf, icon, evTag, quickBy, quickCount, PROB, LABELS, PROOF, proofCount, FF, qOf, BUILD, LANES, cellOf, costRows, bar, INCIDENTS, BOARD, UNKNOWN, HERO, clientData } from './what-breaks/model';
+import './what-breaks/iso-tones.css';
+
+/* Deck mode (the /present route): every scene is one slide, stills only, no 3D. */
+const { mode = 'page' } = Astro.props as { mode?: 'page' | 'deck' };
+
+// Still 1: the four layers as rows of block tiles, top layer first.
+const stillSystem = LAYERS.slice().reverse().map((L) => { const i = LAYERS.indexOf(L); return `<div class="wb-layer"><h3>${L.name}</h3><div class="wb-tiles">${L.blocks.map((id) => `<button type="button" class="wb-tile" data-open="${id}">${icon(BLOCKS[id].ic, LAYER_TONE[i])}<b>${BLOCKS[id].name}</b><span>${id}</span></button>`).join('')}</div></div>`; }).join('');
+
+// Still 5: the offline loop strip that sits under the seven-step list.
+const stillLoop = `<div class="wb-loop" aria-label="The offline loop"><div class="wb-loopnode">${icon(BLOCKS.P3.ic, LAYER_TONE[0])}<b>Failure log</b><span>each failure logged</span></div><span class="wb-looparrow" aria-hidden="true">→</span><div class="wb-loopnode">${icon(ALWAYS[0].ic, LAYER_TONE[2])}<b>${ALWAYS[0].name}</b><span>becomes a test case</span></div><span class="wb-looparrow" aria-hidden="true">→</span><div class="wb-loopnode">${icon(BLOCKS.P6.ic, LAYER_TONE[2])}<b>Gateway</b><span>tests gate every change</span></div><span class="wb-looparrow back" aria-hidden="true">↺</span></div>`;
+
+// Still 4: the architecture as a DOM grid. Control plane row, data plane in request order, outside systems.
+// Connector lines are drawn by the client script once the buttons have positions.
+const archGrid = (() => {
+  if (!view) return '';
+  const nodes: any[] = view.nodes, flows: any[] = view.flows;
+  const order = new Map<string, number>();
+  flows.filter((f) => f.kind === 'request' || f.kind === 'response').sort((a, b) => (a.order ?? 99) - (b.order ?? 99))
+    .forEach((f) => { for (const id of [f.from, f.to]) if (!order.has(id)) order.set(id, order.size); });
+  const inOrg = (n: any) => n.zone === 'org';
+  const ctrl = nodes.filter((n) => inOrg(n) && n.plane === 'control');
+  const data = nodes.filter((n) => inOrg(n) && n.plane === 'data').sort((a, b) => (order.get(a.id) ?? 99) - (order.get(b.id) ?? 99));
+  const fence = data.filter((n) => n.block === 'P4' && n.id !== 'act');
+  const main = data.filter((n) => !fence.includes(n));
+  const out = nodes.filter((n) => !inOrg(n));
+  let idx = 0;
+  const btn = (n: any, k = '') => { const o = order.get(n.id); const tone = n.block ? LAYER_TONE[layerOf(n.block)] : 'iso-violet'; const qn = n.block ? (quickBy[n.block] ?? []).length : 0; const noq = !n.external && qn === 0; return `<button type="button" class="wb-node ${k} ${n.external ? 'ghost' : ''} ${noq ? 'noq' : ''}" data-node="${n.id}" style="--i:${idx++}">${o !== undefined && main.includes(n) ? `<i class="wb-ord">${o + 1}</i>` : ''}${n.block ? icon(BLOCKS[n.block].ic, tone, 44) : ''}<b>${n.name}</b><span>${n.block ?? (n.ev === 'design' ? 'design' : (n.zone === 'vendor' ? 'provider' : n.zone === 'sandbox' ? 'isolated' : ''))}</span><span class="wb-q">${n.external ? 'as today' : qn ? `${qn} fix${qn > 1 ? 'es' : ''} now` : 'no fix yet'}</span></button>`; };
+  return `<div class="wb-archgrid" id="wb-archgrid"><svg class="wb-wires" aria-hidden="true"></svg>
+    <div class="wb-zone org"><p class="wb-zonel">Your organisation <i class="wb-ev design">trust boundary, design</i></p>
+      <div class="wb-plane"><p class="wb-planel">Control plane. The settings, versioned.</p><div class="wb-row">${ctrl.map((n) => btn(n, 'ctl')).join('')}</div></div>
+      <div class="wb-plane"><p class="wb-planel">Data plane. Enforced on every request, in this order.</p><div class="wb-row data">${main.map((n) => btn(n)).join('')}</div>
+        <p class="wb-planel">The agent fence, around step ${(order.get('act') ?? 0) + 1}.</p><div class="wb-row fence">${fence.map((n) => btn(n, 'fence')).join('')}</div></div>
+    </div>
+    <div class="wb-zone out"><p class="wb-zonel">Outside your boundary</p><div class="wb-row">${out.map((n) => btn(n, 'out')).join('')}</div></div>
+    <ul class="wb-key" aria-label="Line key"><li><i class="k flow"></i>request and answer</li><li><i class="k ctl"></i>settings</li><li><i class="k log"></i>logs</li><li><i class="k loop"></i>offline loop</li></ul>
+  </div>`;
+})();
+
+const chip = (p: any) => `<button type="button" class="wb-spark ${p.st}" data-open="${p.id}">${icon(p.ic, p.pre === 'S' ? 'iso-violet' : 'iso-coral', 44)}<b>${p.name}</b><span>${LABELS[p.st].name}</span></button>`;
+const stillSparks = `<div class="wb-lanes">${[['S', 'Web search'], ['F', 'Wider AI use']].map(([pre, t]) => `<div class="wb-lane"><h3>${t}, ${PROB.filter((p) => p.pre === pre).length}</h3><div class="wb-tiles">${PROB.filter((p) => p.pre === pre).map(chip).join('')}</div></div>`).join('')}</div>
+  <details class="wb-matrix wb-fold"><summary>How bad it is, against how well the fix is proven <i class="wb-ev design">design</i></summary>
+    <div class="wb-mgrid"><i></i>${['n', 'v', 'm'].map((k) => `<b>${PROOF[k]} <span>${proofCount(k)}</span></b>`).join('')}
+    ${['high', 'medium', 'lower'].map((sv) => `<b class="sev">${sv}</b>${['n', 'v', 'm'].map((k) => `<div>${PROB.filter((p) => p.sev === sv && p.ev === k).map((p) => `<button type="button" class="wb-dot ${p.st}" data-open="${p.id}" title="${p.name}">${p.id}</button>`).join('')}</div>`).join('')}`).join('')}</div>
+  </details>`;
+
+// Scene 3: fix now, then fix properly. Four moves with the quick fix this week and the target block.
+const stillMoves = `<div class="wb-moves">${FF.moves.map((m: any) => { const q = qOf(m.covers); const b = BLOCKS[m.block]; return `<article class="wb-move"><div class="wb-movetop"><span class="wb-n">${m.n}</span>${icon(m.ic, 'iso-teal', 64)}</div><h3>${m.title}</h3><p class="wb-who">${m.who}</p>${q ? `<p class="wb-week"><b>This week</b> ${q.fix} <i class="wb-ev ${q.ev}">${q.ev === 'verified' ? 'verified 2026' : q.ev}</i></p>` : ''}<button type="button" class="wb-then" data-open="${m.block}"><b>Then</b> ${m.block} ${b.name}</button></article>`; }).join('')}</div>
+  <details class="wb-next wb-fold"><summary>Then, in this order</summary><div class="wb-nextrow">${FF.next.map((x: any, i: number) => `<button type="button" data-open="${x.block}"><span>Step ${i + 5}</span><b>${x.step}</b><span>${x.who} · ${x.covers}</span></button>`).join('')}</div></details>`;
+
+// Scene 6: build it, contracts first. One row per layer in build order.
+const stillBuild = `<ol class="wb-build">${BUILD.order.map((name: string, i: number) => { const li = LAYERS.findIndex((l) => l.name === name); const L = LAYERS[li]; return `<li class="wb-brow" style="--i:${i}"><span class="wb-n">${i + 1}</span><div><h3>${name}</h3><p>${BUILD.why[name]}</p></div><div class="wb-btiles">${L.blocks.map((id) => `<button type="button" data-open="${id}">${icon(BLOCKS[id].ic, LAYER_TONE[li], 44)}<b>${BLOCKS[id].name}</b></button>`).join('')}</div></li>`; }).join('')}</ol>`;
+
+// Scene 7: run it. Six teams by five stages, a playhead sweeps the stages.
+const stillLanes = `<div class="wb-lanesgrid" role="table" aria-label="Who does what"><div class="wb-lhead" role="row"><i></i>${LANES.cols.map((c: string, ci: number) => `<button type="button" data-colbtn="${ci}">${c}</button>`).join('')}</div>${LANES.rows.map((r: string, ri: number) => `<div class="wb-lrow" role="row"><b>${r}</b>${LANES.cols.map((_: string, ci: number) => { const c = cellOf(ri, ci); return c ? `<button type="button" data-cell="${ri}-${ci}" data-col="${ci}" data-stage="${LANES.cols[ci]}"><b>${c.task}</b></button>` : '<i></i>'; }).join('')}</div>`).join('')}</div>`;
+
+// Scene 8: cost, proof and the board. Real charts from the data, every number tagged.
+const stillCharts = `<div class="wb-charts">
+  <details class="wb-chart wb-fold"><summary>Cost to run, a month <i class="wb-ev illustrative">illustrative</i></summary><div class="wb-bars">${costRows.map((x) => `<button type="button" data-open="${x.id}"><b>${x.name}</b><i class="wb-bar"><i style="left:${bar(x.r![0])}%;width:${Math.max(1.2, +bar(x.r![1]) - +bar(x.r![0]))}%"></i></i><span>${x.cost.replace(' a month', '')}</span></button>`).join('')}</div></details>
+  <div class="wb-chart"><h3>Proof the fixes work <i class="wb-ev design">design</i></h3><div class="wb-waffle">${PROB.map((p) => `<button type="button" class="${p.ev}" data-open="${p.id}">${p.id}</button>`).join('')}</div><ul class="wb-key"><li><i class="k m"></i>measured ${proofCount('m')}</li><li><i class="k v"></i>vendor-reported ${proofCount('v')}</li><li><i class="k n"></i>not measured ${proofCount('n')}</li></ul></div>
+  <div class="wb-chart"><h3>${INCIDENTS.label} <i class="wb-ev verified">verified 2026</i></h3>${(() => { const M = INCIDENTS.months; const n = M.labels.length; const W = 320, H = 110, T = 8, B = 8; const base = (v: number[]) => (v[0] + v[1] + v[2]) / 3; const idx = M.series.map((sr: any) => sr.v.map((x: number) => x / base(sr.v))); const max = Math.max(...idx.flat()) * 1.1; const px = (i: number) => (i + 0.5) * W / n; const py = (y: number) => T + (H - T - B) * (1 - y / max); const line = (ys: number[]) => ys.map((y, i) => `${i ? 'L' : 'M'}${px(i).toFixed(1)} ${py(y).toFixed(1)}`).join(' '); return `<div class="wb-linewrap"><svg class="wb-line" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true"><line x1="0" y1="${py(1).toFixed(1)}" x2="${W}" y2="${py(1).toFixed(1)}" class="base"/>${idx.map((ys: number[], k: number) => `<path d="${line(ys)}" class="s${k}" vector-effect="non-scaling-stroke"/>`).join('')}</svg>${idx.map((ys: number[], k: number) => ys.map((y, i) => `<i class="wb-dot-pt s${k}" style="left:${(px(i) / W * 100).toFixed(1)}%;top:${(py(y) / H * 100).toFixed(1)}%" title="${M.labels[i]} ${y.toFixed(1)}x"></i>`).join('')).join('')}</div><div class="wb-months" aria-hidden="true">${M.labels.map((l: string) => `<span>${l}</span>`).join('')}</div><ul class="wb-key">${INCIDENTS.rows.map((r: any, k: number) => `<li><i class="k s${k}"></i>${r.name} ${r.x}x</li>`).join('')}</ul>`; })()}</div>
+</div>`;
+---
+
+<div class={`wb-cine ${mode === 'deck' ? 'wb-deck' : ''}`} id="wb-cine" data-scene="1" data-mode={mode}>
+  <div class="wb-sprite" aria-hidden="true" set:html={sprite} />
+  <script type="application/json" id="wb-data" set:html={clientData} />
+
+  <div class="wb-stage" aria-hidden="true">
+    <canvas class="wb-canvas"></canvas>
+    <div class="wb-overlay"></div>
+    <div class="wb-vignette"></div>
+  </div>
+
+  <div class="wb-scenes">
+    <article class="wb-scene" id="scene-1" data-scene="1">
+      <div class="wb-panel">
+        <p class="wb-eyebrow">Board briefing, October 2026</p>
+        <h2>AI fails in 24 known ways. The fixes are one system, not 24 projects.</h2>
+        <div class="wb-nums">
+          {HERO.map((h) => <div class="wb-num"><b>{h.n}</b><span>{h.l}</span><Fragment set:html={evTag(h.ev)} /></div>)}
+        </div>
+      </div>
+      <details class="wb-lfold wb-fold"><summary>The four layers</summary><div class="wb-still wb-layers" set:html={stillSystem} /></details>
+    </article>
+
+    <article class="wb-scene" id="scene-2" data-scene="2">
+      <div class="wb-panel">
+        <p class="wb-eyebrow">Where it breaks</p>
+        <h2>Ten failures hide inside the answer. Fourteen hit the business directly.</h2>
+        <p class="wb-hint">Tap a problem for its number, its quick fix and its proper fix.</p>
+      </div>
+      <Fragment set:html={stillSparks} />
+    </article>
+
+    <article class="wb-scene" id="scene-3" data-scene="3">
+      <div class="wb-panel">
+        <p class="wb-eyebrow">Fix now, then fix properly</p>
+        <h2>Four moves do most of the work. Each starts this week and lands on one block.</h2>
+        <p class="wb-hint">None needs a new vendor.</p>
+      </div>
+      <Fragment set:html={stillMoves} />
+    </article>
+
+    <article class="wb-scene" id="scene-4" data-scene="4">
+      <div class="wb-panel">
+        <p class="wb-eyebrow">The architecture</p>
+        <h2>A control plane holds the settings. A data plane enforces them on every request.</h2>
+        <div class="wb-switch" role="group" aria-label="Architecture view">
+          <button type="button" data-arch="target" aria-pressed="true">Target</button>
+          <button type="button" data-arch="interim" aria-pressed="false">Interim</button>
+          <i class="wb-ev design">design</i>
+        </div>
+        {view ? <p class="wb-hint" data-hint="target">Tap any part for its options and standards.</p> : <p class="wb-hint">The checked architecture view is being prepared.</p>}
+        <p class="wb-hint" data-hint="interim">{quickCount} quick fixes with the tools you have. Dashed parts have none. Tap a part for its fixes.</p>
+      </div>
+      <Fragment set:html={archGrid} />
+    </article>
+
+    <article class="wb-scene" id="scene-5" data-scene="5">
+      <div class="wb-panel">
+        <p class="wb-eyebrow">Follow one request, end to end</p>
+        <h2>Seven controls on the way out. One loop that turns each failure into a test.</h2>
+        <div class="wb-plays" role="group" aria-label="Play a request">
+          {PLAYS.map((p) => <button type="button" data-play={p.id} aria-pressed={p.id === 'good' ? 'true' : 'false'}>{p.label}</button>)}
+          <i class="wb-ev illustrative">illustrative</i>
+        </div>
+        <p class="wb-msg" aria-live="polite">{PLAYS[0].msg}</p>
+      </div>
+      <ol class="wb-steps">
+        {STEPS.map((s) => <li><button type="button" data-step={s.id} data-state="on" data-open={s.block}><svg class={`ic ${LAYER_TONE[layerOf(s.block)]}`} width="64" height="64" aria-hidden="true"><use href={`#${s.ic}`} /></svg><b>{s.name}</b><span class="wb-state">Passed</span></button></li>)}
+      </ol>
+      <Fragment set:html={stillLoop} />
+    </article>
+
+    <article class="wb-scene" id="scene-6" data-scene="6">
+      <div class="wb-panel">
+        <p class="wb-eyebrow">Build it</p>
+        <h2>Four layers, built contracts first.</h2>
+        <p class="wb-hint">Each layer rests on the one before it. <i class="wb-ev design">design</i></p>
+      </div>
+      <Fragment set:html={stillBuild} />
+    </article>
+
+    <article class="wb-scene" id="scene-7" data-scene="7">
+      <div class="wb-panel">
+        <p class="wb-eyebrow">Run it</p>
+        <h2>Six teams, five stages, one loop from buy to change.</h2>
+        <p class="wb-hint">The sweep lights each stage's tasks. Tap one for its standard.</p>
+      </div>
+      <Fragment set:html={stillLanes} />
+    </article>
+
+    <article class="wb-scene" id="scene-8" data-scene="8">
+      <div class="wb-panel">
+        <p class="wb-eyebrow">Cost, proof and the board</p>
+        <h2>What it costs, how much is proven, and five sentences to repeat.</h2>
+      </div>
+      <Fragment set:html={stillCharts} />
+      <div class="wb-board">
+        <h3>What to tell your board</h3>
+        <ol>{BOARD.map((b) => <li><b>{b.n}</b><span>{b.s}</span><i class={`wb-ev ${b.ev}`}>{b.ev === 'verified' ? 'verified 2026' : b.ev}</i></li>)}</ol>
+        <h3>What we do not know yet</h3>
+        <ul>{UNKNOWN.map((u) => <li><b>{u.t}.</b> {u.s}</li>)}</ul>
+      </div>
+    </article>
+  </div>
+
+  <aside class="wb-drawer" id="wb-drawer" hidden aria-labelledby="wb-drawer-h">
+    <button type="button" class="wb-close" data-close>Close</button>
+    <p class="wb-eyebrow" id="wb-drawer-k"></p>
+    <h3 id="wb-drawer-h" tabindex="-1"></h3>
+    <p class="wb-lead" id="wb-drawer-p"></p>
+    <dl class="wb-kv" id="wb-drawer-kv"></dl>
+    <div class="wb-fixes" id="wb-drawer-fx"></div>
+    <div class="wb-quick" id="wb-drawer-q"></div>
+    <div class="wb-arch-layer" id="wb-drawer-a"></div>
+  </aside>
+</div>
+
+<style is:global>
+  /* The stage is always dark, by owner decision (2026-10-26). The page shell around it follows the theme. */
+  .wb-cine { --sbg: #0b0f17; --sink: #eef3ff; --smut: #a7b4c9; --srule: rgba(167, 180, 201, .22); --spanel: rgba(11, 15, 23, .8);
+    --good: #4edab5; --warn: #f4cb73; --stop: #ff776c; --flow: #86abdd; --ctl: #c79a45;
+    position: relative; margin: 20px 0 0; color: var(--sink); font-family: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif; }
+  .wb-cine .wb-sprite { position: absolute; width: 0; height: 0; overflow: hidden; } /* never display:none, the sprite's gradients and masks stop rendering */
+  .wb-stage { position: sticky; top: var(--wb-top, 0px); height: calc(100vh - var(--wb-top, 0px)); height: calc(100dvh - var(--wb-top, 0px)); overflow: hidden; background: radial-gradient(120% 90% at 50% 10%, #16213a 0%, var(--sbg) 60%, #05070c 100%); border-radius: 20px; display: none; }
+  .wb-cine.is-3d .wb-stage { display: block; }
+  .wb-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  .wb-overlay { position: absolute; inset: 0; pointer-events: none; }
+  .wb-overlay .wb-tag { position: absolute; transform: translate(-50%, 0); display: grid; justify-items: center; gap: 4px; font-size: 14px; line-height: 1.2; color: var(--sink); text-shadow: 0 1px 2px #000; white-space: nowrap; transition: opacity .4s; }
+  .wb-overlay .wb-tag svg { width: 64px; height: 64px; filter: drop-shadow(0 6px 10px rgba(0,0,0,.5)); }
+  .wb-overlay .wb-tag.dim { opacity: .28; }
+  .wb-overlay .wb-tag.layer { transform: translate(0, -50%); font-weight: 600; letter-spacing: .02em; color: var(--smut); }
+  .wb-vignette { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(180deg, rgba(5,7,12,0) 55%, rgba(5,7,12,.75) 100%); }
+  .wb-cine.is-3d .wb-scenes { margin-top: calc(-100vh + var(--wb-top, 0px)); margin-top: calc(-100dvh + var(--wb-top, 0px)); position: relative; z-index: 1; }
+  .wb-scene { display: grid; gap: 18px; align-content: end; padding: 24px 16px 36px; scroll-margin-top: var(--wb-top, 0px); }
+  .wb-cine.is-3d .wb-scene { min-height: calc(40vh - var(--wb-top, 0px)); padding: 12px 24px 18px; }
+  .wb-cine:not(.is-3d) .wb-scene { background: var(--sbg); border-radius: 20px; margin-bottom: 14px; padding: 20px 16px; }
+  .wb-panel { max-width: min(100%, 780px); display: grid; gap: 14px; padding: 20px 22px; background: var(--spanel); border: 1px solid var(--srule); border-radius: 16px; backdrop-filter: blur(10px); }
+  .wb-cine:not(.is-3d) .wb-panel { background: transparent; border: 0; padding: 0; max-width: 820px; }
+  .wb-eyebrow { margin: 0; font: 600 14px/1.3 "IBM Plex Mono", ui-monospace, Menlo, monospace; letter-spacing: .06em; text-transform: uppercase; color: var(--ctl); }
+  .wb-scene h2 { margin: 0; font-size: clamp(24px, 3.2vw, 38px); line-height: 1.12; font-weight: 700; letter-spacing: -.01em; text-wrap: balance; color: var(--sink); }
+  .wb-scene h3 { margin: 0; font-size: 16px; font-weight: 600; text-wrap: balance; color: var(--smut); }
+  .wb-scene p { margin: 0; text-wrap: pretty; color: var(--smut); font-size: 16px; line-height: 1.5; }
+  .wb-hint { font-size: 15px; }
+  .wb-nums { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
+  .wb-num { display: grid; gap: 4px; align-content: start; padding: 12px; border: 1px solid var(--srule); border-radius: 12px; background: rgba(255,255,255,.03); }
+  .wb-num b { font-size: 30px; line-height: 1; font-weight: 700; color: var(--sink); }
+  .wb-num span { font-size: 14px; line-height: 1.35; color: var(--smut); text-wrap: balance; }
+  .wb-ev { display: inline-flex; justify-self: start; font: 600 14px/1.2 "IBM Plex Mono", ui-monospace, Menlo, monospace; padding: 5px 9px; border: 1.5px solid currentColor; border-radius: 6px; white-space: nowrap; font-style: normal; }
+  .wb-ev.verified { color: var(--good); } .wb-ev.vendor { color: var(--ctl); } .wb-ev.illustrative { color: var(--smut); border-style: dashed; } .wb-ev.design { color: var(--flow); border-style: dotted; }
+  .wb-switch, .wb-plays { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .wb-cine button { font-family: inherit; font-size: 15px; font-weight: 600; line-height: 1.2; color: var(--sink); min-height: 44px; padding: 10px 14px; border-radius: 10px; border: 1.5px solid var(--srule); background: rgba(255,255,255,.04); cursor: pointer; }
+  .wb-cine button:hover:not(:disabled) { border-color: var(--flow); }
+  .wb-cine button:disabled { opacity: .45; cursor: default; }
+  .wb-cine button[aria-pressed="true"] { background: var(--flow); border-color: var(--flow); color: #0b0f17; }
+  .wb-cine :focus-visible { outline: 3px solid var(--warn); outline-offset: 2px; }
+  .wb-msg { min-height: 48px; text-wrap: balance !important; }
+  /* still 1: layers */
+  .wb-still { display: grid; gap: 12px; }
+  .wb-cine.is-3d .wb-still { display: none; }
+  .wb-layer { display: grid; grid-template-columns: minmax(120px, 170px) 1fr; gap: 12px; align-items: center; padding: 12px 14px; border: 1px solid var(--srule); border-radius: 14px; background: rgba(255,255,255,.03); }
+  .wb-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+  .wb-tile, .wb-steps button, .wb-node { display: grid; justify-items: center; gap: 6px; padding: 12px 8px; border-radius: 14px; text-align: center; width: 100%; }
+  .wb-tile b, .wb-steps b, .wb-node b { font-size: 15px; line-height: 1.2; text-wrap: balance; }
+  .wb-tile span, .wb-node span { font: 500 14px/1.2 "IBM Plex Mono", ui-monospace, Menlo, monospace; color: var(--smut); }
+  /* scene 5: steps and loop */
+  .wb-steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 10px; }
+  .wb-steps li { display: grid; }
+  .wb-steps button { background: var(--spanel); backdrop-filter: blur(10px); transition: border-color .3s, transform .3s; }
+  .wb-steps .wb-state { font: 600 14px/1.2 "IBM Plex Mono", ui-monospace, Menlo, monospace; color: var(--good); }
+  .wb-steps button[data-state="warn"] { border-color: var(--warn); } .wb-steps button[data-state="warn"] .wb-state { color: var(--warn); }
+  .wb-steps button[data-state="stop"] { border-color: var(--stop); transform: translateY(-4px); } .wb-steps button[data-state="stop"] .wb-state { color: var(--stop); }
+  .wb-steps button[data-state="na"] { opacity: .55; } .wb-steps button[data-state="na"] .wb-state, .wb-steps button[data-state="skip"] .wb-state, .wb-steps button[data-state="wait"] .wb-state { color: var(--smut); }
+  .wb-loop { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: center; padding: 14px 16px; border: 1.5px dashed var(--good); border-radius: 14px; background: var(--spanel); backdrop-filter: blur(10px); }
+  .wb-loopnode { display: grid; grid-template-columns: 64px 1fr; gap: 4px 12px; align-items: center; }
+  .wb-loopnode svg { grid-row: span 2; } .wb-loopnode b { font-size: 15px; } .wb-loopnode span { font-size: 14px; color: var(--smut); }
+  .wb-looparrow { font-size: 26px; color: var(--good); line-height: 1; }
+  /* scene 4: architecture grid */
+  .wb-archgrid { position: relative; display: grid; gap: 10px; max-width: 1180px; padding: 12px; border-radius: 16px; background: var(--spanel); backdrop-filter: blur(10px); border: 1px solid var(--srule); }
+  .wb-cine[data-scene="4"] .wb-overlay { opacity: 0; }  /* the grid is the architecture, the stage steps back */
+  .wb-wires { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+  .wb-wires path { fill: none; stroke-width: 2; }
+  .wb-wires .flow { stroke: var(--flow); opacity: .75; } .wb-wires .ctl { stroke: var(--ctl); stroke-dasharray: 5 4; opacity: .8; } .wb-wires .log { stroke: var(--smut); stroke-dasharray: 2 5; } .wb-wires .loop { stroke: var(--good); stroke-dasharray: 8 6; }
+  .wb-zone { position: relative; display: grid; gap: 10px; padding: 12px; border: 1.5px dashed var(--srule); border-radius: 16px; }
+  .wb-zone.org { background: rgba(134,171,221,.04); }
+  .wb-zonel { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-weight: 600; color: var(--sink) !important; }
+  .wb-plane { display: grid; gap: 8px; }
+  .wb-planel { font-size: 15px !important; }
+  .wb-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(136px, 1fr)); gap: 10px; }
+  .wb-row.fence { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); padding-left: 10px; border-left: 3px solid var(--stop); }
+  .wb-node { position: relative; background: #121826; min-height: 64px; }
+  .wb-node.ctl { border-color: color-mix(in srgb, var(--ctl) 55%, var(--srule)); }
+  .wb-node.ghost { background: transparent; border-style: dashed; }
+  .wb-node.sel { border-color: var(--flow); box-shadow: 0 0 0 3px color-mix(in srgb, var(--flow) 35%, transparent); }
+  /* interim view: the same grid, each part showing the quick fixes that stand in for it today. Morph is staggered per part. */
+  .wb-node { transition: border-color .5s, background-color .5s, opacity .5s, transform .5s; transition-delay: calc(var(--i, 0) * 45ms); }
+  .wb-node .wb-q { display: none; color: var(--warn); }
+  .wb-hint[data-hint="interim"] { display: none; }
+  .wb-cine[data-arch="interim"] .wb-hint[data-hint="target"] { display: none; }
+  .wb-cine[data-arch="interim"] .wb-hint[data-hint="interim"] { display: block; }
+  .wb-cine[data-arch="interim"] .wb-node .wb-q { display: block; }
+  .wb-cine[data-arch="interim"] .wb-node > span:not(.wb-q) { display: none; }  /* the count takes the id line, so the scene keeps its height */
+  .wb-cine[data-arch="interim"] .wb-node:not(.ghost):not(.noq) { border-color: color-mix(in srgb, var(--warn) 60%, var(--srule)); background: #1a1a14; }
+  .wb-cine[data-arch="interim"] .wb-node.noq { border-style: dashed; background: transparent; opacity: .6; }
+  .wb-cine[data-arch="interim"] .wb-node.noq .wb-q { color: var(--smut); }
+  .wb-cine[data-arch="interim"] .wb-wires .flow, .wb-cine[data-arch="interim"] .wb-wires .ctl { opacity: .25; }
+  .wb-quick:empty { display: none; }
+  .wb-quick { border-top: 1px dashed var(--srule); padding-top: 12px; display: grid; gap: 10px; }
+  .wb-quick h4 { margin: 0; font: 600 14px/1.2 "IBM Plex Mono", ui-monospace, monospace; letter-spacing: .06em; text-transform: uppercase; color: var(--warn); text-wrap: balance; }
+  .wb-quick ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+  .wb-quick li { display: grid; gap: 4px; padding: 10px 12px; border-radius: 10px; background: rgba(244,203,115,.06); font-size: 15px; }
+  .wb-quick li b { font-weight: 600; } .wb-quick li span { color: var(--smut); text-wrap: pretty; font-size: 14px; line-height: 1.4; }
+  .wb-quick li .wb-ev { margin-top: 2px; }
+  .wb-ord { position: absolute; top: 8px; left: 8px; font: 600 14px/1 "IBM Plex Mono", ui-monospace, monospace; color: var(--flow); font-style: normal; }
+  .wb-key { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: center; font-size: 14px; color: var(--smut); }
+  .wb-key li { white-space: nowrap; }
+  .wb-key .k { display: inline-block; width: 22px; height: 0; border-top: 2px solid; margin-right: 6px; vertical-align: middle; }
+  .wb-key .flow { border-color: var(--flow); } .wb-key .ctl { border-color: var(--ctl); border-top-style: dashed; } .wb-key .log { border-color: var(--smut); border-top-style: dotted; } .wb-key .loop { border-color: var(--good); border-top-style: dashed; }
+  /* scene 2: sparks and the severity matrix */
+  .wb-lanes { display: grid; gap: 12px; }
+  .wb-lane { display: grid; gap: 10px; padding: 12px 14px; border: 1px solid var(--srule); border-radius: 14px; background: var(--spanel); backdrop-filter: blur(10px); }
+  .wb-lane .wb-tiles { grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); }
+  .wb-fold > summary { list-style: none; cursor: pointer; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; min-height: 44px; font-size: 16px; font-weight: 600; color: var(--sink); } .wb-fold > summary::-webkit-details-marker { display: none; } .wb-fold > summary::before { content: '+'; font: 600 18px/1 "IBM Plex Mono", ui-monospace, monospace; color: var(--flow); } .wb-fold[open] > summary::before { content: '\2013'; }
+  .wb-spark { display: grid; grid-template-columns: 44px 1fr; gap: 2px 10px; align-items: center; text-align: left; justify-items: start; padding: 8px 10px; border-radius: 12px; }
+  .wb-spark svg { grid-row: span 2; } .wb-spark b { font-size: 15px; line-height: 1.2; text-wrap: balance; } .wb-spark span { font: 600 14px/1.2 "IBM Plex Mono", ui-monospace, monospace; color: var(--smut); }
+  .wb-spark.worse span { color: var(--stop); } .wb-spark.new span { color: var(--warn); }
+  .wb-spark.worse { border-color: color-mix(in srgb, var(--stop) 60%, var(--srule)); }
+  .wb-matrix { display: grid; gap: 10px; padding: 12px 14px; border: 1px solid var(--srule); border-radius: 14px; background: var(--spanel); backdrop-filter: blur(10px); }
+  .wb-matrix .wb-planel { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .wb-mgrid { display: grid; grid-template-columns: 84px repeat(3, minmax(0, 1fr)); gap: 6px; align-items: stretch; }
+  .wb-mgrid > b { font: 600 14px/1.2 "IBM Plex Mono", ui-monospace, monospace; color: var(--smut); text-transform: uppercase; letter-spacing: .04em; align-self: center; padding: 4px 0; }
+  .wb-mgrid > b span { color: var(--sink); }
+  .wb-mgrid > div { display: flex; flex-wrap: wrap; gap: 6px; align-content: flex-start; min-height: 52px; padding: 6px; border-radius: 10px; background: rgba(255,255,255,.03); }
+  .wb-cine .wb-dot { min-height: 44px; min-width: 44px; padding: 6px 8px; font: 600 14px/1 "IBM Plex Mono", ui-monospace, monospace; border-radius: 8px; }
+  .wb-dot.worse { border-color: var(--stop); color: var(--stop); } .wb-dot.new { border-color: var(--warn); }
+  /* scene 3: four moves */
+  .wb-moves { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+  .wb-move { display: grid; gap: 8px; align-content: start; padding: 14px; border: 1px solid var(--srule); border-radius: 14px; background: var(--spanel); backdrop-filter: blur(10px); min-width: 0; }
+  .wb-movetop { display: flex; justify-content: space-between; align-items: flex-start; }
+  .wb-n { font-size: 28px; font-weight: 700; line-height: 1; color: var(--flow); }
+  .wb-move h3 { font-size: 17px; color: var(--sink); }
+  .wb-move p { font-size: 15px; line-height: 1.45; overflow-wrap: anywhere; } .wb-who { font: 600 14px/1.3 "IBM Plex Mono", ui-monospace, monospace !important; color: var(--ctl) !important; }
+  .wb-week, .wb-then { padding: 8px 10px; border-radius: 10px; background: rgba(244,203,115,.07); } .wb-cine .wb-then { background: rgba(134,171,221,.08); text-align: left; font-weight: 500; font-size: 15px; line-height: 1.45; border-color: transparent; text-wrap: balance; }
+  .wb-week b { color: var(--warn); } .wb-then b { color: var(--flow); } .wb-week .wb-ev { display: flex; width: max-content; margin-top: 6px; }
+  .wb-next { display: grid; gap: 10px; }
+  .wb-nextrow { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; }
+  .wb-nextrow button { display: grid; gap: 4px; text-align: left; justify-items: start; border-style: dashed; padding: 10px 12px; }
+  .wb-nextrow button span { font: 500 14px/1.3 "IBM Plex Mono", ui-monospace, monospace; color: var(--smut); } .wb-nextrow button b { font-size: 15px; line-height: 1.25; text-wrap: balance; }
+  /* scene 6: build order */
+  .wb-build { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+  .wb-brow { display: grid; grid-template-columns: 44px minmax(200px, 1fr) minmax(0, 1.4fr); gap: 12px; align-items: center; padding: 12px 14px; border: 1px solid var(--srule); border-radius: 14px; background: var(--spanel); backdrop-filter: blur(10px); transition: opacity .6s, transform .6s; transition-delay: calc(var(--i, 0) * 220ms); }
+  .wb-cine.is-3d .wb-brow { opacity: .35; transform: translateY(24px); }
+  .wb-cine.is-3d.is-built .wb-brow { opacity: 1; transform: none; }
+  .wb-brow h3 { color: var(--sink); } .wb-brow p { font-size: 15px; line-height: 1.45; text-wrap: balance; }
+  .wb-btiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 8px; }
+  .wb-btiles button { display: grid; grid-template-columns: 44px 1fr; gap: 8px; align-items: center; text-align: left; padding: 8px 10px; }
+  .wb-btiles b { font-size: 15px; line-height: 1.2; text-wrap: balance; }
+  /* scene 7: swimlane with a playhead */
+  .wb-lanesgrid { display: grid; gap: 8px; padding: 12px; border: 1px solid var(--srule); border-radius: 14px; background: var(--spanel); backdrop-filter: blur(10px); }
+  .wb-lhead, .wb-lrow { display: grid; grid-template-columns: 150px repeat(5, minmax(0, 1fr)); gap: 8px; align-items: stretch; }
+  .wb-cine .wb-lhead button, .wb-lrow > b { font: 600 14px/1.25 "IBM Plex Mono", ui-monospace, monospace; color: var(--smut); align-self: center; text-wrap: balance; padding: 4px 6px; border-radius: 8px; transition: color .4s, background-color .4s; }
+  .wb-cine .wb-lhead button { border: 0; background: transparent; text-align: left; padding: 6px 8px; } .wb-cine .wb-lhead button.on { color: var(--sbg); background: var(--good); }
+  .wb-lrow button { display: grid; gap: 4px; text-align: left; justify-items: start; align-content: start; padding: 8px 10px; transition: border-color .4s, background-color .4s, transform .4s; }
+  .wb-lrow button b { font-size: 15px; line-height: 1.2; text-wrap: balance; } .wb-lrow button span { font: 500 14px/1.2 "IBM Plex Mono", ui-monospace, monospace; color: var(--smut); }
+  .wb-lrow button.on { border-color: var(--good); background: rgba(78,218,181,.1); transform: translateY(-2px); }
+  /* scene 8: charts and the board */
+  .wb-charts { display: grid; grid-template-columns: 1.2fr 1fr; grid-auto-rows: auto; gap: 12px; }
+  .wb-charts .wb-chart:first-child { grid-row: span 2; }
+  .wb-chart { display: grid; gap: 10px; align-content: start; padding: 14px; border: 1px solid var(--srule); border-radius: 14px; background: var(--spanel); backdrop-filter: blur(10px); min-width: 0; }
+  .wb-chart h3 { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; color: var(--sink); font-size: 16px; min-width: 0; } .wb-chart h3 .wb-ev, .wb-fold > summary .wb-ev { flex: none; } .wb-chart p { font-size: 15px; }
+  .wb-bars { display: grid; gap: 6px; }
+  .wb-bars button, .wb-xbars div { display: grid; grid-template-columns: minmax(100px, 150px) minmax(40px, 1fr) auto; gap: 10px; align-items: center; text-align: left; padding: 8px 10px; }
+  .wb-bars b, .wb-xbars b { font-size: 14px; line-height: 1.2; text-wrap: balance; } .wb-bars span, .wb-xbars span { font: 600 14px/1.2 "IBM Plex Mono", ui-monospace, monospace; color: var(--smut); white-space: nowrap; }
+  .wb-bar { display: block; position: relative; height: 12px; border-radius: 6px; background: rgba(255,255,255,.06); overflow: hidden; }
+  .wb-bar i { position: absolute; top: 0; bottom: 0; left: 0; border-radius: 6px; background: var(--flow); }
+  .wb-xbars div { border: 0; } .wb-xbars div:first-child .wb-bar i { background: var(--stop); }
+  .wb-linewrap { position: relative; height: 120px; } .wb-line { position: absolute; inset: 0; width: 100%; height: 100%; display: block; } .wb-line path { fill: none; stroke-width: 2.5; stroke-linejoin: round; } .wb-line .s0 { stroke: var(--stop); } .wb-line .s1 { stroke: var(--smut); } .wb-line .base { stroke: var(--srule); stroke-dasharray: 3 3; vector-effect: non-scaling-stroke; }
+  .wb-dot-pt { position: absolute; width: 10px; height: 10px; margin: -5px 0 0 -5px; border-radius: 50%; } .wb-dot-pt.s0 { background: var(--stop); } .wb-dot-pt.s1 { background: var(--smut); }
+  @media (max-width: 720px) { .wb-linewrap { height: 88px; } }
+  .wb-months { display: grid; grid-template-columns: repeat(5, 1fr); text-align: center; font: 500 14px/1.2 "IBM Plex Mono", ui-monospace, monospace; color: var(--smut); }
+  .wb-key .k.s0 { border-color: var(--stop); } .wb-key .k.s1 { border-color: var(--smut); }
+  .wb-ev.unverified { color: var(--warn); border-style: dashed; }
+  .wb-waffle { display: grid; grid-template-columns: repeat(auto-fill, minmax(48px, 1fr)); gap: 6px; }
+  .wb-cine .wb-waffle button { padding: 8px; min-height: 44px; min-width: 44px; font: 600 14px/1 "IBM Plex Mono", ui-monospace, monospace; }
+  .wb-waffle .m { background: color-mix(in srgb, var(--good) 35%, transparent); border-color: var(--good); } .wb-waffle .v { background: color-mix(in srgb, var(--ctl) 30%, transparent); border-color: var(--ctl); } .wb-waffle .n { border-style: dashed; }
+  .wb-key .m { border-color: var(--good); } .wb-key .v { border-color: var(--ctl); } .wb-key .n { border-color: var(--smut); border-top-style: dashed; }
+  .wb-board { display: grid; gap: 12px; padding: 16px 18px; border: 1px solid var(--srule); border-radius: 14px; background: var(--spanel); backdrop-filter: blur(10px); }
+  .wb-board h3 { color: var(--sink); font-size: 16px; }
+  .wb-board ol, .wb-board ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+  .wb-board ol li { display: grid; grid-template-columns: 90px minmax(0, 1fr) auto; gap: 10px; align-items: start; font-size: 15px; line-height: 1.45; color: var(--smut); }
+  .wb-board ol li b { font-size: 22px; line-height: 1.1; color: var(--sink); }
+  .wb-board ul li { font-size: 15px; line-height: 1.45; color: var(--smut); text-wrap: balance; } .wb-board ul li b { color: var(--sink); }
+  /* deck mode: one scene per slide, stills only */
+  .wb-deck .wb-scene { scroll-snap-align: start; min-height: calc(100dvh - 82px); background: var(--sbg); border-radius: 20px; margin-bottom: 18px; padding: 28px 20px; box-sizing: border-box; }
+  @media (max-width: 1000px) { .wb-moves { grid-template-columns: repeat(2, minmax(0, 1fr)); } .wb-nextrow { grid-template-columns: repeat(3, minmax(0, 1fr)); } .wb-charts { grid-template-columns: 1fr; } .wb-brow { grid-template-columns: 44px 1fr; } .wb-brow .wb-btiles { grid-column: 2; } }
+  @media (max-width: 720px) {
+    .wb-lhead { display: flex; flex-wrap: wrap; gap: 6px; } .wb-lhead i { display: none; } .wb-cine .wb-lhead button { border: 1.5px solid var(--srule); }
+    .wb-lrow { grid-template-columns: 1fr; gap: 6px; } .wb-lrow > b { padding-top: 8px; }
+    .wb-lrow button { display: none; } .wb-lrow button.on { display: grid; }
+    .wb-lrow button::before { content: attr(data-stage); font: 600 14px/1.2 "IBM Plex Mono", ui-monospace, monospace; color: var(--good); }
+    .wb-mgrid { grid-template-columns: repeat(3, minmax(0, 1fr)); } .wb-mgrid > i { display: none; } .wb-mgrid > b.sev { grid-column: 1 / -1; padding-top: 6px; }
+    .wb-moves, .wb-nextrow { grid-template-columns: 1fr; }
+    .wb-board ol li { display: block; } .wb-board ol li b { display: inline; font-size: 18px; margin-right: 8px; } .wb-board ol li .wb-ev { margin-left: 8px; }
+    .wb-btiles { display: flex; flex-wrap: wrap; } .wb-btiles button { display: inline-flex; align-items: center; gap: 8px; padding: 8px 10px; width: auto; } .wb-btiles svg { width: 32px; height: 32px; }
+  }
+  /* drawer */
+  .wb-drawer { position: relative; z-index: 2; margin: 0 16px 20px; padding: 16px 22px; border-radius: 16px; border: 1px solid var(--srule); background: #121826; display: grid; gap: 12px; }
+  .wb-drawer[hidden] { display: none; }
+  /* wide screens: the quick fixes and the architect layer sit side by side, so an open drawer costs half the height */
+  @media (min-width: 1000px) { .wb-drawer { grid-template-columns: 1fr 1fr; column-gap: 28px; } .wb-drawer > * { grid-column: 1 / -1; } .wb-drawer > .wb-quick { grid-column: 1; } .wb-drawer > .wb-arch-layer { grid-column: 2; border-top: 0; border-left: 1px dashed var(--srule); padding: 0 0 0 24px; } .wb-drawer > .wb-quick:empty + .wb-arch-layer { grid-column: 1 / -1; border-left: 0; border-top: 1px dashed var(--srule); padding: 12px 0 0; } }
+  .wb-drawer > * { min-width: 0; }  /* a long drawer child must not widen the grid track past the drawer */
+  .wb-drawer #wb-drawer-p { text-wrap: balance; }
+  .wb-drawer p { margin: 0; text-wrap: pretty; color: var(--smut); font-size: 16px; line-height: 1.5; }
+  .wb-drawer h3 { margin: 0; font-size: 26px; line-height: 1.15; text-wrap: balance; color: var(--sink); }
+  .wb-drawer h3:focus { outline: none; }
+  .wb-close { justify-self: end; }
+  .wb-kv { margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+  .wb-kv div { padding: 10px 12px; border-radius: 10px; background: rgba(255,255,255,.04); display: grid; gap: 4px; }
+  .wb-kv dt { font: 600 14px/1.2 "IBM Plex Mono", ui-monospace, monospace; letter-spacing: .04em; text-transform: uppercase; color: var(--smut); }
+  .wb-kv dd { margin: 0; font-size: 16px; text-wrap: balance; }
+  .wb-fixes { display: flex; flex-wrap: wrap; gap: 8px; }
+  .wb-fixes span { font-family: inherit; font-size: 14px; font-weight: 600; line-height: 1.2; padding: 7px 10px; border-radius: 999px; background: rgba(255,255,255,.06); }
+  .wb-arch-layer { border-top: 1px dashed var(--srule); padding-top: 12px; display: grid; gap: 10px; }
+  .wb-arch-layer h4 { margin: 0; font: 600 14px/1.2 "IBM Plex Mono", ui-monospace, monospace; letter-spacing: .06em; text-transform: uppercase; color: var(--ctl); text-wrap: balance; }
+  .wb-arch-layer ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+  .wb-arch-layer li { display: grid; grid-template-columns: minmax(120px, 190px) minmax(0, 1fr) auto; gap: 4px 12px; align-items: start; font-size: 15px; }
+  .wb-arch-layer li b { font-weight: 600; } .wb-arch-layer li span { color: var(--smut); text-wrap: pretty; }
+  .wb-arch-layer p { font-size: 15px; text-wrap: balance; }
+  @media (max-width: 960px) { .wb-steps { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+  @media (max-width: 600px) { .wb-lane .wb-tiles { grid-template-columns: 1fr; } .wb-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); } .wb-tiles { grid-template-columns: 1fr; } .wb-tile { grid-template-columns: 64px 1fr; justify-items: start; text-align: left; } .wb-tile svg { grid-row: span 2; } .wb-arch-layer li { grid-template-columns: 1fr; } .wb-scene h2 { font-size: 24px; } .wb-layer { grid-template-columns: 1fr; } .wb-row, .wb-row.fence { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (prefers-reduced-motion: reduce) { .wb-cine * { transition: none !important; animation: none !important; } }
+  /* Round 10l: the scene 1 layer still folds on phones (opened by script on wide screens) and hides with the rest of the stills in 3D. */
+  .wb-cine.is-3d .wb-lfold { display: none; }
+  @media print { .wb-cine.is-3d .wb-lfold { display: block; } .wb-cine.is-3d .wb-stage { display: none; } .wb-cine.is-3d .wb-still { display: grid; } .wb-cine.is-3d .wb-scenes { margin-top: 0; } }
+</style>
+
+<script>
+  import { webglOk, startNear, makeWorld, runLoop, project } from './what-breaks/scene3d';
+  // Scene logic. three.js loads only when the stage is near view and the device can run it.
+  const root = document.getElementById('wb-cine') as HTMLElement | null;
+  if (root) {
+    const D = JSON.parse((document.getElementById('wb-data') as HTMLElement).textContent || '{}');
+    const $ = (s: string, p: ParentNode = root) => p.querySelector(s) as HTMLElement;
+    const $$ = (s: string, p: ParentNode = root) => Array.from(p.querySelectorAll(s)) as HTMLElement[];
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const narrow = matchMedia('(max-width: 767px)').matches;
+    const webgl = webglOk();
+    const deck = root.dataset.mode === 'deck';
+    const use3d = !reduce && !narrow && webgl && !deck;
+    const hdr = document.querySelector('.site-header') as HTMLElement | null;
+    const setTop = () => root.style.setProperty('--wb-top', (hdr?.offsetHeight || 0) + 'px'); setTop(); addEventListener('resize', setTop);
+    if (use3d) root.classList.add('is-3d'); // decide the layout before any scroll jump, so the page height is final
+    const hashGet = () => new URLSearchParams(location.hash.slice(1));
+    const hashSet = (k: string, v: string | null) => { const h = hashGet(); if (v === null) h.delete(k); else h.set(k, v); try { history.replaceState(null, '', h.toString() ? '#' + h.toString() : location.pathname + location.search); } catch {} };
+    const LAYER_TONE = ['iso-teal', 'iso-violet', 'iso-amber', 'iso-coral'];
+    const layerOf = (id: string) => D.layers.findIndex((l: any) => l.blocks.includes(id));
+    const icon = (ic: string, tone: string, size = 64) => `<svg class="ic ${tone}" width="${size}" height="${size}" aria-hidden="true"><use href="#${ic}"/></svg>`;
+    const ev = (e?: string) => e ? `<i class="wb-ev ${e}">${e === 'verified' ? 'verified 2026' : e}</i>` : '';
+
+    // ---- drawer (one block, or one architecture node)
+    const drawer = $('#wb-drawer');
+    let lastFocus: HTMLElement | null = null;
+    const archLayer = (b: any) => `<h4>For architects</h4>${b.options?.length ? `<p>Named options, examples not a ranking</p><ul>${b.options.map((o: any) => `<li><b>${o.name}</b><span>${o.what}</span>${ev(o.ev)}</li>`).join('')}</ul>` : '<p>Named options are listed in the design document.</p>'}${b.std ? `<p>Standards: ${b.std}</p>` : ''}`;
+    // Quick fixes this week for a block: shown in every view, first in the interim view.
+    const quickLayer = (b: any) => {
+      const q: any[] = b?.quick || []; if (!q.length) return '';
+      const li = (x: any) => `<li><b>${x.id}. ${x.fix}</b><span>${x.who}</span>${ev(x.ev)}</li>`;
+      return `<h4>Quick fix this week</h4><ul>${q.map(li).join('')}</ul>`;
+    };
+    function openBlock(id: string, focusEl?: HTMLElement) {
+      const b = D.blocks[id]; if (!b) return; lastFocus = focusEl || null;
+      $('#wb-drawer-k').textContent = `${id} · ${D.layers[layerOf(id)].name}`;
+      $('#wb-drawer-h').textContent = b.name; $('#wb-drawer-p').textContent = b.includes;
+      $('#wb-drawer-kv').innerHTML = `<div><dt>Owner</dt><dd>${b.owner}</dd></div><div><dt>Cost to run</dt><dd>${b.cost || 'Price at first funding gate'} ${ev(b.costev)}</dd></div><div><dt>Fixes</dt><dd>${id === 'P10' ? 'All 24 problems' : b.fixes.length + ' of 24 problems'}</dd></div>`;
+      $('#wb-drawer-fx').innerHTML = id === 'P10' ? '' : b.fixes.map((f: string) => `<span>${f}</span>`).join('');
+      $('#wb-drawer-q').innerHTML = quickLayer(b);
+      const mv = D.moves.find((m: any) => m.block === id);
+      $('#wb-drawer-a').innerHTML = (mv ? `<h4>First step</h4><p>${mv.first}</p>` : '') + archLayer(b);
+      showDrawer('open', id);
+    }
+    function openNode(id: string, focusEl?: HTMLElement) {
+      const n = D.view?.nodes.find((x: any) => x.id === id); if (!n) return; lastFocus = focusEl || null;
+      const b = n.block ? D.blocks[n.block] : null;
+      $('#wb-drawer-k').textContent = n.external ? 'Outside system' : `${n.plane === 'control' ? 'Control plane' : 'Data plane'}${n.block ? ' · ' + n.block + ' ' + b.name : ''}`;
+      $('#wb-drawer-h').textContent = n.name; $('#wb-drawer-p').textContent = n.role || '';
+      $('#wb-drawer-kv').innerHTML = `<div><dt>Evidence</dt><dd>${ev(n.ev || 'design')}</dd></div>${b ? `<div><dt>Owner</dt><dd>${b.owner}</dd></div><div><dt>Cost to run</dt><dd>${b.cost || 'Price at first funding gate'} ${ev(b.costev)}</dd></div>` : ''}`;
+      $('#wb-drawer-fx').innerHTML = (n.parts || []).map((p: string) => `<span>${p}</span>`).join('');
+      $('#wb-drawer-q').innerHTML = b ? quickLayer(b) : (n.external ? '' : '<h4>Quick fix this week</h4><ul><li><b>No quick fix stands in for this part.</b><span>It arrives with its target block.</span></li></ul>');
+      $('#wb-drawer-a').innerHTML = b ? archLayer(b) : `<h4>For architects</h4><p>${n.ev === 'design' ? 'This part is our design framing, not a vendor fact.' : 'Backed by opened sources in the design document.'}</p>`;
+      showDrawer('node', id);
+    }
+    // One problem (scene 2, 3 and 8). The three-label key sits under the status.
+    function openProblem(id: string, focusEl?: HTMLElement) {
+      const p = D.probs.find((x: any) => x.id === id); if (!p) return; lastFocus = focusEl || null;
+      const lab = D.labels[p.st];
+      $('#wb-drawer-k').textContent = `${id} · ${p.pre === 'S' ? 'Web search' : 'Wider AI use'} · ${lab.name}`;
+      $('#wb-drawer-h').textContent = p.name; $('#wb-drawer-p').textContent = p.see;
+      $('#wb-drawer-kv').innerHTML = `<div><dt>The number</dt><dd>${p.num} ${p.numl} ${ev(p.nev)}</dd></div><div><dt>Why it happens</dt><dd>${p.why}</dd></div><div><dt>${lab.name}</dt><dd>${lab.s}</dd></div>`;
+      $('#wb-drawer-fx').innerHTML = `<span>Owner ${p.own}</span><span>Effort ${p.eff}</span><span>Maturity ${p.mat}</span>` + (p.b || []).map((b: string) => `<span>${b} ${D.blocks[b]?.name || ''}</span>`).join('');
+      $('#wb-drawer-q').innerHTML = p.quick ? `<h4>Quick fix this week</h4><ul><li><b>${p.quick.fix}</b><span>${p.quick.who}. ${p.quick.effort}.</span><span>Does not cover: ${p.quick.limit}</span>${ev(p.quick.ev)}</li></ul>` : '';
+      $('#wb-drawer-a').innerHTML = `<h4>Fix properly</h4><p>${p.fix}</p><p><b>First step.</b> ${p.first}</p><p><b>Proof.</b> ${p.evl} ${ev(p.ev === 'm' ? 'verified' : p.ev === 'v' ? 'vendor' : undefined)}</p>`;
+      showDrawer('open', id);
+    }
+    // One swimlane cell (scene 7).
+    function openCell(id: string, focusEl?: HTMLElement) {
+      const [r, c] = id.split('-').map(Number); const cell = D.lanes.cells.find((x: any) => x.r === r && x.c === c); if (!cell) return; lastFocus = focusEl || null;
+      $('#wb-drawer-k').textContent = `${D.lanes.rows[r]} · ${D.lanes.cols[c]} · ${cell.cad}`;
+      $('#wb-drawer-h').textContent = cell.task; $('#wb-drawer-p').textContent = cell.detail;
+      $('#wb-drawer-kv').innerHTML = `<div><dt>Standard</dt><dd>${cell.std || 'None named'}</dd></div><div><dt>Evidence</dt><dd>${ev(cell.ev || 'design')}</dd></div>`;
+      $('#wb-drawer-fx').innerHTML = ''; $('#wb-drawer-q').innerHTML = ''; $('#wb-drawer-a').innerHTML = '';
+      showDrawer('cell', id);
+    }
+    function showDrawer(k: string, v: string) {
+      drawer.hidden = false; ['open', 'node', 'cell'].forEach((x) => { if (x !== k) hashSet(x, null); }); hashSet(k, v); $$('.wb-node').forEach((n) => n.classList.toggle('sel', n.dataset.node === v));
+      $(`#scene-${current}`).after(drawer);
+      drawer.scrollIntoView({ block: 'nearest', behavior: reduce ? 'auto' : 'smooth' }); ($('#wb-drawer-h') as HTMLElement).focus({ preventScroll: true });
+    }
+    function closeDrawer() { drawer.hidden = true; hashSet('open', null); hashSet('node', null); hashSet('cell', null); $$('.wb-node').forEach((n) => n.classList.remove('sel')); lastFocus?.focus({ preventScroll: true }); }
+    $('[data-close]').addEventListener('click', closeDrawer);
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !drawer.hidden) closeDrawer(); });
+    root.addEventListener('click', (e) => {
+      const t = e.target as HTMLElement; const nb = t.closest('button[data-node]') as HTMLElement | null; const ob = t.closest('button[data-open]') as HTMLElement | null;
+      const cb = t.closest('button[data-cell]') as HTMLElement | null;
+      if (nb) openNode(nb.dataset.node!, nb); else if (cb) openCell(cb.dataset.cell!, cb); else if (ob) openAny(ob.dataset.open!, ob);
+    });
+    const openAny = (id: string, el?: HTMLElement) => (/^[SF]\d/.test(id) ? openProblem(id, el) : openBlock(id, el));
+
+    // ---- architecture wires: lines between node buttons, redrawn on resize
+    const grid = $('#wb-archgrid');
+    function wires() {
+      if (!grid || !D.view) return; const svg = $('.wb-wires', grid) as unknown as SVGSVGElement; const g = grid.getBoundingClientRect();
+      if (g.width < 720) { svg.innerHTML = ''; return; } // narrow: the order badges carry the sequence
+      const pos = (id: string) => { const b = $(`[data-node="${id}"]`, grid); if (!b) return null; const r = b.getBoundingClientRect(); return { x: r.left - g.left + r.width / 2, y: r.top - g.top + r.height / 2, t: r.top - g.top, b: r.bottom - g.top, l: r.left - g.left, r: r.right - g.left }; };
+      const K: Record<string, string> = { request: 'flow', response: 'flow', control: 'ctl', log: 'log', offline: 'loop' };
+      svg.innerHTML = D.view.flows.map((f: any) => {
+        const a = pos(f.from), b = pos(f.to); if (!a || !b) return '';
+        const same = Math.abs(a.y - b.y) < 4; let d: string;
+        if (same && Math.abs(a.x - b.x) < 260) d = a.x < b.x ? `M${a.r} ${a.y} L${b.l} ${b.y}` : `M${a.l} ${a.y} L${b.r} ${b.y}`;
+        else if (same) { const y = a.t - 14; d = `M${a.x} ${a.t} C${a.x} ${y}, ${b.x} ${y}, ${b.x} ${b.t}`; }
+        else { const down = b.y > a.y; const y1 = down ? a.b : a.t, y2 = down ? b.t : b.b, m = (y1 + y2) / 2; d = `M${a.x} ${y1} C${a.x} ${m}, ${b.x} ${m}, ${b.x} ${y2}`; }
+        return `<path class="${K[f.kind] || 'flow'}" d="${d}"><title>${f.label || ''}</title></path>`;
+      }).join('');
+    }
+    wires(); addEventListener('resize', wires); if ((document as any).fonts?.ready) (document as any).fonts.ready.then(wires);
+
+    // ---- interim / target switch (hash `arch=interim`). The morph is CSS, staggered per part.
+    function setArch(v: string) {
+      const interim = v === 'interim'; root.dataset.arch = interim ? 'interim' : 'target'; hashSet('arch', interim ? 'interim' : null);
+      $$('.wb-switch button[data-arch]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.arch === (interim ? 'interim' : 'target'))));
+    }
+    $('.wb-switch').addEventListener('click', (e) => { const b = (e.target as HTMLElement).closest('button[data-arch]') as HTMLElement; if (b) setArch(b.dataset.arch!); });
+    if (hashGet().get('arch') === 'interim') setArch('interim');
+
+    // ---- scene 5 plays (DOM list is the source of truth, the 3D stage mirrors it)
+    const stepEls = $$('.wb-steps button'); const stepIds = D.steps.map((s: any) => s.id);
+    const WORD: Record<string, string> = { on: 'Passed', warn: 'Partly caught', stop: 'Stopped', na: 'Not used', wait: 'Waiting', skip: 'Skipped' };
+    let playTimers: number[] = []; let onPlay: ((id: string, states: Record<string, string>) => void) | null = null;
+    function setStep(id: string, st: string) { const el = stepEls.find((e) => e.dataset.step === id); if (!el) return; el.dataset.state = st; el.querySelector('.wb-state')!.textContent = WORD[st] || st; }
+    function play(id: string) {
+      const p = D.plays.find((x: any) => x.id === id); if (!p) return;
+      $$('.wb-plays button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.play === id)));
+      hashSet('play', id === 'good' ? null : id); $('.wb-msg').textContent = p.msg;
+      playTimers.forEach(clearTimeout); playTimers = [];
+      const final: Record<string, string> = {}; let stopped = false;
+      for (const s of stepIds) { let st = p.st[s] || 'on'; if (stopped && s !== 'log') st = 'skip'; final[s] = st; if (st === 'stop') stopped = true; }
+      if (reduce) { stepIds.forEach((s: string) => setStep(s, final[s])); }
+      else { stepIds.forEach((s: string) => setStep(s, 'wait')); stepIds.forEach((s: string, i: number) => playTimers.push(window.setTimeout(() => setStep(s, final[s]), 260 * (i + 1)))); playTimers.push(window.setTimeout(() => stepIds.forEach((s: string) => setStep(s, final[s])), 260 * stepIds.length + 400)); }
+      onPlay?.(id, final);
+    }
+    $('.wb-plays').addEventListener('click', (e) => { const b = (e.target as HTMLElement).closest('button[data-play]') as HTMLElement; if (b) play(b.dataset.play!); });
+
+    // ---- scenes and the hash
+    let current = '1'; let onScene: ((n: string) => void) | null = null; let settleUntil = 0;
+    // Scene 7 playhead: the active stage column sweeps Buy to Change and loops. Reduced motion shows every stage lit.
+    const laneBtns = $$('.wb-lrow button'), laneHeads = $$('.wb-lhead button'); let sweep = 0; let sweepTimer = 0;
+    const setStage = (ci: number) => { sweep = ci; laneBtns.forEach((b) => b.classList.toggle('on', reduce || +b.dataset.col! === ci)); laneHeads.forEach((h) => h.classList.toggle('on', reduce || +h.dataset.colbtn! === ci)); };
+    laneHeads.forEach((h) => h.addEventListener('click', () => { setStage(+h.dataset.colbtn!); if (sweepTimer) runSweep(true); }));
+    const runSweep = (on: boolean) => { clearInterval(sweepTimer); if (reduce || deck) { laneBtns.forEach((x) => x.classList.add('on')); laneHeads.forEach((x) => x.classList.add('on')); return; } if (on) { setStage(sweep); sweepTimer = window.setInterval(() => setStage((sweep + 1) % 5), 1600); } };
+    if (laneBtns.length) { if (deck) runSweep(false); else setStage(0); }
+    $$('details.wb-fold').forEach((d) => { if (!narrow) (d as HTMLDetailsElement).open = true; });
+    function setScene(n: string, fromHash = false) {
+      if (n === current && !fromHash) return; current = n; root.dataset.scene = n; if (!fromHash) hashSet('scene', n === '1' ? null : n); onScene?.(n);
+      runSweep(n === '7'); if (n === '6') root.classList.add('is-built');
+    }
+    // A programmatic jump (hash on load) wins over the observer's first callbacks for a moment.
+    const io = new IntersectionObserver((es) => { if (performance.now() < settleUntil) return; es.forEach((e) => { if (e.isIntersecting) setScene((e.target as HTMLElement).dataset.scene!); }); }, { rootMargin: '-45% 0px -45% 0px', threshold: 0 });
+    const h0 = hashGet();
+    const jump = () => { const s = h0.get('scene') && $(`#scene-${h0.get('scene')}`); if (s) { settleUntil = performance.now() + 900; s.scrollIntoView({ block: 'start', behavior: 'instant' as ScrollBehavior }); /* the site scrolls smoothly by default, and two smooth jumps cancel */ setScene(h0.get('scene')!, true); } };
+    try { history.scrollRestoration = 'manual'; } catch {}
+    jump(); $$('.wb-scene').forEach((s) => io.observe(s));
+    addEventListener('load', () => requestAnimationFrame(() => { jump(); wires(); }), { once: true });
+    if ((document as any).fonts?.ready) (document as any).fonts.ready.then(() => requestAnimationFrame(jump));
+    if (h0.get('play')) play(h0.get('play')!);
+    if (h0.get('open')) openAny(h0.get('open')!);
+    if (h0.get('node')) openNode(h0.get('node')!);
+    if (h0.get('cell')) openCell(h0.get('cell')!);
+
+    // ---- the 3D stage
+    if (use3d) {
+      const stage = $('.wb-stage'); const canvas = $('.wb-canvas') as HTMLCanvasElement; const overlay = $('.wb-overlay');
+      // Shared boot (what-breaks/scene3d.ts): lazy import near view, one retry, then the still frames take over.
+      startNear(root, boot, () => { root.classList.remove('is-3d'); jump(); });
+
+      function boot(THREE: typeof import('three')) {
+        const world = makeWorld(THREE, canvas, stage); const { R, S, cam } = world;
+        let W = world.W, H = world.H; addEventListener('resize', () => { W = world.W; H = world.H; });
+
+        const TONE: Record<string, number> = { 'iso-teal': 0x0f8a6b, 'iso-violet': 0x4b44a8, 'iso-amber': 0xb8740f, 'iso-coral': 0xd2552d };
+        const slabs: any[] = []; const blocks: Record<string, any> = {}; const home: Record<string, any> = {};
+        D.layers.forEach((L: any, i: number) => {
+          const col = TONE[LAYER_TONE[i]];
+          const g = new THREE.Mesh(new THREE.BoxGeometry(10, 0.22, 5.4), new THREE.MeshStandardMaterial({ color: col, transparent: true, opacity: 0.22, roughness: 0.6, metalness: 0.1 }));
+          g.position.y = i * 1.6; g.userData = { y: i * 1.6, o: 0.22 }; S.add(g); slabs.push(g);
+          const edge = new THREE.LineSegments(new THREE.EdgesGeometry(g.geometry), new THREE.LineBasicMaterial({ color: col, transparent: true, opacity: 0.5 })); g.add(edge);
+          L.blocks.forEach((id: string, j: number) => {
+            const xs = L.blocks.length === 1 ? [0] : [-3, 0, 3];
+            const m = new THREE.Mesh(new THREE.BoxGeometry(1.7, 0.7, 1.7), new THREE.MeshStandardMaterial({ color: col, emissive: col, emissiveIntensity: 0.18, roughness: 0.4 }));
+            m.position.set(xs[j], i * 1.6 + 0.47, 0); S.add(m); blocks[id] = m; home[id] = m.position.clone();
+          });
+        });
+        const up = (id: string) => blocks[id].position.clone().add(new THREE.Vector3(0, 0.75, 0));
+        const curve = new THREE.CatmullRomCurve3(D.steps.map((s: any) => up(s.block)), false, 'catmullrom', 0.2);
+        const tube = new THREE.Mesh(new THREE.TubeGeometry(curve, 120, 0.035, 8, false), new THREE.MeshBasicMaterial({ color: 0x86abdd, transparent: true, opacity: 0.55 })); S.add(tube);
+        // offline loop: failure log -> test set -> gateway
+        const loopCurve = new THREE.CatmullRomCurve3([up('P3'), up('P3').add(new THREE.Vector3(0, 0, 3.2)), up('P10').add(new THREE.Vector3(0, 0, 3.2)), up('P10'), up('P6')], false, 'catmullrom', 0.1);
+        const loopTube = new THREE.Mesh(new THREE.TubeGeometry(loopCurve, 90, 0.03, 8, false), new THREE.MeshBasicMaterial({ color: 0x4edab5, transparent: true, opacity: 0 })); S.add(loopTube);
+
+        const dotGeo = new THREE.SphereGeometry(0.16, 14, 10); const dots: any[] = []; const MAX_DOTS = 36;
+        const mkDot = (col: number, onCurve = curve) => { const m = new THREE.Mesh(dotGeo, new THREE.MeshBasicMaterial({ color: col, transparent: true })); const halo = new THREE.Sprite(new THREE.SpriteMaterial({ color: col, transparent: true, opacity: 0.35, depthWrite: false })); halo.scale.setScalar(0.9); m.add(halo); m.userData = { t: 0, curve: onCurve, speed: 0.0045, dead: 0 }; S.add(m); dots.push(m); return m; };
+
+        // DOM labels projected from 3D, kept inside the stage
+        const tags: Record<string, HTMLElement> = {};
+        const mkTag = (key: string, html: string, cls = '') => { const el = document.createElement('div'); el.className = 'wb-tag ' + cls; el.innerHTML = html; overlay.appendChild(el); tags[key] = el; return el; };
+        D.layers.forEach((L: any, i: number) => mkTag('L' + i, L.name, 'layer'));
+        Object.keys(blocks).forEach((id) => mkTag(id, `${icon(D.blocks[id].ic, LAYER_TONE[layerOf(id)], 64)}<span>${D.blocks[id].name}</span>`));
+        const v = new THREE.Vector3(); const LIFT = new THREE.Vector3(0, 0.5, 0.95);
+        const place = () => {
+          D.layers.forEach((_: any, i: number) => { const p = project(v.set(-5.6, slabs[i].position.y, 2.7), cam, W, H, null, { x0: 12, x1: W - 120 - 12, dx: -120, y0: 12, y1: H - 20 }); const t = tags['L' + i]; t.style.left = p.cx + 'px'; t.style.top = p.cy + 'px'; t.style.opacity = slabs[i].material.opacity < 0.05 ? '0' : '1'; });
+          Object.entries(blocks).forEach(([id, m]: any) => { const p = project(m.position, cam, W, H, LIFT, { x0: 12, x1: W - 120 - 12, dx: -60, y0: 12, y1: H - 96 }); const t = tags[id]; t.style.left = p.cx + 60 + 'px'; t.style.top = p.cy + 'px'; t.style.opacity = (p.behind || m.material.opacity === 0) ? '0' : '1'; });
+        };
+
+        // camera presets per scene, eased over 1.2 s. Not tied to scroll position.
+        const PRESET: Record<string, { pos: number[]; look: number[] }> = {
+          '1': { pos: [13, 10, 14], look: [0, 2.4, 0] },
+          '2': { pos: [-9, 9, 13], look: [0, 2.8, 0] },
+          '3': { pos: [8, 5.5, 11], look: [0, 2.2, 0] },
+          '4': { pos: [0.5, 15, 13], look: [0, 2.6, 0.2] },
+          '5': { pos: [11.5, 7, 12.5], look: [0, 2.2, 0.6] },
+          '6': { pos: [-12, 6, 11], look: [0, 2.4, 0] },
+          '7': { pos: [0, 17, 6], look: [0, 1.5, 0] },
+          '8': { pos: [14, 9, 15], look: [0, 2.4, 0] }
+        };
+        // scene 2: one spark per problem, sitting above the block that fixes it first
+        const sparkGeo = new THREE.SphereGeometry(0.11, 10, 8); const sparks: any[] = [];
+        D.probs.forEach((p: any, i: number) => { const b = blocks[p.b?.[0]]; if (!b) return; const m = new THREE.Mesh(sparkGeo, new THREE.MeshBasicMaterial({ color: p.st === 'worse' ? 0xff776c : p.st === 'new' ? 0xf4cb73 : 0xff9a8f, transparent: true, opacity: 0 })); const a = i * 2.4; m.position.copy(b.position).add(new THREE.Vector3(Math.cos(a) * 0.6, 1.1 + (i % 3) * 0.35, Math.sin(a) * 0.6)); m.userData = { base: m.position.clone(), ph: i }; S.add(m); sparks.push(m); });
+        let builtAt = 0;
+        // A fresh visit opens with a pull-back from one request. A deep link to a later scene starts at that scene's view.
+        const p0 = PRESET[current] || PRESET['1'];
+        let from = current === '1' ? { pos: new THREE.Vector3(2.5, 2.2, 3.5), look: new THREE.Vector3(0, 1.7, 0) } : { pos: new THREE.Vector3(...p0.pos), look: new THREE.Vector3(...p0.look) }, to = from, t0 = performance.now(), moving = true;
+        const target = from.look.clone();
+        const go = (n: string) => { const p = PRESET[n] || PRESET['1']; from = { pos: cam.position.clone(), look: target.clone() }; to = { pos: new THREE.Vector3(...p.pos), look: new THREE.Vector3(...p.look) }; t0 = performance.now(); moving = true; };
+        cam.position.copy(from.pos);
+
+        let mode = current; let lastSpawn = 0; let highlight: Record<string, string> | null = null; let loopOn = false; let arch = false;
+        const archPos: Record<string, any> = {};
+        const layoutArch = () => { const ctrl = ['P5', 'P7', 'P8', 'P10'], data = D.steps.map((s: any) => s.block); ctrl.forEach((id, i) => archPos[id] = new THREE.Vector3(-4.5 + i * 3, 5.6, -2.2)); data.forEach((id: string, i: number) => archPos[id] = new THREE.Vector3(-6 + i * 2, 1.2, 1.6)); };
+        onScene = (n) => { mode = n; go(n); arch = n === '4'; loopOn = n === '5'; if (n !== '5') highlight = null; if (arch) layoutArch(); if (n === '6' && !builtAt) builtAt = performance.now(); };
+        onScene(current);
+        onPlay = (id, final) => { highlight = final; dots.forEach((d) => S.remove(d)); dots.length = 0; const d = mkDot(id === 'good' ? 0x4edab5 : 0xff776c); d.userData.speed = 0.0032; d.userData.final = final; };
+        let visible = true; new IntersectionObserver((es) => { visible = es.some((e) => e.isIntersecting); }, { threshold: 0 }).observe(stage);
+        const flash: Record<string, number> = {};
+
+        function frame(now: number) {
+          const k = Math.min(1, (now - t0) / 1200), e = 1 - Math.pow(1 - k, 3);
+          if (moving) { cam.position.lerpVectors(from.pos, to.pos, e); target.lerpVectors(from.look, to.look, e); if (k >= 1) moving = false; }
+          if (!moving && mode === '1') cam.position.x = to.pos.x + Math.sin(now / 6000) * 0.8;
+          cam.lookAt(target);
+          // scene 6: layers rise into place in build order, 700 ms apart. Before scene 6 is reached they sit at home.
+          const riseOf = (id: string) => { if (mode !== '6' || !builtAt) return 0; const oi = D.buildOrder.indexOf(D.layers[layerOf(id)].name); const k = Math.min(1, Math.max(0, (now - builtAt - oi * 700) / 900)); return (1 - (1 - Math.pow(1 - k, 3))) * 5; };
+          slabs.forEach((s, i) => { const o = arch ? 0 : (mode === '5' ? 0.1 : 0.22); s.material.opacity += (o - s.material.opacity) * 0.08; s.children[0].material.opacity = s.material.opacity * 2.2; s.position.y = s.userData.y - (mode === '6' ? riseOf(D.layers[i].blocks[0]) : 0); });
+          sparks.forEach((s, i) => { s.material.opacity += ((mode === '2' ? 0.95 : 0) - s.material.opacity) * 0.06; s.position.y = s.userData.base.y + Math.sin(now / 900 + i) * 0.12; });
+          Object.entries(blocks).forEach(([id, m]: any) => {
+            const dest = arch && archPos[id] ? archPos[id] : home[id]; m.position.lerp(dest, 0.07); if (mode === '6') m.position.y = dest.y - riseOf(id);
+            let glow = 0.18; const base = TONE[LAYER_TONE[layerOf(id)]];
+            if (mode === '3') glow = D.first4.includes(id) ? 1.0 : 0.04;
+            if (highlight) { const st = Object.entries(highlight).find(([sid]) => D.steps.find((s: any) => s.id === sid)?.block === id)?.[1]; glow = st === 'stop' ? 1.2 : st === 'warn' ? 0.7 : st === 'na' || st === 'skip' ? 0.05 : 0.3; m.material.emissive.setHex(st === 'stop' ? 0xff776c : st === 'warn' ? 0xf4cb73 : base); }
+            else m.material.emissive.setHex(base);
+            if (flash[id] && now < flash[id]) glow = 1.4; m.material.emissiveIntensity += (glow - m.material.emissiveIntensity) * 0.1;
+            tags[id]?.classList.toggle('dim', (!!highlight || mode === '3') && glow < 0.1);
+          });
+          if (arch || mode === '5') { curve.points = D.steps.map((s: any) => up(s.block)); tube.geometry.dispose(); tube.geometry = new THREE.TubeGeometry(curve, 120, 0.035, 8, false); }
+          loopTube.material.opacity += ((loopOn ? 0.6 : 0) - loopTube.material.opacity) * 0.06;
+          if (mode === '1' && now - lastSpawn > 700 && dots.length < MAX_DOTS) { lastSpawn = now; const bad = Math.random() < 0.2; const d = mkDot(bad ? 0xff776c : 0x4edab5); d.userData.final = bad ? { check: 'stop' } : null; }
+          if (mode === '5' && loopOn && now - lastSpawn > 1600 && dots.length < MAX_DOTS) { lastSpawn = now; const d = mkDot(0x4edab5, loopCurve); d.userData.speed = 0.0028; }
+          for (let i = dots.length - 1; i >= 0; i--) {
+            const d = dots[i], u = d.userData;
+            if (u.dead) { u.dead += 0.03; d.material.opacity = Math.max(0, 1 - u.dead); d.scale.setScalar(1 + u.dead * 2.5); if (u.dead > 1) { S.remove(d); dots.splice(i, 1); } continue; }
+            u.t += u.speed; const stopAt = u.final ? D.steps.findIndex((s: any) => u.final[s.id] === 'stop') : -1;
+            if (stopAt >= 0 && u.t >= stopAt / (D.steps.length - 1)) { u.t = stopAt / (D.steps.length - 1); u.dead = 0.01; flash[D.steps[stopAt].block] = now + 500; }
+            if (u.t >= 1) { u.dead = 0.01; if (u.curve === loopCurve) flash.P6 = now + 300; }
+            d.position.copy(u.curve.getPointAt(Math.min(1, u.t)));
+          }
+          R.render(S, cam); place();
+        }
+        runLoop(stage, frame);
+        addEventListener('pagehide', () => R.dispose());
+        (window as any).__wb = { get mode() { return mode; }, get cam() { return [cam.position.x, cam.position.y, cam.position.z].map((n) => +n.toFixed(2)); }, get moving() { return moving; }, get dots() { return dots.length; }, get visible() { return visible; } };
+      }
+    }
+  }
+</script>

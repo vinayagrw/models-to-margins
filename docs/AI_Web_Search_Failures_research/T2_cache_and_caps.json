@@ -1,0 +1,718 @@
+{
+ "test_id": "T2",
+ "title": "Claude Code WebFetch cache and WebSearch caps measured test",
+ "date": "2026-10-25",
+ "run_window_utc": "13:07 to 13:26",
+ "claude_code_version": "2.1.296",
+ "tester": "Claude Code (Opus 5.5) as a subagent, testing its own WebFetch and WebSearch tools from this install",
+ "independence_caveat": "The tester is Claude Code itself. The test does not rely on vendor docs or third-party write-ups, but it is not independent of the vendor.",
+ "machine": "one macOS machine, one network, one day",
+ "tool_call_counts": {
+  "websearch": 30,
+  "webfetch": 18
+ },
+ "check_1_webfetch_cache": {
+  "documented_claim": "Responses are cached for 15 minutes per URL.",
+  "documented_claim_source": "WebFetch tool description given to the model",
+  "ground_truth": "curl -s to the same URL just before each WebFetch call. Time is the Bash clock read before the curl. WebFetch ran within about 10 seconds after.",
+  "url_selection": {
+   "kept": {
+    "U1": "https://httpbin.org/uuid",
+    "U2": "https://www.uuidgenerator.net/api/version4",
+    "U3": "https://www.random.org/integers/?num=1&min=1&max=1000000000&col=1&base=10&format=plain&rnd=new"
+   },
+   "reserve": {
+    "url": "https://time.now/developer/api/timezone/Etc/UTC",
+    "status": "changed on both curl calls, not used"
+   },
+   "dropped": {
+    "url": "https://worldtimeapi.org/api/timezone/Etc/UTC",
+    "reason": "no response, curl HTTP code 000 on both calls"
+   }
+  },
+  "headers_curl_get": {
+   "U1": {
+    "status": "HTTP/2 200",
+    "redirects": 0,
+    "cache_headers": null
+   },
+   "U2": {
+    "status": "HTTP/2 200",
+    "redirects": 0,
+    "cache_headers": null
+   },
+   "U3": {
+    "status": "HTTP/2 200",
+    "redirects": 0,
+    "cache_headers": "cache-control: no-store, no-cache, must-revalidate. pragma: no-cache. expires: Thu, 19 Nov 1981 08:52:00 GMT"
+   }
+  },
+  "calls": [
+   {
+    "round": "R1",
+    "url_id": "U1",
+    "url": "https://httpbin.org/uuid",
+    "time_utc": "13:07:30",
+    "elapsed_from_own_first_fetch": "0:00",
+    "prompt": "Return the exact value in the body, verbatim.",
+    "curl_value": "4eb851d7-0f33-412c-b98e-30cfe01b645b",
+    "webfetch_value": "1d9074a3-ab18-486d-83ce-0ace685f672f",
+    "same_as_own_first_webfetch": null
+   },
+   {
+    "round": "R1",
+    "url_id": "U2",
+    "url": "https://www.uuidgenerator.net/api/version4",
+    "time_utc": "13:07:37",
+    "elapsed_from_own_first_fetch": "0:00",
+    "prompt": "Return the exact value in the body, verbatim.",
+    "curl_value": "f22d21a1-6397-46e8-bcf5-ad161a7101b6",
+    "webfetch_value": "fac6a7ef-64f1-4fb0-9e28-ce25044a8ece",
+    "same_as_own_first_webfetch": null
+   },
+   {
+    "round": "R1",
+    "url_id": "U3",
+    "url": "https://www.random.org/integers/?num=1&min=1&max=1000000000&col=1&base=10&format=plain&rnd=new",
+    "time_utc": "13:07:46",
+    "elapsed_from_own_first_fetch": "0:00",
+    "prompt": "Return the exact value in the body, verbatim.",
+    "curl_value": "57793597",
+    "webfetch_value": "135457978",
+    "same_as_own_first_webfetch": null
+   },
+   {
+    "round": "R2",
+    "url_id": "U1",
+    "url": "https://httpbin.org/uuid",
+    "time_utc": "13:09:39",
+    "elapsed_from_own_first_fetch": "2:09",
+    "prompt": "Return the exact value in the body, verbatim.",
+    "curl_value": "84888517-bada-4960-8d55-98cb64f90956",
+    "webfetch_value": "1d9074a3-ab18-486d-83ce-0ace685f672f",
+    "same_as_own_first_webfetch": true
+   },
+   {
+    "round": "R2",
+    "url_id": "U1cb",
+    "url": "https://httpbin.org/uuid?cb=1",
+    "time_utc": "13:09:45",
+    "elapsed_from_own_first_fetch": "0:00",
+    "prompt": "Return the exact value in the body, verbatim.",
+    "curl_value": "302378fa-2d2a-4778-abe1-79149d2c7d60",
+    "webfetch_value": "c00886cd-7c96-44e1-822b-2ec6bb357b79",
+    "same_as_own_first_webfetch": null
+   },
+   {
+    "round": "R2",
+    "url_id": "U2",
+    "url": "https://www.uuidgenerator.net/api/version4",
+    "time_utc": "13:09:53",
+    "elapsed_from_own_first_fetch": "2:16",
+    "prompt": "Return the exact value in the body, verbatim.",
+    "curl_value": "889fdcff-251c-48e7-a227-e2ad055966a3",
+    "webfetch_value": "fac6a7ef-64f1-4fb0-9e28-ce25044a8ece",
+    "same_as_own_first_webfetch": true
+   },
+   {
+    "round": "R2",
+    "url_id": "U2cb",
+    "url": "https://www.uuidgenerator.net/api/version4?cb=1",
+    "time_utc": "13:10:00",
+    "elapsed_from_own_first_fetch": "0:00",
+    "prompt": "Return the exact value in the body, verbatim.",
+    "curl_value": "fde3d55a-b0e5-4b27-8266-e60f2e76af17",
+    "webfetch_value": "26a4f913-4a18-4404-abaa-0962b2a9c01d",
+    "same_as_own_first_webfetch": null
+   },
+   {
+    "round": "R2",
+    "url_id": "U3",
+    "url": "https://www.random.org/integers/?num=1&min=1&max=1000000000&col=1&base=10&format=plain&rnd=new",
+    "time_utc": "13:10:06",
+    "elapsed_from_own_first_fetch": "2:20",
+    "prompt": "Return the exact value in the body, verbatim.",
+    "curl_value": "725302164",
+    "webfetch_value": "135457978",
+    "same_as_own_first_webfetch": true
+   },
+   {
+    "round": "R2",
+    "url_id": "U3cb",
+    "url": "https://www.random.org/integers/?num=1&min=1&max=1000000000&col=1&base=10&format=plain&rnd=new&cb=1",
+    "time_utc": "13:10:14",
+    "elapsed_from_own_first_fetch": "0:00",
+    "prompt": "Return the exact value in the body, verbatim.",
+    "curl_value": "133474591",
+    "webfetch_value": "318297426",
+    "same_as_own_first_webfetch": null
+   },
+   {
+    "round": "R3",
+    "url_id": "U1",
+    "url": "https://httpbin.org/uuid",
+    "time_utc": "13:15:32",
+    "elapsed_from_own_first_fetch": "8:02",
+    "prompt": "Return the exact value in the body, verbatim.",
+    "curl_value": "dee94632-e4b9-46f8-9f78-62aa42b5e06e",
+    "webfetch_value": "1d9074a3-ab18-486d-83ce-0ace685f672f",
+    "same_as_own_first_webfetch": true
+   },
+   {
+    "round": "R3",
+    "url_id": "U2",
+    "url": "https://www.uuidgenerator.net/api/version4",
+    "time_utc": "13:15:41",
+    "elapsed_from_own_first_fetch": "8:04",
+    "prompt": "Return the exact value in the body, verbatim.",
+    "curl_value": "f9b9672d-5f95-4f15-9524-c9a778bb8473",
+    "webfetch_value": "fac6a7ef-64f1-4fb0-9e28-ce25044a8ece",
+    "same_as_own_first_webfetch": true
+   },
+   {
+    "round": "R3",
+    "url_id": "U3",
+    "url": "https://www.random.org/integers/?num=1&min=1&max=1000000000&col=1&base=10&format=plain&rnd=new",
+    "time_utc": "13:15:49",
+    "elapsed_from_own_first_fetch": "8:03",
+    "prompt": "Return the exact value in the body, verbatim.",
+    "curl_value": "683745672",
+    "webfetch_value": "135457978",
+    "same_as_own_first_webfetch": true
+   },
+   {
+    "round": "R4",
+    "url_id": "U1",
+    "url": "https://httpbin.org/uuid",
+    "time_utc": "13:23:35",
+    "elapsed_from_own_first_fetch": "16:05",
+    "prompt": "Return the exact value in the body, verbatim.",
+    "curl_value": "6f90b82b-2140-41eb-b3a9-1456d55bbf6c",
+    "webfetch_value": "4acfe3b8-c0ed-40b2-a660-de6e629b5831",
+    "same_as_own_first_webfetch": false
+   },
+   {
+    "round": "R4",
+    "url_id": "U1cb",
+    "url": "https://httpbin.org/uuid?cb=1",
+    "time_utc": "13:23:47",
+    "elapsed_from_own_first_fetch": "14:02",
+    "prompt": "Return the exact value in the body, verbatim.",
+    "curl_value": "5610bf48-ec32-481e-acc6-e52aefb7e282",
+    "webfetch_value": "c00886cd-7c96-44e1-822b-2ec6bb357b79",
+    "same_as_own_first_webfetch": true
+   },
+   {
+    "round": "R4",
+    "url_id": "U2",
+    "url": "https://www.uuidgenerator.net/api/version4",
+    "time_utc": "13:23:54",
+    "elapsed_from_own_first_fetch": "16:17",
+    "prompt": "Return the exact value in the body, verbatim.",
+    "curl_value": "efba7fc7-91ba-4860-9513-8f60b1135bec",
+    "webfetch_value": "62d97717-2c91-4f3b-b267-73435ba38df3",
+    "same_as_own_first_webfetch": false
+   },
+   {
+    "round": "R4",
+    "url_id": "U3",
+    "url": "https://www.random.org/integers/?num=1&min=1&max=1000000000&col=1&base=10&format=plain&rnd=new",
+    "time_utc": "13:24:03",
+    "elapsed_from_own_first_fetch": "16:17",
+    "prompt": "Return the exact value in the body, verbatim.",
+    "curl_value": "136387765",
+    "webfetch_value": "112720823",
+    "same_as_own_first_webfetch": false
+   },
+   {
+    "round": "R5",
+    "url_id": "U1cb",
+    "url": "https://httpbin.org/uuid?cb=1",
+    "time_utc": "13:25:00",
+    "elapsed_from_own_first_fetch": "15:15",
+    "prompt": "Return the exact value in the body, verbatim.",
+    "curl_value": "1d42573a-d4ce-45f0-81ae-4178f03d0581",
+    "webfetch_value": "f957bc66-0d93-4e95-add9-20cbcdf1bfda",
+    "same_as_own_first_webfetch": false
+   },
+   {
+    "round": "R5",
+    "url_id": "U1",
+    "url": "https://httpbin.org/uuid",
+    "time_utc": "13:25:36",
+    "elapsed_from_own_first_fetch": "2:01 after R4",
+    "prompt": "What is the first 8 characters of the uuid field, and what is the full raw response text?",
+    "curl_value": null,
+    "webfetch_value": "4acfe3b8-c0ed-40b2-a660-de6e629b5831",
+    "same_as_own_first_webfetch": true,
+    "note": "Different prompt. Returned the R4 UUID and the full JSON body. No curl taken."
+   }
+  ],
+  "results": {
+   "same_value_inside_15_min": "3 of 3 URLs at about 2 and 8 minutes",
+   "new_value_after_15_min": "3 of 3 URLs at about 16 minutes",
+   "curl_changed_every_call": true,
+   "query_string_bypass": "3 of 3 added parameters gave a fresh value",
+   "cb_variant_expiry_bound": "still cached at 14:02, fresh at 15:15",
+   "key_includes_prompt": false,
+   "cache_holds_page_content": "yes, a different prompt got the cached body and quoted the full JSON",
+   "honours_origin_no_store": false,
+   "webfetch_mentioned_caching_in_replies": false,
+   "redirects_explain_repeats": false,
+   "summariser_explains_repeats": "no, same 36-character UUID on 4 calls, fresh values on variant URLs and after 16 minutes",
+   "verdict": "15-minute per-URL cache confirmed"
+  }
+ },
+ "check_2a_links_per_call": {
+  "queries": [
+   {
+    "call": 1,
+    "type": "news",
+    "query": "Federal Reserve interest rate decision October 2026",
+    "mode": "standard",
+    "domain_filter": null,
+    "links_returned": 9,
+    "outcome": "ok"
+   },
+   {
+    "call": 2,
+    "type": "technical_docs",
+    "query": "Python asyncio TaskGroup documentation exception handling",
+    "mode": "standard",
+    "domain_filter": null,
+    "links_returned": 9,
+    "outcome": "ok"
+   },
+   {
+    "call": 3,
+    "type": "local",
+    "query": "best ramen restaurants near Shinjuku station Tokyo",
+    "mode": "standard",
+    "domain_filter": null,
+    "links_returned": 9,
+    "outcome": "ok"
+   },
+   {
+    "call": 4,
+    "type": "non_english_fr",
+    "query": "recette traditionnelle du cassoulet de Castelnaudary",
+    "mode": "standard",
+    "domain_filter": null,
+    "links_returned": 9,
+    "outcome": "ok"
+   },
+   {
+    "call": 5,
+    "type": "very_niche",
+    "query": "Hamamatsu R1924A photomultiplier tube dark current at 1000V",
+    "mode": "standard",
+    "domain_filter": null,
+    "links_returned": 9,
+    "outcome": "ok"
+   },
+   {
+    "call": 6,
+    "type": "technical_docs",
+    "query": "Kubernetes HorizontalPodAutoscaler behavior scaleDown stabilizationWindowSeconds",
+    "mode": "standard",
+    "domain_filter": null,
+    "links_returned": 9,
+    "outcome": "ok"
+   },
+   {
+    "call": 7,
+    "type": "non_english_de_news",
+    "query": "Bundesliga Ergebnisse heute Spieltag",
+    "mode": "standard",
+    "domain_filter": null,
+    "links_returned": 10,
+    "outcome": "ok"
+   },
+   {
+    "call": 8,
+    "type": "local",
+    "query": "plumbers open Sunday in Boise Idaho",
+    "mode": "standard",
+    "domain_filter": null,
+    "links_returned": 9,
+    "outcome": "ok"
+   },
+   {
+    "call": 9,
+    "type": "non_english_ja_news",
+    "query": "日本銀行 金融政策決定会合 2026年10月 結果",
+    "mode": "standard",
+    "domain_filter": null,
+    "links_returned": 9,
+    "outcome": "ok"
+   },
+   {
+    "call": 10,
+    "type": "very_niche",
+    "query": "Coleophora alcyonipennella larval host plant case-bearer moth",
+    "mode": "standard",
+    "domain_filter": null,
+    "links_returned": 10,
+    "outcome": "ok"
+   }
+  ],
+  "min": 9,
+  "max": 10,
+  "median": 9.0,
+  "all_30_calls": {
+   "min": 9,
+   "max": 10,
+   "median": 9.0,
+   "calls_with_9": 23,
+   "calls_with_10": 7,
+   "total_links": 277
+  }
+ },
+ "check_2b_calls_per_turn": {
+  "calls": [
+   {
+    "call": 1,
+    "type": "news",
+    "query": "Federal Reserve interest rate decision October 2026",
+    "mode": "standard",
+    "domain_filter": null,
+    "links_returned": 9,
+    "outcome": "ok"
+   },
+   {
+    "call": 2,
+    "type": "technical_docs",
+    "query": "Python asyncio TaskGroup documentation exception handling",
+    "mode": "standard",
+    "domain_filter": null,
+    "links_returned": 9,
+    "outcome": "ok"
+   },
+   {
+    "call": 3,
+    "type": "local",
+    "query": "best ramen restaurants near Shinjuku station Tokyo",
+    "mode": "standard",
+    "domain_filter": null,
+    "links_returned": 9,
+    "outcome": "ok"
+   },
+   {
+    "call": 4,
+    "type": "non_english_fr",
+    "query": "recette traditionnelle du cassoulet de Castelnaudary",
+    "mode": "standard",
+    "domain_filter": null,
+    "links_returned": 9,
+    "outcome": "ok"
+   },
+   {
+    "call": 5,
+    "type": "very_niche",
+    "query": "Hamamatsu R1924A photomultiplier tube dark current at 1000V",
+    "mode": "standard",
+    "domain_filter": null,
+    "links_returned": 9,
+    "outcome": "ok"
+   },
+   {
+    "call": 6,
+    "type": "technical_docs",
+    "query": "Kubernetes HorizontalPodAutoscaler behavior scaleDown stabilizationWindowSeconds",
+    "mode": "standard",
+    "domain_filter": null,
+    "links_returned": 9,
+    "outcome": "ok"
+   },
+   {
+    "call": 7,
+    "type": "non_english_de_news",
+    "query": "Bundesliga Ergebnisse heute Spieltag",
+    "mode": "standard",
+    "domain_filter": null,
+    "links_returned": 10,
+    "outcome": "ok"
+   },
+   {
+    "call": 8,
+    "type": "local",
+    "query": "plumbers open Sunday in Boise Idaho",
+    "mode": "standard",
+    "domain_filter": null,
+    "links_returned": 9,
+    "outcome": "ok"
+   },
+   {
+    "call": 9,
+    "type": "non_english_ja_news",
+    "query": "日本銀行 金融政策決定会合 2026年10月 結果",
+    "mode": "standard",
+    "domain_filter": null,
+    "links_returned": 9,
+    "outcome": "ok"
+   },
+   {
+    "call": 10,
+    "type": "very_niche",
+    "query": "Coleophora alcyonipennella larval host plant case-bearer moth",
+    "mode": "standard",
+    "domain_filter": null,
+    "links_returned": 10,
+    "outcome": "ok"
+   },
+   {
+    "call": 11,
+    "type": "simple",
+    "query": "capital of Australia",
+    "mode": "standard",
+    "domain_filter": null,
+    "links_returned": 9,
+    "outcome": "ok"
+   },
+   {
+    "call": 12,
+    "type": "simple",
+    "query": "boiling point of water at 2000 meters altitude",
+    "mode": "standard",
+    "domain_filter": null,
+    "links_returned": 9,
+    "outcome": "ok"
+   },
+   {
+    "call": 13,
+    "type": "simple",
+    "query": "how many moons does Jupiter have",
+    "mode": "standard",
+    "domain_filter": null,
+    "links_returned": 10,
+    "outcome": "ok"
+   },
+   {
+    "call": 14,
+    "type": "simple",
+    "query": "git rebase onto another branch example",
+    "mode": "standard",
+    "domain_filter": null,
+    "links_returned": 9,
+    "outcome": "ok"
+   },
+   {
+    "call": 15,
+    "type": "simple",
+    "query": "population of Canada 2026",
+    "mode": "standard",
+    "domain_filter": null,
+    "links_returned": 9,
+    "outcome": "ok"
+   },
+   {
+    "call": 16,
+    "type": "simple",
+    "query": "Rust borrow checker lifetime elision rules",
+    "mode": "standard",
+    "domain_filter": null,
+    "links_returned": 9,
+    "outcome": "ok"
+   },
+   {
+    "call": 17,
+    "type": "simple",
+    "query": "weather forecast Chicago this week",
+    "mode": "standard",
+    "domain_filter": null,
+    "links_returned": 10,
+    "outcome": "ok"
+   },
+   {
+    "call": 18,
+    "type": "simple",
+    "query": "PostgreSQL VACUUM FULL vs VACUUM difference",
+    "mode": "standard",
+    "domain_filter": null,
+    "links_returned": 9,
+    "outcome": "ok"
+   },
+   {
+    "call": 19,
+    "type": "simple",
+    "query": "what year did the Berlin Wall fall",
+    "mode": "standard",
+    "domain_filter": null,
+    "links_returned": 9,
+    "outcome": "ok"
+   },
+   {
+    "call": 20,
+    "type": "simple",
+    "query": "tallest building in the world",
+    "mode": "standard",
+    "domain_filter": null,
+    "links_returned": 9,
+    "outcome": "ok"
+   },
+   {
+    "call": 21,
+    "type": "simple",
+    "query": "Docker compose healthcheck syntax",
+    "mode": "standard",
+    "domain_filter": null,
+    "links_returned": 9,
+    "outcome": "ok"
+   },
+   {
+    "call": 22,
+    "type": "simple",
+    "query": "speed of light in vacuum meters per second",
+    "mode": "standard",
+    "domain_filter": null,
+    "links_returned": 9,
+    "outcome": "ok"
+   },
+   {
+    "call": 23,
+    "type": "simple",
+    "query": "how to make sourdough starter",
+    "mode": "standard",
+    "domain_filter": null,
+    "links_returned": 9,
+    "outcome": "ok"
+   },
+   {
+    "call": 24,
+    "type": "simple",
+    "query": "TypeScript satisfies operator example",
+    "mode": "standard",
+    "domain_filter": null,
+    "links_returned": 9,
+    "outcome": "ok"
+   },
+   {
+    "call": 25,
+    "type": "simple",
+    "query": "largest desert in Africa",
+    "mode": "standard",
+    "domain_filter": null,
+    "links_returned": 10,
+    "outcome": "ok"
+   },
+   {
+    "call": 26,
+    "type": "simple",
+    "query": "nginx reverse proxy websocket configuration",
+    "mode": "standard",
+    "domain_filter": null,
+    "links_returned": 9,
+    "outcome": "ok"
+   },
+   {
+    "call": 27,
+    "type": "simple",
+    "query": "who wrote Pride and Prejudice",
+    "mode": "standard",
+    "domain_filter": null,
+    "links_returned": 10,
+    "outcome": "ok"
+   },
+   {
+    "call": 28,
+    "type": "simple",
+    "query": "Mount Kilimanjaro height",
+    "mode": "standard",
+    "domain_filter": null,
+    "links_returned": 9,
+    "outcome": "ok"
+   },
+   {
+    "call": 29,
+    "type": "simple",
+    "query": "JavaScript Array.prototype.toSorted browser support",
+    "mode": "standard",
+    "domain_filter": null,
+    "links_returned": 10,
+    "outcome": "ok"
+   },
+   {
+    "call": 30,
+    "type": "simple",
+    "query": "photosynthesis light dependent reactions summary",
+    "mode": "standard",
+    "domain_filter": null,
+    "links_returned": 9,
+    "outcome": "ok"
+   }
+  ],
+  "result": "no cap hit at n = 30 within one subagent turn",
+  "errors_or_limit_messages": [],
+  "timing": "about 13:10 to 13:18 UTC, mixed with Bash and WebFetch calls, not strictly back to back",
+  "schema": {
+   "parameters": [
+    "query (required, minLength 2)",
+    "mode (required, standard or extended)",
+    "allowed_domains",
+    "blocked_domains"
+   ],
+   "max_uses_or_limit_parameter": false,
+   "description_start": "Search the web. Returns result blocks with titles and URLs. US-only.",
+   "mode_extended_text": "a thorough, fresh search at several times the cost and latency.",
+   "cap_stated_in_schema": false
+  },
+  "modes_tested": [
+   "standard"
+  ]
+ },
+ "side_observations": {
+  "keyword_pages_on_unrelated_subdomains": {
+   "calls": [
+    11,
+    12,
+    13,
+    15,
+    19,
+    22,
+    27
+   ],
+   "examples": [
+    "shibboleth.idm.home.nyu.edu (4 calls)",
+    "myshare-cms.siemens.com (2 calls)",
+    "face.meei.harvard.edu",
+    "aptraining.csc.com",
+    "evri-delivery.blogto.com (3 links in call 19)"
+   ],
+   "method": "judged from URL and title only, pages not opened"
+  },
+  "staging_or_admin_hosts": {
+   "calls": [
+    8,
+    21,
+    24,
+    25
+   ],
+   "examples": [
+    "dev-azure.rotorooter.com",
+    "cu-azure.rotorooter.com",
+    "wpadmin.middleware.io",
+    "2ality-com.onrender.com",
+    "ls.sandbox2.aheadworks.com"
+   ]
+  },
+  "stale_time_bound_results": {
+   "calls": [
+    7,
+    9,
+    17
+   ]
+  },
+  "appended_text": "every WebSearch reply ended with a reminder to cite sources as markdown links"
+ },
+ "limits": [
+  "Where the cache lives (process, session or server) was not tested.",
+  "Only an added query parameter was tested as a key change. Case, trailing slash, fragment and parameter order were not.",
+  "Expiry is bounded, not pinned: between 14:02 and 15:15 for one URL, between about 8 and 16 minutes for three.",
+  "Curl makes its own request, so it proves the origin changes, not that WebFetch quoted its copy exactly.",
+  "WebFetch gives no timing or cache flag, so network or token cost of a cached reply is unknown.",
+  "No WebSearch cap above 30 calls, in a main session, over a longer session or in extended mode was tested.",
+  "Link counts cover the Links list only, not URLs named in the summary.",
+  "One machine, one network, one day, one Claude Code version.",
+  "Claude chose the URLs and queries, ran the tools and scored the results."
+ ]
+}

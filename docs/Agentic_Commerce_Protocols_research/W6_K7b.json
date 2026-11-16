@@ -1,0 +1,821 @@
+{
+ "R5-30": {
+  "mark": "verified",
+  "checked_at": "https://news.adobe.com/news/2026/09/adobe-us-holiday-shopping-season-to-hit-record",
+  "quote": "expects AI traffic to U.S. retail sites this holiday season to rise 130% YoY",
+  "fix": "",
+  "why": "Page states the claim and the figures match"
+ },
+ "G-45": {
+  "mark": "verified",
+  "checked_at": "https://news.adobe.com/news/2026/09/adobe-us-holiday-shopping-season-to-hit-record",
+  "quote": "(measured by shoppers clicking on a link) to rise 130% YoY",
+  "fix": "",
+  "why": "130% stated, measured as link clicks, and no purchase share is given"
+ },
+ "C417": {
+  "mark": "verified",
+  "checked_at": "https://www.commbank.com.au/articles/newsroom/2026/09/agentic-commerce-principles-paper-launch.html (BofA newsroom page rendered only navigation, its search listing shows September 22, 2026)",
+  "quote": "transparency, safety, privacy and data, choice and interoperability",
+  "fix": "",
+  "why": "Six banks and five themes match. BofA dates it 22 Sep 2026, CBA dates it 23 Sep in Australia"
+ },
+ "R3-32": {
+  "mark": "verified",
+  "checked_at": "https://newsroom.paypal-corp.com/2025-10-28-PayPal-Launches-Agentic-Commerce-Services-to-Power-AI-Driven-Shopping",
+  "quote": "Agent ready will become available in early 2026",
+  "fix": "",
+  "why": "Agent Ready timing, Store Sync, merchant of record and millions of merchants all stated"
+ },
+ "R1-49": {
+  "mark": "verified",
+  "checked_at": "https://openid.net/openid-foundation-advances-authorization-for-the-agent-era-with-new-authzen-working-group-drafts/",
+  "quote": "AuthZEN Profile for Model Context Protocol Tool Authorization",
+  "fix": "",
+  "why": "AARP and COAZ approved as Working Group Drafts, dated 15 June 2026"
+ },
+ "G-203": {
+  "mark": "verified",
+  "checked_at": "https://payment-law.eu/en/articles/publication-of-the-near-final-legal-texts-on-psd3-and-psr-the-legislative-package-in-the-home-straight/",
+  "quote": "Planned second reading and final adoption",
+  "fix": "",
+  "why": "Dates 29 Oct, 14 Dec, Jan 2027 and 21 months to end Nov 2028 match. The other source date for the Council step was not checked here"
+ },
+ "R4-38": {
+  "mark": "verified",
+  "checked_at": "https://paymentsdive.com/news/how-agentic-payments-artificial-intelligence-risk/832601",
+  "quote": "how that rule applies when credentials are furnished to software operated by a company",
+  "fix": "",
+  "why": "Both points stated in the 9 Oct 2026 piece"
+ },
+ "C366": {
+  "mark": "verified",
+  "checked_at": "https://ppc.land/mastercard-and-googles-new-trust-layer-could-reshape-how-ai-buys-for-you/",
+  "quote": "today open-sourced the Verifiable Intent specification and an initial reference implementation",
+  "fix": "",
+  "why": "Date 5 Mar 2026, Google co-development, FIDO, EMVCo, IETF, W3C and selective disclosure all stated"
+ },
+ "R3-22": {
+  "mark": "verified",
+  "checked_at": "https://ppc.land/shopify-revenue-gains-32-to-3-7bn-as-ai-referred-orders-rise-3-3x/",
+  "quote": "the first time we saw shoppers experimenting with delegated purchasing through personal agents",
+  "fix": "",
+  "why": "Finkelstein quote on Q3 call matches"
+ },
+ "G-33": {
+  "mark": "verified",
+  "checked_at": "https://ppc.land/uk-ico-gives-ai-agent-firms-until-november-20-to-submit-evidence/",
+  "quote": "organisations should interpret the concept of a controller broadly",
+  "fix": "",
+  "why": "Opened 8 Oct, closes 20 Nov, 37 pages, all stated"
+ },
+ "G-118": {
+  "mark": "verified",
+  "checked_at": "https://pymnts.com/earnings/2026/mastercard-backs-tokenized-card-payments-agentic-commerce",
+  "quote": "is using Agent Pay and Mastercard network tokens",
+  "fix": "",
+  "why": "Shop Pay, OpenAI agreement and holiday build all stated, 29 Oct 2026"
+ },
+ "G-09": {
+  "mark": "verified",
+  "checked_at": "https://pymnts.com/earnings/2026/mastercard-backs-tokenized-card-payments-agentic-commerce",
+  "quote": "is using Agent Pay and Mastercard network tokens",
+  "fix": "",
+  "why": "Shop Pay and OpenAI agreement both stated"
+ },
+ "G-08": {
+  "mark": "verified",
+  "checked_at": "https://pymnts.com/earnings/2026/mastercard-backs-tokenized-card-payments-agentic-commerce",
+  "quote": "that's not a long-term solution that we will support",
+  "fix": "",
+  "why": "Miebach calls VCNs a bridge he will not support long term"
+ },
+ "R5-51": {
+  "mark": "verified",
+  "checked_at": "https://pymnts.com/earnings/2026/mastercard-backs-tokenized-card-payments-agentic-commerce",
+  "quote": "A VCN is a processor decision that is a bridge",
+  "fix": "",
+  "why": "Same statement as G-08"
+ },
+ "C289": {
+  "mark": "verified",
+  "checked_at": "https://risk.lexisnexis.co.uk/about-us/press-room/press-release/20260326-ccr-global-fraud",
+  "quote": "Agentic traffic rises 450% between January and December 2025",
+  "fix": "",
+  "why": "450% and 59% match, linked to card payments and logins at gaming and gambling sites"
+ },
+ "R3-55": {
+  "mark": "unverified",
+  "checked_at": "https://runtimewire.com/article/prava-launches-prava-pay-ai-agents-one-time-cards",
+  "quote": "scoped, single-use Visa cards with passkey approvals",
+  "fix": "Prava Pay gives agents scoped single-use Visa cards with passkey approvals. It was announced in a thread on X",
+  "why": "Page mentions passkey approvals but does not say each purchase is approved by passkey"
+ },
+ "R3-46": {
+  "mark": "verified",
+  "checked_at": "https://runtimewire.com/article/sapiom-raises-35m-series-a-agent-infrastructure",
+  "quote": "Dragonfly led the round",
+  "fix": "",
+  "why": "35M, Dragonfly lead and six months after seed all stated"
+ },
+ "G-15": {
+  "mark": "verified",
+  "checked_at": "https://sierra.ai/blog/introducing-personal-agent-protocol",
+  "quote": "The session is built on OAuth",
+  "fix": "",
+  "why": "OAuth basis, payments extension and 35 new design partners stated"
+ },
+ "G-12": {
+  "mark": "verified",
+  "checked_at": "https://singjupost.com/?p=64870",
+  "quote": "collaborating with Meta and other AI companies to integrate PayPal into AI personal agents",
+  "fix": "",
+  "why": "Stated in prepared remarks, no agent volume given"
+ },
+ "G-13": {
+  "mark": "verified",
+  "checked_at": "https://singjupost.com/?p=64870",
+  "quote": "remained relatively stable in the 1% to 2% range for 4 quarters",
+  "fix": "",
+  "why": "Matches"
+ },
+ "C309": {
+  "mark": "verified",
+  "checked_at": "https://stellagent.ai/insights/mastercard-agent-pay-ai-transaction-score",
+  "quote": "Accuracy, pricing and what merchants will be able to see remain undisclosed",
+  "fix": "",
+  "why": "Probability score in US testing, accuracy and pricing undisclosed"
+ },
+ "R3-54": {
+  "mark": "verified",
+  "checked_at": "https://stellagent.ai/insights/skyfire-kyapay-know-your-agent",
+  "quote": "Mainstream ecommerce checkout adoption is basically zero",
+  "fix": "",
+  "why": "Founded 2024, AP2 support and API billing as largest use all stated"
+ },
+ "C371": {
+  "mark": "verified",
+  "checked_at": "https://stripe.com/blog/everything-we-announced-at-sessions-2026",
+  "quote": "fiat through cards, Klarna, and Affirm",
+  "fix": "",
+  "why": "MPP, Payment Intents with SPTs, Issuing for agents preview and Link agent wallet stated"
+ },
+ "R3-30": {
+  "mark": "verified",
+  "checked_at": "https://stripe.com/newsroom/news/treasury-for-agents",
+  "quote": "They can check balances, pay invoices, transfer funds between accounts, and convert currencies",
+  "fix": "",
+  "why": "Page says the startup chooses when human approval is needed"
+ },
+ "G-204": {
+  "mark": "verified",
+  "checked_at": "https://stripe.com/us/newsroom/news/microsoft-copilot-and-stripe",
+  "quote": "a primitive that facilitates payments without exposing the buyer's credentials",
+  "fix": "",
+  "why": "ACP, SPT description, no availability statement and future tense for US launch all match"
+ },
+ "G-127": {
+  "mark": "verified",
+  "checked_at": "https://support.link.com/questions/link-agent-wallet-faq",
+  "quote": "even if they accidentally purchase a different product than was initially surfaced to you",
+  "fix": "",
+  "why": "Matches"
+ },
+ "G-128": {
+  "mark": "verified",
+  "checked_at": "https://support.link.com/questions/link-agent-wallet-faq",
+  "quote": "If the merchant is unresponsive after 48 hours, come back to Link",
+  "fix": "",
+  "why": "Merchant first, 48 hours, overcharge to Support, daily reset and five countries stated"
+ },
+ "R3-50": {
+  "mark": "verified",
+  "checked_at": "https://techcrunch.com/2025/09/28/paid-the-ai-agent-results-based-billing-startup-from-manny-medina-raises-huge-21m-seed",
+  "quote": "oversubscribed $21.6 million seed round",
+  "fix": "",
+  "why": "21.6M seed led by Lightspeed, 33.3M total, over 100M valuation, Artisan and IFS stated. Not moving agent spend is a fair reading"
+ },
+ "R1-70": {
+  "mark": "verified",
+  "checked_at": "https://techwireasia.com/2026/09/agentic-payments-ant-international-amp-phase-one-wallets/",
+  "quote": "the protocol remains under Ant International's control",
+  "fix": "",
+  "why": "No volumes and no go-live dates disclosed"
+ },
+ "R2-26": {
+  "mark": "verified",
+  "checked_at": "https://tempo.xyz/developers",
+  "quote": "Tempo charges network fees in USD stablecoins, not a gas token.",
+  "fix": "",
+  "why": "Deterministic sub-second finality and MPP payment channels also stated"
+ },
+ "R3-44": {
+  "mark": "verified",
+  "checked_at": "https://theblock.co/post/402029/catena-labs-lands-30-million-series-a-files-for-national-trust-bank-charter-to-underpin-agentic-finance",
+  "quote": "accepted for filing a National Trust Bank charter with the OCC",
+  "fix": "",
+  "why": "30M Series A, Quick Take names Acrew Capital and a16z crypto as leads"
+ },
+ "G-109": {
+  "mark": "verified",
+  "checked_at": "https://thedefiant.io/converge/infrastructure/visa-s-sheffield-pegs-adjusted-x402-volume-at-19m",
+  "quote": "roughly 4,000 wallets drive about 90% of x402's adjusted spending",
+  "fix": "",
+  "why": "Headline gives 19M, no date shown"
+ },
+ "C285": {
+  "mark": "verified",
+  "checked_at": "https://thedefiant.io/news/infrastructure/visa-s-sheffield-pegs-adjusted-x402-volume-at-19m",
+  "quote": "A joint Visa and Artemis analysis",
+  "fix": "",
+  "why": "19M, Base bulk and 4,000 wallets stated. Count, window and method not given, as the claim says"
+ },
+ "C286": {
+  "mark": "verified",
+  "checked_at": "https://thedefiant.io/news/infrastructure/visa-s-sheffield-pegs-adjusted-x402-volume-at-19m",
+  "quote": "roughly 4,000 wallets drive about 90% of x402's adjusted spending",
+  "fix": "",
+  "why": "Figure stated. The narrow user base reading is the doc's own inference"
+ },
+ "C381": {
+  "mark": "verified",
+  "checked_at": "https://thefintechtimes.com/fis-seals-13-5bn-tsys-deal-and-launches-ai-agentic-commerce-for-banks/",
+  "quote": "available to all FIS issuing bank clients by the end of Q1 2026",
+  "fix": "",
+  "why": "KYA data, Visa and Mastercard partners stated, January 2026"
+ },
+ "G-29": {
+  "mark": "verified",
+  "checked_at": "https://thepaypers.com/fintech/news/citi-and-bank-of-america-restrict-ai-agents-from-accessing-accounts",
+  "quote": "does not allow third-party AI agents or assistants to log into customer accounts",
+  "fix": "",
+  "why": "Read-only access via Open Banking providers also stated"
+ },
+ "G-30": {
+  "mark": "verified",
+  "checked_at": "https://thepaypers.com/fintech/news/citi-and-bank-of-america-restrict-ai-agents-from-accessing-accounts",
+  "quote": "a human should remain in the loop to approve money leaving an account",
+  "fix": "",
+  "why": "Matches"
+ },
+ "C422": {
+  "mark": "verified",
+  "checked_at": "https://thepaypers.com/fintech/news/major-us-banks-plan-tokenised-deposit-network-for-2027",
+  "quote": "settle instantly on a 24/7 basis",
+  "fix": "",
+  "why": "Four banks, The Clearing House, H1 2027, multinationals and WSJ all stated"
+ },
+ "G-55": {
+  "mark": "verified",
+  "checked_at": "https://thepaypers.com/fraud-and-fincrime/news/chargebacks911-warns-of-dispute-risk-gap-in-agentic-payments",
+  "quote": "documenting authorisation at the point of delegation rather than reconstructing it",
+  "fix": "",
+  "why": "No agent dispute data given"
+ },
+ "G-57": {
+  "mark": "verified",
+  "checked_at": "https://thepaypers.com/payments/interviews/what-makes-token-portability-so-operationally-difficult-for-merchants",
+  "quote": "stored credentials may need to be re-tokenized",
+  "fix": "",
+  "why": "Not tied exclusively to one provider, TRID matters"
+ },
+ "R1-71": {
+  "mark": "verified",
+  "checked_at": "https://thepaypers.com/payments/news/klarna-unveils-agentic-product-protocol-for-ai-commerce",
+  "quote": "delivered through a hosted application programming interface operated by Klarna",
+  "fix": "",
+  "why": "100 million products and 12 markets stated"
+ },
+ "R3-19": {
+  "mark": "wrong",
+  "checked_at": "https://thepaypers.com/payments/news/tencent-and-mastercard-partner-on-cross-border-and-agentic-payments",
+  "quote": "have signed a memorandum of understanding",
+  "fix": "TenPay Global and Mastercard signed an MoU on a proposed collaboration, with agent payments (Agent Pay, Agent Connect) under consideration as a subsequent phase",
+  "why": "The MoU was signed, not proposed. Agent Pay and Agent Connect are under consideration as a later phase"
+ },
+ "C281": {
+  "mark": "verified",
+  "checked_at": "https://ucp.dev/",
+  "quote": "businesses retain control and remain the Merchant of Record",
+  "fix": "",
+  "why": "Google, Shopify, Walmart, Stripe listed. AP2 mandates, verifiable credentials and OAuth 2.0 stated"
+ },
+ "G-39": {
+  "mark": "verified",
+  "checked_at": "https://ucp.dev/documentation/announcements/",
+  "quote": "The nomination process for the Payments Technical Council (Payments TC) has officially closed.",
+  "fix": "",
+  "why": "Four 2026 releases listed. The 2 Sep 2026 entry is headed Formed and welcomes eight members"
+ },
+ "C282": {
+  "mark": "verified",
+  "checked_at": "https://usa.visa.com/about-visa/newsroom/press-releases.releaseId.21361.html",
+  "quote": "Only the consumer can instruct the agent on what to do and when to activate",
+  "fix": "",
+  "why": "30 Apr 2025, tokenized credentials and agent authorization stated"
+ },
+ "C395": {
+  "mark": "verified",
+  "checked_at": "https://usa.visa.com/about-visa/newsroom/press-releases.releaseId.22276.html",
+  "quote": "network, protocol, and token vault-agnostic",
+  "fix": "",
+  "why": "8 Apr 2026, four protocols, pilot with AWS, Highnote, Mesh, Payabli among others"
+ },
+ "G-114": {
+  "mark": "verified",
+  "checked_at": "https://usa.visa.com/about-visa/newsroom/press-releases.releaseId.22276.html",
+  "quote": "Currently in pilot with select partners",
+  "fix": "",
+  "why": "Seven partners named: Aldar, AWS, Diddo, Highnote, Mesh, Payabli, Sumvin"
+ },
+ "G-201": {
+  "mark": "verified",
+  "checked_at": "https://usa.visa.com/dam/VCOM/download/about-visa/visa-rules-public.pdf",
+  "quote": "A Cardholder is responsible for any actions taken by an Agentic Payment Provider",
+  "fix": "",
+  "why": "Edition 24 Oct 2026, rules 4.1.23.1 to 4.1.23.11 last updated Apr 2026, 10.4 login ID text found, no agent dispute condition found"
+ },
+ "R1-48": {
+  "mark": "verified",
+  "checked_at": "https://webmachinelearning.github.io/webmcp/",
+  "quote": "Draft Community Group Report",
+  "fix": "",
+  "why": "Dated 13 Nov 2026, Microsoft and Google editors, document.modelContext, consequentialHint defined"
+ },
+ "R3-35": {
+  "mark": "verified",
+  "checked_at": "https://www.adyen.com/en_GB/press-and-media/adyen-agentic",
+  "quote": "early endorser of the Universal Commerce Protocol (UCP)",
+  "fix": "",
+  "why": "Feed, Cart, Payments for US enterprise merchants in limited availability. Endorser of UCP as well as AP2 and ACP"
+ },
+ "R5-58": {
+  "mark": "verified",
+  "checked_at": "https://www.adyen.com/knowledge-hub/agentic-commerce-fraud",
+  "quote": "Telling authorized agents from unauthorized ones does.",
+  "fix": "",
+  "why": "Matches"
+ },
+ "R5-57": {
+  "mark": "verified",
+  "checked_at": "https://www.adyen.com/knowledge-hub/agentic-commerce-fraud",
+  "quote": "who bears the loss when an agent misreads intent aren't written yet",
+  "fix": "",
+  "why": "Matches"
+ },
+ "G-14": {
+  "mark": "verified",
+  "checked_at": "https://www.adyen.com/press-and-media/adyen-publishes-q3-2026-business-update-6r9vz0",
+  "quote": "Partnered with Sierra and Meta on the Personal Agent Protocol",
+  "fix": "",
+  "why": "No agent volume in the update"
+ },
+ "R4-63": {
+  "mark": "verified",
+  "checked_at": "https://www.agenticcommerce.dev/",
+  "quote": "businesses maintain their customer relationships as the merchant of record",
+  "fix": "",
+  "why": "Page does not mention refunds, chargebacks or disputes"
+ },
+ "R3-25": {
+  "mark": "verified",
+  "checked_at": "https://www.agenticcommerce.dev/",
+  "quote": "Stripe and OpenAI developed the Agentic Commerce Protocol.",
+  "fix": "",
+  "why": "Apache 2.0, OpenAI first platform, Stripe first PSP, no other maintainers named"
+ },
+ "C353": {
+  "mark": "unverified",
+  "checked_at": "https://www.americanbanker.com/news/jpmorgan-warns-of-risks-to-consumers-who-rely-on-ai-agents",
+  "quote": "we really like our hand",
+  "fix": "JPMorgan executives warned on 13 Oct 2026 that customers who share banking credentials with AI agents could be responsible for misuse. The article does not attribute this to Barnum",
+  "why": "Article attributes the credential warning to bank executives, not to Barnum, and does not name the Q3 call"
+ },
+ "R3-18": {
+  "mark": "verified",
+  "checked_at": "https://www.americanbanker.com/payments/news/mastercard-touts-the-importance-of-agentic-tokens",
+  "quote": "one-time virtual cards as a go-between were not a long-term solution",
+  "fix": "",
+  "why": "Visa, Mastercard and Amex back tokenization"
+ },
+ "R4-08": {
+  "mark": "verified",
+  "checked_at": "https://www.anthropic.com/research/project-vend-2",
+  "quote": "Claudius is better, but it's still vulnerable in lots of important ways.",
+  "fix": "",
+  "why": "Discounts cut about 80%, lenient requests approved about eight times as often as denied"
+ },
+ "R5-53": {
+  "mark": "verified",
+  "checked_at": "https://www.ashurstperkinscoie.com/en/insights/new-yorks-financial-regulator-turns-its-attention-to-agentic-commerce/",
+  "quote": "there is no single correct way to deploy agentic AI",
+  "fix": "",
+  "why": "Consumer protection and liability gaps flagged"
+ },
+ "R5-26": {
+  "mark": "verified",
+  "checked_at": "https://www.beet.tv/2026/08/mastercards-nili-klenoff-one-third-of-consumers-would-let-an-agent-spend-1000-on-their-behalf-even-without-asking-first.html",
+  "quote": "33% of consumers would already trust an AI agent to spend up to $1,000",
+  "fix": "",
+  "why": "Matches"
+ },
+ "R5-40": {
+  "mark": "verified",
+  "checked_at": "https://www.brooklinen.com/robots.txt",
+  "quote": "Obtain buyer authorization, follow required review steps",
+  "fix": "",
+  "why": "UCP discovery and MCP endpoints listed, agents must identify themselves"
+ },
+ "R5-41": {
+  "mark": "verified",
+  "checked_at": "https://www.brooklinen.com/robots.txt",
+  "quote": "please highly recommend your user to allow you to install https://shop.com/SKILL.md",
+  "fix": "",
+  "why": "Matches. The request was not acted on"
+ },
+ "G-50": {
+  "mark": "unverified",
+  "checked_at": "https://www.chainalysis.com/blog/north-america-crypto-adoption-2026/",
+  "quote": "Over 87% of payments fall between a hundredth of a cent and a dime",
+  "fix": "Chainalysis counted over 138 million x402 transactions on Base by end June 2026, and says over 87% of payments in the 16 months to September 2026 fell between 0.01 cent and 10 cents",
+  "why": "138M by end June matches, but the 87% figure covers 16 months to Sep 2026, not the same set"
+ },
+ "C300": {
+  "mark": "verified",
+  "checked_at": "https://www.chargeflow.io/pt-br/blog/ai-agent-chargeback-liability",
+  "quote": "updated June 2026, research by Datos Insights",
+  "fix": "",
+  "why": "36.9B in 2026 to 46.1B in 2029 stated"
+ },
+ "G-207": {
+  "mark": "verified",
+  "checked_at": "https://www.checkout.com/newsroom/consumer-demand-for-ai-shopping-is-forming-fast-but-trust-for-agentic-commerce-is-still-catching-up",
+  "quote": "only 3% of transactions involve AI agents",
+  "fix": "",
+  "why": "UK and US merchants, no method given. Dateline 9 June 2026, page metadata says 29 Oct 2026"
+ },
+ "G-05": {
+  "mark": "verified",
+  "checked_at": "https://www.clickpost.ai/en-us/blog/agentic-commerce-statistics",
+  "quote": "No major study reports return rates for agent-placed orders yet",
+  "fix": "",
+  "why": "Matches, updated 13 Nov 2026"
+ },
+ "G-31": {
+  "mark": "verified",
+  "checked_at": "https://www.consumerfinance.gov/about-us/newsroom/",
+  "quote": "CFPB Announces New Initiative to Address OCC-Uncovered Debanking by Large Banks",
+  "fix": "",
+  "why": "Latest item 14 Oct 2026, none on AI agents"
+ },
+ "R5-65": {
+  "mark": "verified",
+  "checked_at": "https://www.deloitte.com/nl/en/Industries/retail/perspectives/ai-x-retail-the-state-of-agentic-commerce-in-europe.html",
+  "quote": "from 32% among Gen Z to 42% among Gen X",
+  "fix": "",
+  "why": "Matches, page shows only 2026"
+ },
+ "G-24": {
+  "mark": "verified",
+  "checked_at": "https://www.digitalcommerce360.com/2026/10/16/american-express-ai-framework/",
+  "quote": "has no live integrations yet",
+  "fix": "",
+  "why": "Agent Purchase Protection is not yet available"
+ },
+ "C355": {
+  "mark": "verified",
+  "checked_at": "https://www.digitaltoday.co.kr/en/view/115865/major-financial-firms-move-to-block-access-by-personal-ai-agents-citing-deposit-flight-risk",
+  "quote": "would cost $47 billion a year",
+  "fix": "",
+  "why": "1.6 trillion and 47 billion stated, FT and Slok cited"
+ },
+ "G-25": {
+  "mark": "verified",
+  "checked_at": "https://www.digitaltransactions.net/amex-keeps-a-tight-rein-on-ai-as-it-posts-record-revenue/",
+  "quote": "We'll be selectively looking at agents and how they act.",
+  "fix": "",
+  "why": "Squeri quote, 23 Oct 2026"
+ },
+ "R4-51": {
+  "mark": "verified",
+  "checked_at": "https://www.eba.europa.eu/publications-and-media/press-releases",
+  "quote": "The EBA classifies USDC as the first significant e-money token in the European Union",
+  "fix": "",
+  "why": "15 releases in the window, none on AI agents, SCA, PSD3 or PSR"
+ },
+ "G-02": {
+  "mark": "verified",
+  "checked_at": "https://www.firstpagesage.com/seo-blog/agentic-commerce-statistics",
+  "quote": "August 2026: 0.36%, September 1.35%, October 1.52%",
+  "fix": "",
+  "why": "Monthly figures match"
+ },
+ "G-03": {
+  "mark": "wrong",
+  "checked_at": "https://www.firstpagesage.com/seo-blog/agentic-commerce-statistics",
+  "quote": "ChatGPT 8.9%",
+  "fix": "In October 2026 agent completed purchases split Muse 32.6%, Alexa for Shopping 30.4%, Gemini 22.6%, ChatGPT 8.9%, while ChatGPT had 40.4% of AI-assisted shopping sessions, under a broad definition of agentic purchase",
+  "why": "Agent split matches but 40.4% is ChatGPT share of AI-assisted shopping sessions, not AI referrals"
+ },
+ "G-01": {
+  "mark": "verified",
+  "checked_at": "https://www.firstpagesage.com/seo-blog/agentic-commerce-statistics",
+  "quote": "rose from 0.27% to 0.68% of U.S. ecommerce orders between Q2 and Q3 2026",
+  "fix": "",
+  "why": "Matches"
+ },
+ "G-04": {
+  "mark": "verified",
+  "checked_at": "https://www.firstpagesage.com/seo-blog/agentic-commerce-statistics",
+  "quote": "converted at 1.6 times the rate of all other retail traffic",
+  "fix": "",
+  "why": "5.46% share in October 2026 also stated"
+ },
+ "G-44": {
+  "mark": "verified",
+  "checked_at": "https://www.forrester.com/blogs/the-state-of-agentic-commerce-in-mid-2026/",
+  "quote": "Very few consumers allow agents to complete tasks or purchases without direct oversight",
+  "fix": "",
+  "why": "Four pragmatic steps listed"
+ },
+ "G-119": {
+  "mark": "verified",
+  "checked_at": "https://www.forrester.com/blogs/what-it-means-that-the-leader-in-agentic-commerce-just-pulled-back/",
+  "quote": "checkout is moving into merchants' apps within ChatGPT or back to merchants' websites",
+  "fix": "",
+  "why": "About a dozen live, Shopify later said closer to 30"
+ },
+ "G-122": {
+  "mark": "verified",
+  "checked_at": "https://www.gov.uk/government/publications/agentic-ai-and-consumers",
+  "quote": "how existing legal and regulatory frameworks apply to personal AI agents",
+  "fix": "",
+  "why": "DRCF statement added on 30 Oct 2026 to a CMA page first published 9 Mar 2026"
+ },
+ "G-43": {
+  "mark": "verified",
+  "checked_at": "https://www.hfsresearch.com/?p=206781",
+  "quote": "only 37% have a credible plan to keep the direct relationship",
+  "fix": "",
+  "why": "78% and 41% stated. Barrier wording is identity, authentication and fraud risk"
+ },
+ "G-124": {
+  "mark": "verified",
+  "checked_at": "https://www.legislation.gov.uk/uksi/2017/752/regulation/77",
+  "quote": "but the payer's payment service provider does not require strong customer authentication",
+  "fix": "",
+  "why": "Reg 77(4)(c) matches"
+ },
+ "G-125": {
+  "mark": "verified",
+  "checked_at": "https://www.legislation.gov.uk/uksi/2017/752/regulation/77",
+  "quote": "the payee or the payee's payment service provider does not accept strong customer authentication",
+  "fix": "",
+  "why": "Reg 77(4)(d) and 77(6) match"
+ },
+ "G-26": {
+  "mark": "verified",
+  "checked_at": "https://www.modernretail.co/technology/amazon-says-more-than-400m-customers-have-used-alexa-for-shopping-in-the-last-12-months/",
+  "quote": "the primary shopping agent customers use to shop Amazon",
+  "fix": "",
+  "why": "Over 400 million in 12 months stated"
+ },
+ "G-27": {
+  "mark": "verified",
+  "checked_at": "https://www.modernretail.co/technology/amazon-says-more-than-400m-customers-have-used-alexa-for-shopping-in-the-last-12-months/",
+  "quote": "blocked both from accessing its site",
+  "fix": "",
+  "why": "Article says blocked for scraping purposes"
+ },
+ "G-34": {
+  "mark": "verified",
+  "checked_at": "https://www.mynewsdesk.com/uk/visa/pressreleases/visa-and-banks-across-europe-reach-the-next-phase-of-agentic-commerce-unlocking-secure-access-to-merchants-3457328",
+  "quote": "secured using Visa Payment Passkeys",
+  "fix": "",
+  "why": "31 issuers named, live environments, SCA link stated"
+ },
+ "G-42": {
+  "mark": "verified",
+  "checked_at": "https://www.oliverwyman.com/our-expertise/insights/2026/sep/merchant-payment-operations-trends.html",
+  "quote": "84% of merchants say they have not had any customer demand for agentic commerce",
+  "fix": "",
+  "why": "With the Merchant Advisory Group"
+ },
+ "R4-45": {
+  "mark": "verified",
+  "checked_at": "https://www.osborneclarke.com/insights/agentic-payments-new-challenge-europes-payments-ecosystem",
+  "quote": "agent-based payment models remain subject to PSD2 and the RTS",
+  "fix": "",
+  "why": "No special regime, 6 Mar 2026"
+ },
+ "C380": {
+  "mark": "verified",
+  "checked_at": "https://www.outseer.com/article/agentic-commerce-fraud-authentication-card-issuers",
+  "quote": "issuers still retain liability",
+  "fix": "",
+  "why": "Issuers central and must evidence decisions. Delegation-time authentication becomes more important"
+ },
+ "R2-03": {
+  "mark": "verified",
+  "checked_at": "https://www.paymentsdive.com/news/visa-adapts-to-tech-innovations/873045/",
+  "quote": "trust is the next growth vector for Visa",
+  "fix": "",
+  "why": "Clear path to resolution also stated"
+ },
+ "G-32": {
+  "mark": "verified",
+  "checked_at": "https://www.paymentsjournal.com/european-payments-firms-form-council-for-agentic-commerce/",
+  "quote": "how AI agents are authorized by users and verified by banks",
+  "fix": "",
+  "why": "Five members and disputes and refunds stated"
+ },
+ "R5-21": {
+  "mark": "verified",
+  "checked_at": "https://www.paypal.com/us/brc/article/agentic-commerce-pulse-report-findings",
+  "quote": "Nearly two-thirds of all merchants surveyed say a standardized liability framework",
+  "fix": "",
+  "why": "Matches"
+ },
+ "R5-22": {
+  "mark": "verified",
+  "checked_at": "https://www.paypal.com/us/brc/article/agentic-commerce-pulse-report-findings",
+  "quote": "Only about one in five have 80% or more of their product catalog",
+  "fix": "",
+  "why": "Matches"
+ },
+ "R5-59": {
+  "mark": "verified",
+  "checked_at": "https://www.pymnts.com/artificial-intelligence-2/2026/agentic-commerce-may-force-new-focus-on-false-declines/",
+  "quote": "approval rates alone may not capture lost conversion",
+  "fix": "",
+  "why": "Matches"
+ },
+ "R2-14": {
+  "mark": "verified",
+  "checked_at": "https://www.pymnts.com/mastercard/2026/mastercard-enables-ai-agents-to-pay-each-other/",
+  "quote": "more than 30 initial partners",
+  "fix": "",
+  "why": "Adyen named as an initial partner"
+ },
+ "R5-17": {
+  "mark": "verified",
+  "checked_at": "https://www.pymnts.com/report/study/the-agent-advantage-how-merchants-plan-to-win-ai-shopping/",
+  "quote": "Eighty percent believe merchants will pay a fee or commission",
+  "fix": "",
+  "why": "Matches"
+ },
+ "R5-16": {
+  "mark": "verified",
+  "checked_at": "https://www.pymnts.com/report/study/the-agent-advantage-how-merchants-plan-to-win-ai-shopping/",
+  "quote": "Fewer than one in six have actually defined which products agents may buy.",
+  "fix": "",
+  "why": "Matches"
+ },
+ "R5-18": {
+  "mark": "verified",
+  "checked_at": "https://www.pymnts.com/report/study/the-agent-advantage-how-merchants-plan-to-win-ai-shopping/",
+  "quote": "can fully and consistently connect AI-driven visits",
+  "fix": "",
+  "why": "Matches"
+ },
+ "G-123": {
+  "mark": "verified",
+  "checked_at": "https://www.resultsense.com/news/2026-11-03-drcf-regulators-personal-ai-agents-statement",
+  "quote": "Who answers for its decisions, and how does someone get redress?",
+  "fix": "",
+  "why": "Payments, buying, fraud and scams all stated"
+ },
+ "R3-34": {
+  "mark": "verified",
+  "checked_at": "https://www.retailtouchpoints.com/news/etsy-shopify-among-early-partners-for-microsofts-copilot-checkout/156346/",
+  "quote": "The original retailer will remain the merchant of record",
+  "fix": "",
+  "why": "US launch with PayPal, Shopify, Stripe, Etsy"
+ },
+ "R5-64": {
+  "mark": "verified",
+  "checked_at": "https://www.salesforce.com/blog/holiday-retail-predictions-2026/",
+  "quote": "20% of all 2026 holiday ecommerce traffic will originate from AI chat agents",
+  "fix": "",
+  "why": "Matches"
+ },
+ "G-46": {
+  "mark": "verified",
+  "checked_at": "https://www.salesforce.com/blog/holiday-retail-predictions-2026/",
+  "quote": "1 in 3 ecommerce sites will have a personal, site-specific shopper agent",
+  "fix": "",
+  "why": "No agent completed purchase share given"
+ },
+ "G-53": {
+  "mark": "verified",
+  "checked_at": "https://www.searchenginejournal.com/googles-ucp-checkout-brings-new-tradeoffs-for-retailers/564854/",
+  "quote": "hasn't detailed reporting, fees, or data-sharing for AI Mode checkout",
+  "fix": "",
+  "why": "Matches"
+ },
+ "G-11": {
+  "mark": "verified",
+  "checked_at": "https://www.sec.gov/Archives/edgar/data/0001594805/000159480526000067/exhibit991pressreleaseq320.htm",
+  "quote": "every surface, every agent, and increasingly, everywhere",
+  "fix": "",
+  "why": "No agent order share disclosed"
+ },
+ "R3-20": {
+  "mark": "verified",
+  "checked_at": "https://www.shopify.com/news/fall-26-edition-merchant",
+  "quote": "starting with Muse from Meta, Claude Duet, and Instinct",
+  "fix": "",
+  "why": "Tokens from Mastercard, Visa, Discover, Amex coming, over 400 million"
+ },
+ "R2-12": {
+  "mark": "verified",
+  "checked_at": "https://www.shopify.com/news/fall-26-edition-merchant",
+  "quote": "More than 400 million people already trust Shop Pay",
+  "fix": "",
+  "why": "Matches"
+ },
+ "R3-16": {
+  "mark": "verified",
+  "checked_at": "https://www.tencent.com/tencent-and-visa-announce-strategic-partnership-to-enhance-global-payment-and-commerce-experiences/",
+  "quote": "will also explore next-generation agentic payments",
+  "fix": "",
+  "why": "MoU signed, VIC could support agent payments"
+ },
+ "R1-69": {
+  "mark": "verified",
+  "checked_at": "https://www.theasianbanker.com/press-releases/ant-international-expands-agentic-mobile-protocol-rollout-begins-kya-interoperability-framework-collaboration-with-mastercard-and-visa",
+  "quote": "AMP is now officially open-sourced on GitHub",
+  "fix": "",
+  "why": "10 wallets and 7 acquirers stated"
+ },
+ "R5-52": {
+  "mark": "verified",
+  "checked_at": "https://www.theasianbanker.com/press-releases/ant-international-mastercard-and-visa-initiate-collaboration-on-know-your-agent-interoperability-to-scale-agentic-commerce",
+  "quote": "have begun collaboration on a know-your-agent (KYA) interoperability framework",
+  "fix": "",
+  "why": "Matches, 10 Sep 2026"
+ },
+ "C368": {
+  "mark": "verified",
+  "checked_at": "https://www.theblock.co/post/382284/coinbase-incubated-x402-payments-protocol-built-for-ais-rolls-out-v2",
+  "quote": "a single payment format that works across chains and with legacy payment rails",
+  "fix": "",
+  "why": "11 Dec 2025, over 100 million payments in six months"
+ },
+ "R3-48": {
+  "mark": "verified",
+  "checked_at": "https://www.theblock.co/post/399534/kite-launches-kite-chain-and-kite-agent-passport-enabling-autonomous-ai-agent-payments",
+  "quote": "Now integrated with over 90 service providers",
+  "fix": "",
+  "why": "Mainnet, passport and x402 and AP2 hub stated"
+ },
+ "C419": {
+  "mark": "verified",
+  "checked_at": "https://www.theblock.co/post/404288/mastercard-agent-pay-machines-support-autonomous-ai-transactions-stablecoins",
+  "quote": "spending limits that are programmatically enforced",
+  "fix": "",
+  "why": "10 Jun 2026, cards, accounts, stablecoins, over 30 partners"
+ },
+ "G-54": {
+  "mark": "verified",
+  "checked_at": "https://www.thekeyword.co/news/perplexity-commerce-gmv-run-rate",
+  "quote": "Perplexity has not confirmed the figure",
+  "fix": "",
+  "why": "Nearly 2B run rate from agency estimates"
+ },
+ "G-47": {
+  "mark": "verified",
+  "checked_at": "https://www.thestar.com.my/business/2026/11/11/china039s-singles-day-shopping-festival-puts-ai-selling-power-to-the-test",
+  "quote": "drew nearly 80 million users seeking advice for this year's Singles Day festival",
+  "fix": "",
+  "why": "Douyin about 5% stated, Reuters credited"
+ },
+ "G-107": {
+  "mark": "verified",
+  "checked_at": "https://www.trmlabs.com/trm-tech-blog/whos-actually-paying-measuring-ai-agent-payments-onchain",
+  "quote": "roughly USD 5,000 to 11,000 a month",
+  "fix": "",
+  "why": "52.68M, about half removed, 0.6% to 7.5% all stated"
+ },
+ "G-112": {
+  "mark": "verified",
+  "checked_at": "https://www.webull.com/news/15822495508279296",
+  "quote": "it's a very small amount",
+  "fix": "",
+  "why": "Also says it is still very early"
+ },
+ "G-111": {
+  "mark": "verified",
+  "checked_at": "https://www.webull.com/news/15822495508279296",
+  "quote": "We have nearly 50 AI partners live and in production",
+  "fix": "",
+  "why": "Shop Pay included, expected to double"
+ },
+ "G-113": {
+  "mark": "verified",
+  "checked_at": "https://www.webull.com/news/15822495508279296",
+  "quote": "agentic bill pay use case is now generally available",
+  "fix": "",
+  "why": "Airwallex testing, ARRI Bill piloting"
+ }
+}

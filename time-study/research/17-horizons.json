@@ -1,0 +1,177 @@
+[
+ {
+  "y": 1,
+  "c": "High",
+  "sig": "Directive share in Anthropic Economic Index: under 40% slow, over 55% fast",
+  "slow": [
+   "Office work uses AI for email and drafts, jobs steady",
+   "Seat pricing holds, saved minutes logged as earlier finish",
+   "Hours flat, a few four day pilots, little felt change"
+  ],
+  "base": [
+   "Software and writing tasks shift first, junior hiring slows",
+   "Hybrid seat plus usage pricing, saved time fills with tasks",
+   "Hours flat, more tasks per hour, rushed feeling unchanged"
+  ],
+  "fast": [
+   "Firms cut junior hiring sharply and pilot agent teams",
+   "Saved time resold as more output, volume targets rise",
+   "More meetings and messages, felt rush rises like after Teams"
+  ],
+  "energy": [
+   "Big cloud regions get AI first, others wait for power",
+   "Usage priced by compute, rationed tiers for heavy users",
+   "Same as base for most, slower rollout outside tech hubs"
+  ]
+ },
+ {
+  "y": 3,
+  "c": "Medium high",
+  "sig": "Graduate unemployment gap vs all workers widening over 2 points means fast",
+  "slow": [
+   "Support and back office automate, staff move to shorter weeks",
+   "Outcome pricing starts, saving booked as paid time off",
+   "Full time hours 38 to 40, more async, less rush"
+  ],
+  "base": [
+   "Support and back office automate, entry roles thin",
+   "2% to 5% of firms on four days, outcome pricing spreads",
+   "Free time flat in total, more of it on screens"
+  ],
+  "fast": [
+   "Entry roles shrink, agent labour replaces junior desks",
+   "Firms bank saving as growth, headcount flat, output up",
+   "Work expands to fill hours, focus spans keep shrinking"
+  ],
+  "energy": [
+   "Data centre and grid trades boom, AI work clusters near power",
+   "Compute cost sets margins, energy deals become strategy",
+   "Gains uneven by region, rush stays where power is short"
+  ]
+ },
+ {
+  "y": 5,
+  "c": "Medium",
+  "sig": "OECD annual hours per worker: a fall over 3% from 2026 means fast",
+  "slow": [
+   "Exposed white collar sectors trade output growth for shorter hours",
+   "Four day week used as a hiring perk",
+   "Hours down in exposed sectors, writing and recall skills fade"
+  ],
+  "base": [
+   "Agent labour a budget line, BPO and call centres shrink",
+   "Agent costs sit beside payroll, pricing by outcome",
+   "Hours down 2% to 4%, clear deskilling in writing"
+  ],
+  "fast": [
+   "Exposed sectors run more output, not fewer hours",
+   "Saved hours sold as speed, market share races",
+   "Hours roughly flat, felt time poverty stays near 80%"
+  ],
+  "energy": [
+   "Data centres near 945 TWh, power sets where AI spreads",
+   "Firms buy power before models, compute rationed by price",
+   "Hour cuts arrive years later in power tight regions"
+  ]
+ },
+ {
+  "y": 10,
+  "c": "Medium low",
+  "sig": "Labour share of national income falling below its historic range",
+  "slow": [
+   "Four days common in white collar work, jobs mostly kept",
+   "Productivity paid out as time, prices fall slowly",
+   "Leisure up 2 to 4 hrs a week, rush eases"
+  ],
+  "base": [
+   "Routine office, support and outsourcing work largely agent run",
+   "Agent firms with small staff, outcome pricing the norm",
+   "34 to 36 hrs a week, offloading accepted like calculators"
+  ],
+  "fast": [
+   "New AI made services absorb freed labour, output soars",
+   "Growth captures saving, labour share under pressure",
+   "Hours barely fall, life fills with new tasks and media"
+  ],
+  "energy": [
+   "Energy and grid sectors set the pace of AI jobs",
+   "Compute access priced like a utility, power rich regions win",
+   "Hour gains split by region, gap with power poor areas"
+  ]
+ },
+ {
+  "y": 15,
+  "c": "Low",
+  "sig": "Share of under 35s who say paid work is their main identity",
+  "slow": [
+   "Care, craft and community work grow as paid hours shrink",
+   "Firms compete on time off, not pay",
+   "About 32 hrs, portfolio lives of paid, care and craft"
+  ],
+  "base": [
+   "Most knowledge work agent assisted, care jobs grow",
+   "Small firms run large agent fleets, pricing by result",
+   "Leisure about a third higher than 2026, gaps by gender remain"
+  ],
+  "fast": [
+   "Entire service sectors rebuilt around agents, few desk jobs",
+   "Saving spent on new products, income support debated",
+   "Hours stay high for many, rush and burnout persist"
+  ],
+  "energy": [
+   "Power build out decides which countries automate first",
+   "Cheap power regions host AI, others license services",
+   "Shorter hours mostly in power rich countries"
+  ]
+ },
+ {
+  "y": 25,
+  "c": "Very low",
+  "sig": "Median paid hours per adult across OECD under 15 a week means fast",
+  "slow": [
+   "Paid work shared across more people at fewer hours",
+   "Productivity dividend paid as time, not extra goods",
+   "About 28 to 30 hrs, deliberate skill training common"
+  ],
+  "base": [
+   "Human work concentrates in care, judgement and trust roles",
+   "Agent run firms, people paid for taste and accountability",
+   "Large leisure gain, identity shifts to craft and community"
+  ],
+  "fast": [
+   "Paid work a minority activity, output many times larger",
+   "Most value made by agents, ownership decides income",
+   "Free time full of status games, felt rush may stay"
+  ],
+  "energy": [
+   "Energy supply caps AI share of work in many regions",
+   "Margins tied to power cost, energy rich firms dominate",
+   "Hour cuts lag a decade where power stays short"
+  ]
+ },
+ {
+  "y": 50,
+  "c": "Speculative",
+  "sig": "Whether hours per worker fell faster after AI than after electricity",
+  "slow": [
+   "Work week set by law and custom, AI fills the gap",
+   "Firms sell fewer hours of human work at higher value",
+   "Keynes partly right a century late, much more free time"
+  ],
+  "base": [
+   "Most production automated, humans in care, craft and oversight",
+   "Pricing by outcome, human work a premium label",
+   "20 to 25 hrs, post work identity mainstream"
+  ],
+  "fast": [
+   "Work optional for most, new industries invent new demand",
+   "Saving fully re-spent on output, consumption far higher",
+   "Time feels as scarce as ever despite huge leisure"
+  ],
+  "energy": [
+   "Power supply, not models, sets the limit on automation",
+   "Energy cost is the core input price for all firms",
+   "Free time gains track energy access across countries"
+  ]
+ }
+]

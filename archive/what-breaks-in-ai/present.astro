@@ -1,0 +1,60 @@
+---
+/* Slide view of What Breaks in AI. The same stage component in deck mode: every scene is one
+   slide built from its still frame, no 3D, keyboard arrows move between slides. The article at
+   /deep-dives/what-breaks-in-ai stays the canonical page. */
+import { getEntry } from 'astro:content';
+import WhatBreaksStage from '../../../components/deep-dive/WhatBreaksStage.astro';
+
+const entry = await getEntry('deep-dives', 'what-breaks-in-ai');
+if (!entry) throw new Error('what-breaks-in-ai entry missing');
+const d = entry.data;
+const SCENES = ['1', '2', '3', '4', '5', '6', '7', '8'];
+---
+
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>{d.title}, slide view | Models to Margins</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet" />
+    <style is:global>
+      .wb-deckpage { margin: 0; background: #0b0f17; color: #eef3ff; font-family: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif; }
+      .wb-deckbar { position: sticky; top: 0; z-index: 5; display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center; padding: 10px 16px; background: rgba(11, 15, 23, .9); border-bottom: 1px solid rgba(167, 180, 201, .22); backdrop-filter: blur(10px); }
+      .wb-deckback { color: #86abdd; font-weight: 600; font-size: 15px; min-height: 44px; display: inline-flex; align-items: center; text-decoration: none; }
+      .wb-decktitle { margin: 0; font-size: 15px; font-weight: 600; color: #a7b4c9; }
+      .wb-decknav { margin-left: auto; display: flex; gap: 6px; }
+      .wb-decknav a { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; border-radius: 10px; border: 1.5px solid rgba(167, 180, 201, .22); color: #eef3ff; text-decoration: none; font: 600 14px/1 "IBM Plex Mono", ui-monospace, monospace; }
+      .wb-deckpage .wb-page { max-width: 1240px; margin: 0 auto; padding: 0 16px 32px; }
+      .wb-deckpage .wb-cine { margin-top: 0; }
+      .wb-deckpage .wb-scene { scroll-margin-top: 64px; }
+      html:has(.wb-deckpage) { scroll-snap-type: y proximity; }
+    </style>
+  </head>
+  <body class="wb-deckpage">
+    <header class="wb-deckbar">
+      <a class="wb-deckback" href="/deep-dives/what-breaks-in-ai">Back to the article</a>
+      <p class="wb-decktitle">{d.bpTitle ?? d.title}</p>
+      <nav class="wb-decknav" aria-label="Slides">
+        {SCENES.map((n) => <a href={`#scene-${n}`}>{n}</a>)}
+      </nav>
+    </header>
+    <main class="wb-page">
+      <WhatBreaksStage mode="deck" />
+    </main>
+    <script>
+      // Arrow keys and page keys move one slide at a time. Native scroll stays in charge.
+      const ids = Array.from(document.querySelectorAll('.wb-scene')).map((s) => s.id);
+      const at = () => { const y = scrollY + innerHeight / 2; let i = 0; ids.forEach((id, k) => { const el = document.getElementById(id)!; if (el.offsetTop <= y) i = k; }); return i; };
+      const go = (i: number) => document.getElementById(ids[Math.max(0, Math.min(ids.length - 1, i))])?.scrollIntoView({ block: 'start', behavior: 'instant' as ScrollBehavior });
+      addEventListener('keydown', (e) => {
+        const tag = (e.target as HTMLElement)?.tagName; if (tag === 'BUTTON' || tag === 'A' || tag === 'SUMMARY' || tag === 'INPUT') return;
+        if (['ArrowRight', 'ArrowDown', 'PageDown', ' '].includes(e.key)) { e.preventDefault(); go(at() + 1); }
+        if (['ArrowLeft', 'ArrowUp', 'PageUp'].includes(e.key)) { e.preventDefault(); go(at() - 1); }
+      });
+    </script>
+  </body>
+</html>

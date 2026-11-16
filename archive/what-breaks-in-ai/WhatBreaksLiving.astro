@@ -1,0 +1,486 @@
+---
+/* Sample C, the living system. One picture of the AI system that runs the whole time: requests
+   move through the stations, bad ones are caught where a building block stops them, and caught
+   ones ride the offline loop back into the tests. Five zoom levels (board, system, block, problem,
+   run), a what-if switch per block, an Interim and Target switch, and a 90 second film that plays
+   the story over the live picture. All text is DOM. Data is shaped once in what-breaks/model.ts. */
+import { sprite, view, LAYERS, BLOCKS, LAYER_TONE, layerOf, icon, evTag, quickBy, PROB, LABELS, proofCount, LANES, cellOf, costRows, bar, INCIDENTS, BOARD, UNKNOWN, HERO, clientData } from './what-breaks/model';
+import './what-breaks/iso-tones.css';
+
+const N = Object.fromEntries((view?.nodes ?? []).map((n: any) => [n.id, n]));
+const NODE_IC: Record<string, string> = { screen_in: 'i-scrub', model: 'i-model', screen_out: 'i-explain', settings: 'i-rule-brick', providers: 'i-model', idp: 'i-vault', web: 'i-network', traces: 'i-lake' };
+const BANDS = [
+  { id: 'control', name: 'Control plane', note: 'settings, tested before release', ids: ['change', 'testset', 'testgate', 'settings', 'canary'] },
+  { id: 'data', name: 'Data plane', note: 'every request, in this order', ids: ['ask', 'gate', 'budget', 'screen_in', 'read', 'route', 'model', 'check', 'screen_out', 'human', 'log'] },
+  { id: 'fence', name: 'Agent fence', note: 'when the answer needs an action', ids: ['agentid', 'reader', 'act', 'toolgw', 'approval', 'sandbox', 'offswitch'] },
+  { id: 'out', name: 'Outside your boundary', note: '', ids: ['providers', 'idp', 'web', 'traces'] }
+];
+const toneOf = (n: any) => n?.block ? LAYER_TONE[layerOf(n.block)] : (n?.external ? 'iso-slate' : 'iso-violet');
+const nodeBtn = (id: string) => { const n = N[id]; if (!n) return ''; const ic = n.block ? BLOCKS[n.block].ic : (NODE_IC[id] || 'i-cloud'); const qn = n.block ? (quickBy[n.block] ?? []).length : 0; const noq = !n.external && n.block && qn === 0; return `<button type="button" class="wbl-node${n.external ? ' ext' : ''}${noq ? ' noq' : ''}" data-node="${id}" data-block="${n.block ?? ''}">${icon(ic, toneOf(n), 44)}<b>${n.name}</b><span class="wbl-tagl">${n.block ?? (n.external ? 'outside' : 'part')}</span><span class="wbl-q">${n.external ? 'as today' : qn ? qn + ' fix' + (qn > 1 ? 'es' : '') + ' now' : (n.block ? 'none yet' : 'as today')}</span><i class="wbl-badge" aria-hidden="true"></i></button>`; };
+const mapHtml = BANDS.map((b) => `<div class="wbl-band ${b.id}"><p class="wbl-bandl"><b>${b.name}</b>${b.note ? ' <span>' + b.note + '</span>' : ''}</p><div class="wbl-row">${b.ids.map(nodeBtn).join('')}</div></div>`).join('');
+const chips = PROB.map((p) => `<button type="button" class="wbl-chip ${p.pre}" data-prob="${p.id}" title="${p.name}">${p.id}</button>`).join('');
+const blockSw = Object.entries(BLOCKS).map(([id, b]: any) => `<button type="button" class="wbl-sw" data-sw="${id}" aria-pressed="true">${icon(b.ic, LAYER_TONE[layerOf(id)], 32)}<span>${id}</span></button>`).join('');
+
+// Board level charts, the same data and scales as the stage's scene 8.
+const waffle = PROB.map((p) => `<button type="button" class="${p.ev}" data-prob="${p.id}">${p.id}</button>`).join('');
+const M = INCIDENTS.months; const W = 320, H = 110;
+const base = (v: number[]) => (v[0] + v[1] + v[2]) / 3;
+const idx = M.series.map((sr: any) => sr.v.map((x: number) => x / base(sr.v)));
+const ymax = Math.max(...idx.flat()) * 1.1;
+const px = (i: number) => (i + 0.5) * W / M.labels.length; const py = (y: number) => 8 + (H - 16) * (1 - y / ymax);
+const linePaths = idx.map((ys: number[], k: number) => '<path class="s' + k + '" vector-effect="non-scaling-stroke" d="' + ys.map((y, i) => (i ? 'L' : 'M') + px(i).toFixed(1) + ' ' + py(y).toFixed(1)).join(' ') + '"/>').join('');
+const lineDots = idx.map((ys: number[], k: number) => ys.map((y, i) => '<i class="wbl-pt s' + k + '" style="left:' + (px(i) / W * 100).toFixed(1) + '%;top:' + (py(y) / H * 100).toFixed(1) + '%"></i>').join('')).join('');
+const costBars = costRows.map((x) => `<button type="button" data-block="${x.id}"><b>${BLOCKS[x.id].name}</b><i class="wbl-bar"><i style="left:${bar(x.r[0])}%;width:${Math.max(1.2, +bar(x.r[1]) - +bar(x.r[0]))}%"></i></i><span>${x.cost.replace(' a month', '')}</span></button>`).join('');
+const lanesHtml = `<div class="wbl-lanes" role="table" aria-label="Who does what"><div class="wbl-lhead" role="row"><i></i>${LANES.cols.map((c: string, ci: number) => `<b data-col="${ci}">${c}</b>`).join('')}</div>${LANES.rows.map((r: string, ri: number) => `<div class="wbl-lrow" role="row"><b>${r}</b>${LANES.cols.map((_: string, ci: number) => { const c = cellOf(ri, ci); return c ? `<button type="button" data-cell="${ri}-${ci}" data-col="${ci}">${c.task}</button>` : '<i></i>'; }).join('')}</div>`).join('')}</div>`;
+---
+
+<div class="wbl" id="wbl" data-zoom="system" data-arch="target">
+  <div class="wbl-sprite" aria-hidden="true" set:html={sprite} />
+  <script type="application/json" id="wbl-data" set:html={clientData}></script>
+
+  <div class="wbl-top">
+    <div class="wbl-nums">
+      {HERO.map((h) => <div class="wbl-num"><b>{h.n}</b><span>{h.l}</span><Fragment set:html={evTag(h.ev)} /></div>)}
+    </div>
+    <div class="wbl-rail" role="group" aria-label="Zoom level">
+      <button type="button" data-zoomto="board">Board</button>
+      <button type="button" data-zoomto="system">System</button>
+      <button type="button" data-zoomto="block">Block</button>
+      <button type="button" data-zoomto="problem">Problem</button>
+      <button type="button" data-zoomto="run">Run it</button>
+      <button type="button" class="wbl-playbtn" data-film="play">Play the film</button>
+    </div>
+  </div>
+
+  <section class="wbl-view" data-v="system" id="wbl-system">
+    <div class="wbl-sysbar">
+      <div class="wbl-hud" aria-live="off">
+        <span><b id="wbl-sent">0</b> requests</span><span class="ok"><b id="wbl-pass">0</b> through clean</span><span class="stop"><b id="wbl-caught">0</b> caught</span><span class="leak"><b id="wbl-leak">0</b> missed</span><i class="wb-ev design">design</i>
+      </div>
+      <div class="wbl-switch" role="group" aria-label="Architecture view">
+        <button type="button" data-arch="target" aria-pressed="true">Target</button>
+        <button type="button" data-arch="interim" aria-pressed="false">This week</button>
+      </div>
+    </div>
+    <div class="wbl-stagegrid">
+      <div class="wbl-map" id="wbl-map">
+        <svg class="wbl-wires" aria-hidden="true"><path class="req" id="wbl-req"></path><path class="loop" id="wbl-loop"></path><g id="wbl-dots"></g></svg>
+        <Fragment set:html={mapHtml} />
+      </div>
+      <aside class="wbl-card" id="wbl-card" hidden aria-labelledby="wbl-card-h">
+        <button type="button" class="wbl-close" data-close>Close</button>
+        <p class="wbl-k" id="wbl-card-k"></p>
+        <h3 id="wbl-card-h" tabindex="-1"></h3>
+        <div id="wbl-card-b"></div>
+      </aside>
+    </div>
+    <div class="wbl-strip">
+      <p class="wbl-stripl"><b>24 failures</b> <span>lit red when nothing stops them</span></p>
+      <div class="wbl-chips"><Fragment set:html={chips} /></div>
+    </div>
+    <div class="wbl-strip">
+      <p class="wbl-stripl"><b>What if</b> <span>switch a block off, watch what leaks</span></p>
+      <div class="wbl-sws"><Fragment set:html={blockSw} /></div>
+    </div>
+  </section>
+
+  <section class="wbl-view" data-v="board" id="wbl-board" hidden>
+    <ol class="wbl-say">{BOARD.map((b) => <li><b>{b.n}</b><span>{b.s}</span><Fragment set:html={evTag(b.ev)} /></li>)}</ol>
+    <div class="wbl-charts">
+      <div class="wbl-chart"><h3>Proof the fixes work <i class="wb-ev design">design</i></h3><div class="wbl-waffle" set:html={waffle} /><ul class="wbl-key"><li><i class="k m"></i>measured {proofCount('m')}</li><li><i class="k v"></i>vendor-reported {proofCount('v')}</li><li><i class="k n"></i>not measured {proofCount('n')}</li></ul></div>
+      <div class="wbl-chart"><h3>{INCIDENTS.label} <Fragment set:html={evTag(INCIDENTS.ev)} /></h3><div class="wbl-linewrap"><svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" aria-hidden="true" set:html={`<line class="base" x1="0" x2="${W}" y1="${py(1).toFixed(1)}" y2="${py(1).toFixed(1)}"/>` + linePaths} /><Fragment set:html={lineDots} /></div><div class="wbl-months">{M.labels.map((l: string) => <span>{l}</span>)}</div><ul class="wbl-key">{INCIDENTS.rows.map((r: any, k: number) => <li><i class={`k s${k}`}></i>{r.name} {r.x}x</li>)}</ul></div>
+      <div class="wbl-chart wide"><h3>Cost to run, a month <i class="wb-ev illustrative">illustrative</i></h3><div class="wbl-bars" set:html={costBars} /></div>
+    </div>
+    <details class="wbl-unknown"><summary>What we do not know yet</summary><ul>{UNKNOWN.map((u) => <li><b>{u.t}.</b> {u.s}</li>)}</ul></details>
+  </section>
+
+  <section class="wbl-view" data-v="run" id="wbl-run" hidden>
+    <p class="wbl-runl"><b>Six teams, five stages.</b> <span>The playhead lights what comes due. Tap a task.</span></p>
+    <Fragment set:html={lanesHtml} />
+    <aside class="wbl-card run" id="wbl-cellcard" hidden aria-labelledby="wbl-cell-h">
+      <button type="button" class="wbl-close" data-close>Close</button>
+      <p class="wbl-k" id="wbl-cell-k"></p>
+      <h3 id="wbl-cell-h" tabindex="-1"></h3>
+      <div id="wbl-cell-b"></div>
+    </aside>
+  </section>
+
+  <div class="wbl-film" id="wbl-film" hidden>
+    <p class="wbl-cap" id="wbl-cap" aria-live="polite"></p>
+    <div class="wbl-scrub"><i class="wbl-prog"><i id="wbl-prog"></i></i>
+      <div class="wbl-marks" role="group" aria-label="Chapters">{[1, 2, 3, 4, 5, 6, 7, 8].map((n) => <button type="button" data-beat={n}>{n}</button>)}</div>
+      <button type="button" class="wbl-pp" data-film="toggle">Pause</button>
+      <button type="button" class="wbl-pp" data-film="stop">Stop</button>
+    </div>
+  </div>
+</div>
+
+<style is:global>
+  .wbl { --sbg: #0b0f17; --sink: #eef3ff; --smut: #a7b4c9; --srule: rgba(167, 180, 201, .22); --spanel: #111827;
+    --good: #4edab5; --warn: #f4cb73; --stop: #ff776c; --flow: #86abdd; --ctl: #c79a45; --vio: #a5a2d4; --cor: #e8aa96;
+    position: relative; margin: 20px 0 0; padding: 20px; border-radius: 20px; background: var(--sbg); color: var(--sink);
+    font-family: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif; display: grid; gap: 16px; }
+  .wbl-sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
+  .wbl button { font: inherit; color: inherit; cursor: pointer; }
+  .wbl h3 { margin: 0; font-size: 18px; text-wrap: balance; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .wbl p { margin: 0; text-wrap: pretty; }
+  .wbl .wb-ev { display: inline-flex; font: 600 14px/1.2 "IBM Plex Mono", ui-monospace, monospace; font-style: normal; padding: 3px 7px; border: 1.5px solid currentColor; border-radius: 6px; white-space: nowrap; }
+  .wbl .wb-ev.verified { color: var(--good); } .wbl .wb-ev.vendor { color: var(--ctl); } .wbl .wb-ev.illustrative { color: var(--smut); border-style: dashed; } .wbl .wb-ev.design { color: var(--flow); border-style: dashed; } .wbl .wb-ev.unverified { color: var(--warn); border-style: dashed; }
+
+  .wbl-top { display: flex; flex-wrap: wrap; gap: 14px 24px; align-items: center; justify-content: space-between; }
+  .wbl-nums { display: flex; flex-wrap: wrap; gap: 10px 28px; }
+  .wbl-num { display: grid; grid-template-columns: auto auto; gap: 2px 10px; align-items: center; }
+  .wbl-num b { font: 600 34px/1 "IBM Plex Mono", ui-monospace, monospace; grid-row: span 2; }
+  .wbl-num span { font-size: 15px; color: var(--smut); max-width: 18ch; }
+  .wbl-rail { display: flex; flex-wrap: wrap; gap: 6px; }
+  .wbl-rail button, .wbl-switch button, .wbl-pp, .wbl-close { min-height: 44px; padding: 0 14px; border-radius: 10px; border: 1.5px solid var(--srule); background: transparent; font-size: 15px; font-weight: 600; }
+  .wbl-rail button[aria-current="true"], .wbl-switch button[aria-pressed="true"] { background: var(--sink); color: var(--sbg); border-color: var(--sink); }
+  .wbl-rail .wbl-playbtn { border-color: var(--good); color: var(--good); }
+
+  .wbl-view[hidden] { display: none; }
+  .wbl-view { display: grid; gap: 14px; }
+  .wbl-sysbar { display: flex; flex-wrap: wrap; gap: 10px 20px; align-items: center; justify-content: space-between; }
+  .wbl-hud { display: flex; flex-wrap: wrap; gap: 6px 18px; align-items: center; font-size: 15px; color: var(--smut); }
+  .wbl-hud b { font: 600 20px/1 "IBM Plex Mono", ui-monospace, monospace; color: var(--sink); margin-right: 4px; font-variant-numeric: tabular-nums; }
+  .wbl-hud .ok b { color: var(--good); } .wbl-hud .stop b { color: var(--warn); } .wbl-hud .leak b { color: var(--stop); }
+  .wbl-switch { display: flex; gap: 6px; }
+
+  .wbl-stagegrid { display: grid; gap: 14px; }
+  .wbl[data-card="on"] .wbl-stagegrid { grid-template-columns: minmax(0, 1fr) 340px; }
+  .wbl-map { position: relative; display: grid; gap: 10px; padding: 12px; border-radius: 16px; background: radial-gradient(120% 90% at 50% 10%, #16213a 0%, var(--sbg) 70%); border: 1px solid var(--srule); overflow: hidden; transition: transform .6s ease; }
+  .wbl-wires { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 2; }
+  .wbl-wires path { fill: none; stroke-width: 2; vector-effect: non-scaling-stroke; }
+  .wbl-wires .req { stroke: var(--flow); opacity: .45; stroke-dasharray: 6 6; }
+  .wbl-wires .loop { stroke: var(--good); opacity: .35; stroke-dasharray: 3 6; }
+  .wbl-wires circle.ok { fill: var(--good); } .wbl-wires circle.S { fill: var(--vio); } .wbl-wires circle.F { fill: var(--cor); } .wbl-wires circle.leak { fill: var(--stop); } .wbl-wires circle.back { fill: var(--good); opacity: .8; }
+  .wbl-band { display: grid; gap: 6px; padding: 8px; border-radius: 12px; border: 1px dashed var(--srule); }
+  .wbl-band.control { border-color: rgba(199, 154, 69, .45); } .wbl-band.fence { border-color: rgba(255, 119, 108, .35); } .wbl-band.out { border-style: dotted; }
+  .wbl-bandl { font-size: 14px; color: var(--smut); } .wbl-bandl b { color: var(--sink); font-weight: 600; }
+  .wbl-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(96px, 1fr)); gap: 8px; }
+  @media (min-width: 1200px) { .wbl:not([data-card="on"]) .wbl-band.data .wbl-row { grid-template-columns: repeat(11, minmax(0, 1fr)); } }
+  .wbl-node { position: relative; display: grid; justify-items: center; align-content: start; gap: 4px; min-height: 116px; padding: 16px 10px 8px; border-radius: 12px; border: 1.5px solid var(--srule); background: rgba(17, 24, 39, .85); text-align: center; transition: opacity .3s, border-color .3s, transform .3s, box-shadow .3s; }
+  .wbl-node b { font-size: 14px; font-weight: 600; line-height: 1.2; text-wrap: balance; }
+  .wbl-node .wbl-tagl, .wbl-node .wbl-q { font: 500 14px/1.2 "IBM Plex Mono", ui-monospace, monospace; color: var(--smut); }
+  .wbl-node .wbl-q { display: none; color: var(--warn); }
+  .wbl-node.ext { border-style: dotted; }
+  .wbl-node.hit { border-color: var(--warn); box-shadow: 0 0 0 3px rgba(244, 203, 115, .25); }
+  .wbl-node.sel { border-color: var(--sink); transform: scale(1.06); }
+  .wbl-node.dim { opacity: .28; }
+  .wbl-node.off { opacity: .3; border-style: dashed; }
+  .wbl-node.lit { border-color: var(--good); box-shadow: 0 0 0 3px rgba(78, 218, 181, .2); }
+  .wbl-badge { display: none; position: absolute; top: 6px; left: 6px; min-width: 26px; height: 26px; border-radius: 13px; background: var(--sink); color: var(--sbg); font: 600 14px/26px "IBM Plex Mono", monospace; font-style: normal; }
+  .wbl[data-badges="on"] .wbl-node[data-block]:not([data-block=""]) .wbl-badge { display: block; }
+  .wbl[data-arch="interim"] .wbl-node.im .wbl-tagl { display: none; } .wbl[data-arch="interim"] .wbl-node.im .wbl-q { display: block; }
+  .wbl[data-arch="interim"] .wbl-node.im.noq { border-style: dashed; opacity: .55; }
+  .wbl[data-focus="control"] .wbl-band:not(.control) .wbl-node, .wbl[data-focus="fence"] .wbl-band:not(.fence) .wbl-node { opacity: .3; }
+
+  .wbl-strip { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 12px; align-items: center; }
+  .wbl-stripl { font-size: 15px; color: var(--smut); } .wbl-stripl b { color: var(--sink); display: block; font-size: 16px; }
+  .wbl-chips, .wbl-sws { display: flex; flex-wrap: wrap; gap: 6px; }
+  .wbl-chip { min-width: 46px; min-height: 42px; border-radius: 8px; border: 1.5px solid var(--srule); background: transparent; font: 600 14px/1 "IBM Plex Mono", monospace !important; }
+  .wbl-chip.S { color: var(--vio); } .wbl-chip.F { color: var(--cor); }
+  .wbl-chip.flash { background: rgba(244, 203, 115, .22); border-color: var(--warn); }
+  .wbl-chip.leak { background: rgba(255, 119, 108, .25); border-color: var(--stop); color: var(--sink); }
+  .wbl-chip.terms { border-style: dashed; }
+  .wbl-sw { display: inline-flex; gap: 6px; align-items: center; min-height: 44px; padding: 0 10px 0 6px; border-radius: 10px; border: 1.5px solid var(--srule); background: transparent; font: 600 14px/1 "IBM Plex Mono", monospace !important; }
+  .wbl-sw[aria-pressed="false"] { opacity: .45; border-style: dashed; text-decoration: line-through; }
+
+  .wbl-card { display: grid; gap: 10px; align-content: start; padding: 16px; border-radius: 16px; background: var(--spanel); border: 1px solid var(--srule); }
+  .wbl-card[hidden] { display: none; }
+  .wbl-card .wbl-close { justify-self: end; }
+  .wbl-k { font: 500 14px/1.3 "IBM Plex Mono", monospace; color: var(--smut); }
+  .wbl-card h3 { font-size: 20px; }
+  .wbl-card dl { margin: 0; display: grid; gap: 8px; }
+  .wbl-card dt { font-size: 14px; color: var(--smut); } .wbl-card dd { margin: 0; font-size: 15px; line-height: 1.45; }
+  .wbl-card h4 { margin: 4px 0 0; font-size: 15px; color: var(--good); text-wrap: balance; }
+  .wbl-card p, .wbl-card li, .wbl-card dd { text-wrap: balance; }
+  .wbl-card ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; font-size: 15px; line-height: 1.4; }
+  .wbl-card .wbl-catch { padding: 10px 12px; border-radius: 10px; border: 1.5px solid var(--warn); font-size: 15px; }
+  .wbl-card .wbl-catch.leak { border-color: var(--stop); }
+  .wbl-card .wbl-cchips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .wbl-card .wbl-cbar { height: 12px; border-radius: 6px; background: rgba(167, 180, 201, .15); position: relative; } .wbl-card .wbl-cbar i { position: absolute; top: 0; bottom: 0; border-radius: 6px; background: var(--flow); }
+
+  .wbl-say { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; }
+  .wbl-say li { display: grid; gap: 6px; align-content: start; padding: 14px; border-radius: 14px; background: var(--spanel); border: 1px solid var(--srule); font-size: 15px; line-height: 1.45; }
+  .wbl-say b { font: 600 30px/1 "IBM Plex Mono", monospace; }
+  .wbl-say .wb-ev { justify-self: start; }
+  .wbl-charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 12px; }
+  .wbl-chart { display: grid; gap: 10px; align-content: start; padding: 14px; border-radius: 14px; background: var(--spanel); border: 1px solid var(--srule); }
+  .wbl-chart.wide { grid-column: 1 / -1; }
+  .wbl-waffle { display: grid; grid-template-columns: repeat(auto-fill, minmax(50px, 1fr)); gap: 6px; }
+  .wbl-waffle button { min-height: 42px; border-radius: 8px; border: 1.5px solid var(--srule); background: transparent; font: 600 14px/1 "IBM Plex Mono", monospace !important; }
+  .wbl-waffle .m { background: rgba(78, 218, 181, .28); border-color: var(--good); } .wbl-waffle .v { background: rgba(199, 154, 69, .25); border-color: var(--ctl); }
+  .wbl-key { margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 14px; color: var(--smut); }
+  .wbl-key .k { display: inline-block; width: 14px; height: 14px; border-radius: 4px; margin-right: 6px; vertical-align: -2px; border: 1.5px solid var(--srule); }
+  .wbl-key .k.m { background: rgba(78, 218, 181, .5); } .wbl-key .k.v { background: rgba(199, 154, 69, .5); } .wbl-key .k.s0 { background: var(--stop); } .wbl-key .k.s1 { background: var(--smut); }
+  .wbl-linewrap { position: relative; height: 140px; }
+  .wbl-linewrap svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .wbl-linewrap path { fill: none; stroke-width: 2.5; } .wbl-linewrap path.s0 { stroke: var(--stop); } .wbl-linewrap path.s1 { stroke: var(--smut); }
+  .wbl-linewrap .base { stroke: var(--srule); stroke-dasharray: 4 4; vector-effect: non-scaling-stroke; }
+  .wbl-pt { position: absolute; width: 10px; height: 10px; margin: -5px 0 0 -5px; border-radius: 50%; } .wbl-pt.s0 { background: var(--stop); } .wbl-pt.s1 { background: var(--smut); }
+  .wbl-months { display: grid; grid-template-columns: repeat(5, 1fr); text-align: center; font: 500 14px/1.2 "IBM Plex Mono", monospace; color: var(--smut); }
+  .wbl-bars { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 6px 18px; }
+  .wbl-bars button { display: grid; grid-template-columns: 150px minmax(0, 1fr) auto; gap: 10px; align-items: center; min-height: 44px; border: 0; background: transparent; text-align: left; font-size: 14px; }
+  .wbl-bars button span { font: 500 14px/1.2 "IBM Plex Mono", monospace; color: var(--smut); }
+  .wbl-bar { position: relative; height: 12px; border-radius: 6px; background: rgba(167, 180, 201, .15); } .wbl-bar i { position: absolute; top: 0; bottom: 0; border-radius: 6px; background: var(--flow); }
+  .wbl-unknown summary { min-height: 44px; display: flex; align-items: center; font-weight: 600; cursor: pointer; }
+  .wbl-unknown ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; font-size: 15px; color: var(--smut); }
+
+  .wbl-runl { font-size: 15px; color: var(--smut); } .wbl-runl b { color: var(--sink); }
+  .wbl-lanes { display: grid; gap: 6px; }
+  .wbl-lhead, .wbl-lrow { display: grid; grid-template-columns: 170px repeat(5, minmax(0, 1fr)); gap: 6px; align-items: stretch; }
+  .wbl-lhead b { font: 600 14px/1.2 "IBM Plex Mono", monospace; color: var(--smut); padding: 6px; border-radius: 8px; text-align: center; transition: background .3s, color .3s; }
+  .wbl-lhead b.on { background: var(--good); color: var(--sbg); }
+  .wbl-lrow > b { font-size: 14px; align-self: center; }
+  .wbl-lrow button { min-height: 52px; padding: 6px 8px; border-radius: 10px; border: 1.5px solid var(--srule); background: rgba(17, 24, 39, .85); font-size: 14px; line-height: 1.25; text-align: left; text-wrap: balance; transition: border-color .3s, opacity .3s; opacity: .55; }
+  .wbl-lrow button.on { opacity: 1; border-color: var(--good); }
+  .wbl-card.run { max-width: 640px; }
+
+  .wbl-film { position: sticky; bottom: 0; z-index: 5; display: grid; gap: 8px; padding: 12px 14px; border-radius: 14px; background: rgba(11, 15, 23, .94); border: 1px solid var(--srule); backdrop-filter: blur(10px); }
+  .wbl-film[hidden] { display: none; }
+  .wbl-cap { font-size: 22px; font-weight: 600; text-wrap: balance; }
+  .wbl-scrub { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .wbl-prog { flex: 1 1 100%; height: 4px; border-radius: 2px; background: var(--srule); position: relative; } .wbl-prog i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--good); border-radius: 2px; width: 0; }
+  .wbl-marks { display: flex; flex-wrap: wrap; gap: 6px; }
+  .wbl-marks button { min-width: 44px; min-height: 44px; border-radius: 10px; border: 1.5px solid var(--srule); background: transparent; font: 600 14px/1 "IBM Plex Mono", monospace !important; }
+  .wbl-marks button[aria-current="true"] { background: var(--good); color: var(--sbg); border-color: var(--good); }
+
+  @media (max-width: 1199px) { .wbl[data-card="on"] .wbl-stagegrid { grid-template-columns: minmax(0, 1fr); } }
+  @media (max-width: 720px) {
+    .wbl { padding: 12px; border-radius: 14px; }
+    .wbl-row { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; } .wbl-node b { font-size: 14px; letter-spacing: -.03em; } .wbl-band { padding: 6px; } .wbl-map { padding: 8px; }
+    .wbl-node { min-height: 100px; }
+    .wbl-strip { grid-template-columns: minmax(0, 1fr); }
+    .wbl-lhead { display: none; }
+    .wbl-lrow { grid-template-columns: minmax(0, 1fr); }
+    .wbl-lrow button { opacity: 1; }
+    .wbl-lrow button::before { content: attr(data-stage); }
+    .wbl-bars button { grid-template-columns: minmax(0, 1fr) auto; } .wbl-bars button .wbl-bar { grid-column: 1 / -1; grid-row: 2; }
+    .wbl-bars button { min-width: 0; } .wbl-bars button b { min-width: 0; }
+    .wbl[data-card="on"] .wbl-band.out, .wbl[data-card="on"] .wbl-band.control, .wbl[data-card="on"] .wbl-strip:last-child { display: none; }
+    .wbl-num b { font-size: 28px; }
+  }
+  @media (prefers-reduced-motion: reduce) { .wbl * { transition: none !important; } }
+  @media print { .wbl-view[hidden] { display: grid !important; } .wbl-rail, .wbl-film, .wbl-sws { display: none !important; } .wbl-wires g { display: none; } }
+</style>
+
+<script>
+  const root = document.getElementById('wbl') as HTMLElement | null;
+  if (root) {
+    const D = JSON.parse((document.getElementById('wbl-data') as HTMLElement).textContent || '{}');
+    const $ = (s: string, p: ParentNode = root) => p.querySelector(s) as HTMLElement;
+    const $$ = (s: string, p: ParentNode = root) => Array.from(p.querySelectorAll(s)) as HTMLElement[];
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const ev = (e?: string) => e ? `<i class="wb-ev ${e}">${e === 'verified' ? 'verified 2026' : e}</i>` : '';
+    const hashGet = () => new URLSearchParams(location.hash.slice(1));
+    const hashSet = (o: Record<string, string | null>) => { const h = hashGet(); for (const [k, v] of Object.entries(o)) { if (v === null) h.delete(k); else h.set(k, v); } try { history.replaceState(null, '', h.toString() ? '#' + h.toString() : location.pathname + location.search); } catch {} };
+    const nodes = D.view?.nodes || []; const nodeById = (id: string) => nodes.find((n: any) => n.id === id);
+    const probs: any[] = D.probs;
+
+    // ---- the catch rule. A bad request is caught at the first station on its path whose block
+    // is in the problem's block list and switched on. Blocks with no station never ride the belt.
+    const PATH = ['ask', 'gate', 'budget', 'screen_in', 'read', 'route', 'model', 'check', 'screen_out', 'human', 'log'];
+    const STATIONS = ['ask', 'gate', 'budget', 'read', 'toolgw', 'route', 'check', 'human', 'log'];
+    const onPathBlocks = new Set(STATIONS.map((s) => nodeById(s)?.block).filter(Boolean));
+    const off = new Set<string>();
+    const catchOf = (p: any) => {
+      const mine = (p.b || []).filter((b: string) => onPathBlocks.has(b));
+      if (!mine.length) return { kind: 'terms' };
+      for (const s of STATIONS) { const b = nodeById(s)?.block; if (b && mine.includes(b) && !off.has(b)) return { kind: 'caught', station: s }; }
+      return { kind: 'leak' };
+    };
+    const riders = probs.filter((p) => catchOf(p).kind !== 'terms');
+    $$('.wbl-chip').forEach((c) => { const p = probs.find((x) => x.id === c.dataset.prob); if (p && catchOf(p).kind === 'terms') c.classList.add('terms'); });
+
+    // ---- map wires and the moving requests
+    const map = $('#wbl-map'); const svg = $('.wbl-wires', map) as unknown as SVGSVGElement;
+    const reqPath = $('#wbl-req', map) as unknown as SVGPathElement; const loopPath = $('#wbl-loop', map) as unknown as SVGPathElement; const dotsG = $('#wbl-dots', map);
+    const center = (id: string) => { const b = $(`[data-node="${id}"]`, map); if (!b) return null; const m = map.getBoundingClientRect(), r = b.getBoundingClientRect(); return { x: r.left - m.left + r.width / 2, y: r.top - m.top + 7 }; };
+    let stopAt: Record<string, number> = {};
+    function layout() {
+      const m = map.getBoundingClientRect(); svg.setAttribute('viewBox', `0 0 ${m.width} ${m.height}`);
+      const pts = PATH.map(center).filter(Boolean) as { x: number; y: number }[];
+      reqPath.setAttribute('d', pts.map((p, i) => (i ? 'L' : 'M') + p.x.toFixed(1) + ' ' + p.y.toFixed(1)).join(' '));
+      const L = reqPath.getTotalLength(); let acc = 0; stopAt = {};
+      pts.forEach((p, i) => { if (i) acc += Math.hypot(p.x - pts[i - 1].x, p.y - pts[i - 1].y); stopAt[PATH[i]] = acc; });
+      stopAt.toolgw = stopAt.read; stopAt.__end = L;
+      const lp = ['log', 'testset', 'testgate', 'settings', 'check'].map(center).filter(Boolean) as { x: number; y: number }[];
+      loopPath.setAttribute('d', lp.map((p, i) => (i ? 'L' : 'M') + p.x.toFixed(1) + ' ' + p.y.toFixed(1)).join(' '));
+    }
+
+    const counts = { sent: 0, pass: 0, caught: 0, leak: 0 };
+    const showCounts = () => { $('#wbl-sent').textContent = String(counts.sent); $('#wbl-pass').textContent = String(counts.pass); $('#wbl-caught').textContent = String(counts.caught); $('#wbl-leak').textContent = String(counts.leak); };
+    type Dot = { el: SVGCircleElement; t0: number; dur: number; path: SVGPathElement; end: number; done: () => void };
+    let dots: Dot[] = []; let k = 0; let lastSpawn = 0; let running = false;
+    const mkDot = (cls: string) => { const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle'); c.setAttribute('r', '7'); c.setAttribute('class', cls); dotsG.appendChild(c); return c; };
+    const flash = (sel: string, cls: string, ms = 900) => { const e = $(sel); if (!e) return; e.classList.add(cls); setTimeout(() => e.classList.remove(cls), ms); };
+    function spawn(now: number) {
+      const bad = k % 4 === 3; const p = bad ? riders[(k >> 2) % riders.length] : null; k++; counts.sent++;
+      const c = p ? catchOf(p) : null; const L = stopAt.__end || reqPath.getTotalLength();
+      const end = c?.kind === 'caught' ? stopAt[c.station!] : L;
+      const el = mkDot(p ? (c!.kind === 'leak' ? 'leak' : p.pre) : 'ok');
+      dots.push({ el, t0: now, dur: 5200 * end / L, path: reqPath, end, done: () => {
+        if (!p) { counts.pass++; }
+        else if (c!.kind === 'caught') { counts.caught++; flash(`[data-node="${c!.station}"]`, 'hit'); flash(`.wbl-chip[data-prob="${p.id}"]`, 'flash'); const back = mkDot('back'); const LL = loopPath.getTotalLength(); dots.push({ el: back, t0: performance.now(), dur: 4200, path: loopPath, end: LL, done: () => flash('[data-node="check"]', 'lit') }); }
+        else { counts.leak++; flash(`.wbl-chip[data-prob="${p.id}"]`, 'leak', 1600); }
+        showCounts();
+      } });
+    }
+    function frame(now: number) {
+      if (!running) return; requestAnimationFrame(frame);
+      if (now - lastSpawn > 2500) { lastSpawn = now; spawn(now); }
+      dots = dots.filter((d) => { const t = Math.min(1, (now - d.t0) / d.dur); const pt = d.path.getPointAtLength(t * d.end); d.el.setAttribute('cx', pt.x.toFixed(1)); d.el.setAttribute('cy', pt.y.toFixed(1)); if (t >= 1) { d.done(); d.el.remove(); return false; } return true; });
+    }
+    const vis = { inView: true, sys: true };
+    const setRunning = () => { const on = !reduce && vis.inView && vis.sys; if (on && !running) { running = true; lastSpawn = performance.now() - 2400; requestAnimationFrame(frame); } else if (!on) running = false; };
+    new IntersectionObserver((es) => { vis.inView = es.some((e) => e.isIntersecting); setRunning(); }).observe(map);
+    // Reduced motion: no moving dots. The counters show one full cycle of the fixed schedule.
+    const staticCycle = () => { counts.sent = riders.length * 4; counts.pass = riders.length * 3; counts.caught = riders.filter((p) => catchOf(p).kind === 'caught').length; counts.leak = riders.length - counts.caught; showCounts(); };
+    if (reduce) staticCycle();
+    const leakMarks = () => $$('.wbl-chip').forEach((c) => { const p = probs.find((x) => x.id === c.dataset.prob); c.classList.toggle('leak', !!p && catchOf(p).kind === 'leak'); });
+
+    // ---- what if: switch blocks off
+    $$('.wbl-sw').forEach((b) => b.addEventListener('click', () => {
+      const id = b.dataset.sw!; if (off.has(id)) off.delete(id); else off.add(id);
+      b.setAttribute('aria-pressed', String(!off.has(id)));
+      $$('.wbl-node').forEach((n) => n.classList.toggle('off', !!n.dataset.block && off.has(n.dataset.block)));
+      leakMarks(); if (reduce) staticCycle(); refreshCard();
+    }));
+
+    // ---- interim and target, a timed morph block by block in build order
+    const buildIdx = (b: string) => { const li = D.layers.findIndex((l: any) => l.blocks.includes(b)); return li < 0 ? 9 : D.buildOrder.indexOf(D.layers[li].name); };
+    let morphT: number[] = [];
+    function setArch(v: string, animate = true) {
+      const interim = v === 'interim'; root!.dataset.arch = interim ? 'interim' : 'target'; hashSet({ arch: interim ? 'interim' : null });
+      $$('.wbl-switch button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.arch === (interim ? 'interim' : 'target'))));
+      morphT.forEach(clearTimeout); morphT = [];
+      const ns = $$('.wbl-node').sort((a, b) => buildIdx(a.dataset.block || '') - buildIdx(b.dataset.block || ''));
+      ns.forEach((n, i) => { const go = () => n.classList.toggle('im', interim); if (!animate || reduce) go(); else morphT.push(window.setTimeout(go, 120 * i)); });
+    }
+    $('.wbl-switch').addEventListener('click', (e) => { const b = (e.target as HTMLElement).closest('button[data-arch]') as HTMLElement; if (b) setArch(b.dataset.arch!); });
+
+    // ---- cards
+    const card = $('#wbl-card'); let cardFor: { kind: string; id: string } | null = null; let lastFocus: HTMLElement | null = null;
+    const stName = (s: string) => nodeById(s)?.name || s;
+    function blockBody(id: string) {
+      const b = D.blocks[id]; const cr = D.costRows.find((x: any) => x.id === id);
+      const q = (b.quick || []).slice(0, 2).map((x: any) => `<li><b>${x.fix}</b> ${ev(x.ev)}</li>`).join('');
+      const pct = (v: number) => (Math.sqrt(v / Math.max(...D.costRows.map((x: any) => x.r[1]))) * 100).toFixed(1);
+      return `<p>${b.includes}</p><dl><div><dt>Owner</dt><dd>${b.owner}</dd></div><div><dt>Cost to run, a month</dt><dd>${cr ? `<div class="wbl-cbar"><i style="left:${pct(cr.r[0])}%;width:${Math.max(1.2, +pct(cr.r[1]) - +pct(cr.r[0]))}%"></i></div>${cr.cost.replace(' a month', '')} ` : 'Priced at the first funding gate '}${ev(b.costev)}</dd></div></dl>`
+        + `<h4>Stops ${id === 'P10' ? 'all 24' : b.fixes.length + ' of 24'}</h4><div class="wbl-cchips">${(id === 'P10' ? [] : b.fixes).map((f: string) => `<button type="button" class="wbl-chip ${f[0]}" data-prob="${f}">${f}</button>`).join('')}</div>`
+        + (q ? `<h4>Quick fix this week</h4><ul>${q}</ul>` : '') + (b.options?.length ? `<p class="wbl-k">${b.options.length} named options in the design document</p>` : '');
+    }
+    function probBody(id: string) {
+      const p = probs.find((x) => x.id === id); const c = catchOf(p); const lab = D.labels[p.st];
+      const where = c.kind === 'caught' ? `<p class="wbl-catch">Caught at <b>${stName(c.station!)}</b>, block ${nodeById(c.station!)?.block}</p>` : c.kind === 'leak' ? `<p class="wbl-catch leak">Nothing stops it. Its blocks are switched off.</p>` : `<p class="wbl-catch">Fixed by terms and budget, not on the request path</p>`;
+      let ext = '';
+      if (D.extra?.timeline) { const t = D.extra.timeline.filter((x: any) => x.ev === 'verified' && (x.ids || []).includes(id)).slice(0, 3); if (t.length) ext += `<h4>Last 30 days</h4><ul>${t.map((x: any) => `<li><b>${x.date}</b> ${x.text}</li>`).join('')}</ul>`; }
+      return where + `<dl><div><dt>The number</dt><dd>${p.num} ${p.numl} ${ev(p.nev)}</dd></div><div><dt>${lab.name}</dt><dd>${lab.s}</dd></div><div><dt>Owner</dt><dd>${p.own}. Maturity ${p.mat}.</dd></div></dl>`
+        + (p.quick ? `<h4>Quick fix this week</h4><ul><li><b>${p.quick.fix}</b> ${ev(p.quick.ev)}</li></ul>` : '') + `<h4>Fix properly</h4><p>${p.fix}</p><p><b>First step.</b> ${p.first}</p>` + ext;
+    }
+    function openCard(kind: 'block' | 'problem', id: string, focusEl?: HTMLElement) {
+      cardFor = { kind, id }; lastFocus = focusEl || null; root!.dataset.card = 'on'; card.hidden = false;
+      $$('.wbl-node').forEach((n) => { n.classList.remove('sel', 'dim'); });
+      if (kind === 'block') {
+        const b = D.blocks[id]; if (!b) return; $('#wbl-card-k').textContent = `${id} · ${D.layers[D.layers.findIndex((l: any) => l.blocks.includes(id))].name}`; $('#wbl-card-h').textContent = b.name; $('#wbl-card-b').innerHTML = blockBody(id);
+        $$('.wbl-node').forEach((n) => n.classList.toggle(n.dataset.block === id ? 'sel' : 'dim', true));
+      } else {
+        const p = probs.find((x) => x.id === id); if (!p) return; $('#wbl-card-k').textContent = `${id} · ${p.pre === 'S' ? 'Web search' : 'Wider AI use'}`; $('#wbl-card-h').textContent = p.name; $('#wbl-card-b').innerHTML = probBody(id);
+        const c = catchOf(p); $$('.wbl-node').forEach((n) => { const on = c.kind === 'caught' ? n.dataset.node === c.station : (p.b || []).includes(n.dataset.block); n.classList.toggle(on ? 'sel' : 'dim', true); });
+      }
+      $$('.wbl-chip').forEach((c) => c.classList.toggle('flash', kind === 'problem' && c.dataset.prob === id && !!c.closest('.wbl-chips')));
+      requestAnimationFrame(layout);
+    }
+    const refreshCard = () => { if (cardFor) { $('#wbl-card-b').innerHTML = cardFor.kind === 'block' ? blockBody(cardFor.id) : probBody(cardFor.id); } };
+    function closeCard() { cardFor = null; card.hidden = true; root!.dataset.card = 'off'; $$('.wbl-node').forEach((n) => n.classList.remove('sel', 'dim')); $$('.wbl-chips .wbl-chip').forEach((c) => c.classList.remove('flash')); requestAnimationFrame(layout); }
+
+    // ---- run level: the playhead sweeps the five stages
+    const laneBtns = $$('.wbl-lrow button'); const laneHeads = $$('.wbl-lhead b'); let sweep = 0; let sweepT = 0;
+    laneBtns.forEach((b) => b.dataset.stage = D.lanes.cols[+b.dataset.col!] + '. ');
+    const setStage = (ci: number) => { sweep = ci; laneBtns.forEach((b) => b.classList.toggle('on', reduce || +b.dataset.col! === ci)); laneHeads.forEach((h) => h.classList.toggle('on', reduce || +h.dataset.col! === ci)); };
+    const runSweep = (on: boolean) => { clearInterval(sweepT); if (reduce) { setStage(0); return; } if (on) { setStage(sweep); sweepT = window.setInterval(() => setStage((sweep + 1) % 5), 1600); } };
+    const cellCard = $('#wbl-cellcard');
+    function openCell(id: string) {
+      const [r, c] = id.split('-').map(Number); const cell = D.lanes.cells.find((x: any) => x.r === r && x.c === c); if (!cell) return;
+      $('#wbl-cell-k').textContent = `${D.lanes.rows[r]} · ${D.lanes.cols[c]} · ${cell.cad}`; $('#wbl-cell-h').textContent = cell.task;
+      $('#wbl-cell-b').innerHTML = `<p>${cell.detail}</p><dl><div><dt>Standard</dt><dd>${cell.std || 'None named'}</dd></div><div><dt>Evidence</dt><dd>${ev(cell.ev || 'design')}</dd></div></dl>`;
+      cellCard.hidden = false; hashSet({ cell: id });
+    }
+
+    // ---- zoom levels
+    let zoom = 'system'; let lastBlock = 'P4'; let lastProb = 'S1';
+    function setZoom(z: string, id?: string, focusEl?: HTMLElement) {
+      zoom = z; root!.dataset.zoom = z;
+      const v = z === 'block' || z === 'problem' ? 'system' : z;
+      $$('.wbl-view').forEach((s) => { s.hidden = s.dataset.v !== v; });
+      $$('.wbl-rail button[data-zoomto]').forEach((b) => b.setAttribute('aria-current', String(b.dataset.zoomto === z)));
+      vis.sys = v === 'system'; setRunning(); runSweep(v === 'run');
+      if (z === 'block') { lastBlock = id || lastBlock; openCard('block', lastBlock, focusEl); }
+      else if (z === 'problem') { lastProb = id || lastProb; openCard('problem', lastProb, focusEl); }
+      else if (v === 'system') closeCard();
+      if (v !== 'run') { cellCard.hidden = true; }
+      hashSet({ zoom: z === 'system' ? null : z, id: z === 'block' ? lastBlock : z === 'problem' ? lastProb : null, cell: null });
+      if (v === 'system') requestAnimationFrame(layout);
+    }
+    root.addEventListener('click', (e) => {
+      const t = e.target as HTMLElement;
+      const zb = t.closest('[data-zoomto]') as HTMLElement | null; if (zb) { stopFilm(); setZoom(zb.dataset.zoomto!); return; }
+      const pb = t.closest('[data-prob]') as HTMLElement | null; if (pb) { if (zoom !== 'system' && zoom !== 'block' && zoom !== 'problem') stopFilm(); setZoom('problem', pb.dataset.prob!, pb); return; }
+      const nb = t.closest('.wbl-node') as HTMLElement | null; if (nb) { if (nb.dataset.block) setZoom('block', nb.dataset.block, nb); return; }
+      const bb = t.closest('.wbl-bars [data-block]') as HTMLElement | null; if (bb) { setZoom('block', bb.dataset.block!, bb); return; }
+      const cb = t.closest('[data-cell]') as HTMLElement | null; if (cb) { openCell(cb.dataset.cell!); return; }
+      if (t.closest('[data-close]')) { if (t.closest('#wbl-cellcard')) { cellCard.hidden = true; hashSet({ cell: null }); } else setZoom('system'); lastFocus?.focus({ preventScroll: true }); }
+    });
+    // Ctrl plus wheel (and trackpad pinch) moves one level. A plain wheel always scrolls the page.
+    const LADDER = ['board', 'system', 'block', 'problem'];
+    root.addEventListener('wheel', (e) => { if (!e.ctrlKey) return; e.preventDefault(); const i = Math.max(0, LADDER.indexOf(zoom)); const j = Math.min(LADDER.length - 1, Math.max(0, i + (e.deltaY < 0 ? 1 : -1))); if (j !== i) setZoom(LADDER[j]); }, { passive: false });
+
+    // ---- the film: eight beats over the live picture, one caption each
+    const BEATS = [
+      { z: 'board', cap: 'Three numbers frame the whole problem.' },
+      { z: 'system', f: 'chips', cap: 'Twenty four failures. Each one has a station that stops it.' },
+      { z: 'system', f: 'first4', cap: 'Four blocks do most of the work.' },
+      { z: 'system', f: 'control', cap: 'Settings live above. Every request runs below.' },
+      { z: 'problem', id: 'S1', cap: 'One bad answer, caught and turned into a test.' },
+      { z: 'system', f: 'badges', cap: 'Built in four layers, contracts first.' },
+      { z: 'run', cap: 'Six teams, five stages, one loop.' },
+      { z: 'board', f: 'charts', cap: 'What it costs, and how much is proven.' }
+    ];
+    const BEAT_MS = 11000; let beat = 0; let filmT = 0; let filmStart = 0; let paused = false; let progT = 0;
+    const film = $('#wbl-film');
+    function showBeat(n: number) {
+      beat = n; const b = BEATS[n - 1]; root!.dataset.focus = b.f === 'control' ? 'control' : ''; root!.dataset.badges = b.f === 'badges' ? 'on' : 'off';
+      setZoom(b.z, b.id); hashSet({ beat: String(n) });
+      if (b.f === 'first4') $$('.wbl-node').forEach((x) => x.classList.toggle('dim', !D.first4.includes(x.dataset.block)));
+      if (b.f === 'chips') $$('.wbl-chips .wbl-chip').forEach((c, i) => { if (!reduce) setTimeout(() => { c.classList.add('flash'); setTimeout(() => c.classList.remove('flash'), 1400); }, i * 120); });
+      if (b.f === 'badges') $$('.wbl-node').forEach((x) => { const bi = buildIdx(x.dataset.block || ''); const bd = x.querySelector('.wbl-badge'); if (bd) bd.textContent = bi < 9 ? String(bi + 1) : ''; });
+      $('#wbl-cap').textContent = b.cap; film.hidden = false;
+      $$('.wbl-marks button').forEach((m) => m.setAttribute('aria-current', String(+m.dataset.beat! === n)));
+      filmStart = performance.now();
+    }
+    function tick() { if (paused || !beat) return; const t = (performance.now() - filmStart) / BEAT_MS; ($('#wbl-prog') as HTMLElement).style.width = (((beat - 1) + Math.min(1, t)) / 8 * 100).toFixed(1) + '%'; if (t >= 1) { if (beat < 8) showBeat(beat + 1); else { pause(true); return; } } progT = requestAnimationFrame(tick); }
+    function play(from = 1) { paused = false; showBeat(from); ($('[data-film="toggle"]') as HTMLElement).textContent = 'Pause'; cancelAnimationFrame(progT); progT = requestAnimationFrame(tick); film.scrollIntoView({ block: 'nearest', behavior: 'instant' as ScrollBehavior }); }
+    function pause(p: boolean) { paused = p; ($('[data-film="toggle"]') as HTMLElement).textContent = p ? 'Play' : 'Pause'; if (!p) { filmStart = performance.now(); progT = requestAnimationFrame(tick); } }
+    function stopFilm() { if (!beat) return; beat = 0; paused = true; cancelAnimationFrame(progT); film.hidden = true; root!.dataset.focus = ''; root!.dataset.badges = 'off'; $$('.wbl-node').forEach((x) => x.classList.remove('dim')); hashSet({ beat: null }); }
+    $$('[data-film="play"]').forEach((b) => b.addEventListener('click', () => play(1)));
+    ($('[data-film="toggle"]') as HTMLElement).addEventListener('click', () => pause(!paused));
+    ($('[data-film="stop"]') as HTMLElement).addEventListener('click', stopFilm);
+    $$('.wbl-marks button').forEach((m) => m.addEventListener('click', () => { const n = +m.dataset.beat!; if (paused) { showBeat(n); } else play(n); }));
+    document.addEventListener('keydown', (e) => {
+      const tag = (e.target as HTMLElement)?.tagName; if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+      if (e.key === 'Escape') { if (beat) stopFilm(); else if (!card.hidden) setZoom('system'); else if (!cellCard.hidden) cellCard.hidden = true; }
+      if (!beat) return;
+      if (e.key === ' ' && tag !== 'BUTTON') { e.preventDefault(); pause(!paused); }
+      if (e.key === 'ArrowRight' && beat < 8) { showBeat(beat + 1); } if (e.key === 'ArrowLeft' && beat > 1) { showBeat(beat - 1); }
+    });
+
+    // ---- start from the hash. A beat in the hash opens the film paused on that beat.
+    layout(); addEventListener('resize', () => requestAnimationFrame(layout)); (document as any).fonts?.ready?.then(layout);
+    const h = hashGet();
+    if (h.get('arch') === 'interim') setArch('interim', false);
+    if (h.get('beat')) { paused = true; showBeat(Math.min(8, Math.max(1, +h.get('beat')!))); ($('[data-film="toggle"]') as HTMLElement).textContent = 'Play'; }
+    else setZoom(h.get('zoom') || 'system', h.get('id') || undefined);
+    if (h.get('cell')) openCell(h.get('cell')!);
+    leakMarks();
+  }
+</script>

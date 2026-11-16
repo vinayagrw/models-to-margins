@@ -1,0 +1,887 @@
+{
+ "adoption": [
+  {
+   "id": "a1",
+   "label": "x402 Foundation members, October 2026",
+   "value": 50,
+   "unit": "members (more than)",
+   "rung": 2,
+   "ev": "vendor",
+   "src": [
+    "R2-33",
+    "R2-31"
+   ],
+   "as_of": "2026-10-01",
+   "protocol": "x402",
+   "use": "M",
+   "one": "Announced under the Linux Foundation in April 2026, operational launch 2026-07-14. Members passed fifty by October."
+  },
+  {
+   "id": "a2",
+   "label": "UCP endorsing companies listed",
+   "value": 51,
+   "unit": "endorsers listed",
+   "rung": 6,
+   "ev": "vendor",
+   "src": [
+    "R3-24"
+   ],
+   "as_of": "2026-11-15",
+   "protocol": "ucp",
+   "use": "C",
+   "one": "The spec site lists endorsers. It does not say who ships checkout."
+  },
+  {
+   "id": "a3",
+   "label": "MPP named payment methods",
+   "value": 11,
+   "unit": "named methods plus custom",
+   "rung": 2,
+   "ev": "verified 2026",
+   "src": [
+    "R2-23"
+   ],
+   "as_of": "2026-11-15",
+   "protocol": "mpp",
+   "use": "M",
+   "one": "Cards, stablecoins and Lightning are listed. There is still no bank debit method."
+  },
+  {
+   "id": "a4",
+   "label": "x402 transactions, August to October 2026",
+   "value": 72,
+   "unit": "% fall in monthly count",
+   "rung": 3,
+   "ev": "vendor",
+   "src": [
+    "G-104",
+    "G-106"
+   ],
+   "as_of": "2026-10-31",
+   "protocol": "x402",
+   "use": "M",
+   "one": "17.9 million in August, 5.1 million in October, then a rise on one facilitator."
+  },
+  {
+   "id": "a5",
+   "label": "Agentic share of x402 settled value",
+   "value": 7.5,
+   "unit": "% of settled value, at most",
+   "rung": 5,
+   "ev": "verified 2026",
+   "src": [
+    "G-107"
+   ],
+   "as_of": "2026-09-09",
+   "protocol": "x402",
+   "use": "M",
+   "one": "Between 0.6 and 7.5 percent after screens, about 5K to 11K USD a month."
+  },
+  {
+   "id": "a6",
+   "label": "x402 settled in October 2026",
+   "value": 274000,
+   "unit": "USD",
+   "rung": 3,
+   "ev": "vendor",
+   "src": [
+    "R2-39",
+    "G-105"
+   ],
+   "as_of": "2026-10-31",
+   "protocol": "x402",
+   "use": "M",
+   "one": "5.1 million payments averaging about five cents each, on a single operator tracker."
+  },
+  {
+   "id": "a7",
+   "label": "MPP on Tempo, lifetime events",
+   "value": 48585,
+   "unit": "on chain events",
+   "rung": 3,
+   "ev": "verified 2026",
+   "src": [
+    "R2-28"
+   ],
+   "as_of": "2026-11-15",
+   "protocol": "mpp",
+   "use": "M",
+   "one": "From 1,874 payers to 92 payees. Card based MPP runs off chain, uncounted."
+  },
+  {
+   "id": "a8",
+   "label": "Agent activity reaching checkout pages",
+   "value": 2.3,
+   "unit": "% of agent activity",
+   "rung": 3,
+   "ev": "vendor",
+   "src": [
+    "R5-32"
+   ],
+   "as_of": "2025-12-31",
+   "protocol": "",
+   "use": "C",
+   "one": "Most agent visits land on product and search pages, not checkout."
+  },
+  {
+   "id": "a9",
+   "label": "Amazon blocks named AI agents",
+   "value": 99,
+   "unit": "agents disallowed",
+   "rung": 3,
+   "ev": "verified 2026",
+   "src": [
+    "R5-37"
+   ],
+   "as_of": "2026-11-15",
+   "protocol": "",
+   "use": "C",
+   "one": "Amazon's robots.txt bars named agents from Google, OpenAI, Anthropic and Perplexity."
+  },
+  {
+   "id": "a10",
+   "label": "European banks in controlled live Agent Pay tests",
+   "value": 36,
+   "unit": "banks",
+   "rung": 4,
+   "ev": "vendor",
+   "src": [
+    "C360",
+    "R1-60"
+   ],
+   "as_of": "2026-06-02",
+   "protocol": "mc-agentpay",
+   "use": "C",
+   "one": "Mastercard's footnote names 36 banks. Pilot, not public."
+  },
+  {
+   "id": "a11",
+   "label": "Personal agents paying with Shop Pay",
+   "value": 3,
+   "unit": "agents",
+   "rung": 4,
+   "ev": "vendor",
+   "src": [
+    "R2-11"
+   ],
+   "as_of": "2026-10-28",
+   "protocol": "",
+   "use": "C",
+   "one": "Muse, Claude Duet and Instinct pay with network tokens. The agent never sees the card."
+  },
+  {
+   "id": "a12",
+   "label": "Comfortable with AI buying for them",
+   "value": 28,
+   "unit": "% of US shoppers",
+   "rung": 5,
+   "ev": "verified 2026",
+   "src": [
+    "R5-24"
+   ],
+   "as_of": "2026-11-09",
+   "protocol": "",
+   "use": "C",
+   "one": "Kantar is the only neutral firm in the survey set."
+  },
+  {
+   "id": "a13",
+   "label": "Shopify AI search orders, year on year",
+   "value": 3.3,
+   "unit": "times",
+   "rung": 6,
+   "ev": "vendor",
+   "src": [
+    "R3-21"
+   ],
+   "as_of": "2026-11-03",
+   "protocol": "",
+   "use": "C",
+   "one": "Shopify says the volume is still small. Base level not disclosed."
+  },
+  {
+   "id": "a14",
+   "label": "Visa AI partners live",
+   "value": 50,
+   "unit": "partners (nearly)",
+   "rung": 6,
+   "ev": "vendor",
+   "src": [
+    "R2-01",
+    "R3-14",
+    "G-111",
+    "G-112",
+    "G-113"
+   ],
+   "as_of": "2026-10-27",
+   "protocol": "visa-ic",
+   "use": "C",
+   "one": "Visa calls agentic volume limited and very small, with Ramp bill pay generally available."
+  },
+  {
+   "id": "a15",
+   "label": "Trust AI to make a payment",
+   "value": 23,
+   "unit": "% of US adults",
+   "rung": 6,
+   "ev": "vendor",
+   "src": [
+    "R5-04"
+   ],
+   "as_of": "2026-05-28",
+   "protocol": "",
+   "use": "C",
+   "one": "Visa sponsored the poll. It gains if trust attaches to networks."
+  },
+  {
+   "id": "a16",
+   "label": "Alipay AI Pay, one week",
+   "value": 120000000,
+   "unit": "transactions",
+   "rung": 6,
+   "ev": "vendor",
+   "src": [
+    "R2-66",
+    "R3-38",
+    "G-49"
+   ],
+   "as_of": "2026-02-11",
+   "protocol": "",
+   "use": "C",
+   "one": "Largest reported base, outside Western protocols. Every payment needs user approval."
+  },
+  {
+   "id": "a17",
+   "label": "Transactions merchants say involve agents",
+   "value": 3,
+   "unit": "% of transactions",
+   "rung": 6,
+   "ev": "vendor",
+   "src": [
+    "R3-40",
+    "R5-11",
+    "G-207"
+   ],
+   "as_of": "2026-06-09",
+   "protocol": "",
+   "use": "C",
+   "one": "Merchant estimate, UK and US, no method given."
+  },
+  {
+   "id": "a18",
+   "label": "US ecommerce orders completed by agents",
+   "value": 1.52,
+   "unit": "% of orders, October 2026",
+   "rung": 7,
+   "ev": "vendor",
+   "src": [
+    "G-01",
+    "G-02"
+   ],
+   "as_of": "2026-10-31",
+   "protocol": "",
+   "use": "C",
+   "one": "A modeled panel from an SEO agency. Up from 0.27 percent in Q2."
+  },
+  {
+   "id": "a19",
+   "label": "Agent completed orders inside three platforms",
+   "value": 86,
+   "unit": "% of agent completed orders",
+   "rung": 7,
+   "ev": "vendor",
+   "src": [
+    "G-03"
+   ],
+   "as_of": "2026-10-31",
+   "protocol": "",
+   "use": "C",
+   "one": "Meta Muse, Alexa for Shopping and Gemini. ChatGPT refers more than it completes."
+  }
+ ],
+ "players": {
+  "companies": [
+   {
+    "id": "mastercard",
+    "name": "Mastercard",
+    "icon": "i-vault",
+    "tone": "amber",
+    "layers": [
+     "L2",
+     "L3",
+     "L4",
+     "L5",
+     "L7"
+    ],
+    "score": 400,
+    "one": "Wants the agentic token, not a one time virtual card, inside every agent.",
+    "arch": "Agent keys in a network directory via Web Bot Auth, Verifiable Intent SD-JWT chains, agentic tokens with passkeys, and an agent transaction score in testing.",
+    "moves": [
+     {
+      "date": "2026-06-02",
+      "text": "All European issuers enabled, 36 banks completed controlled live agent transactions",
+      "ev": "vendor",
+      "src": [
+       "C360",
+       "R1-60"
+      ]
+     },
+     {
+      "date": "2026-09-10",
+      "text": "Began a know your agent framework with Ant and Visa",
+      "ev": "verified 2026",
+      "src": [
+       "C365",
+       "R1-68"
+      ]
+     },
+     {
+      "date": "2026-09-30",
+      "text": "Expanded Agent Pay, agent probability score in US testing",
+      "ev": "vendor",
+      "src": [
+       "G-115"
+      ]
+     },
+     {
+      "date": "2026-10-29",
+      "text": "OpenAI deal includes Agent Pay, and Shop Pay uses Agent Pay",
+      "ev": "vendor",
+      "src": [
+       "R3-17",
+       "G-09"
+      ]
+     }
+    ],
+    "watch": "Network rules on virtual cards, and OpenAI checkout on Agent Pay.",
+    "rank": 1
+   },
+   {
+    "id": "visa",
+    "name": "Visa",
+    "icon": "i-security",
+    "tone": "violet",
+    "layers": [
+     "L2",
+     "L3",
+     "L4",
+     "L5",
+     "L6"
+    ],
+    "score": 380,
+    "one": "Wants to be the trust layer every agent protocol routes through, consumer and B2B.",
+    "arch": "Trusted Agent Protocol signs agent requests under RFC 9421. Intelligent Commerce provisions agentic tokens after a passkey and purchase instruction. Connect accepts TAP, MPP, ACP and UCP.",
+    "moves": [
+     {
+      "date": "2026-10-20",
+      "text": "Live B2B pilot with BILL and Billtrust paying invoices",
+      "ev": "verified 2026",
+      "src": [
+       "C349",
+       "R1-54"
+      ]
+     },
+     {
+      "date": "2026-10-24",
+      "text": "Rules make cardholders answer for their enrolled agents",
+      "ev": "verified 2026",
+      "src": [
+       "G-201"
+      ]
+     },
+     {
+      "date": "2026-10-27",
+      "text": "Says nearly 50 AI partners live, volume still very small",
+      "ev": "vendor",
+      "src": [
+       "R3-14",
+       "R2-01",
+       "G-112"
+      ]
+     },
+     {
+      "date": "2026-11-05",
+      "text": "Benchmark finds 57.2 percent pass rate across 22 models",
+      "ev": "vendor",
+      "src": [
+       "R3-15",
+       "R1-55"
+      ]
+     }
+    ],
+    "watch": "Partner count doubling, and a published dispute path for agents.",
+    "rank": 2,
+    "rank_note": "Tied with Google at 380. Ties break on the score with vendor reach cut, where Visa leads 340 to 320, then on the token layer.",
+    "rank_note_ev": "illustrative"
+   },
+   {
+    "id": "google",
+    "name": "Google",
+    "icon": "i-network",
+    "tone": "teal",
+    "layers": [
+     "L1",
+     "L2",
+     "L4"
+    ],
+    "score": 380,
+    "one": "Co-develops UCP and wrote AP2. Wants Search and Gemini to be where agents shop.",
+    "arch": "UCP covers discovery and checkout over REST, MCP and A2A. AP2 adds SD-JWT mandates. Merchants stay merchant of record.",
+    "moves": [
+     {
+      "date": "2026-01-11",
+      "text": "UCP published with Shopify, PayPal support the same day",
+      "ev": "verified 2026",
+      "src": [
+       "R3-21",
+       "R3-33"
+      ]
+     },
+     {
+      "date": "2026-10-15",
+      "text": "Universal Cart begins US rollout with UCP checkout",
+      "ev": "verified 2026",
+      "src": [
+       "C313",
+       "R1-29"
+      ]
+     },
+     {
+      "date": "2026-10-28",
+      "text": "Says UCP reaches hundreds of thousands of brands, adding AP2",
+      "ev": "vendor",
+      "src": [
+       "R3-23"
+      ]
+     }
+    ],
+    "watch": "AP2 folded into a UCP release, and any disclosed checkout volume.",
+    "rank": 3,
+    "rank_note": "Tied with Visa at 380. Ties break on the score with vendor reach cut, where Visa leads 340 to 320, then on the token layer.",
+    "rank_note_ev": "illustrative"
+   }
+  ],
+  "startups": [
+   {
+    "id": "rain",
+    "name": "Rain",
+    "icon": "i-payer",
+    "tone": "amber",
+    "layers": [
+     "L2",
+     "L4",
+     "L5"
+    ],
+    "score": 265,
+    "one": "Issues scoped, stablecoin funded Visa cards to agents and convenes an industry alliance.",
+    "arch": "Agent Control Layer enforces agent and program limits at card issuance and transfer start. Beta. No protocol of its own.",
+    "moves": [
+     {
+      "date": "2026-01-09",
+      "text": "Series C round, reporting over 200 partners",
+      "ev": "vendor",
+      "src": [
+       "R3-43"
+      ]
+     },
+     {
+      "date": "2026-08-18",
+      "text": "Launched the Agentic Payments Alliance with 26 founding members",
+      "ev": "vendor",
+      "src": [
+       "C416"
+      ]
+     }
+    ],
+    "watch": "Whether networks restrict virtual cards in agent payments.",
+    "funding": {
+     "text": "250 million USD Series C at 1.95 billion USD, January 2026",
+     "ev": "verified 2026",
+     "src": [
+      "R3-43"
+     ]
+    },
+    "rank": 1
+   },
+   {
+    "id": "skyfire",
+    "name": "Skyfire",
+    "icon": "i-agent",
+    "tone": "violet",
+    "layers": [
+     "L3",
+     "L4",
+     "L5"
+    ],
+    "score": 220,
+    "one": "Know your agent identity tokens with payment attached, published as an IETF draft.",
+    "arch": "KYAPay JWTs carry agent, platform and human principal claims from a trusted issuer. Individual draft, no working group standing. Stablecoin settlement.",
+    "moves": [
+     {
+      "date": "2026-10-02",
+      "text": "KYAPay draft 01 published at the IETF",
+      "ev": "verified 2026",
+      "src": [
+       "C367"
+      ]
+     },
+     {
+      "date": "2026-11-02",
+      "text": "KYAPay draft 02, same three authors, expires 2027-05-06",
+      "ev": "verified 2026",
+      "src": [
+       "R1-67"
+      ]
+     }
+    ],
+    "watch": "The Ant, Mastercard and Visa KYA framework could make it redundant.",
+    "funding": {
+     "text": "9.5 million USD in total, last verified round October 2024",
+     "ev": "verified 2026",
+     "src": [
+      "R3-53"
+     ]
+    },
+    "rank": 2
+   },
+   {
+    "id": "crossmint",
+    "name": "Crossmint",
+    "icon": "i-sdk",
+    "tone": "slate",
+    "layers": [
+     "L4",
+     "L5"
+    ],
+    "score": 180,
+    "one": "A self serve agent checkout toolkit that rides Visa and Mastercard agentic tokens.",
+    "arch": "Uses Visa Intelligent Commerce and Mastercard Agent Pay tokens where a card is eligible. Checks out through UCP, Shop Pay or browser automation.",
+    "moves": [
+     {
+      "date": "2026-08-18",
+      "text": "Founding member of the Agentic Payments Alliance",
+      "ev": "vendor",
+      "src": [
+       "C416"
+      ]
+     },
+     {
+      "date": "2026-10-08",
+      "text": "Agent Commerce Toolkit goes live and self serve",
+      "ev": "vendor",
+      "src": [
+       "R3-52"
+      ]
+     }
+    ],
+    "watch": "Named customers, and how many checkouts use agentic tokens.",
+    "funding": {
+     "text": "23.6 million USD led by Ribbit Capital, March 2025",
+     "ev": "verified 2026",
+     "src": [
+      "R3-51"
+     ]
+    },
+    "rank": 3
+   }
+  ]
+ },
+ "scenarios": [
+  {
+   "id": "open",
+   "name": "Network tokens, open checkout",
+   "one": "Agentic network tokens pay, and open protocols carry checkout across many agent platforms.",
+   "arch": "Kill test: three platforms still hold over half of agent orders at 2027-12-31. Thesis wins: canonical model plus adapters.",
+   "by": {
+    "2027": "Top three platforms fall below half of agent orders",
+    "2028": "Networks ship an agent flag and dispute rule",
+    "2030": "Most agent checkouts ride agentic tokens on open protocols"
+   },
+   "signals": [
+    "Vendor panel: top three platforms below half",
+    "EMVCo or a network adds an agent flag"
+   ]
+  },
+  {
+   "id": "walled",
+   "name": "Platform wallets own checkout",
+   "one": "Agents pay inside the wallet and checkout of the platform they live in.",
+   "arch": "The lead case today. Kill test: top three platforms below half for two quarters. Thesis loses: integrate those platforms directly.",
+   "by": {
+    "2027": "Three platforms still hold most agent completed orders",
+    "2028": "Merchants pay platform fees to reach agent shoppers",
+    "2030": "A few wallets carry most consumer agent payments"
+   },
+   "signals": [
+    "Amazon still blocks named outside shopping agents",
+    "Platforms charge merchants fees on agent sales"
+   ]
+  },
+  {
+   "id": "referral",
+   "name": "Agents refer, people pay",
+   "one": "Agents find and compare, then people check out on the merchant's own site.",
+   "arch": "Kill test: your own agent completed share passes the trigger for two months. Thesis holds: wait with readiness, never build the gateway.",
+   "by": {
+    "2027": "Agent completed orders stay a small share of orders",
+    "2028": "AI referrals keep growing, checkout stays on merchant sites",
+    "2030": "Agents shape demand, people still press pay"
+   },
+   "signals": [
+    "Your agent order share stays below the trigger",
+    "Holiday reports count referral clicks, not agent payments"
+   ]
+  },
+  {
+   "id": "machines",
+   "name": "Machine payments split off",
+   "one": "Pay per call moves to stablecoin rails over HTTP 402, apart from card checkout.",
+   "arch": "Kill test: screened agentic x402 value below a million USD a month at end 2027. Separate lane, settled through a facilitator.",
+   "by": {
+    "2027": "Stablecoin issuer rule in force in the US",
+    "2028": "Organic payers grow beyond a few thousand wallets",
+    "2030": "API, data and content sellers price per call by default"
+   },
+   "signals": [
+    "Screened agentic x402 value rises with no dominant facilitator",
+    "API sellers list x402 or MPP prices by default"
+   ]
+  }
+ ],
+ "signposts": [
+  {
+   "yr": 2026,
+   "text": "UK ICO call for evidence on agentic AI closes 2026-11-20",
+   "scenario": "",
+   "ev": "verified 2026",
+   "src": [
+    "G-33"
+   ]
+  },
+  {
+   "yr": 2026,
+   "text": "Wells Fargo makes customers prove they revoked an agent",
+   "scenario": "open",
+   "ev": "verified 2026",
+   "src": [
+    "R5-44"
+   ]
+  },
+  {
+   "yr": 2026,
+   "text": "European Parliament votes on PSD3 and PSR on 2026-12-14",
+   "scenario": "",
+   "ev": "verified 2026",
+   "src": [
+    "G-203"
+   ]
+  },
+  {
+   "yr": 2026,
+   "text": "FCA consults on long term open banking framework, subject to legislation",
+   "scenario": "open",
+   "ev": "verified 2026",
+   "src": [
+    "R2-74"
+   ]
+  },
+  {
+   "yr": 2027,
+   "text": "US stablecoin issuer rule takes effect on 18 January",
+   "scenario": "machines",
+   "ev": "verified 2026",
+   "src": [
+    "C341"
+   ]
+  },
+  {
+   "yr": 2027,
+   "text": "Visa commercial virtual card authentication expected to reach GA",
+   "scenario": "open",
+   "ev": "vendor",
+   "src": [
+    "R2-04"
+   ]
+  },
+  {
+   "yr": 2027,
+   "text": "Web Bot Auth draft reaches the IESG or lapses in May",
+   "scenario": "open",
+   "ev": "verified 2026",
+   "src": [
+    "R1-56",
+    "R1-57"
+   ]
+  },
+  {
+   "yr": 2027,
+   "text": "Your agent share passes 3%, our proposed threshold, two months running",
+   "scenario": "referral",
+   "ev": "illustrative",
+   "src": [
+    "G-02"
+   ]
+  },
+  {
+   "yr": 2027,
+   "text": "Vendor panel: top three platforms fall below half of agent orders",
+   "scenario": "walled",
+   "ev": "illustrative",
+   "src": [
+    "G-03"
+   ]
+  },
+  {
+   "yr": 2027,
+   "text": "Local Payments Council publishes agent rules for EU bank payments",
+   "scenario": "open",
+   "ev": "illustrative",
+   "src": [
+    "G-32"
+   ]
+  },
+  {
+   "yr": 2027,
+   "text": "EMVCo or a network adds an agent flag to authorization",
+   "scenario": "open",
+   "ev": "illustrative",
+   "src": [
+    "G-21",
+    "R1-64"
+   ]
+  },
+  {
+   "yr": 2027,
+   "text": "A network publishes an agent specific dispute reason code",
+   "scenario": "open",
+   "ev": "illustrative",
+   "src": [
+    "C299",
+    "R2-03"
+   ]
+  },
+  {
+   "yr": 2027,
+   "text": "Screened agentic x402 value passes 1M USD a month",
+   "scenario": "machines",
+   "ev": "illustrative",
+   "src": [
+    "G-107",
+    "R2-40"
+   ]
+  },
+  {
+   "yr": 2027,
+   "text": "Amazon still blocks named outside shopping agents at year end",
+   "scenario": "walled",
+   "ev": "illustrative",
+   "src": [
+    "R5-37",
+    "G-27"
+   ]
+  },
+  {
+   "yr": 2028,
+   "text": "UCP and AP2 ship in one tagged release",
+   "scenario": "open",
+   "ev": "illustrative",
+   "src": [
+    "R3-23",
+    "R1-19"
+   ]
+  },
+  {
+   "yr": 2030,
+   "text": "Morgan Stanley checkpoint, 190 to 385 billion USD US agentic GMV",
+   "scenario": "",
+   "ev": "vendor",
+   "src": [
+    "R3-02",
+    "R3-03"
+   ]
+  }
+ ],
+ "forecasts": [
+  {
+   "author": "Morgan Stanley",
+   "range": "190 to 385 billion USD by 2030",
+   "scope": "US agentic GMV from AI shopping assistants",
+   "incentive": "Bank covering and advising e-commerce and payments firms",
+   "ev": "vendor",
+   "src": [
+    "R3-02",
+    "R3-03"
+   ]
+  },
+  {
+   "author": "Bain",
+   "range": "300 to 500 billion USD by 2030",
+   "scope": "US purchases agents initiate, influence or complete",
+   "incentive": "Sells retail and technology consulting",
+   "ev": "vendor",
+   "src": [
+    "R3-04"
+   ]
+  },
+  {
+   "author": "McKinsey",
+   "range": "Up to 1 trillion USD US, 3 to 5 trillion USD global, by 2030",
+   "scope": "Orchestrated retail revenue, term not defined",
+   "incentive": "Sells transformation consulting to retailers and payment firms",
+   "ev": "vendor",
+   "src": [
+    "R3-01"
+   ]
+  },
+  {
+   "author": "Juniper Research",
+   "range": "8 billion USD in 2026 to 1.5 trillion USD by 2030",
+   "scope": "Agentic commerce spending, scope and geography not defined in the source",
+   "incentive": "Sells the paywalled forecast report",
+   "ev": "vendor",
+   "src": [
+    "R3-07"
+   ]
+  },
+  {
+   "author": "Edgar Dunn consultant, not the firm's official view",
+   "range": "2.9 trillion USD by 2030",
+   "scope": "Retail transaction flows, geography not stated",
+   "incentive": "Advises acquirers, and urges them to act now",
+   "ev": "vendor",
+   "src": [
+    "R3-06"
+   ]
+  },
+  {
+   "author": "WARC and PHD",
+   "range": "944 billion USD in 2026 to 3.35 trillion USD by 2030",
+   "scope": "Global spending agents influence or complete",
+   "incentive": "Marketing research seller and a media agency",
+   "ev": "vendor",
+   "src": [
+    "R3-11"
+   ]
+  },
+  {
+   "author": "eMarketer",
+   "range": "20.9 billion USD in 2026 to 144 billion USD by 2029",
+   "scope": "Sales through AI platforms, geography not stated",
+   "incentive": "Sells research subscriptions to marketers and retailers",
+   "ev": "vendor",
+   "src": [
+    "R3-09"
+   ]
+  },
+  {
+   "author": "Gartner",
+   "range": "More than 15 trillion USD of B2B spend intermediated by 2028",
+   "scope": "Global B2B buying intermediated by agents",
+   "incentive": "Sells research and advice to IT buyers and vendors",
+   "ev": "vendor",
+   "src": [
+    "R3-05"
+   ]
+  }
+ ]
+}

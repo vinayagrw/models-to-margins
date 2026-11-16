@@ -3,7 +3,7 @@ title: Harness Engineering — The Discipline Around the Model
 summary: "Agent = Model + Harness. The model does the thinking; the harness decides what's true, what tools exist, what gets verified, and what survives a crash. Ten scenes descend from a context map to the wire, and the August 2026 refresh answers a harder question than the original: now that two platforms ship three of the five layers as runtime features, which layers are still yours?"
 pubDate: 2026-04-30
 updatedDate: 2026-08-25
-featured: true
+featured: false
 listed: true
 template: tower
 bpEyebrow: Instrument Log HE-01

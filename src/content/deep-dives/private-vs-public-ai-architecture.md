@@ -3,7 +3,7 @@ title: Private AI vs Public AI — The Architecture, Not the Argument
 summary: "The open-versus-closed debate died quietly in 2026. Frontier models now run air-gapped on your own metal, open weights are served as managed APIs, and the capability gap at the top of the table closed to about one index point. What remains is an architecture question with five real answers, and the only thing that decides between them is where your data is allowed to be. Six legs follow one request from the client app to the GPU and back."
 pubDate: 2026-08-25
 updatedDate: 2026-08-25
-featured: true
+featured: false
 listed: true
 template: waybill
 bpEyebrow: Consignment MS-02

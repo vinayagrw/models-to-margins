@@ -1,0 +1,972 @@
+---
+/* Sample D, the operations floor (round 10b). The AI system drawn as a flat facilities schematic:
+   stations are labelled boxes, belts are thin lines with arrows, and every line is a flow held in
+   arch_view.json. Each problem is flagged at the first station on the path whose block is in its
+   sol.json list (the catch rule). Two accents only: teal for controls, coral for failures.
+   This week and Target switch, a step-through with a drag scrubber, a board wall and the team
+   lanes. All text is DOM. Data is shaped once in what-breaks/model.ts. */
+import { arch, probName, sprite, view, BLOCKS, LAYER_TONE, layerOf, icon, evTag, quickBy, cover, PROB, proofCount, LANES, LABELS, LAYERS, BUILD, cellOf, costRows, bar, INCIDENTS, HERO, UNKNOWN, extra, clientData } from './what-breaks/model';
+import './what-breaks/iso-tones.css';
+import { story } from './what-breaks/story';
+
+const N: Record<string, any> = Object.fromEntries((view?.nodes ?? []).map((n: any) => [n.id, n]));
+// Catch order: the order a request meets the stations. The agent branch leaves Read sources (F18)
+// before the model answers, then the log, then the offline loop.
+const ORDER = ['ask', 'gate', 'budget', 'screen_in', 'read', 'act', 'toolgw', 'route', 'model', 'check', 'screen_out', 'human', 'log', 'testset', 'testgate', 'settings'];
+const OFF = ['P7', 'P8'];
+// Wide plan: column and row on a 10 by 3 grid. Narrow plans snake through PHONE order.
+const POS: Record<string, [number, number]> = {
+  act: [5, 1], toolgw: [6, 1], P7: [9, 1], P8: [10, 1],
+  ask: [1, 2], gate: [2, 2], budget: [3, 2], screen_in: [4, 2], read: [5, 2], route: [6, 2], model: [7, 2], check: [8, 2], screen_out: [9, 2], human: [10, 2],
+  log: [6, 3], testset: [7, 3], testgate: [8, 3], settings: [9, 3]
+};
+const PHONE = ['ask', 'gate', 'budget', 'screen_in', 'read', 'route', 'model', 'check', 'screen_out', 'human', 'act', 'toolgw', 'log', 'testset', 'testgate', 'settings', 'P7', 'P8'];
+const snake = (i: number, n: number) => { const r = Math.floor(i / n); const c = r % 2 ? n - 1 - (i % n) : i % n; return [c + 1, r + 1]; };
+// The belt: only flows the data holds, and only between drawn stations.
+const DRAW_IDS = ['F01', 'F02', 'F04', 'F05', 'F08', 'F09', 'F10', 'F11', 'F13', 'F18', 'F21', 'F15', 'F40', 'F38', 'F36', 'F34'];
+const DRAW = (view?.flows ?? []).filter((f: any) => DRAW_IDS.includes(f.id) && POS[f.from] && POS[f.to]).map((f: any) => ({ id: f.id, from: f.from, to: f.to, kind: f.kind }));
+const NOIC: Record<string, string> = { screen_in: 'i-scrub', model: 'i-model', screen_out: 'i-approve', settings: 'i-vault' };
+const blockOf = (id: string) => (OFF.includes(id) ? id : N[id]?.block) || '';
+const nameOf = (id: string) => (OFF.includes(id) ? BLOCKS[id].name : N[id]?.name) || id;
+
+// The catch rule.
+const catchAt: Record<string, string> = {}; const flagged: Record<string, string[]> = {};
+for (const p of PROB) {
+  let at = ORDER.find((s) => (p.b || []).includes(blockOf(s))) || OFF.find((s) => (p.b || []).includes(s)) || '';
+  if (at) { catchAt[p.id] = at; (flagged[at] ??= []).push(p.id); }
+}
+const CATCH_ROWS = [...ORDER, ...OFF].filter((s) => flagged[s]);
+
+const stationBtn = (id: string, i: number) => {
+  const blk = blockOf(id); const b = BLOCKS[blk]; const n = N[id];
+  const ic = b ? b.ic : NOIC[id] || 'i-explain';
+  const tone = n?.zone === 'vendor' ? 'iso-slate' : blk ? LAYER_TONE[layerOf(blk)] : 'iso-slate';
+  const qn = blk ? (quickBy[blk] ?? []).length : 0;
+  const fl = (flagged[id] ?? []).length;
+  const [c5, r5] = snake(PHONE.indexOf(id), 5); const [c3, r3] = snake(PHONE.indexOf(id), 3);
+  const cls = ['wbf-st', OFF.includes(id) ? 'off' : '', n?.zone === 'vendor' ? 'ext' : '', blk && !qn ? 'noq' : '', !blk ? 'nob' : ''].filter(Boolean).join(' ');
+  const now = !blk ? '' : qn ? `<span class="wbf-clip">${icon('i-policy-doc', 'iso-amber', 32)}${qn} step${qn > 1 ? 's' : ''}</span>` : '<span class="wbf-clip none">None yet</span>';
+  return `<button type="button" class="${cls}" data-st="${id}" data-block="${blk}" style="--c:${POS[id][0]};--r:${POS[id][1]};--c5:${c5};--r5:${r5};--c3:${c3};--r3:${r3}">${icon(ic, tone, 80)}<b>${nameOf(id)}</b>${fl ? `<span class="wbf-fl n">${fl} flagged</span>` : OFF.includes(id) ? '<span class="wbf-fl tag">Off path</span>' : n?.zone === 'vendor' ? '<span class="wbf-fl tag">Outside</span>' : '<span class="wbf-fl e" aria-hidden="true">&nbsp;</span>'}${now}</button>`;
+};
+const floorHtml = PHONE.map(stationBtn).join('');
+// Hidden harm: the problems that score 3 of 3 on the Hidden lens (frontier set only, the search lenses use a different order).
+const HH = PROB.filter((p) => p.pre === 'F' && Array.isArray(p.l) && p.l[2] === 3).map((p) => p.id);
+const chip = (id: string) => `<button type="button" class="wbf-chip ${id[0]}${HH.includes(id) ? ' hh' : ''}" data-prob="${id}" aria-label="${probName(id)}, ${PROB.find((p) => p.id === id)?.sev} severity">${probName(id)}</button>`;
+const catchHtml = [...CATCH_ROWS].sort((a, b) => flagged[b].length - flagged[a].length).map((s) => `<div class="wbf-crow"><div class="wbf-chead"><button type="button" class="wbf-cname" data-st="${s}">${nameOf(s)}</button><span class="wbf-ccount" aria-label="${flagged[s].length} caught">${flagged[s].length}</span></div><div class="wbf-cchips">${flagged[s].map(chip).join('')}</div></div>`).join('');
+
+// Step-through stops, titled as findings.
+const say = (s: string) => { const k = (flagged[s] ?? []).length; return `${nameOf(s)} stops ${k} problem${k === 1 ? '' : 's'}`; };
+const STOPS: { st: string; cap: string; ids: string[]; num?: string; numl?: string; ev?: string; fix?: string }[] = [];
+for (const s of ORDER) {
+  if (s === 'log') STOPS.push({ st: 'log', cap: 'Logged calls and actions land in the failure log', ids: flagged.log ?? [] });
+  else if (s === 'screen_out') STOPS.push({ st: s, cap: 'Output screening runs safety and citation checks', ids: [] });
+  else if (s === 'testgate') STOPS.push({ st: s, cap: 'Failures become test cases before any change ships', ids: [] });
+  else if (flagged[s]) STOPS.push({ st: s, cap: say(s), ids: flagged[s] });
+  if (s === 'read' && extra?.ownCase) { const o = extra.ownCase; STOPS.push({ st: o.st, cap: o.cap, ids: o.ids, num: o.num, numl: o.numl, ev: o.ev, fix: o.fix }); }
+}
+for (const s of OFF) if (flagged[s]) STOPS.push({ st: s, cap: `${nameOf(s)} fixes ${flagged[s].map(probName).join(', ')} outside the request path`, ids: flagged[s] });
+STOPS.push({ st: '', cap: 'Where each problem is caught', ids: [] });
+const tickHtml = STOPS.map((x, i) => `<i title="${i + 1}. ${x.st ? nameOf(x.st) : 'Summary'}" style="left:calc(9px + (100% - 18px) * ${(i / (STOPS.length - 1)).toFixed(4)})"></i>`).join('');
+
+const PROOF: [string, string][] = [['m', 'Measured'], ['v', 'Vendor-reported'], ['n', 'Not measured']];
+const waffle = PROOF.map(([k, t]) => { const ps = PROB.filter((p) => p.ev === k); return ps.length ? `<div class="wbf-ngrp"><p class="wbf-ngl">${t}, ${ps.length}</p><div class="wbf-nrow">${ps.map((p) => `<button type="button" class="wbf-nchip ${p.ev}${HH.includes(p.id) ? ' hh' : ''}" data-prob="${p.id}" aria-label="${p.name}, ${p.sev} severity">${p.name}</button>`).join('')}</div></div>` : ''; }).join('');
+// Incident line, with dated ticks from the verified timeline.
+const M = INCIDENTS.months; const W = 320, H = 110;
+const base = (v: number[]) => (v[0] + v[1] + v[2]) / 3;
+const idx = M.series.map((sr: any) => sr.v.map((x: number) => x / base(sr.v)));
+const ymax = Math.max(...idx.flat()) * 1.1;
+const px = (i: number) => (i + 0.5) * W / M.labels.length; const py = (y: number) => 8 + (H - 16) * (1 - y / ymax);
+const linePaths = '<line class="base" x1="0" x2="' + W + '" y1="' + py(1).toFixed(1) + '" y2="' + py(1).toFixed(1) + '"/>' + idx.map((ys: number[], k: number) => '<path class="s' + k + '" vector-effect="non-scaling-stroke" d="' + ys.map((y, i) => (i ? 'L' : 'M') + px(i).toFixed(1) + ' ' + py(y).toFixed(1)).join(' ') + '"/>').join('');
+const lineDots = idx.map((ys: number[], k: number) => ys.map((y, i) => '<i class="wbf-pt s' + k + '" style="left:' + (px(i) / W * 100).toFixed(1) + '%;top:' + (py(y) / H * 100).toFixed(1) + '%"></i>').join('')).join('');
+const MON = ['Jun', 'Jul', 'Aug', 'Sep', 'Oct'];
+const TL = (extra?.timeline ?? []).filter((t: any) => t.ev === 'verified');
+const tickX = (d: string) => { const [, m, dd] = d.split('-').map(Number); const i = m - 6; return ((i + (dd ? (dd - 0.5) / 31 : 0.5)) / M.labels.length * 100).toFixed(1); };
+const ticks = TL.map((t: any, k: number) => `<i class="wbf-tick" data-k="${k}" style="left:${tickX(t.date)}%"></i>`).join('');
+const costBars = costRows.map((x) => `<button type="button" data-open="${x.id}"><b>${BLOCKS[x.id].name}</b><i class="wbf-bar"><i style="left:${bar(x.r[0])}%;width:${Math.max(1.2, +bar(x.r[1]) - +bar(x.r[0]))}%"></i></i><span>${x.cost.replace(' a month', '')}</span></button>`).join('');
+// The stage panels, same data and labels as the archived stage (archive/what-breaks-in-ai/WhatBreaksStage.astro): problem grid, build order, cost.
+const probTile = (p: any) => `<button type="button" class="wbf-ptile ${p.st}" data-prob="${p.id}">${icon(p.ic, p.pre === 'S' ? 'iso-violet' : 'iso-coral', 44)}<b>${p.name}</b><span>${LABELS[p.st].name}</span></button>`;
+const gridLanes = [['S', 'Web search'], ['F', 'Wider AI use']].map(([pre, t]) => ({ t: `${t}, ${PROB.filter((p) => p.pre === pre).length}`, n: PROB.filter((p) => p.pre === pre).length, html: PROB.filter((p) => p.pre === pre).map(probTile).join('') }));
+const buildRows = BUILD.order.map((name: string, i: number) => { const li = LAYERS.findIndex((l) => l.name === name); const L = LAYERS[li]; return { n: i + 1, name, why: BUILD.why[name], count: L.blocks.length, html: L.blocks.map((id) => `<button type="button" data-open="${id}">${icon(BLOCKS[id].ic, LAYER_TONE[li], 44)}<b>${BLOCKS[id].name}</b></button>`).join('') }; });
+// Impact and effort, the 14 wider problems by their matrix cell.
+const MX = extra?.matrix; const FP = PROB.filter((p) => Array.isArray(p.mx));
+const mxHtml = MX ? `<div class="wbf-mx"><i></i>${MX.cols.map((c: string) => `<span class="ch">${c}</span>`).join('')}${MX.rows.map((r: string, ri: number) => `<span class="rh">${r}</span>${MX.cols.map((_: string, ci: number) => `<div class="cell${MX.hot[0] === ri && MX.hot[1] === ci ? ' hot' : ''}">${FP.filter((p) => p.mx[0] === ri && p.mx[1] === ci).map((p) => chip(p.id)).join('')}</div>`).join('')}`).join('')}</div>` : '';
+const OWN = extra?.owners ?? [];
+const lanesHtml = `<div class="wbf-lanes" role="table" aria-label="Who acts at each stage"><div class="wbf-lhead" role="row"><i></i>${LANES.cols.map((c: string, ci: number) => `<b data-col="${ci}">${c}</b>`).join('')}</div>${LANES.rows.map((r: string, ri: number) => `<details class="wbf-lrow" open><summary>${r}</summary><div class="wbf-lcells">${LANES.cols.map((_: string, ci: number) => { const c = cellOf(ri, ci); return c ? `<button type="button" data-cell="${ri}-${ci}" data-col="${ci}" data-stage="${LANES.cols[ci]}. ">${c.task}</button>` : '<i></i>'; }).join('')}</div></details>`).join('')}</div>`;
+// The search pipeline inside Read sources: 8 steps, each S problem at the step where it starts.
+const PIPE = extra?.pipeline ?? [];
+const pipeHtml = PIPE.length ? `<div class="wbf-pipe"><h4>Search pipeline</h4><ol>${PIPE.map((x: any) => `<li><b>${x.name}</b><span class="wbf-cchips">${x.ids.map(chip).join('')}</span></li>`).join('')}</ol></div>` : '';
+const OBJ = extra?.objections ?? [];
+// Two links that would cross stations if drawn straight. Curved on wide plans, listed in cards on narrow ones.
+const XLINK = (view?.flows ?? []).filter((f: any) => ['F16', 'F28'].includes(f.id)).map((f: any) => ({ id: f.id, from: f.from, to: f.to, label: f.label }));
+// All parts by zone, ported from sample C and drawn from view.nodes and its zones.
+const ZIC: Record<string, string> = { screen_in: 'i-scrub', model: 'i-model', screen_out: 'i-explain', settings: 'i-rule-brick', providers: 'i-model', idp: 'i-vault', web: 'i-network', traces: 'i-lake' };
+const NODES = (view?.nodes ?? []) as any[];
+const inFence = (n: any) => !n.external && (n.block === 'P4' || n.zone === 'sandbox');
+const ZBANDS = [
+  { id: 'control', name: 'Control plane', note: 'tested settings', ids: NODES.filter((n) => !n.external && !inFence(n) && n.plane === 'control').map((n) => n.id) },
+  { id: 'data', name: 'Data plane', note: 'every request, in this order', ids: NODES.filter((n) => !n.external && !inFence(n) && n.plane !== 'control').map((n) => n.id) },
+  { id: 'fence', name: 'Agent fence', note: 'when the answer needs an action', ids: NODES.filter(inFence).map((n) => n.id) },
+  { id: 'out', name: 'Outside your boundary', note: '', ids: NODES.filter((n) => n.external).map((n) => n.id) }
+].filter((b) => b.ids.length);
+const znBtn = (id: string) => { const n = N[id]; const ic = n.block ? BLOCKS[n.block].ic : (ZIC[id] || 'i-cloud'); const tone = n.block ? LAYER_TONE[layerOf(n.block)] : 'iso-slate'; const qn = n.block ? (quickBy[n.block] ?? []).length : 0;
+  const tag = n.external ? 'outside' : n.zone === 'vendor' ? 'vendor' : n.block ?? 'part';
+  const act = PHONE.includes(id) ? `data-st="${id}"` : n.block ? `data-open="${n.block}"` : `data-zn="${id}"`;
+  return `<button type="button" class="wbf-zn${n.external ? ' ext' : ''}${n.block && !qn ? ' noq' : ''}" ${act}>${icon(ic, tone, 44)}<b>${n.name}</b><span>${tag}</span></button>`; };
+const zonesHtml = ZBANDS.map((b) => `<div class="wbf-band ${b.id}"><p class="wbf-bandl"><b>${b.name}</b>${b.note ? ' <span>' + b.note + '</span>' : ''}</p><div class="wbf-zrow">${b.ids.map(znBtn).join('')}</div></div>`).join('');
+const W10 = { hh: HH, xlink: XLINK, lenses: extra?.lenses ?? [], slenses: extra?.slenses ?? [], catchAt, flagged, stops: STOPS, draw: DRAW, order: ORDER, phone: PHONE, owners: OWN, tl: TL, ltone: LAYER_TONE };
+// Layer 1, the one-minute briefing. The four moves come from arch.fixfirst, the cost bands from the
+// block data (all illustrative), the actions shortened from each move's first step.
+const B1 = [
+  { blk: 'P9', name: 'Named checkers', who: 'Team heads', act: 'Name one person who checks every source before sending.' },
+  { blk: 'P4', name: 'Agent fence', who: 'Security lead', act: 'List every agent and give each a low-privilege login.' },
+  { blk: 'P6', name: 'Pinned models', who: 'Platform lead', act: 'Pin model versions and run your test set before changes.' },
+  { blk: 'P7', name: 'Contract terms', who: 'Procurement lead', act: 'At renewal, add notice for changes and pay per result.' }
+];
+const SEVT: Record<string, string> = { high: 'iso-coral', medium: 'iso-amber', lower: 'iso-slate' };
+const briefCards = B1.map((x, i) => { const b = BLOCKS[x.blk]; return `<li class="wbf-bc">${icon(b.ic, LAYER_TONE[layerOf(x.blk)], 44)}<div><b>${i + 1}. ${x.name}</b><span class="wbf-bcm">${x.who}</span><span class="wbf-bcm">${b.cost.replace(' a month', '/mo')} ${evTag(b.costev)}</span><p>${x.act}</p></div></li>`; }).join('');
+const heat = [['S', 'Search'], ['F', 'Wider use']].map(([pre, t]) => `<div class="wbf-ngrp"><p class="wbf-ngl">${t}</p><div class="wbf-nrow">${PROB.filter((p) => p.pre === pre).map((p) => `<button type="button" class="wbf-hc ${SEVT[p.sev]}" data-prob="${p.id}" aria-label="${p.name}, ${p.sev} severity">${p.name}</button>`).join('')}</div></div>`).join('');
+const { ST, hl, fixRowsHtml, PB, gapsHtml, caught, chapters } = story(chip);
+
+---
+
+<div class="wbf" id="wbf" data-arch="target">
+  <div class="wbf-sprite" aria-hidden="true" set:html={sprite} />
+  <script type="application/json" id="wbf-data" set:html={clientData}></script>
+  <script type="application/json" id="wbf-floor-data" set:html={JSON.stringify(W10)}></script>
+
+
+  <section class="wbf-view wbf-scr wbf-hook g-coral" id="wbf-s1" aria-labelledby="wbf-s1h">
+    <p class="wbf-kick">What breaks in AI</p>
+    <h2 class="wbf-big rv" id="wbf-s1h"><b class="cor">24</b> ways AI breaks</h2>
+    <ul class="wbf-sevkey rv"><li class="wbf-none">None improved by 15 Nov 2026 <Fragment set:html={evTag('verified')} /></li>{chapters.map((c: any, i: number) => <li><a class="wbf-chlink" href={`#wbf-c${i + 1}`}><b class="mono">{i + 1}</b> {c.head.join('')} <span class="mono">{c.n}</span></a></li>)}<li><i class="high"></i>High</li><li><i class="medium"></i>Medium</li><li><i class="lower"></i>Lower</li><li><span class="wbf-our">Our read</span> Grouping and severity <Fragment set:html={evTag('design')} /></li></ul>
+  </section>
+{chapters.map((c: any, i: number) => (
+  <section class={`wbf-view wbf-scr wbf-chap g-${c.glow}`} id={`wbf-c${i + 1}`} aria-labelledby={`wbf-c${i + 1}h`}>
+    <div class="wbf-chtop"><p class="wbf-kick">Chapter {i + 1} of 3</p><ol class="wbf-dots3" aria-hidden="true">{chapters.map((_: any, k: number) => <li class={k === i ? 'on' : ''}></li>)}</ol></div>
+    <h2 class="wbf-big rv" id={`wbf-c${i + 1}h`} set:html={hl(c.head, c.tone)} />
+    <div class="wbf-chgrid">
+      <div class="wbf-bgrid rv" set:html={c.tiles} />{c.alsoLine && <p class="wbf-alsol rv" set:html={c.alsoLine} />}
+      <div class="wbf-chside rv">
+        <div class="wbf-chcase"><Fragment set:html={icon(c.case.ic, 'iso-coral', 64)} /><div><p class="wbf-ct">{c.case.t}</p><p class="wbf-cn">{c.case.n} <Fragment set:html={evTag(c.case.ev)} /></p><p>{c.case.s}</p></div></div>
+        <div class="wbf-ind"><p class="wbf-frl">Industry is doing</p><ul set:html={c.indHtml} /></div>
+      </div>
+    </div>
+    <p class="wbf-stopby rv"><Fragment set:html={c.fixIc} /><span><span class="wbf-our">Our read</span> <b>{c.fixShort}</b> {c.our}</span></p>
+  </section>
+))}
+
+
+  <section class="wbf-view wbf-scr g-teal" id="wbf-s3" aria-labelledby="wbf-s3h">
+    <p class="wbf-kick">{ST.fixes.kick}</p>
+    <h2 class="wbf-big rv" id="wbf-s3h" set:html={hl(ST.fixes.head, 'tea')} />
+    <ol class="wbf-frs" set:html={fixRowsHtml}></ol>
+    <p class="wbf-basis rv">Each failure counts once, in the row of the first fix that catches it. The four catch <span class="mono">{caught.n}</span> of 24, <span class="mono">{caught.m}</span> measured. <span class="mono">{PB[0].c - caught.m}</span> more measured failures sit beyond the four, <span class="mono">{PB[0].c}</span> of 24 in all <Fragment set:html={evTag('verified')} /></p>
+  </section>
+
+  <section class="wbf-view wbf-scr g-coral" id="wbf-gaps" aria-labelledby="wbf-gapsh">
+    <p class="wbf-kick">{ST.gaps.kick}</p>
+    <h2 class="wbf-big rv" id="wbf-gapsh" set:html={hl(ST.gaps.head, 'cor')} />
+    <ul class="wbf-gaps rv" set:html={gapsHtml}></ul>
+    <p class="wbf-ourl rv"><span class="wbf-our">Our read</span> {ST.gaps.our}</p>
+  </section>
+
+  <section class="wbf-view wbf-scr g-slate" id="wbf-s4" aria-labelledby="wbf-s4h">
+    <p class="wbf-kick">{ST.sure.kick}</p>
+    <h2 class="wbf-big rv" id="wbf-s4h" set:html={hl(ST.sure.head, 'tea')} />
+    <div class="wbf-stack rv" role="img" aria-label={PB.map((x) => `${x.t} ${x.c}`).join(', ')}>{PB.map((x) => <i class={`k ${x.k}`} style={`flex:${x.c}`}></i>)}</div>
+    <ul class="wbf-skey">{PB.map((x) => <li><i class={`k ${x.k}`}></i><b class="mono">{x.c}</b> {x.t}</li>)}<li>of 24 <Fragment set:html={evTag('verified')} /></li><li><span class="wbf-our">Our read</span> Not yet checked by outsiders</li></ul>
+    {OBJ.length > 0 && <details class="wbf-fold wbf-shut"><summary>Hard questions <Fragment set:html={evTag('design')} /></summary><dl class="wbf-obj">{OBJ.map((o: any) => <div><dt>{o.q}</dt><dd>{o.a}</dd></div>)}</dl></details>}
+  </section>
+
+  <section class="wbf-view" id="wbf-floorview">
+    <div class="wbf-refh"><h3>Reference map</h3><p>Technical detail, optional for leaders.</p></div>
+    <div class="wbf-top">
+      <div class="wbf-nums">{HERO.map((h) => <div class="wbf-num"><b>{h.n}</b><span>{h.l}</span><Fragment set:html={evTag(h.ev)} /></div>)}</div>
+      <div class="wbf-ctl">
+        <div class="wbf-switch" role="group" aria-label="Floor view" hidden>
+          <button type="button" data-arch="target" aria-pressed="true">Target</button>
+          <button type="button" data-arch="interim" aria-pressed="false">This week</button>
+        </div>
+        <button type="button" class="wbf-walkbtn" data-walk="play">Step through</button>
+        <button type="button" class="wbf-pp wbf-fmbtn" aria-expanded="false" aria-controls="wbf-map">Full map</button>
+      </div>
+    </div>
+    <div class="wbf-floorwrap"><div class="wbf-floor" id="wbf-floor">
+      <svg class="wbf-belts" aria-hidden="true"><defs><marker id="wbf-ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="arh"></path></marker><marker id="wbf-al" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="alh"></path></marker></defs><g id="wbf-lines"></g></svg>
+      <ul class="wbf-legend"><li><i class="k req"></i>Request path</li><li><i class="k loop"></i>Test loop</li><li><i class="k off"></i>Off path, runs separately</li></ul>
+      <Fragment set:html={floorHtml} />
+      <div class="wbf-dots" id="wbf-dots" aria-hidden="true"></div>
+    </div></div>
+    <aside class="wbf-card" id="wbf-card" hidden aria-labelledby="wbf-card-h">
+      <button type="button" class="wbf-close" data-close>Close</button>
+      <p class="wbf-k" id="wbf-card-k"></p>
+      <h3 id="wbf-card-h" tabindex="-1"></h3>
+      <div id="wbf-card-b"></div>
+    </aside>
+    <div class="wbf-walk" id="wbf-walk" hidden>
+      <p class="wbf-step" id="wbf-step"></p>
+      <p class="wbf-cap" id="wbf-cap" aria-live="polite"></p>
+      <div class="wbf-capn" id="wbf-capn" hidden></div>
+      <div class="wbf-cchips" id="wbf-capchips"></div>
+      <div class="wbf-scrub">
+        <div class="wbf-rangebox"><input type="range" id="wbf-range" min="1" max={String(STOPS.length)} step="1" value="1" aria-label="Stop" /><div class="wbf-ticks" set:html={tickHtml} /></div>
+        <button type="button" class="wbf-pp" data-walk="prev">Back</button>
+        <button type="button" class="wbf-pp" data-walk="toggle">Play</button>
+        <button type="button" class="wbf-pp" data-walk="next">Next</button>
+        <button type="button" class="wbf-pp" data-walk="stop">Close</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="wbf-map" id="wbf-map" role="dialog" aria-modal="true" aria-label="Full map" hidden>
+    <div class="wbf-mapbar">
+      <div class="wbf-switch" role="group" aria-label="Map view" hidden><button type="button" data-map="week" aria-pressed="false">This week</button><button type="button" data-map="target" aria-pressed="true">Target</button></div>
+      <div class="wbf-ctl"><button type="button" class="wbf-pp" data-mz="out" aria-label="Zoom out">-</button><button type="button" class="wbf-pp" data-mz="in" aria-label="Zoom in">+</button><button type="button" class="wbf-pp" data-mz="reset">Reset</button><button type="button" class="wbf-pp" data-mapclose>Close</button></div>
+    </div>
+    <div class="wbf-mapbox" id="wbf-mapbox"><img id="wbf-mapimg" alt="Full architecture map" src="/images/what-breaks-in-ai/arch-target.svg" /></div>
+  </div>
+
+  <section class="wbf-view" id="wbf-zones">
+    <Fragment set:html={pipeHtml} />
+    <details class="wbf-zfold wbf-fold wbf-shut"><summary>All parts</summary><div class="wbf-zones" set:html={zonesHtml} /></details>
+    <details class="wbf-fold wbf-shut wbf-catch" id="wbf-catchstrip"><summary>Where fixes catch</summary><div class="wbf-crows" set:html={catchHtml} /></details>
+    <details class="wbf-fold wbf-shut wbf-bfold" id="wbf-build"><summary>Build order, {buildRows.reduce((a: number, r: any) => a + r.count, 0)} blocks <Fragment set:html={evTag('design')} /></summary><ol class="wbf-build">{buildRows.map((r: any) => <li><span class="wbf-n">{r.n}</span><div class="wbf-brow"><p class="wbf-bh" title={r.why}><b>{r.name}</b></p><div class="wbf-btiles" set:html={r.html} /></div></li>)}</ol></details>
+  </section>
+
+
+
+
+  <section class="wbf-view" id="wbf-wall">
+    <h3>The evidence</h3>
+    <details class="wbf-fold wbf-own wbf-shut"><summary>Who acts first</summary>
+      <div class="wbf-ownchips">{OWN.map((o: any) => <button type="button" data-own={o.id}><Fragment set:html={icon(o.ic, 'iso-teal', 32)} />{o.name}</button>)}</div>
+      <p class="wbf-ownp" id="wbf-ownp" hidden></p>
+    </details>
+    <div class="wbf-hhbar"><button type="button" class="wbf-pp" data-hh aria-pressed="false">Hidden harm <b class="mono">{HH.length}</b></button><span>Hardest to spot <Fragment set:html={evTag('design')} /></span></div>
+    <div class="wbf-charts">
+      <div class="wbf-chart wide"><h4>{INCIDENTS.label} <Fragment set:html={evTag(INCIDENTS.ev)} /></h4><div class="wbf-linewrap"><svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" aria-hidden="true" set:html={linePaths} /><Fragment set:html={lineDots} /><Fragment set:html={ticks} /></div><div class="wbf-months">{M.labels.map((l: string) => <span>{l}</span>)}</div><p class="wbf-note">{M.note}</p><ul class="wbf-key">{INCIDENTS.rows.map((r: any, k: number) => <li><i class={`k s${k}`}></i>{r.name} {r.x}x <Fragment set:html={evTag(INCIDENTS.ev)} /></li>)}</ul>
+        <div class="wbf-tl"><button type="button" class="wbf-pp" data-tl="-1">Earlier</button><button type="button" class="wbf-pp" data-tl="1">Dated events</button></div><p class="wbf-tlp" id="wbf-tlp" hidden></p></div>
+      <details class="wbf-fold wbf-chart wide wbf-shut" id="wbf-costs"><summary>Monthly run cost <i class="wb-ev illustrative">illustrative</i></summary><div class="wbf-bars" set:html={costBars} /></details>
+      <details class="wbf-fold wbf-chart wide wbf-shut"><summary>Impact and effort</summary>{MX && <p class="wbf-axis">{MX.rowAxis} down, {MX.colAxis.split(' ')[0].toLowerCase()} across</p>}<Fragment set:html={mxHtml} /></details>
+            <details class="wbf-fold wbf-chart wide wbf-shut"><summary>Open questions</summary><ul class="wbf-unk">{UNKNOWN.map((u) => <li><b>{u.t}</b><span>{u.s} <Fragment set:html={u.ev ? evTag(u.ev) : ''} /></span></li>)}</ul></details>
+    </div>
+  </section>
+
+
+  <section class="wbf-view" id="wbf-lanesview" hidden>
+    <h3>Who acts when</h3>
+    <Fragment set:html={lanesHtml} />
+    <aside class="wbf-card" id="wbf-cellcard" hidden aria-labelledby="wbf-cell-h">
+      <button type="button" class="wbf-close" data-close>Close</button>
+      <p class="wbf-k" id="wbf-cell-k"></p>
+      <h3 id="wbf-cell-h" tabindex="-1"></h3>
+      <div id="wbf-cell-b"></div>
+    </aside>
+  </section>
+
+</div>
+
+<style is:global>
+  .wbf .wbf-view[hidden] { display: none !important; }
+  .wbf .wbf-aud { justify-self: start; }
+  .wbf .wbf-aud button { min-height: 44px; min-width: 44px; padding: 0 18px; }
+  .wbf-brief { gap: 12px; }
+  .wbf-thesis { font-size: clamp(19px, 2vw, 24px); line-height: 1.3; font-weight: 600; max-width: 60ch; }
+  .wbf-thesis span { display: inline-block; margin-right: 8px; font: 600 14px/1.2 "IBM Plex Mono", ui-monospace, monospace; text-transform: uppercase; letter-spacing: .06em; color: var(--warn); vertical-align: middle; }
+  .wbf-bcards { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+  .wbf-bc { display: flex; gap: 10px; align-items: flex-start; padding: 12px; border: 1px solid var(--srule); border-radius: 14px; background: var(--spanel); }
+  .wbf-bc .ic { flex: none; }
+  .wbf-bc div { display: grid; gap: 4px; min-width: 0; }
+  .wbf-bc b { font-size: 17px; }
+  .wbf-bcm { font-size: 14px; color: var(--smut); display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  .wbf-bc p { font-size: 15px; line-height: 1.35; }
+  .wbf-heat { display: grid; gap: 8px; }
+  .wbf [data-aud="arch"][hidden] { display: none !important; }
+  .wbf-brief .wbf-why, .wbf-brief .wbf-total { margin: 0; font-size: 18px !important; line-height: 1.4; }
+  .wbf-why b, .wbf-total b { margin-right: 8px; color: var(--warn); }
+  .wbf-heatl { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; font-size: 15px; }
+  .wbf-hk { display: inline-flex; align-items: center; gap: 6px; color: var(--smut); font-size: 14px; }
+  .wbf-hk::before { content: ""; width: 14px; height: 14px; border-radius: 4px; background: var(--iso-mid); }
+  .wbf-hgrps { display: grid; gap: 10px; }
+  .wbf-ngrp { display: grid; gap: 6px; }
+  .wbf-ngl { margin: 0; font-size: 14px; font-weight: 600; color: var(--smut); }
+  .wbf-nrow { display: flex; flex-wrap: wrap; gap: 6px; }
+  .wbf .wbf-hc { min-height: 44px; padding: 6px 12px; border: 0; border-radius: 8px; background: var(--iso-mid); color: #fff; font: 600 14px/1.25 "Space Grotesk", sans-serif; text-align: left; white-space: normal; }
+  .wbf .wbf-hc:hover, .wbf .wbf-hc:focus-visible { outline: 2px solid var(--sink); outline-offset: 1px; }
+  @media (max-width: 1023.98px) { .wbf-bcards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 559.98px) { .wbf-bcards { grid-template-columns: 1fr; } .wbf-bc { padding: 10px; } }
+  .wbf { --sbg: #0d1118; --sink: #eef3ff; --smut: #a7b4c9; --srule: rgba(167, 180, 201, .28); --spanel: #121a26;
+    --ctl: #4edab5; --fail: #ff8a7a; --flow: #86abdd; --warn: #f4cb73; --vio: #b9b6e6; --cor: #f0b4a2;
+    position: relative; margin: 20px 0 0; padding: 20px; border-radius: 20px; background: var(--sbg); color: var(--sink);
+    font-family: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif; display: grid; gap: 20px; }
+  .wbf-sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
+  .wbf button { font: inherit; color: inherit; cursor: pointer; }
+  .wbf h3 { margin: 0; font-size: 20px; text-wrap: balance; display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: baseline; }
+  .wbf h4 { margin: 0; font-size: 16px; text-wrap: balance; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .wbf p { margin: 0; text-wrap: pretty; }
+  .wbf-sub { font-size: 15px; font-weight: 400; color: var(--smut); }
+  .wbf .wb-ev { display: inline-flex; font: 600 14px/1.2 "IBM Plex Mono", ui-monospace, monospace; font-style: normal; padding: 3px 7px; border: 1.5px solid currentColor; border-radius: 6px; white-space: nowrap; }
+  .wbf .wb-ev.verified { color: var(--ctl); } .wbf .wb-ev.vendor { color: var(--warn); } .wbf .wb-ev.illustrative { color: var(--smut); border-style: dashed; } .wbf .wb-ev.design { color: var(--flow); border-style: dashed; } .wbf .wb-ev.unverified { color: var(--warn); border-style: dashed; }
+  .wbf-view { display: grid; gap: 14px; }
+  .wbf-top { display: flex; flex-wrap: wrap; gap: 14px 24px; align-items: center; justify-content: space-between; }
+  .wbf-nums { display: flex; flex-wrap: wrap; gap: 10px 28px; }
+  .wbf-num { display: grid; grid-template-columns: auto auto; gap: 2px 10px; align-items: center; }
+  .wbf-num b { font: 600 34px/1 "IBM Plex Mono", ui-monospace, monospace; grid-row: span 2; }
+  .wbf-num span { font-size: 15px; color: var(--smut); max-width: 26ch; }
+  .wbf-ctl, .wbf-switch { display: flex; flex-wrap: wrap; gap: 6px; }
+  .wbf-switch button, .wbf-walkbtn, .wbf-pp, .wbf-close { min-height: 44px; padding: 0 14px; border-radius: 10px; border: 1.5px solid var(--srule); background: transparent; font-size: 15px; font-weight: 600; }
+  .wbf-switch button[aria-pressed="true"] { background: var(--sink); color: var(--sbg); border-color: var(--sink); }
+  .wbf-walkbtn { border-color: var(--ctl) !important; color: var(--ctl) !important; }
+
+  /* The floor: a flat plan on a 10 by 3 grid, lines drawn under the boxes, labels above. */
+  .wbf-floorwrap { border-radius: 16px; border: 1px solid var(--srule); background: #0a0e14; }
+  .wbf-floor { position: relative; display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 40px 12px; padding: 18px 14px; }
+  .wbf-belts { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
+  .wbf-belts path, .wbf-belts line { fill: none; }
+  .wbf-belts .req { stroke: var(--flow); stroke-width: 2; }
+  .wbf-belts .loop { stroke: var(--ctl); stroke-width: 2; stroke-dasharray: 5 5; }
+  .wbf-belts .arh { fill: var(--flow); } .wbf-belts .alh { fill: var(--ctl); }
+  .wbf-legend { grid-column: 1 / 5; grid-row: 1; align-self: center; margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 14px; color: var(--smut); z-index: 2; }
+  .wbf-legend .k { display: inline-block; width: 22px; height: 0; margin-right: 8px; vertical-align: middle; border-top: 2px solid var(--flow); }
+  .wbf-legend .k.loop { border-top: 2px dashed var(--ctl); } .wbf-legend .k.off { width: 14px; height: 14px; border: 1.5px dashed var(--smut); border-radius: 3px; }
+  .wbf-st { grid-column: var(--c); grid-row: var(--r); position: relative; z-index: 2; min-width: 0; display: grid; justify-items: center; align-content: start; gap: 3px; padding: 8px; border-radius: 10px; border: 1.5px solid var(--srule); background: var(--spanel); text-align: center; transition: border-color .4s, background .4s; }
+  .wbf-st b { max-width: calc(100% - 18px); font-size: 14px; font-weight: 600; line-height: 1.2; text-wrap: balance; }
+  .wbf-st .wbf-fl { font: 600 14px/1.2 "Space Grotesk", sans-serif; white-space: nowrap; color: var(--smut); padding: 2px 9px; border-radius: 999px; border: 1px solid var(--srule); background: rgba(167, 180, 201, .1); }
+  .wbf-st .wbf-fl.tag { background: transparent; border-style: dotted; } .wbf-st .wbf-fl.e { visibility: hidden; }
+  .wbf-st.sel .wbf-fl.n { color: var(--ctl); border-color: var(--ctl); background: rgba(78, 218, 181, .12); }
+  .wbf-st.off { border-style: dashed; }
+  .wbf-st.off .wbf-fl, .wbf-st.ext .wbf-fl { color: var(--smut); }
+  .wbf-clip { display: none; align-items: center; gap: 4px; font: 500 14px/1.2 "IBM Plex Mono", monospace; color: var(--warn); }
+  .wbf-clip.none { color: var(--smut); }
+  .wbf[data-arch="interim"] .wbf-st.im .wbf-fl { display: none; } .wbf[data-arch="interim"] .wbf-st.im .wbf-clip { display: inline-flex; }
+  .wbf[data-arch="interim"] .wbf-st.im.noq { border-style: dashed; background: transparent; }
+  .wbf-st.sel { border-color: var(--ctl); background: #12261f; }
+  .wbf-st.dim { border-color: rgba(167, 180, 201, .12); background: rgba(18, 26, 38, .5); } .wbf-st.dim .ic { opacity: .4; } .wbf-st.dim b { color: var(--smut); }
+  .wbf-st.onpath { border-color: rgba(78, 218, 181, .5); }
+  .wbf-dots { position: absolute; inset: 0; pointer-events: none; z-index: 3; }
+  .wbf-dot { position: absolute; left: 0; top: 0; padding: 2px 6px; border-radius: 6px; font: 600 14px/1.2 "IBM Plex Mono", monospace; background: var(--fail); color: #1a0a06; }
+
+  .wbf-catch { display: grid; gap: 10px; }
+  .wbf-crows { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr)); gap: 12px; align-items: stretch; }
+  .wbf-crow { display: grid; grid-template-rows: auto 1fr; gap: 10px; padding: 14px; border-radius: 14px; background: var(--spanel); border: 1px solid var(--srule); }
+  .wbf-chead { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding-bottom: 8px; border-bottom: 1px solid var(--srule); }
+  .wbf-cname { min-height: 44px; min-width: 44px; padding: 0; border: 0; background: transparent; text-align: left; color: inherit; font-size: 17px !important; font-weight: 700 !important; cursor: pointer; }
+  .wbf-cname:hover { color: var(--teal, #4edab5); }
+  .wbf-ccount { min-width: 42px; height: 42px; display: grid; place-items: center; border-radius: 50%; background: rgba(78, 218, 181, .14); color: #4edab5; font: 700 18px/1 "Space Grotesk", sans-serif; }
+  .wbf-crow .wbf-cchips { align-content: start; }
+  .wbf-cdet > summary { display: none; }
+  .wbf-ckey { margin: 0; font-size: 14px; color: var(--smut); }
+  .wbf, .wbf-view, .wbf-card, .wbf-floorwrap { scroll-margin-top: 104px; }
+  .wbf-cchips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .wbf-chip { min-height: 44px; padding: 6px 10px; border-radius: 8px; border: 1.5px solid var(--srule); background: transparent; text-align: left; white-space: normal; font: 600 14px/1.25 "Space Grotesk", sans-serif !important; }
+  .wbf-chip.S { color: var(--vio); } .wbf-chip.F { color: var(--cor); }
+
+  .wbf-card { display: grid; gap: 10px; align-content: start; padding: 16px; border-radius: 16px; background: var(--spanel); border: 1px solid var(--srule); }
+  .wbf-card[hidden] { display: none; }
+  .wbf-card .wbf-close { justify-self: end; }
+  .wbf-k { font: 500 14px/1.3 "IBM Plex Mono", monospace; color: var(--smut); }
+  .wbf-card dl { margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr)); gap: 8px 18px; }
+  .wbf-card dt { font-size: 14px; color: var(--smut); } .wbf-card dd { margin: 0; font-size: 15px; line-height: 1.45; }
+  .wbf-card h4 { color: var(--ctl); font-size: 15px; }
+  .wbf-card p, .wbf-card li, .wbf-card dd { font-size: 15px; line-height: 1.45; text-wrap: pretty; }
+  .wbf-card ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; }
+  .wbf-card .wbf-where { padding: 10px 12px; border-radius: 10px; border: 1.5px solid var(--fail); }
+  .wbf-grades { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 6px; }
+  .wbf-grades span { display: grid; gap: 2px; padding: 6px 8px; border-radius: 8px; border: 1px solid var(--srule); font-size: 14px; }
+  .wbf-grades span i { font-style: normal; color: var(--smut); }
+  .wbf-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .wbf-tags span { padding: 4px 8px; border-radius: 6px; border: 1px solid var(--srule); font-size: 14px; }
+  .wbf-card.cell { max-width: 640px; }
+  @media (max-width: 767.98px) {
+    .wbf-card, .wbf-card.cell { position: fixed; left: 0; right: 0; bottom: 0; z-index: 60; max-width: none; max-height: 85dvh; overflow-y: auto; overscroll-behavior: contain; border-radius: 16px 16px 0 0; padding: 0 16px calc(16px + env(safe-area-inset-bottom)); box-shadow: 0 -12px 32px rgba(0, 0, 0, 0.28); }
+    .wbf-walk:not([hidden]) { position: fixed; left: 0; right: 0; bottom: 0; max-height: 50dvh; overflow-y: auto; border-radius: 14px 14px 0 0; padding-bottom: calc(12px + env(safe-area-inset-bottom)); }
+    .wbf-card .wbf-close { position: sticky; top: 0; z-index: 1; margin-top: 8px; background: var(--spanel); }
+  }
+
+  .wbf-walk { position: sticky; bottom: 0; z-index: 5; display: grid; gap: 8px; padding: 12px 14px; border-radius: 14px; background: var(--spanel); border: 1px solid var(--srule); backdrop-filter: blur(10px); }
+  .wbf-walk[hidden] { display: none; }
+  .wbf-cap { font-size: 20px; font-weight: 600; text-wrap: balance; }
+  .wbf-scrub { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .wbf-scrub input { flex: 1 1 100%; min-height: 42px; accent-color: var(--ctl); }
+  .wbf-step { justify-self: start; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--ctl); font: 600 14px/1.2 "IBM Plex Mono", monospace; color: var(--ctl); }
+  .wbf-rangebox { position: relative; flex: 1 1 100%; display: grid; }
+  .wbf-rangebox input { width: 100%; margin: 0; }
+  .wbf-ticks { position: relative; height: 12px; }
+  .wbf-ticks i { position: absolute; top: 0; width: 8px; height: 12px; margin-left: -4px; background: linear-gradient(var(--smut), var(--smut)) center / 2px 100% no-repeat; }
+  .wbf-chip.long { display: flex; gap: 8px; align-items: center; padding: 6px 10px; text-align: left; font: 600 14px/1.25 "Space Grotesk", sans-serif !important; color: var(--sink); }
+  .wbf-chip.long b { font: 600 14px/1 "IBM Plex Mono", monospace; } .wbf-chip.long.S b { color: var(--vio); } .wbf-chip.long.F b { color: var(--cor); }
+  .wbf-belts .faint { opacity: .3; }
+  .wbf-belts .lit { stroke: var(--ctl); stroke-width: 3; fill: none; }
+  .wbf-belts .next { stroke: var(--ctl); stroke-width: 2.5; stroke-dasharray: 6 5; fill: none; }
+  .wbf-belts .pdot { fill: var(--ctl); stroke: var(--sbg); stroke-width: 2; }
+  @media (min-width: 1024px) {
+    .wbf.walking #wbf-floorview { grid-template-columns: minmax(0, 1fr) 320px; align-items: start; }
+    .wbf.walking #wbf-floorview > .wbf-top, .wbf.walking #wbf-floorview > .wbf-card { grid-column: 1 / -1; }
+    .wbf.walking .wbf-floorwrap { grid-column: 1; grid-row: 2; }
+    .wbf.walking .wbf-walk { grid-column: 2; grid-row: 2; position: sticky; top: 104px; bottom: auto; }
+    .wbf.walking #wbf-capchips { display: grid; }
+    .wbf.walking .wbf-floor { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 28px 24px; }
+    .wbf.walking .wbf-st { grid-column: var(--c5); grid-row: calc(var(--r5) + 1); }
+    .wbf.walking .wbf-legend { grid-column: 1 / -1; grid-row: 1; }
+  }
+  @media (min-width: 1024px) and (max-width: 1279px) {
+    .wbf.walking #wbf-floorview { grid-template-columns: minmax(0, 1fr) 300px; }
+    .wbf.walking .wbf-floor { gap: 28px 10px; padding: 18px 10px; }
+  }
+
+  .wbf-own { display: grid; gap: 10px; }
+  .wbf-ownchips { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(190px, 100%), 1fr)); gap: 8px; }
+  .wbf-ownchips button { min-height: 52px; display: flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 10px; border: 1.5px solid var(--srule); background: var(--spanel); font-size: 15px; font-weight: 600; text-align: left; }
+  .wbf-ownchips button[aria-pressed="true"] { border-color: var(--ctl); }
+  .wbf-ownp { padding: 12px 14px; border-radius: 10px; background: var(--spanel); border: 1px solid var(--srule); font-size: 15px; line-height: 1.45; }
+  .wbf-ownp[hidden], .wbf-tlp[hidden] { display: none; }
+  .wbf-charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(420px, 100%), 1fr)); gap: 12px; align-items: start; }
+  .wbf-chart { display: grid; gap: 10px; align-content: start; padding: 14px; border-radius: 14px; background: var(--spanel); border: 1px solid var(--srule); }
+  .wbf-chart.wide { grid-column: 1 / -1; }
+  .wbf-axis, .wbf-note { font-size: 14px; color: var(--smut); }
+  .wbf-mx { display: grid; grid-template-columns: 52px repeat(3, minmax(0, 1fr)); gap: 6px; }
+  .wbf-mx .ch, .wbf-mx .rh { font: 500 14px/1.2 "IBM Plex Mono", monospace; color: var(--smut); display: flex; align-items: center; }
+  .wbf-mx .ch { justify-content: center; }
+  .wbf-mx .cell { min-width: 0; min-height: 56px; display: flex; flex-direction: column; gap: 4px; justify-content: center; padding: 4px; border-radius: 8px; border: 1px solid var(--srule); }
+  .wbf-mx .cell.hot { border: 1.5px solid var(--fail); background: rgba(255, 138, 122, .1); }
+  .wbf-waffle { display: grid; gap: 10px; }
+  .wbf-waffle button { min-height: 44px; padding: 6px 10px; border-radius: 8px; border: 1.5px solid var(--srule); background: transparent; text-align: left; white-space: normal; font: 600 14px/1.25 "Space Grotesk", sans-serif !important; }
+  .wbf-waffle .m { background: rgba(78, 218, 181, .22); border-color: var(--ctl); } .wbf-waffle .v { background: rgba(244, 203, 115, .16); border-color: var(--warn); }
+  .wbf-key { margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 14px; color: var(--smut); }
+  .wbf-key .k { display: inline-block; width: 14px; height: 14px; border-radius: 4px; margin-right: 6px; vertical-align: -2px; border: 1.5px solid var(--srule); }
+  .wbf-key .k.m { background: rgba(78, 218, 181, .5); } .wbf-key .k.v { background: rgba(244, 203, 115, .45); } .wbf-key .k.s0 { background: var(--fail); } .wbf-key .k.s1 { background: var(--smut); }
+  .wbf-linewrap { position: relative; height: 140px; max-width: 760px; }
+  .wbf-linewrap svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .wbf-linewrap path { fill: none; stroke-width: 2.5; } .wbf-linewrap path.s0 { stroke: var(--fail); } .wbf-linewrap path.s1 { stroke: var(--smut); }
+  .wbf-linewrap .base { stroke: var(--srule); stroke-dasharray: 4 4; vector-effect: non-scaling-stroke; }
+  .wbf-pt { position: absolute; width: 10px; height: 10px; margin: -5px 0 0 -5px; border-radius: 50%; } .wbf-pt.s0 { background: var(--fail); } .wbf-pt.s1 { background: var(--smut); }
+  .wbf-tick { position: absolute; bottom: 0; width: 2px; height: 12px; margin-left: -1px; background: var(--smut); }
+  .wbf-tick.on { background: var(--warn); height: 22px; }
+  .wbf-months { max-width: 760px; display: grid; grid-template-columns: repeat(5, 1fr); text-align: center; font: 500 14px/1.2 "IBM Plex Mono", monospace; color: var(--smut); }
+  .wbf-tl { display: flex; flex-wrap: wrap; gap: 6px; }
+  .wbf-tlp { font-size: 15px; line-height: 1.45; }
+  .wbf-bars { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 6px 18px; }
+  .wbf-bars button { display: grid; grid-template-columns: 150px minmax(0, 1fr) auto; gap: 10px; align-items: center; min-height: 44px; min-width: 0; border: 0; background: transparent; text-align: left; font-size: 14px; }
+  .wbf-bars button span { font: 500 14px/1.2 "IBM Plex Mono", monospace; color: var(--smut); }
+  .wbf-bar { position: relative; height: 12px; border-radius: 6px; background: rgba(167, 180, 201, .15); } .wbf-bar i { position: absolute; top: 0; bottom: 0; border-radius: 6px; background: var(--flow); }
+  .wbf-unk { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr)); gap: 10px 18px; }
+  .wbf-unk li { display: grid; gap: 4px; font-size: 15px; line-height: 1.45; } .wbf-unk span { color: var(--smut); }
+
+  .wbf-lanes { display: grid; gap: 6px; }
+  .wbf-lhead { display: grid; grid-template-columns: 170px repeat(5, minmax(0, 1fr)); gap: 6px; }
+  .wbf-lhead b { font: 600 14px/1.2 "IBM Plex Mono", monospace; color: var(--smut); padding: 6px; border-radius: 8px; text-align: center; transition: background .4s, color .4s; }
+  .wbf-lhead b.on { background: var(--ctl); color: var(--sbg); }
+  .wbf-lrow { display: block; }
+  .wbf-lrow summary { list-style: none; font-size: 14px; font-weight: 600; float: left; width: 170px; min-height: 52px; display: flex; align-items: center; cursor: default; }
+  .wbf-lrow summary::-webkit-details-marker { display: none; }
+  .wbf-lcells { margin-left: 176px; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }
+  .wbf-lcells button { min-height: 52px; padding: 6px 8px; border-radius: 10px; border: 1.5px solid var(--srule); background: var(--spanel); font-size: 14px; line-height: 1.25; text-align: left; text-wrap: balance; transition: border-color .4s; color: var(--smut) !important; }
+  .wbf-lcells button.on { border-color: var(--ctl); color: var(--sink) !important; }
+
+  /* Mid widths: the same stations as an ordered snake, five a row. */
+  .wbf-plane2 { display: grid; gap: 12px; }
+  .wbf-plane { display: block; padding: 12px 14px; border-radius: 14px; background: var(--spanel); border: 1px solid var(--srule); }
+  .wbf-ptiles { margin-top: 8px; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
+  .wbf-ptile { display: grid; grid-template-columns: 44px minmax(0, 1fr); grid-template-rows: auto auto; column-gap: 10px; align-items: center; min-height: 64px; padding: 8px 10px; text-align: left; border-radius: 10px; border: 1px solid var(--srule); background: transparent; color: var(--sink); font-size: 14px; }
+  .wbf-ptile svg { grid-row: 1 / 3; } .wbf-ptile b { font-weight: 600; line-height: 1.25; } .wbf-ptile span { font-size: 14px; color: var(--smut); }
+  .wbf-ptile.new span, .wbf-ptile.worse span { color: var(--warn); }
+  .wbf-sub2 { margin: 0 0 10px; color: var(--smut); display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .wbf-build { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+  .wbf-build > li { display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 12px; align-items: start; padding: 12px 14px; border-radius: 14px; background: var(--spanel); border: 1px solid var(--srule); }
+  .wbf-n { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--flow); color: var(--flow); font: 600 16px/1 "IBM Plex Mono", monospace; }
+  .wbf-brow { display: grid; gap: 8px; }
+  .wbf .wbf-bh { display: grid; gap: 2px; } .wbf-why { font-size: 14px; font-weight: 400; color: var(--smut); } .wbf-cnt { display: none; }
+  .wbf-btiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 8px; }
+  .wbf-btiles button { display: flex; gap: 8px; align-items: center; min-height: 52px; padding: 4px 8px; text-align: left; border-radius: 10px; border: 1px solid var(--srule); background: transparent; color: var(--sink); font-size: 14px; }
+  @media (max-width: 1099px) { .wbf-ptiles { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  @media (max-width: 760px) { .wbf-ptiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } .wbf-ptile { grid-template-columns: minmax(0, 1fr); } .wbf-ptile svg { grid-row: auto; } .wbf-cnt { display: inline; font-size: 14px; color: var(--smut); font-weight: 400; } .wbf-build > li { grid-template-columns: 36px minmax(0, 1fr); padding: 10px; } }
+  @media (max-width: 1099px) {
+    .wbf-floor { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 34px 14px; }
+    .wbf-st { grid-column: var(--c5); grid-row: calc(var(--r5) + 1); }
+    .wbf-legend { grid-column: 1 / -1; grid-row: 1; }
+  }
+  @media (max-width: 760px) {
+    .wbf { padding: 10px; border-radius: 14px; }
+    .wbf-floor { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 30px 8px; padding: 12px 4px; }
+    .wbf-st { grid-column: var(--c3); grid-row: calc(var(--r3) + 1); padding: 8px 4px; }
+    .wbf-st .ic { width: 64px; height: 64px; }
+    .wbf-clip .ic { display: none; }
+    .wbf-crow { grid-template-columns: minmax(0, 1fr); }
+    .wbf-cdet > summary { display: block; min-height: 44px; line-height: 44px; cursor: pointer; font-size: 14px; color: var(--smut); }
+    .wbf-lhead { display: none; }
+    .wbf-lrow summary { float: none; width: auto; min-height: 44px; cursor: pointer; }
+    .wbf-lrow summary::after { content: " +"; color: var(--smut); }
+    .wbf-lrow[open] summary::after { content: " -"; }
+    .wbf-lcells { margin-left: 0; display: flex; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 6px; }
+    .wbf-lcells > * { flex: 0 0 72%; scroll-snap-align: start; }
+    .wbf-lcells > i { display: none; }
+    .wbf-lcells button { color: var(--sink) !important; }
+    .wbf-lcells button::before { content: attr(data-stage); color: var(--smut); }
+    .wbf-bars button { grid-template-columns: minmax(0, 1fr) auto; } .wbf-bars button .wbf-bar { grid-column: 1 / -1; grid-row: 2; }
+    .wbf-num b { font-size: 28px; }
+  }
+  .wbf-zfold > summary { list-style: none; font-size: 20px; font-weight: 600; margin-bottom: 4px; }
+  .wbf-zfold > summary::-webkit-details-marker { display: none; }
+  .wbf-zones { display: grid; gap: 10px; }
+  .wbf-band { display: grid; gap: 6px; padding: 8px; border-radius: 12px; border: 1px dashed var(--srule); }
+  .wbf-band.fence { border-color: rgba(255, 138, 122, .45); } .wbf-band.out { border-style: dotted; }
+  .wbf-bandl { font-size: 14px; color: var(--smut); } .wbf-bandl b { color: var(--sink); font-weight: 600; }
+  .wbf-zrow { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; }
+  .wbf-zn { display: grid; justify-items: center; align-content: start; gap: 4px; min-height: 108px; padding: 10px 8px 8px; border-radius: 12px; border: 1.5px solid var(--srule); background: var(--spanel); text-align: center; }
+  .wbf-zn b { font-size: 14px; font-weight: 600; line-height: 1.2; text-wrap: balance; }
+  .wbf-zn span { font: 500 14px/1.2 "IBM Plex Mono", ui-monospace, monospace; color: var(--smut); }
+  .wbf-zn.ext { border-style: dotted; }
+  .wbf[data-arch="interim"] .wbf-zn.noq { border-style: dashed; background: transparent; }
+  @media (max-width: 760px) { .wbf-zrow { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .wbf-map { position: fixed; inset: 0; z-index: 60; display: grid; grid-template-rows: auto minmax(0, 1fr); gap: 10px; padding: 14px; background: rgba(8, 11, 16, .97); }
+  .wbf-map[hidden] { display: none; }
+  .wbf-map [data-mz] { min-width: 48px; }
+  .wbf-mapbar { display: flex; flex-wrap: wrap; gap: 8px 16px; justify-content: space-between; align-items: center; }
+  .wbf-mapbox { overflow: auto; border-radius: 12px; border: 1px solid var(--srule); overscroll-behavior: contain; }
+  .wbf-mapbox img { display: block; width: calc(100% * var(--z, 1)); min-width: 1100px; height: auto; transition: width .3s; }
+  @media (prefers-reduced-motion: reduce) { .wbf-mapbox img { transition: none; } }
+  .wbf-belts .xl { stroke: var(--flow); stroke-width: 2; stroke-dasharray: 2 4; fill: none; }
+  .wbf-pipe { display: grid; gap: 8px; padding: 12px 14px; border-radius: 14px; border: 1px solid var(--srule); }
+  .wbf-pipe ol { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 6px; counter-reset: pp; }
+  .wbf-pipe li { display: grid; gap: 6px; align-content: start; padding: 6px; border-top: 2px solid var(--flow); font-size: 14px; }
+  .wbf-pipe li b { font-weight: 600; }
+  .wbf-fold > summary { list-style: none; font-size: 16px; font-weight: 600; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; min-height: 44px; pointer-events: none; }
+  .wbf-fold > summary::-webkit-details-marker { display: none; }
+  .wbf-fold.wbf-shut > summary { pointer-events: auto; cursor: pointer; }
+  .wbf-fold.wbf-shut > summary::after { content: "+"; color: var(--smut); }
+  .wbf-fold.wbf-shut[open] > summary::after { content: "-"; }
+  .wbf-ptile.true > span { display: none; }
+  .wbf-hhbar { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; font-size: 14px; color: var(--smut); }
+  .wbf-hhbar button[aria-pressed="true"] { border-color: var(--warn); color: var(--warn); }
+  .wbf.hh .hh[data-prob] { border-color: var(--warn) !important; box-shadow: inset 0 0 0 2px var(--warn); }
+  .wbf-obj { margin: 0; display: grid; gap: 10px; }
+  .wbf-obj dt { font-size: 15px; font-weight: 600; } .wbf-obj dd { margin: 0; font-size: 15px; color: var(--smut); }
+  .wbf-lens { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; }
+  .wbf-lens > span { display: inline-flex; gap: 4px; align-items: center; font-size: 14px; }
+  .wbf-lens > span i { font-style: normal; color: var(--smut); margin-right: 2px; }
+  .wbf-lens b { width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid var(--smut); }
+  .wbf-lens b.on { background: var(--ctl); border-color: var(--ctl); }
+  .wbf-lens .wbf-tier { padding: 3px 8px; border-radius: 6px; border: 1.5px solid var(--sink); font-weight: 600; }
+  .wbf-capn { font-size: 15px; line-height: 1.45; } .wbf-capn[hidden] { display: none; }
+  @media (max-width: 1099px) { .wbf-pipe ol { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+  @media (max-width: 760px) {
+    .wbf-pipe ol { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .wbf-fold.wbf-bfold > summary { display: flex; }
+    .wbf-fold > summary { pointer-events: auto; cursor: pointer; min-height: 44px; }
+    .wbf-fold > summary::after { content: "+"; color: var(--smut); }
+    .wbf-fold[open] > summary::after { content: "-"; }
+  }
+  @media (prefers-reduced-motion: reduce) { .wbf * { transition: none !important; } }
+  @media print {
+    .wbf-walk, .wbf-ctl, .wbf-card, .wbf-dots, .wbf-tl { display: none !important; }
+    .wbf-catch, #wbf-wall, #wbf-costs { break-before: page; }
+  }
+
+  /* Hero 3D (round 10j). The canvas is masked on the left so the title and summary stay on a clear ground. */
+  .wbf-fxc { display: none; position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+  .wbf-page .wb-head.wbf-hero3d { position: relative; isolation: isolate; }
+  .wb-head.wbf-hero3d > .wbf-fxc { display: block; z-index: -1; opacity: .55; --m: linear-gradient(90deg, transparent var(--clear, 60%), #000 calc(var(--clear, 60%) + 140px)); -webkit-mask-image: var(--m); mask-image: var(--m); }
+  /* Round 10k: at 1024 and wider the booted header gains a 3D band under the text. The band exists only once
+     3D has booted (.is-3d), so the fallback header has no empty gap. The mask keeps only the text block clear. */
+  @media (min-width: 1024px) {
+    .wb-head.wbf-hero3d.is-3d { padding-bottom: clamp(220px, 28vh, 300px); }
+    .wb-head.wbf-hero3d.is-3d > .wbf-fxc { opacity: .7; --b: linear-gradient(180deg, transparent var(--textb, 70%), #000 calc(var(--textb, 70%) + 48px)); -webkit-mask-image: var(--m), var(--b); mask-image: var(--m), var(--b); }
+  }
+  .wb-head.wbf-hero3d .note-panel { backdrop-filter: blur(10px); }
+  @media print { .wbf-fxc { display: none !important; } }
+  /* Round 15, the five-screen story in the GIF v3 style. Final state is the default, motion only adds an entry. */
+  .wbf-scr { --g: 78, 218, 181; position: relative; overflow: hidden; gap: 14px; padding: clamp(20px, 2.4vw, 36px) clamp(16px, 4vw, 56px); border-radius: 18px; border: 1px solid var(--srule);
+    background: radial-gradient(ellipse 75% 60% at 50% 40%, rgba(var(--g), .2) 0%, rgba(var(--g), .06) 45%, rgba(13, 17, 24, 0) 75%), #0d1118; }
+  .wbf-scr.g-coral { --g: 255, 138, 122; } .wbf-scr.g-amber { --g: 244, 203, 115; } .wbf-scr.g-teal { --g: 78, 218, 181; } .wbf-scr.g-slate { --g: 134, 171, 221; }
+  .wbf-scr.g-slate { background: radial-gradient(ellipse 75% 60% at 50% 40%, rgba(var(--g), .1) 0%, rgba(13, 17, 24, 0) 70%), #0d1118; }
+  .wbf-kick { font: 600 15px/1.2 "IBM Plex Mono", ui-monospace, monospace; letter-spacing: .14em; text-transform: uppercase; color: var(--smut); }
+  .wbf .wbf-big { margin: 0; font: 700 clamp(48px, 7vw, 110px)/.95 "Space Grotesk", sans-serif; letter-spacing: -.035em; text-wrap: balance; max-width: 20ch; }
+  @media (max-width: 559px) { .wbf .wbf-big { font-size: 34px; line-height: 1; } .wbf-scr { padding: 20px 14px; } .wbf { padding: 14px; } }
+  .wbf-big .cor, .wbf b.cor { color: var(--fail); } .wbf-big .amb { color: var(--warn); } .wbf-big .tea { color: var(--ctl); }
+  .wbf .mono { font-family: "IBM Plex Mono", ui-monospace, monospace; }
+  .wbf-our { display: inline-block; margin-right: 6px; font: 600 14px/1.2 "IBM Plex Mono", ui-monospace, monospace; text-transform: uppercase; letter-spacing: .06em; color: var(--warn); }
+  .wbf-ourl { font-size: 17px; line-height: 1.4; color: var(--smut); }
+  .wbf-case { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+  .wbf-case li { display: grid; gap: 10px; align-content: start; padding: 18px; border-radius: 16px; background: rgba(18, 26, 38, .8); border: 1px solid var(--srule); }
+  .wbf-case p { font-size: 17px; line-height: 1.4; }
+  .wbf .wbf-ct { font: 600 15px/1.2 "IBM Plex Mono", monospace; text-transform: uppercase; letter-spacing: .08em; color: var(--smut); }
+  .wbf .wbf-cn { font: 700 clamp(40px, 5vw, 64px)/1 "Space Grotesk", sans-serif; color: var(--fail); display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .wbf-bign { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+  .wbf-bign > div { display: grid; gap: 8px; align-content: start; }
+  .wbf-bn { font: 700 clamp(64px, 8vw, 120px)/1 "Space Grotesk", sans-serif; letter-spacing: -.04em; color: var(--warn); }
+  .wbf-bl { font-size: 19px; font-weight: 600; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .wbf-bs { font-size: 16px; line-height: 1.4; color: var(--smut); max-width: 34ch; }
+  .wbf-frs { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+  .wbf-fr { position: relative; border-radius: 14px; background: rgba(18, 26, 38, .85); border: 1px solid var(--srule); padding: 10px 14px; display: grid; gap: 0; }
+  .wbf-frd summary { position: absolute; left: 92px; bottom: 6px; } .wbf-frd[open] { padding-top: 8px; } .wbf-frd[open] summary { position: static; }
+  @media (max-width: 559px) { .wbf-frd summary { position: static; } .wbf-frc.sm { grid-column: auto; } .wbf-frm { grid-template-columns: 44px minmax(0, 1fr) minmax(0, 1fr); } .wbf-fr .wbf-frc.fix { grid-column: 2 / -1; } .wbf-fr .wbf-frc.catches, .wbf-fr .wbf-frc.first { grid-column: 1 / -1; } }
+  .wbf-frm { display: grid; grid-template-columns: 64px minmax(140px, .8fr) minmax(0, 3.2fr) minmax(80px, .45fr) minmax(120px, .65fr) minmax(120px, .7fr); gap: 14px; align-items: start; }
+  .wbf-frc { display: grid; gap: 4px; align-content: start; min-width: 0; font-size: 15px; }
+  @media (min-width: 560px) { .wbf-frc.fix { padding-bottom: 40px; } }
+  .wbf-frc.fix b { font-size: 19px; } .wbf-frc.fix span { color: var(--smut); }
+  .wbf-frc .wb-ev { justify-self: start; }
+  .wbf-frl { font: 600 14px/1.2 "IBM Plex Mono", monospace; color: var(--smut); text-transform: uppercase; letter-spacing: .05em; }
+  .wbf-frc.catches .wbf-cchips { display: flex; flex-wrap: wrap; gap: 6px; } .wbf-frc .wbf-chip { white-space: nowrap; }
+  .wbf-frd summary { cursor: pointer; font-weight: 600; color: var(--ctl); min-height: 44px; display: flex; align-items: center; }
+  .wbf-frd dl { margin: 6px 0 10px; display: grid; gap: 8px; font-size: 15px; } .wbf-frd dt { font-weight: 600; color: var(--smut); } .wbf-frd dd { margin: 0; line-height: 1.4; }
+  .wbf-tot { display: grid; gap: 8px; padding: 16px; border-radius: 14px; border: 1.5px solid rgba(78, 218, 181, .5); font-size: 18px; }
+  .wbf-tot p { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; }
+  .wbf-stack { display: flex; height: 64px; border-radius: 32px; overflow: hidden; border: 2px solid #2a3648; }
+  .wbf-stack .k, .wbf-skey .k { display: block; } .wbf-stack .k.m, .wbf-skey .k.m { background: var(--ctl); } .wbf-stack .k.v, .wbf-skey .k.v { background: var(--warn); } .wbf-stack .k.n, .wbf-skey .k.n { background: #3a4658; }
+  .wbf-skey { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px 22px; font-size: 17px; align-items: center; }
+  .wbf-skey li { display: flex; gap: 8px; align-items: center; } .wbf-skey .k { width: 16px; height: 16px; border-radius: 4px; }
+  .wbf-gates { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+  .wbf-gate { border-radius: 16px; padding: 16px; border: 1.5px solid rgba(78, 218, 181, .55); background: rgba(78, 218, 181, .08); display: grid; gap: 10px; align-content: start; }
+  .wbf-gt { font: 700 26px/1 "Space Grotesk", sans-serif; color: var(--ctl); }
+  .wbf-gate ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+  .wbf-gate ul li { display: flex; gap: 8px; align-items: flex-start; font-size: 15px; line-height: 1.35; } .wbf-gate li .ic { flex: none; }
+  .wbf-gate ul b { display: block; font-size: 14px; color: var(--smut); }
+  .wbf-stop { font-size: 15px; font-weight: 600; color: var(--fail); border-top: 1px solid var(--srule); padding-top: 8px; }
+  .wbf-refh { display: grid; gap: 4px; border-top: 1px solid var(--srule); padding-top: 18px; } .wbf-refh p { color: var(--smut); font-size: 16px; }
+  .wbf-breaks { display: grid; gap: 16px; }
+  .wbf-bgrp { display: grid; gap: 8px; }
+  .wbf-bgl { font: 600 15px/1.2 "IBM Plex Mono", ui-monospace, monospace; text-transform: uppercase; letter-spacing: .1em; color: var(--smut); }
+  .wbf-bgl b { color: var(--sink); }
+  .wbf-bgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(180px, 100%), 1fr)); gap: 8px; }
+  .wbf .wbf-bt { display: grid; grid-template-columns: 44px minmax(0, 1fr); grid-template-rows: auto auto; gap: 2px 10px; align-items: center; min-height: 64px; padding: 8px 10px; border-radius: 12px; border: 1.5px solid var(--srule); border-left: 5px solid var(--smut); background: rgba(18, 26, 38, .85); text-align: left; }
+  .wbf-bt .ic { grid-row: span 2; }
+  .wbf-bt b { font-size: 15px; line-height: 1.2; }
+  .wbf-bt.high { border-left-color: var(--fail); } .wbf-bt.medium { border-left-color: var(--warn); }
+  .wbf-bt:hover, .wbf-bt:focus-visible { border-color: var(--sink); }
+  .wbf-btf { display: flex; flex-wrap: wrap; gap: 4px 6px; align-items: center; font: 500 14px/1.2 "IBM Plex Mono", ui-monospace, monospace; color: var(--ctl); }
+  .wbf-btf.none { color: var(--smut); }
+  .wbf .wbf-sh { font: 600 14px/1.1 "IBM Plex Mono", ui-monospace, monospace; font-style: normal; padding: 1px 6px; margin-left: 6px; border-radius: 999px; border: 1px dashed var(--warn); color: var(--warn); }
+  .wbf-sevkey { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px 20px; align-items: center; font-size: 15px; color: var(--smut); }
+  .wbf-sevkey .wbf-none { color: var(--sink); font-size: 17px; margin-right: 8px; } .wbf-sevkey li { display: flex; gap: 8px; align-items: center; } .wbf-sevkey i:not(.wb-ev) { width: 14px; height: 14px; border-radius: 3px; background: var(--smut); } .wbf-sevkey i.high { background: var(--fail); } .wbf-sevkey i.medium { background: var(--warn); }
+  .wbf-tolink { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; font-size: 15px; color: var(--fail); text-decoration: underline; text-underline-offset: 3px; }
+  .wbf-ask { font-size: 20px; line-height: 1.35; font-weight: 600; display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; }
+  .wbf-basis { font-size: 15px !important; color: var(--smut); }
+  .wbf-hook { gap: 12px; }
+  .wbf-chlink { display: inline-flex; gap: 8px; align-items: center; min-height: 44px; color: var(--sink); text-decoration: underline; text-underline-offset: 3px; }
+  .wbf-chtop { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; } .wbf-view > .wbf-refh { padding-top: 10px; border-top: 0; }
+  .wbf-dots3 { list-style: none; margin: 0; padding: 0; display: flex; gap: 6px; } .wbf-dots3 li { width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid var(--smut); } .wbf-dots3 li.on { background: rgb(var(--g)); border-color: rgb(var(--g)); }
+  .wbf-chap { gap: 12px; } .wbf-chap .wbf-big { font-size: clamp(34px, 5vw, 72px); }
+  .wbf-chgrid { display: grid; grid-template-columns: minmax(0, 1.9fr) minmax(280px, 1fr); gap: 16px; align-items: start; }
+  .wbf-chside { display: grid; gap: 10px; }
+  .wbf-chcase { display: flex; gap: 12px; align-items: flex-start; padding: 14px; border-radius: 14px; background: rgba(18, 26, 38, .85); border: 1px solid var(--srule); }
+  .wbf-chcase .ic { flex: none; } .wbf-chcase > div { display: grid; gap: 6px; } .wbf-chcase p { font-size: 15px; line-height: 1.4; }
+  .wbf-chcase .wbf-cn { font-size: 40px; }
+  .wbf-ind { display: grid; gap: 8px; padding: 12px 14px; border-radius: 14px; border: 1px solid var(--srule); }
+  .wbf-ind ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+  .wbf-ind li { display: grid; gap: 2px; } .wbf-ind li b { font-size: 16px; } .wbf-ind li span { font-size: 15px; line-height: 1.35; color: var(--smut); }
+  .wbf-gaps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr)); gap: 12px; }
+  .wbf-gaps li { display: flex; gap: 10px; align-items: flex-start; padding: 14px; border-radius: 14px; background: rgba(18, 26, 38, .85); border: 1px solid var(--srule); }
+  .wbf-gaps li .ic { flex: none; } .wbf-gaps li > div { display: grid; gap: 4px; } .wbf-gaps b { font-size: 17px; } .wbf-gaps p { font-size: 15px; line-height: 1.4; }
+  .wbf-also summary { min-height: 44px; display: inline-flex; align-items: center; cursor: pointer; font: 600 14px/1.2 "IBM Plex Mono", monospace; color: var(--warn); }
+  .wbf-also[open] summary { margin-bottom: 6px; }
+  .wbf .wbf-switch[hidden] { display: none; }
+  .wbf-alsol { font-size: 15px; color: var(--smut); } .wbf-alsol .wbf-sh { margin-left: 0; display: inline; font-size: 14px; } .wbf-alsol { text-wrap: balance; } .wbf .wbf-basis { text-wrap: balance; }
+  .wbf-gch { font: 600 14px/1.2 "IBM Plex Mono", monospace; color: var(--smut); }
+  .wbf-stopby { display: flex; gap: 10px; align-items: center; padding: 10px 14px; border-radius: 14px; border: 1.5px solid rgba(78, 218, 181, .55); background: rgba(78, 218, 181, .08); }
+  .wbf-stopby > span { display: grid; gap: 2px; } .wbf-stopby b { font-size: 17px; color: var(--ctl); }
+  @media (max-width: 899px) { .wbf-chgrid { grid-template-columns: 1fr; } }
+  .wbf-refh[hidden] { display: none !important; }
+  @media (max-width: 1099px) { .wbf-frm { grid-template-columns: 64px minmax(0, 1fr) minmax(0, 1fr); } .wbf-frc.catches { grid-column: 2 / -1; } .wbf-fr .wbf-frc.fix, .wbf-fr .wbf-frc.first { grid-column: 2 / -1; } }
+  /* short rows (two chips or fewer): spread cells across the row at mid widths so the right side is not empty */
+  @media (min-width: 560px) and (max-width: 1099px) { .wbf-fr:not(:has(.wbf-chip:nth-child(3))) .wbf-frm { grid-template-columns: 64px minmax(0, 1.1fr) minmax(0, 1fr) minmax(0, .9fr); } .wbf-fr:not(:has(.wbf-chip:nth-child(3))) .wbf-frm > .ic { grid-column: 1; grid-row: 1; } .wbf-fr:not(:has(.wbf-chip:nth-child(3))) .wbf-frc.sm { grid-column: 1; grid-row: 2; } .wbf-fr:not(:has(.wbf-chip:nth-child(3))) .wbf-frc.fix { grid-column: 2; grid-row: 1 / span 2; } .wbf-fr:not(:has(.wbf-chip:nth-child(3))) .wbf-frc.catches { grid-column: 3; grid-row: 1 / span 2; } .wbf-fr:not(:has(.wbf-chip:nth-child(3))) .wbf-frc.first { grid-column: 4; grid-row: 1 / span 2; } }
+  @media (max-width: 899px) { .wbf-case, .wbf-bign, .wbf-gates { grid-template-columns: 1fr; } }
+  /* Motion: the hidden start applies only once JS has armed it and motion is allowed. */
+  @media (prefers-reduced-motion: no-preference) {
+    .wbf.anim .wbf-scr .rv { opacity: 0; transform: translateY(40px); transition: opacity .7s cubic-bezier(.22, 1, .36, 1), transform .8s cubic-bezier(.22, 1, .36, 1); transition-delay: calc(var(--i, 0) * 120ms); }
+    .wbf.anim .wbf-scr.in .rv { opacity: 1; transform: none; }
+    .wbf.anim .wbf-gate { opacity: .35; transition: opacity .6s ease, box-shadow .6s ease; transition-delay: calc(300ms + var(--d) * 450ms); }
+    .wbf.anim .wbf-scr.in .wbf-gate { opacity: 1; box-shadow: 0 0 28px rgba(78, 218, 181, .25); }
+    .wbf.anim .wbf-stack .k { transform: scaleX(0); transform-origin: left; transition: transform 1s cubic-bezier(.22, 1, .36, 1); }
+    .wbf.anim .wbf-scr.in .wbf-stack .k { transform: none; }
+  }
+</style>
+
+<script>
+  import { can3d, startNear, makeWorld, runLoop, camEase, layerScene, project } from './what-breaks/scene3d';
+  const root = document.getElementById('wbf') as HTMLElement | null;
+  if (root) {
+    const D = JSON.parse((document.getElementById('wbf-data') as HTMLElement).textContent || '{}');
+    const F = JSON.parse((document.getElementById('wbf-floor-data') as HTMLElement).textContent || '{}');
+    const $ = (s: string, p: ParentNode = root) => p.querySelector(s) as HTMLElement;
+    const $$ = (s: string, p: ParentNode = root) => Array.from(p.querySelectorAll(s)) as HTMLElement[];
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // ---- story motion: reveal on scroll, count numbers up. Without JS or with reduced motion the final state shows.
+    if (!reduce && 'IntersectionObserver' in window) {
+      const scr = $$('.wbf-scr');
+      const count = (el: HTMLElement) => { const to = +el.dataset.to!, dec = +(el.dataset.dec || 0); const t0 = performance.now();
+        const f = (t: number) => { const k = Math.min(1, (t - t0) / 1200); const e = 1 - Math.pow(1 - k, 3); el.textContent = (to * e).toFixed(dec); if (k < 1) requestAnimationFrame(f); else el.textContent = to.toFixed(dec); }; requestAnimationFrame(f); };
+      const io = new IntersectionObserver((es) => es.forEach((e) => { if (!e.isIntersecting) return; const el = e.target as HTMLElement; el.classList.add('in'); $$('.wbf-cu', el).forEach(count); io.unobserve(el); }), { threshold: 0.15 });
+      scr.forEach((x) => { const r = x.getBoundingClientRect(); if (r.top < innerHeight && r.bottom > 0) x.classList.add('in'); else io.observe(x); });
+      root.classList.add('anim');
+      setTimeout(() => scr.forEach((x) => x.classList.add('in')), 6000);
+    }
+    const ev = (e?: string) => e ? `<i class="wb-ev ${e}">${e === 'verified' ? 'measured' : e}</i>` : '';
+    const hashGet = () => new URLSearchParams(location.hash.slice(1));
+    const hashSet = (o: Record<string, string | null>) => { const h = hashGet(); for (const [k, v] of Object.entries(o)) { if (v === null) h.delete(k); else h.set(k, v); } try { history.replaceState(null, '', h.toString() ? '#' + h.toString() : location.pathname + location.search); } catch {} };
+    const nodes = D.view?.nodes || []; const nodeById = (id: string) => nodes.find((n: any) => n.id === id);
+    const probs: any[] = D.probs;
+    const stEl = (id: string) => $(`.wbf-st[data-st="${id}"]`);
+    const stName = (id: string) => stEl(id)?.querySelector('b')?.textContent || id;
+    const blockOf = (id: string) => stEl(id)?.dataset.block || '';
+    const pName = (f: string) => probs.find((x) => x.id === f)?.name || f;
+    const pSev = (f: string) => probs.find((x) => x.id === f)?.sev || '';
+    const chip = (f: string) => `<button type="button" class="wbf-chip ${f[0]}" data-prob="${f}" aria-label="${pName(f)}, ${pSev(f)} severity">${pName(f)}</button>`;
+    const longChip = chip;
+    const chips = (ids: string[]) => `<div class="wbf-cchips">${ids.map(chip).join('')}</div>`;
+
+    // ---- the belt: flows from the data, drawn between the boxes as they sit now
+    const floor = $('#wbf-floor'); const svg = $('.wbf-belts', floor) as unknown as SVGSVGElement; const linesG = $('#wbf-lines', floor);
+    const box = (id: string) => { const b = stEl(id); const f = floor.getBoundingClientRect(), r = b.getBoundingClientRect(); return { x: r.left - f.left + r.width / 2, y: r.top - f.top + r.height / 2, w: r.width / 2, h: r.height / 2 }; };
+    const edge = (a: any, b: any) => { const dx = b.x - a.x, dy = b.y - a.y; const t = Math.min(dx ? a.w / Math.abs(dx) : 1e9, dy ? a.h / Math.abs(dy) : 1e9); return { x: a.x + dx * t, y: a.y + dy * t }; };
+    const snakeMode = () => matchMedia('(max-width: 1099px)').matches || root!.classList.contains('walking');
+    // Orthogonal routing through the gutters, so links never cross a station.
+    const gaps = () => { const cs = getComputedStyle(floor); return { rg: parseFloat(cs.rowGap) || 30, cg: parseFloat(cs.columnGap) || 12 }; };
+    function routePts(from: string, to: string) {
+      const a = box(from), b = box(to); const { rg, cg } = gaps();
+      const sameRow = Math.abs(a.y - b.y) < 4, sameCol = Math.abs(a.x - b.x) < 4;
+      if ((sameRow && Math.abs(a.x - b.x) < a.w + b.w + cg * 1.5) || (sameCol && Math.abs(a.y - b.y) < a.h + b.h + rg * 1.5)) return [edge(a, b), edge(b, a)];
+      const down = sameRow || b.y > a.y;
+      const ya = down ? a.y + a.h + rg / 2 : a.y - a.h - rg / 2;
+      const yb = sameRow ? ya : down ? b.y - b.h - rg / 2 : b.y + b.h + rg / 2;
+      const s = { x: a.x, y: down ? a.y + a.h : a.y - a.h }; const e = { x: b.x, y: sameRow ? b.y + b.h : down ? b.y - b.h : b.y + b.h };
+      if (Math.abs(ya - yb) < 2) return [s, { x: a.x, y: ya }, { x: b.x, y: ya }, e];
+      const gx = b.x + (a.x < b.x ? -(b.w + cg / 2) : b.w + cg / 2);
+      return [s, { x: a.x, y: ya }, { x: gx, y: ya }, { x: gx, y: yb }, { x: b.x, y: yb }, e];
+    }
+    const dOf = (pts: { x: number; y: number }[]) => 'M' + pts.map((p) => `${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(' L');
+    let walkPath: string[] = []; let walkNext = ''; let dotRun = false;
+    function layout() {
+      const f = floor.getBoundingClientRect(); svg.setAttribute('viewBox', `0 0 ${f.width} ${f.height}`);
+      const snake = snakeMode(); const walking = walkPath.length > 0;
+      const lit = new Set(walkPath.slice(1).map((s, i) => walkPath[i] + '>' + s));
+      let html = F.draw.filter((l: any) => !lit.has(l.from + '>' + l.to) && (!snake || Math.abs(F.phone.indexOf(l.from) - F.phone.indexOf(l.to)) === 1)).map((l: any) => {
+        const lp = l.kind === 'offline';
+        return `<path class="${lp ? 'loop' : 'req'}${walking ? ' faint' : ''}" d="${dOf(routePts(l.from, l.to))}" marker-end="url(#${lp ? 'wbf-al' : 'wbf-ar'})"/>`;
+      }).join('') + (snake ? '' : F.xlink.map((l: any) => `<path class="xl${walking ? ' faint' : ''}" d="${dOf(routePts(l.from, l.to))}" marker-end="url(#wbf-ar)"/>`).join(''));
+      if (walking) {
+        const all: { x: number; y: number }[] = [];
+        walkPath.slice(1).forEach((s, i) => { const pts = routePts(walkPath[i], s); all.push(...pts); html += `<path class="lit" d="${dOf(pts)}" marker-end="url(#wbf-al)"/>`; });
+        if (walkNext) html += `<path class="next" d="${dOf(routePts(walkPath[walkPath.length - 1], walkNext))}" marker-end="url(#wbf-al)"/>`;
+        if (all.length) {
+          const end = all[all.length - 1];
+          html += dotRun && !reduce ? `<circle class="pdot" r="7"><animateMotion dur="${Math.min(2.4, 0.4 * (walkPath.length - 1)).toFixed(1)}s" repeatCount="1" fill="freeze" path="${dOf(all)}"/></circle>` : `<circle class="pdot" r="7" cx="${end.x.toFixed(1)}" cy="${end.y.toFixed(1)}"/>`;
+        }
+        dotRun = false;
+      }
+      linesG.innerHTML = html;
+    }
+
+    // ---- one slow dot per problem, only while stepping through, along drawn flows from Ask
+    const adj: Record<string, string[]> = {}; F.draw.forEach((l: any) => (adj[l.from] ??= []).push(l.to));
+    const route = (to: string) => { const prev: Record<string, string> = { ask: '' }; const q = ['ask']; while (q.length) { const s = q.shift()!; if (s === to) break; for (const n of adj[s] || []) if (!(n in prev)) { prev[n] = s; q.push(n); } } if (!(to in prev)) return []; const p: string[] = []; for (let s = to; s; s = prev[s]) p.unshift(s); return p; };
+    const dotsEl = $('#wbf-dots');
+
+    // ---- This week and Target: a timed flip, station by station in build order
+    const buildIdx = (b: string) => { const li = D.layers.findIndex((l: any) => l.blocks.includes(b)); return li < 0 ? 9 : D.buildOrder.indexOf(D.layers[li].name); };
+    let flipT: number[] = [];
+    function setArch(v: string, animate = true) {
+      const interim = v === 'interim'; root!.dataset.arch = interim ? 'interim' : 'target'; hashSet({ arch: interim ? 'interim' : null });
+      $$('.wbf-switch button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.arch === (interim ? 'interim' : 'target'))));
+      flipT.forEach(clearTimeout); flipT = [];
+      $$('.wbf-st').sort((a, b) => buildIdx(a.dataset.block!) - buildIdx(b.dataset.block!)).forEach((s, i) => { const go = () => s.classList.toggle('im', interim); if (!animate || reduce) go(); else flipT.push(window.setTimeout(go, 140 * i)); });
+    }
+    $('.wbf-switch').addEventListener('click', (e) => { const b = (e.target as HTMLElement).closest('button[data-arch]') as HTMLElement; if (b) setArch(b.dataset.arch!); });
+
+    // ---- one card for a station, a block or a problem
+    const card = $('#wbf-card'); let lastFocus: HTMLElement | null = null;
+    function blockBody(id: string, here: string[]) {
+      const b = D.blocks[id]; const cr = D.costRows.find((x: any) => x.id === id); const q = (b.quick || []).slice(0, 2);
+      const also = (b.fixes || []).filter((f: string) => !here.includes(f));
+      return `<h4>Flagged here: ${here.length}</h4>${here.length ? chips(here) : ''}<h4>Also covers: ${also.length}</h4>${also.length ? chips(also) : ''}`
+        + `<dl><div><dt>Owner</dt><dd>${b.owner}</dd></div><div><dt>Running cost, a month</dt><dd>${cr ? cr.cost.replace(' a month', '') + ' ' + ev(b.costev) : 'Priced at first funding gate ' + ev('design')}</dd></div></dl>`
+        + `<h4>Quick fix this week</h4>` + (q.length ? `<ul>${q.map((x: any) => `<li><b>${x.fix}</b> ${ev(x.ev)}<br>Does not cover: ${x.limit}</li>`).join('')}</ul>` : `<p>None stands in. It arrives with the block.</p>`);
+    }
+    function show(k1: string, title: string, body: string, focusEl?: HTMLElement) {
+      lastFocus = focusEl || null; $('#wbf-card-k').textContent = k1; $('#wbf-card-h').textContent = title; $('#wbf-card-b').innerHTML = body; card.hidden = false; requestAnimationFrame(layout);
+      if (sheet()) ($('#wbf-card-h') as HTMLElement).focus({ preventScroll: true });
+    }
+    const sheet = () => matchMedia('(max-width: 767.98px)').matches;
+    const near = () => { const r = card.getBoundingClientRect(); if (r.top > innerHeight || r.bottom < 0) card.scrollIntoView({ block: 'nearest', behavior: 'instant' as ScrollBehavior }); };
+    const mark = (on: (s: HTMLElement) => boolean) => $$('.wbf-st').forEach((s) => { const k = on(s); s.classList.toggle('sel', k); s.classList.toggle('dim', !k); });
+    function openStation(id: string, focusEl?: HTMLElement) {
+      const blk = blockOf(id); const n = nodeById(id); const here = F.flagged[id] || [];
+      mark((s) => s.dataset.st === id);
+      let body = n?.role ? `<p>${n.role}</p>` : '';
+      if (id === 'ask' && D.extra?.segments) body += `<h4>Who asks</h4>` + D.extra.segments.map((g: any) => `<div class="wbf-tags"><span>${g.name}</span>${g.top.map(chip).join('')}</div>`).join('');
+      const xl = F.xlink.filter((l: any) => l.from === id || l.to === id);
+      if (snakeMode() && xl.length) body += `<h4>Links not drawn</h4><ul>${xl.map((l: any) => `<li>${stName(l.from)} to ${stName(l.to)}. ${l.label}</li>`).join('')}</ul>`;
+      if (blk && D.blocks[blk]) body += blockBody(blk, here);
+      else body += `<h4>Flagged here: ${here.length}</h4><p>${n?.zone === 'vendor' ? 'Run by the vendor, outside your fence.' : 'Not a block of its own in the plan.'}</p>`;
+      show(blk ? `${blk} · station` : 'station', stName(id), body, focusEl); hashSet({ open: id });
+    }
+    function openBlock(id: string, focusEl?: HTMLElement) {
+      const b = D.blocks[id]; if (!b) return;
+      const here = [...new Set([...$$('.wbf-st').filter((s) => s.dataset.block === id).flatMap((s) => F.flagged[s.dataset.st!] || []), ...(F.flagged[id] || [])])];
+      mark((s) => s.dataset.block === id);
+      show(`${id} · ${D.layers[D.layers.findIndex((l: any) => l.blocks.includes(id))].name}`, b.name, `<p>${b.includes}</p>` + blockBody(id, here), focusEl); hashSet({ open: id });
+    }
+    function openProblem(id: string, focusEl?: HTMLElement) {
+      const p = probs.find((x) => x.id === id); if (!p) return; const at = F.catchAt[id]; const lab = D.labels[p.st];
+      mark((s) => s.dataset.st === at);
+      const offBelt = at && !F.order.includes(at);
+      const where = !at ? '' : offBelt ? `<p class="wbf-where">Fixed by the ${stName(at).toLowerCase()}, off the belt</p>` : `<p class="wbf-where">Flagged at <b>${stName(at)}</b></p>`;
+      let ext = '';
+      const sc = D.extra?.scorecard;
+      if (p.pre === 'S' && sc?.grades?.[id]) ext += `<h4>Seven assistants ${ev(sc.ev)}</h4><div class="wbf-grades">${sc.models.map((m: string, i: number) => `<span><b>${m}</b><i>${sc.key[sc.grades[id][i]]}</i>${sc.older?.[id]?.[i] ? '<i>older than 2026</i>' : ''}</span>`).join('')}</div>`;
+      const jr = (D.extra?.journey || []).find((j: any) => (j.ids || []).includes(id));
+      const tags = [jr ? `Stage: ${jr.name}` : '', ...(p.seg ? String(p.seg).split(', ').map((s: string) => s[0].toUpperCase() + s.slice(1)) : [])].filter(Boolean);
+      const tl = (D.extra?.timeline || []).filter((x: any) => x.ev === 'verified' && (x.ids || []).includes(id)).slice(0, 3);
+      if (tl.length) ext += `<h4>Recent events</h4><ul>${tl.map((x: any) => `<li><b>${x.date}</b> ${x.text}</li>`).join('')}</ul>`;
+      const lens = Array.isArray(p.l) ? `<div class="wbf-lens">${p.tier ? `<span class="wbf-tier">Tier ${p.tier}</span>` : ''}${(p.pre === 'S' ? F.slenses : F.lenses).map((n: string, i: number) => `<span><i>${n}</i>${'<b class="on"></b>'.repeat(p.l[i])}${'<b></b>'.repeat(3 - p.l[i])}</span>`).join('')}${p.pre === 'S' ? `<span><i>Score</i>${p.score} of ${p.max}${p.pub != null && p.pub !== p.score ? `, published ${p.pub}` : ''}</span>` : ''}${ev('design')}</div>` : `<div class="wbf-lens"><span><i>Score</i>${p.score} of ${p.max}</span>${ev('design')}</div>`;
+      show(`${p.pre === 'S' ? 'Web search' : 'Wider AI use'}`, p.name, where + lens + (tags.length ? `<div class="wbf-tags">${tags.map((t) => `<span>${t}</span>`).join('')}</div>` : '') + `<dl><div><dt>The number</dt><dd>${p.num} ${p.numl} ${ev(p.nev)}</dd></div><div><dt>${lab.name}</dt><dd>${lab.s}</dd></div><div><dt>Owner</dt><dd>${p.own}. Maturity ${p.mat}.</dd></div></dl>`
+        + (p.quick ? `<h4>Quick fix this week</h4><ul><li><b>${p.quick.fix}</b> ${ev(p.quick.ev)}<br>Does not cover: ${p.quick.limit}</li></ul>` : '') + `<h4>Fix properly</h4><p>${p.fix}</p><p><b>First step.</b> ${p.first}</p>` + ext, focusEl);
+      hashSet({ open: id });
+    }
+    const openAny = (id: string, el?: HTMLElement) => /^[SF]\d/.test(id) ? openProblem(id, el) : stEl(id) && !stEl(id).classList.contains('off') ? openStation(id, el) : openBlock(id, el);
+    function closeCard() { card.hidden = true; $$('.wbf-st').forEach((s) => s.classList.remove('sel', 'dim')); hashSet({ open: null }); requestAnimationFrame(layout); lastFocus?.focus({ preventScroll: true }); }
+
+    // ---- lanes: the playhead walks the five stages
+    const laneBtns = $$('.wbf-lcells button'); const laneHeads = $$('.wbf-lhead b'); let sweep = 0;
+    const setStage = (ci: number) => { sweep = ci; laneBtns.forEach((b) => b.classList.toggle('on', reduce || +b.dataset.col! === ci)); laneHeads.forEach((h) => h.classList.toggle('on', reduce || +h.dataset.col! === ci)); };
+    setStage(0); if (!reduce) setInterval(() => setStage((sweep + 1) % 5), 2400);
+    if (matchMedia('(max-width: 760px)').matches) $$('.wbf-cdet').forEach((d) => d.removeAttribute('open'));
+    if (matchMedia('(max-width: 760px)').matches) $$('.wbf-fold').forEach((d) => d.removeAttribute('open'));
+    if (matchMedia('(max-width: 760px)').matches) $$('.wbf-lrow').forEach((d) => d.removeAttribute('open'));
+    const cellCard = $('#wbf-cellcard');
+    function openCell(id: string) {
+      const [r, c] = id.split('-').map(Number); const cell = D.lanes.cells.find((x: any) => x.r === r && x.c === c); if (!cell) return;
+      $('#wbf-cell-k').textContent = `${D.lanes.rows[r]} · ${D.lanes.cols[c]} · ${cell.cad}`; $('#wbf-cell-h').textContent = cell.task;
+      $('#wbf-cell-b').innerHTML = `<p>${cell.detail}</p><dl><div><dt>Standard</dt><dd>${cell.std || 'None named'}</dd></div><div><dt>Evidence</dt><dd>${ev(cell.ev || 'design')}</dd></div></dl>`;
+      cellCard.hidden = false; cellCard.classList.add('cell'); hashSet({ cell: id }); if (sheet()) ($('#wbf-cell-h') as HTMLElement).focus({ preventScroll: true });
+    }
+
+    // ---- board wall: owners and dated events
+    const ownP = $('#wbf-ownp');
+    const openOwner = (id: string) => { const o = F.owners.find((x: any) => x.id === id); if (!o) return; $$('[data-own]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.own === id))); ownP.innerHTML = `<b>${o.name}. First step.</b> ${o.first} ${ev(o.ev)}`; ownP.hidden = false; };
+    let tk = -1; const tlP = $('#wbf-tlp');
+    const showTick = (k: number) => { tk = Math.max(0, Math.min(F.tl.length - 1, k)); const t = F.tl[tk]; $$('.wbf-tick').forEach((x) => x.classList.toggle('on', +x.dataset.k! === tk)); tlP.innerHTML = `<b>${t.date}</b> ${t.text} <span class="wbf-k">${tk + 1} of ${F.tl.length}</span> ${ev(t.ev)}`; tlP.hidden = false; };
+
+    // ---- audience view: board (short) or architects (full)
+    const archOnly = $$('[data-aud="arch"]');
+    let aud = 'architects';
+    function setAud(v: string, write = true) {
+      aud = 'architects'; void v;
+      archOnly.forEach((s) => { s.hidden = aud === 'board'; }); root!.dataset.aud = aud;
+      $$('[data-aud-set]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.audSet === aud)));
+      if (write && hashGet().has('view')) { try { hashSet({ view: null }); } catch {} }
+      requestAnimationFrame(() => { try { layout(); } catch {} });
+    }
+    const inArch = (el: Element | null) => !!el && !!el.closest('[data-aud="arch"]');
+    root.addEventListener('click', (e) => {
+      const t = e.target as HTMLElement;
+      const av = t.closest('[data-aud-set]') as HTMLElement | null; if (av) { setAud(av.dataset.audSet!); return; }
+      if (aud === 'board' && t.closest('[data-prob]') && inArch(card)) { setAud('architects'); try { layout(); } catch {} }
+      if (t.closest('[data-close]')) { if (t.closest('#wbf-cellcard')) { cellCard.hidden = true; hashSet({ cell: null }); } else closeCard(); return; }
+      const pb = t.closest('[data-prob]') as HTMLElement | null; if (pb) { openProblem(pb.dataset.prob!, pb); near(); return; }
+      const sb = t.closest('[data-st]') as HTMLElement | null; if (sb) { openAny(sb.dataset.st!, sb); near(); return; }
+      const ob = t.closest('[data-open]') as HTMLElement | null; if (ob) { openBlock(ob.dataset.open!, ob); near(); return; }
+      const cb = t.closest('[data-cell]') as HTMLElement | null; if (cb) { openCell(cb.dataset.cell!); return; }
+      const ow = t.closest('[data-own]') as HTMLElement | null; if (ow) { openOwner(ow.dataset.own!); return; }
+      const zb = t.closest('[data-zn]') as HTMLElement | null; if (zb) { const n = nodeById(zb.dataset.zn!); if (n) { show(n.external ? 'outside your boundary' : 'part', n.name, `<p>${n.role || ''}</p>`, zb); hashSet({ open: n.id }); near(); } return; }
+      const hb = t.closest('[data-hh]') as HTMLElement | null; if (hb) { const on = !root!.classList.contains('hh'); root!.classList.toggle('hh', on); hb.setAttribute('aria-pressed', String(on)); return; }
+      const tb = t.closest('[data-tl]') as HTMLElement | null; if (tb) { showTick(tk + +tb.dataset.tl!); return; }
+    });
+
+    // ---- step through: one finding per stop, a drag scrubber, slow dots only here
+    const STOPS = F.stops; const STEP_MS = 7000; let w = 0; let wPaused = true; let timer = 0;
+    const walk = $('#wbf-walk'); const range = $('#wbf-range') as HTMLInputElement;
+    function step(n: number, play = !wPaused) {
+      w = n; const b = STOPS[n - 1]; $('#wbf-cap').textContent = b.cap; $('#wbf-capchips').innerHTML = b.ids.map(longChip).join(''); root!.classList.add('walking'); const cn = $('#wbf-capn'); cn.hidden = !b.num; cn.innerHTML = b.num ? `<b>${b.num}</b> ${b.numl} ${ev(b.ev)}<br>${b.fix}` : ''; $('#wbf-step').textContent = `${n} / ${STOPS.length}`; walk.hidden = false; range.value = String(n); range.setAttribute('aria-valuetext', `Stop ${n} of ${STOPS.length}, ${b.st ? stName(b.st) : 'summary'}`);
+      walkPath = b.st ? (route(b.st).length ? route(b.st) : [b.st]) : []; walkNext = b.st && walkPath.length > 1 ? (adj[b.st] || [])[0] || '' : ''; dotRun = true;
+      $$('.wbf-st').forEach((s) => { const id = s.dataset.st!; s.classList.toggle('sel', id === b.st); s.classList.toggle('onpath', id !== b.st && walkPath.includes(id)); s.classList.toggle('dim', !!b.st && !walkPath.includes(id) && id !== walkNext); });
+      card.hidden = true; hashSet({ play: String(n), open: null }); requestAnimationFrame(layout);
+      clearTimeout(timer); if (play) timer = window.setTimeout(() => { if (w < STOPS.length) step(w + 1, true); else setPaused(true); }, STEP_MS);
+    }
+    function setPaused(p: boolean) { wPaused = p; ($('[data-walk="toggle"]') as HTMLElement).textContent = p ? 'Play' : 'Pause'; clearTimeout(timer); if (!p && w) step(w, true); }
+    function stopWalk() { if (!w) return; w = 0; wPaused = true; clearTimeout(timer); dotsEl.innerHTML = ''; walk.hidden = true; walkPath = []; walkNext = ''; root!.classList.remove('walking'); $$('.wbf-st').forEach((s) => s.classList.remove('sel', 'dim', 'onpath')); hashSet({ play: null }); requestAnimationFrame(layout); }
+    ($('[data-walk="play"]') as HTMLElement).addEventListener('click', () => { closeCard(); wPaused = reduce; step(1, !reduce); ($('[data-walk="toggle"]') as HTMLElement).textContent = reduce ? 'Play' : 'Pause'; });
+    ($('[data-walk="toggle"]') as HTMLElement).addEventListener('click', () => setPaused(!wPaused));
+    ($('[data-walk="stop"]') as HTMLElement).addEventListener('click', stopWalk);
+    ($('[data-walk="next"]') as HTMLElement).addEventListener('click', () => { if (w < STOPS.length) step(w + 1); });
+    ($('[data-walk="prev"]') as HTMLElement).addEventListener('click', () => { if (w > 1) step(w - 1); });
+    range.addEventListener('input', () => { setPaused(true); step(+range.value, false); });
+    document.addEventListener('keydown', (e) => {
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (e.key === 'Escape') { if (w) stopWalk(); else if (!card.hidden) closeCard(); else if (!cellCard.hidden) cellCard.hidden = true; return; }
+      if (!w || tag === 'INPUT') return;
+      if (e.key === ' ' && tag !== 'BUTTON') { e.preventDefault(); setPaused(!wPaused); }
+      if (e.key === 'ArrowRight' && w < STOPS.length) step(w + 1); if (e.key === 'ArrowLeft' && w > 1) step(w - 1);
+    });
+
+    // ---- full map overlay, after the payouts desk Full map: switch, zoom, Escape, hash
+    const mapEl = $('#wbf-map'); const mapImg = $('#wbf-mapimg') as HTMLImageElement; const fmBtn = $('.wbf-fmbtn'); let mz = 1; let mapLast: HTMLElement | null = null;
+    const MAPS: Record<string, string> = { target: '/images/what-breaks-in-ai/arch-target.svg', week: '/images/what-breaks-in-ai/arch-week.svg' };
+    const setMap = (k: string) => { mapImg.src = MAPS[k]; $$('[data-map]', mapEl).forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.map === k))); hashSet({ map: k }); };
+    const zoomMap = () => mapImg.style.setProperty('--z', String(mz));
+    function openMap(k: string) { mapLast = document.activeElement as HTMLElement; mapEl.hidden = false; fmBtn.setAttribute('aria-expanded', 'true'); mz = 1; zoomMap(); setMap(k); ($('[data-mapclose]', mapEl) as HTMLElement).focus({ preventScroll: true }); }
+    function closeMap() { if (mapEl.hidden) return; mapEl.hidden = true; fmBtn.setAttribute('aria-expanded', 'false'); hashSet({ map: null }); mapLast?.focus({ preventScroll: true }); }
+    fmBtn.addEventListener('click', () => openMap(root!.dataset.arch === 'interim' ? 'week' : 'target'));
+    mapEl.addEventListener('click', (e) => { const t = e.target as HTMLElement;
+      const m = t.closest('[data-map]') as HTMLElement | null; if (m) { setMap(m.dataset.map!); return; }
+      const z = t.closest('[data-mz]') as HTMLElement | null; if (z) { const k = z.dataset.mz; mz = k === 'in' ? Math.min(4, mz * 1.5) : k === 'out' ? Math.max(1, mz / 1.5) : 1; zoomMap(); return; }
+      if (t.closest('[data-mapclose]')) closeMap(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !mapEl.hidden) { e.stopImmediatePropagation(); closeMap(); } }, true);
+
+    // ---- Hero 3D (round 10j, the owner's pick from the round 10i try-out): the stage's dimmed slabs and dots
+    // behind the page header. Phones, reduced motion, print and no WebGL keep the plain header. No text in the canvas.
+    const head = root.closest('.wbf-page')?.querySelector('.wb-head') as HTMLElement | null;
+    if (head && can3d()) {
+      const c = document.createElement('canvas'); c.className = 'wbf-fxc'; c.setAttribute('aria-hidden', 'true'); head.prepend(c);
+      startNear(head, (THREE) => {
+        head.classList.add('wbf-hero3d');
+        // Keep the scene to the right of the summary at every width.
+        const wide = matchMedia('(min-width: 1024px)');
+        const clear = () => { const hb = head.getBoundingClientRect(); const sm = head.querySelector('.wb-head-summary') as HTMLElement | null; const np = head.querySelector('.wb-note-wrap') as HTMLElement | null;
+          if (sm) c.style.setProperty('--clear', Math.round(sm.getBoundingClientRect().right - hb.left + 24) + 'px');
+          if (np) c.style.setProperty('--textb', Math.round(np.getBoundingClientRect().bottom - hb.top + 16) + 'px'); };
+        head.classList.add('is-3d');
+        clear(); addEventListener('resize', clear);
+        const wd = makeWorld(THREE, c, head);
+        const tick = layerScene(THREE, wd.S, D, F.ltone, 0.75);
+        // Round 10l: on wide screens, fit the camera to the slab stack. Project the 8 corners of its box, pull back until
+        // it fits the band with a 16px margin, then shift the image down into the band with a view offset.
+        const ce = camEase(THREE, wd.cam); const DIR = new THREE.Vector3(8, 3.4, 28).normalize(); const LOOK = [0, 2.7, 0];
+        const corners = [-5.2, 5.2].flatMap((x) => [-0.2, 5.7].flatMap((y) => [-2.9, 2.9].map((z) => new THREE.Vector3(x, y, z))));
+        let baseX = 12;
+        const aim = () => {
+          const cam = wd.cam; cam.clearViewOffset();
+          if (!wide.matches) { wd.S.fog.density = 0.028; baseX = 12; ce.go([12, 8, 13], [-15, 3.2, 0], 0, true); return; }
+          clear(); const top = parseFloat(c.style.getPropertyValue('--textb')) || wd.H * 0.7; const bandH = wd.H - top;
+          let k = 12, box = { t: 0, b: 0, l: 0, r: 0 };
+          for (let i = 0; i < 200; i++) {
+            const pos = DIR.clone().multiplyScalar(k).add(new THREE.Vector3(...LOOK)); cam.position.copy(pos); cam.lookAt(...LOOK); cam.updateMatrixWorld();
+            const ps = corners.map((v) => project(v, cam, wd.W, wd.H)); box = { t: Math.min(...ps.map((p) => p.y)), b: Math.max(...ps.map((p) => p.y)), l: Math.min(...ps.map((p) => p.x)), r: Math.max(...ps.map((p) => p.x)) };
+            if (box.b - box.t <= bandH - 32 && box.r - box.l <= wd.W - 64) break; k += 0.5;
+          }
+          wd.S.fog.density = 0.028 * 22 / Math.max(22, k); // keep the stack as bright as at the old distance
+          baseX = cam.position.x; ce.go(cam.position.toArray(), LOOK, 0, true);
+          const dy = top + bandH / 2 - (box.t + box.b) / 2; cam.setViewOffset(wd.W, wd.H, 0, -dy, wd.W, wd.H);
+        };
+        aim(); wide.addEventListener('change', aim); addEventListener('resize', () => requestAnimationFrame(aim));
+        runLoop(head, (now) => { wd.cam.position.x = baseX + Math.sin(now / 6000) * 0.8; ce.step(now); tick(now); wd.R.render(wd.S, wd.cam); });
+        addEventListener('pagehide', () => wd.R.dispose());
+      }, () => c.remove(), '200px 0px');
+    }
+
+    // ---- start from the hash. A stop in the hash opens the step-through paused there.
+    layout(); addEventListener('resize', () => requestAnimationFrame(layout)); (document as any).fonts?.ready?.then(layout);
+    const h = hashGet();
+    let hv = 'board'; try { hv = h.get('view') || 'board'; } catch {}
+    setAud(hv === 'architects' || hv === 'zones' || hv === 'floor' || h.get('play') || h.get('open') || h.get('cell') ? 'architects' : 'board', false);
+    if (h.get('arch') === 'interim') setArch('interim', false);
+    if (h.get('play')) step(Math.min(STOPS.length, Math.max(1, +h.get('play')!)), false);
+    else if (h.get('open')) openAny(h.get('open')!);
+    if (h.get('cell')) openCell(h.get('cell')!);
+    if (h.get('map') === 'target' || h.get('map') === 'week') openMap(h.get('map')!);
+    addEventListener('hashchange', () => { const v = hashGet().get('view'); if (v === 'architects' || v === 'board') { if (v !== aud) setAud(v, false); } });
+    if (h.get('view') === 'zones') $('#wbf-zones').scrollIntoView({ block: 'start', behavior: 'instant' as ScrollBehavior });
+    if (h.get('play')) $('.wbf-floorwrap').scrollIntoView({ block: 'start', behavior: 'instant' as ScrollBehavior });
+    else if (h.get('view') === 'floor') $('#wbf-floorview').scrollIntoView({ block: 'start', behavior: 'instant' as ScrollBehavior });
+  }
+</script>

@@ -1,0 +1,1105 @@
+{
+ "meta": {
+  "title": "AI fix reference architecture",
+  "built": "2026-10-26",
+  "from": [
+   "A1 1.1 to 1.3",
+   "A2 section 1",
+   "V10a verified rows",
+   "Design doc 6.2",
+   "arch.json"
+  ],
+  "ev_rule": "verified: backed by V10a verified rows from a standard, spec, paper or open project. vendor: backed only by V10a verified rows from a seller's own page. design: our framing, src empty.",
+  "steps_key": "R1 to R10 are A1 1.2 request steps. L11 to L13 are A1 1.3 offline steps. F0 to F9 are A2 section 1 fence steps.",
+  "design_parts": "design_parts lists node parts that are our design, not ledger facts."
+ },
+ "planes": [
+  {
+   "id": "control",
+   "name": "Control plane",
+   "note": "Versioned settings. Every change is a release you test and can roll back.",
+   "ev": "design",
+   "src": []
+  },
+  {
+   "id": "data",
+   "name": "Data plane",
+   "note": "The path each live request takes. It reads the settings and enforces them.",
+   "ev": "design",
+   "src": []
+  }
+ ],
+ "zones": [
+  {
+   "id": "org",
+   "name": "Your organisation",
+   "kind": "trust",
+   "ev": "design",
+   "src": []
+  },
+  {
+   "id": "sandbox",
+   "name": "Agent sandbox",
+   "kind": "isolated",
+   "parent": "org",
+   "ev": "design",
+   "src": []
+  },
+  {
+   "id": "vendor",
+   "name": "Model providers",
+   "kind": "external",
+   "ev": "design",
+   "src": []
+  },
+  {
+   "id": "web",
+   "name": "Web sources",
+   "kind": "untrusted",
+   "ev": "design",
+   "src": []
+  },
+  {
+   "id": "idp",
+   "name": "Identity provider",
+   "kind": "external",
+   "ev": "design",
+   "src": []
+  },
+  {
+   "id": "obs",
+   "name": "Trace store",
+   "kind": "external",
+   "ev": "design",
+   "src": []
+  }
+ ],
+ "nodes": [
+  {
+   "id": "ask",
+   "name": "Ask",
+   "block": "P5",
+   "plane": "data",
+   "zone": "org",
+   "steps": [
+    "R1",
+    "R9"
+   ],
+   "role": "App calls one internal endpoint, never providers",
+   "parts": [],
+   "ev": "design",
+   "src": [],
+   "design_parts": []
+  },
+  {
+   "id": "gate",
+   "name": "Gateway",
+   "block": "P6",
+   "plane": "data",
+   "zone": "org",
+   "steps": [
+    "R1"
+   ],
+   "role": "Checks the caller and applies its policies",
+   "parts": [
+    "Per-key limits",
+    "Policy set"
+   ],
+   "ev": "vendor",
+   "src": [
+    "AR1-14",
+    "AR1-15"
+   ],
+   "design_parts": [
+    "Policy set"
+   ]
+  },
+  {
+   "id": "budget",
+   "name": "Budget check",
+   "block": "P6",
+   "plane": "data",
+   "zone": "org",
+   "steps": [
+    "R2"
+   ],
+   "role": "Refuses calls over spend cap or rate",
+   "parts": [
+    "Spend cap",
+    "Token rate limit",
+    "Pre-count prompt tokens"
+   ],
+   "ev": "vendor",
+   "src": [
+    "AR1-14",
+    "AR1-60"
+   ],
+   "design_parts": []
+  },
+  {
+   "id": "screen_in",
+   "name": "Input screening",
+   "block": null,
+   "plane": "data",
+   "zone": "org",
+   "steps": [
+    "R3"
+   ],
+   "role": "Masks personal data, screens harmful prompts",
+   "parts": [
+    "Personal data masking",
+    "Harmful prompt screen"
+   ],
+   "ev": "vendor",
+   "src": [
+    "AR1-17",
+    "AR1-44",
+    "AR1-12"
+   ],
+   "design_parts": []
+  },
+  {
+   "id": "read",
+   "name": "Read sources",
+   "block": "P2",
+   "plane": "data",
+   "zone": "org",
+   "steps": [
+    "R4"
+   ],
+   "role": "Allow lists, page dates, read before cite",
+   "parts": [
+    "Domain allow lists",
+    "Page dates",
+    "Recency filter",
+    "Cite opened pages only"
+   ],
+   "ev": "vendor",
+   "src": [
+    "AR1-29",
+    "AR1-30",
+    "AR1-31",
+    "AR1-33"
+   ],
+   "design_parts": [
+    "Cite opened pages only"
+   ]
+  },
+  {
+   "id": "route",
+   "name": "Pinned route",
+   "block": "P6",
+   "plane": "data",
+   "zone": "org",
+   "steps": [
+    "R5"
+   ],
+   "role": "Exact version ID, same-version fallback only",
+   "parts": [
+    "Exact version ID",
+    "No floating alias",
+    "Same-version fallback"
+   ],
+   "ev": "vendor",
+   "src": [
+    "AR1-16",
+    "AR1-47",
+    "AR1-48"
+   ],
+   "design_parts": []
+  },
+  {
+   "id": "model",
+   "name": "Pinned model",
+   "block": null,
+   "plane": "data",
+   "zone": "vendor",
+   "steps": [
+    "R6"
+   ],
+   "role": "Pinned snapshot answers with source passages",
+   "parts": [],
+   "ev": "vendor",
+   "src": [
+    "AR1-47",
+    "AR1-49",
+    "AR1-24"
+   ],
+   "design_parts": []
+  },
+  {
+   "id": "check",
+   "name": "Claim check",
+   "block": "P1",
+   "plane": "data",
+   "zone": "org",
+   "steps": [
+    "R7"
+   ],
+   "role": "Separate checker scores each claim against sources",
+   "parts": [
+    "Split into claims",
+    "Cited source chunk",
+    "Block, flag or correct"
+   ],
+   "ev": "verified",
+   "src": [
+    "AR1-07",
+    "AR1-18",
+    "AR1-19",
+    "AR1-25"
+   ],
+   "design_parts": []
+  },
+  {
+   "id": "screen_out",
+   "name": "Output screening",
+   "block": null,
+   "plane": "data",
+   "zone": "org",
+   "steps": [
+    "R8"
+   ],
+   "role": "Safety classifiers and a citation coverage check",
+   "parts": [
+    "Harmful answer screen",
+    "Every claim cited"
+   ],
+   "ev": "vendor",
+   "src": [
+    "AR1-44",
+    "AR1-28"
+   ],
+   "design_parts": [
+    "Every claim cited"
+   ]
+  },
+  {
+   "id": "human",
+   "name": "Named checker",
+   "block": "P9",
+   "plane": "data",
+   "zone": "org",
+   "steps": [],
+   "role": "Named person signs off work that leaves",
+   "parts": [],
+   "ev": "design",
+   "src": [],
+   "design_parts": []
+  },
+  {
+   "id": "log",
+   "name": "Failure log",
+   "block": "P3",
+   "plane": "data",
+   "zone": "org",
+   "steps": [
+    "R10",
+    "F7"
+   ],
+   "role": "Every step writes one trace span",
+   "parts": [
+    "Model asked and answered",
+    "Tokens and cost",
+    "Claim score",
+    "Policy decisions"
+   ],
+   "ev": "verified",
+   "src": [
+    "AR1-38",
+    "AR1-39",
+    "AR1-60",
+    "AR2-03",
+    "AR2-33"
+   ],
+   "design_parts": [
+    "Claim score",
+    "Policy decisions"
+   ]
+  },
+  {
+   "id": "settings",
+   "name": "Settings store",
+   "block": null,
+   "plane": "control",
+   "zone": "org",
+   "steps": [],
+   "role": "Versioned settings, each change a release",
+   "parts": [
+    "Model versions",
+    "Source lists",
+    "Thresholds",
+    "Budgets",
+    "Test set"
+   ],
+   "ev": "design",
+   "src": [],
+   "design_parts": []
+  },
+  {
+   "id": "change",
+   "name": "Proposed change",
+   "block": "P10",
+   "plane": "control",
+   "zone": "org",
+   "steps": [
+    "L11"
+   ],
+   "role": "New model, prompt, threshold or source list",
+   "parts": [],
+   "ev": "design",
+   "src": [],
+   "design_parts": []
+  },
+  {
+   "id": "testset",
+   "name": "Own test set",
+   "block": "P10",
+   "plane": "control",
+   "zone": "org",
+   "steps": [
+    "L13"
+   ],
+   "role": "Your questions with planted errors and injections",
+   "parts": [],
+   "ev": "design",
+   "src": [],
+   "design_parts": []
+  },
+  {
+   "id": "testgate",
+   "name": "Test-set gate",
+   "block": "P10",
+   "plane": "control",
+   "zone": "org",
+   "steps": [
+    "L11"
+   ],
+   "role": "Change ships only above the pass bar",
+   "parts": [],
+   "ev": "vendor",
+   "src": [
+    "AR1-36"
+   ],
+   "design_parts": []
+  },
+  {
+   "id": "canary",
+   "name": "Daily canary",
+   "block": "P10",
+   "plane": "control",
+   "zone": "org",
+   "steps": [
+    "L12"
+   ],
+   "role": "Small fixed set runs daily on production",
+   "parts": [],
+   "ev": "vendor",
+   "src": [
+    "AR1-36",
+    "AR1-56"
+   ],
+   "design_parts": []
+  },
+  {
+   "id": "act",
+   "name": "Agent acts",
+   "block": "P4",
+   "plane": "data",
+   "zone": "org",
+   "steps": [
+    "F1"
+   ],
+   "role": "Planner writes the plan before untrusted text",
+   "parts": [],
+   "ev": "verified",
+   "src": [
+    "AR2-12",
+    "AR2-08"
+   ],
+   "design_parts": []
+  },
+  {
+   "id": "agentid",
+   "name": "Agent identity",
+   "block": "P4",
+   "plane": "data",
+   "zone": "org",
+   "steps": [
+    "F0"
+   ],
+   "role": "Own low-privilege login, short-lived tokens",
+   "parts": [
+    "Own identity",
+    "Short-lived tokens",
+    "Step-up scopes"
+   ],
+   "ev": "verified",
+   "src": [
+    "AR2-37",
+    "AR2-39",
+    "AR2-01"
+   ],
+   "design_parts": []
+  },
+  {
+   "id": "reader",
+   "name": "Isolated reader",
+   "block": "P4",
+   "plane": "data",
+   "zone": "org",
+   "steps": [
+    "F2",
+    "F6"
+   ],
+   "role": "Model with no tools reads untrusted text",
+   "parts": [
+    "No tools",
+    "Returns labelled values",
+    "Origin tag on values"
+   ],
+   "ev": "verified",
+   "src": [
+    "AR2-06",
+    "AR2-07",
+    "AR2-09"
+   ],
+   "design_parts": []
+  },
+  {
+   "id": "toolgw",
+   "name": "Tool gateway",
+   "block": "P4",
+   "plane": "data",
+   "zone": "org",
+   "steps": [
+    "F3"
+   ],
+   "role": "Every tool call checked against written policy",
+   "parts": [
+    "Audience-bound token",
+    "Deny-by-default list",
+    "Policy rules",
+    "Data-flow check"
+   ],
+   "ev": "verified",
+   "src": [
+    "AR2-02",
+    "AR2-46",
+    "AR2-49",
+    "AR2-50",
+    "AR2-51",
+    "AR2-09",
+    "AR2-13"
+   ],
+   "design_parts": []
+  },
+  {
+   "id": "approval",
+   "name": "Approval step",
+   "block": "P4",
+   "plane": "data",
+   "zone": "org",
+   "steps": [
+    "F4"
+   ],
+   "role": "Delete, deploy or send waits for approval",
+   "parts": [
+    "Person or reviewer model",
+    "Exact command shown",
+    "Deny rules always hold"
+   ],
+   "ev": "vendor",
+   "src": [
+    "AR2-20",
+    "AR2-24",
+    "AR2-51"
+   ],
+   "design_parts": [
+    "Exact command shown"
+   ]
+  },
+  {
+   "id": "sandbox",
+   "name": "Sandbox",
+   "block": "P4",
+   "plane": "data",
+   "zone": "sandbox",
+   "steps": [
+    "F5"
+   ],
+   "role": "Code runs boxed, network off by default",
+   "parts": [
+    "Workspace-only writes",
+    "Host allow list",
+    "Credentials kept outside"
+   ],
+   "ev": "verified",
+   "src": [
+    "AR2-21",
+    "AR2-24",
+    "AR2-45",
+    "AR2-56",
+    "AR2-57"
+   ],
+   "design_parts": []
+  },
+  {
+   "id": "offswitch",
+   "name": "Off switch",
+   "block": "P4",
+   "plane": "control",
+   "zone": "org",
+   "steps": [
+    "F9"
+   ],
+   "role": "Cuts the agent off from one place",
+   "parts": [
+    "Block at identity provider",
+    "Revoke at gateway",
+    "Scheduled drill"
+   ],
+   "ev": "vendor",
+   "src": [
+    "AR2-38",
+    "AR2-40",
+    "AR2-41"
+   ],
+   "design_parts": [
+    "Scheduled drill"
+   ]
+  }
+ ],
+ "flows": [
+  {
+   "id": "F01",
+   "from": "ask",
+   "to": "gate",
+   "kind": "request",
+   "label": "One internal endpoint",
+   "order": 1,
+   "ev": "design",
+   "src": []
+  },
+  {
+   "id": "F02",
+   "from": "gate",
+   "to": "budget",
+   "kind": "request",
+   "label": "Known caller",
+   "order": 2,
+   "ev": "vendor",
+   "src": [
+    "AR1-14"
+   ]
+  },
+  {
+   "id": "F03",
+   "from": "budget",
+   "to": "ask",
+   "kind": "response",
+   "label": "Refused over cap",
+   "order": null,
+   "ev": "vendor",
+   "src": [
+    "AR1-14",
+    "AR1-60"
+   ]
+  },
+  {
+   "id": "F04",
+   "from": "budget",
+   "to": "screen_in",
+   "kind": "request",
+   "label": "Under the cap",
+   "order": 3,
+   "ev": "design",
+   "src": []
+  },
+  {
+   "id": "F05",
+   "from": "screen_in",
+   "to": "read",
+   "kind": "request",
+   "label": "Screened prompt",
+   "order": 4,
+   "ev": "design",
+   "src": []
+  },
+  {
+   "id": "F06",
+   "from": "read",
+   "to": "web",
+   "kind": "request",
+   "label": "Allow-listed search",
+   "order": null,
+   "ev": "vendor",
+   "src": [
+    "AR1-29",
+    "AR1-31",
+    "AR1-33"
+   ]
+  },
+  {
+   "id": "F07",
+   "from": "web",
+   "to": "read",
+   "kind": "response",
+   "label": "Pages with dates",
+   "order": null,
+   "ev": "vendor",
+   "src": [
+    "AR1-29",
+    "AR1-30"
+   ]
+  },
+  {
+   "id": "F08",
+   "from": "read",
+   "to": "route",
+   "kind": "request",
+   "label": "Opened sources only",
+   "order": 5,
+   "ev": "design",
+   "src": []
+  },
+  {
+   "id": "F09",
+   "from": "route",
+   "to": "model",
+   "kind": "request",
+   "label": "Exact version ID",
+   "order": 6,
+   "ev": "vendor",
+   "src": [
+    "AR1-47",
+    "AR1-16"
+   ]
+  },
+  {
+   "id": "F10",
+   "from": "model",
+   "to": "check",
+   "kind": "response",
+   "label": "Answer with citations",
+   "order": 7,
+   "ev": "vendor",
+   "src": [
+    "AR1-24"
+   ]
+  },
+  {
+   "id": "F11",
+   "from": "check",
+   "to": "screen_out",
+   "kind": "request",
+   "label": "Checked claims",
+   "order": 8,
+   "ev": "design",
+   "src": []
+  },
+  {
+   "id": "F12",
+   "from": "screen_out",
+   "to": "ask",
+   "kind": "response",
+   "label": "Answer and warnings",
+   "order": 9,
+   "ev": "design",
+   "src": []
+  },
+  {
+   "id": "F13",
+   "from": "screen_out",
+   "to": "human",
+   "kind": "request",
+   "label": "Outbound work",
+   "order": null,
+   "ev": "design",
+   "src": []
+  },
+  {
+   "id": "F14",
+   "from": "human",
+   "to": "ask",
+   "kind": "response",
+   "label": "Signed off",
+   "order": null,
+   "ev": "design",
+   "src": []
+  },
+  {
+   "id": "F15",
+   "from": "route",
+   "to": "log",
+   "kind": "log",
+   "label": "Models and tokens",
+   "order": 10,
+   "ev": "verified",
+   "src": [
+    "AR1-38"
+   ]
+  },
+  {
+   "id": "F16",
+   "from": "toolgw",
+   "to": "log",
+   "kind": "log",
+   "label": "Who, what, why",
+   "order": 10,
+   "ev": "verified",
+   "src": [
+    "AR2-03",
+    "AR2-33"
+   ]
+  },
+  {
+   "id": "F17",
+   "from": "log",
+   "to": "traces",
+   "kind": "log",
+   "label": "OTel export",
+   "order": null,
+   "ev": "verified",
+   "src": [
+    "AR1-38",
+    "AR1-59"
+   ]
+  },
+  {
+   "id": "F18",
+   "from": "read",
+   "to": "act",
+   "kind": "request",
+   "label": "If action needed",
+   "order": null,
+   "ev": "design",
+   "src": []
+  },
+  {
+   "id": "F19",
+   "from": "web",
+   "to": "reader",
+   "kind": "response",
+   "label": "Untrusted page text",
+   "order": null,
+   "ev": "verified",
+   "src": [
+    "AR2-06"
+   ]
+  },
+  {
+   "id": "F20",
+   "from": "reader",
+   "to": "act",
+   "kind": "response",
+   "label": "Labelled values only",
+   "order": null,
+   "ev": "verified",
+   "src": [
+    "AR2-06",
+    "AR2-07"
+   ]
+  },
+  {
+   "id": "F21",
+   "from": "act",
+   "to": "toolgw",
+   "kind": "request",
+   "label": "Each tool call",
+   "order": null,
+   "ev": "vendor",
+   "src": [
+    "AR2-51",
+    "AR2-41"
+   ]
+  },
+  {
+   "id": "F22",
+   "from": "idp",
+   "to": "agentid",
+   "kind": "control",
+   "label": "Short-lived token",
+   "order": null,
+   "ev": "vendor",
+   "src": [
+    "AR2-39",
+    "AR2-41"
+   ]
+  },
+  {
+   "id": "F23",
+   "from": "agentid",
+   "to": "toolgw",
+   "kind": "control",
+   "label": "Audience-bound token",
+   "order": null,
+   "ev": "verified",
+   "src": [
+    "AR2-02"
+   ]
+  },
+  {
+   "id": "F24",
+   "from": "toolgw",
+   "to": "approval",
+   "kind": "request",
+   "label": "Risky action",
+   "order": null,
+   "ev": "vendor",
+   "src": [
+    "AR2-20",
+    "AR2-51"
+   ]
+  },
+  {
+   "id": "F25",
+   "from": "toolgw",
+   "to": "sandbox",
+   "kind": "request",
+   "label": "Safe action runs",
+   "order": null,
+   "ev": "design",
+   "src": []
+  },
+  {
+   "id": "F26",
+   "from": "approval",
+   "to": "sandbox",
+   "kind": "request",
+   "label": "Approved action",
+   "order": null,
+   "ev": "design",
+   "src": []
+  },
+  {
+   "id": "F27",
+   "from": "sandbox",
+   "to": "reader",
+   "kind": "response",
+   "label": "Result as untrusted",
+   "order": null,
+   "ev": "design",
+   "src": []
+  },
+  {
+   "id": "F28",
+   "from": "act",
+   "to": "check",
+   "kind": "response",
+   "label": "Claims vs records",
+   "order": null,
+   "ev": "design",
+   "src": []
+  },
+  {
+   "id": "F29",
+   "from": "offswitch",
+   "to": "idp",
+   "kind": "control",
+   "label": "Block or revoke",
+   "order": null,
+   "ev": "vendor",
+   "src": [
+    "AR2-38",
+    "AR2-40"
+   ]
+  },
+  {
+   "id": "F30",
+   "from": "offswitch",
+   "to": "toolgw",
+   "kind": "control",
+   "label": "Revoke at gateway",
+   "order": null,
+   "ev": "vendor",
+   "src": [
+    "AR2-41"
+   ]
+  },
+  {
+   "id": "F31",
+   "from": "settings",
+   "to": "gate",
+   "kind": "control",
+   "label": "Policies and budgets",
+   "order": null,
+   "ev": "design",
+   "src": []
+  },
+  {
+   "id": "F32",
+   "from": "settings",
+   "to": "read",
+   "kind": "control",
+   "label": "Source lists",
+   "order": null,
+   "ev": "design",
+   "src": []
+  },
+  {
+   "id": "F33",
+   "from": "settings",
+   "to": "route",
+   "kind": "control",
+   "label": "Pinned versions",
+   "order": null,
+   "ev": "design",
+   "src": []
+  },
+  {
+   "id": "F34",
+   "from": "settings",
+   "to": "check",
+   "kind": "control",
+   "label": "Thresholds",
+   "order": null,
+   "ev": "design",
+   "src": []
+  },
+  {
+   "id": "F35",
+   "from": "change",
+   "to": "testgate",
+   "kind": "offline",
+   "label": "Run test set",
+   "order": null,
+   "ev": "vendor",
+   "src": [
+    "AR1-36"
+   ]
+  },
+  {
+   "id": "F36",
+   "from": "testgate",
+   "to": "settings",
+   "kind": "offline",
+   "label": "Ship if pass",
+   "order": null,
+   "ev": "vendor",
+   "src": [
+    "AR1-36"
+   ]
+  },
+  {
+   "id": "F37",
+   "from": "testgate",
+   "to": "change",
+   "kind": "offline",
+   "label": "Blocked below bar",
+   "order": null,
+   "ev": "vendor",
+   "src": [
+    "AR1-36"
+   ]
+  },
+  {
+   "id": "F38",
+   "from": "testset",
+   "to": "testgate",
+   "kind": "offline",
+   "label": "Your own cases",
+   "order": null,
+   "ev": "design",
+   "src": []
+  },
+  {
+   "id": "F39",
+   "from": "canary",
+   "to": "gate",
+   "kind": "offline",
+   "label": "Daily probe",
+   "order": null,
+   "ev": "design",
+   "src": []
+  },
+  {
+   "id": "F40",
+   "from": "log",
+   "to": "testset",
+   "kind": "offline",
+   "label": "Failures become cases",
+   "order": null,
+   "ev": "design",
+   "src": []
+  }
+ ],
+ "loop": [
+  "change",
+  "testgate",
+  "settings",
+  "canary",
+  "log",
+  "testset"
+ ],
+ "external": [
+  {
+   "id": "providers",
+   "name": "Model providers",
+   "zone": "vendor",
+   "examples": [
+    "Anthropic",
+    "OpenAI",
+    "Google",
+    "AWS Bedrock"
+   ],
+   "note": "Each publishes its own pin and retirement notice rules.",
+   "src": [
+    "AR1-47",
+    "AR1-48",
+    "AR1-49",
+    "AR1-50"
+   ]
+  },
+  {
+   "id": "idp",
+   "name": "Identity provider",
+   "zone": "idp",
+   "examples": [
+    "Microsoft Entra",
+    "Okta"
+   ],
+   "note": "Agent identities, short-lived tokens, revoke.",
+   "src": [
+    "AR2-37",
+    "AR2-38",
+    "AR2-39",
+    "AR2-40",
+    "AR2-41"
+   ]
+  },
+  {
+   "id": "web",
+   "name": "Web sources",
+   "zone": "web",
+   "examples": [
+    "Anthropic web search",
+    "Anthropic web fetch",
+    "OpenAI web search",
+    "Google Search grounding",
+    "Perplexity"
+   ],
+   "note": "Domain lists on every tool, page dates on some.",
+   "src": [
+    "AR1-29",
+    "AR1-30",
+    "AR1-31",
+    "AR1-32",
+    "AR1-33"
+   ]
+  },
+  {
+   "id": "traces",
+   "name": "Trace store",
+   "zone": "obs",
+   "examples": [
+    "Langfuse"
+   ],
+   "note": "Stores traces with shared GenAI field names.",
+   "src": [
+    "AR1-38",
+    "AR1-58"
+   ]
+  }
+ ]
+}

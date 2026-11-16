@@ -1,6 +1,14 @@
 {
   "/deep-dives/agentic-payouts-desk": {
     "sceneAllow": "build=arch|builder+rail=b:1.9",
-    "why": "Round 36: the owner chose a fitted full map with no inner scroll, so the Architecture screen may reach 1.9 viewports at 1440. builder+rail=b covers the builder reader, whose build screen opens on that tab."
+    "why": "Round 36: the owner chose a fitted full map with no inner scroll, so the Architecture screen may reach 1.9 viewports at 1440. Every seat, the builder included, opens the build screen on Verdict, and Architecture is reached by its tab. builder+rail=b covers the builder reader in that tab state."
+  },
+  "/visuals/time-study/index.html": {
+    "pageAllow": {
+      "1440": 19,
+      "1024": 21,
+      "0": 23
+    },
+    "why": "Round 15, 2026-11-01: the owner chose to keep the 16-section time study in one piece rather than fold each section to one chart. Measured 17.2 viewports at 1440 and 19.6 at 1024 after the 14px pass. Raised by one viewport at 1440 (18 to 19) and at 1024 (20 to 21) on 2026-11-02 because the owner added the open questions section (What nobody has measured yet, section #openq), and the phone bucket (key 0, the 375 run) got its first allowance, 23 against the default 22, after the five stacked cards measured 22.5. Every section is inside the scene limit. Raise this only if the owner adds a section, and say so in design doc section 25."
   }
 }

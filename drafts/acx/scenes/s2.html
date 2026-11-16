@@ -1,0 +1,556 @@
+<section class="acx-scene" id="acx-s2" aria-labelledby="acx-s2-h">
+  <header class="acx-head"><span class="acx-num">02</span><h2 id="acx-s2-h">Compare and choose</h2>
+    <p class="acx-dek" data-for="leader">Describe your case to see which protocols fit and what you still have to build.</p>
+    <p class="acx-dek" data-for="architect">Fit reads each protocol's own parameters. The build list comes from matching rules.</p></header>
+  <div class="acx-card s2-cfg" role="group" aria-label="Your setup"></div>
+  <div class="acx-split s2-split">
+    <div class="acx-card s2-main">
+      <div class="s2-top">
+        <div class="acx-seg" role="group" aria-label="View" data-s2-view></div>
+        <button type="button" class="acx-btn s2-all" aria-pressed="false"></button>
+      </div>
+      <p class="s2-read" aria-live="polite"></p>
+      <div class="s2-view" data-v="matrix">
+        <div class="s2-scroll"><div class="s2-mx" role="grid" aria-label="Protocols by parameter"></div></div>
+        <div class="s2-key" aria-hidden="true"></div>
+      </div>
+      <div class="s2-view" data-v="arch" hidden>
+        <div class="s2-zones"></div>
+        <div class="s2-left"><div class="s2-lt"><p class="acx-k">Variables to set</p><span class="s2-k s2-k-dash" data-s2-evk><i></i>Evidence to record</span></div><div class="s2-tags" data-s2-vars></div></div>
+        <div class="s2-crit"><div class="s2-lt"><p class="acx-k">What to weigh</p><span data-s2-cev></span></div><div class="s2-bar" role="img"></div><ol class="s2-cl"></ol><div class="s2-gates"></div></div>
+      </div>
+      <div class="s2-view" data-v="tree" hidden>
+        <div class="s2-tree"><svg class="s2-wires" aria-hidden="true"></svg></div>
+      </div>
+    </div>
+    <div class="acx-panel s2-side">
+      <div class="acx-card s2-box s2-fits"><h3>Fits your setup</h3><div class="s2-fl"></div></div>
+      <div class="acx-card s2-box s2-build"><h3>You must build</h3><div class="s2-bl"></div></div>
+    </div>
+  </div>
+</section>
+<style id="acx-s2-css">
+#acx-s2 .s2-cfg{display:grid; grid-template-columns:repeat(5, minmax(0,1fr)); gap:12px 14px; padding:14px 16px; margin:0 0 16px}
+#acx-s2 .s2-f{display:flex; flex-direction:column; gap:6px; min-width:0}
+#acx-s2 .s2-f label{font-family:var(--acx-mono); font-size:14px; color:var(--acx-ink3); text-transform:uppercase; letter-spacing:.05em}
+#acx-s2 .s2-sel{position:relative}
+#acx-s2 .s2-sel::after{content:""; position:absolute; right:14px; top:50%; width:8px; height:8px; margin-top:-6px; border-right:2px solid var(--acx-ink2); border-bottom:2px solid var(--acx-ink2); transform:rotate(45deg); pointer-events:none}
+#acx-s2 select{appearance:none; -webkit-appearance:none; width:100%; min-height:44px; padding:0 36px 0 12px; border:1px solid var(--acx-line2); border-radius:10px; background:var(--acx-bg2); color:var(--acx-ink); font:inherit; font-size:15px; font-weight:500; cursor:pointer}
+#acx-s2 select:focus-visible{outline:2px solid var(--acx-accent); outline-offset:2px}
+#acx-s2 .s2-split{grid-template-columns:minmax(0,1fr)}
+@media (min-width:1400px){ #acx-s2 .s2-split{grid-template-columns:minmax(0,1fr) 320px} }
+#acx-s2 .s2-main{padding:14px 16px 16px; display:flex; flex-direction:column; gap:12px; min-width:0; align-self:start}
+#acx-s2 .s2-top{display:flex; flex-wrap:wrap; align-items:center; gap:10px}
+#acx-s2 .s2-read{min-height:44px; font-size:15px; line-height:1.45; color:var(--acx-ink2); text-wrap:balance}
+#acx-s2 .s2-read b{color:var(--acx-ink); font-weight:600}
+#acx-s2 .s2-read .s2-rt{font-family:var(--acx-mono); font-size:14px; color:var(--acx-ink3)}
+
+/* matrix */
+#acx-s2 .s2-scroll{overflow-x:auto; overscroll-behavior-x:contain}
+#acx-s2 .s2-mx{--nc:150px; display:grid; grid-template-columns:var(--nc) repeat(var(--k,6), minmax(92px,1fr)); min-width:calc(var(--nc) + var(--k,6) * 92px)}
+#acx-s2 .s2-row{display:contents}
+#acx-s2 .s2-hd{display:flex; align-items:flex-end; justify-content:center; min-height:46px; padding:0 4px 6px; border:0; border-bottom:1px solid var(--acx-line2); background:none; cursor:pointer; text-align:center; font-size:14px; line-height:1.2; font-weight:600; color:var(--acx-ink2)}
+#acx-s2 .s2-hd:hover, #acx-s2 .s2-hd.is-on{color:var(--acx-accent)}
+#acx-s2 .s2-hd:focus-visible{outline:2px solid var(--acx-accent); outline-offset:-2px}
+#acx-s2 .s2-corner{border-bottom:1px solid var(--acx-line2)}
+#acx-s2 .s2-pn{display:flex; align-items:center; min-height:32px; padding:4px 8px 4px 4px; font-size:15px; font-weight:600; line-height:1.15; color:var(--acx-ink); border-bottom:1px solid var(--acx-line)}
+#acx-s2 .s2-c{display:flex; align-items:center; justify-content:center; min-height:32px; border-bottom:1px solid var(--acx-line); cursor:default; outline:none}
+#acx-s2 .s2-c:focus-visible{box-shadow:inset 0 0 0 2px var(--acx-accent)}
+#acx-s2 .s2-c:hover i, #acx-s2 .s2-c.is-on i{transform:scale(1.25)}
+#acx-s2 .s2-c i, #acx-s2 .s2-k i{position:relative; display:block; width:14px; height:14px; border-radius:4px; box-sizing:border-box; transition:transform .15s ease}
+#acx-s2 [data-g="def"] i{background:var(--acx-accent2)}
+#acx-s2 [data-g="del"] i{background:linear-gradient(135deg, var(--acx-accent2) 0 50%, transparent 50%); box-shadow:inset 0 0 0 2px var(--acx-accent2)}
+#acx-s2 [data-g="none"] i{background:transparent; box-shadow:inset 0 0 0 2px var(--acx-ink3)}
+#acx-s2 [data-g="unk"] i{width:8px; height:8px; border-radius:50%; background:var(--acx-ink3)}
+#acx-s2 [data-f="clash"] i::after{content:""; position:absolute; inset:-6px; border-radius:50%; border:2px dashed var(--acx-pain)}
+#acx-s2 .s2-hd.is-cfg{box-shadow:inset 0 -3px 0 var(--acx-accent)}
+#acx-s2 .s2-k-cfg i{width:18px; height:3px; border-radius:2px; background:var(--acx-accent)}
+#acx-s2 .s2-k-clash i{width:14px; height:14px; border-radius:50%; border:2px dashed var(--acx-pain); background:transparent}
+#acx-s2 .s2-row.is-out > *{opacity:.38}
+#acx-s2 .s2-all{margin-left:auto; background:transparent; font-weight:500; color:var(--acx-ink2)}
+#acx-s2 .s2-also{font-size:14px; line-height:1.4; color:var(--acx-ink2); padding-top:6px; border-top:1px solid var(--acx-line); text-wrap:pretty}
+#acx-s2 .s2-also b{color:var(--acx-ink); font-weight:600}
+#acx-s2 .s2-key{display:flex; flex-wrap:wrap; gap:6px 18px}
+#acx-s2 .s2-k{display:inline-flex; align-items:center; gap:10px; font-size:14px; color:var(--acx-ink2)}
+#acx-s2 .s2-k i{margin:0 3px}
+#acx-s2 .s2-left{display:flex; flex-direction:column; gap:6px}
+#acx-s2 .s2-lt{display:flex; flex-wrap:wrap; align-items:center; gap:4px 18px}
+#acx-s2 .s2-tag.is-dash{border-style:dashed; color:var(--acx-ink3)}
+#acx-s2 .s2-k-dash i{width:22px; height:14px; border-radius:7px; border:1px dashed var(--acx-ink3); box-sizing:border-box}
+#acx-s2 .s2-tags{display:flex; flex-wrap:wrap; gap:6px}
+#acx-s2 .s2-tag{display:inline-flex; align-items:center; gap:8px; min-height:42px; padding:0 14px; border-radius:999px; border:1px solid var(--acx-line2); background:transparent; cursor:pointer; font-size:14px; font-weight:500; color:var(--acx-ink2)}
+#acx-s2 .s2-tag b{font-family:var(--acx-mono); font-weight:500; color:var(--acx-ink3)}
+#acx-s2 .s2-tag[aria-pressed="true"]{border-color:var(--acx-accent); color:var(--acx-ink); box-shadow:inset 0 0 0 1px var(--acx-accent)}
+
+/* architecture */
+#acx-s2 .s2-zones{display:grid; grid-template-columns:repeat(5, minmax(0,1fr)); gap:10px 18px}
+#acx-s2 .s2-zone{display:flex; flex-direction:column; gap:6px; min-width:0}
+#acx-s2 .s2-zt{display:grid; grid-template-columns:repeat(var(--zn,5), minmax(0,1fr)); gap:8px 18px; align-items:stretch}
+#acx-s2 .s2-zl{font-family:var(--acx-mono); font-size:14px; color:var(--acx-ink3); text-transform:uppercase; letter-spacing:.05em}
+#acx-s2 .s2-tile{position:relative; display:flex; flex-direction:column; align-items:center; gap:4px; padding:4px 4px 10px; border:1px solid transparent; border-radius:var(--acx-r-sm); background:none; cursor:pointer; text-align:center}
+#acx-s2 .s2-tile:hover{border-color:var(--acx-line2)}
+#acx-s2 .s2-tile[aria-pressed="true"]{border-color:var(--acx-accent); box-shadow:inset 0 0 0 1px var(--acx-accent)}
+#acx-s2 .s2-tn{font-size:14px; line-height:1.25; font-weight:600; color:var(--acx-ink); text-wrap:balance}
+#acx-s2 .s2-who{display:inline-flex; align-items:center; gap:6px; font-size:14px; color:var(--acx-ink3)}
+#acx-s2 .s2-who::before{content:""; width:8px; height:8px; border-radius:50%; background:var(--pc, var(--acx-ink3))}
+#acx-s2 .s2-zone.is-path .s2-tile + .s2-tile::before{content:""; position:absolute; left:-15px; top:40px; width:12px; height:12px; border-top:2px solid var(--acx-accent); border-right:2px solid var(--acx-accent); transform:rotate(45deg)}
+
+/* decision tree */
+#acx-s2 .s2-tree{position:relative; display:grid; grid-template-columns:repeat(var(--tc,3), minmax(0,1fr)); column-gap:40px; row-gap:16px; align-items:center}
+#acx-s2 .s2-wires{position:absolute; inset:0; width:100%; height:100%; overflow:visible; pointer-events:none}
+#acx-s2 .s2-wires path{fill:none; stroke:var(--acx-line2); stroke-width:1.5}
+#acx-s2 .s2-wires path.is-on{stroke:var(--acx-accent); stroke-width:2.5}
+#acx-s2 .s2-wires path.is-open{stroke:var(--acx-accent); stroke-width:2; stroke-dasharray:5 5}
+#acx-s2 .s2-n{position:relative; z-index:1; display:block; min-height:42px; padding:10px 12px; text-wrap:balance; border:1px solid var(--acx-line2); border-radius:var(--acx-r-sm); background:var(--acx-panel); text-align:left; font-size:14px; line-height:1.3; color:var(--acx-ink2); text-decoration:none}
+#acx-s2 .s2-n.is-q{color:var(--acx-ink)}
+#acx-s2 .s2-n.is-leaf{border-style:solid; background:var(--acx-sunk); font-weight:600; color:var(--acx-ink); cursor:pointer}
+#acx-s2 .s2-n.is-on{border-color:var(--acx-accent); box-shadow:inset 0 0 0 1px var(--acx-accent)}
+#acx-s2 .s2-n.is-open{border-style:dashed; border-color:var(--acx-accent)}
+#acx-s2 .s2-n.is-end{background:var(--acx-accent); border-color:var(--acx-accent); color:var(--acx-on-accent)}
+#acx-s2 .s2-n.is-end .s2-br{color:var(--acx-on-accent)}
+#acx-s2 .s2-br{font-family:var(--acx-mono); font-size:14px; font-weight:500; color:var(--acx-ink3); text-transform:uppercase; letter-spacing:.04em; margin-right:7px}
+#acx-s2 .s2-ans{font-family:var(--acx-mono); font-size:14px; font-weight:500; color:var(--acx-accent); margin-left:7px; white-space:nowrap}
+#acx-s2 .s2-crit{display:flex; flex-direction:column; gap:8px}
+#acx-s2 .s2-gate{display:grid; grid-template-columns:18px minmax(0,1fr); gap:10px; align-items:start; padding-top:8px; border-top:1px solid var(--acx-line)}
+#acx-s2 .s2-gate::before{content:""; width:16px; height:16px; margin-top:2px; border-radius:4px; border:2px solid var(--acx-pain); box-sizing:border-box}
+#acx-s2 .s2-gate p{font-size:14px; line-height:1.4; color:var(--acx-ink2)}
+#acx-s2 .s2-gate b{color:var(--acx-ink); font-weight:600}
+#acx-s2 .s2-gate .s2-rt{font-family:var(--acx-mono); color:var(--acx-pain)}
+#acx-s2 .s2-bar{display:flex; gap:2px; height:28px}
+#acx-s2 .s2-seg{display:flex; align-items:center; padding:0 8px; min-width:0; border-radius:4px; background:var(--acx-accent2); color:var(--acx-on-accent); font-family:var(--acx-mono); font-size:14px; font-weight:600}
+#acx-s2 .s2-seg:nth-child(even), #acx-s2 .s2-cl li:nth-child(even)::before{background:var(--acx-ink2)}
+#acx-s2 .s2-seg:nth-child(even){color:var(--acx-bg)}
+#acx-s2 .s2-cl{list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:4px 22px}
+#acx-s2 .s2-cl li{display:grid; grid-template-columns:12px 1fr; gap:10px; align-items:start; font-size:14px; line-height:1.35; color:var(--acx-ink2)}
+#acx-s2 .s2-cl li span{text-wrap:balance}
+#acx-s2 .s2-cl li b{display:none; font-family:var(--acx-mono); font-weight:600; color:var(--acx-ink); margin-right:6px}
+#acx-s2 .s2-cl li::before{content:""; width:12px; height:12px; margin-top:3px; border-radius:3px; background:var(--acx-accent2)}
+
+/* side panel */
+#acx-s2 .s2-side{padding:0; gap:16px; min-width:0}
+#acx-s2 .s2-box{padding:16px 18px; display:flex; flex-direction:column; gap:10px}
+#acx-s2 .s2-box h3{font-size:18px; line-height:1.2}
+#acx-s2 .s2-fl{display:flex; flex-direction:column; gap:8px}
+#acx-s2 .s2-fi{display:flex; align-items:flex-start; gap:10px}
+#acx-s2 .s2-fi .acx-chip{flex:none; min-width:86px; justify-content:flex-start}
+#acx-s2 .s2-fi p{font-size:15px; line-height:1.4; font-weight:600; color:var(--acx-ink); padding-top:1px}
+#acx-s2 .s2-none{font-size:15px; color:var(--acx-ink2)}
+#acx-s2 .s2-bl{display:flex; flex-direction:column; gap:2px}
+#acx-s2 .s2-lg{display:flex; flex-direction:column}
+#acx-s2 .s2-lr{display:flex; align-items:center; gap:10px; width:100%; min-height:42px; padding:3px 6px; border:0; border-radius:var(--acx-r-sm); background:none; cursor:pointer; text-align:left; font-size:14px; color:var(--acx-ink2)}
+#acx-s2 .s2-lr:hover, #acx-s2 .s2-lr[aria-expanded="true"]{background:var(--acx-sunk)}
+#acx-s2 .s2-lr:focus-visible{outline:2px solid var(--acx-accent); outline-offset:-2px}
+#acx-s2 .s2-lr.is-empty{cursor:default; background:none; opacity:.5}
+#acx-s2 .s2-ln{flex:1 1 auto; min-width:0; line-height:1.25}
+#acx-s2 .s2-ln b{font-family:var(--acx-mono); font-weight:500; color:var(--acx-ink3)}
+#acx-s2 .s2-dots{display:flex; flex-wrap:wrap; gap:4px; justify-content:flex-end; max-width:96px}
+#acx-s2 .s2-dots i{display:block; width:10px; height:10px; border-radius:50%; background:var(--acx-accent)}
+#acx-s2 .s2-li{display:flex; flex-direction:column; gap:2px; padding:4px 0 8px 22px}
+#acx-s2 .s2-bi{display:block; width:100%; min-height:42px; padding:4px 0 4px 12px; border:0; border-left:2px solid var(--acx-line2); background:none; cursor:pointer; text-align:left; font-size:14px; line-height:1.35; color:var(--acx-ink); text-wrap:balance}
+#acx-s2 .s2-bi:hover, #acx-s2 .s2-bi[aria-expanded="true"]{border-left-color:var(--acx-accent)}
+#acx-s2 .s2-bi:focus-visible{outline:2px solid var(--acx-accent); outline-offset:2px}
+#acx-s2 .s2-why{display:block; margin-top:4px; font-size:14px; color:var(--acx-ink2)}
+#acx-s2 .s2-out{align-self:flex-start}
+
+@media (min-width:700px) and (max-width:1399px){
+  #acx-s2 .s2-side{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.4fr); gap:0 30px; padding:16px 20px; background:var(--acx-panel); border:1px solid var(--acx-line); border-radius:var(--acx-r); box-shadow:var(--acx-shadow)}
+  #acx-s2 .s2-box{background:transparent; border:0; box-shadow:none; padding:0; border-radius:0}
+  #acx-s2 .s2-build{padding-left:30px; margin-left:-1px; border-left:1px solid var(--acx-line)}
+}
+@media (max-width:1279px){ #acx-s2 .s2-cfg{grid-template-columns:repeat(3, minmax(0,1fr))} }
+@media (max-width:699px){
+  #acx-s2 .s2-cfg{grid-template-columns:minmax(0,1fr); gap:8px; padding:12px 14px}
+  #acx-s2 .s2-f{gap:3px}
+  #acx-s2 .acx-seg{border-radius:20px}
+  #acx-s2 .acx-seg button{padding:0 12px}
+  #acx-s2 .s2-tags{flex-wrap:nowrap; overflow-x:auto; overscroll-behavior-x:contain; gap:6px; padding-bottom:4px}
+  #acx-s2 .s2-tag{flex:none; padding:0 12px}
+  #acx-s2 .s2-mx{--nc:124px; grid-template-columns:var(--nc) repeat(var(--k,6), 118px); min-width:calc(var(--nc) + var(--k,6) * 118px)}
+  #acx-s2 .s2-pn, #acx-s2 .s2-corner{position:sticky; left:0; z-index:2; background:var(--acx-panel)}
+  #acx-s2 .s2-pn{font-size:14px; padding:9px 8px 9px 10px; min-height:40px}
+  #acx-s2 .s2-fi{flex-direction:column; gap:4px}
+  #acx-s2 .s2-zones{display:flex; flex-direction:column; gap:10px}
+  #acx-s2 .s2-zt{display:flex; flex-wrap:nowrap; gap:8px; overflow-x:auto; overscroll-behavior-x:contain; padding-bottom:4px}
+  #acx-s2 .s2-tile{flex:0 0 168px}
+  #acx-s2 .s2-zone.is-path .s2-tile + .s2-tile::before{display:none}
+  #acx-s2 .s2-tree{display:flex; flex-direction:column; align-items:stretch; gap:6px}
+  #acx-s2 .s2-tree .s2-n{margin-left:calc(var(--c,0) * 16px); padding:8px 10px}
+  #acx-s2 .s2-tree{gap:4px}
+  #acx-s2 .s2-cl{gap:2px}
+  #acx-s2 .s2-wires{display:none}
+  #acx-s2 .s2-cl{grid-template-columns:minmax(0,1fr)}
+  #acx-s2 .s2-sv{display:none}
+  #acx-s2 .s2-cl li b{display:inline}
+}
+</style>
+<script>ACX.scene('s2', function (el, A) {
+  'use strict';
+  var D = A.data || {}, esc = A.esc;
+  var CFG = D.configurator || {}, IN = CFG.inputs || [], RULES = CFG.build || [];
+  var P = D.protocols || [], PAR = D.params || [], L = D.layers || [], PAT = D.patterns || [];
+  var TREE = D.tree || [], CRIT = D.criteria || [], COMP = (D.arch && D.arch.components) || [], VARS = D.vars || [];
+  var PM = {}, LM = {}, PATM = {}, TM = {};
+  PAR.forEach(function (x) { PM[x.id] = x; }); L.forEach(function (x, i) { LM[x.id] = x; x._i = i; });
+  PAT.forEach(function (x) { PATM[x.id] = x; }); TREE.forEach(function (x) { TM[x.id] = x; });
+  var RANK = { Live: 0, Pilot: 1, Spec: 2, Unsettled: 3, Absent: 4 };
+  var VIEWS = [{ id: 'matrix', name: 'Matrix' }, { id: 'arch', name: 'Architecture' }, { id: 'tree', name: 'Decision tree' }];
+  var used = {}; P.forEach(function (p) { Object.keys(p.params || {}).forEach(function (k) { used[k] = 1; }); });
+  var COLS = {
+    leader: ['P1', 'P3', 'P4', 'P6', 'P7', 'P9'].filter(function (k) { return PM[k] && used[k]; }),
+    architect: ['P3', 'P4', 'P5', 'P6', 'P11', 'P12'].filter(function (k) { return PM[k] && used[k]; })
+  };
+  var $ = function (s) { return el.querySelector(s); };
+  var readEl = $('.s2-read');
+
+  /* ---------- configuration in the hash: the five values joined by dots, in input order */
+  function parseCfg(s) {
+    var parts = String(s || '').split('.'), o = {};
+    IN.forEach(function (inp, i) {
+      var opts = inp.options || [];
+      o[inp.id] = opts.some(function (x) { return x.v === parts[i]; }) ? parts[i] : (opts[0] && opts[0].v);
+    });
+    return o;
+  }
+  function cfgStr(o) { return IN.map(function (inp) { return o[inp.id]; }).join('.'); }
+  var st = { cfg: parseCfg(A.get('cfg')), view: VIEWS.some(function (v) { return v.id === A.get('view'); }) ? A.get('view') : 'matrix', read: null, comp: COMP[0] && COMP[0].id, open: null };
+
+  $('.s2-cfg').innerHTML = IN.map(function (inp) {
+    return '<div class="s2-f"><label for="acx-s2-' + esc(inp.id) + '">' + esc(inp.label) + '</label><div class="s2-sel"><select id="acx-s2-' + esc(inp.id) + '" data-k="' + esc(inp.id) + '">' +
+      (inp.options || []).map(function (o) { return '<option value="' + esc(o.v) + '">' + esc(o.label) + '</option>'; }).join('') + '</select></div></div>';
+  }).join('');
+  $('.s2-cfg').addEventListener('change', function (e) {
+    var s = e.target.closest('select'); if (!s) return;
+    var o = {}; IN.forEach(function (inp) { o[inp.id] = st.cfg[inp.id]; }); o[s.dataset.k] = s.value;
+    A.set('cfg', cfgStr(o));
+  });
+
+  /* ---------- fit logic, read from each protocol's own parameter text */
+  var RAIL = { card: /card/i, a2a: /account to account/i, stable: /stablecoin/i, ln: /lightning/i };
+  var HUMAN = { present: /human present/i, delegated: /not present/i, machine: /machine to machine/i };
+  function neutral(v) { return !v || /^(not defined|not found|not checked|not stated)|^via |^set by/i.test(v); }
+  function fitOf(pid, v, c) {
+    if (neutral(v)) return null;
+    if (pid === 'P1') { var h = HUMAN[c.human]; return h ? (h.test(v) ? 'fit' : 'clash') : null; }
+    if (pid === 'P6') { var r = RAIL[c.rail]; return r ? (r.test(v) ? 'fit' : 'clash') : null; }
+    if (pid === 'P7') {
+      var rev = /chargeback|reversible/i.test(v), fin = /final/i.test(v);
+      if (c.rail === 'card') return rev ? 'fit' : (fin ? 'clash' : null);
+      return fin ? 'fit' : (rev ? 'clash' : null);
+    }
+    return null;
+  }
+  function stat(p, u) { var s = (p.status || {})[u]; return s && s.m ? s : { m: 'Absent' }; }
+  function fits(p, c) {
+    if (!(p.status || {})[c.use]) return false;
+    if (stat(p, c.use).m === 'Absent') return false;
+    var pr = p.params || {};
+    return fitOf('P1', pr.P1, c) !== 'clash' && fitOf('P6', pr.P6, c) !== 'clash';
+  }
+  function glyph(v) {
+    if (!v) return 'unk';
+    if (/runs inside|^via |^set by|expected|maps onto/i.test(v)) return 'del';
+    if (/^not (found|checked|stated)/i.test(v)) return 'unk';
+    if (/^none,? or /i.test(v)) return 'def';
+    if (/^(none|not defined)/i.test(v)) return 'none';
+    return 'def';
+  }
+  var GLYPH = [['def', 'Defined'], ['del', 'Left to another layer'], ['none', 'None'], ['unk', 'Not found']];
+  function rulesFor(c) {
+    return RULES.filter(function (r) {
+      return Object.keys(r.if || {}).every(function (k) { return (r.if[k] || []).indexOf(c[k]) >= 0; });
+    });
+  }
+
+  /* ---------- view switch */
+  var segV = $('[data-s2-view]');
+  segV.innerHTML = VIEWS.map(function (v) { return '<button type="button" data-v="' + v.id + '" aria-pressed="false">' + esc(v.name) + '</button>'; }).join('');
+  segV.addEventListener('click', function (e) { var b = e.target.closest('button[data-v]'); if (b) A.set('view', b.dataset.v); });
+
+  /* ---------- readout line, one item at a time */
+  function setRead(html, key) { readEl.innerHTML = html; st.read = key || null; markRead(); }
+  function markRead() {
+    el.querySelectorAll('[data-rk]').forEach(function (x) {
+      var on = x.dataset.rk === st.read;
+      if (x.matches('button')) x.setAttribute('aria-pressed', String(on)); else x.classList.toggle('is-on', on);
+    });
+  }
+  function paramRead(id) {
+    var p = PM[id]; if (!p) return;
+    setRead('<b>' + esc(p.name) + '</b> ' + esc(p.why || '') + (p.who ? ' <span class="s2-rt">Set by ' + esc(p.who.charAt(0).toLowerCase() + p.who.slice(1)) + '</span>' : ''), 'p:' + id);
+  }
+  function cellRead(pid, k) {
+    var p = P.filter(function (x) { return x.id === pid; })[0]; if (!p) return;
+    var v = (p.params || {})[k], f = fitOf(k, v, st.cfg);
+    setRead('<b>' + esc(p.name) + '</b> <span class="s2-rt">' + esc(PM[k] ? PM[k].name : k) + '</span> ' + esc(v || 'not stated') +
+      (f === 'fit' ? ' <span class="s2-rt">matches your setup</span>' : f === 'clash' ? ' <span class="s2-rt">clashes with your setup</span>' : ''), 'c:' + pid + ':' + k);
+  }
+
+  /* ---------- matrix */
+  var mx = $('.s2-mx');
+  function cols() { return COLS[A.reader === 'architect' ? 'architect' : 'leader']; }
+  function buildMatrix() {
+    var K = cols();
+    mx.style.setProperty('--k', K.length || 1);
+    var h = '<div class="s2-row" role="row"><span class="s2-corner" role="columnheader"><span class="acx-sr">Protocol</span></span>' + K.map(function (k) {
+      return '<button type="button" class="s2-hd" role="columnheader" data-rk="p:' + esc(k) + '" data-pk="' + esc(k) + '">' + esc(PM[k].name) + '</button>';
+    }).join('') + '</div>';
+    h += P.map(function (p, ri) {
+      return '<div class="s2-row" role="row" data-p="' + esc(p.id) + '"><span class="s2-pn" role="rowheader">' + esc(p.name) + '</span>' + K.map(function (k, ci) {
+        var v = (p.params || {})[k];
+        return '<span class="s2-c" role="gridcell" tabindex="' + (ri === 0 && ci === 0 ? '0' : '-1') + '" data-rk="c:' + esc(p.id) + ':' + esc(k) + '" data-k="' + esc(k) + '" data-g="' + glyph(v) + '" aria-label="' + esc(p.name + ', ' + PM[k].name + ': ' + (v || 'not stated')) + '"><i></i></span>';
+      }).join('') + '</div>';
+    }).join('');
+    mx.innerHTML = h;
+    $('.s2-key').innerHTML = GLYPH.map(function (g) { return '<span class="s2-k" data-g="' + g[0] + '"><i></i>' + g[1] + '</span>'; }).join('') +
+      '<span class="s2-k s2-k-cfg"><i></i>Checked against your setup</span><span class="s2-k s2-k-clash"><i></i>Clashes</span>';
+    paintMatrix();
+  }
+  function paintMatrix() {
+    var c = st.cfg;
+    var anyFit = c.use !== 'P' && P.some(function (p) { return fits(p, c); });
+    allBtn.hidden = !anyFit;
+    allBtn.textContent = st.all ? 'Show fits only' : 'Show all ' + P.length;
+    allBtn.setAttribute('aria-pressed', String(!!st.all));
+    mx.querySelectorAll('.s2-hd').forEach(function (h) { h.classList.toggle('is-cfg', c.use !== 'P' && ['P1', 'P6', 'P7'].indexOf(h.dataset.pk) >= 0); });
+    mx.querySelectorAll('.s2-row[data-p]').forEach(function (row) {
+      var p = P.filter(function (x) { return x.id === row.dataset.p; })[0];
+      var out = c.use === 'P' || !fits(p, c);
+      row.classList.toggle('is-out', out);
+      row.hidden = out && !st.all && anyFit;
+      row.querySelectorAll('.s2-c').forEach(function (cell) {
+        var f = fitOf(cell.dataset.k, (p.params || {})[cell.dataset.k], c);
+        if (f === 'clash' && c.use !== 'P') cell.dataset.f = f; else delete cell.dataset.f;
+      });
+    });
+    var vis = mx.querySelectorAll('.s2-row:not([hidden]) .s2-c');
+    mx.querySelectorAll('.s2-c').forEach(function (x) { x.setAttribute('tabindex', '-1'); });
+    if (vis[0]) vis[0].setAttribute('tabindex', '0');
+  }
+  mx.addEventListener('click', function (e) {
+    var hd = e.target.closest('.s2-hd'); if (hd) { paramRead(hd.dataset.pk); return; }
+    var c = e.target.closest('.s2-c'); if (c) { c.focus(); }
+  });
+  mx.addEventListener('focusin', function (e) {
+    var c = e.target.closest('.s2-c'); if (!c) return;
+    mx.querySelectorAll('.s2-c[tabindex="0"]').forEach(function (x) { if (x !== c) x.setAttribute('tabindex', '-1'); });
+    c.setAttribute('tabindex', '0');
+    var parts = c.dataset.rk.split(':'); cellRead(parts[1], parts[2]);
+  });
+  mx.addEventListener('pointerover', function (e) {
+    var c = e.target.closest('.s2-c'); if (!c) return;
+    var parts = c.dataset.rk.split(':'); cellRead(parts[1], parts[2]);
+  });
+  mx.addEventListener('keydown', function (e) {
+    var c = e.target.closest('.s2-c'); if (!c) return;
+    var all = [].slice.call(mx.querySelectorAll('.s2-row:not([hidden]) .s2-c')), i = all.indexOf(c), K = cols().length, j = i;
+    if (e.key === 'ArrowRight') j = i + 1; else if (e.key === 'ArrowLeft') j = i - 1;
+    else if (e.key === 'ArrowDown') j = i + K; else if (e.key === 'ArrowUp') j = i - K; else return;
+    e.preventDefault(); if (all[j]) all[j].focus();
+  });
+
+  /* parameters no protocol sets: left for the business to decide */
+  var allBtn = $('.s2-all');
+  allBtn.addEventListener('click', function () { st.all = !st.all; paintMatrix(); });
+  /* the build list covers the parameters no protocol sets, so there is no separate chip list */
+
+  /* ---------- architecture: zones follow the gateway diagram in the design doc */
+  var ZONES = [{ id: 'core', name: 'Payment path', ids: ['adapt', 'mandv', 'policy', 'canon', 'orch'], path: true }, { id: 'edge', name: 'Edge', ids: ['disc', 'idv'] }, { id: 'rec', name: 'Records', ids: ['evid', 'events', 'dispute'] }];
+  var placed = {}; ZONES.forEach(function (z) { z.items = z.ids.map(function (id) { var c = COMP.filter(function (x) { return x.id === id; })[0]; if (c) placed[id] = 1; return c; }).filter(Boolean); });
+  COMP.forEach(function (c) { if (!placed[c.id]) ZONES[ZONES.length - 1].items.push(c); });
+  var PERSONA = {}; var PTONE = ['--acx-l1', '--acx-l2', '--acx-l3', '--acx-l4', '--acx-l6', '--acx-l7', '--acx-l5'];
+  COMP.forEach(function (c) { if (c.persona && !PERSONA[c.persona]) PERSONA[c.persona] = PTONE[Object.keys(PERSONA).length % PTONE.length]; });
+  $('.s2-zones').innerHTML = ZONES.filter(function (z) { return z.items.length; }).map(function (z) {
+    var n = Math.min(z.items.length, 5);
+    return '<div class="s2-zone' + (z.path ? ' is-path' : '') + '" style="grid-column:span ' + n + '; --zn:' + n + '"><p class="s2-zl">' + esc(z.name) + '</p><div class="s2-zt">' + z.items.map(function (c) {
+      return '<button type="button" class="s2-tile" data-rk="a:' + esc(c.id) + '" data-c="' + esc(c.id) + '" aria-pressed="false">' + A.icon(c.icon, c.tone, 'hero') +
+        '<span class="s2-tn">' + esc(c.name) + '</span>' + (c.persona ? '<span class="s2-who" style="--pc:var(' + PERSONA[c.persona] + ')">' + esc(c.persona) + '</span>' : '') + '</button>';
+    }).join('') + '</div></div>';
+  }).join('');
+  function compRead(id) {
+    var c = COMP.filter(function (x) { return x.id === id; })[0]; if (!c) return;
+    st.comp = id;
+    setRead('<b>' + esc(c.name) + '</b> ' + esc(c.one || '') + (c.persona ? ' <span class="s2-rt">Owner ' + esc(c.persona) + '</span>' : ''), 'a:' + id);
+  }
+  $('.s2-zones').addEventListener('click', function (e) { var b = e.target.closest('.s2-tile'); if (b) compRead(b.dataset.c); });
+  function vtag(v) { return '<button type="button" class="s2-tag" data-rk="v:' + esc(v.id) + '" data-vk="' + esc(v.id) + '" aria-pressed="false">' + esc(v.name) + '</button>'; }
+  var varBox = $('[data-s2-vars]');
+  var isEv = function (v) { return v.kind && v.kind !== 'choice'; };
+  varBox.innerHTML = VARS.filter(function (v) { return !isEv(v); }).map(vtag).join('') + VARS.filter(isEv).map(function (v) { return vtag(v).replace('class="s2-tag"', 'class="s2-tag is-dash"'); }).join('');
+  $('[data-s2-evk]').hidden = !VARS.some(isEv);
+  varBox.addEventListener('click', function (e) {
+    var b = e.target.closest('.s2-tag'); if (!b) return;
+    var v = VARS.filter(function (x) { return x.id === b.dataset.vk; })[0]; if (!v) return;
+    setRead('<b>' + esc(v.name) + '</b> ' + esc(v.why || '') + (v.typical ? ' <span class="s2-rt">Typical ' + esc(v.typical) + '</span>' : ''), 'v:' + v.id);
+  });
+
+  /* ---------- decision tree: yes to the right, no below */
+  var treeEl = $('.s2-tree'), wires = $('.s2-wires'), nodes = [], byKey = {}, maxC = 0;
+  function place(id, c, r, from, branch, seen) {
+    var key = 'n' + nodes.length, q = TM[id], n = { key: key, id: id, c: c, r: r, from: from, branch: branch, q: q };
+    nodes.push(n); byKey[key] = n; maxC = Math.max(maxC, c);
+    if (!q || seen[id]) return 1;
+    var s2 = Object.assign({}, seen); s2[id] = 1;
+    var hy = place(q.yes, c + 1, r, key, 'yes', s2); n.yes = findChild(key, 'yes');
+    var hn = place(q.no, c, r + hy, key, 'no', s2); n.no = findChild(key, 'no');
+    return hy + hn;
+  }
+  function findChild(key, br) { for (var i = 0; i < nodes.length; i++) if (nodes[i].from === key && nodes[i].branch === br) return nodes[i].key; return null; }
+  if (TREE.length) place(TREE[0].id, 0, 0, null, null, {});
+  treeEl.style.setProperty('--tc', maxC + 1);
+  function leafLabel(id) {
+    if (id === 'payouts') return 'Payouts page';
+    return String(id).split('+').map(function (x) { return PATM[x] ? PATM[x].name : x; }).join(' + ');
+  }
+  var order = nodes.slice().sort(function (a, b) { return a.r - b.r || a.c - b.c; });
+  treeEl.insertAdjacentHTML('beforeend', order.map(function (n) {
+    var style = 'grid-column:' + (n.c + 1) + '; grid-row:' + (n.r + 1) + '; --c:' + n.c;
+    var br = n.branch ? '<span class="s2-br">' + (n.branch === 'yes' ? 'Yes' : 'No') + '</span>' : '';
+    if (n.q) return '<div class="s2-n is-q" data-key="' + n.key + '" style="' + style + '">' + br + '<span>' + esc(n.q.q) + '</span><span class="s2-ans" hidden></span></div>';
+    if (n.id === 'payouts') return '<a class="s2-n is-leaf" data-key="' + n.key + '" style="' + style + '" href="/deep-dives/agentic-payouts-desk">' + br + '<span>' + esc(leafLabel(n.id)) + ' <span aria-hidden="true">&rarr;</span></span></a>';
+    return '<button type="button" class="s2-n is-leaf" data-key="' + n.key + '" data-rk="t:' + n.key + '" style="' + style + '">' + br + '<span>' + esc(leafLabel(n.id)) + '</span></button>';
+  }).join(''));
+  function leafRead(key) {
+    var n = byKey[key]; if (!n) return;
+    var lead = PATM[String(n.id).split('+')[0]];
+    var line = lead ? (lead.best_for ? 'Best for ' + lead.best_for.charAt(0).toLowerCase() + lead.best_for.slice(1) + '.' : (lead.one || '')) : '';
+    setRead('<b>' + esc(leafLabel(n.id)) + '</b> ' + esc(line), 't:' + key);
+  }
+  treeEl.addEventListener('click', function (e) { var b = e.target.closest('button.s2-n'); if (b) leafRead(b.dataset.key); });
+
+  /* answers a configuration gives to each question; null means the setup alone cannot say */
+  function answer(id, c, matched) {
+    switch (id) {
+      case 'u1': return c.use === 'P';
+      case 'u2': return c.use === 'M';
+      case 'q2': return c.payer === 'business' ? true : (c.payer === 'consumer' ? false : null);
+      case 'q1': return c.human === 'present';
+      case 'q3': return c.rail === 'card' ? false : true;
+      case 'q4': return c.rail !== 'card';
+      case 'q6': return matched.some(function (r) { return r.layer === 'L2' && r.if && r.if.juris; });
+      case 'q0': return true;
+      default: return null;
+    }
+  }
+  var ASSUMED = { q0: 1 };
+  function treePath() {
+    var on = {}, open = {}, ends = [], matched = rulesFor(st.cfg);
+    (function walk(key, depth) {
+      var n = byKey[key]; if (!n || depth > 40) return;
+      on[key] = 1;
+      if (!n.q) { ends.push(key); return; }
+      var a = answer(n.id, st.cfg, matched);
+      if (a === null) { open[key] = 1; walk(n.yes, depth + 1); walk(n.no, depth + 1); }
+      else walk(a ? n.yes : n.no, depth + 1);
+    })('n0', 0);
+    return { on: on, open: open, ends: ends };
+  }
+  var lastPath = null;
+  function paintTree() {
+    var t = lastPath = treePath();
+    treeEl.querySelectorAll('.s2-n').forEach(function (x) {
+      var k = x.dataset.key, n = byKey[k];
+      x.classList.toggle('is-on', !!t.on[k] && !!n.q);
+      x.classList.toggle('is-open', !!t.open[k]);
+      x.classList.toggle('is-end', t.ends.indexOf(k) >= 0);
+      var ans = x.querySelector('.s2-ans');
+      var assumed = !!t.on[k] && ASSUMED[n.id];
+      if (ans) { ans.hidden = !(t.open[k] || assumed); ans.textContent = t.open[k] ? 'Your call' : (assumed ? 'Assumed yes' : ''); }
+    });
+    drawWires();
+  }
+  function drawWires() {
+    if (!lastPath || el.querySelector('[data-v="tree"]').hidden) return;
+    var box = treeEl.getBoundingClientRect(); if (!box.width) return;
+    wires.setAttribute('viewBox', '0 0 ' + box.width + ' ' + box.height);
+    var out = '';
+    nodes.forEach(function (n) {
+      if (!n.from) return;
+      var a = treeEl.querySelector('[data-key="' + n.from + '"]'), b = treeEl.querySelector('[data-key="' + n.key + '"]'); if (!a || !b) return;
+      var ra = a.getBoundingClientRect(), rb = b.getBoundingClientRect(), d;
+      if (n.branch === 'yes') d = 'M' + (ra.right - box.left) + ' ' + (ra.top + ra.height / 2 - box.top) + ' H' + (rb.left - box.left);
+      else { var x = ra.left - box.left + 22; d = 'M' + x + ' ' + (ra.bottom - box.top) + ' V' + (rb.top - box.top); }
+      var on = lastPath.on[n.from] && lastPath.on[n.key];
+      out += '<path d="' + d + '" class="' + (on ? (lastPath.open[n.from] ? 'is-open' : 'is-on') : '') + '"/>';
+    });
+    wires.innerHTML = out;
+  }
+  if ('ResizeObserver' in window) new ResizeObserver(function () { drawWires(); }).observe(treeEl);
+
+  /* criteria weights as one segmented bar */
+  var total = CRIT.reduce(function (a, c) { return a + (+c.weight || 0); }, 0) || 1;
+  var GATES = CRIT.filter(function (c) { return c.gate; }); CRIT = CRIT.filter(function (c) { return !c.gate && +c.weight > 0; });
+  $('.s2-gates').innerHTML = GATES.map(function (g) { return '<div class="s2-gate"><p><b>' + esc(g.name) + '</b> <span class="s2-rt">Pass or fail</span> ' + esc(g.why || '') + '</p></div>'; }).join('');
+  var cev = (CRIT.filter(function (c) { return c.ev; })[0] || {}).ev; $('[data-s2-cev]').innerHTML = cev ? A.ev(cev) : '';
+  $('.s2-bar').innerHTML = CRIT.map(function (c) { return '<span class="s2-seg" style="flex:' + (+c.weight || 0) + ' 1 0"><span class="s2-sv">' + esc(c.weight) + '</span></span>'; }).join('');
+  $('.s2-bar').setAttribute('aria-label', CRIT.map(function (c) { return c.name + ' ' + c.weight; }).join(', '));
+  $('.s2-cl').innerHTML = CRIT.map(function (c) { return '<li><span><b>' + esc(c.weight) + '</b>' + esc(c.name) + '</span></li>'; }).join('');
+
+  /* ---------- side panel: what fits and what you must build */
+  var fl = $('.s2-fl'), bl = $('.s2-bl');
+  function paintSide() {
+    var c = st.cfg;
+    if (c.use === 'P') {
+      fl.innerHTML = '<a class="acx-btn s2-out" href="/deep-dives/agentic-payouts-desk">Open the payouts desk <span aria-hidden="true">&rarr;</span></a>';
+    } else {
+      var all = P.filter(function (p) { return fits(p, c); }).sort(function (a, b) { return RANK[stat(a, c.use).m] - RANK[stat(b, c.use).m]; });
+      var isEn = function (p) { return (p.kind === 'trust' && p.id !== 'ap2') || p.id === 'mcp' || p.id === 'a2a'; };
+      var f = all.filter(function (p) { return !isEn(p); }), en = all.filter(isEn);
+      var by = {}; f.forEach(function (p) { var m = stat(p, c.use).m; (by[m] = by[m] || []).push(p.name); });
+      fl.innerHTML = f.length ? Object.keys(by).sort(function (a, b) { return RANK[a] - RANK[b]; }).map(function (m) { return '<div class="s2-fi">' + A.chip(m) + '<p>' + esc(by[m].join(', ')) + '</p></div>'; }).join('') :
+        '<p class="s2-none">No payment protocol on this page fits yet.</p>';
+      if (en.length) fl.insertAdjacentHTML('beforeend', '<p class="s2-also"><b>Also needed:</b> ' + esc(en.map(function (p) { return p.name; }).join(', ')) + '</p>');
+    }
+    var m = rulesFor(c), groups = {};
+    m.forEach(function (r, i) { (groups[r.layer] = groups[r.layer] || []).push({ r: r, i: i }); });
+    var rows = L.slice(); Object.keys(groups).forEach(function (k) { if (!LM[k]) rows.push({ id: k, name: '' }); });
+    var first = rows.filter(function (l) { return groups[l.id]; })[0];
+    if (!st.openL || !groups[st.openL]) st.openL = first ? first.id : null;
+    bl.innerHTML = rows.map(function (l) {
+      var items = groups[l.id] || [], open = l.id === st.openL;
+      var head = (l.icon ? A.icon(l.icon, l.tone, 'chip') : '') + '<span class="s2-ln"><b>' + esc(l.id) + '</b> ' + esc(l.name) + '</span>' +
+        '<span class="s2-dots" aria-hidden="true">' + items.map(function () { return '<i></i>'; }).join('') + '</span>';
+      if (!items.length) return '<div class="s2-lg"><div class="s2-lr is-empty">' + head + '</div></div>';
+      return '<div class="s2-lg"><button type="button" class="s2-lr" data-l="' + esc(l.id) + '" aria-expanded="' + open + '" aria-label="' + esc(l.id + ' ' + l.name + ', ' + items.length + ' to build') + '">' + head + '</button>' +
+        '<div class="s2-li"' + (open ? '' : ' hidden') + '>' + items.map(function (x) {
+          return '<button type="button" class="s2-bi" aria-expanded="false" data-i="' + x.i + '">' + esc(x.r.must) + '<span class="s2-why" hidden>' + esc(x.r.why || '') + '</span></button>';
+        }).join('') + '</div></div>';
+    }).join('');
+  }
+  bl.addEventListener('click', function (e) {
+    var lr = e.target.closest('button.s2-lr');
+    if (lr) {
+      var was = lr.getAttribute('aria-expanded') === 'true';
+      bl.querySelectorAll('button.s2-lr').forEach(function (x) { x.setAttribute('aria-expanded', 'false'); x.nextElementSibling.hidden = true; });
+      if (!was) { lr.setAttribute('aria-expanded', 'true'); lr.nextElementSibling.hidden = false; st.openL = lr.dataset.l; } else st.openL = '-';
+      return;
+    }
+    var b = e.target.closest('.s2-bi'); if (!b) return;
+    var was = b.getAttribute('aria-expanded') === 'true';
+    bl.querySelectorAll('.s2-bi').forEach(function (x) { x.setAttribute('aria-expanded', 'false'); x.querySelector('.s2-why').hidden = true; });
+    if (!was) { b.setAttribute('aria-expanded', 'true'); b.querySelector('.s2-why').hidden = false; }
+  });
+
+  /* ---------- render */
+  function defaultRead() {
+    if (st.view === 'matrix') { var K = cols(); if (K[0]) paramRead(K[0]); }
+    else if (st.view === 'arch') compRead(st.comp);
+    else { var t = lastPath || treePath(); if (t.ends[0] && byKey[t.ends[0]].id !== 'payouts') leafRead(t.ends[0]); else if (TM[TREE[0] && TREE[0].id]) setRead('<b>' + esc(leafLabel('payouts')) + '</b> ' + esc((RULES.filter(function (r) { return r.if && r.if.use && r.if.use.indexOf('P') >= 0; })[0] || {}).why || ''), null); }
+  }
+  function paintView() {
+    segV.querySelectorAll('button').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.v === st.view)); });
+    el.querySelectorAll('.s2-view').forEach(function (v) { v.hidden = v.dataset.v !== st.view; });
+    if (st.view === 'tree') paintTree();
+    defaultRead();
+  }
+  function paintCfg() {
+    IN.forEach(function (inp) { var s = el.querySelector('select[data-k="' + inp.id + '"]'); if (s) s.value = st.cfg[inp.id]; });
+    paintMatrix(); paintSide(); lastPath = null; if (st.view === 'tree') paintTree();
+    if (st.view !== 'arch') defaultRead();
+  }
+  A.on('cfg', function (v) { var o = parseCfg(v); if (cfgStr(o) === cfgStr(st.cfg)) return; st.cfg = o; paintCfg(); });
+  A.on('view', function (v) { if (!VIEWS.some(function (x) { return x.id === v; }) || v === st.view) return; st.view = v; paintView(); });
+  A.onReader(function () { buildMatrix(); if (st.view !== 'arch' || !st.read) defaultRead(); else compRead(st.comp); });
+
+  paintCfg();
+  paintView();
+});</script>

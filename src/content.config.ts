@@ -37,7 +37,9 @@ const deepDives = defineCollection({
     bpEyebrow: z.string().optional(),
     bpTitle: z.string().optional(),
     bpSubtitle: z.string().optional(),
-    bpCoords: z.array(z.string()).optional()
+    bpCoords: z.array(z.string()).optional(),
+    // Opt an older page into the layout-gate type and tap sizes. See gateReady in [slug].astro.
+    gate: z.boolean().optional()
   })
 });
 

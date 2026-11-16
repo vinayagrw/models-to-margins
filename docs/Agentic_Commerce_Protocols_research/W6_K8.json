@@ -1,0 +1,1289 @@
+[
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:48",
+  "text": "$240K a year in the default case",
+  "mark": "unverified",
+  "kind": "proposal",
+  "checked_at": "no source, calculator output",
+  "quote": "Our arithmetic. Recomputed 72,000 x 45% x $9.40 less $65K, about $240K",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:48",
+  "text": "payback in month 21",
+  "mark": "unverified",
+  "kind": "proposal",
+  "checked_at": "no source, calculator output",
+  "quote": "Recomputed: $400K build over $240K a year is about 20 months",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:48",
+  "text": "3,000 suppliers, 72,000 payments a year, 60% released by rule",
+  "mark": "unverified",
+  "kind": "proposal",
+  "checked_at": "no source, illustrative inputs",
+  "quote": "Page labels these Illustrative",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:49",
+  "text": "4 vendors let the agent go last",
+  "mark": "unverified",
+  "kind": "sourced",
+  "checked_at": "meow.com page returned HTTP 526 twice, other three sources opened",
+  "quote": "Payouts.com agents run in shadow mode for a fortnight",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:420",
+  "text": "Payouts.com after two weeks in shadow mode",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://fintech.global/2026/07/14/payouts-com-launches-digital-employee-ai-agents/",
+  "quote": "New agents run in shadow mode for a fortnight",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:49",
+  "text": "Visa, BILL and Billtrust pilot after buyer approval",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://usa.visa.com/about-visa/newsroom/press-releases.releaseId.22856.html",
+  "quote": "only executes eligible payments that have already been approved by the buyer",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:50",
+  "text": "$3.05B lost to business email compromise in 2025, FBI",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://www.ic3.gov/AnnualReport/Reports/2025_IC3Report.pdf",
+  "quote": "BEC $3,046,598,558 (2025 complaint loss)",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:50",
+  "text": "About $123,000 per complaint",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://www.ic3.gov/AnnualReport/Reports/2025_IC3Report.pdf",
+  "quote": "BEC 24,768 complaints in 2025, so about $123,005 each",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:51",
+  "text": "38.4% of workflows passed, best agent",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://arxiv.org/html/2512.13168v4",
+  "quote": "GPT 5.1 Pro ... passes only 38.4% of workflows",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:143",
+  "text": "38.4% of accounting workflows passed, best agent",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://arxiv.org/html/2512.13168v4",
+  "quote": "passes only 38.4% of workflows, on a finance and accounting benchmark",
+  "fix": "38.4% of finance and accounting workflows passed, best agent"
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:52",
+  "text": "2 of 10 payout states differ, eight of ten shared",
+  "mark": "unverified",
+  "kind": "proposal",
+  "checked_at": "no source, our state model",
+  "quote": "Page labels this Illustrative",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:53",
+  "text": "Stripe may prune keys after 24 hours",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://docs.stripe.com/api/idempotent_requests",
+  "quote": "remove keys from the system automatically after they're at least 24 hours old",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:54,114",
+  "text": "Three 2026 market sizes run $3.8B to $6.57B, 1.7 times apart",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://www.futuremarketinsights.com/reports/accounts-payable-automation-market and https://www.thebusinessresearchcompany.com/report/accounts-payable-automation-global-market-report",
+  "quote": "USD 3.8 billion and $6.57 billion in 2026, ratio 1.73",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:110",
+  "text": "$3.8B Future Market Insights",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://www.futuremarketinsights.com/reports/accounts-payable-automation-market",
+  "quote": "projected to reach USD 3.8 billion in 2026",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:111",
+  "text": "$6.4B Research and Markets",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://www.researchandmarkets.com/reports/6242294/ap-automation-market-outlook-market-share",
+  "quote": "The AP Automation Market is estimated at US$6.4 billion in 2026",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:112",
+  "text": "$6.57B The Business Research Company",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://www.thebusinessresearchcompany.com/report/accounts-payable-automation-global-market-report",
+  "quote": "$6.57 billion in 2026",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:55",
+  "text": "about $400 billion in 2025, about 60% of it B2B",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://stripe.com/newsroom/news/stripe-2025-update",
+  "quote": "around $400 billion ... 60% of which is estimated to represent B2B",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:55",
+  "text": "About $240 billion of B2B stablecoin payments in 2025, our arithmetic",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://stripe.com/newsroom/news/stripe-2025-update",
+  "quote": "$400 billion x 60% is $240 billion, arithmetic checks",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:55",
+  "text": "beside $93 trillion of ACH",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://www.nacha.org/news/same-day-ach-and-business-business-payments-propel-ach-network-volume-growth-2025",
+  "quote": "The value of those payments reached $93 trillion",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:55",
+  "text": "The FSB puts the coin market at $300 billion",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://www.fsb.org/uploads/P121026-2.pdf",
+  "quote": "total market value for stablecoins is around $300 billion",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:56",
+  "text": "Wise kept 52 basis points per dollar moved in fiscal 2026, down from 58",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://www.investegate.co.uk/announcement/rns/wise-class-a--wise/wise-fy26-results/9637901",
+  "quote": "Cross-border take rate (%) 0.52 0.58 -6bps",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:56",
+  "text": "Take rates fell at Wise and Payoneer",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://www.payoneer.com/press/payoneer-reports-second-quarter-2026-financial-results/",
+  "quote": "Take rate 126 bps in 2Q 2025 to 116 bps in 2Q 2026",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:56",
+  "text": "A Fed governor names liability as a barrier",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://www.federalreserve.gov/newsevents/speech/waller20260928a.htm",
+  "quote": "concrete challenges stand out: authentication, liability, and fraud",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:67",
+  "text": "38% of B2B buyers already use agentic AI in purchasing",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://www.marketscale.com/industries/business-services/38-of-b2b-buyers-already-use-agentic-ai-and-many-suppliers-still-lack-front-to-back-integration",
+  "quote": "38% of surveyed B2B buyers are already using agentic AI in purchasing",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:69",
+  "text": ">$100M a year at one network",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://thefintechtimes.com/melio-launches-agentic-b2b-payment-network-for-us-smbs/",
+  "quote": "recorded over $100million in annualised payment volume",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:69",
+  "text": "Melio says live since Jun 2026",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://thefintechtimes.com/melio-launches-agentic-b2b-payment-network-for-us-smbs/",
+  "quote": "launched an AI agent-powered B2B payment network on 17 June",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:69",
+  "text": "A Visa, BILL and Billtrust pilot began 20 Oct 2026",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://usa.visa.com/about-visa/newsroom/press-releases.releaseId.22856.html",
+  "quote": "Oct. 20, 2026 ... today announced they have launched the first live pilot",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:69",
+  "text": "Only 13% of suppliers are fully integrated",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://www.marketscale.com/industries/business-services/38-of-b2b-buyers-already-use-agentic-ai-and-many-suppliers-still-lack-front-to-back-integration",
+  "quote": "only 13% of suppliers say their ... systems are completely integrated",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:69-71",
+  "text": "6 months and 12 months outlooks, incl. a few million a month at most",
+  "mark": "unverified",
+  "kind": "proposal",
+  "checked_at": "no source, our forecast",
+  "quote": "Forecast horizons and values are our own",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:70",
+  "text": "$36.9B chargebacks agent rules must cover",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://www.chargeflow.io/pt-br/blog/ai-agent-chargeback-liability",
+  "quote": "chargebacks to merchants will rise from $36.9 billion in 2026",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:70",
+  "text": "ChatGPT moved checkout to retailer sites in Mar 2026",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://forklog.com/en/openai-abandons-instant-checkout-feature-in-chatgpt/",
+  "quote": "23.03.2026 ... will redirect users to vendors' own websites",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:71",
+  "text": "x402 pay per call $24M in 30 days",
+  "mark": "wrong",
+  "kind": "sourced",
+  "checked_at": "https://cryptobriefing.com/solana-x402-market-share-dominance/ and https://agenteconomy.to/data.json",
+  "quote": "Crypto Briefing: Solana alone, $24.24 million, mid-August 2026. AP#1 Oct 26: 274220",
+  "fix": "x402 pay per call: about $274K in October 2026"
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:71",
+  "text": "A Linux Foundation project with 50+ members",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://www.linuxfoundation.org/press/linux-foundation-appoints-michael-hursta-as-executive-director-of-the-x402-foundation",
+  "quote": "Hursta will lead 50+ member organizations advancing x402",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:71",
+  "text": "Volume is below its peak",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://agenteconomy.to/data.json",
+  "quote": "Nov 25 vol 20544830 against Oct 26 vol 274220",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:71",
+  "text": "Tickets average a few cents",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://agenteconomy.to/data.json",
+  "quote": "Oct 26: txs 5087812, vol 274220, about 5 cents each",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:72",
+  "text": "Amex ACE: a kit for select developers since Apr 2026",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://ecommercenews.com.au/story/american-express-launches-ai-commerce-kit-protection",
+  "quote": "15th Apr 2026 ... launched an AI commerce developer kit",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:99",
+  "text": "$9.40 to process an average invoice, WEX reports",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://www.wexinc.com/resources/blog/what-does-it-cost-to-process-an-invoice-ap-benchmarks-every-finance-team-should-know/",
+  "quote": "the average cost of processing a single invoice is $9.40",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:102",
+  "text": "BILL: up to 89% fewer steps on one bill analyzed",
+  "mark": "unverified",
+  "kind": "sourced",
+  "checked_at": "https://www.bill.com/blog/new-at-bill-april-june-2026",
+  "quote": "cutting multi-line invoice coding steps by up to 89%",
+  "fix": "BILL: up to 89% fewer multi-line invoice coding steps, vendor figure"
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:102",
+  "text": "over 80% of a 12-step process",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://www.bill.com/blog/new-at-bill-april-june-2026",
+  "quote": "over 80% of the steps ... typical 12-step W-9 collection process",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:119",
+  "text": "B2B ACH payments a year, 2025: 8.1B",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://www.icba.org/w/ach-network-sees-volume-and-value-increases-in-2025-q4",
+  "quote": "with close to 8.1 billion B2B payments",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:120",
+  "text": "Cost per item $9.40",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://www.wexinc.com/resources/blog/what-does-it-cost-to-process-an-invoice-ap-benchmarks-every-finance-team-should-know/",
+  "quote": "the average cost of processing a single invoice is $9.40",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:121",
+  "text": "Share automatable 14%, exception rate proxy",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://www.wexinc.com/resources/blog/what-does-it-cost-to-process-an-invoice-ap-benchmarks-every-finance-team-should-know/",
+  "quote": "exception rates averaging 14% across organizations",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:122",
+  "text": "Share of cost saved 35%, 70% ceiling",
+  "mark": "unverified",
+  "kind": "proposal",
+  "checked_at": "https://www.wexinc.com/resources/blog/what-does-it-cost-to-process-an-invoice-ap-benchmarks-every-finance-team-should-know/",
+  "quote": "Average $9.40, best-in-class $2.78. The 70% gap is derived, 35% is ours",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:123",
+  "text": "Fraud loss addressable 25% of $3.05B",
+  "mark": "unverified",
+  "kind": "proposal",
+  "checked_at": "https://www.ic3.gov/AnnualReport/Reports/2025_IC3Report.pdf",
+  "quote": "$3.05B is sourced. The 25% share is our assumption",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:127,129",
+  "text": "$4.5B a year, illustration only, Processing $3.73B, Fraud $0.76B",
+  "mark": "unverified",
+  "kind": "proposal",
+  "checked_at": "no source, our arithmetic",
+  "quote": "Recomputed 8.1B x $9.40 x 14% x 35% is $3.73B",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:136",
+  "text": "Baltimore sent $1.5 million to a changed vendor account",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://securityaffairs.com/181772/cyber-crime/fraudster-stole-over-1-5-million-from-city-of-baltimore.html",
+  "quote": "The total amount of fraudulent transactions amounted to $1,524,621.04",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:178,259",
+  "text": "Baltimore lost $803K to a changed vendor account, never recovered",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://securityaffairs.com/181772/cyber-crime/fraudster-stole-over-1-5-million-from-city-of-baltimore.html",
+  "quote": "has been unable to recover the $803,384.44 payment",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:141",
+  "text": "63% slower AI rollout than expected, Gartner reports",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://www.cpapracticeadvisor.com/2026/05/28/gartner-says-cfos-must-stop-mistaking-finance-ai-deployment-for-value-creation/184094/",
+  "quote": "63% of finance organizations said AI implementation was slower than expected",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:142",
+  "text": "35% measure AI return well, Protiviti reports",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://www.protiviti.com/us-en/press-release-cfos-turn-ai-better-synchronize-finance-and-enterprise-priorities",
+  "quote": "only 35% of finance organizations say they are effective at measuring AI ROI",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:176",
+  "text": "74% of firms were hit by email compromise in 2025",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://www.financialprofessionals.org/about/learn-more/press-releases/Details/over-75-percent-of-us-firms-experienced-payments-fraud-in-2025-while-ai-adoption-for-fraud-mitigation-lags",
+  "quote": "About three in four organizations (74%) were affected by business email compromise",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:237,250,259",
+  "text": "74% hit by email compromise, 2025 (repeats)",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://www.nacha.org/news/business-email-compromise-attempts-rose-sharply-2025-report-finds",
+  "quote": "74% of organizations experienced BEC last year, up from 63%",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:177",
+  "text": "About $9.40 to process one invoice",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://www.wexinc.com/resources/blog/what-does-it-cost-to-process-an-invoice-ap-benchmarks-every-finance-team-should-know/",
+  "quote": "the average cost of processing a single invoice is $9.40",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:180,187,203,243,266",
+  "text": "RTP and FedNow network ceiling $10M per payment",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://bankingjournal.aba.com/2024/12/rtp-network-to-raise-individual-transaction-limit-to-10m/ and https://www.alacriti.com/knowledge-hub/blog/fednow-to-increase-transaction-limit-to-10-million-in-november-2025",
+  "quote": "raise the individual transaction limit on the RTP network to $10 million",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:192,207",
+  "text": "Kill switch takes effect within a minute",
+  "mark": "unverified",
+  "kind": "proposal",
+  "checked_at": "no source, our design target",
+  "quote": "Design choice, not a sourced figure",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:196",
+  "text": "Ramp says its AP agents flagged over $1M of fraudulent invoices in 90 days",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://www.cpapracticeadvisor.com/2025/10/07/ramp-launches-accounts-payable-agents/170422/",
+  "quote": "flagged more than $1 million in fraudulent invoices in just 90 days",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:200",
+  "text": "SR 26-2, which replaced SR 11-7 in Apr 2026",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://www.federalreserve.gov/supervisionreg/srletters/SR2602.htm",
+  "quote": "SR 26-2 April 17, 2026 ... supersedes and replaces SR letter 11-7",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:204,237",
+  "text": "Opens 18 Jan 2027 at the earliest",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://occ.gov/news-issuances/news-releases/2026/nr-occ-2026-92.html",
+  "quote": "The final rule and the GENIUS Act take effect on January 18, 2027",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:204,237",
+  "text": "Open USD went live on 30 Sep 2026",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://www.ledgerinsights.com/stripe-linked-open-usd-stablecoin-goes-live-with-visa-mastercard-as-backers/",
+  "quote": "October 1, 2026 ... Yesterday ... Open USD (OUSD) stablecoin is live",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:204,243",
+  "text": "four big US banks plan a 24/7 tokenized deposit network for 2027",
+  "mark": "unverified",
+  "kind": "sourced",
+  "checked_at": "https://thepaypers.com/fintech/news/major-us-banks-plan-tokenised-deposit-network-for-2027",
+  "quote": "co-owned by JPMorgan Chase, Bank of America, Citigroup, Wells Fargo, and other",
+  "fix": "Large US banks, through The Clearing House, plan a 24/7 tokenized deposit network for 2027"
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:226-228",
+  "text": "Weeks 0 to 6, Weeks 6 to 12, Week 12 onward",
+  "mark": "unverified",
+  "kind": "proposal",
+  "checked_at": "no source, our delivery plan",
+  "quote": "Plan phases are our own",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:230",
+  "text": "$240K yearly saving, 21 payback month, 15.8 checker hours a day, 45% straight through",
+  "mark": "unverified",
+  "kind": "proposal",
+  "checked_at": "no source, calculator output",
+  "quote": "Recomputed: 288 payments a day, 55% held at 6 minutes is 15.8 hours",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:230",
+  "text": "ACH 65%, Card 10%, Cross-border 25%, 6 minutes per hold, $400K build, $15K AWS run, $50K fraud, 250 working days",
+  "mark": "unverified",
+  "kind": "proposal",
+  "checked_at": "no source, illustrative inputs",
+  "quote": "Page labels inputs as illustration values",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:230",
+  "text": "Cost per payment $9.40 at the WEX average",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://www.wexinc.com/resources/blog/what-does-it-cost-to-process-an-invoice-ap-benchmarks-every-finance-team-should-know/",
+  "quote": "the average cost of processing a single invoice is $9.40",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:239,249",
+  "text": "Mastercard Agent Pay on every European issuer, 36 banks live",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://newsroom.mastercard.com/news/europe/en/perspectives/en/2026/europe-is-building-the-foundations-for-trusted-agentic-commerce/",
+  "quote": "all Mastercard issuers in Europe are enabled. Footnote lists 36 banks",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:239",
+  "text": "Verifiable Intent is open, draft v0.1",
+  "mark": "unverified",
+  "kind": "sourced",
+  "checked_at": "https://ppc.land/mastercard-and-googles-new-trust-layer-could-reshape-how-ai-buys-for-you/ opened, no v0.1 text found",
+  "quote": "",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:240",
+  "text": "Natural: Six products live, $30M raised",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://fintech.global/2026/07/21/natural-raises-30m-to-power-payments-for-ai-agents/",
+  "quote": "13 products in total, six of which have now reached general availability",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:240",
+  "text": "An alliance of 26 founders",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://tradeinformer.com/payments/rain-forms-agentic-payments-alliance-with-visa-mastercard-and-24-other-founding-members",
+  "quote": "Rain forms agentic-payments alliance with Visa, Mastercard and 24 other founding members",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:243",
+  "text": "Agent payments under $1",
+  "mark": "unverified",
+  "kind": "sourced",
+  "checked_at": "https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/payments.html opened, says microtransaction, no $1 figure",
+  "quote": "enables microtransaction payments in AI agents",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:243",
+  "text": "Fedwire averages $5.28M",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://frbservices.org/resources/financial-services/wires/volume-value-stats/annual-stats.html",
+  "quote": "2025 ... Average value per transfer ($millions) 5.28",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:243",
+  "text": "the market sits near $300B",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://www.fsb.org/uploads/P121026-2.pdf",
+  "quote": "total market value for stablecoins is around $300 billion",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:243",
+  "text": "Visa's $20B run rate is card settlement",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://theblock.co/news/business/2026-09-08-visa-stablecoin-settlement-tops-20-billion-annualized-run-rate-up-more-than-15x-year-over-year-413749",
+  "quote": "stablecoin settlement volume has surpassed a $20 billion annualized run rate",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:243,272",
+  "text": "x402 settled about $274K in October 2026",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://agenteconomy.to/data.json",
+  "quote": "Oct 26: vol 274220",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:243",
+  "text": "about 4,000 wallets make up roughly 90% of spend",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://thedefiant.io/news/infrastructure/visa-s-sheffield-pegs-adjusted-x402-volume-at-19m",
+  "quote": "roughly 4,000 wallets drive about 90% of x402's adjusted spending",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:243",
+  "text": "ACH carried $93T in 2025, including 8.1B B2B payments",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://www.nacha.org/news/same-day-ach-and-business-business-payments-propel-ach-network-volume-growth-2025",
+  "quote": "reached $93 trillion ... close to 8.1 billion B2B payments",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:251",
+  "text": "$1T annual trade credit volume on Billtrust",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://usa.visa.com/about-visa/newsroom/press-releases.releaseId.22856.html",
+  "quote": "$1 trillion in annual trade credit volume",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:252",
+  "text": "20+ Visa partners live in the UK and EU",
+  "mark": "unverified",
+  "kind": "sourced",
+  "checked_at": "corporate.visa.com Agentic Ready page returned HTTP 404",
+  "quote": "",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:253",
+  "text": "500K businesses on BILL",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://usa.visa.com/about-visa/newsroom/press-releases.releaseId.22856.html",
+  "quote": "Nearly 500,000 businesses trust BILL",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:258",
+  "text": "Money at risk against power to fix, scored 1 to 5",
+  "mark": "unverified",
+  "kind": "proposal",
+  "checked_at": "no source, our scoring",
+  "quote": "Scores are our own",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:259",
+  "text": "$5.3M at a children's hospital group",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://www.hipaajournal.com/former-cpa-sentenced-laundering-childrens-healthcare-atlanta-funds",
+  "quote": "resulted in $5.3 million in funds being stolen",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:259",
+  "text": "$25.6M at Arup",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://abc17news.com/money/cnn-business-consumer/2024/05/16/british-engineering-giant-arup-revealed-as-25-million-deepfake-scam-victim",
+  "quote": "200 million Hong Kong dollars, about $25.6 million",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:259",
+  "text": "One firm says $1.43M meant for its supplier went to a new account",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://www.insurancebusinessmag.com/us/news/legal-insights/frontline-fabrics-sues-chubb-unit-banks-over-alleged-1-4-million-fraud-561537.aspx",
+  "quote": "allegedly diverted $1,426,476.86 from its accounts",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:259",
+  "text": "$114K about $114,000 (UK cap) per refund claim",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://www.psr.org.uk/information-for-consumers/app-fraud-reimbursement-protections/ and Bank of England XUDLUSS csv",
+  "quote": "maximum amount people can claim is GBP 85,000. Rate 1.3363 on 22 Oct",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:259",
+  "text": "$36.9B merchant chargebacks, 2026 forecast",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://www.chargeflow.io/pt-br/blog/ai-agent-chargeback-liability",
+  "quote": "Mastercard forecasts ... $36.9 billion in 2026",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:137",
+  "text": "the Nacha 2026 rule (ACH only)",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://www.nacha.org/rules/risk-management-topics-fraud-monitoring-phase-1",
+  "quote": "Effective Date March 20, 2026 ... Phase 2 effective June 19, 2026",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:39,451",
+  "text": "Travel Rule at $3,000 or more",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://www.fincen.gov/resources/statutes-regulations/guidance/funds-travel-regulations-questions-answers",
+  "quote": "Only transmittals of funds equal to or greater than $3,000 ... are subject",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:341,359",
+  "text": "$1K domestic, $20K next day US, $5M treasury, sizes $1K to $25M",
+  "mark": "unverified",
+  "kind": "proposal",
+  "checked_at": "no source, our scenarios",
+  "quote": "Scenario amounts are illustrations",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:346,352,363",
+  "text": "ACH $0.26 to $0.50 (26 to 50 cents)",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://www.nacha.org/content/business-business-b2b",
+  "quote": "median cost ... ACH payment for businesses is between 26 cents and 50 cents",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:362",
+  "text": "FedNow over its $10 million network ceiling",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://frbservices.org/news/communications/120425-general-announcing-2026-fees",
+  "quote": "increase to its transaction limit from $1 million to $10 million",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:362",
+  "text": "FedNow network fee to bank $0.045",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://www.frbservices.org/resources/fees/fednow-2026 (ledger F#19 points to the wires page)",
+  "quote": "Customer Credit Transfer PACS.008 Origination 81100 $0.045 per item",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:364",
+  "text": "Fedwire median fee paid $7",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://www.clevelandfed.org/publications/payments-research-brief/2026/prb-20260921-b2b-payments",
+  "quote": "Wire ... median fee of $7 each for both sending and receiving organizations",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:364",
+  "text": "Fedwire network fee to bank $0.195 to $0.97",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://www.frbservices.org/resources/fees/wires-2026",
+  "quote": "Tier 1 ... $0.97 ... Tier 3 For Transfers Over 90,000 $0.195",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:365",
+  "text": "Paper check $2.01 to $4",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://www.nacha.org/content/business-business-b2b",
+  "quote": "median cost of issuing a check is between $2.01 and $4",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:367",
+  "text": "Wise Business from 0.23%",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://wise.com/us/pricing/business",
+  "quote": "Sending money Fee varies by currency From 0.23%",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:368",
+  "text": "Airwallex 0.5% to 1%",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://www.airwallex.com/us/pricing (ledger F#29 row lists the Wise url only)",
+  "quote": "0.5% above interbank rates for major currencies 1% for all other currencies",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:370",
+  "text": "Payoneer 1.2% to 4%",
+  "mark": "unverified",
+  "kind": "sourced",
+  "checked_at": "ledger F#29 gives no Payoneer price url, payoneer.com/fees redirected and was not read",
+  "quote": "",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:369",
+  "text": "SME bank fee 1.6%",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://www.fsb.org/uploads/P091025-1.pdf",
+  "quote": "Average cost of B2B (MSME) cross-border payment transactions 1.6%",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:371",
+  "text": "Stablecoin test 0.30% to nearly 9% at 200 USDC",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://www.bancaditalia.it/media/notizia/are-stablecoins-efficient-for-remittances-evidence-from-a-mystery-shopping-exercise-by-banca-d-italia/",
+  "quote": "transfers of 200 USDC ... range from 0.30% to nearly 9%",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:371",
+  "text": "drawn under $3,000 only",
+  "mark": "unverified",
+  "kind": "proposal",
+  "checked_at": "no source, our chart choice",
+  "quote": "Chart scope is our own",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:373",
+  "text": "Tether redemption from $100,000 only",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://tether.to/en/fees/",
+  "quote": "Minimum Tether Token acquisition or redemption amount 100,000 USD",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:387",
+  "text": "Amount $3,000 to $1 million",
+  "mark": "unverified",
+  "kind": "proposal",
+  "checked_at": "no source, chooser slider range",
+  "quote": "Slider range is our design",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:413",
+  "text": "Stripe lists 1.5% to accept stablecoin payments",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://stripe.com/pricing",
+  "quote": "Stablecoins ... 1.5% of the transaction amount in USD",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:418,423",
+  "text": "OCC final GENIUS Act issuer rule on 21 Oct 2026",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://occ.gov/news-issuances/news-releases/2026/nr-occ-2026-92.html",
+  "quote": "News Release 2026-92, October 21, 2026, Final Rule to Implement GENIUS Act",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:423",
+  "text": "OCC Proposed 25 Feb 2026",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://www.occ.treas.gov/news-issuances/news-releases/2026/nr-occ-2026-9.html",
+  "quote": "February 25, 2026 OCC Requests Comments on Proposal to Implement GENIUS Act",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:424",
+  "text": "Federal Reserve Proposed 24 Sep 2026",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://www.federalreserve.gov/newsevents/pressreleases/bcreg20260924a.htm",
+  "quote": "September 24, 2026 Federal Reserve Board requests public comment",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:424",
+  "text": "Comments close 30 Nov 2026",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://www.federalreserve.gov/apps/proposals/FR-2026-0033-01/details",
+  "quote": "Closing date for comments: 11/30/2026",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:425",
+  "text": "Treasury Proposed rule 18 Aug 2026",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://www.federalregister.gov/api/v1/documents/2026-16796.json",
+  "quote": "publication_date 2026-08-18",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:425,445",
+  "text": "Interim final rule, procedural only 30 Sep 2026",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://www.federalregister.gov/api/v1/documents/2026-19966.json",
+  "quote": "effective_on 2026-09-30 ... interim procedural regulations and forms",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:426",
+  "text": "FDIC Proposed 7 Apr 2026",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://www.fdic.gov/news/financial-institution-letters/2026/notice-proposed-rulemaking-establish-genius-act",
+  "quote": "On April 7, 2026, the FDIC Board of Directors approved a notice",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:426",
+  "text": "In the Federal Register 10 Apr 2026",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "federalregister.gov API search for FDIC GENIUS rules, April 2026 (the FIL page gives no date)",
+  "quote": "publication_date 2026-04-10 for the FDIC GENIUS proposed rule",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:427",
+  "text": "NCUA Proposed 15 May 2026",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://ncua.gov/newsroom/press-release/2026/ncua-announces-proposed-rule-permitted-payment-stablecoin-issuer-standards",
+  "quote": "Alexandria, VA (May 15, 2026) ... announced a Notice of Proposed Rule Making",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:427",
+  "text": "Comments closed 17 Jul 2026",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://ncua.gov/newsroom/press-release/2026/ncua-announces-proposed-rule-permitted-payment-stablecoin-issuer-standards",
+  "quote": "The comment period on the proposed rule will close on July 17, 2026",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:420",
+  "text": "HSBC Singapore buyer and supplier pilot, May 2026",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://www.about.hsbc.com.sg/news-and-media/hsbc-expands-b2b-payments-capabilities-in-singapore",
+  "quote": "Piloted end-to-end B2B agentic commerce transactions ... on 29 May 2026",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:455,462",
+  "text": "Anchorage Digital bought Routable 6 Oct 2026",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://www.anchorage.com/press-room/anchorage-digital-acquires-routable-extending-its-institutional-platform-to-the-payment-rails-of-the-worlds-largest-companies",
+  "quote": "Anchorage Digital Acquires Routable ... Oct 6, 2026",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:455",
+  "text": "Valley National agreed to buy Bluevine Sep 2026",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://www.sec.gov/Archives/edgar/data/0000714310/000119312526403391/d31493dex991.htm",
+  "quote": "Sept. 28, 2026 (GLOBE NEWSWIRE)",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:455",
+  "text": "Chime agreed to buy Stride Bank Sep 2026",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://www.chime.com/newsroom/chime-announces-agreement-to-acquire-stride-bank/",
+  "quote": "September 8, 2026, definitive agreement to acquire Stride Bank",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:455,462",
+  "text": "Mastercard bought BVNK 3 Aug 2026",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://investor.mastercard.com/investor-news/investor-news-details/2026/Mastercard-completes-acquisition-of-BVNK-to-advance-global-stablecoin-capabilities/default.aspx",
+  "quote": "August 3, 2026 ... today completed its acquisition of BVNK",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:455",
+  "text": "Xero bought Melio Oct 2025",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://www.cpapracticeadvisor.com/2025/10/15/xero-acquires-payments-platform-melio-for-2-5b/170967/",
+  "quote": "October 15, 2025 Xero Completes Acquisition of Payments Platform Melio",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:455",
+  "text": "TPG and Corpay bought AvidXchange Oct 2025",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://www.avidxchange.com/press-releases/tpg-corpay-complete-acquisition-of-avidxchange",
+  "quote": "TPG & Corpay Complete Acquisition of AvidXchange October 15, 2025",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:455",
+  "text": "Coinbase and BVNK, talks ended Nov 2025",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://fortune.com/crypto/2025/11/11/coinbase-bvnk-2-billion-deal-falls-through-stablecoins/",
+  "quote": "Coinbase and the U.K.-based BVNK have called off acquisition talks",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:455",
+  "text": "Stripe bought Bridge Feb 2025",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://www.nbcnewyork.com/news/business/money-report/stripe-closes-1-1-billion-bridge-deal-prepares-for-aggressive-stablecoin-push/6135508/",
+  "quote": "Published February 4, 2025 ... Stripe closed its $1.1 billion purchase",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:459,461",
+  "text": "20 statements: Supported 5, Partly 9, Stale 1, Unsourced 2, Unsettled 3",
+  "mark": "unverified",
+  "kind": "proposal",
+  "checked_at": "no source, our own audit tally",
+  "quote": "Counts sum to 20",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:462",
+  "text": "Buyer valued at $4.2 billion",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://cryptobriefing.com/anchorage-digital-acquires-routable/",
+  "quote": "lifting the bank's valuation to $4.2 billion",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:462",
+  "text": "Visa run rate $7 billion, release dated 29 Apr 2026",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://usa.review.visa.com/about-visa/newsroom/press-releases.releaseId.22336.html",
+  "quote": "Apr. 29, 2026 ... reaching $7B run rate",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:462",
+  "text": "Now over $20 billion annualized, card settlement",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://theblock.co/news/business/2026-09-08-visa-stablecoin-settlement-tops-20-billion-annualized-run-rate-up-more-than-15x-year-over-year-413749",
+  "quote": "surpassed a $20 billion annualized run rate",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:462",
+  "text": "Surveys: 1% of treasurers",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://www.financialprofessionals.org/about/learn-more/press-releases/Details/afp-survey-finds-stablecoins-remain-peripheral-to-liquidity-strategies-as-cash-reserves-rise",
+  "quote": "only 1% are piloting or using them in a limited capacity",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:462",
+  "text": "9% of corporates",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://www.ey.com/en_us/insights/financial-services/cost-savings-and-speed-drive-stablecoin-adoption",
+  "quote": "FIs (23%) leading corporates (9%) in early adoption",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:468",
+  "text": "Amex covers errors by registered agents since Apr 2026",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://ecommercenews.com.au/story/american-express-launches-ai-commerce-kit-protection",
+  "quote": "protection policy for purchases made by registered AI agents",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:468",
+  "text": "An appeals court lifted the ban in Aug 2026",
+  "mark": "unverified",
+  "kind": "sourced",
+  "checked_at": "ledger row V#4 source not opened in this round",
+  "quote": "",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:470",
+  "text": "Old keys phase out from 2030",
+  "mark": "unverified",
+  "kind": "sourced",
+  "checked_at": "ledger rows DC#13 and DC#14 not opened in this round",
+  "quote": "",
+  "fix": ""
+ },
+ {
+  "where": "src/content/deep-dives/agentic-payouts-desk.md:195,198,236",
+  "text": "RFC 9421 signatures under Web Bot Auth",
+  "mark": "unverified",
+  "kind": "sourced",
+  "checked_at": "https://blog.cloudflare.com/secure-agentic-commerce/ opened, page text gave no RFC 9421 match",
+  "quote": "",
+  "fix": ""
+ },
+ {
+  "where": "drafts/acx/data.json vars[15].typical (line 1702)",
+  "text": "below 1%, 1% to 3%, above 3% (our proposed threshold)",
+  "mark": "unverified",
+  "kind": "proposal",
+  "checked_at": "no source, proposed threshold",
+  "quote": "The 3% trigger is our own threshold",
+  "fix": ""
+ },
+ {
+  "where": "drafts/acx/data.json vars[15].why (line 1703)",
+  "text": "Above 3% for two months, build the gateway",
+  "mark": "unverified",
+  "kind": "proposal",
+  "checked_at": "no source, proposed threshold",
+  "quote": "The 3% trigger and two month window are ours",
+  "fix": ""
+ },
+ {
+  "where": "drafts/acx/data.json configurator.build[7].must (line 1909)",
+  "text": "UCP adapter once agent orders pass our proposed 3% threshold",
+  "mark": "unverified",
+  "kind": "proposal",
+  "checked_at": "no source, proposed threshold",
+  "quote": "The 3% trigger is our own threshold",
+  "fix": ""
+ },
+ {
+  "where": "drafts/acx/data.json signposts[7].text (line 3141)",
+  "text": "Your agent share passes 3%, our proposed threshold, two months running",
+  "mark": "unverified",
+  "kind": "proposal",
+  "checked_at": "no source, proposed threshold",
+  "quote": "Same trigger as V17",
+  "fix": ""
+ },
+ {
+  "where": "docs/Agentic_Commerce_Protocols_Technical_Design.md:256,360,479,1685,1687,1717,1864,1891,1918",
+  "text": "V17 trigger, 3 percent of orders for two months, in thesis, table, ADR, kill test, signposts, steps, tree",
+  "mark": "unverified",
+  "kind": "proposal",
+  "checked_at": "no source, proposed threshold",
+  "quote": "Lines 1685 and 1687 also apply 3 percent to the vendor panel",
+  "fix": ""
+ },
+ {
+  "where": "drafts/acx/data.json configurator.build[7].why",
+  "text": "The only checkout protocol live in 90 days",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://blog.google/products-and-platforms/products/shopping/universal-cart-launch/ (R1-29)",
+  "quote": "Oct 15, 2026 ... effortless checkout powered by the Universal Commerce Protocol",
+  "fix": ""
+ },
+ {
+  "where": "drafts/acx/data.json configurator.build[8].why",
+  "text": "ACP signs with HMAC-SHA256",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://github.com/agentic-commerce-protocol/agentic-commerce-protocol spec/2026-04-17 webhook yaml (G-129)",
+  "quote": "Signed payload is timestamp + . + raw_body, HMAC-SHA256",
+  "fix": ""
+ },
+ {
+  "where": "drafts/acx/data.json configurator.build[8].why",
+  "text": "UCP with RFC 9421",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://github.com/Universal-Commerce-Protocol/ucp v2026-08-25 signatures.md (G-131)",
+  "quote": "sign and verify UCP messages using RFC 9421 HTTP Message Signatures",
+  "fix": ""
+ },
+ {
+  "where": "drafts/acx/data.json configurator.build[16].must, params[10].values[1], patterns[2].arch",
+  "text": "HTTP 402 responder, server returns 402",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://cryptobriefing.com/solana-x402-market-share-dominance/",
+  "quote": "repurposes the long-dormant HTTP 402",
+  "fix": ""
+ },
+ {
+  "where": "drafts/acx/data.json configurator.build[20].why, patterns[0].breaks_on",
+  "text": "Card token minimums make sub dollar calls uneconomic",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://docs.stripe.com/payments/machine.md (R2-18)",
+  "quote": "For card payments through Shared Payment Tokens, the minimum amount is 0.50 USD",
+  "fix": ""
+ },
+ {
+  "where": "drafts/acx/data.json vars[9].why, patterns[2].latency",
+  "text": "Pay per call needs sub second settlement, sub second settlement target",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://docs.cdp.coinbase.com/x402/support/faq.md (R2-35)",
+  "quote": "P95 settlement at 900ms on Base and 1500ms on Solana",
+  "fix": ""
+ },
+ {
+  "where": "drafts/acx/data.json vars[9].typical",
+  "text": "milliseconds to seconds per payment",
+  "mark": "verified",
+  "kind": "sourced",
+  "checked_at": "https://docs.cdp.coinbase.com/x402/support/faq.md (R2-35)",
+  "quote": "P95 verification at 60ms on Base ... settlement at 1500ms on Solana",
+  "fix": ""
+ },
+ {
+  "where": "drafts/acx/data.json patterns[1].latency",
+  "text": "Signing at setup, millisecond checks per payment",
+  "mark": "unverified",
+  "kind": "proposal",
+  "checked_at": "no claim id found, design estimate",
+  "quote": "",
+  "fix": ""
+ }
+]

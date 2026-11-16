@@ -1,0 +1,772 @@
+{
+ "G-205": {
+  "mark": "verified",
+  "checked_at": "https://about.ads.microsoft.com/en/solutions/technology/agentic-commerce",
+  "quote": "Only English-language merchants who sell to US buyers are eligible at this time",
+  "fix": "",
+  "why": "Page names UCP, not ACP or PayPal, lists Copilot.com and mobile app, SPT fraud line, no page date"
+ },
+ "G-101": {
+  "mark": "verified",
+  "checked_at": "https://agenteconomy.to/about",
+  "quote": "is built and maintained by @realdora_eth ... Independent of the protocols we track",
+  "fix": "",
+  "why": "Single handle credited, independence stated, no sponsor named. Pseudonymous is inferred from handle only"
+ },
+ "G-104": {
+  "mark": "verified",
+  "checked_at": "https://agenteconomy.to/data.json",
+  "quote": "x402.monthly txs Aug 17855635, Sep 13003306, Oct 5087812, Nov 4718179",
+  "fix": "",
+  "why": "All four monthly counts match the feed"
+ },
+ "G-106": {
+  "mark": "verified",
+  "checked_at": "https://agenteconomy.to/data.json",
+  "quote": "x402.daily txs 2026-11-05 134165, 2026-11-14 486706",
+  "fix": "",
+  "why": "Arithmetic rechecked: 71.5% fall, 10.1M pace over 14 days, value 2.63x October"
+ },
+ "G-105": {
+  "mark": "verified",
+  "checked_at": "https://agenteconomy.to/data.json",
+  "quote": "x402.monthly vol Aug 437476, Sep 417033, Oct 274220, Nov 721545",
+  "fix": "",
+  "why": "Values match, field named vol with no unit"
+ },
+ "G-103": {
+  "mark": "verified",
+  "checked_at": "https://agenteconomy.to/methodology",
+  "quote": "sourced from public on-chain data ... through Dune and direct RPC indexing",
+  "fix": "",
+  "why": "Decode, normalize and dedupe steps described, no wash or test filter mentioned"
+ },
+ "C316": {
+  "mark": "verified",
+  "checked_at": "https://agenticplug.ai/current-state-of-agentic-commerce",
+  "quote": "American Express Publishes Intent Intelligence Framework",
+  "fix": "",
+  "why": "All three items listed with matching dates"
+ },
+ "G-06": {
+  "mark": "verified",
+  "checked_at": "https://aimmediahouse.com/banking/visa-says-agentic-commerce-has-hit-a-tipping-point",
+  "quote": "a very small amount of Visa's business",
+  "fix": "",
+  "why": "CEO quote matches and no agent volumes disclosed"
+ },
+ "G-07": {
+  "mark": "verified",
+  "checked_at": "https://aimmediahouse.com/banking/visa-says-agentic-commerce-has-hit-a-tipping-point",
+  "quote": "including Shopify's Shop Pay",
+  "fix": "",
+  "why": "Nearly 50 partners live, expected to double"
+ },
+ "R5-50": {
+  "mark": "verified",
+  "checked_at": "https://aimmediahouse.com/banking/visa-says-agentic-commerce-has-hit-a-tipping-point",
+  "quote": "a bit of a tipping point on users being able to experience",
+  "fix": "",
+  "why": "Tipping point and stays minor relative to Visa both stated"
+ },
+ "G-10": {
+  "mark": "verified",
+  "checked_at": "https://aimmediahouse.com/retail/ai-orders-on-shopify-grew-33x-now-agents-are-completing-the-purchase",
+  "quote": "Orders are growing even faster at 3.3x",
+  "fix": "",
+  "why": "3.3x orders and Q3 first quarter of delegated purchasing stated"
+ },
+ "C276": {
+  "mark": "verified",
+  "checked_at": "https://ap2-protocol.org/",
+  "quote": "Captures the user's constraints on payment (e.g., budget, allowed instruments)",
+  "fix": "",
+  "why": "Two mandate types, each open and closed, as claimed"
+ },
+ "R1-36": {
+  "mark": "verified",
+  "checked_at": "https://ap2-protocol.org/ap2/specification/index.md",
+  "quote": "Agentic Payment Protocol (v0.2)",
+  "fix": "",
+  "why": "Five roles incl. Trusted Surface, communication APIs out of AP2 scope"
+ },
+ "R4-19": {
+  "mark": "verified",
+  "checked_at": "https://arxiv.org/abs/2501.09674",
+  "quote": "extending OAuth 2.0 and OpenID Connect with agent-specific credentials and metadata",
+  "fix": "",
+  "why": "Abstract matches, submitted 16 Jan 2025"
+ },
+ "R4-10": {
+  "mark": "verified",
+  "checked_at": "https://arxiv.org/abs/2502.08586",
+  "quote": "our attacks are trivial to implement and require no understanding of machine learning",
+  "fix": "",
+  "why": "Abstract matches, 12 Feb 2025"
+ },
+ "R4-06": {
+  "mark": "verified",
+  "checked_at": "https://arxiv.org/abs/2506.00073",
+  "quote": "such as overspending or accepting unreasonable deals",
+  "fix": "",
+  "why": "Outcomes differ by agent, v4 dated 20 Sep 2025"
+ },
+ "R4-20": {
+  "mark": "verified",
+  "checked_at": "https://arxiv.org/abs/2509.10147",
+  "quote": "a spontaneous emergence of a vast and highly permeable AI agent economy",
+  "fix": "",
+  "why": "Tomasev first author, 12 Sep 2025"
+ },
+ "R4-05": {
+  "mark": "verified",
+  "checked_at": "https://arxiv.org/abs/2601.03061",
+  "quote": "more than double what would occur if strategies were independent",
+  "fix": "",
+  "why": "Simulation result and no coordination both in abstract"
+ },
+ "R4-13": {
+  "mark": "verified",
+  "checked_at": "https://arxiv.org/abs/2604.15367",
+  "quote": "derive 12 cross-layer attack vectors",
+  "fix": "",
+  "why": "Seven named protocols, authorization gaps addressed, v2 1 May 2026"
+ },
+ "R2-57": {
+  "mark": "verified",
+  "checked_at": "https://aws.amazon.com/bedrock/agentcore/pricing/",
+  "quote": "AgentCore payments is provided at no additional charge by AWS",
+  "fix": "",
+  "why": "Example uses 0.005 USD per wallet operation"
+ },
+ "R3-49": {
+  "mark": "verified",
+  "checked_at": "https://blog.basistheory.com/series-b-announcement",
+  "quote": "33 million Series B led by Costanoa Ventures",
+  "fix": "",
+  "why": "Amount, lead, June 2025 launch and consortium all stated, 14 Oct 2025"
+ },
+ "C363": {
+  "mark": "verified",
+  "checked_at": "https://blog.cloudflare.com/secure-agentic-commerce/",
+  "quote": "American Express will also be leveraging Web Bot Auth",
+  "fix": "",
+  "why": "Tags, nonce, hosted directories stated. Ed25519 shown in example only"
+ },
+ "G-35": {
+  "mark": "verified",
+  "checked_at": "https://blog.cloudflare.com/trusted-agent-delegation/",
+  "quote": "In practice, when the User disputes it, the Site pays.",
+  "fix": "",
+  "why": "No members named, four tiers, datePublished 2026-11-05"
+ },
+ "G-121": {
+  "mark": "verified",
+  "checked_at": "https://corporate.visa.com/en/sites/visa-perspectives/innovation/visa-openai-partnership.html",
+  "quote": "Visa's payment capabilities will be integrated into OpenAI experiences",
+  "fix": "",
+  "why": "Tokens bound to agents, user guardrails, no launch date, dated 06/10/2026"
+ },
+ "G-108": {
+  "mark": "verified",
+  "checked_at": "https://cryptobriefing.com/ai-agent-payment-value-drops-94-percent/",
+  "quote": "dropped 94.5%, from $29 million in November 2025 to $1.59 million",
+  "fix": "",
+  "why": "Token Terminal figures and 9 Nov 2026 date match"
+ },
+ "R2-25": {
+  "mark": "verified",
+  "checked_at": "https://datatracker.ietf.org/doc/draft-ryan-httpauth-payment/",
+  "quote": "Expired Internet-Draft (individual)",
+  "fix": "",
+  "why": "Rev 01 dated 2026-03-17, no stream, never WG adopted"
+ },
+ "R2-51": {
+  "mark": "verified",
+  "checked_at": "https://decrypt.co/378374/circle-launches-arc-mainnet-with-blackrock-dtcc-and-visa-as-validators",
+  "quote": "Arc ships with agent wallets, spending limits and nanopayments",
+  "fix": "",
+  "why": "Live 16 Sep 2026, permissioned, Visa and Mastercard validators, USDC gas, 100 plus partners"
+ },
+ "G-116": {
+  "mark": "verified",
+  "checked_at": "https://developer.mastercard.com/merchant-cloud/documentation/tutorials-and-guides/agentic-commerce-guide/21/",
+  "quote": "chargeback rights, and dispute resolution processes apply to agentic transactions",
+  "fix": "",
+  "why": "No general agent liability rule in the guide"
+ },
+ "G-20": {
+  "mark": "verified",
+  "checked_at": "https://developer.mastercard.com/merchant-cloud/documentation/tutorials-and-guides/agentic-commerce-guide/21/",
+  "quote": "the network cannot apply appropriate risk controls or identify the flow correctly",
+  "fix": "",
+  "why": "Also says payment network adds it to a trusted agent registry"
+ },
+ "G-117": {
+  "mark": "verified",
+  "checked_at": "https://developer.mastercard.com/merchant-cloud/documentation/tutorials-and-guides/agentic-commerce-guide/21/",
+  "quote": "live agentic transactions in multiple markets, including Thailand",
+  "fix": "",
+  "why": "Also: Agents assume responsibility for consumer verification"
+ },
+ "G-19": {
+  "mark": "verified",
+  "checked_at": "https://developer.mastercard.com/merchant-cloud/documentation/tutorials-and-guides/agentic-commerce-guide/21/",
+  "quote": "stored credentials would prevent card issuers from recognizing the transaction as agentic",
+  "fix": "",
+  "why": "Matches"
+ },
+ "R2-60": {
+  "mark": "verified",
+  "checked_at": "https://developer.paypal.com/ai-tools/agent-tools/",
+  "quote": "Remote MCP server gift card tools: search_product, create_cart, checkout_cart",
+  "fix": "",
+  "why": "30 tools in 7 groups counted, no payout or Venmo tool"
+ },
+ "R1-51": {
+  "mark": "verified",
+  "checked_at": "https://developer.visa.com/capabilities/trusted-agent-protocol/trusted-agent-protocol-specifications",
+  "quote": "use the agent's public key to verify the signature",
+  "fix": "",
+  "why": "RFC 9421 named, merchant rebuilds signature base"
+ },
+ "C364": {
+  "mark": "verified",
+  "checked_at": "https://developer.visa.com/capabilities/trusted-agent-protocol/trusted-agent-protocol-specifications",
+  "quote": "a trusted agent will include a message signature in its request",
+  "fix": "",
+  "why": "RFC 9421 and public key verification stated"
+ },
+ "G-16": {
+  "mark": "verified",
+  "checked_at": "https://developer.visa.com/docs/visa-intelligent-commerce/concepts",
+  "quote": "may hold at most 10 mandates",
+  "fix": "",
+  "why": "Fields listed incl. recurringFrequency for recurring, no modify endpoint"
+ },
+ "G-17": {
+  "mark": "verified",
+  "checked_at": "https://developer.visa.com/docs/visa-intelligent-commerce/concepts",
+  "quote": "sums all transactions and mandates on the instructionId",
+  "fix": "",
+  "why": "Threshold summed, preferred merchant checked per mandate, not summed"
+ },
+ "G-18": {
+  "mark": "verified",
+  "checked_at": "https://developer.visa.com/docs/visa-intelligent-commerce/concepts",
+  "quote": "Required to evidence the specific authorized transaction for disputes",
+  "fix": "",
+  "why": "Matches"
+ },
+ "R2-52": {
+  "mark": "verified",
+  "checked_at": "https://developers.circle.com/agent-stack/agent-nanopayments",
+  "quote": "Gasless USDC micropayments down to $0.000001 via x402",
+  "fix": "",
+  "why": "Gateway batches many authorizations into one onchain settlement"
+ },
+ "G-36": {
+  "mark": "verified",
+  "checked_at": "https://developers.cloudflare.com/bots/concepts/bot/signed-agents",
+  "quote": "Signed agents are now Verified",
+  "fix": "",
+  "why": "Direct or Intermediary from 1 Jul 2026, no signed agents named, updated 12 Nov 2026"
+ },
+ "R1-13": {
+  "mark": "verified",
+  "checked_at": "https://developers.openai.com/commerce/guides/accept-payments.md",
+  "quote": "use ChatGPT Wallet to pay on your website or use an existing saved payment method",
+  "fix": "",
+  "why": "Works out of the box with existing checkout pages"
+ },
+ "G-120": {
+  "mark": "verified",
+  "checked_at": "https://developers.openai.com/commerce/guides/production",
+  "quote": "Your business handles the order, fulfillment, customer support, and fraud decisions",
+  "fix": "",
+  "why": "Forwarded HTTP header carries risk signals, in rollout"
+ },
+ "C389": {
+  "mark": "verified",
+  "checked_at": "https://docs.aws.amazon.com/waf/latest/developerguide/waf-bot-control.html",
+  "quote": "applies to your CloudFront distributions and Regional resources",
+  "fix": "",
+  "why": "AWSManagedRulesBotControlRuleSet Version_4.0 or later"
+ },
+ "R2-48": {
+  "mark": "verified",
+  "checked_at": "https://docs.cdp.coinbase.com/payments-mcp/welcome",
+  "quote": "Every write action requires your approval.",
+  "fix": "",
+  "why": "Wallet MCP title served at old URL, exact, upto, auth-capture on Base, maxPayment cap"
+ },
+ "G-135": {
+  "mark": "verified",
+  "checked_at": "https://docs.cdp.coinbase.com/x402/network-support",
+  "quote": "Solana: exact, upto",
+  "fix": "",
+  "why": "Five EVM networks list exact, upto, batch-settlement"
+ },
+ "R2-36": {
+  "mark": "verified",
+  "checked_at": "https://docs.cdp.coinbase.com/x402/support/faq.md",
+  "quote": "batch-settlement remains EVM-only",
+  "fix": "",
+  "why": "Six mainnets and exact plus upto stated"
+ },
+ "R1-30": {
+  "mark": "verified",
+  "checked_at": "https://docs.stripe.com/agentic-commerce/protocols/ucp.md",
+  "quote": "Stripe is a member of the UCP Tech Council",
+  "fix": "",
+  "why": "Stripe Payments handler for card and Apple Pay"
+ },
+ "R5-20": {
+  "mark": "verified",
+  "checked_at": "https://ecommercenews.asia/story/merchants-rush-to-adopt-ai-shopping-agents-ravelin-finds",
+  "quote": "44% are already integrating agentic commerce protocols",
+  "fix": "",
+  "why": "Article 22 May 2026, sample is enterprise merchants"
+ },
+ "G-52": {
+  "mark": "verified",
+  "checked_at": "https://ecommercenews.com.au/story/openai-to-charge-4-fee-on-shopify-chatgpt-checkout",
+  "quote": "sits alongside existing costs paid by merchants",
+  "fix": "",
+  "why": "4% fee from late January 2026, article 3 Feb 2026"
+ },
+ "G-202": {
+  "mark": "verified",
+  "checked_at": "https://eur-lex.europa.eu/eli/reg/2026/1744/oj",
+  "quote": "2 December 2027 for AI systems classified as high-risk pursuant to Article 6(2)",
+  "fix": "",
+  "why": "8 Jul adoption, OJ 24 Jul, third day rule, 2 Aug 2028 for Annex I. Entry into force read from recital"
+ },
+ "G-22": {
+  "mark": "verified",
+  "checked_at": "https://fbtgibbons.com/the-payment-infrastructure-layer-how-network-rules-already-govern-agentic-commerce/",
+  "quote": "An AI agent-initiated transaction fits neither category cleanly",
+  "fix": "",
+  "why": "MIT needs initial CIT for Trace ID or OTID, dated 5 May 2026"
+ },
+ "G-23": {
+  "mark": "verified",
+  "checked_at": "https://fbtgibbons.com/the-payment-infrastructure-layer-how-network-rules-already-govern-agentic-commerce/",
+  "quote": "Mastercard's public Transaction Processing Rules remain silent on agentic terminology",
+  "fix": "",
+  "why": "Visa Core Rules contain agentic provisions"
+ },
+ "R2-71": {
+  "mark": "verified",
+  "checked_at": "https://finsidersbrasil.com.br/giro-noticias/pix-automatico-cresce-no-1o-semestre-de-2026-diz-bc/",
+  "quote": "movimentou R$ 3,5 bilhões em 9,5 milhões de transações no segundo trimestre",
+  "fix": "",
+  "why": "Q2 figures match, 14,000 recipients reported in August"
+ },
+ "G-49": {
+  "mark": "verified",
+  "checked_at": "https://fintech.global/2026/04/23/alipay-expands-ai-pay-to-openclaw-type-agents/",
+  "quote": "every payment requires explicit user authorisation",
+  "fix": "",
+  "why": "Claude Code named, 100m users, 23 Apr 2026"
+ },
+ "C398": {
+  "mark": "verified",
+  "checked_at": "https://fintech.global/2026/07/21/natural-raises-30m-to-power-payments-for-ai-agents/",
+  "quote": "The round was led by Forerunner's Kirsten Green",
+  "fix": "",
+  "why": "30M, past 40M total, six GA products. Coming list also has Voice, Accept, Direct"
+ },
+ "R1-64": {
+  "mark": "wrong",
+  "checked_at": "https://fintech.global/2026/09/04/emvco-drafts-framework-for-agentic-card-payments/",
+  "quote": "is also exploring additional concepts including Know Your Agent checks and Agentic Transaction Indicators",
+  "fix": "EMVCo's Agentic Payments Task Force drafted a framework centred on Intent Services and is also exploring Know Your Agent checks and Agentic Transaction Indicators. Comments closed 2026-09-30.",
+  "why": "KYA and indicators are only being explored, not part of the draft"
+ },
+ "G-21": {
+  "mark": "verified",
+  "checked_at": "https://fintech.global/2026/09/04/emvco-drafts-framework-for-agentic-card-payments/",
+  "quote": "is also exploring additional concepts including Know Your Agent checks",
+  "fix": "",
+  "why": "Intent Services is the central proposal"
+ },
+ "C294": {
+  "mark": "verified",
+  "checked_at": "https://forkast.news/?p=131077",
+  "quote": "the biggest barrier to scaling agentic commerce, particularly the agent-delegated model",
+  "fix": "",
+  "why": "Sibos 2026 on 29 Sep, three barriers authentication, liability, fraud. Speech URL hints 28 Sep"
+ },
+ "C351": {
+  "mark": "verified",
+  "checked_at": "https://forkast.news/?p=132486",
+  "quote": "does not yet establish a formal liability assignment framework",
+  "fix": "",
+  "why": "No participants, volumes, geography, end date or GA disclosed"
+ },
+ "R4-69": {
+  "mark": "verified",
+  "checked_at": "https://forkast.news/?p=133056",
+  "quote": "it does not verify the identity of the human user",
+  "fix": "",
+  "why": "Dated 6 Nov 2026"
+ },
+ "R3-45": {
+  "mark": "verified",
+  "checked_at": "https://forkast.news/catena-trust-bank-secures-preliminary-occ-approval-for-ai-agent-financial-infrastructure/",
+  "quote": "granting preliminary conditional approval for Catena Trust Bank, N.A.",
+  "fix": "",
+  "why": "Decision issued 18 Sep 2026, article 21 Sep"
+ },
+ "G-41": {
+  "mark": "verified",
+  "checked_at": "https://forkast.news/checkout-com-is-building-its-own-agent-infrastructure-while-backing-three-rival-protocols/",
+  "quote": "integration costs of $5,000 to $500,000 per standard (as summarised)",
+  "fix": "",
+  "why": "ACP, AP2 and Agent Pay for Machines named, 23 Sep 2026"
+ },
+ "R2-69": {
+  "mark": "verified",
+  "checked_at": "https://forkast.news/india-eyes-ai-driven-upi-payments-as-npci-weighs-agent-protocol/",
+  "quote": "the NPCI has not formally confirmed these plans",
+  "fix": "",
+  "why": "Limits, liability, timing pending. Reserve Pay about Rs 10,000 for up to 90 days"
+ },
+ "C359": {
+  "mark": "verified",
+  "checked_at": "https://forklog.com/en/openai-abandons-instant-checkout-feature-in-chatgpt/",
+  "quote": "Instant Checkout is transitioning to an Apps format",
+  "fix": "",
+  "why": "Reported 23 Mar 2026, purchases on retailer sites. Exact cutoff date not given"
+ },
+ "R3-47": {
+  "mark": "verified",
+  "checked_at": "https://fortune.com/crypto/2025/09/02/kite-ai-blockchain-paypal-general-catalyst-18-million/",
+  "quote": "$18 million Series A led by PayPal Ventures and General Catalyst",
+  "fix": "",
+  "why": "33M total, 2 Sep 2025"
+ },
+ "G-51": {
+  "mark": "verified",
+  "checked_at": "https://fortune.com/crypto/2025/10/17/stripe-paradigm-tempo-series-a-5-billion-thrive-capital-greenoaks-joshua-kushner/",
+  "quote": "Paradigm and Stripe did not contribute capital to the round.",
+  "fix": "",
+  "why": "500M at 5B valuation, 17 Oct 2025"
+ },
+ "G-131": {
+  "mark": "verified",
+  "checked_at": "https://github.com/Universal-Commerce-Protocol/ucp/blob/v2026-08-25/docs/specification/signatures.md",
+  "quote": "Webhook notifications MUST be signed.",
+  "fix": "",
+  "why": "ES256 MUST, EdDSA OPTIONAL, payment auth and completion RECOMMENDED"
+ },
+ "R5-73": {
+  "mark": "verified",
+  "checked_at": "https://github.com/Universal-Commerce-Protocol/ucp/issues/1080",
+  "quote": "would drop UCP's key source and fail the signature",
+  "fix": "",
+  "why": "Opened 13 Nov 2026"
+ },
+ "R1-25": {
+  "mark": "unverified",
+  "checked_at": "https://github.com/Universal-Commerce-Protocol/ucp/pull/1057",
+  "quote": "Complete Checkout is a command, not an update.",
+  "fix": "",
+  "why": "PR 1057 only covers the completion boundary, merged 2026-11-07. Return policy and subscription items not on this page"
+ },
+ "R1-24": {
+  "mark": "verified",
+  "checked_at": "https://github.com/Universal-Commerce-Protocol/ucp/pull/897",
+  "quote": "Merchant of Record (MoR) responsibilities with the business",
+  "fix": "",
+  "why": "dev.ucp.food.checkout with fulfillment and tip extensions, merged 10 Nov 2026"
+ },
+ "R1-63": {
+  "mark": "verified",
+  "checked_at": "https://github.com/agent-intent/verifiable-intent/commits/main",
+  "quote": "BREAKING: field alignment per AP2 schema updates",
+  "fix": "",
+  "why": "Commit 18 Apr 2026, latest 20 Apr 2026"
+ },
+ "R1-03": {
+  "mark": "verified",
+  "checked_at": "https://github.com/agentic-commerce-protocol/agentic-commerce-protocol/blob/main/changelog/unreleased/add-meta-tsc-member.md (plus MAINTAINERS.md in same repo)",
+  "quote": "Seat 3 on the TSC",
+  "fix": "",
+  "why": "Lead maintainers heading lists OpenAI, Stripe, Meta in MAINTAINERS.md. Changelog shows no date"
+ },
+ "G-130": {
+  "mark": "verified",
+  "checked_at": "https://github.com/agentic-commerce-protocol/agentic-commerce-protocol/blob/main/rfcs/rfc.agentic_checkout.md",
+  "quote": "SHOULD sign requests (Signature) over canonical JSON with an accompanying Timestamp",
+  "fix": "",
+  "why": "Signing is SHOULD only"
+ },
+ "R1-08": {
+  "mark": "verified",
+  "checked_at": "https://github.com/agentic-commerce-protocol/agentic-commerce-protocol/blob/main/rfcs/rfc.discovery.md",
+  "quote": "introduces a well-known discovery document (/.well-known/acp.json)",
+  "fix": "",
+  "why": "Status Proposal, version unreleased"
+ },
+ "R1-07": {
+  "mark": "unverified",
+  "checked_at": "https://github.com/agentic-commerce-protocol/agentic-commerce-protocol/blob/main/spec/2026-04-17/openapi/openapi.agentic_checkout.yaml",
+  "quote": "HMAC signature for webhook verification",
+  "fix": "",
+  "why": "Idempotency-Key, API-Version and bearer confirmed. Signature header is optional and not described as detached JSON"
+ },
+ "G-129": {
+  "mark": "verified",
+  "checked_at": "https://github.com/agentic-commerce-protocol/agentic-commerce-protocol/blob/main/spec/2026-04-17/openapi/openapi.agentic_checkout_webhook.yaml",
+  "quote": "Recommended timestamp tolerance is 300 seconds.",
+  "fix": "",
+  "why": "Required Merchant-Signature HMAC-SHA256 over timestamp and raw body, order_create and order_update"
+ },
+ "R3-28": {
+  "mark": "verified",
+  "checked_at": "https://github.com/coinbase/x402",
+  "quote": "Our repo (coinbase/x402) is now a development fork.",
+  "fix": "",
+  "why": "Issues and PRs transferred to x402-foundation"
+ },
+ "R5-72": {
+  "mark": "verified",
+  "checked_at": "https://github.com/google-agentic-commerce/AP2/issues/338",
+  "quote": "Years later, JWKS endpoints are gone, keys have rotated",
+  "fix": "",
+  "why": "Opened 21 Aug 2026"
+ },
+ "R1-41": {
+  "mark": "verified",
+  "checked_at": "https://github.com/google-agentic-commerce/a2a-x402/blob/main/spec/v0.1/spec.md plus api.github.com releases and commits for the repo",
+  "quote": "canonical URI for this version of the extension is: https://github.com/google-a2a/a2a-x402/v0.1",
+  "fix": "",
+  "why": "Only release v0.1.0 on 2025-09-16, last commit 2026-05-24 per GitHub API"
+ },
+ "R2-54": {
+  "mark": "verified",
+  "checked_at": "https://github.com/lightninglabs/lightning-agent-tools",
+  "quote": "consists of seven composable skills and an MCP server",
+  "fix": "",
+  "why": "Remote signer, scoped macaroons, 61 stars"
+ },
+ "G-102": {
+  "mark": "verified",
+  "checked_at": "https://github.com/realdora/agenteconomy",
+  "quote": "Raw counts include ecosystem testing, self-dealing, and infrastructure activity.",
+  "fix": "",
+  "why": "Dune dashboards plus Tempo RPC indexer listed, also other inputs"
+ },
+ "R2-22": {
+  "mark": "verified",
+  "checked_at": "https://github.com/tempoxyz/mpp-specs",
+  "quote": "Tempo, Stripe, Lightning, Solana, and others",
+  "fix": "",
+  "why": "Intents charge, session, subscription. ACH not mentioned"
+ },
+ "R5-75": {
+  "mark": "verified",
+  "checked_at": "https://github.com/tempoxyz/mpp-specs/issues/292",
+  "quote": "Receipt reference/settlement semantics undefined for fiat card-class methods",
+  "fix": "",
+  "why": "Opened 4 Jul 2026. Author later narrowed the claim"
+ },
+ "R1-52": {
+  "mark": "verified",
+  "checked_at": "https://github.com/visa/trusted-agent-protocol plus api.github.com commits and releases",
+  "quote": "Merge pull request #3 from visa/tap_hannam_main, 2025-10-28",
+  "fix": "",
+  "why": "No releases, last commit 2025-10-28 per GitHub API"
+ },
+ "G-134": {
+  "mark": "verified",
+  "checked_at": "https://github.com/x402-foundation/x402/blob/main/specs/schemes/batch-settlement/scheme_batch_settlement.md plus GitHub API for PR 2051 and folder",
+  "quote": "value moves later, through the network binding's redemption process",
+  "fix": "",
+  "why": "PR 2051 merged 2026-05-05, evm, svm, cloudflare binding files exist, both backing models"
+ },
+ "G-133": {
+  "mark": "verified",
+  "checked_at": "https://github.com/x402-foundation/x402/blob/main/specs/schemes/upto/scheme_upto.md plus GitHub API for PR 1074 and repo tree",
+  "quote": "Add upto payment scheme specification for EVM (#1074)",
+  "fix": "",
+  "why": "Merged 2026-03-04, evm, svm, xrpl spec files, upto code in typescript, go, python"
+ },
+ "R5-67": {
+  "mark": "unverified",
+  "checked_at": "https://github.com/x402-foundation/x402/issues (full list via GitHub API)",
+  "quote": "423 open issues, 48 titles match the six exact words, 58 with word stems",
+  "fix": "",
+  "why": "Our recount does not reproduce 60"
+ },
+ "R5-66": {
+  "mark": "wrong",
+  "checked_at": "https://github.com/x402-foundation/x402/issues plus GitHub search API",
+  "quote": "Issues 423, Pull requests 421",
+  "fix": "x402 has 423 open issues and 421 open PRs (live count on 2026-11-15)",
+  "why": "PR count differs from 417. Comparison with other four repos not checked here"
+ },
+ "R5-68": {
+  "mark": "verified",
+  "checked_at": "https://github.com/x402-foundation/x402/issues/2887",
+  "quote": "Nobody's standardizing what happens when the thing an agent paid for turns out to be wrong",
+  "fix": "",
+  "why": "Opened 17 Jul 2026"
+ },
+ "R5-69": {
+  "mark": "verified",
+  "checked_at": "https://github.com/x402-foundation/x402/issues/4253",
+  "quote": "sequential settle retries can double-pay",
+  "fix": "",
+  "why": "Title states it, opened 13 Nov 2026"
+ },
+ "R2-30": {
+  "mark": "verified",
+  "checked_at": "https://github.com/x402-foundation/x402/tree/main/specs",
+  "quote": "x402-specification-v1.md, x402-specification-v2.md, transports-v1, transports-v2",
+  "fix": "",
+  "why": "Matches"
+ },
+ "G-110": {
+  "mark": "verified",
+  "checked_at": "https://glenbrook.com/payments_news/the-x402-foundation-activated-a-27-year-old-internet-code-200-million-transactions-later-the-real-volume-is-still-tiny/ plus https://agenteconomy.to/data.json",
+  "quote": "more than 95% of that activity is protocol signaling not buyer-seller exchange",
+  "fix": "",
+  "why": "Over 200M by June 2026. Feed months Oct 2025 to Jun 2026 sum to 154.0M"
+ },
+ "R5-55": {
+  "mark": "verified",
+  "checked_at": "https://gocardless.com/blog/action-plan-agentic-commerce",
+  "quote": "was designed around a human approving each transaction",
+  "fix": "",
+  "why": "Attributed to the Mills Review, page edited Jul 2026"
+ },
+ "R5-56": {
+  "mark": "verified",
+  "checked_at": "https://gocardless.com/blog/action-plan-agentic-commerce",
+  "quote": "build a trust framework for agentic payments",
+  "fix": "",
+  "why": "Covers liability when agents transact and Know Your Agent identity protocols"
+ },
+ "G-206": {
+  "mark": "verified",
+  "checked_at": "https://groups.google.com/a/chromium.org/g/blink-dev/c/gmYffo5WOE8/m/OJxuQRP3AAAJ",
+  "quote": "LGTM to experiment from M149 to M156 inclusive.",
+  "fix": "",
+  "why": "Posted 15 May 2026, ship planned M157. Trial also covers Android and WebView, not desktop only"
+ },
+ "R4-03": {
+  "mark": "verified",
+  "checked_at": "https://ideas.repec.org/a/nas/journl/v122y2025pe2415697122.html",
+  "quote": "a consistent tendency for LLM-based AIs to prefer LLM-presented options",
+  "fix": "",
+  "why": "PNAS vol 122(31), Aug 2025, products among tested items"
+ },
+ "R4-58": {
+  "mark": "verified",
+  "checked_at": "https://inc42.com/buzz/npci-to-launch-agentic-payments-on-upi-report/",
+  "quote": "leverage existing UPI mechanisms, including UPI Circle and Reserve Pay",
+  "fix": "",
+  "why": "Reported via Reuters, payments within preset limit, 1 Sep 2026"
+ },
+ "G-115": {
+  "mark": "verified",
+  "checked_at": "https://investor.mastercard.com/investor-news/investor-news-details/2026/Mastercard-Advances-Agentic-Commerce-With-New-Trust-and-Intelligence-Services/default.aspx",
+  "quote": "rolling out for testing in the U.S.",
+  "fix": "",
+  "why": "30 Sep 2026, no GA date, markets or liability statement"
+ },
+ "G-136": {
+  "mark": "unverified",
+  "checked_at": "https://investor.mastercard.com/investor-news/investor-news-details/2026/Mastercard-Advances-Agentic-Commerce-With-New-Trust-and-Intelligence-Services/default.aspx",
+  "quote": "",
+  "fix": "",
+  "why": "Claim is about the author's own searches, which no page can confirm. The release itself has no liability text"
+ },
+ "R4-40": {
+  "mark": "verified",
+  "checked_at": "https://itif.org/publications/2026/03/23/agentic-commerce-is-coming-but-regulation-meant-for-humans-will-slow-it-down/",
+  "quote": "CFPB should clarify that consumer-authorized agents do not waive all error resolution rights",
+  "fix": "",
+  "why": "Page says clarify, 23 Mar 2026"
+ },
+ "R5-54": {
+  "mark": "verified",
+  "checked_at": "https://itif.org/publications/2026/03/23/agentic-commerce-is-coming-but-regulation-meant-for-humans-will-slow-it-down/",
+  "quote": "CFPB should clarify that consumer-authorized agents do not waive all error resolution rights",
+  "fix": "",
+  "why": "Reg E has no clear framework for agentic disputes"
+ },
+ "G-48": {
+  "mark": "verified",
+  "checked_at": "https://kr-asia.com/alibabas-latest-qwen-subsidies-are-a-bet-on-agentic-commerce",
+  "quote": "more than 120 million consumer orders from February 6-11",
+  "fix": "",
+  "why": "Payment authorised without leaving chat, article 30 Mar 2026"
+ },
+ "R3-38": {
+  "mark": "verified",
+  "checked_at": "https://letsdatascience.com/news/alipay-enables-ai-agents-to-complete-user-approved-payments-5389ae58",
+  "quote": "Every transaction must be confirmed by the user.",
+  "fix": "",
+  "why": "Over 120M transactions 5 to 11 Feb 2026, passed 100M users, article 21 Apr 2026"
+ },
+ "R2-53": {
+  "mark": "verified",
+  "checked_at": "https://lightning.engineering/posts/2026-03-11-L402-for-agents/",
+  "quote": "An agent pays once per endpoint, not once per request.",
+  "fix": "",
+  "why": "402 with token and invoice, retry with preimage, local verification"
+ },
+ "G-126": {
+  "mark": "verified",
+  "checked_at": "https://link.com/terms/purchase-protections",
+  "quote": "currently only open to residents of the United States",
+  "fix": "",
+  "why": "AIG and CNA insurers, Cover Genius agency, discretionary, effective 8 Sep 2026, no agent or SPT mention"
+ },
+ "R5-06": {
+  "mark": "verified",
+  "checked_at": "https://martechseries.com/analytics/data-management-platforms/privacy-and-regulations/riskified-study-finds-consumers-arent-ready-to-hand-over-control-as-ai-transforms-shopping-with-over-half-afraid-of-online-fraud/",
+  "quote": "55.0% are not comfortable with AI agents making purchases on their behalf",
+  "fix": "",
+  "why": "US and UK, 27 Apr 2026"
+ },
+ "R1-44": {
+  "mark": "verified",
+  "checked_at": "https://modelcontextprotocol.io/specification/2026-07-28/changelog",
+  "quote": "remove the initialize/notifications/initialized handshake",
+  "fix": "",
+  "why": "Sessions removed, extensions field added, tasks moved to extension, no payment item in changelog"
+ },
+ "R1-45": {
+  "mark": "verified",
+  "checked_at": "https://modelcontextprotocol.io/specification/2026-07-28/changelog",
+  "quote": "the client learns the outcome of an out-of-band interaction by retrying the original request",
+  "fix": "",
+  "why": "elicitationId of URL mode removed"
+ },
+ "G-37": {
+  "mark": "verified",
+  "checked_at": "https://newreleases.io/project/github/Universal-Commerce-Protocol/ucp/release/v2026-04-08",
+  "quote": "feat!: identity linking OAuth 2.0 foundation with capability-driven scopes (#354)",
+  "fix": "",
+  "why": "12 items carry the breaking marker, two touch Order"
+ },
+ "G-38": {
+  "mark": "verified",
+  "checked_at": "https://newreleases.io/project/github/Universal-Commerce-Protocol/ucp/release/v2026-08-25",
+  "quote": "Removed signing_keys[] from profile.json",
+  "fix": "",
+  "why": "11 top level breaking items incl. Buyer Consent Overhaul"
+ },
+ "R1-74": {
+  "mark": "verified",
+  "checked_at": "https://newreleases.io/project/github/Universal-Commerce-Protocol/ucp/release/v2026-08-25",
+  "quote": "Split PAN and Network Token into explicit, distinct credential types",
+  "fix": "",
+  "why": "Split payments under New Capabilities, capability-driven OAuth 2.0 scopes listed"
+ }
+}

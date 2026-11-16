@@ -1,0 +1,545 @@
+{
+ "R2-33": {
+  "verdict": "fix",
+  "fix": "More than 50 members by 2026-10-01 (Linux Foundation release). Tag vendor. Data line: Announced under the Linux Foundation in April 2026, operational launch 2026-07-14. Members passed fifty by October.",
+  "why": "Count is the foundation's own self report. LF calls April an intent to launch",
+  "opened": true,
+  "checker": "K2",
+  "data_fix": {
+   "item": "a1",
+   "ev": "vendor"
+  }
+ },
+ "R2-31": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Coinbase docs say forty members at launch on 2026-04-02",
+  "opened": true,
+  "checker": "K2"
+ },
+ "R2-32": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "LF release 2026-07-14 says 40 members and names 17 premier members (17 is a tally, not stated)",
+  "opened": true,
+  "checker": "K2"
+ },
+ "R3-24": {
+  "verdict": "fix",
+  "fix": "ucp.dev lists 51 endorsers and 21 co-developers (counted 2026-11-15). Endorsement is stated support, not use.",
+  "why": "No over 60 count on the page. HTML lists 51 distinct endorser names",
+  "opened": true,
+  "checker": "K2",
+  "data_fix": {
+   "item": "a2",
+   "value": 51,
+   "unit": "endorsers listed",
+   "rung": 6,
+   "ev": "vendor"
+  }
+ },
+ "R1-31": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "21 distinct co-developers across Shopping, Lodging and Food tabs",
+  "opened": true,
+  "checker": "K2"
+ },
+ "R2-23": {
+  "verdict": "fix",
+  "fix": "11 named payment methods plus a custom method option, no ACH or bank debit",
+  "why": "The twelfth entry is a guide to building a custom method",
+  "opened": true,
+  "checker": "K2",
+  "data_fix": {
+   "item": "a3",
+   "value": 11,
+   "unit": "named methods plus custom"
+  }
+ },
+ "R2-38": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Lifetime 200,680,559 transactions and 42,999,352 USD, 12 chains, 18 facilitators. August 17.9M matches. Method page not read",
+  "opened": true,
+  "checker": "K2"
+ },
+ "R2-39": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "October 2026 5.1M transactions moving 274K USD. Peak December 2025 at 54.2M",
+  "opened": true,
+  "checker": "K2"
+ },
+ "R2-28": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "48,585 events, 1,874 payers, 92 payees",
+  "opened": true,
+  "checker": "K2"
+ },
+ "R5-32": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "HUMAN PDF: in 2025, 77% on product and search pages, 2.3% on checkout pages. Rung 3 vendor right",
+  "opened": true,
+  "checker": "K2"
+ },
+ "R5-37": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "99 distinct user agents set to Disallow / in amazon.com/robots.txt, a few are general crawlers",
+  "opened": true,
+  "checker": "K2"
+ },
+ "C360": {
+  "verdict": "fix",
+  "fix": "Mastercard's footnote names 36 European banks that completed controlled live Agent Pay transactions (pilot). All European issuers are enabled at network level. Rung 4, vendor.",
+  "why": "Mastercard states no number, 36 is a count of the footnote list. Controlled means pilot under 6.1. Rung 4 not 6 because a named list of banks that transacted is a deployment record",
+  "opened": true,
+  "checker": "K2",
+  "data_fix": {
+   "item": "a10",
+   "label": "European banks in controlled live Agent Pay tests",
+   "rung": 4,
+   "ev": "vendor"
+  }
+ },
+ "R1-60": {
+  "verdict": "fix",
+  "fix": "Same as C360",
+  "why": "Same page as C360",
+  "opened": true,
+  "checker": "K2"
+ },
+ "R2-11": {
+  "verdict": "fix",
+  "fix": "Shopify says Shop Pay checkout is starting in Muse, Claude Duet and Instinct, with tokens from Mastercard, Visa and Discover and Amex coming. Doc row tag vendor to match data.json",
+  "why": "Shopify's own announcement, rollout wording. Doc row says verified 2026, data says vendor",
+  "opened": true,
+  "checker": "K2"
+ },
+ "R5-24": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Kantar 2026-11-09: only 28% comfortable with AI making a purchase. No sample on page",
+  "opened": true,
+  "checker": "K2"
+ },
+ "R3-21": {
+  "verdict": "fix",
+  "fix": "Shopify's investor deck says orders from AI searches rose 3.3 times year on year. Its president said the volume is still small. Rung 6, vendor.",
+  "why": "Shopify's own figure carried by press. The doc grades Visa's call figures at 6",
+  "opened": true,
+  "checker": "K2",
+  "data_fix": {
+   "item": "a13",
+   "rung": 6
+  }
+ },
+ "R2-01": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Visa CEO on 2026-10-27 call: nearly 50 AI partners live and in production, expected to double",
+  "opened": true,
+  "checker": "K2"
+ },
+ "R3-14": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Same page as R2-01. Agent activity to stay very small for four quarters",
+  "opened": true,
+  "checker": "K2"
+ },
+ "R5-04": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Harris Poll for Visa, n 2,065, 2026-05-26 to 2026-05-28, released 2026-09-09",
+  "opened": true,
+  "checker": "K2"
+ },
+ "R5-05": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "61% would trust Visa, same release",
+  "opened": true,
+  "checker": "K2"
+ },
+ "R2-66": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Over 120M transactions in the week of 2026-02-05 to 2026-02-11, 100M users, explicit user authorisation",
+  "opened": true,
+  "checker": "K2"
+ },
+ "R3-40": {
+  "verdict": "fix",
+  "fix": "Checkout.com says merchants in the UK and US estimate 3% of transactions involve AI agents (2026-06-09, no method given). Rung 6, vendor, as_of 2026-06-09.",
+  "why": "Figure is on Checkout.com's own newsroom release of 2026-06-09, attributed to merchants",
+  "opened": true,
+  "checker": "K2",
+  "data_fix": {
+   "item": "a17",
+   "rung": 6,
+   "as_of": "2026-06-09",
+   "src_add": "https://www.checkout.com/newsroom/consumer-demand-for-ai-shopping-is-forming-fast-but-trust-for-agentic-commerce-is-still-catching-up"
+  }
+ },
+ "R5-11": {
+  "verdict": "fix",
+  "fix": "Rung 6 not 7. Delete 'Not on Checkout.com's own page'",
+  "why": "The 3% is on the Checkout.com newsroom release, attributed to merchants across the UK and US. R5-11 opened only the guide page",
+  "opened": true,
+  "checker": "K2"
+ },
+ "C369": {
+  "verdict": "fix",
+  "fix": "x402.org showed 75.41M transactions and 24.24M USD for the last 30 days from at least 2026-07-10 to mid October 2026, unchanged. The window ends on or before 2026-07-10. Vendor, rung 6. For that period the tracker shows 4.8M (June) and 6.0M (July).",
+  "why": "Same pair quoted by Forkast 2026-07-10 and 2026-07-14, Solana Compass 2026-08-25, Crypto Briefing 2026-09-15 and 2026-10-15. Not an August figure. The doc's pairing with August 17.9M is wrong. Wayback snapshots refused, so the 2026-08-25 page date was not seen",
+  "opened": true,
+  "checker": "K2"
+ },
+ "C287": {
+  "verdict": "fix",
+  "fix": "Crypto Briefing (2026-09-15) repeats the 24.24M figure as 30 days to mid August, but the figure was already published on 2026-07-10.",
+  "why": "Re-quote of an older dashboard reading. Article names no source",
+  "opened": true,
+  "checker": "K2"
+ },
+ "R3-27": {
+  "verdict": "fix",
+  "fix": "Crypto Briefing (2026-10-15) quotes the same stale x402.org reading. Do not use for October or August.",
+  "why": "Same 75.41M and 24.24M pair as July. Rung 6 vendor, not 3",
+  "opened": true,
+  "checker": "K2"
+ },
+ "R2-46": {
+  "verdict": "fix",
+  "fix": "The tracker (17.9M, 12 chains with Solana) and Bitquery (18.3M signed USDC payments on five EVM chains, Solana excluded) are close for August, but they count different things, so the match does not validate either. Dashboard and tracker counts differ by about 12 to 16 times.",
+  "why": "Bitquery covers Base, Polygon, Ethereum, Arbitrum, Optimism and counts all signed USDC settlements. It makes no tracker comparison. The 4x and 60x multiples pair different windows",
+  "opened": true,
+  "checker": "K2"
+ },
+ "R2-41": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Fireblocks 2026-11-03 cites agenteconomy.to: 196M lifetime, 12 chains, more than 42M USD, as of 2026-11-01",
+  "opened": true,
+  "checker": "K2"
+ },
+ "R2-44": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Allium: agent payments doubled to 68.3M in Q3 2026, value 3.7M USD",
+  "opened": true,
+  "checker": "K2"
+ },
+ "R2-45": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "More than 138M discrete transactions on Base in Q3 2026. Page date not shown",
+  "opened": true,
+  "checker": "K2"
+ },
+ "R2-47": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Artemis about 50% artificial, CoinDesk real daily settlement near 28,000 USD. No window or method",
+  "opened": true,
+  "checker": "K2"
+ },
+ "R2-40": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Doc wording right. Note the R2-40 row misreads: 1,856,674 is the five day total, Polygon carried about 1.12M",
+  "opened": true,
+  "checker": "K2"
+ },
+ "R2-37": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "x402.org shows no dashboard, says millions of transactions, last updated 2026-10-27",
+  "opened": true,
+  "checker": "K2"
+ },
+ "R1-01": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Latest changelog file 2026-04-17, no GitHub releases",
+  "opened": true,
+  "checker": "K2"
+ },
+ "R1-02": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Last commit on main 2026-07-18 (#281)",
+  "opened": true,
+  "checker": "K2"
+ },
+ "C313": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Universal Cart rolling out in the US across Search and Gemini, checkout powered by UCP. AP2 not mentioned",
+  "opened": true,
+  "checker": "K2"
+ },
+ "R1-29": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Same page as C313",
+  "opened": true,
+  "checker": "K2"
+ },
+ "C349": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Visa release 2026-10-20: pilot currently live and processing end to end. No counts",
+  "opened": true,
+  "checker": "K2"
+ },
+ "C384": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "AWS GA 2026-08-18 with MPP and x402 upto scheme, no usage",
+  "opened": true,
+  "checker": "K2"
+ },
+ "R1-47": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Same page as C384",
+  "opened": true,
+  "checker": "K2"
+ },
+ "R2-73": {
+  "verdict": "fix",
+  "fix": "GoCardless says it made the UK's first live agentic account to account payment, a Trussell donation by Direct Debit, inside the FCA AI Live Testing programme.",
+  "why": "First is GoCardless's own claim. Supervised test, a pilot under 6.1",
+  "opened": true,
+  "checker": "K2"
+ },
+ "C312": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Stripe 2026-09-29: agentic purchases with Link increased 38x over the past month. No base",
+  "opened": true,
+  "checker": "K2"
+ },
+ "R5-27": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Adobe via Small Business Trends: converted 90% better in September 2026",
+  "opened": true,
+  "checker": "K2"
+ },
+ "R5-28": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "AI traffic to US retail up 71% year on year in September 2026",
+  "opened": true,
+  "checker": "K2"
+ },
+ "R5-29": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "August 2025 converted 9% worse",
+  "opened": true,
+  "checker": "K2"
+ },
+ "R2-02": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Ramp's agentic bill pay is now generally available, per Visa CEO",
+  "opened": true,
+  "checker": "K2"
+ },
+ "R5-10": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "42% of merchants testing, over 12,000 consumers and heads of payments",
+  "opened": true,
+  "checker": "K2"
+ },
+ "R5-12": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "PYMNTS and Visa, 1,185 merchants: 11% SMB and 19% large agent ready",
+  "opened": true,
+  "checker": "K2"
+ },
+ "R5-13": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "23% can distinguish AI traffic",
+  "opened": true,
+  "checker": "K2"
+ },
+ "R5-14": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "93% say AI provider should bear the loss",
+  "opened": true,
+  "checker": "K2"
+ },
+ "R2-65": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Fortune 2026-10-15: Dimon and spokesperson on blocking third party agents using credentials",
+  "opened": true,
+  "checker": "K2"
+ },
+ "R3-39": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Amazon started blocking Muse on 2026-09-20, per spokesperson",
+  "opened": true,
+  "checker": "K2"
+ },
+ "R5-63": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Nearly 132 million US adults bought with AI help, 59% of AI assisted purchases end at Amazon. No dates or sample",
+  "opened": true,
+  "checker": "K2"
+ },
+ "R3-26": {
+  "verdict": "not checked",
+  "fix": "",
+  "why": "Budget of 45 pages used on page data and disputes first",
+  "opened": false,
+  "checker": "K2"
+ },
+ "R3-38": {
+  "verdict": "not checked",
+  "fix": "",
+  "why": "Budget of 45 pages used on page data and disputes first",
+  "opened": false,
+  "checker": "K2"
+ },
+ "R2-67": {
+  "verdict": "not checked",
+  "fix": "",
+  "why": "Budget of 45 pages used on page data and disputes first",
+  "opened": false,
+  "checker": "K2"
+ },
+ "R2-04": {
+  "verdict": "not checked",
+  "fix": "",
+  "why": "Budget of 45 pages used on page data and disputes first",
+  "opened": false,
+  "checker": "K2"
+ },
+ "C351": {
+  "verdict": "not checked",
+  "fix": "",
+  "why": "Budget of 45 pages used on page data and disputes first",
+  "opened": false,
+  "checker": "K2"
+ },
+ "C285": {
+  "verdict": "not checked",
+  "fix": "",
+  "why": "Budget of 45 pages used on page data and disputes first",
+  "opened": false,
+  "checker": "K2"
+ },
+ "C286": {
+  "verdict": "not checked",
+  "fix": "",
+  "why": "Budget of 45 pages used on page data and disputes first",
+  "opened": false,
+  "checker": "K2"
+ },
+ "C299": {
+  "verdict": "not checked",
+  "fix": "",
+  "why": "Budget of 45 pages used on page data and disputes first",
+  "opened": false,
+  "checker": "K2"
+ },
+ "R2-09": {
+  "verdict": "not checked",
+  "fix": "",
+  "why": "Budget of 45 pages used on page data and disputes first",
+  "opened": false,
+  "checker": "K2"
+ },
+ "R3-17": {
+  "verdict": "not checked",
+  "fix": "",
+  "why": "Budget of 45 pages used on page data and disputes first",
+  "opened": false,
+  "checker": "K2"
+ },
+ "R3-23": {
+  "verdict": "not checked",
+  "fix": "",
+  "why": "Budget of 45 pages used on page data and disputes first",
+  "opened": false,
+  "checker": "K2"
+ },
+ "R5-01": {
+  "verdict": "not checked",
+  "fix": "",
+  "why": "Budget of 45 pages used on page data and disputes first",
+  "opened": false,
+  "checker": "K2"
+ },
+ "R5-02": {
+  "verdict": "not checked",
+  "fix": "",
+  "why": "Budget of 45 pages used on page data and disputes first",
+  "opened": false,
+  "checker": "K2"
+ },
+ "R5-06": {
+  "verdict": "not checked",
+  "fix": "",
+  "why": "Budget of 45 pages used on page data and disputes first",
+  "opened": false,
+  "checker": "K2"
+ },
+ "R5-17": {
+  "verdict": "not checked",
+  "fix": "",
+  "why": "Budget of 45 pages used on page data and disputes first",
+  "opened": false,
+  "checker": "K2"
+ },
+ "R5-20": {
+  "verdict": "not checked",
+  "fix": "",
+  "why": "Budget of 45 pages used on page data and disputes first",
+  "opened": false,
+  "checker": "K2"
+ },
+ "R5-21": {
+  "verdict": "not checked",
+  "fix": "",
+  "why": "Budget of 45 pages used on page data and disputes first",
+  "opened": false,
+  "checker": "K2"
+ },
+ "R5-26": {
+  "verdict": "not checked",
+  "fix": "",
+  "why": "Budget of 45 pages used on page data and disputes first",
+  "opened": false,
+  "checker": "K2"
+ },
+ "R5-40": {
+  "verdict": "not checked",
+  "fix": "",
+  "why": "Budget of 45 pages used on page data and disputes first",
+  "opened": false,
+  "checker": "K2"
+ },
+ "R5-44": {
+  "verdict": "not checked",
+  "fix": "",
+  "why": "Budget of 45 pages used on page data and disputes first",
+  "opened": false,
+  "checker": "K2"
+ }
+}

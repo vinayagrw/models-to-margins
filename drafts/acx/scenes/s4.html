@@ -1,0 +1,131 @@
+<section class="acx-scene" id="acx-s4" aria-labelledby="acx-s4-h">
+  <header class="acx-head"><span class="acx-num">04</span><h2 id="acx-s4-h">Who is solving it</h2>
+    <p class="acx-dek" data-for="leader">Three incumbents and three startups, and the layers of the stack each one covers. Pick one to see its strategy and latest moves.</p>
+    <p class="acx-dek" data-for="architect">Coverage across the seven layers, discovery to dispute. Open a player for its build, dated moves and the signal that would change the call.</p>
+  </header>
+  <div class="acx-split s4-split">
+    <div class="s4-left">
+      <ol class="s4-key" aria-label="Stack layers"></ol>
+      <div class="s4-group"><p class="s4-gl">Companies</p><div class="s4-cards" data-g="companies"></div></div>
+      <div class="s4-group"><p class="s4-gl">Startups</p><div class="s4-cards" data-g="startups"></div></div>
+    </div>
+    <aside class="acx-card acx-panel s4-panel" aria-live="polite"><div class="s4-stack"></div></aside>
+  </div>
+</section>
+<style id="acx-s4-css">
+#acx-s4 .s4-left{display:flex; flex-direction:column; gap:14px; min-width:0}
+#acx-s4 .s4-key{list-style:none; margin:0; padding:0; display:flex; flex-wrap:wrap; gap:8px 18px}
+#acx-s4 .s4-key li{display:flex; align-items:center; gap:8px; font-size:14px; color:var(--acx-ink2); white-space:nowrap}
+#acx-s4 .s4-key i{width:14px; height:14px; border-radius:4px; flex:none; background:var(--c)}
+#acx-s4 .s4-key b{font-family:var(--acx-mono); font-weight:600; color:var(--acx-ink)}
+#acx-s4 .s4-group{display:flex; flex-direction:column; gap:8px}
+#acx-s4 .s4-gl{font-family:var(--acx-mono); font-size:14px; color:var(--acx-ink3); text-transform:uppercase; letter-spacing:.05em}
+#acx-s4 .s4-cards{display:grid; grid-template-columns:1fr; gap:10px}
+#acx-s4 .s4-card{display:grid; grid-template-columns:minmax(180px,220px) 1fr; align-items:center; gap:14px 20px; padding:12px 18px 12px 12px; text-align:left; cursor:pointer; min-height:42px; transition:border-color .2s, box-shadow .2s}
+#acx-s4 .s4-card:hover{border-color:var(--acx-line2)}
+#acx-s4 .s4-card[aria-pressed="true"]{border-color:var(--acx-accent); box-shadow:0 0 0 1px var(--acx-accent), var(--acx-shadow)}
+#acx-s4 .s4-card:focus-visible{outline:2px solid var(--acx-accent); outline-offset:2px}
+#acx-s4 .s4-top{display:flex; align-items:center; gap:12px; min-width:0}
+#acx-s4 .s4-nm{display:flex; flex-direction:column; min-width:0}
+#acx-s4 .s4-name{font-size:18px; font-weight:600; color:var(--acx-ink); line-height:1.2}
+#acx-s4 .s4-kind{font-size:14px; color:var(--acx-ink3)}
+#acx-s4 .s4-strip{display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:2px}
+#acx-s4 .s4-seg{display:flex; flex-direction:column; align-items:center; gap:6px}
+#acx-s4 .s4-seg i{display:block; width:100%; height:16px; background:var(--acx-sunk); border-radius:2px}
+#acx-s4 .s4-seg:first-child i{border-radius:4px 2px 2px 4px}
+#acx-s4 .s4-seg:last-child i{border-radius:2px 4px 4px 2px}
+#acx-s4 .s4-seg.is-on i{background:var(--c)}
+#acx-s4 .s4-seg span{font-family:var(--acx-mono); font-size:14px; line-height:1; color:var(--acx-ink3)}
+#acx-s4 .s4-seg.is-on span{color:var(--acx-ink); font-weight:600}
+#acx-s4 .s4-stack{display:grid; flex:1}
+#acx-s4 .s4-panel{container-type:inline-size}
+#acx-s4 .s4-d{grid-area:1/1; visibility:hidden; display:flex; flex-direction:column; gap:12px}
+#acx-s4 .s4-a,#acx-s4 .s4-b{display:flex; flex-direction:column; gap:12px; min-width:0}
+#acx-s4 .s4-b{flex:1}
+@container (min-width:640px){
+  #acx-s4 .s4-d{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:12px 32px}
+  #acx-s4 .s4-b{padding-top:6px}
+}
+#acx-s4 .s4-d.is-on{visibility:visible}
+#acx-s4 .s4-dh{display:flex; align-items:center; gap:14px}
+#acx-s4 .s4-dh h3{font-size:24px}
+#acx-s4 .acx-panel .s4-strat{font-size:16px; color:var(--acx-ink); text-wrap:balance}
+#acx-s4 .acx-panel .s4-cov{list-style:none; margin:0; padding:0; display:flex; flex-wrap:wrap; gap:6px}
+#acx-s4 .acx-panel .s4-cov li{display:inline-flex; align-items:center; gap:7px; padding:3px 10px; border:1px solid var(--acx-line); border-radius:999px; font-size:14px; color:var(--acx-ink); white-space:nowrap}
+#acx-s4 .s4-cov i{width:10px; height:10px; border-radius:3px; background:var(--c)}
+#acx-s4 .s4-moves{list-style:none; margin:0; padding:0 0 0 18px; display:flex; flex-direction:column; gap:10px; position:relative}
+#acx-s4 .s4-moves::before{content:""; position:absolute; left:4px; top:6px; bottom:6px; width:1px; background:var(--acx-line2)}
+#acx-s4 .acx-panel .s4-moves li{position:relative; display:flex; flex-direction:column; gap:2px}
+#acx-s4 .s4-moves li::before{content:""; position:absolute; left:-18px; top:5px; width:9px; height:9px; border-radius:50%; background:var(--acx-accent); box-shadow:0 0 0 2px var(--acx-panel)}
+#acx-s4 .s4-mh{display:flex; flex-wrap:wrap; align-items:center; gap:4px 10px}
+#acx-s4 .s4-date{font-family:var(--acx-mono); font-size:14px; color:var(--acx-ink3)}
+#acx-s4 .acx-panel .s4-mt{font-size:15px; color:var(--acx-ink)}
+#acx-s4 .acx-panel .s4-fund{font-size:15px; color:var(--acx-ink)}
+#acx-s4 .s4-watch{margin-top:auto; padding:12px 14px; border-radius:var(--acx-r-sm); background:var(--acx-sunk); display:flex; flex-direction:column; gap:4px}
+#acx-s4 .acx-panel .s4-watch p:last-child{color:var(--acx-ink)}
+@media (max-width:1200px){
+  #acx-s4 .s4-split{grid-template-columns:1fr}
+}
+@media (max-width:640px){
+  #acx-s4 .s4-card{grid-template-columns:1fr; padding:14px}
+}
+</style>
+<script>ACX.scene('s4', function (el, A) {
+  var esc = A.esc, D = A.data || {};
+  var P = D.players || {};
+  var layers = (D.layers || []).filter(function (l) { return l && l.id; });
+  var groups = [['companies', 'Company'], ['startups', 'Startup']];
+  var all = [];
+  groups.forEach(function (g) { (P[g[0]] || []).slice().sort(function (a, b) { return (a.rank || 99) - (b.rank || 99); }).forEach(function (p) { if (p && p.id) all.push({ p: p, kind: g[1], g: g[0] }); }); });
+  function lc(i) { return 'var(--acx-l' + (i + 1) + ')'; }
+
+  el.querySelector('.s4-key').innerHTML = layers.map(function (l, i) {
+    return '<li><i style="--c:' + lc(i) + '" aria-hidden="true"></i><b>' + esc(l.id) + '</b>' + esc(l.name) + '</li>';
+  }).join('');
+
+  groups.forEach(function (g) {
+    var box = el.querySelector('.s4-cards[data-g="' + g[0] + '"]');
+    box.innerHTML = all.filter(function (x) { return x.g === g[0]; }).map(function (x) {
+      var p = x.p, has = p.layers || [];
+      var covered = layers.filter(function (l) { return has.indexOf(l.id) >= 0; }).map(function (l) { return l.name; });
+      var strip = layers.map(function (l, i) {
+        var on = has.indexOf(l.id) >= 0;
+        return '<span class="s4-seg' + (on ? ' is-on' : '') + '" style="--c:' + lc(i) + '"><i></i><span>' + esc(l.id) + '</span></span>';
+      }).join('');
+      return '<button type="button" class="acx-card s4-card" data-id="' + esc(p.id) + '" aria-pressed="false" aria-label="' + esc(p.name + ', ' + x.kind + ', covers ' + (covered.join(', ') || 'no layer')) + '">' +
+        '<span class="s4-top">' + A.icon(p.icon || 'i-agent', p.tone || 'slate', 'sec') + '<span class="s4-nm"><span class="s4-name">' + esc(p.name) + '</span><span class="s4-kind">' + x.kind + (p.rank ? ' #' + p.rank : '') + '</span></span></span>' +
+        '<span class="s4-strip" aria-hidden="true">' + strip + '</span></button>';
+    }).join('');
+  });
+
+  el.querySelector('.s4-stack').innerHTML = all.map(function (x) {
+    var p = x.p;
+    var moves = (p.moves || []).slice().sort(function (a, b) { return String(a.date).localeCompare(String(b.date)); }).map(function (m) {
+      return '<li><span class="s4-mh"><span class="s4-date">' + esc(m.date) + '</span>' + (m.ev ? A.ev(m.ev) : '') + '</span><span class="s4-mt">' + esc(m.text) + '</span></li>';
+    }).join('');
+    var f = p.funding, has = p.layers || [];
+    var cov = layers.map(function (l, i) { return has.indexOf(l.id) >= 0 ? '<li><i style="--c:' + lc(i) + '" aria-hidden="true"></i>' + esc(l.name) + '</li>' : ''; }).join('');
+    return '<div class="s4-d" data-id="' + esc(p.id) + '">' +
+      '<div class="s4-a"><div class="s4-dh">' + A.icon(p.icon || 'i-agent', p.tone || 'slate', 'hero') + '<div><p class="acx-k">' + x.kind + '</p><h3>' + esc(p.name) + '</h3></div></div>' +
+      (p.one ? '<p class="s4-strat" data-for="leader">' + esc(p.one) + '</p>' : '') +
+      (p.arch ? '<p class="s4-strat" data-for="architect">' + esc(p.arch) + '</p>' : '') +
+      (p.rank_note ? '<p class="s4-fund">' + esc(p.rank_note) + ' ' + A.ev(p.rank_note_ev || 'illustrative') + '</p>' : '') +
+      (cov ? '<p class="acx-k">Covers</p><ul class="s4-cov">' + cov + '</ul>' : '') +
+      '</div><div class="s4-b">' +
+      (moves ? '<p class="acx-k">Moves</p><ol class="s4-moves">' + moves + '</ol>' : '') +
+      (f && f.text ? '<p class="acx-k">Funding</p><p class="s4-fund">' + esc(f.text) + ' ' + (f.ev ? A.ev(f.ev) : '') + '</p>' : '') +
+      (p.watch ? '<div class="s4-watch"><p class="acx-k">Watch for</p><p>' + esc(p.watch) + '</p></div>' : '') +
+      '</div></div>';
+  }).join('');
+
+  var cards = el.querySelectorAll('.s4-card'), drawers = el.querySelectorAll('.s4-d');
+  function show(id) {
+    var ok = all.some(function (x) { return x.p.id === id; });
+    var cur = ok ? id : (all[0] && all[0].p.id);
+    cards.forEach(function (c) { c.setAttribute('aria-pressed', String(c.dataset.id === cur)); });
+    drawers.forEach(function (d) { d.classList.toggle('is-on', d.dataset.id === cur); });
+  }
+  cards.forEach(function (c) { c.addEventListener('click', function () { A.set('who', c.dataset.id); }); });
+  A.on('who', show);
+  show(A.get('who'));
+});</script>

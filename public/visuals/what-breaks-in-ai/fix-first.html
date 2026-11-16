@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fix first: four moves, then five</title>
+<script src="./_theme-bootstrap.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<link rel="stylesheet" href="./_theme.css">
+<style>
+.fixes{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.fixc{background:var(--surface);border:1px solid var(--rule);border-radius:16px;padding:18px 16px;display:grid;grid-template-rows:auto auto auto 1fr auto;gap:10px;min-width:0}
+.fixc .top{display:flex;justify-content:space-between;align-items:flex-start}
+.fixc .n{font-size:30px;font-weight:700;line-height:1;color:var(--accent)}
+.fixc h3{font-size:19px;line-height:1.25}
+.fixc .who{font:600 14px/1.3 var(--mono);color:var(--accent-2)}
+.fixc p{line-height:1.45}
+.fixc .meta{display:grid;gap:4px;border-top:1px solid var(--rule);padding-top:10px}
+.then{display:grid;gap:10px}
+.then h3{font-size:16px;font-weight:600;color:var(--muted)}
+.next{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+.next div{background:var(--surface);border:1px dashed var(--rule);border-radius:12px;padding:12px 14px;display:grid;gap:6px;align-content:start}
+.next b{font-size:15px;line-height:1.3;text-wrap:balance}
+@media (max-width:1000px){.fixes{grid-template-columns:repeat(2,minmax(0,1fr))}.next{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:560px){.fixes,.next{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true"><defs>
+<linearGradient id="g-top" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#000"/></linearGradient>
+<linearGradient id="g-left" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".9"/><stop offset="1" stop-color="#fff" stop-opacity=".1"/></linearGradient>
+<linearGradient id="g-right" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#000" stop-opacity=".05"/><stop offset="1" stop-color="#000" stop-opacity=".35"/></linearGradient>
+<radialGradient id="g-shadow"><stop offset="0" stop-color="#000" stop-opacity=".35"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
+<mask id="m-top" maskContentUnits="userSpaceOnUse"><rect x="16" y="14" width="88" height="52" fill="url(#g-top)"/></mask>
+<linearGradient id="g-shine" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".35"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/></linearGradient>
+</defs><symbol id="i-approve" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l3 3 5-6"/></g></symbol><symbol id="i-model" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M4 7.5l8 4.5 8-4.5M12 12v9"/></g></symbol><symbol id="i-policy-doc" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18H6z"/><path d="M9 7h6M9 10h6"/><path d="M12 13l3 1.2v1.8c0 1.8-1.3 2.8-3 3.5-1.7-.7-3-1.7-3-3.5v-1.8z"/></g></symbol><symbol id="i-security" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><rect x="9" y="11" width="6" height="5" rx="1"/><path d="M10 11V9.5a2 2 0 0 1 4 0V11"/></g></symbol></svg><main class="shell" id="fix">
+  <div class="fixes"><div class="fixc"><div class="top"><span class="n">1</span><svg class="ic iso-teal" width="64" height="64" aria-hidden="true"><use href="#i-approve"/></svg></div><h3>Name a checker for what leaves</h3><span class="who">Head of each team that sends AI work out</span><p>Name one person who opens every cited source and figure before it is sent. Turn on citations.</p><div class="meta"><span class="tag">Covers F1, S1</span><span class="tag">Effort: Low to medium</span></div></div><div class="fixc"><div class="top"><span class="n">2</span><svg class="ic iso-teal" width="64" height="64" aria-hidden="true"><use href="#i-security"/></svg></div><h3>Fence every agent</h3><span class="who">Security lead</span><p>List every agent, give each its own low-privilege login, and test the off switch.</p><div class="meta"><span class="tag">Covers F2, F4, F9, S10</span><span class="tag">Effort: Medium</span></div></div><div class="fixc"><div class="top"><span class="n">3</span><svg class="ic iso-teal" width="64" height="64" aria-hidden="true"><use href="#i-model"/></svg></div><h3>Pin models and test before change</h3><span class="who">Platform lead</span><p>Pin model versions and run your own test set before any model or setting change.</p><div class="meta"><span class="tag">Covers F6, F12, F13, F14, all 10 search</span><span class="tag">Effort: Low to medium</span></div></div><div class="fixc"><div class="top"><span class="n">4</span><svg class="ic iso-teal" width="64" height="64" aria-hidden="true"><use href="#i-policy-doc"/></svg></div><h3>Write change into contracts</h3><span class="who">Procurement lead</span><p>At the next renewal, add notice for retirements, limits and prices, full export and no silent renewal.</p><div class="meta"><span class="tag">Covers F6, F7, F12, F14</span><span class="tag">Effort: Low</span></div></div></div>
+  <div class="then"><h3>Then, in this order</h3><div class="next"><div><span class="tag">Step 5</span><b>One approved tool</b><span class="tag">CIO · F3</span></div><div><span class="tag">Step 6</span><b>Value ledger and stop rules</b><span class="tag">Finance lead · F5, F7</span></div><div><span class="tag">Step 7</span><b>Source rules and failure log</b><span class="tag">Architect · S2 to S9</span></div><div><span class="tag">Step 8</span><b>Isolated reader for agents</b><span class="tag">Security lead · S10</span></div><div><span class="tag">Step 9</span><b>Review capacity</b><span class="tag">HR and team heads · F10</span></div></div></div>
+</main>
+
+<script>
+/* Report content height so the host .visual-frame hugs the visual. */
+(() => {
+  const main = document.querySelector('main');
+  const post = () => {
+    if (document.documentElement.dataset.embedded !== 'true') return;
+    window.parent.postMessage({ type: 'm2m:frame-size', height: Math.ceil(main.getBoundingClientRect().height) }, '*');
+  };
+  new ResizeObserver(post).observe(main);
+  window.addEventListener('load', post);
+  if (document.fonts) document.fonts.ready.then(post);
+  window.m2mPostSize = post;
+})();
+</script>
+<script></script>
+</body>
+</html>

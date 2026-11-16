@@ -1,0 +1,11 @@
+/* Page head for the agentic commerce protocols deep dive (template: protocols). The body styles live inside the generated fragment. */
+.acx-shell{max-width:1320px;margin:0 auto;padding:0 16px 48px;font-family:"Space Grotesk","Inter",system-ui,sans-serif}
+.acx-pagehead{max-width:920px;padding:28px 8px 22px}
+.acx-pagehead-eyebrow{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:14px;color:#B45A28;margin:0 0 10px;letter-spacing:.02em}
+[data-theme="dark"] .acx-pagehead-eyebrow{color:#E58A55}
+.acx-pagehead h1{font-family:"Space Grotesk","Inter",system-ui,sans-serif;font-size:clamp(32px,4.6vw,56px);line-height:1.04;letter-spacing:-.02em;margin:0 0 12px;text-wrap:balance}
+.acx-pagehead-summary{font-size:18px;line-height:1.5;margin:0 0 16px;max-width:68ch;text-wrap:pretty;opacity:.86}
+.acx-pagehead-foot{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center}
+.acx-pagehead-note{font-size:15px;max-width:72ch;opacity:.8}
+.acx-pagehead-note p{margin:10px 0 0;text-wrap:pretty}
+.acx-pagehead-note:empty{display:none}

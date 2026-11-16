@@ -1,0 +1,482 @@
+<title>Where AI Search Breaks</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,600&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: one 1180px column of full-width bands. Each band holds one main visual. Detail lives in a shared drawer. */
+:root{
+  --bg:#F5F4F1; --panel:#FFFFFF; --ink:#1B2226; --muted:#55606A; --line:#DCDAD4;
+  --copper:#B45A28; --teal:#1F5E5A;
+  --worse:#B3122E; --worse-bg:#FBE3E7; --true:#8A4B12; --true-bg:#F8E9D9; --part:#1F5E5A; --part-bg:#DDEEEA;
+  --gB:#2E7D5B; --gM:#B8860B; --gW:#B3122E; --gN:#8C949B; --gX:#E7E5E0;
+  --display:"Newsreader",Georgia,"Times New Roman",serif;
+  --body:"Public Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#121618; --panel:#1B2125; --ink:#E9ECEC; --muted:#A3ADB3; --line:#2E363B;
+  --copper:#E08A57; --teal:#5FB3A9;
+  --worse:#FF7A8E; --worse-bg:#3A1A21; --true:#F0B27A; --true-bg:#33261A; --part:#7FD0C4; --part-bg:#173230;
+  --gB:#4CC08D; --gM:#E0B341; --gW:#FF7A8E; --gN:#6E777E; --gX:#262D31; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#121618; --panel:#1B2125; --ink:#E9ECEC; --muted:#A3ADB3; --line:#2E363B;
+  --copper:#E08A57; --teal:#5FB3A9;
+  --worse:#FF7A8E; --worse-bg:#3A1A21; --true:#F0B27A; --true-bg:#33261A; --part:#7FD0C4; --part-bg:#173230;
+  --gB:#4CC08D; --gM:#E0B341; --gW:#FF7A8E; --gN:#6E777E; --gX:#262D31; color-scheme:dark}
+.iso-teal{--iso-hi:#87C4B5;--iso-mid:#0F8A6B;--iso-lo:#084C3B}
+.iso-amber{--iso-hi:#DCBA87;--iso-mid:#B8740F;--iso-lo:#654008}
+.iso-coral{--iso-hi:#E8AA96;--iso-mid:#D2552D;--iso-lo:#742F19}
+.iso-violet{--iso-hi:#A5A2D4;--iso-mid:#4B44A8;--iso-lo:#29255C}
+.iso-red{--iso-hi:#E48896;--iso-mid:#C8102E;--iso-lo:#6E0919}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:16px/1.55 var(--body);margin:0}
+main{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+section{padding-block:56px;border-top:1px solid var(--line)}
+section:first-child{border-top:0;padding-top:40px}
+h1,h2,h3{font-family:var(--display);font-weight:600;text-wrap:balance;margin:0;letter-spacing:-.01em}
+h1{font-size:clamp(34px,5.2vw,58px);line-height:1.06;max-width:16ch}
+h2{font-size:clamp(26px,3.2vw,36px);line-height:1.15}
+p{text-wrap:pretty;margin:0}
+.eyebrow{font:500 14px/1.3 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--copper)}
+.lede{font-size:18px;color:var(--muted);max-width:62ch}
+.head{display:grid;gap:10px;margin-bottom:28px}
+.tag{font:500 14px/1 var(--mono);color:var(--muted);letter-spacing:.02em}
+.nb{white-space:nowrap}
+button{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--copper);outline-offset:2px}
+svg.ic{display:block;flex:none}
+
+/* hero */
+.hero{display:grid;grid-template-columns:1.35fr 1fr;gap:40px;align-items:center}
+.hero-copy{display:grid;gap:18px;min-width:0}
+.stats{display:grid;gap:14px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 20px;display:grid;grid-template-columns:auto 1fr;gap:4px 16px;align-items:center}
+.stat b{font:600 40px/1 var(--display);color:var(--copper);grid-row:span 2}
+.stat b.w{color:var(--worse)}
+.stat span{font-weight:600;line-height:1.3}
+
+/* pipeline */
+.pipe{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:10px;position:relative}
+.stage{display:grid;justify-items:center;gap:8px;align-content:start;text-align:center;min-width:0}
+.stage .num{font:500 14px/1 var(--mono);color:var(--muted)}
+.stage h3{font:600 15px/1.25 var(--body)}
+.rail{grid-column:1/-1;height:3px;background:linear-gradient(90deg,var(--teal),var(--copper));border-radius:3px;margin:2px 0 4px;order:2}
+.chips{display:grid;gap:6px;justify-items:center;width:100%}
+.chip{border:1.5px solid var(--copper);background:var(--panel);border-radius:999px;min-height:44px;padding:9px 12px;font-weight:600;font-size:14px;line-height:1.2;cursor:pointer;width:100%;max-width:150px}
+.chip.w{border-color:var(--worse);color:var(--worse)}
+.chip:hover{background:var(--true-bg)}
+.chip.w:hover{background:var(--worse-bg)}
+.pipe-note{margin-top:22px;color:var(--muted);max-width:70ch}
+
+/* cards */
+.legend{display:flex;flex-wrap:wrap;gap:10px 18px;margin-bottom:18px}
+.pill{display:inline-flex;align-items:center;gap:6px;font:600 14px/1 var(--body);padding:6px 10px;border-radius:999px;white-space:nowrap}
+.pill.worse{background:var(--worse-bg);color:var(--worse)}
+.pill.true{background:var(--true-bg);color:var(--true)}
+.pill.part{background:var(--part-bg);color:var(--part)}
+.cards{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px 14px 14px;display:grid;gap:10px;justify-items:start;text-align:left;cursor:pointer;min-width:0;transition:transform .15s,border-color .15s}
+.card:hover{transform:translateY(-2px);border-color:var(--copper)}
+.card .top{display:flex;justify-content:space-between;width:100%;align-items:flex-start}
+.card .rank{font:600 30px/1 var(--display);color:var(--muted)}
+.card h3{font:700 16px/1.25 var(--body)}
+.score{display:flex;gap:3px;width:100%}
+.score i{height:6px;flex:1;border-radius:2px;background:var(--gX)}
+.score i.on{background:var(--copper)}
+.card .more{font:500 14px/1 var(--mono);color:var(--teal)}
+
+/* map */
+.mapwrap{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:32px;align-items:center}
+.map{position:relative;aspect-ratio:16/10;max-width:100%;background:linear-gradient(var(--worse-bg),var(--worse-bg)) right top/50% 50% no-repeat,var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.map .q{position:absolute;width:50%;height:50%;padding:12px 14px;font:600 14px/1.2 var(--body);color:var(--muted)}
+.map .q.hot{color:var(--worse)}
+.map .q{height:auto;width:auto}
+.map::after{content:"";position:absolute;left:50%;top:0;bottom:0;border-left:1px dashed var(--line)}.map::before{content:"";position:absolute;top:50%;left:0;right:0;border-top:1px dashed var(--line)}
+.map .q1{right:0;top:0;text-align:right}.map .q2{left:0;top:0}.map .q3{left:0;bottom:0;display:flex;align-items:flex-end}.map .q4{right:0;bottom:0;display:flex;align-items:flex-end;justify-content:flex-end}
+.dot{position:absolute;transform:translate(-50%,50%);width:44px;height:44px;border-radius:50%;background:var(--copper);color:#fff;font:600 16px/44px var(--body);text-align:center;border:0;cursor:pointer;box-shadow:0 0 0 3px var(--panel)}
+.dot.w{background:var(--worse)}
+.axis{font:500 14px/1.2 var(--mono);color:var(--muted);margin-top:8px;display:flex;justify-content:space-between}
+.mapside{display:grid;gap:14px}
+.mapside .row{display:flex;gap:12px;align-items:center}
+
+/* month */
+.tl{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.ev{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;display:grid;gap:8px;align-content:start;min-width:0}
+.ev .d{font:500 14px/1 var(--mono);color:var(--muted)}
+.ev p{font-weight:600;line-height:1.35}
+.ev .pill{justify-self:start}
+
+/* scorecard */
+.sc-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:16px;background:var(--panel)}
+table.sc{border-collapse:collapse;width:100%;min-width:760px;font-size:15px}
+.sc th,.sc td{padding:8px 6px;text-align:center;border-bottom:1px solid var(--line)}
+.sc th{font:600 14px/1.2 var(--body);color:var(--muted)}
+.sc th.r{text-align:left;color:var(--ink);padding-left:14px;white-space:nowrap}
+.sc tr:last-child td,.sc tr:last-child th{border-bottom:0}
+.g{display:inline-grid;place-items:center;width:40px;height:34px;border-radius:8px;font:600 15px/1 var(--mono);color:#fff;position:relative}
+.g.B{background:var(--gB)}.g.M{background:var(--gM)}.g.W{background:var(--gW)}.g.N{background:var(--gN)}.g.X{background:var(--gX);color:var(--muted)}
+.g.s::after{content:"";position:absolute;right:3px;top:3px;width:6px;height:6px;border-radius:50%;background:var(--panel)}
+.sc-key{display:flex;flex-wrap:wrap;gap:10px 18px;margin-top:14px;align-items:center;font-size:14px;color:var(--muted)}
+.sc-key .g{width:30px;height:26px;font-size:14px}
+.reads{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:22px}
+.reads p{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;font-weight:500}
+
+/* architecture */
+.filt{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:22px}
+.filt button{min-height:42px;min-width:42px;border:1.5px solid var(--line);background:var(--panel);border-radius:10px;padding:6px 12px;font-weight:600;cursor:pointer}
+.filt button[aria-pressed="true"]{border-color:var(--copper);background:var(--copper);color:#fff}
+.lanes{display:grid;gap:16px}
+.lane{display:grid;grid-template-columns:120px minmax(0,1fr);gap:14px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px 16px}
+.lane>b{font:500 14px/1.2 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.comps{display:flex;flex-wrap:wrap;gap:10px 6px;align-items:flex-start}
+.comp{display:grid;justify-items:center;gap:4px;width:118px;text-align:center;transition:opacity .2s}
+.comp span{font:600 14px/1.25 var(--body)}
+.comp.dim{opacity:.22}
+.arrow{align-self:center;color:var(--muted);font:600 18px/1 var(--body);margin-top:-22px}
+.fixline{margin-top:16px;color:var(--muted);min-height:26px}
+
+/* do */
+.tabs{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap}
+.tabs button{min-height:44px;padding:8px 16px;border-radius:10px;border:1.5px solid var(--line);background:var(--panel);font-weight:600;cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--teal);border-color:var(--teal);color:#fff}
+.dolist{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px;list-style:none;padding:0;margin:0}
+.dolist li{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;display:grid;gap:10px;align-content:start}
+.dolist .n{font:600 26px/1 var(--display);color:var(--teal)}
+.dolist p{font-weight:500;line-height:1.4;text-wrap:pretty}
+.foot{padding-block:28px 48px;color:var(--muted);font-size:14px;border-top:1px solid var(--line)}
+
+/* drawer */
+.scrim{position:fixed;inset:0;background:rgb(0 0 0 / .35);z-index:9}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(460px,100%);background:var(--panel);z-index:10;overflow-y:auto;box-shadow:-12px 0 40px rgb(0 0 0 / .2);
+  padding:calc(20px + env(safe-area-inset-top,0px)) max(22px,env(safe-area-inset-right,0px)) calc(28px + env(safe-area-inset-bottom,0px)) 22px;display:grid;gap:16px;align-content:start}
+.drawer .dh{display:flex;gap:14px;align-items:center}
+.drawer h2{font-size:28px}
+.close{margin-left:auto;min-width:44px;min-height:44px;border-radius:10px;border:1.5px solid var(--line);background:var(--panel);font-size:22px;cursor:pointer}
+.big{display:grid;gap:4px;background:var(--bg);border-radius:12px;padding:14px 16px}
+.big b{font:600 34px/1.05 var(--display);color:var(--copper)}
+.big b.w{color:var(--worse)}
+.dl{display:grid;gap:12px;margin:0}
+.dl dt{font:500 14px/1.2 var(--mono);text-transform:uppercase;letter-spacing:.06em;color:var(--teal)}
+.dl dd{margin:2px 0 0;line-height:1.5;text-wrap:pretty}
+.big span{text-wrap:pretty}
+.navrow{display:flex;gap:10px}
+.navrow button{flex:1;min-height:44px;border-radius:10px;border:1.5px solid var(--line);background:var(--panel);font-weight:600;cursor:pointer}
+
+@media (max-width:1000px){
+  .hero{grid-template-columns:1fr}
+  .pipe{grid-template-columns:repeat(4,minmax(0,1fr));row-gap:22px}
+  .rail{display:none}
+  .cards{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .mapwrap{grid-template-columns:1fr}
+  .tl{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .reads{grid-template-columns:1fr}
+  .dolist{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .lane{grid-template-columns:1fr}
+}
+@media (max-width:560px){
+  section{padding-block:40px}
+  .pipe{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .cards{grid-template-columns:1fr}
+  .card{grid-template-columns:auto 1fr;align-items:center;column-gap:14px}
+  .card .top{grid-row:span 3;width:auto;flex-direction:column;align-items:center;gap:4px}
+  .tl{grid-template-columns:1fr}
+  .dolist{grid-template-columns:1fr}
+  .comp{width:104px}
+  .arrow{display:none}
+  .map{aspect-ratio:1/1}
+  .stat b{font-size:34px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true"><defs>
+<linearGradient id="g-top" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#000"/></linearGradient>
+<linearGradient id="g-left" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".9"/><stop offset="1" stop-color="#fff" stop-opacity=".1"/></linearGradient>
+<linearGradient id="g-right" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#000" stop-opacity=".05"/><stop offset="1" stop-color="#000" stop-opacity=".35"/></linearGradient>
+<radialGradient id="g-shadow"><stop offset="0" stop-color="#000" stop-opacity=".35"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
+<mask id="m-top" maskContentUnits="userSpaceOnUse"><rect x="16" y="14" width="88" height="52" fill="url(#g-top)"/></mask>
+<linearGradient id="g-shine" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".35"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/></linearGradient>
+</defs><symbol id="i-scrub" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14l6-6 6 6-4 4H8z"/><path d="M10 8l3-3 6 6-3 3"/><path d="M4 21h9"/><circle cx="19" cy="18" r=".8" fill="currentColor"/></g></symbol><symbol id="i-submit" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-7-6 17-3-7z"/><path d="M12 14l9-10"/></g></symbol><symbol id="i-approve" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l3 3 5-6"/></g></symbol><symbol id="i-rollback" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4v6h6"/><path d="M4.5 10A8 8 0 1 1 6 17.5"/><circle cx="12" cy="12" r="1" fill="currentColor"/></g></symbol><symbol id="i-gateway" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V9l8-6 8 6v12"/><path d="M9 21v-7h6v7"/><circle cx="12" cy="9" r="1" fill="currentColor"/></g></symbol><symbol id="i-roadmap" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/><path d="M9 4v14M15 6v14"/><circle cx="18" cy="9" r=".8" fill="currentColor"/></g></symbol><symbol id="i-llm-drafter" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l1-4L16 5l3 3L8 19z"/><path d="M14 7l3 3"/><path d="M19 15l.7 1.5L21 17l-1.3.6L19 19l-.7-1.4L17 17l1.3-.5z"/></g></symbol><symbol id="i-pattern-miner" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="6"/><path d="M14.5 14.5L20 20"/><path d="M7 11l2-2 2 2 2-2"/></g></symbol><symbol id="i-eval" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 1.8 3h10.4a2 2 0 0 0 1.8-3l-5-9V3"/><path d="M7.5 15h9"/><circle cx="11" cy="18" r=".6" fill="currentColor"/></g></symbol><symbol id="i-sql" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="7" ry="2.5"/><path d="M5 5v14c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5V5"/><path d="M5 12c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5"/><circle cx="16" cy="18" r=".6" fill="currentColor"/></g></symbol><symbol id="i-monitor" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M6 11h3l2-3 2 5 2-2h3"/><path d="M9 20h6M12 16v4"/></g></symbol><symbol id="i-cloud" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 18a4 4 0 0 1-.5-8A6 6 0 0 1 18 9a4.5 4.5 0 0 1-.5 9z"/><circle cx="12" cy="14" r=".8" fill="currentColor"/></g></symbol><symbol id="i-network" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="2"/><circle cx="5" cy="19" r="2"/><circle cx="19" cy="19" r="2"/><circle cx="12" cy="13" r="1.2" fill="currentColor"/><path d="M12 7v5M6.5 17.5l4.5-3.5M17.5 17.5L13 14"/></g></symbol><symbol id="i-kpi" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7"/><path d="M3 20h18"/><circle cx="20" cy="7" r="1" fill="currentColor"/></g></symbol><symbol id="i-measure" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15L15 4l5 5L9 20z"/><path d="M8 11l2 2M11 8l2 2M14 5l1 1M5 14l1 1"/></g></symbol><symbol id="i-analyst" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="3"/><path d="M3 20a6 6 0 0 1 12 0"/><path d="M16 14l2-3 2 2 2-4"/></g></symbol><symbol id="i-executive" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7" r="3.5"/><path d="M5 21a7 7 0 0 1 14 0"/><path d="M12 14l-1.3 2 1.3 3 1.3-3z"/></g></symbol><symbol id="i-policy-doc" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18H6z"/><path d="M9 7h6M9 10h6"/><path d="M12 13l3 1.2v1.8c0 1.8-1.3 2.8-3 3.5-1.7-.7-3-1.7-3-3.5v-1.8z"/></g></symbol><symbol id="i-hcc-evidence" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h10l4 4v14H5z"/><circle cx="11" cy="12" r="3"/><path d="M13.2 14.2L16 17"/><path d="M15 3v4h4"/></g></symbol><symbol id="i-denial" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/></g></symbol><symbol id="i-risk" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l9.5 17h-19z"/><path d="M12 10v4"/><circle cx="12" cy="17" r=".8" fill="currentColor"/></g></symbol><symbol id="i-security" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><rect x="9" y="11" width="6" height="5" rx="1"/><path d="M10 11V9.5a2 2 0 0 1 4 0V11"/></g></symbol><symbol id="i-cross" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7l10 10M17 7L7 17"/><circle cx="12" cy="12" r="10" stroke-dasharray="3 3"/></g></symbol></svg>
+
+<main>
+  <section id="top">
+    <div class="hero">
+      <div class="hero-copy">
+        <div class="eyebrow">AI web search · October 2026</div>
+        <h1>Ten ways AI assistants miss the right details online</h1>
+        <p class="lede">Claude, ChatGPT, Gemini, Perplexity, Grok and Copilot all search the web for you. Most of their misses start long before the answer is written, but you only see them in the answer.</p>
+      </div>
+      <div class="stats">
+        <div class="stat"><b>60%+</b><span>of citation tests got the article, publisher or link wrong</span><span class="tag">Independent audit, 8 tools</span></div>
+        <div class="stat"><b>0.5%</b><span>of questions were refused. The rest got an answer, right or wrong</span><span class="tag">Independent study, 4 assistants</span></div>
+        <div class="stat"><b class="w">2 of 10</b><span>failures got worse in the last 30 days</span><span class="tag">Re-checked 25 Sep to 25 Oct 2026</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="pipeline">
+    <div class="head">
+      <div class="eyebrow">Where it breaks</div>
+      <h2>Eight steps from question to answer</h2>
+    </div>
+    <div class="pipe" id="pipe"></div>
+    <p class="pipe-note">Tap a failure to see why it happens and what fixes it. Red ones got worse this month.</p>
+  </section>
+
+  <section id="ten">
+    <div class="head">
+      <div class="eyebrow">The top 10, ranked</div>
+      <h2>Ranked by user pain, measured evidence, builder impact and hidden harm</h2>
+    </div>
+    <div class="legend">
+      <span class="pill worse">Worse this month</span>
+      <span class="pill true">Still true</span>
+      <span class="pill part">Partly fixed</span>
+    </div>
+    <div class="cards" id="cards"></div>
+  </section>
+
+  <section id="map">
+    <div class="head">
+      <div class="eyebrow">Fix first</div>
+      <h2>Where the most hidden harm sits</h2>
+    </div>
+    <div class="mapwrap">
+      <div>
+        <div class="map" id="mapbox" role="group" aria-label="Failures placed by how often users report them and how hidden the harm is">
+          <div class="q q2">Quiet risk</div><div class="q q1 hot">Fix first</div>
+          <div class="q q3">Watch</div><div class="q q4">Visible pain</div>
+        </div>
+        <div class="axis"><span>0</span><span>15</span><span>30 user complaints</span></div>
+      </div>
+      <div class="mapside">
+        <p class="lede">Across is how many of 91 user complaints name the failure. Up is how likely the harm goes unnoticed before someone acts on it.</p>
+        <div class="row"><svg class="ic iso-red" width="80" height="80" aria-hidden="true"><use href="#i-risk"/></svg><p><strong>Citation failures</strong> sit alone top right. Silent failure, stale facts and snippet reading are reported less but are just as hidden.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="month">
+    <div class="head">
+      <div class="eyebrow">Last 30 days</div>
+      <h2>Vendors fixed the plumbing. The web got harder.</h2>
+    </div>
+    <div class="tl" id="tl"></div>
+  </section>
+
+  <section id="scorecard">
+    <div class="head">
+      <div class="eyebrow">Model scorecard</div>
+      <h2>No single winner, and most cells lack data</h2>
+      <p class="lede">Graded only where an independent study compared a product with at least two others on the same test. Vendor claims are left out.</p>
+    </div>
+    <div class="sc-wrap"><table class="sc" id="sc"></table></div>
+    <div class="sc-key">
+      <span><span class="g B">B</span> Better than peers</span>
+      <span><span class="g M">M</span> Mixed</span>
+      <span><span class="g W">W</span> Worse than peers</span>
+      <span><span class="g N">N</span> Not enough data</span>
+      <span><span class="g X">-</span> No independent data</span>
+      <span><span class="g N s">N</span> Dot: evidence older than 2026</span>
+    </div>
+    <div class="reads">
+      <p>Claude leads on citations, planted claims and false premises, but trails on fast-changing facts. In our own small test, Claude Code could not read either PDF it was given.</p>
+      <p>ChatGPT splits by mode. Quick search scores lowest on long tasks while Deep Research leads.</p>
+      <p>Gemini is weakest on sourcing but the only one seen reading JavaScript on a live page fetch.</p>
+    </div>
+  </section>
+
+  <section id="fix">
+    <div class="head">
+      <div class="eyebrow">The fix</div>
+      <h2>A search pipeline that checks itself</h2>
+      <p class="lede">Pick a failure to see which parts of the design answer it.</p>
+    </div>
+    <div class="filt" id="filt" role="group" aria-label="Filter by failure"></div>
+    <div class="lanes" id="lanes"></div>
+    <p class="fixline" id="fixline">Showing every part.</p>
+  </section>
+
+  <section id="do">
+    <div class="head">
+      <div class="eyebrow">What to do now</div>
+      <h2>Five habits, five build rules</h2>
+    </div>
+    <div class="tabs" role="tablist">
+      <button role="tab" id="t-use" aria-selected="true" aria-controls="do-list">If you use AI search</button>
+      <button role="tab" id="t-build" aria-selected="false" aria-controls="do-list">If you build with it</button>
+    </div>
+    <ol class="dolist" id="do-list"></ol>
+  </section>
+
+  <p class="foot">Evidence comes from independent studies, audits, vendor documentation and user reports. Every item was re-checked against articles dated 25 September to 25 October 2026. Vendor performance claims do not count toward any rank or grade.</p>
+</main>
+
+<div class="scrim" id="scrim" hidden></div>
+<aside class="drawer" id="drawer" hidden role="dialog" aria-modal="true" aria-labelledby="dr-title"></aside>
+
+<script>
+const F=[
+ {id:1,name:"Citation does not hold",ic:"i-hcc-evidence",st:"true",score:12,stage:8,
+  see:"A link that loads but does not say what the answer says. Some links never existed.",
+  why:"Links are attached after the text is written, from a pool of snippets and copies. Nothing checks that the page holds the sentence.",
+  num:"60%+",numl:"of 1,600 citation tests named the wrong article, publisher or URL",tag:"Independent audit, 2025",
+  fix:"A separate checker ties each claim to a quoted sentence on a page it opened. Claims it cannot tie are dropped or marked.",
+  you:"Ask for a verbatim quote next to each key claim, then open two links yourself.",c:28,y:0.82},
+ {id:2,name:"Silent failure",ic:"i-monitor",st:"true",score:10,stage:8,
+  see:"A finished, confident report when the search found nothing or the tool broke.",
+  why:"Guessing scores better than saying \"I don't know\", and tool errors often come back looking like success.",
+  num:"73.2%",numl:"of answers that used planted content gave no warning",tag:"Preprint, Oct 2026",
+  fix:"Show every failed search, blocked page and spent budget above the answer. Never deliver a report with zero opened sources.",
+  you:"End research prompts with: list the searches you ran, the pages you opened, and anything that failed.",c:10,y:0.86},
+ {id:3,name:"Stops too early",ic:"i-pattern-miner",st:"true",score:10,stage:2,
+  see:"Few sources, generic queries, and the key page never found.",
+  why:"Agents stop when they feel confident, not when each part of the question has evidence.",
+  num:"71.5%",numl:"of errors on same-day news came from retrieval, not reasoning",tag:"Preprint, May 2026",
+  fix:"Split the question into sub-questions and stop only when each has evidence or a clear \"not found\".",
+  you:"Use deep research mode for multi-part questions and ask for the plan first.",c:12,y:0.38},
+ {id:4,name:"Planted sources win",ic:"i-risk",st:"worse",score:10,stage:6,
+  see:"SEO lists, vendor pages, one forum comment or a scam phone number presented as fact.",
+  why:"Ranking rewards relevance, not reliability. Many copies of one planted page look like agreement.",
+  num:"8 of 10",numl:"AI search platforms cited a made-up concept within 7 days",tag:"Preprint, Oct 2026",
+  fix:"Label every source by publisher, date and type, and count copies as one source. Use allow and block lists for high-stakes work.",
+  you:"Ask for primary sources and who published each one.",c:15,y:0.3},
+ {id:5,name:"Stale facts",ic:"i-rollback",st:"true",score:9,stage:3,
+  see:"Last year's figure, a former office holder, old install steps.",
+  why:"Snippets and caches lag the live page, and the model's sense of today drifts toward its training date.",
+  num:"5x",numl:"more outdated answers when built from snippets than from opened pages",tag:"Preprint, Oct 2026",
+  fix:"Give the model today's date and open the page for any fact that changes. Show the page date next to each figure.",
+  you:"Start with \"As of today\" and ask for the date next to every number.",c:15,y:0.74},
+ {id:6,name:"Snippets, not pages",ic:"i-scrub",st:"true",score:9,stage:5,
+  see:"An answer built from a search snippet or a cut-down summary of the page.",
+  why:"Opening pages costs time and tokens. Some tools pass the page through a smaller model first.",
+  num:"53.6%",numl:"of search episodes where one leading model opened no page at all",tag:"Preprint, Oct 2026",
+  fix:"Read before cite: only cite pages that were opened, and report any page that was cut.",
+  you:"Ask it to open every source it cites and quote the exact sentence it used from each page.",c:8,y:0.7},
+ {id:7,name:"Blocked pages",ic:"i-denial",st:"worse",score:9,stage:4,
+  see:"The best source is paywalled, bot-blocked or built in JavaScript, so the answer leans on copies.",
+  why:"Sites are closing the door to AI bots, and many AI fetchers do not run JavaScript.",
+  num:"Default",numl:"AI-bot blocking now covers ad pages on existing free sites on a major network",tag:"News report, Oct 2026",
+  fix:"Label each blocked fetch, then route to a browser, a document parser or a licensed source. Never evade blocks.",
+  you:"Paste or upload the source yourself when it matters.",c:10,y:0.24},
+ {id:8,name:"False premise",ic:"i-cross",st:"true",score:9,stage:1,
+  see:"The wrong fact in your question is accepted and \"confirmed\" with sources.",
+  why:"Models are tuned to agree, and the premise gets written into the search query.",
+  num:"64%",numl:"of fabricated facts accepted by one leading model",tag:"Preprint, May 2026",
+  fix:"Check the question's assumptions before searching, and flag any that fail.",
+  you:"Ask neutral questions first, then ask for the best evidence against your view.",c:5,y:0.82},
+ {id:9,name:"Memory beats search",ic:"i-sql",st:"true",score:8,stage:7,
+  see:"An answer from training data when search was on, or a correct memory overwritten by a bad page.",
+  why:"The model's own confidence decides what to trust, and that confidence is poorly calibrated.",
+  num:"60%+",numl:"of cases where models took wrong retrieved text over correct memory",tag:"Peer-reviewed study, 2024",
+  fix:"Show disagreements between memory and evidence, and prefer dated primary pages for facts that change.",
+  you:"Require a dated primary source for prices, rules and people in roles.",c:10,y:0.44},
+ {id:10,name:"Planted instructions",ic:"i-security",st:"true",score:7,stage:5,
+  see:"Usually nothing. Hidden text on a page steers the answer or tells an agent to act.",
+  why:"One model reads data and instructions together and cannot reliably tell them apart.",
+  num:"73.1%",numl:"of injected attacks on real pages got past a standard browsing planner",tag:"Preprint, Oct 2026",
+  fix:"Partly fixed at the top: leading products now ship injection filters. For any agent that can act, read pages in a separate model with no tools. Read-only research can use injection filters.",
+  you:"Never give a browsing agent your email, payments or private files.",c:6,y:0.34}
+];
+const ST={worse:["worse","Worse this month"],true:["true","Still true"],part:["part","Partly fixed"]};
+const STAGES=[["Understand","i-analyst"],["Plan","i-roadmap"],["Search","i-network"],["Fetch","i-cloud"],["Read","i-policy-doc"],["Rank","i-kpi"],["Reconcile","i-eval"],["Write and cite","i-llm-drafter"]];
+const role=f=>f.st==="worse"?"iso-red":"iso-coral";
+const icon=(id,size,cls)=>`<svg class="ic ${cls}" width="${size}" height="${size}" aria-hidden="true"><use href="#${id}"/></svg>`;
+const $=s=>document.querySelector(s);
+
+/* pipeline */
+$("#pipe").innerHTML=STAGES.map((s,i)=>{
+  const fs=F.filter(f=>f.stage===i+1);
+  return `<div class="stage">${icon(s[1],88,"iso-violet")}<span class="num">0${i+1}</span><h3>${s[0]}</h3><div class="chips">${fs.map(f=>`<button class="chip ${f.st==="worse"?"w":""}" data-open="${f.id}">#${f.id} ${f.name}</button>`).join("")}</div></div>`;
+}).join("");
+
+/* cards */
+$("#cards").innerHTML=F.map(f=>`<button class="card" data-open="${f.id}" aria-label="Open #${f.id} ${f.name}">
+  <div class="top"><span class="rank">${f.id}</span>${icon(f.ic,80,role(f))}</div>
+  <h3>${f.name}</h3>
+  <span class="pill ${ST[f.st][0]}">${ST[f.st][1]}</span>
+  <span class="score" aria-label="Score ${f.score} of 12">${Array.from({length:12},(_,i)=>`<i class="${i<f.score?"on":""}"></i>`).join("")}</span>
+</button>`).join("");
+
+/* map */
+$("#mapbox").insertAdjacentHTML("beforeend",F.map(f=>`<button class="dot ${f.st==="worse"?"w":""}" style="left:${6+f.c/30*88}%;bottom:${f.y*100}%" data-open="${f.id}" aria-label="#${f.id} ${f.name}">${f.id}</button>`).join(""));
+
+/* month */
+const TL=[
+ ["15 Sep","A major bot network starts blocking AI agents on ad pages by default, including existing free sites. Launched just before the window, felt within it","worse","#7 worse"],
+ ["25 Sep","Fake support numbers planted for 374+ companies reach AI answers","worse","#4 worse"],
+ ["5 Oct","Claude Code starts reporting unread page text instead of dropping it","part","#6 partly fixed"],
+ ["8 Oct","8 of 10 AI search platforms cite a made-up concept within a week","worse","#4 worse"],
+ ["Oct","Full Fact: stale figures and wrong office holders with search on","true","#5 still true"],
+ ["15 Oct","One leading model opened no page in over half its searches","true","#6 still true"],
+ ["21 Oct","Claude Code cloud sessions now return blocked fetches as normal results, as local sessions already did","part","#2 partly fixed"],
+ ["22 Oct","Publisher copyright suit that alleges invented quotes heads toward a jury trial","true","#1 still true"]
+];
+$("#tl").innerHTML=TL.map(t=>`<div class="ev"><span class="d">${t[0]} 2026</span><p>${t[1]}</p><span class="pill ${t[2]}">${t[3]}</span></div>`).join("");
+
+/* scorecard: grade letter, s = all evidence before 2026 */
+const COLS=["Claude","ChatGPT","Gemini","AI Overviews","Perplexity","Grok","Copilot"];
+const G=[
+ ["B","M","W","N","M","Ws","Ms"],["Ns","Ms","W","N","Ws","N","Bs"],["M","M","M","X","Ws","Ms","X"],["B","W","Bs","N","M","W","Ns"],["W","B","M","N","X","X","Ns"],
+ ["X","N","X","X","X","X","X"],["N","N","B","X","N","X","X"],["B","W","B","N","X","M","Ns"],["N","N","W","X","X","N","X"],["B","M","W","X","N","X","N"]];
+const GN={B:"Better than peers",M:"Mixed",W:"Worse than peers",N:"Not enough data",X:"No independent data"};
+$("#sc").innerHTML=`<thead><tr><th class="r" scope="col">Failure</th>${COLS.map(c=>`<th scope="col">${c}</th>`).join("")}</tr></thead><tbody>`+
+ F.map((f,r)=>`<tr><th class="r" scope="row">#${f.id} ${f.name}</th>${G[r].map((g,c)=>{const k=g[0],s=g[1]==="s";return `<td><span class="g ${k} ${s?"s":""}" title="${COLS[c]}: ${GN[k]}${s?", evidence older than 2026":""}">${k==="X"?"-":k}</span></td>`}).join("")}</tr>`).join("")+`</tbody>`;
+
+/* architecture */
+const LANES=[
+ ["Gather",[["Premise check","i-approve",[8]],["Planner","i-roadmap",[3]],["Multi-index search","i-network",[3,5]],["Fetch and render","i-cloud",[7]],["Isolated reader","i-security",[6,10]]]],
+ ["Check",[["Source labels","i-kpi",[4,5]],["Coverage check","i-measure",[3]],["Reconcile","i-eval",[9]],["Quoted writer","i-llm-drafter",[1,6]],["Citation checker","i-hcc-evidence",[1]]]],
+ ["Deliver",[["Failure ledger","i-monitor",[2,7]],["Stakes gate","i-gateway",[2,8]],["Human sign-off","i-executive",[1,4,8]],["Answer and gaps","i-submit",[2]]]]
+];
+const LROLE={Gather:"iso-violet",Check:"iso-amber",Deliver:"iso-teal"};
+$("#lanes").innerHTML=LANES.map(l=>`<div class="lane"><b>${l[0]}</b><div class="comps">${l[1].map((c,i)=>`${i?'<span class="arrow" aria-hidden="true">›</span>':""}<div class="comp" data-fix="${c[2].join(",")}">${icon(c[1],80,LROLE[l[0]])}<span>${c[0]}</span></div>`).join("")}</div></div>`).join("");
+$("#filt").innerHTML=`<button aria-pressed="true" data-f="0">All</button>`+F.map(f=>`<button aria-pressed="false" data-f="${f.id}" title="${f.name}">#${f.id}</button>`).join("");
+$("#filt").addEventListener("click",e=>{
+  const b=e.target.closest("button");if(!b)return;
+  const n=+b.dataset.f;
+  $("#filt").querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",x===b));
+  let hit=0;
+  document.querySelectorAll(".comp").forEach(c=>{const on=!n||c.dataset.fix.split(",").map(Number).includes(n);c.classList.toggle("dim",!on);if(on)hit++});
+  $("#fixline").textContent=n?`#${n} ${F[n-1].name}: answered by ${hit} part${hit>1?"s":""}. ${F[n-1].fix}`:"Showing every part.";
+});
+
+/* do */
+const DO={use:[
+ "Treat any answer you will repeat to a client as unchecked until two key claims match a quoted sentence on the page.",
+ "Use deep research mode for multi-part questions, and ask for the plan first.",
+ "End with: list the searches you ran, the pages you opened, and anything that failed.",
+ "Paste or upload the source yourself when it matters, especially paywalled pages and PDFs.",
+ "Never give a browsing agent your email, payments or private files."],
+ build:[
+ "Measure a baseline on your own questions first. Agree a ceiling on what each run may cost.",
+ "Ship the failure ledger and zero-source rule next. Continue only if silent failures fall.",
+ "Run domain allow and block lists on every answer. Add read-before-cite and a citation checker to anything forwarded.",
+ "Show source labels beside every check mark. A quote from a planted page still passes the check.",
+ "If the agent can act, read pages in a separate model with no tools. Read-only research can use filters."]};
+function showDo(k){
+  $("#do-list").innerHTML=DO[k].map((t,i)=>`<li><span class="n">${i+1}</span><p>${t}</p></li>`).join("");
+  $("#t-use").setAttribute("aria-selected",k==="use");$("#t-build").setAttribute("aria-selected",k==="build");
+}
+$("#t-use").onclick=()=>showDo("use");$("#t-build").onclick=()=>showDo("build");showDo(/tab=build/.test(location.hash)?"build":"use");
+
+/* drawer */
+let cur=0,lastFocus=null;
+function openD(id){
+  const f=F[id-1];cur=id;
+  $("#drawer").innerHTML=`<div class="dh">${icon(f.ic,88,role(f))}<div><div class="tag">#${f.id} of 10 · score ${f.score} of 12</div><h2 id="dr-title">${f.name}</h2></div><button class="close" id="dr-x" aria-label="Close">×</button></div>
+  <span class="pill ${ST[f.st][0]}" style="justify-self:start">${ST[f.st][1]}</span>
+  <div class="big"><b class="${f.st==="worse"?"w":""}">${f.num}</b><span>${f.numl}</span><span class="tag">${f.tag}</span></div>
+  <dl class="dl"><div><dt>What you see</dt><dd>${f.see}</dd></div><div><dt>Why</dt><dd>${f.why}</dd></div><div><dt>The fix</dt><dd>${f.fix}</dd></div><div><dt>You can do now</dt><dd>${f.you}</dd></div></dl>
+  <div class="navrow"><button id="dr-p" ${id===1?"disabled":""}>‹ Previous</button><button id="dr-n" ${id===10?"disabled":""}>Next ›</button></div>`;
+  $("#drawer").hidden=false;$("#scrim").hidden=false;
+  $("#dr-x").onclick=closeD;$("#dr-p").onclick=()=>openD(cur-1);$("#dr-n").onclick=()=>openD(cur+1);
+  $("#dr-x").focus();
+}
+function closeD(){$("#drawer").hidden=true;$("#scrim").hidden=true;if(lastFocus)lastFocus.focus()}
+document.addEventListener("click",e=>{const b=e.target.closest("[data-open]");if(b){lastFocus=b;openD(+b.dataset.open)}});
+$("#scrim").onclick=closeD;
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("#drawer").hidden)closeD()});
+const m=/open=(\d+)/.exec(location.hash);if(m)openD(+m[1]);
+</script>

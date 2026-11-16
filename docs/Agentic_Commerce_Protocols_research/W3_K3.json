@@ -1,0 +1,310 @@
+{
+ "R4-64": {
+  "verdict": "fix",
+  "fix": "No US, EU or UK law or court case allocates the loss when an agent buys the wrong thing. Visa's rules do assign responsibility: the cardholder answers for an enrolled agent's actions as if the cardholder initiated the transaction (rule 4.1.23.10). No agent dispute condition exists, so wrong item disputes run on existing reason codes [R4-64, R4-65, R5-47, V#10, Visa rules 2026-10-24]",
+  "why": "Worldpay says no liability shift exists, but Visa rule 4.1.23.10 (last updated 2026-04) is a network rule making the cardholder responsible for agent actions. Also used in 7.2 card row and 7.3 Visa row",
+  "opened": true,
+  "checker": "K3"
+ },
+ "R4-65": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Worldpay: issuer carries authenticated token fraud, non fraud agent disputes still being negotiated",
+  "opened": true,
+  "checker": "K3"
+ },
+ "R5-47": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Payments Dive 2026-10-28: Stripe's John Piazza says there is no case law on liability",
+  "opened": true,
+  "checker": "K3"
+ },
+ "V#10": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "No agent dispute condition or reason code found in the Visa rules text (edition 2026-10-24) or Chargeflow. Compelling Evidence for 10.4 now accepts the agent provider's login ID",
+  "opened": true,
+  "checker": "K3"
+ },
+ "R4-34": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "12 CFR 1005.2(m)(1) text matches",
+  "opened": true,
+  "checker": "K3"
+ },
+ "C296": {
+  "verdict": "fix",
+  "fix": "Under Goodwin's reading of Reg E, the consumer carries it once credentials are shared, until the bank is told the access is revoked or unless the bank broke its own security procedure [R4-34, C296]",
+  "why": "7.1 states a law firm reading as the settled default. Goodwin text itself matches",
+  "opened": true,
+  "checker": "K3"
+ },
+ "C299": {
+  "verdict": "fix",
+  "fix": "and the merchant carries non fraud card disputes by default, unless it wins the dispute [C299, R4-65]",
+  "why": "Chargeflow says merchant by default unless it wins. Worldpay says allocation is still negotiated",
+  "opened": true,
+  "checker": "K3"
+ },
+ "R5-43": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Bank of America email of 2026-10-27, confirmed to TechCrunch by a spokesperson",
+  "opened": true,
+  "checker": "K3"
+ },
+ "R5-44": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "American Banker 2026-11-02: from Nov. 24 customers liable unless they evidence revocation. Agreement text not opened",
+  "opened": true,
+  "checker": "K3"
+ },
+ "C352": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "PYMNTS 2026-10-19 names JPMorganChase, Citi, Bank of America, Schwab",
+  "opened": true,
+  "checker": "K3"
+ },
+ "R4-17": {
+  "verdict": "fix",
+  "fix": "An AP2 threat model (preprint) found 48 threats, 8 of them high risk in at least one deployment architecture, and showed that valid signatures can sit on a manipulated decision [R4-17]",
+  "why": "Paper says eight reach High in at least one architecture",
+  "opened": true,
+  "checker": "K3"
+ },
+ "R4-27": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Visa release 2026-11-05: 22 models, failed 42.8 percent of runs",
+  "opened": true,
+  "checker": "K3"
+ },
+ "R4-28": {
+  "verdict": "fix",
+  "fix": "In Visa's benchmark of 22 models, 42.8 percent of runs failed and 54 percent of failed runs still ended in a purchase, with checkout and payment not yet tested (vendor) [R4-27, R4-28]",
+  "why": "Visa says checkout, payment and order placement testing comes later, so bought something overstates",
+  "opened": true,
+  "checker": "K3"
+ },
+ "R4-67": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "README defines facilitator, exact and upto, no refund or dispute process",
+  "opened": true,
+  "checker": "K3"
+ },
+ "R4-53": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "bratby.law (updated 2026-10-25) matches Question 15, Recommendation 10 and no response",
+  "opened": true,
+  "checker": "K3"
+ },
+ "R4-55": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Freshfields 2026-10-22: FCA good and poor practice 2026-10-19, trusted framework, no timeline",
+  "opened": true,
+  "checker": "K3"
+ },
+ "R4-56": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "CMA guidance published 2026-03-09, updated 2026-10-30, responsible as for an employee, up to 10 percent of worldwide turnover, business deployed agents only",
+  "opened": true,
+  "checker": "K3"
+ },
+ "R4-47": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Matheson 2026-04-29 confirms Council released final compromise texts on 2026-04-23",
+  "opened": true,
+  "checker": "K3"
+ },
+ "R4-48": {
+  "verdict": "fix",
+  "fix": "The EU PSR is not yet in the Official Journal. The Council adopted its first reading position in late October 2026 (sources give 2026-10-28 and 2026-10-29), the Parliament's second reading vote is planned for 2026-12-14 and publication is expected in 2027-01, so the PSR would apply about 2028-11 [R4-47, R4-48, payment-law.eu 2026-11-03]",
+  "why": "Vixio's Q3 2026 publication expectation has passed. 21 months still holds per payment-law.eu",
+  "opened": true,
+  "checker": "K3"
+ },
+ "R4-60": {
+  "verdict": "fix",
+  "fix": "Issued 2026-10-07, effective 2027-10-07, with sections 5 and 6 due by 2028-10-07. Firms should review controls as AI use grows. MAS will consult on agentic guidance in 2027",
+  "why": "MAS release says should, not must, and phases in sections 5 and 6 to 2028-10-07",
+  "opened": true,
+  "checker": "K3"
+ },
+ "R4-41": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "CFPB newsroom shows two items, 2026-10-02 and 2026-10-14, neither on agents",
+  "opened": true,
+  "checker": "K3"
+ },
+ "R4-35": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Goodwin 2026-06-11: presumed authorized even if the agent acts outside intended scope",
+  "opened": true,
+  "checker": "K3"
+ },
+ "R4-36": {
+  "verdict": "fix",
+  "fix": "Rule cell: Reg Z, 12 CFR 1026.12 and 1026.13(a)(3). Consumer liability capped at the lesser of 50 USD or the amount obtained before notice. Billing error rights in 1026.13(a)(3) cover goods not accepted or not delivered as agreed",
+  "why": "Billing error definition sits in 1026.13(a)(3), not 1026.12. Cap is the lesser of 50 USD or the amount obtained",
+  "opened": true,
+  "checker": "K3"
+ },
+ "R4-37": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Goodwin: more room to back out, merchant bears the loss",
+  "opened": true,
+  "checker": "K3"
+ },
+ "R4-39": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Goodwin: Article 4A is state law, commercially reasonable security procedure binds the customer",
+  "opened": true,
+  "checker": "K3"
+ },
+ "C347": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "UCC 4A-202(b) matches, also requires the bank to honour written customer restrictions",
+  "opened": true,
+  "checker": "K3"
+ },
+ "R4-42": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Fed page: speech dated 2026-09-29 at Sibos 2026, Miami, asks who is on the hook. Standards idea is tentative",
+  "opened": true,
+  "checker": "K3"
+ },
+ "R4-43": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Fed page: question shifts to proving the agent has authority to pay for the buyer",
+  "opened": true,
+  "checker": "K3"
+ },
+ "C284": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Checked against the Fed original of the same speech, not the BIS copy",
+  "opened": true,
+  "checker": "K3"
+ },
+ "C341": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "OCC release 2026-92 of 2026-10-21: rule and GENIUS Act take effect 2027-01-18, no AI agent text",
+  "opened": true,
+  "checker": "K3"
+ },
+ "C372": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "ecommercenews 2026-04-15: select developers, registered agent and authenticated intent, protects card members",
+  "opened": true,
+  "checker": "K3"
+ },
+ "R4-44": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "EBA Q&A 2018_4131 published 2019-03-01: without a mandate, not payee initiated",
+  "opened": true,
+  "checker": "K3"
+ },
+ "R4-49": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Finologee 2026-01-08: impersonation refund narrowed to PSP impersonation, failure to block liability",
+  "opened": true,
+  "checker": "K3"
+ },
+ "C305": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Finologee matches, provisional deal of 2025-11, 15 business days converging",
+  "opened": true,
+  "checker": "K3"
+ },
+ "R4-50": {
+  "verdict": "fix",
+  "fix": "The Digital Omnibus on AI, Regulation (EU) 2026/1744, was adopted 2026-07-08, published in the Official Journal 2026-07-24 and in force 2026-07-27. It moves Annex III high risk duties to 2027-12-02 and product embedded ones to 2028-08-02. No source opened treats shopping agents as high risk",
+  "why": "Council gave final approval on 2026-06-29 and EUR-Lex shows OJ L 2026/1744 of 2026-07-24. Doc says Council approval pending",
+  "opened": true,
+  "checker": "K3"
+ },
+ "R4-52": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "PSRs 2017 reg 77 text current to 2026-11-14: up to 35 GBP, unlimited for fraud or gross negligence",
+  "opened": true,
+  "checker": "K3"
+ },
+ "C306": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "bratby.law matches consultation dates 2026-07-14 to 2026-10-06 and Question 15",
+  "opened": true,
+  "checker": "K3"
+ },
+ "R4-54": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "PSR consumer page: maximum claim 85,000 GBP, from 2024-10-07, individuals, microenterprises and charities. Sending and receiving split not shown",
+  "opened": true,
+  "checker": "K3"
+ },
+ "DC#10": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "PSR news 2024-09-25 confirms the 85,000 GBP cap from 2024-10-07",
+  "opened": true,
+  "checker": "K3"
+ },
+ "C418": {
+  "verdict": "fix",
+  "fix": "GoCardless says it processed the first UK agentic account to account payment, a Direct Debit mandate set up inside a chat, built in FCA AI Live Testing [C418]",
+  "why": "Vendor claim stated as fact",
+  "opened": true,
+  "checker": "K3"
+ },
+ "R4-57": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "RBI press release 2025-09-25: minimum two factor authentication, risk based checks allowed, compliance by 2026-04-01",
+  "opened": true,
+  "checker": "K3"
+ },
+ "R4-59": {
+  "verdict": "fix",
+  "fix": "A Unified Agent Protocol using UPI Circle and Reserve Pay was reported in 2026-09 on unnamed sources and was expected at Global Fintech Fest in a 2026-09-09 report. No launch confirmation found by 2026-11-15 [R4-58, R4-59]",
+  "why": "The inc42 article is from the event day, so still expected after the event overstates",
+  "opened": true,
+  "checker": "K3"
+ },
+ "R5-71": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "AP2 issue 393 opened 2026-11-03, open, no maintainer reply",
+  "opened": true,
+  "checker": "K3"
+ },
+ "R4-68": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Cloudflare post 2026-11-05: IETF aim, the Site pays when the User disputes, four disclosure tiers, no liability rule",
+  "opened": true,
+  "checker": "K3"
+ }
+}

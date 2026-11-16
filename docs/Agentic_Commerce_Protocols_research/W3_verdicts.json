@@ -1,0 +1,1904 @@
+{
+ "R1-29": {
+  "verdict": "fix",
+  "fix": "2026-10-15 Universal Cart began rolling out in the US across Search and the Gemini app, with UCP checkout",
+  "why": "same page as C313, rolling out",
+  "opened": true,
+  "checker": "K5"
+ },
+ "R2-59": {
+  "verdict": "fix",
+  "fix": "PayPal, Shopify and Stripe launched as Copilot Checkout payment partners on 2026-01-08. Stripe says its sellers connect over ACP. Microsoft's current page names UCP as future support and does not name ACP. Also reword 2.2: UCP is the only commerce protocol with a verified live consumer checkout inside the 90 day window.",
+  "why": "ppc.land only quotes Microsoft adopting open standards like ACP. Stripe's own newsroom (2026-01-08) confirms ACP on the Stripe path",
+  "opened": true,
+  "checker": "K1",
+  "new_src": "https://stripe.com/us/newsroom/news/microsoft-copilot-and-stripe"
+ },
+ "R1-72": {
+  "verdict": "fix",
+  "fix": "Keep as the PayPal launch fact. Do not use it to say Copilot Checkout runs on no protocol.",
+  "why": "True of its article only. Stripe's page names ACP for Stripe sellers",
+  "opened": false,
+  "checker": "K1"
+ },
+ "R1-02": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Commits page: last commit 2026-07-18",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R1-19": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Announcements list v2026-08-25 as latest",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R1-21": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Payments TC formed 2026-09-02 with 8 members",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R1-22": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Stripe joined Governing Council 2026-04-28",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R1-23": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Tech Council expanded to 16 seats 2026-04-24",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R1-35": {
+  "verdict": "fix",
+  "fix": "No real money AP2 use was verified, and the last AP2 release is v0.2.0 of 2026-04-28 [R1-35].",
+  "why": "Row 32. Release date confirmed. The 2026-04-29 last commit was not visible on the opened page. Its uses in 1.3 and the AP2 mandate list (rows 3, 21) are supported",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R1-40": {
+  "verdict": "fix",
+  "fix": "Standardisation moved to the FIDO Payments working group, chaired by Mastercard and Visa and seeded by Google and Mastercard contributions [R1-40].",
+  "why": "Row 25. Only the Payments TWG has Mastercard and Visa chairs. The other group is chaired by CVS Health, Google and OpenAI",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R1-42": {
+  "verdict": "fix",
+  "fix": "A2A v1.0 is its first stable specification, backed by more than 150 organisations (Linux Foundation, 2026-04-09). Cite the A2A GitHub release page for v1.0.1 on 2026-05-28.",
+  "why": "Cited page gives no patch version or date",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R1-33": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Shopify changelog 2026-10-13: Shop MCP is live, checkout completes after shopper confirms",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R1-47": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "AWS GA notice 2026-08-18. Leaves the 90 day window on 2026-11-16",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R2-56": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "AWS: MPP, x402 upto, Coinbase and Stripe Privy, limits at infrastructure layer",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R1-34": {
+  "verdict": "fix",
+  "fix": "WebMCP C Pilot 2026-11-15. Shopify registers checkout tools on eligible checkouts, but Chrome runs WebMCP as an origin trial (Chrome 149 to 156, shipping planned for 157).",
+  "why": "Shopify page has no date or availability status. The permission quote itself is correct. Chromium intent to experiment 2026-05-15 sets the origin trial",
+  "opened": true,
+  "checker": "K1",
+  "new_src": "https://groups.google.com/a/chromium.org/g/blink-dev/c/gmYffo5WOE8/m/OJxuQRP3AAAJ"
+ },
+ "R1-16": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "OpenAI page: ChatGPT signs with Web Bot Auth, Akamai, Cloudflare, HUMAN and Vercel verify. Page has no date",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R1-57": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "WG milestones 2026-04-30 and 2026-08-31 with no documents attached",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R1-50": {
+  "verdict": "fix",
+  "fix": "Visa TAP C Pilot 2026-07-02. Visa says merchant participation in live European agent purchases (lastminute.com, Frasers, Cleverbridge, BrickDepot) was enabled through TAP. Delete the 2.3 line that no source ties TAP to a live consumer payment.",
+  "why": "Visa's own 2026-07-02 release contradicts the Spec call. R1-50 itself not opened",
+  "opened": false,
+  "checker": "K1",
+  "new_src": "https://www.visa.co.uk/about-visa/newsroom/press-releases.3457328.html"
+ },
+ "R2-04": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Visa 2026-10-21: BILL and Billtrust pilot live end to end, TAP named, GA of two features in 2027",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R2-01": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Visa call 2026-10-27: nearly 50 AI partners live including Shop Pay, no volume",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R2-11": {
+  "verdict": "fix",
+  "fix": "Mastercard Agent Pay C is Live. Shopify's 2026-10-28 page shows Shop Pay in personal agents on Mastercard tokens [R2-11] but does not name Agent Pay. Mastercard's CEO said on 2026-10-29 that Shop Pay uses Agent Pay [R2-09].",
+  "why": "Page supports the Shop Pay and token facts. It names neither Agent Pay nor Intelligent Commerce, so the 2.3 bullet overstates it",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R1-60": {
+  "verdict": "fix",
+  "fix": "Same as C360",
+  "why": "Same page as C360",
+  "opened": true,
+  "checker": "K2"
+ },
+ "R2-09": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "PYMNTS 2026-10-29: CEO says Shop Pay uses Agent Pay and calls VCN a bridge",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R2-13": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "The Block 2026-06-10: more than 30 early adopters, no GA date, no real money shown",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R1-61": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "README: Draft (v0.1), maintained by Mastercard. Mappings to AP2, ACP, UCP not visible on the landing page",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R1-65": {
+  "verdict": "cut",
+  "fix": "Recheck in a browser before acting. A search snippet of the same Amex page matches the doc wording.",
+  "why": "Page failed to open twice (header overflow), so the rule defaults to does not support",
+  "opened": false,
+  "checker": "K1"
+ },
+ "R1-66": {
+  "verdict": "cut",
+  "fix": "Recheck in a browser. If confirmed: Amex announced Agent Purchase Protection on 2026-04-14. It covers registered agents, and agent registration specs are still in development.",
+  "why": "Not openable. Press reports call the protection rolled out on 2026-04-14, so future tense may be wrong",
+  "opened": false,
+  "checker": "K1"
+ },
+ "R1-67": {
+  "verdict": "fix",
+  "fix": "2026-11-02 KYAPay draft 02 published, same three authors, expires 2027-05-06",
+  "why": "Akamai author already on draft 01, data.json says adds",
+  "opened": true,
+  "checker": "K5"
+ },
+ "R1-68": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Asian Banker 2026-09-10: KYA collaboration through MAS convened BuildFin.ai, no spec or timeline",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R2-15": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Stripe docs: 2026-09-30.preview, agent services preview terms, 34 country codes",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R2-16": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Stripe docs: may use Mastercard Agent Pay and Visa Intelligent Commerce tokens",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R2-21": {
+  "verdict": "fix",
+  "fix": "Keep only as the Instinct Link balance fact. Remove it from the SPT C status sources.",
+  "why": "Article never mentions Shared Payment Tokens",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R2-17": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Stripe agentic docs index lists machine payments with MPP and x402. Machine page not opened",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R2-31": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Coinbase: launched under the Linux Foundation 2026-04-02 with forty members. LF release speaks of an operational launch in July 2026",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R2-33": {
+  "verdict": "fix",
+  "fix": "More than 50 members by 2026-10-01 (Linux Foundation release). Tag vendor. Data line: Announced under the Linux Foundation in April 2026, operational launch 2026-07-14. Members passed fifty by October.",
+  "why": "Count is the foundation's own self report. LF calls April an intent to launch",
+  "opened": true,
+  "checker": "K2",
+  "data_fix": {
+   "item": "a1",
+   "ev": "vendor"
+  }
+ },
+ "R2-38": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Tracker: 200,680,559 transactions, 42,999,352 USD, 12 chains, 18 facilitators",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R2-39": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Tracker: October 5.1M transactions moving 274K USD, peak December 2025 at 54.2M",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R2-28": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Tracker: MPP on Tempo 48,585 events, 1,874 payers, 92 payees",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R2-40": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Tracker: 60.1 percent through one facilitator in 5 days to 14 Nov",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R2-55": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Lightning Labs 2026-07-21: alpha, mainnet by invite, 1 basis point fee, L402 and MCP",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R2-61": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Adyen 2026-06-16: limited availability for US enterprise merchants. Stale for a Pilot cell",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R2-63": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Checkout.com: early access for selected partners, certified payment handler, UCP via Google Pay rails",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R2-64": {
+  "verdict": "fix",
+  "fix": "Worldpay C Absent 2026-11-15 as a shipped product. Announced on 2026-01-28 as launching soon, no later source found.",
+  "why": "Quote correct. Spec is the wrong word for an announced product with no spec",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R2-68": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Razorpay 2026-02-20: pilot with a small group of users on UPI Reserve Pay. Stale",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R2-72": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Lets Money 2026-05-21: Iniciador MCP, biometric approval each payment, offered to institutions",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R2-66": {
+  "verdict": "fix",
+  "fix": "Alipay AI Pay C Live 2026-05-26 on vendor figures, stale, recheck.",
+  "why": "Figures match. 100M users and 120M transactions in one week is not a pilot, and neither page says pilot",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R2-67": {
+  "verdict": "fix",
+  "fix": "Same as R2-66: Live on vendor figures, stale.",
+  "why": "300M transactions to date confirmed. Pilot understates maturity",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R4-27": {
+  "verdict": "fix",
+  "fix": "In Visa's benchmark of 22 models, 42.8 percent of runs failed and 54 percent of the failed runs still ended in a purchase decision [R4-27, R4-28]. The benchmark did not test checkout or payment, but a valid token would not have stopped those purchases.",
+  "why": "Row 15. Numbers match. The test covered product selection only, so paid for each of them overstates",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R5-44": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "American Banker 2026-11-02: starting Nov. 24, liable unless evidence of revocation. Year implied, press source",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R2-65": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Fortune 2026-10-15: spokesperson says the bank does not allow third party agents using banking credentials",
+  "opened": true,
+  "checker": "K1"
+ },
+ "status:acp:C": {
+  "verdict": "keep",
+  "fix": "Keep Spec 2026-11-15. Add: Copilot Checkout used ACP for Stripe sellers at launch on 2026-01-08. Stripe's agentic docs now list UCP and not ACP.",
+  "why": "Spec holds but hides that ACP shipped in Copilot Checkout",
+  "opened": true,
+  "checker": "K1"
+ },
+ "status:ucp:C": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Live 2026-10-15 confirmed",
+  "opened": true,
+  "checker": "K1"
+ },
+ "status:mc-agentpay:C": {
+  "verdict": "keep",
+  "fix": "Cite R2-09 as the source that names Agent Pay.",
+  "why": "Live supported by Shopify tokens plus CEO remark",
+  "opened": true,
+  "checker": "K1"
+ },
+ "status:mc-agentpay:M": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Spec, announcement only",
+  "opened": true,
+  "checker": "K1"
+ },
+ "status:visa-tap:C": {
+  "verdict": "fix",
+  "fix": "Pilot 2026-07-02",
+  "why": "Visa release says TAP enabled merchant participation in live European agent purchases",
+  "opened": true,
+  "checker": "K1",
+  "new_src": "https://www.visa.co.uk/about-visa/newsroom/press-releases.3457328.html"
+ },
+ "status:visa-tap:B": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Pilot 2026-10-20 supported by Visa 2026-10-21 release",
+  "opened": true,
+  "checker": "K1"
+ },
+ "status:visa-ic:C": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Live 2026-10-28",
+  "opened": true,
+  "checker": "K1"
+ },
+ "status:visa-ic:B": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Pilot 2026-10-21",
+  "opened": true,
+  "checker": "K1"
+ },
+ "status:spt:C": {
+  "verdict": "fix",
+  "fix": "Live 2026-11-15, preview terms. Sources R2-15 plus Stripe Copilot newsroom and Microsoft merchant page. Drop R2-21.",
+  "why": "Stripe says SPTs are available in US, CA and Europe. Copilot Checkout is available now and uses SPTs",
+  "opened": true,
+  "checker": "K1",
+  "new_src": "https://about.ads.microsoft.com/en/solutions/technology/agentic-commerce"
+ },
+ "status:alipay:C": {
+  "verdict": "fix",
+  "fix": "Live 2026-05-26, ev vendor, stale",
+  "why": "Scale and live use shown, no pilot wording",
+  "opened": true,
+  "checker": "K1"
+ },
+ "status:alipay:M": {
+  "verdict": "fix",
+  "fix": "Split the row. M Spec belongs to Ant AMP, the doc gives Alipay AI Pay M Absent",
+  "why": "Merged row mixes two products",
+  "opened": false,
+  "checker": "K1"
+ },
+ "status:wba:C": {
+  "verdict": "fix",
+  "fix": "Live, as_of 2026-11-15, identity only",
+  "why": "No cited page carries 2026-09-28",
+  "opened": true,
+  "checker": "K1"
+ },
+ "status:mcp:C": {
+  "verdict": "fix",
+  "fix": "Live 2026-10-13, src R1-33 only",
+  "why": "R1-34 is WebMCP, not MCP",
+  "opened": true,
+  "checker": "K1"
+ },
+ "status:mcp:M": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Live 2026-08-18",
+  "opened": true,
+  "checker": "K1"
+ },
+ "status:webmcp:C": {
+  "verdict": "fix",
+  "fix": "Pilot 2026-11-15 (Chrome origin trial). Not on data.json, doc only",
+  "why": "Origin trial 149 to 156, ship 157",
+  "opened": true,
+  "checker": "K1"
+ },
+ "status:x402:C": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Spec",
+  "opened": true,
+  "checker": "K1"
+ },
+ "status:x402:B": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Spec",
+  "opened": true,
+  "checker": "K1"
+ },
+ "status:x402:M": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Live 2026-11-15 on tracker",
+  "opened": true,
+  "checker": "K1"
+ },
+ "status:mpp:M": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Live 2026-11-15 on tracker",
+  "opened": true,
+  "checker": "K1"
+ },
+ "status:upi:C": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Pilot 2026-02-20, stale",
+  "opened": true,
+  "checker": "K1"
+ },
+ "status:pix:C": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Spec, no consumer volume shown",
+  "opened": true,
+  "checker": "K1"
+ },
+ "status:kya:B": {
+  "verdict": "fix",
+  "fix": "Make page and doc agree. Doc has KYAPay B Absent and KYA framework B Unsettled",
+  "why": "Merged row",
+  "opened": false,
+  "checker": "K1"
+ },
+ "status:amex-ace:C": {
+  "verdict": "keep",
+  "fix": "Spec likely right. Sources need a browser recheck",
+  "why": "Amex page not openable",
+  "opened": false,
+  "checker": "K1"
+ },
+ "status:ap2:C": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Spec, no deployment found",
+  "opened": true,
+  "checker": "K1"
+ },
+ "status:mc-vi:C": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Draft v0.1",
+  "opened": true,
+  "checker": "K1"
+ },
+ "status:fido:C": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Unsettled, no draft",
+  "opened": true,
+  "checker": "K1"
+ },
+ "status:a2a:C": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Spec for commerce. LF cites enterprise production use outside commerce",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R2-32": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "LF release 2026-07-14 says 40 members and names 17 premier members (17 is a tally, not stated)",
+  "opened": true,
+  "checker": "K2"
+ },
+ "R3-24": {
+  "verdict": "fix",
+  "fix": "ucp.dev lists 51 endorsers and 21 co-developers (counted 2026-11-15). Endorsement is stated support, not use.",
+  "why": "No over 60 count on the page. HTML lists 51 distinct endorser names",
+  "opened": true,
+  "checker": "K2",
+  "data_fix": {
+   "item": "a2",
+   "value": 51,
+   "unit": "endorsers listed",
+   "rung": 6,
+   "ev": "vendor"
+  }
+ },
+ "R1-31": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "21 distinct co-developers across Shopping, Lodging and Food tabs",
+  "opened": true,
+  "checker": "K2"
+ },
+ "R2-23": {
+  "verdict": "fix",
+  "fix": "11 named payment methods plus a custom method option, no ACH or bank debit",
+  "why": "The twelfth entry is a guide to building a custom method",
+  "opened": true,
+  "checker": "K2",
+  "data_fix": {
+   "item": "a3",
+   "value": 11,
+   "unit": "named methods plus custom"
+  }
+ },
+ "R5-32": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "HUMAN PDF: in 2025, 77% on product and search pages, 2.3% on checkout pages. Rung 3 vendor right",
+  "opened": true,
+  "checker": "K2"
+ },
+ "R5-37": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "99 distinct user agents set to Disallow / in amazon.com/robots.txt, a few are general crawlers",
+  "opened": true,
+  "checker": "K2"
+ },
+ "C360": {
+  "verdict": "fix",
+  "fix": "Mastercard's footnote names 36 European banks that completed controlled live Agent Pay transactions (pilot). All European issuers are enabled at network level. Rung 4, vendor.",
+  "why": "Mastercard states no number, 36 is a count of the footnote list. Controlled means pilot under 6.1. Rung 4 not 6 because a named list of banks that transacted is a deployment record",
+  "opened": true,
+  "checker": "K2",
+  "data_fix": {
+   "item": "a10",
+   "label": "European banks in controlled live Agent Pay tests",
+   "rung": 4,
+   "ev": "vendor"
+  }
+ },
+ "R5-24": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Kantar 2026-11-09: only 28% comfortable with AI making a purchase. No sample on page",
+  "opened": true,
+  "checker": "K2"
+ },
+ "R3-21": {
+  "verdict": "fix",
+  "fix": "Shopify's investor deck says orders from AI searches rose 3.3 times year on year. Its president said the volume is still small. Rung 6, vendor.",
+  "why": "Shopify's own figure carried by press. The doc grades Visa's call figures at 6",
+  "opened": true,
+  "checker": "K2",
+  "data_fix": {
+   "item": "a13",
+   "rung": 6
+  }
+ },
+ "R3-14": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Same page as R2-01. Agent activity to stay very small for four quarters",
+  "opened": true,
+  "checker": "K2"
+ },
+ "R5-04": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Harris Poll for Visa, n 2,065, 2026-05-26 to 2026-05-28, released 2026-09-09",
+  "opened": true,
+  "checker": "K2"
+ },
+ "R5-05": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "61% would trust Visa, same release",
+  "opened": true,
+  "checker": "K2"
+ },
+ "R3-40": {
+  "verdict": "fix",
+  "fix": "Checkout.com says merchants in the UK and US estimate 3% of transactions involve AI agents (2026-06-09, no method given). Rung 6, vendor, as_of 2026-06-09.",
+  "why": "Figure is on Checkout.com's own newsroom release of 2026-06-09, attributed to merchants",
+  "opened": true,
+  "checker": "K2",
+  "data_fix": {
+   "item": "a17",
+   "rung": 6,
+   "as_of": "2026-06-09",
+   "src_add": "https://www.checkout.com/newsroom/consumer-demand-for-ai-shopping-is-forming-fast-but-trust-for-agentic-commerce-is-still-catching-up"
+  }
+ },
+ "R5-11": {
+  "verdict": "fix",
+  "fix": "Rung 6 not 7. Delete 'Not on Checkout.com's own page'",
+  "why": "The 3% is on the Checkout.com newsroom release, attributed to merchants across the UK and US. R5-11 opened only the guide page",
+  "opened": true,
+  "checker": "K2"
+ },
+ "C369": {
+  "verdict": "fix",
+  "fix": "x402.org showed 75.41M transactions and 24.24M USD for the last 30 days from at least 2026-07-10 to mid October 2026, unchanged. The window ends on or before 2026-07-10. Vendor, rung 6. For that period the tracker shows 4.8M (June) and 6.0M (July).",
+  "why": "Same pair quoted by Forkast 2026-07-10 and 2026-07-14, Solana Compass 2026-08-25, Crypto Briefing 2026-09-15 and 2026-10-15. Not an August figure. The doc's pairing with August 17.9M is wrong. Wayback snapshots refused, so the 2026-08-25 page date was not seen",
+  "opened": true,
+  "checker": "K2"
+ },
+ "C287": {
+  "verdict": "fix",
+  "fix": "Crypto Briefing (2026-09-15) repeats the 24.24M figure as 30 days to mid August, but the figure was already published on 2026-07-10.",
+  "why": "Re-quote of an older dashboard reading. Article names no source",
+  "opened": true,
+  "checker": "K2"
+ },
+ "R3-27": {
+  "verdict": "fix",
+  "fix": "Crypto Briefing (2026-10-15) quotes the same stale x402.org reading. Do not use for October or August.",
+  "why": "Same 75.41M and 24.24M pair as July. Rung 6 vendor, not 3",
+  "opened": true,
+  "checker": "K2"
+ },
+ "R2-46": {
+  "verdict": "fix",
+  "fix": "The tracker (17.9M, 12 chains with Solana) and Bitquery (18.3M signed USDC payments on five EVM chains, Solana excluded) are close for August, but they count different things, so the match does not validate either. Dashboard and tracker counts differ by about 12 to 16 times.",
+  "why": "Bitquery covers Base, Polygon, Ethereum, Arbitrum, Optimism and counts all signed USDC settlements. It makes no tracker comparison. The 4x and 60x multiples pair different windows",
+  "opened": true,
+  "checker": "K2"
+ },
+ "R2-41": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Fireblocks 2026-11-03 cites agenteconomy.to: 196M lifetime, 12 chains, more than 42M USD, as of 2026-11-01",
+  "opened": true,
+  "checker": "K2"
+ },
+ "R2-44": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Allium: agent payments doubled to 68.3M in Q3 2026, value 3.7M USD",
+  "opened": true,
+  "checker": "K2"
+ },
+ "R2-45": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "More than 138M discrete transactions on Base in Q3 2026. Page date not shown",
+  "opened": true,
+  "checker": "K2"
+ },
+ "R2-47": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Artemis about 50% artificial, CoinDesk real daily settlement near 28,000 USD. No window or method",
+  "opened": true,
+  "checker": "K2"
+ },
+ "R2-37": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "x402.org shows no dashboard, says millions of transactions, last updated 2026-10-27",
+  "opened": true,
+  "checker": "K2"
+ },
+ "R1-01": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Latest changelog file 2026-04-17, no GitHub releases",
+  "opened": true,
+  "checker": "K2"
+ },
+ "C313": {
+  "verdict": "fix",
+  "fix": "2026-10-15 Universal Cart began rolling out in the US across Search and the Gemini app, with UCP checkout",
+  "why": "page says launches today and rolling out, not fully live",
+  "opened": true,
+  "checker": "K5"
+ },
+ "C349": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Visa release 2026-10-20: pilot currently live and processing end to end. No counts",
+  "opened": true,
+  "checker": "K2"
+ },
+ "C384": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "AWS GA 2026-08-18 with MPP and x402 upto scheme, no usage",
+  "opened": true,
+  "checker": "K2"
+ },
+ "R2-73": {
+  "verdict": "fix",
+  "fix": "GoCardless says it made the UK's first live agentic account to account payment, a Trussell donation by Direct Debit, inside the FCA AI Live Testing programme.",
+  "why": "First is GoCardless's own claim. Supervised test, a pilot under 6.1",
+  "opened": true,
+  "checker": "K2"
+ },
+ "C312": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Stripe 2026-09-29: agentic purchases with Link increased 38x over the past month. No base",
+  "opened": true,
+  "checker": "K2"
+ },
+ "R5-27": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Adobe via Small Business Trends: converted 90% better in September 2026",
+  "opened": true,
+  "checker": "K2"
+ },
+ "R5-28": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "AI traffic to US retail up 71% year on year in September 2026",
+  "opened": true,
+  "checker": "K2"
+ },
+ "R5-29": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "August 2025 converted 9% worse",
+  "opened": true,
+  "checker": "K2"
+ },
+ "R2-02": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Ramp's agentic bill pay is now generally available, per Visa CEO",
+  "opened": true,
+  "checker": "K2"
+ },
+ "R5-10": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "42% of merchants testing, over 12,000 consumers and heads of payments",
+  "opened": true,
+  "checker": "K2"
+ },
+ "R5-12": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "PYMNTS and Visa, 1,185 merchants: 11% SMB and 19% large agent ready",
+  "opened": true,
+  "checker": "K2"
+ },
+ "R5-13": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "23% can distinguish AI traffic",
+  "opened": true,
+  "checker": "K2"
+ },
+ "R5-14": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "93% say AI provider should bear the loss",
+  "opened": true,
+  "checker": "K2"
+ },
+ "R3-39": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Amazon started blocking Muse on 2026-09-20, per spokesperson",
+  "opened": true,
+  "checker": "K2"
+ },
+ "R5-63": {
+  "verdict": "fix",
+  "why": "PYMNTS survey with no sample or base on the page, and no vendor tag in the doc",
+  "opened": true,
+  "checker": "K4",
+  "fix": "59 percent of AI-assisted purchases still end at Amazon (PYMNTS survey, base not stated)"
+ },
+ "R4-64": {
+  "verdict": "fix",
+  "fix": "No US, EU or UK law or court case allocates the loss when an agent buys the wrong thing. Visa's rules do assign responsibility: the cardholder answers for an enrolled agent's actions as if the cardholder initiated the transaction (rule 4.1.23.10). No agent dispute condition exists, so wrong item disputes run on existing reason codes [R4-64, R4-65, R5-47, V#10, Visa rules 2026-10-24]",
+  "why": "Worldpay says no liability shift exists, but Visa rule 4.1.23.10 (last updated 2026-04) is a network rule making the cardholder responsible for agent actions. Also used in 7.2 card row and 7.3 Visa row",
+  "opened": true,
+  "checker": "K3"
+ },
+ "R4-65": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Worldpay: issuer carries authenticated token fraud, non fraud agent disputes still being negotiated",
+  "opened": true,
+  "checker": "K3"
+ },
+ "R5-47": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Payments Dive 2026-10-28: Stripe's John Piazza says there is no case law on liability",
+  "opened": true,
+  "checker": "K3"
+ },
+ "V#10": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "No agent dispute condition or reason code found in the Visa rules text (edition 2026-10-24) or Chargeflow. Compelling Evidence for 10.4 now accepts the agent provider's login ID",
+  "opened": true,
+  "checker": "K3"
+ },
+ "R4-34": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "12 CFR 1005.2(m)(1) text matches",
+  "opened": true,
+  "checker": "K3"
+ },
+ "C296": {
+  "verdict": "fix",
+  "fix": "Under Goodwin's reading of Reg E, the consumer carries it once credentials are shared, until the bank is told the access is revoked or unless the bank broke its own security procedure [R4-34, C296]",
+  "why": "7.1 states a law firm reading as the settled default. Goodwin text itself matches",
+  "opened": true,
+  "checker": "K3"
+ },
+ "C299": {
+  "verdict": "fix",
+  "fix": "and the merchant carries non fraud card disputes by default, unless it wins the dispute [C299, R4-65]",
+  "why": "Chargeflow says merchant by default unless it wins. Worldpay says allocation is still negotiated",
+  "opened": true,
+  "checker": "K3"
+ },
+ "R5-43": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Bank of America email of 2026-10-27, confirmed to TechCrunch by a spokesperson",
+  "opened": true,
+  "checker": "K3"
+ },
+ "C352": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "PYMNTS 2026-10-19 names JPMorganChase, Citi, Bank of America, Schwab",
+  "opened": true,
+  "checker": "K3"
+ },
+ "R4-17": {
+  "verdict": "fix",
+  "fix": "An AP2 threat model (preprint) found 48 threats, 8 of them high risk in at least one deployment architecture, and showed that valid signatures can sit on a manipulated decision [R4-17]",
+  "why": "Paper says eight reach High in at least one architecture",
+  "opened": true,
+  "checker": "K3"
+ },
+ "R4-28": {
+  "verdict": "fix",
+  "fix": "In Visa's benchmark of 22 models, 42.8 percent of runs failed and 54 percent of failed runs still ended in a purchase, with checkout and payment not yet tested (vendor) [R4-27, R4-28]",
+  "why": "Visa says checkout, payment and order placement testing comes later, so bought something overstates",
+  "opened": true,
+  "checker": "K3"
+ },
+ "R4-67": {
+  "verdict": "fix",
+  "fix": "Final rail with no protocol refund path. The x402 README defines no refund or dispute process [R4-67]. A refund is a voluntary transfer back from the seller, so the payer carries the loss unless the seller agrees.",
+  "why": "Row 48. README has no refund process, but Coinbase tells sellers to refund by transfer and Stripe offers refunds on machine payments it settles. README now lists exact, upto and batch-settlement",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R4-53": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "bratby.law (updated 2026-10-25) matches Question 15, Recommendation 10 and no response",
+  "opened": true,
+  "checker": "K3"
+ },
+ "R4-55": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Freshfields 2026-10-22: FCA good and poor practice 2026-10-19, trusted framework, no timeline",
+  "opened": true,
+  "checker": "K3"
+ },
+ "R4-56": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "CMA guidance published 2026-03-09, updated 2026-10-30, responsible as for an employee, up to 10 percent of worldwide turnover, business deployed agents only",
+  "opened": true,
+  "checker": "K3"
+ },
+ "R4-47": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Matheson 2026-04-29 confirms Council released final compromise texts on 2026-04-23",
+  "opened": true,
+  "checker": "K3"
+ },
+ "R4-48": {
+  "verdict": "fix",
+  "fix": "The EU PSR is not yet in the Official Journal. The Council adopted its first reading position in late October 2026 (sources give 2026-10-28 and 2026-10-29), the Parliament's second reading vote is planned for 2026-12-14 and publication is expected in 2027-01, so the PSR would apply about 2028-11 [R4-47, R4-48, payment-law.eu 2026-11-03]",
+  "why": "Vixio's Q3 2026 publication expectation has passed. 21 months still holds per payment-law.eu",
+  "opened": true,
+  "checker": "K3"
+ },
+ "R4-60": {
+  "verdict": "fix",
+  "fix": "Issued 2026-10-07, effective 2027-10-07, with sections 5 and 6 due by 2028-10-07. Firms should review controls as AI use grows. MAS will consult on agentic guidance in 2027",
+  "why": "MAS release says should, not must, and phases in sections 5 and 6 to 2028-10-07",
+  "opened": true,
+  "checker": "K3"
+ },
+ "R4-41": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "CFPB newsroom shows two items, 2026-10-02 and 2026-10-14, neither on agents",
+  "opened": true,
+  "checker": "K3"
+ },
+ "R4-35": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Goodwin 2026-06-11: presumed authorized even if the agent acts outside intended scope",
+  "opened": true,
+  "checker": "K3"
+ },
+ "R4-36": {
+  "verdict": "fix",
+  "fix": "Rule cell: Reg Z, 12 CFR 1026.12 and 1026.13(a)(3). Consumer liability capped at the lesser of 50 USD or the amount obtained before notice. Billing error rights in 1026.13(a)(3) cover goods not accepted or not delivered as agreed",
+  "why": "Billing error definition sits in 1026.13(a)(3), not 1026.12. Cap is the lesser of 50 USD or the amount obtained",
+  "opened": true,
+  "checker": "K3"
+ },
+ "R4-37": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Goodwin: more room to back out, merchant bears the loss",
+  "opened": true,
+  "checker": "K3"
+ },
+ "R4-39": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Goodwin: Article 4A is state law, commercially reasonable security procedure binds the customer",
+  "opened": true,
+  "checker": "K3"
+ },
+ "C347": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "UCC 4A-202(b) matches, also requires the bank to honour written customer restrictions",
+  "opened": true,
+  "checker": "K3"
+ },
+ "R4-42": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Fed page: speech dated 2026-09-29 at Sibos 2026, Miami, asks who is on the hook. Standards idea is tentative",
+  "opened": true,
+  "checker": "K3"
+ },
+ "R4-43": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Fed page: question shifts to proving the agent has authority to pay for the buyer",
+  "opened": true,
+  "checker": "K3"
+ },
+ "C284": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Checked against the Fed original of the same speech, not the BIS copy",
+  "opened": true,
+  "checker": "K3"
+ },
+ "C341": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "OCC release 2026-92 of 2026-10-21: rule and GENIUS Act take effect 2027-01-18, no AI agent text",
+  "opened": true,
+  "checker": "K3"
+ },
+ "C372": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "ecommercenews 2026-04-15: select developers, registered agent and authenticated intent, protects card members",
+  "opened": true,
+  "checker": "K3"
+ },
+ "R4-44": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "EBA Q&A 2018_4131 published 2019-03-01: without a mandate, not payee initiated",
+  "opened": true,
+  "checker": "K3"
+ },
+ "R4-49": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Finologee 2026-01-08: impersonation refund narrowed to PSP impersonation, failure to block liability",
+  "opened": true,
+  "checker": "K3"
+ },
+ "C305": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Finologee matches, provisional deal of 2025-11, 15 business days converging",
+  "opened": true,
+  "checker": "K3"
+ },
+ "R4-50": {
+  "verdict": "fix",
+  "fix": "The Digital Omnibus on AI, Regulation (EU) 2026/1744, was adopted 2026-07-08, published in the Official Journal 2026-07-24 and in force 2026-07-27. It moves Annex III high risk duties to 2027-12-02 and product embedded ones to 2028-08-02. No source opened treats shopping agents as high risk",
+  "why": "Council gave final approval on 2026-06-29 and EUR-Lex shows OJ L 2026/1744 of 2026-07-24. Doc says Council approval pending",
+  "opened": true,
+  "checker": "K3"
+ },
+ "R4-52": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "PSRs 2017 reg 77 text current to 2026-11-14: up to 35 GBP, unlimited for fraud or gross negligence",
+  "opened": true,
+  "checker": "K3"
+ },
+ "C306": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "bratby.law matches consultation dates 2026-07-14 to 2026-10-06 and Question 15",
+  "opened": true,
+  "checker": "K3"
+ },
+ "R4-54": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "PSR consumer page: maximum claim 85,000 GBP, from 2024-10-07, individuals, microenterprises and charities. Sending and receiving split not shown",
+  "opened": true,
+  "checker": "K3"
+ },
+ "DC#10": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "PSR news 2024-09-25 confirms the 85,000 GBP cap from 2024-10-07",
+  "opened": true,
+  "checker": "K3"
+ },
+ "C418": {
+  "verdict": "fix",
+  "fix": "GoCardless says it processed the first UK agentic account to account payment, a Direct Debit mandate set up inside a chat, built in FCA AI Live Testing [C418]",
+  "why": "Vendor claim stated as fact",
+  "opened": true,
+  "checker": "K3"
+ },
+ "R4-57": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "RBI press release 2025-09-25: minimum two factor authentication, risk based checks allowed, compliance by 2026-04-01",
+  "opened": true,
+  "checker": "K3"
+ },
+ "R4-59": {
+  "verdict": "fix",
+  "fix": "A Unified Agent Protocol using UPI Circle and Reserve Pay was reported in 2026-09 on unnamed sources and was expected at Global Fintech Fest in a 2026-09-09 report. No launch confirmation found by 2026-11-15 [R4-58, R4-59]",
+  "why": "The inc42 article is from the event day, so still expected after the event overstates",
+  "opened": true,
+  "checker": "K3"
+ },
+ "R5-71": {
+  "verdict": "fix",
+  "fix": "AP2 v0.2 replaced the Intent Mandate with user signed open mandates, and an open issue says the mispick dispute row went with it [R5-71].",
+  "why": "Row 79. The v0.2 spec has the user sign open Checkout and Payment Mandates with limits. Only the Intent Mandate name went",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R4-68": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Cloudflare post 2026-11-05: IETF aim, the Site pays when the User disputes, four disclosure tiers, no liability rule",
+  "opened": true,
+  "checker": "K3"
+ },
+ "R4-01": {
+  "verdict": "keep",
+  "why": "Abstract matches. v1 2025-08-04, revised 2025-10-27 and 2025-12-17",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R4-02": {
+  "verdict": "keep",
+  "why": "Abstract says all models show severe first proposal bias and 10-30x advantage for speed over quality",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R4-04": {
+  "verdict": "fix",
+  "why": "Numbers right, but human participants were steered by an LLM. It is not agent bias, yet 7.6 and challenge 10 treat it as agent picks",
+  "opened": true,
+  "checker": "K4",
+  "fix": "7.4: In a study of human participants, an LLM shopping assistant nearly tripled sponsored picks (61.2 percent versus 22.4 percent with search), and Sponsored labels did not significantly reduce it. 7.6: Position and first proposal bias steer agent picks, and LLM persuasion steers users. data.json ch10 one: Agents still buy the wrong thing, hidden prompts can steer them, and LLM sales pitches steer the people using them."
+ },
+ "R4-07": {
+  "verdict": "keep",
+  "why": "Matches. 186 deals were the one real run of four",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R4-09": {
+  "verdict": "keep",
+  "why": "Matches Guardio 2025-08-20, some runs autofilled card and completed checkout",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R4-11": {
+  "verdict": "keep",
+  "why": "Matches, 2026-01-30 revised 2026-05-18",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R4-12": {
+  "verdict": "keep",
+  "why": "Matches, simulation and evaluated attacks only, about 3.8 ms",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R4-14": {
+  "verdict": "keep",
+  "why": "Matches, local chains, Base Sepolia and live endpoints",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R4-15": {
+  "verdict": "keep",
+  "why": "Matches, four flaw classes, up to 100 percent leakage, official SDKs and a production deployment, all disclosed",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R4-16": {
+  "verdict": "keep",
+  "why": "Matches, 33 vulnerabilities across three platforms, three chain into payment hijack, PCAT defence",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R4-18": {
+  "verdict": "fix",
+  "why": "86 cases include 46 known or calibration cases. Findings are formal consistency findings, not confirmed issues",
+  "opened": true,
+  "checker": "K4",
+  "fix": "Tamarin models of x402, MPP, ACP and AP2 found 40 previously undocumented formal consistency findings across 86 verification cases"
+ },
+ "R4-21": {
+  "verdict": "keep",
+  "why": "Matches, January to December 2025, no malicious intent, malicious bots up 59 percent",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R4-22": {
+  "verdict": "keep",
+  "why": "Matches PYMNTS 2026-06-10 citing HUMAN, 7,851 percent year over year, 2.3 percent checkout, retail 46.6 percent",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R5-34": {
+  "verdict": "keep",
+  "why": "Matches, 2025 versus 2024, started from almost nothing in 2024",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R5-33": {
+  "verdict": "keep",
+  "why": "HUMAN PDF industry chart shows retail and ecommerce 46.6 percent",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R4-23": {
+  "verdict": "keep",
+  "why": "Matches, carding up 250 percent since 2022, post login takeover quadrupled",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R5-35": {
+  "verdict": "keep",
+  "why": "Matches HUMAN Satori report via PPC Land 2026-06-04",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R4-24": {
+  "verdict": "keep",
+  "why": "Matches DataDome via SecurityInfoWatch 2026-09-22, window 2025-07 to 2026-06, 605.6 million requests in H1 2026",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R4-25": {
+  "verdict": "keep",
+  "why": "Matches, about 20,000 to 21,000 sites tested",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R5-36": {
+  "verdict": "keep",
+  "why": "Matches Imperva 2026-04-29, all automated traffic",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R4-26": {
+  "verdict": "keep",
+  "why": "Matches, nearly 1 billion USD Jul to Dec 2025, no agent figure",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R4-30": {
+  "verdict": "fix",
+  "why": "Page says retailers and other companies. Figures are Gambit's reconstruction, cards validated by Overwatch Data, cost from operator's own records",
+  "opened": true,
+  "checker": "K4",
+  "fix": "Three open source agent frameworks breached at least 27 online retailers and other companies, took over 600,000 card records and skimmed over 100 sites, at about 25.46 USD per target by the operator's own records (Gambit Security 2026-09-22, via CSA note 2026-09-26)"
+ },
+ "R4-31": {
+  "verdict": "fix",
+  "why": "2026-08-18 date covers the 3 critical fixes only, 9 medium and low findings were sent 2026-09-09. No advisory statement is dated 2026-10-23",
+  "opened": true,
+  "checker": "K4",
+  "fix": "25 flaws, 3 critical. V12 reported 25 flaws and the x402 Foundation fixed the 3 critical ones on 2026-08-18. As of 2026-10-23 no security advisory had been published. No exploitation reported."
+ },
+ "R4-32": {
+  "verdict": "keep",
+  "why": "Matches. Note the 1 USD cap can be switched off with spendControls false",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R4-33": {
+  "verdict": "keep",
+  "why": "Matches Reuters via The Star 2026-09-22, six named banks",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R5-38": {
+  "verdict": "keep",
+  "why": "Notices sent late Sunday 2026-09-20",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R5-39": {
+  "verdict": "keep",
+  "why": "Ruling Tuesday 2026-08-04, preliminary injunction only, lawsuit ongoing",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R4-29": {
+  "verdict": "keep",
+  "why": "Matches Visa 2026-10-30, Morning Consult, n 1,016, also 23 percent",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R5-01": {
+  "verdict": "keep",
+  "why": "Matches Accenture, 25,590 consumers in 16 countries",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R5-02": {
+  "verdict": "keep",
+  "why": "Matches, 32 percent decision within limits with approval before payment",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R5-61": {
+  "verdict": "fix",
+  "why": "Page says failures came from credential sharing and app connection friction, not reasoning or wrong purchases. Misused as wrong purchase evidence in challenge 10",
+  "opened": true,
+  "checker": "K4",
+  "fix": "Remove from challenge 10 evidence and data.json ch10 src. In challenge 6: all three errands failed on credential sharing and app connection friction (PYMNTS test, 2026-09-09)"
+ },
+ "R5-62": {
+  "verdict": "fix",
+  "why": "Source is Meta employees' internal posts reported by Reuters, not an independent test",
+  "opened": true,
+  "checker": "K4",
+  "fix": "Meta employees testing Muse at launch said in internal posts, reviewed by Reuters, that it uploaded sensitive information without permission"
+ },
+ "R5-45": {
+  "verdict": "keep",
+  "why": "Matches Payments Dive, Wells Fargo email 2026-10-02",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R5-46": {
+  "verdict": "keep",
+  "why": "Matches, PNC CEO at Money20/20 2026-10-19",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R5-07": {
+  "verdict": "keep",
+  "why": "Matches Riskified Q1 2026, US and UK consumers",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R5-09": {
+  "verdict": "keep",
+  "why": "Matches Checkout.com 2026-06-16",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R4-46": {
+  "verdict": "keep",
+  "why": "Matches Ashurst 2025-11-03",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R5-70": {
+  "verdict": "keep",
+  "why": "Matches ACP issue 315, open, 2026-10-15",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R3-33": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "PayPal release dated 2026-01-11 announces UCP support",
+  "opened": true,
+  "checker": "K5"
+ },
+ "R3-23": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Q3 call 2026-10-28: hundreds of thousands of brands, combining with AP2, consumer agents later this year",
+  "opened": true,
+  "checker": "K5"
+ },
+ "C365": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "KYA framework begun 2026-09-10 with Ant International and Visa, no spec or timeline",
+  "opened": true,
+  "checker": "K5"
+ },
+ "R3-17": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "OpenAI partnership incl. Agent Pay on Q3 call 2026-10-29, early days, virtual cards a bridge",
+  "opened": true,
+  "checker": "K5"
+ },
+ "R1-18": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "disclosed on Q3 call, no OpenAI statement on page",
+  "opened": true,
+  "checker": "K5"
+ },
+ "R1-54": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "same page as C349",
+  "opened": true,
+  "checker": "K5"
+ },
+ "R3-15": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "22 models, 12 labs, 57.2 percent pass, 54 percent of failed runs bought, 2026-11-05",
+  "opened": true,
+  "checker": "K5"
+ },
+ "R1-55": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "same page as R3-15",
+  "opened": true,
+  "checker": "K5"
+ },
+ "R3-41": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "500M Series A at about 5B, 2025-10-17, Thrive and Greenoaks led, Stripe and Paradigm did not invest, stakes undisclosed",
+  "opened": true,
+  "checker": "K5"
+ },
+ "R3-42": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "mainnet and MPP 2026-03-18, over 100 services, partners named, no volume",
+  "opened": true,
+  "checker": "K5"
+ },
+ "R2-27": {
+  "verdict": "fix",
+  "fix": "Passed 1 billion USD in rolling 30 day stablecoin transfers. Agent share not disclosed and data source not named",
+  "why": "page gives no agent split and no data source, mostly not agent is inference",
+  "opened": true,
+  "checker": "K5"
+ },
+ "R3-43": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "250M Series C led by ICONIQ at 1.95B on 2026-01-09, over 200 partners, over 3B annualized",
+  "opened": true,
+  "checker": "K5"
+ },
+ "C416": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "alliance 2026-08-18, 26 listed including Rain, Visa, Mastercard, Fiserv, Circle, Crossmint, no spec",
+  "opened": true,
+  "checker": "K5"
+ },
+ "C399": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Agent Control Layer in beta, enforced at card issuance and transfer initiation",
+  "opened": true,
+  "checker": "K5"
+ },
+ "R3-53": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "total 9.5M after Coinbase Ventures and a16z CSX, 2024-10-24",
+  "opened": true,
+  "checker": "K5"
+ },
+ "C367": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "draft 01 dated 2026-10-02, no formal standing",
+  "opened": true,
+  "checker": "K5"
+ },
+ "R3-52": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "toolkit live and self serve 2026-10-08, network tokens where the card is eligible",
+  "opened": true,
+  "checker": "K5"
+ },
+ "R3-51": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "23.6M led by Ribbit 2025-03-18, no named customers",
+  "opened": true,
+  "checker": "K5"
+ },
+ "R3-26": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "x402 Foundation 2026-07-14, 17 premier members incl. Coinbase, 40 organisations",
+  "opened": true,
+  "checker": "K5"
+ },
+ "COINBASE-M": {
+  "verdict": "fix",
+  "fix": "Coinbase M 3, score 255. Moves: AWS AgentCore wallet integration 2026-08-18, UCP Payments Technical Council seat 2026-09-02",
+  "why": "two dated moves inside the 90 day window, scored 0. Evidence R1-21 and C384",
+  "opened": true,
+  "checker": "K5"
+ },
+ "R3-29": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Link in Claude Duet 2026-10-21, research preview, over 200 personal agents, vendor, no volume",
+  "opened": true,
+  "checker": "K5"
+ },
+ "R3-02": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "about 190B base and 385B bull in 2030, 10 to 20 percent of US e-commerce",
+  "opened": true,
+  "checker": "K5"
+ },
+ "R3-03": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "up to 385B of US online sales by 2030",
+  "opened": true,
+  "checker": "K5"
+ },
+ "R3-04": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "300B to 500B US by 2030, initiate, influence or complete",
+  "opened": true,
+  "checker": "K5"
+ },
+ "R3-01": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "up to 1T US orchestrated, 3T to 5T global, term undefined",
+  "opened": true,
+  "checker": "K5"
+ },
+ "R3-07": {
+  "verdict": "fix",
+  "fix": "Juniper (April): 8 billion USD in 2026 to 1.5 trillion USD by 2030. Scope: agentic commerce spending, not defined in the source. Geography: not stated",
+  "why": "opened article defines neither scope nor geography",
+  "opened": true,
+  "checker": "K5"
+ },
+ "R3-08": {
+  "verdict": "fix",
+  "fix": "Juniper's July study gives 3.5 trillion USD for 2031, one year past its April figure of 1.5 trillion USD for 2030, and uses a different measure. They are not a like for like revision",
+  "why": "row itself is correct, but the doc says Juniper moved, which the pages do not show",
+  "opened": true,
+  "checker": "K5"
+ },
+ "R3-06": {
+  "verdict": "fix",
+  "fix": "Author: Edgar Dunn consultant. The article says it is not the firm's official opinion",
+  "why": "figure and incentive right, attribution to the firm overstates",
+  "opened": true,
+  "checker": "K5"
+ },
+ "R3-11": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "944B 2026 to 3.35T 2030, global, influenced or completed",
+  "opened": true,
+  "checker": "K5"
+ },
+ "R3-09": {
+  "verdict": "fix",
+  "fix": "Geography: not stated by the secondary source (eMarketer is US based)",
+  "why": "opened page does not say US",
+  "opened": true,
+  "checker": "K5"
+ },
+ "R3-05": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "more than 15T B2B intermediated by 2028, global implied",
+  "opened": true,
+  "checker": "K5"
+ },
+ "R3-12": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "12.5T JPY 2026 to 15.6T JPY 2030, L2 and above, 3,606 surveyed",
+  "opened": true,
+  "checker": "K5"
+ },
+ "R3-10": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "8T by 2030 via secondary source, geography not stated, logged not applied",
+  "opened": true,
+  "checker": "K5"
+ },
+ "R3-13": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "no number, adoption low and relatively stagnant, 2026-04-09",
+  "opened": true,
+  "checker": "K5"
+ },
+ "BAND-2030": {
+  "verdict": "fix",
+  "fix": "about 26 times",
+  "why": "5,000 divided by 190 is 26.3, not 25. Evidence R3-01 and R3-02",
+  "opened": true,
+  "checker": "K5"
+ },
+ "R2-74": {
+  "verdict": "fix",
+  "fix": "data.json ev: regulator plan reported by a law firm, not vendor. Add that it depends on legislation",
+  "why": "doc row correct, data.json evidence tag wrong",
+  "opened": true,
+  "checker": "K5"
+ },
+ "SIGNPOST-MS-2030": {
+  "verdict": "fix",
+  "fix": "data.json scenario: all, matching the doc's 2030 band row",
+  "why": "data.json maps the Morgan Stanley checkpoint to wallets, doc maps the 2030 check to all scenarios. Evidence R3-02 and R3-03",
+  "opened": true,
+  "checker": "K5"
+ },
+ "K6-row4": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "3: Protocols converge on network tokens, PSP scoped tokens and stablecoin authorisations. Fits ACP Allowance, UCP credential types and Stripe SPT. Note ACP still accepts fpan, so raw card numbers still reach PSP vaults",
+  "opened": true,
+  "checker": "K6"
+ },
+ "K6-row5": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "5.3: Edge checks HTTP message signatures against a key directory, TAP, Agent Pay or a KYA token. Matches the Web Bot Auth draft, the Cloudflare TAP post and the KYAPay draft",
+  "opened": true,
+  "checker": "K6"
+ },
+ "K6-row6": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "5.3: Discovery through a well known capability file. ACP 2026-04-17 adds /.well-known/acp.json and UCP publishes /.well-known/ucp",
+  "opened": true,
+  "checker": "K6"
+ },
+ "K6-row7": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "5.3: Every payment call carries an idempotency key. ACP made Idempotency-Key mandatory on POST. UCP covers idempotency keys on complete checkout retries",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R2-05": {
+  "verdict": "fix",
+  "fix": "Visa Intelligent Commerce takes the purchase instruction through Visa's own API, after a passkey, before it releases credentials [R2-05].",
+  "why": "Row 27. The developer page does not say where the instruction is held. Its use in the token pattern (row 8) is supported",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R1-05": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Row 11. Allowance reason enum has one value, six required fields",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R1-14": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Row 12. Matches",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R1-11": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Row 17. ACP Allowance has merchant_id. SPT is issued with seller_details",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R2-18": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Row 19. Matches",
+  "opened": true,
+  "checker": "K6"
+ },
+ "K6-row20": {
+  "verdict": "fix",
+  "fix": "Replace M->>N with M->>P: Charge token through own PSP, then P->>N: Authorise. Add an alt branch where the PSP returns requires_action and the user completes 3D Secure.",
+  "why": "8.1 P1 diagram: Token sequence: agent gets token from PSP, merchant authorises straight with the network. In ACP and SPT flows the merchant charges through its PSP, and an SPT can need 3D Secure before payment",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R1-37": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Row 21. Spec defines exactly two mandate types, each open or closed, and eight constraint types",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R1-38": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Row 21. Spec defines exactly two mandate types, each open or closed, and eight constraint types",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R1-39": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Row 22. Matches",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R1-62": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Row 23. Matches",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R1-28": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Row 24. Active only in the capability intersection, then Security Locked",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R4-61": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Row 31. Matches the v0.2 spec",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R4-62": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Row 31. Matches the v0.2 spec",
+  "opened": true,
+  "checker": "K6"
+ },
+ "K6-row34": {
+  "verdict": "fix",
+  "fix": "Show the agent sending both the user signed open mandate and its own closed mandate to the credential provider. Change the note to: The user signs the limits. The agent key signs the cart inside them.",
+  "why": "8.1 P2 diagram: Mandate sequence and the note: signature proves consent to the cart the agent built. Order matches the v0.2 human not present flow, but the closed cart mandate is signed by the agent key, not the user",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R2-24": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Row 36. mpp.dev lists 12 top level methods and no ACH. The R2-22 repo was not opened",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R1-46": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Row 39. Matches",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R2-34": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Row 41. Matches",
+  "opened": true,
+  "checker": "K6"
+ },
+ "K6-row50": {
+  "verdict": "fix",
+  "fix": "Split S->>F into Verify, then the server does the work, then Settle, then 200 with PAYMENT-RESPONSE. Name the PAYMENT-REQUIRED and PAYMENT-SIGNATURE headers.",
+  "why": "8.1 P3 diagram: 402 sequence verifies and settles before the server serves. The x402 README order is verify, do the work, settle, then respond",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R1-53": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Row 51. Cloudflare post matches. R1-50 not opened",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R1-56": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Row 52. Matches. Draft requires created and expires, recommends 24 h, names no mandatory algorithm, Ed25519 in examples",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R1-59": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Row 52. Matches. Draft requires created and expires, recommends 24 h, names no mandatory algorithm, Ed25519 in examples",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R1-26": {
+  "verdict": "fix",
+  "fix": "UCP business profiles publish a JWK set at /.well-known/ucp. RFC 9421 request signatures are one authentication option, Web Bot Auth lookup is an optional layer, and business to platform webhooks must be signed [R1-26].",
+  "why": "Row 54. The spec makes webhook signing the MUST, not every request",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R1-17": {
+  "verdict": "fix",
+  "fix": "Keep the wording and add C359 to the citation.",
+  "why": "Row 56. R1-17 says Instant Checkout moved into individual apps by March, not retailer sites. R1-15 has no date",
+  "opened": true,
+  "checker": "K6"
+ },
+ "K6-row63": {
+  "verdict": "fix",
+  "fix": "Change the step to: Verify signature and expiry, and the nonce where the network requires one. Show the key fetched from the Signature-Agent URL and matched on keyid.",
+  "why": "8.1 P4 diagram: Registered agent sequence verifies signature, nonce and expiry. The IETF draft leaves nonces to deployment policy. Visa and Mastercard require one",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R2-35": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Row 64. FAQ calls these targets",
+  "opened": true,
+  "checker": "K6"
+ },
+ "K6-row66": {
+  "verdict": "fix",
+  "fix": "Either make leaf T4 Scoped token plus stored instruction as mandate, or change step 3 to: A mandate is required when the human is away and a regulator or the issuer asks for one.",
+  "why": "8.1 verdict: Step 3: a mandate is required when the human is not present. Leaf T4 lets a human away consumer pay with a token and no mandate, which contradicts step 3 and ADR-3",
+  "opened": false,
+  "checker": "K6"
+ },
+ "K6-row68": {
+  "verdict": "fix",
+  "fix": "T5 becomes Signed mandate + registered agent + bank or stablecoin credential. B2B on card becomes Registered agent + token + buyer approval limits, as in the pilot's buyer approved invoices. Ask about finality after the rail is chosen, and note UCC 4A covers wires, not stablecoin transfers.",
+  "why": "8.3 B2B leaves: B2B final rail: mandate plus registered agent. B2B card: registered agent plus token. T5 names no credential, B2B T1 drops the human set spend limits of requirement 1.1.2, and the rail is an output not an input",
+  "opened": true,
+  "checker": "K6"
+ },
+ "K6-row69": {
+  "verdict": "fix",
+  "fix": "Ask the SCA question for every EU, UK and India payer, present or away, and for business payers outside the corporate exemption.",
+  "why": "8.3 question: SCA asked only for consumers with the human away. SCA and RBI two factor rules also cover customer initiated payments, so EU business payers reach a leaf with no SCA check",
+  "opened": false,
+  "checker": "K6"
+ },
+ "R1-15": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Row 70. Supported. UCP keeps the business as MoR and requires continue_url with requires_escalation",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R1-27": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Row 70. Supported. UCP keeps the business as MoR and requires continue_url with requires_escalation",
+  "opened": true,
+  "checker": "K6"
+ },
+ "K6-row74": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "8.4: Weighted scores 78, 58, 77, 72, 43 and 76, 69, 43, 51. Recomputed the sum of score times weight over 5. All nine match",
+  "opened": false,
+  "checker": "K6"
+ },
+ "K6-row75": {
+  "verdict": "fix",
+  "fix": "Add Live as identity only, 4 to the maturity scale, or score it 5 or 3.",
+  "why": "8.4: Web Bot Auth maturity scored 4, Live as identity, still an IETF draft. The stated scale is Live 5, Pilot 3, Spec 2, so 4 is off the scale",
+  "opened": false,
+  "checker": "K6"
+ },
+ "R1-04": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Row 76. Overview names no ACP. Governance confirms the veto and no foundation",
+  "opened": true,
+  "checker": "K6"
+ },
+ "K6-row80": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Whole doc: Do not regress list: Travel Rule, MPP no ACH, AP2 and ACP Spec in payouts, ChatGPT March 2026, Visa Direct and Mastercard Move. Lines 99, 127, 475, 567, 605, 618, 841, 890, 1022, 1150, 1175, 1177, 1487 agree. No line breaks one",
+  "opened": false,
+  "checker": "K6"
+ }
+}

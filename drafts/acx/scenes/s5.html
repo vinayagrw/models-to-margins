@@ -1,0 +1,159 @@
+<section class="acx-scene" id="acx-s5" aria-labelledby="acx-s5-h">
+  <header class="acx-head"><span class="acx-num">05</span><h2 id="acx-s5-h">Ten challenges, six stakeholders</h2>
+    <p class="acx-dek" data-for="leader">Where each problem hurts, and how much. Darker is worse. Pick a row for the pain and who is fixing it, or a column to rank the rows.</p>
+    <p class="acx-dek" data-for="architect">Severity by stakeholder, from none to high. Pick a row for the design response and active work, or a column to rank by that party.</p>
+  </header>
+  <div class="acx-split s5-split">
+    <div class="acx-card s5-heat">
+      <div class="s5-cap"><p class="s5-hint">Pick a column to rank the rows</p><p class="s5-on" hidden><span class="s5-onl"></span><button type="button" class="acx-btn s5-clear">Clear</button></p></div>
+      <div class="s5-grid">
+        <div class="s5-hrow"><span class="s5-corner"></span></div>
+        <ul class="s5-keyl" aria-hidden="true"></ul>
+        <div class="s5-rows"></div>
+      </div>
+      <div class="s5-legend" aria-hidden="true"><span>Severity</span></div>
+    </div>
+    <aside class="acx-card acx-panel s5-panel" aria-live="polite"><div class="s5-stack"></div></aside>
+  </div>
+</section>
+<style id="acx-s5-css">
+#acx-s5 .s5-heat{container-type:inline-size; padding:12px 14px 14px; display:flex; flex-direction:column; gap:10px; min-width:0}
+#acx-s5 .s5-cap{display:flex; align-items:center; min-height:42px}
+#acx-s5 .s5-hint{font-size:14px; color:var(--acx-ink3)}
+#acx-s5 .s5-on{display:flex; align-items:center; gap:12px; font-size:15px; color:var(--acx-ink)}
+#acx-s5 .s5-onl b{font-weight:600}
+#acx-s5 .s5-grid{--nc:212px; display:flex; flex-direction:column; gap:2px}
+#acx-s5 .s5-hrow,#acx-s5 .s5-row{display:grid; grid-template-columns:var(--nc) repeat(6,minmax(0,1fr)); gap:2px}
+#acx-s5 .s5-hrow{align-items:end; margin-bottom:6px}
+#acx-s5 .s5-sh{position:relative; display:flex; flex-direction:column; align-items:center; gap:4px; min-height:42px; min-width:42px; padding:0 0 8px; border:0; background:transparent; cursor:pointer; color:var(--acx-ink2); font-size:14px; line-height:1.25; text-align:center; transition:opacity .2s}
+#acx-s5 .s5-shn{text-wrap:balance}
+#acx-s5 .s5-sh::after{content:""; position:absolute; left:10%; right:10%; bottom:0; height:3px; border-radius:2px; background:transparent}
+#acx-s5 .s5-sh[aria-pressed="true"]{color:var(--acx-ink); font-weight:600}
+#acx-s5 .s5-sh[aria-pressed="true"]::after{background:var(--acx-accent)}
+#acx-s5 .s5-grid.has-sh .s5-sh[aria-pressed="false"]{opacity:.5}
+#acx-s5 .s5-sh:focus-visible,#acx-s5 .s5-row:focus-visible{outline:2px solid var(--acx-accent); outline-offset:2px}
+#acx-s5 .s5-keyl{display:none; list-style:none; margin:0 0 8px; padding:0; flex-wrap:wrap; gap:4px 14px}
+#acx-s5 .s5-keyl li{display:flex; align-items:center; gap:6px; font-size:14px; color:var(--acx-ink2); white-space:nowrap}
+#acx-s5 .s5-rows{display:flex; flex-direction:column; gap:2px}
+#acx-s5 .s5-row{width:100%; min-height:48px; padding:0; border:0; border-radius:6px; background:transparent; cursor:pointer; text-align:left; color:var(--acx-ink)}
+#acx-s5 .s5-row[aria-pressed="true"]{outline:2px solid var(--acx-accent); outline-offset:1px}
+#acx-s5 .s5-name{display:flex; align-items:center; gap:10px; padding:4px 10px 4px 0; font-size:15px; font-weight:500; line-height:1.25; text-wrap:balance}
+#acx-s5 .s5-row[aria-pressed="true"] .s5-name{font-weight:650}
+#acx-s5 .s5-c{display:flex; align-items:center; justify-content:center; gap:3px; min-height:40px; border-radius:4px; background:var(--acx-heat0); transition:opacity .2s}
+#acx-s5 .s5-c[data-s="1"]{background:var(--acx-heat1)} #acx-s5 .s5-c[data-s="2"]{background:var(--acx-heat2)} #acx-s5 .s5-c[data-s="3"]{background:var(--acx-heat3)}
+#acx-s5 .s5-c i{width:5px; height:12px; border-radius:2px; background:var(--acx-ink); opacity:.7}
+#acx-s5 .s5-c[data-s="3"] i{background:var(--acx-on-accent); opacity:.9}
+#acx-s5 .s5-grid.has-sh .s5-c:not(.is-sh){opacity:.28}
+#acx-s5 .s5-legend{display:flex; flex-wrap:wrap; align-items:center; gap:6px 14px; margin-top:4px; font-size:14px; color:var(--acx-ink3)}
+#acx-s5 .s5-legend .s5-lg{display:flex; align-items:center; gap:6px; color:var(--acx-ink2)}
+#acx-s5 .s5-legend .s5-c{min-height:18px; width:30px; gap:2px}
+#acx-s5 .s5-legend .s5-c i{width:3px; height:8px}
+#acx-s5 .s5-panel{container-type:inline-size}
+#acx-s5 .s5-stack{display:grid; flex:1}
+#acx-s5 .s5-d{grid-area:1/1; visibility:hidden; display:flex; flex-direction:column; gap:12px}
+#acx-s5 .s5-d.is-on{visibility:visible}
+#acx-s5 .s5-dh{display:flex; align-items:center; gap:14px}
+#acx-s5 .s5-dh > div{display:flex; flex-direction:column; gap:6px; min-width:0}
+#acx-s5 .s5-kick{display:flex; flex-wrap:wrap; align-items:center; gap:4px 10px}
+#acx-s5 .acx-panel .s5-lead{font-size:16px; color:var(--acx-ink); text-wrap:balance; max-width:68ch}
+#acx-s5 .acx-panel .s5-pain{margin:0; padding:10px 14px; border-left:3px solid var(--acx-pain); background:var(--acx-sunk); border-radius:0 var(--acx-r-sm) var(--acx-r-sm) 0; font-size:17px; line-height:1.4; color:var(--acx-ink); text-wrap:balance}
+#acx-s5 .s5-kv{display:flex; flex-direction:column; gap:3px}
+#acx-s5 .s5-kv .s5-kh{display:flex; flex-wrap:wrap; align-items:center; gap:4px 10px}
+#acx-s5 .acx-panel .s5-kv > p:last-child{color:var(--acx-ink); text-wrap:balance; max-width:68ch}
+#acx-s5 .acx-panel .s5-ml{list-style:none; margin:2px 0 0; padding:0; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px 18px}
+#acx-s5 .acx-panel .s5-ml li{display:flex; align-items:center; justify-content:space-between; gap:10px; font-size:14px; color:var(--acx-ink2); white-space:nowrap}
+#acx-s5 .s5-mb{display:inline-grid; grid-template-columns:repeat(3,16px); gap:2px; flex:none}
+#acx-s5 .s5-mb i{height:10px; border-radius:2px; background:var(--acx-heat0)}
+#acx-s5 .s5-mb i[data-s="1"]{background:var(--acx-heat1)} #acx-s5 .s5-mb i[data-s="2"]{background:var(--acx-heat2)} #acx-s5 .s5-mb i[data-s="3"]{background:var(--acx-heat3)}
+#acx-s5 .s5-kv:last-child{margin-top:auto; padding-top:12px; border-top:1px solid var(--acx-line)}
+@container (max-width:599px){
+  #acx-s5 .s5-hrow,#acx-s5 .s5-row{grid-template-columns:repeat(6,minmax(0,1fr)); row-gap:4px}
+  #acx-s5 .s5-corner,#acx-s5 .s5-shn,#acx-s5 .s5-name .acx-ic{display:none}
+  #acx-s5 .s5-row .s5-name{grid-column:1/-1; padding:6px 8px 0}
+  #acx-s5 .s5-c{min-height:30px}
+  #acx-s5 .s5-sh .acx-ic{width:40px; height:40px}
+  #acx-s5 .s5-keyl{display:flex}
+}
+@container (max-width:380px){ #acx-s5 .acx-panel .s5-ml{grid-template-columns:1fr} #acx-s5 .s5-dh{flex-direction:column; align-items:flex-start; gap:8px} }
+@container (min-width:640px){ #acx-s5 .acx-panel .s5-ml{grid-template-columns:repeat(3,minmax(0,1fr))} }
+@media (max-width:1200px){ #acx-s5 .s5-split{grid-template-columns:1fr} #acx-s5 .s5-grid{--nc:240px} }
+@media (max-width:640px){ #acx-s5 .s5-heat{padding:10px 8px 12px} #acx-s5 .s5-cap{padding:0 6px} #acx-s5 .s5-legend{padding:0 6px} }
+</style>
+<script>ACX.scene('s5', function (el, A) {
+  var esc = A.esc, D = A.data || {};
+  var SH = (D.stakeholders || []).filter(function (s) { return s && s.id; });
+  var CH = (D.challenges || []).filter(function (c) { return c && c.id != null; });
+  var LV = ['None', 'Low', 'Medium', 'High'];
+  function sev(c, s) { var v = Number((c.sev || {})[s]) || 0; return Math.max(0, Math.min(3, v)); }
+  function pips(n) { var o = ''; for (var i = 0; i < n; i++) o += '<i></i>'; return o; }
+  var grid = el.querySelector('.s5-grid'), rowsBox = el.querySelector('.s5-rows');
+
+  el.querySelector('.s5-hrow').insertAdjacentHTML('beforeend', SH.map(function (s) {
+    return '<button type="button" class="s5-sh" data-sh="' + esc(s.id) + '" aria-pressed="false" aria-label="Rank by ' + esc(s.name) + '" title="' + esc(s.name) + '">' +
+      A.icon(s.icon || 'i-analyst', s.tone || 'slate', 'sec') + '<span class="s5-shn">' + esc(s.name) + '</span></button>';
+  }).join(''));
+  el.querySelector('.s5-keyl').innerHTML = SH.map(function (s) { return '<li>' + A.icon(s.icon || 'i-analyst', s.tone || 'slate', 'chip') + esc(s.name) + '</li>'; }).join('');
+  el.querySelector('.s5-legend').insertAdjacentHTML('beforeend', LV.map(function (l, i) {
+    return '<span class="s5-lg"><span class="s5-c" data-s="' + i + '">' + pips(i) + '</span>' + l + '</span>';
+  }).join(''));
+
+  rowsBox.innerHTML = CH.map(function (c) {
+    var label = c.name + '. ' + SH.map(function (s) { return s.name + ' ' + LV[sev(c, s.id)].toLowerCase(); }).join(', ');
+    return '<button type="button" class="s5-row" data-ch="' + esc(c.id) + '" aria-pressed="false" aria-label="' + esc(label) + '">' +
+      '<span class="s5-name">' + A.icon(c.icon || 'i-risk', c.tone || 'slate', 'chip') + '<span>' + esc(c.name) + '</span></span>' +
+      SH.map(function (s) { var v = sev(c, s.id); return '<span class="s5-c" data-sh="' + esc(s.id) + '" data-s="' + v + '">' + pips(v) + '</span>'; }).join('') +
+      '</button>';
+  }).join('');
+
+  el.querySelector('.s5-stack').innerHTML = CH.map(function (c) {
+    return '<div class="s5-d" data-ch="' + esc(c.id) + '">' +
+      '<div class="s5-dh">' + A.icon(c.icon || 'i-risk', c.tone || 'slate', 'hero') + '<div><p class="s5-kick"><span class="acx-k">Challenge ' + esc(c.id) + '</span>' + (c.ev ? A.ev(c.ev) : '') + '</p><h3>' + esc(c.name) + '</h3></div></div>' +
+      (c.one ? '<p class="s5-lead" data-for="leader">' + esc(c.one) + '</p>' : '') +
+      (c.arch ? '<p class="s5-lead" data-for="architect">' + esc(c.arch) + '</p>' : '') +
+      (c.pain ? '<p class="s5-pain">“' + esc(c.pain) + '”</p>' : '') +
+      '<div class="s5-kv"><p class="acx-k">Where it hurts</p><ul class="s5-ml">' + SH.slice().sort(function (a, b) { return (sev(c, b.id) - sev(c, a.id)) || (SH.indexOf(a) - SH.indexOf(b)); }).map(function (s) {
+        var v = sev(c, s.id), bar = '';
+        for (var i = 1; i <= 3; i++) bar += '<i' + (i <= v ? ' data-s="' + v + '"' : '') + '></i>';
+        return '<li><span>' + esc(s.name) + '</span><span class="s5-mb" role="img" aria-label="' + LV[v] + '">' + bar + '</span></li>';
+      }).join('') + '</ul></div>' +
+      (c.working ? '<div class="s5-kv"><p class="acx-k">Who is working on it</p><p>' + esc(c.working) + '</p></div>' : '') +
+      (c.research ? '<div class="s5-kv"><p class="s5-kh"><span class="acx-k">Research</span>' + (c.ev ? A.ev(c.ev) : '') + '</p><p>' + esc(c.research) + '</p></div>' : '') +
+      '</div>';
+  }).join('');
+
+  var rows = [].slice.call(el.querySelectorAll('.s5-row'));
+  var heads = el.querySelectorAll('.s5-sh'), drawers = el.querySelectorAll('.s5-d');
+  var hint = el.querySelector('.s5-hint'), on = el.querySelector('.s5-on'), onl = el.querySelector('.s5-onl');
+  var cur = { ch: null, sh: '' };
+  function byId(id) { return CH.find(function (c) { return String(c.id) === String(id); }); }
+
+  function showCh(v) {
+    var c = byId(v) || CH[0]; if (!c) return;
+    cur.ch = String(c.id);
+    rows.forEach(function (r) { r.setAttribute('aria-pressed', String(r.dataset.ch === cur.ch)); });
+    drawers.forEach(function (d) { d.classList.toggle('is-on', d.dataset.ch === cur.ch); });
+  }
+  function showSh(v) {
+    var s = SH.find(function (x) { return x.id === v; });
+    cur.sh = s ? s.id : '';
+    grid.classList.toggle('has-sh', !!s);
+    heads.forEach(function (h) { h.setAttribute('aria-pressed', String(h.dataset.sh === cur.sh)); });
+    rows.forEach(function (r) { r.querySelectorAll('.s5-c').forEach(function (c) { c.classList.toggle('is-sh', c.dataset.sh === cur.sh); }); });
+    hint.hidden = !!s; on.hidden = !s;
+    onl.innerHTML = s ? 'Ranked by <b>' + esc(s.name) + '</b>' : '';
+    // rank rows by the chosen party, worst first, ties in challenge order
+    var order = rows.slice().sort(function (a, b) {
+      var ca = byId(a.dataset.ch), cb = byId(b.dataset.ch);
+      var d = s ? sev(cb, s.id) - sev(ca, s.id) : 0;
+      return d || (CH.indexOf(ca) - CH.indexOf(cb));
+    });
+    order.forEach(function (r) { rowsBox.appendChild(r); });
+  }
+  rows.forEach(function (r) { r.addEventListener('click', function () { A.set('ch', r.dataset.ch); }); });
+  heads.forEach(function (h) { h.addEventListener('click', function () { A.set('sh', h.dataset.sh === cur.sh ? '' : h.dataset.sh); }); });
+  el.querySelector('.s5-clear').addEventListener('click', function () { A.set('sh', ''); });
+  A.on('ch', showCh);
+  A.on('sh', showSh);
+  showCh(A.get('ch'));
+  showSh(A.get('sh'));
+});</script>

@@ -18,6 +18,10 @@
 //                  contains one of the |-separated parts, e.g. build=arch|builder+rail=b:1.9, for a
 //                  screen the owner chose to let grow (state it in the report)
 //                  Without the flag, scripts/layout-allow.json supplies it for listed page paths.
+//   --page-allow   width:vp[,width:vp] raises the LN2 page limit for a width bucket, e.g. 1440:18,1024:20,
+//                  for a long study page the owner chose to keep in one piece (state it in the report).
+//                  Without the flag, scripts/layout-allow.json supplies it (key pageAllow, same format
+//                  as a string or an object {"1440": 18}) for listed page paths.
 //   --only         measure a single scene (page-level rules LN2, LN3 are skipped)
 //   --shots        save outlined screenshots, --shot-n per rule (default 2), one per distinct
 //                  class path, from the first run that has the fault
@@ -110,18 +114,31 @@ const cfg = {
   themes: list(opt.themes, ['light', 'dark']),
   only: opt.only || null,
   sceneAllow: opt['scene-allow'] ? opt['scene-allow'].split(':') : null,
+  pageAllow: opt['page-allow'] ? parsePageAllow(opt['page-allow']) : null,
   words: Number(opt['budget-words'] || T.WORDS),
 };
+// pageAllow: { <bucket min width>: <viewports> }, from "1440:18,1024:20" or an object with the same keys
+function parsePageAllow(v) {
+  const out = {};
+  if (v && typeof v === 'object') { for (const [k, n] of Object.entries(v)) out[Number(k)] = Number(n); return out; }
+  for (const part of String(v).split(',')) { const [w, n] = part.split(':'); if (w && n) out[Number(w)] = Number(n); }
+  return out;
+}
 // Owner-approved exceptions live in scripts/layout-allow.json, keyed by page path, each with a reason.
 // They apply to every caller, so no flag has to be typed by hand. --scene-allow still overrides.
-let allowNote = '';
-if (!cfg.sceneAllow) {
+const allowNotes = [];
+const fmtPage = (pa) => Object.entries(pa).map(([w, n]) => `${w}px up to ${n} viewports`).join(', ');
+if (cfg.sceneAllow) allowNotes.push(`LN1 allowance from --scene-allow: ${cfg.sceneAllow[0]} up to ${cfg.sceneAllow[1]} viewports`);
+if (cfg.pageAllow) allowNotes.push(`LN2 allowance from --page-allow: ${fmtPage(cfg.pageAllow)}`);
+if (!cfg.sceneAllow || !cfg.pageAllow) {
   try {
     const allow = JSON.parse(fs.readFileSync(new URL('./layout-allow.json', import.meta.url), 'utf8'));
     const hit = allow[new URL(cfg.url).pathname.replace(/\/$/, '')];
-    if (hit && hit.sceneAllow) { cfg.sceneAllow = hit.sceneAllow.split(':'); allowNote = `LN1 allowance from layout-allow.json: ${cfg.sceneAllow[0]} up to ${cfg.sceneAllow[1]} viewports (${hit.why || 'no reason given'})`; }
+    if (hit && hit.sceneAllow && !cfg.sceneAllow) { cfg.sceneAllow = hit.sceneAllow.split(':'); allowNotes.push(`LN1 allowance from layout-allow.json: ${cfg.sceneAllow[0]} up to ${cfg.sceneAllow[1]} viewports (${hit.why || 'no reason given'})`); }
+    if (hit && hit.pageAllow && !cfg.pageAllow) { cfg.pageAllow = parsePageAllow(hit.pageAllow); allowNotes.push(`LN2 allowance from layout-allow.json: ${fmtPage(cfg.pageAllow)} (${hit.why || 'no reason given'})`); }
   } catch (e) { if (e.code !== 'ENOENT') { console.error('layout-allow.json: ' + e.message); process.exit(2); } }
-} else allowNote = `LN1 allowance from --scene-allow: ${cfg.sceneAllow[0]} up to ${cfg.sceneAllow[1]} viewports`;
+}
+const allowNote = allowNotes.join('\n');
 const bucket = (w) => VIEWPORTS.find((v) => w >= v.min);
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -268,7 +285,9 @@ function measureInPage(C) {
   // ---- SP1 empty panel
   for (const p of painted) {
     if (p === root || p === scope) continue;
+    if (/^(IFRAME|IMG|VIDEO|CANVAS|OBJECT|EMBED)$/.test(p.tagName)) continue; // replaced content: the gate cannot see inside, so it is not empty
     const r = rectOf(p); if (W(r) <= T.PANEL_MIN_W || H(r) <= T.PANEL_MIN_H) continue;
+    const vis = clipRect(r, clipFor(p.parentElement)); if (!vis || H(vis) < H(r) - 1) continue; // partly scrolled out of a clipping ancestor: its children are clipped, the panel box is not, so the gap is not real
     if (clipsX(p) && p.scrollWidth > p.clientWidth + 1) continue; // horizontal scroller: its content is wider than the box
     const cb = inner(p, true); let maxB = -1e9, maxR = -1e9, n = 0;
     for (const lf of leaves) {
@@ -432,7 +451,7 @@ async function run(cdp, reader, width, theme, state) {
   await cdp.ev('document.fonts.ready.then(()=>true)');
   await sleep(800);
   await cdp.ev(SETTLE);
-  const C = { T, RULES, root: cfg.root, scene: cfg.scene, only: cfg.only, words: cfg.words, limits: { scene: (cfg.sceneAllow && cfg.sceneAllow[0].split('|').some((k) => `${reader || '-'}+${state || ''}`.includes(k))) ? Math.max(vp.scene, Number(cfg.sceneAllow[1])) : vp.scene, page: vp.page } };
+  const C = { T, RULES, root: cfg.root, scene: cfg.scene, only: cfg.only, words: cfg.words, limits: { scene: (cfg.sceneAllow && cfg.sceneAllow[0].split('|').some((k) => `${reader || '-'}+${state || ''}`.includes(k))) ? Math.max(vp.scene, Number(cfg.sceneAllow[1])) : vp.scene, page: (cfg.pageAllow && cfg.pageAllow[vp.min] != null) ? Math.max(vp.page, cfg.pageAllow[vp.min]) : vp.page } };
   const res = await cdp.ev(`(${measureInPage.toString()})(${JSON.stringify(C)})`);
   if (res.error) throw new Error(res.error);
   return { reader, width, height: vp.h, theme, state, label: `${reader || '-'}${state ? '+' + state : ''}@${width}/${theme}`, ...res };

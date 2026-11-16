@@ -940,3 +940,107 @@
     .dd-boardroom.article-shell { --bd-wide: 100%; }
   }
 }
+
+/* ------------------------------------------------ Layout-gate sizes --- */
+/* Opt-in via data-gate on the article (set for boardroom pages published from
+   2026-10-23). Brings labels to 14px, tap targets to 44px and balances headings,
+   per the layout gate in AGENTS.md. Older boardroom pages are unchanged. */
+.dd-boardroom[data-gate] .br-formline > span,
+.dd-boardroom[data-gate] .br-coords > span,
+.dd-boardroom[data-gate] .meta-pill,
+.dd-boardroom[data-gate] .tag-row .tag,
+.dd-boardroom[data-gate] .br-agenda-no,
+.dd-boardroom[data-gate] .br-agenda-label,
+.dd-boardroom[data-gate] .br-agenda-fig,
+.dd-boardroom[data-gate] .br-chip,
+.dd-boardroom[data-gate] .article-body .br-stat > span,
+.dd-boardroom[data-gate] .article-body .callout > strong {
+  font-size: 14px;
+  letter-spacing: 0.04em;
+}
+.dd-boardroom[data-gate] .br-chip { padding: 3px 9px; }
+.dd-boardroom[data-gate] .article-body .br-stat > span { line-height: 1.4; }
+.dd-boardroom[data-gate] .article-body .br-stat > span .br-chip { margin-top: 6px; }
+.dd-boardroom[data-gate] .article-body .callout > strong { padding: 2px 10px; line-height: 1.3; }
+.dd-boardroom[data-gate] .br-title,
+.dd-boardroom[data-gate] .article-body h2 { text-wrap: balance; }
+.dd-boardroom[data-gate] .article-body > p,
+.dd-boardroom[data-gate] .article-body .note-panel p,
+.dd-boardroom[data-gate] .article-body .callout p,
+.dd-boardroom[data-gate] .br-subtitle,
+.dd-boardroom[data-gate] .br-lead { text-wrap: pretty; }
+.dd-boardroom[data-gate] .back-link { min-height: 44px; display: inline-flex; align-items: center; }
+.dd-boardroom[data-gate] .br-agenda-link { min-height: 44px; align-items: center; }
+@media (min-width: 961px) {
+  .dd-boardroom[data-gate] .br-agenda-item.is-open .br-agenda-fig { min-height: 44px; display: flex; align-items: center; }
+}
+@media (max-width: 960px) {
+  /* The agenda strip already scrolls sideways, so labels show in full. */
+  .dd-boardroom[data-gate] .br-agenda-label { max-width: none; }
+}
+@media (max-width: 1240px) {
+  .dd-boardroom[data-gate] .article-body .stat-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .dd-boardroom[data-gate] .article-body .br-stat:nth-child(3) { border-left: 0; }
+  .dd-boardroom[data-gate] .article-body .br-stat:nth-child(n+3) { border-top: 1px solid var(--bd-rule); }
+}
+@media (max-width: 560px) {
+  .dd-boardroom[data-gate] .article-body .stat-strip { grid-template-columns: 1fr; }
+  .dd-boardroom[data-gate] .article-body .br-stat { border-left: 0; }
+  .dd-boardroom[data-gate] .article-body .br-stat:nth-child(n+2) { border-top: 1px solid var(--bd-rule); }
+}
+
+/* Gate-ready additions for older boardroom pages that opt in with `gate: true`
+   (data-gate="opt", first used by ai-governance-before-roi). Pages gated by
+   date (data-gate="2026") are not touched by this block. Summary and cite reach 14px, short
+   paragraphs balance so no line is left as an orphan, the callout label keeps
+   8px of ink clearance, the title fits two lines on a phone, and block spacing
+   tightens so a six-exhibit page stays inside the page-length budget. */
+.dd-boardroom[data-gate="opt"] .article-body summary {
+  font-size: 14px;
+  letter-spacing: 0.06em;
+  min-height: 44px;
+  padding-top: 6px;
+  padding-bottom: 6px;
+  text-wrap: balance;
+}
+.dd-boardroom[data-gate="opt"] .article-body blockquote cite,
+.dd-boardroom[data-gate="opt"] .article-body blockquote footer {
+  font-size: 14px;
+  letter-spacing: 0.08em;
+}
+.dd-boardroom[data-gate="opt"] .article-body > p,
+.dd-boardroom[data-gate="opt"] .article-body .note-panel p,
+.dd-boardroom[data-gate="opt"] .article-body .callout p,
+.dd-boardroom[data-gate="opt"] .article-body blockquote p { text-wrap: balance; }
+.dd-boardroom[data-gate="opt"] .article-body details > p {
+  margin: 0;
+  padding: 12px 14px 0;
+  text-wrap: pretty;
+}
+.dd-boardroom[data-gate="opt"] .article-body details > p + .table-wrap { margin-top: 12px; }
+.dd-boardroom[data-gate="opt"] .article-body .callout > strong { padding: 5px 10px; }
+.dd-boardroom[data-gate="opt"] .article-body details { margin-top: 0.8rem; margin-bottom: 0.9rem; }
+.dd-boardroom[data-gate="opt"] .article-body details > blockquote { margin: 12px 14px 0; }
+.dd-boardroom[data-gate="opt"] .article-body details > blockquote + .table-wrap { margin-top: 12px; }
+.dd-boardroom[data-gate="opt"] .article-body .visual-frame { margin-top: 0.9rem; margin-bottom: 1rem; }
+.dd-boardroom[data-gate="opt"] .article-body blockquote { margin-top: 1.2rem; margin-bottom: 1.2rem; padding: 0.8rem 0; }
+.dd-boardroom[data-gate="opt"] .article-body .callout { margin-top: 1.2rem; margin-bottom: 1rem; }
+.dd-boardroom[data-gate="opt"] .article-body .stat-strip { margin-top: 1rem; margin-bottom: 1.1rem; }
+.dd-boardroom[data-gate="opt"] .article-body .note-panel { margin-bottom: 1.1rem; }
+.dd-boardroom[data-gate="opt"] .article-body h2 { margin-top: 1.7rem; }
+.dd-boardroom[data-gate="opt"] .br-body h2:first-of-type { margin-top: 0.6rem; }
+.dd-boardroom[data-gate="opt"] .br-layout { margin-top: 10px; }
+.dd-boardroom[data-gate="opt"] .article-body .callout { padding: 1rem 1.1rem 0.85rem; }
+.dd-boardroom[data-gate="opt"] .article-body .br-stat { padding: 0.85rem 1.1rem 0.9rem; }
+.dd-boardroom[data-gate="opt"] .article-body .note-panel { padding: 0.8rem 1.15rem 0.9rem; }
+.dd-boardroom[data-gate="opt"] .article-body h2 { padding-top: 14px; margin-bottom: 0.9rem; }
+.dd-boardroom[data-gate="opt"].article-shell { padding-top: 32px; padding-bottom: 32px; }
+.dd-boardroom[data-gate="opt"] .br-header { padding-bottom: 18px; }
+.dd-boardroom[data-gate="opt"] .br-title { margin-top: 0.25em; }
+.dd-boardroom[data-gate="opt"] .br-lead { margin-top: 0.75rem; }
+.dd-boardroom[data-gate="opt"] .br-coords { margin-top: 0.9rem; }
+.dd-boardroom[data-gate="opt"] .br-header-foot { margin-top: 0.9rem; }
+.dd-boardroom[data-gate="opt"] .tag-row { margin-top: 0.8rem; }
+@media (max-width: 720px) {
+  .dd-boardroom[data-gate="opt"] .br-title { font-size: clamp(1.5rem, 7vw, 2.8rem); }
+}

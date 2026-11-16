@@ -1,4 +1,4 @@
-/* Stablecoin B2B payouts: core behaviour, then one block per scene. */
+/* Stablecoin B2B payouts: core behavior, then one block per scene. */
 (function () {
   const root = document.querySelector('.pdd');
   if (!root) return;
@@ -71,6 +71,19 @@
   root.querySelectorAll('input[type="range"]').forEach((i) => { PDD.fill(i); i.addEventListener('input', () => PDD.fill(i)); });
 
   // evidence chips are plain highlighted text: <span class="pdd-chip" data-src="G#38">. The data-src keys trace to docs/agentic-payouts-desk-sources.md. Nothing opens.
+  // r37: the note behind a chip is reachable again as a title on hover and focus. Chips drawn later get theirs on first hover.
+  const noteOf = (c) => { if (c && c.dataset.note && !c.title) c.title = c.dataset.note; };
+  root.querySelectorAll('.pdd-chip[data-note]').forEach(noteOf);
+  const noteAt = (e) => { noteOf(e.target.closest ? e.target.closest('.pdd-chip[data-note]') : null); };
+  root.addEventListener('mouseover', noteAt); root.addEventListener('focusin', noteAt);
+  if ('MutationObserver' in window) new MutationObserver((ms) => ms.forEach((m) => m.addedNodes.forEach((n) => { if (n.nodeType !== 1) return; if (n.matches('.pdd-chip[data-note]')) noteOf(n); n.querySelectorAll('.pdd-chip[data-note]').forEach(noteOf); }))).observe(root, { childList: true, subtree: true });
+  // r37: seat-scoped drawers. <details class="pdd-more" data-open-for="buyer strategy"> opens for those seats, "all" for every seat. Runs on every seat change.
+  // Desktop and projector only. On a phone an open table or list makes the screen several viewports tall, so drawers stay closed there.
+  PDD.onReader((r) => { const wide = window.matchMedia('(min-width: 1024px)').matches; root.querySelectorAll('details.pdd-more[data-open-for]').forEach((d) => { const l = (d.dataset.openFor || '').split(/\s+/); d.open = wide && (l.includes('all') || l.includes(r)); }); });
+  // pass 2: <a href="#id" data-open="#id"> opens the drawer it points at, then the browser scrolls to it
+  root.addEventListener('click', (e) => { const a = e.target.closest('a[data-open]'); if (!a) return; const d = root.querySelector(a.dataset.open); if (d && d.tagName === 'DETAILS') d.open = true; });
+  // r37: screen-reader sentences announce changes and stay visually hidden
+  root.querySelectorAll('.pdd-s2-sr, .pdd-s3-sr').forEach((p) => { if (!p.hasAttribute('aria-live')) p.setAttribute('aria-live', 'polite'); });
 
   // segmented toggle: <div class="pdd-seg" data-key="k"><button data-val="v">. Sets data-<key> on the closest [data-host] or scene.
   root.querySelectorAll('.pdd-seg[data-key]').forEach((seg) => {
@@ -103,8 +116,8 @@
   const run = (byUser) => { if (!seen) return; scene.querySelectorAll('[data-s1-count]').forEach((n) => { if (n.offsetParent !== null) count(n); }); };
   scene.addEventListener('pdd:in', () => { seen = true; run(); });
   PDD.onReader(() => run());
-  // the note audit: a strip of the 20 statements and verdict filters
-  const audit = scene.querySelector('.pdd-s1-audit'); if (!audit) return;
+  // the note audit: a strip of the 20 statements and verdict filters. r37: it lives on #pdd-rules now, so it is found by class anywhere on the page.
+  const audit = root.querySelector('.pdd-s1-audit'); if (!audit) return;
   const strip = audit.querySelector('.pdd-s1-strip');
   const list = audit.querySelector('.pdd-s1-lines'); if (list) { list.setAttribute('tabindex', '0'); list.setAttribute('aria-label', 'The 20 statements and their verdicts'); }
   const lines = [...audit.querySelectorAll('.pdd-s1-line')];
@@ -144,6 +157,15 @@
   let rail = scene.getAttribute('data-rail') === 'coin' ? 'coin' : 'bank';
   let sel = { k: 'fault', id: 'wrong' }, pos = 7, timer = 0, touched = false;
   const txt = (n, t) => { if (n) n.textContent = t; };
+  // r37: four fault buttons show, the rest sit behind More faults. The pressed fault always stays visible.
+  let fold = () => {};
+  const faultsBox = q('.pdd-s2-faults');
+  if (faultsBox && pills.length > 4) {
+    const more = PDD.el('button', { type: 'button', class: 'pdd-pill pdd-s2-more', 'aria-expanded': 'false' }, faultsBox, 'More faults');
+    let open = false;
+    fold = () => { pills.forEach((b, i) => { b.hidden = !open && i >= 4 && b.getAttribute('aria-pressed') !== 'true'; }); more.textContent = open ? 'Fewer faults' : 'More faults'; more.setAttribute('aria-expanded', String(open)); };
+    more.addEventListener('click', () => { open = !open; fold(); if (open && pills[4]) pills[4].focus({ preventScroll: true }); });
+  }
   const pick = (v) => (v && typeof v === 'object' && !Array.isArray(v)) ? v[rail] : v;
   const view = () => {
     if (sel.k === 'fault') {
@@ -172,6 +194,7 @@
     }
     steps.forEach((b, i) => { b.setAttribute('aria-pressed', String(sel.k === 'state' && sel.id === i)); b.toggleAttribute('data-fault', sel.k === 'fault' && v.at === i); b.classList.remove('is-flash'); });
     pills.forEach((b) => b.setAttribute('aria-pressed', String(sel.k === 'fault' && b.getAttribute('data-fault') === sel.id)));
+    fold();
     lossBtns.forEach((b) => { const tr = b.closest('tr'); if (tr) tr.classList.toggle('is-hit', (v.loss || []).includes(b.dataset.loss)); });
     txt(sr, RAIL[rail] + '. ' + v.kick + ', ' + v.title + '. ' + v.what + ' ' + v.h2 + ': ' + v.two + (v.rule ? ' ' + v.h3 + ': ' + v.rule : ''));
     return v;
@@ -225,18 +248,20 @@
 
   /*S3-LOGIC-START*/
   // Pure: inputs in, gate results and a decision-table row number out. No DOM, no data lookups.
-  // i = { route: domestic|cross, country: us|br|other, status: established|new|changed, cap: instant|ach|hosted|self,
+  // i = { route: domestic|cross, country: us|br|other, status: established|new|changed, cap: instant|ach|hosted|self|card,
   //       consent: yes|no, amount: 0..3 (under $3,000, to $1 million, to $10 million, above), speed: minutes|same|next,
   //       day: hours|outside (weekend or holiday), health: normal|chain|bank, token: usdc|usdt, data: yes|no }
   // Gate states: info (always runs), pass, data (needs data), close (rules out one rail, later gates still run),
   // stop (the payout is held or declined). Every gate is evaluated on every route.
   // FINAL rows pay on a rail treated as final. A new or changed payee never lands on one.
   // bw: a plain reason for the base rail, shown as the deciding check when no gate decided.
-  const FINAL = [3, 6, 7, 8, 9, 10, 11, 12];
+  const FINAL = [3, 6, 7, 8, 9, 10, 11, 12, 21];
   const COIN = [10, 11];
+  const WIRE = [6, 7, 8, 12]; // Fedwire, Fedwire after the weekend, correspondent wire, cross-border bank partner
   function choose(i) {
     const dom = i.route === 'domestic';
     const wallet = i.cap === 'hosted' || i.cap === 'self';
+    const card = i.cap === 'card';
     const fresh = i.status !== 'established';
     const urgent = i.speed !== 'next';
     const weekend = i.day === 'outside';
@@ -244,7 +269,7 @@
     const chainDown = i.health === 'chain', bankDown = i.health === 'bank';
     const ramp = !dom && i.cap === 'ach' && weekend && urgent && i.consent === 'yes';
     const token = !dom && (wallet || ramp);
-    const bankAsk = dom && !wallet && urgent;
+    const bankAsk = dom && !wallet && !card && urgent;
     const g1 = ['info', 'Parties and addresses, again at submission'];
     const g2 = !token ? ['pass', 'No token leg']
       : i.country !== 'br' ? ['data', 'Legality checked for Brazil alone']
@@ -256,15 +281,15 @@
       : i.cap === 'self' ? ['data', 'Verify self-hosted wallet first'] : ['pass', 'Payee consents'];
     const g4 = token && i.amount >= 2 ? ['close', 'Stablecoin closed above $1 million, no cap set', 'Stablecoin: above $1 million, no cap set', 'coin']
       : bankAsk && i.amount === 3 ? ['close', 'RTP, FedNow and Same Day ACH closed above $10 million', 'RTP, FedNow, Same Day ACH: above their limits']
-      : bankAsk && i.amount === 2 ? ['close', 'Same Day ACH closed above $1 million', 'Same Day ACH: $1 million limit until September 17, 2027']
+      : bankAsk && i.amount === 2 ? ['close', 'Same Day ACH closed above $1 million', 'Same Day ACH: $1 million limit until 17 Sep 2027']
       : token ? ['data', 'Platform cap not yet set'] : ['pass', 'Rail limits checked'];
-    const g5 = i.amount === 0 ? ['pass', 'Under $3,000'] : i.data === 'no' ? ['stop', 'Incomplete data, held on any rail'] : ['pass', 'Data complete'];
     const g7 = !token ? ['pass', 'No token leg'] : usdt ? ['stop', 'USDT is off the list'] : ['pass', 'USDC is on the list'];
     const tokenOpen = token && g2[0] !== 'close' && g3[0] !== 'close' && g4[0] !== 'close' && !usdt && !chainDown && !(ramp && bankDown);
     // base rail, before the first-payout rule and before holds
     let base, then = null, bw = '';
     if (dom) {
-      if (wallet) { base = 18; then = 1; bw = 'A US payout needs bank details'; }
+      if (card) { base = 21; bw = 'Payee gave only a card, and no agent push-to-card product exists, so a person keys it'; }
+      else if (wallet) { base = 18; then = 1; bw = 'A US payout needs bank details'; }
       else if (!urgent) { base = 1; bw = 'Next day is enough, so the cheapest bank rail'; }
       else if (i.amount === 3) { base = weekend ? 7 : 6; bw = weekend ? 'Above $10 million at a weekend, and Fedwire is shut' : 'Above $10 million and urgent, so only Fedwire is left'; }
       else if (i.speed === 'same' && i.amount <= 1 && !weekend) { base = 2; bw = 'Same day, at $1 million or less'; }
@@ -273,12 +298,16 @@
       else { base = weekend ? 16 : 6; bw = weekend ? 'Above $1 million at a weekend, with no instant rail at the payee bank' : 'Above $1 million, with no instant rail at the payee bank'; }
     } else if (tokenOpen) { base = wallet ? 10 : 11; bw = wallet ? 'Payee abroad consents and holds a wallet' : 'Weekend, urgent, and the payee consents to a ramp'; }
     else if (wallet) { if (usdt) { base = 13; bw = 'USDT asked for'; } else if (chainDown) { base = 14; bw = 'Chain or ramp degraded'; } else { base = 18; then = i.amount >= 2 ? 8 : 12; bw = 'Wallet route closed, so bank details are needed'; } }
+    else if (card) { base = 21; bw = 'Payee abroad gave only a card, and no agent push-to-card product exists, so a person keys it'; }
     else if (i.amount >= 2) { base = 8; bw = 'Above $1 million abroad'; }
     else if (i.cap === 'instant') { base = 9; bw = 'The payee bank abroad takes instant payments'; }
     else { base = 12; bw = 'No instant rail at the payee bank abroad'; }
     const g8 = bankDown ? (base === 10 ? ['close', 'Bank partner degraded, bank rails closed', 'Bank rails: partner degraded'] : base === 13 ? ['close', 'Bank partner degraded, bank rails closed'] : ['stop', 'Bank partner degraded, held'])
       : chainDown ? (!token ? ['pass', 'No token leg, bank partner normal'] : wallet ? ['stop', 'Chain or ramp degraded, no blind resend'] : ['close', 'Chain or ramp degraded, stablecoin closed', 'Stablecoin: chain or ramp degraded'])
       : ['pass', 'Partner and chain normal'];
+    // r37: the Travel Rule (31 CFR 1010.100) attaches to wires and to transmitter stablecoin transfers. ACH, Same Day ACH,
+    // RTP and FedNow are outside it, so G5 fires only when the base rail is a wire, a correspondent or partner transfer, or a token leg.
+    const g5 = !(WIRE.indexOf(base) >= 0 || COIN.indexOf(base) >= 0) ? ['pass', 'Rule attaches to wires and stablecoin only'] : i.amount === 0 ? ['pass', 'Under $3,000'] : i.data === 'no' ? ['stop', 'Incomplete data, held'] : ['pass', 'Data complete'];
     let row = base;
     let g6;
     if (!fresh) g6 = ['pass', 'Payee established'];
@@ -299,19 +328,20 @@
   /*S3-LOGIC-END*/
 
   const ICONS = {
-    bank: '<path d="M12 32 40 16l28 16M16 32h48M22 38v20M34 38v20M46 38v20M58 38v20M14 64h52"/>',
-    same: '<path d="M8 30 32 16l24 14M12 30h40M17 36v18M27 36v18M37 36v18M10 60h34"/><circle cx="58" cy="54" r="14"/><path d="M58 46v8l6 4"/>',
-    instant: '<circle cx="40" cy="40" r="28"/><path d="M44 18 28 44h12l-4 18 16-26H40z"/>',
-    wire: '<path d="M16 28 40 14l24 14M20 28h40M25 34v16M35 34v16M45 34v16M55 34v16M18 56h44"/><path d="M10 68h58M60 62l8 6-8 6"/>',
-    wait: '<circle cx="40" cy="40" r="28"/><path d="M40 24v16l10 8"/>',
-    globe: '<circle cx="40" cy="40" r="28"/><path d="M12 40h56M40 12c-13 8-13 48 0 56M40 12c13 8 13 48 0 56"/>',
-    local: '<path d="M40 70S20 50 20 34a20 20 0 0 1 40 0c0 16-20 36-20 36z"/><circle cx="40" cy="34" r="7"/>',
-    coin: '<path d="M12 26h50a6 6 0 0 1 6 6v28a6 6 0 0 1-6 6H18a6 6 0 0 1-6-6zM12 26l36-12v12M48 46h20"/><circle cx="54" cy="46" r="2.5"/>',
-    ramp: '<circle cx="18" cy="40" r="12"/><path d="M18 34v12M36 40h12M43 35l5 5-5 5M54 38l11-8 11 8M57 43v11M65 43v11M73 43v11M54 58h22"/>',
-    partner: '<circle cx="40" cy="34" r="22"/><path d="M18 34h44M40 12c-10 7-10 37 0 44M40 12c10 7 10 37 0 44M10 68h58M60 62l8 6-8 6"/>',
-    decline: '<circle cx="40" cy="40" r="28"/><path d="M20.5 20.5l39 39"/>',
-    hold: '<circle cx="40" cy="40" r="28"/><path d="M32 28v24M48 28v24"/>',
-    ask: '<path d="M20 12h30l12 12v44H20zM50 12v12h12M30 38h22M30 48h22M30 58h12"/>',
+    bank: '<use href="#pdd-ar3-i-bank"/>',
+    same: '<use href="#pdd-ar3-i-rtp"/>',
+    instant: '<use href="#pdd-ar3-i-rtp"/>',
+    wire: '<use href="#pdd-ar3-i-wire"/>',
+    wait: '<use href="#pdd-ar3-i-trace"/>',
+    globe: '<use href="#pdd-ar3-i-globe"/>',
+    local: '<use href="#pdd-ar3-i-bank"/>',
+    coin: '<use href="#pdd-ar3-i-coin"/>',
+    ramp: '<use href="#pdd-ar3-i-coin"/>',
+    partner: '<use href="#pdd-ar3-i-globe"/>',
+    decline: '<use href="#pdd-ar3-i-wall"/>',
+    hold: '<use href="#pdd-ar3-i-lock"/>',
+    ask: '<use href="#pdd-ar3-i-doc"/>',
+    card: '<use href="#pdd-ar3-i-card"/>',
   };
   const WORD = { info: 'Runs', pass: 'Pass', data: 'Needs data', close: 'Closes rail', stop: 'Stop', wait: 'Wait' };
   const LONG = { info: 'runs here', pass: 'pass', data: 'needs data', close: 'closes a rail', stop: 'stop', wait: 'waiting' };
@@ -376,7 +406,7 @@
     if (gw) {
       gw.textContent = g.why || '';
       gw.setAttribute('data-src', (meta.src || []).join(' '));
-      if (meta.note) gw.setAttribute('data-note', meta.note); else gw.removeAttribute('data-note');
+      if (meta.note) { gw.setAttribute('data-note', meta.note); gw.title = meta.note; } else { gw.removeAttribute('data-note'); gw.removeAttribute('title'); }
     }
   };
   // the gate that decided most: the stop, else the first that closes a rail, else the first that needs data
@@ -399,7 +429,7 @@
   const LAD = { amt: [1000, 20000, 5000000, 25000000], say: ['1,000', '20,000', '5 million', '25 million'] };
   // result row to chart rows. A hold or a "collect details first" row borrows the rail it leads to (res.then).
   // r34 c: one chart row per result, so "your rail" always names one rail. A correspondent wire has no published price, so nothing lights.
-  const LADROW = { 1: ['ach'], 2: ['ach'], 3: ['fednow'], 4: ['ach'], 5: ['ach'], 6: ['fedwire'], 7: ['fedwire'], 8: [], 9: ['airwallex'], 10: ['coin'], 11: ['coin'], 12: ['sme'], 15: ['ach'], 16: ['ach'] };
+  const LADROW = { 1: ['ach'], 2: ['ach'], 3: ['fednow'], 4: ['ach'], 5: ['ach'], 6: ['fedwire'], 7: ['fedwire'], 8: [], 9: ['airwallex'], 10: ['coin'], 11: ['coin'], 12: ['sme'], 15: ['ach'], 16: ['ach'], 21: ['card'] };
   const ladRows = lad ? [...lad.querySelectorAll('.pdd-s3-lr')] : [];
   const segs = (v) => (v || '').trim().split(/\s+/).filter(Boolean).map((x) => x.split('-').map(Number)).map((a) => [a[0], a.length > 1 ? a[1] : a[0]]);
   const n0 = (v) => v.toLocaleString('en-US', { maximumFractionDigits: 0 });
@@ -484,9 +514,17 @@
     resEl.dataset.m = row.m; resEl.dataset.row = String(row.n);
     if (R0.role) R0.role.textContent = row.role;
     if (R0.ico) R0.ico.innerHTML = ICONS[row.kind] || ICONS.bank;
-    const then = next ? ', then ' + (next.short || next.rail) : '';
-    if (R0.rf) R0.rf.textContent = row.rail + then;
-    if (R0.rs) R0.rs.textContent = (row.short || row.rail) + then;
+    // r37: one result line. "ACH now. RTP or FedNow once the payee is confirmed (gate G6)." The later rail comes from
+    // the row this one leads to, or from the gate that closed an instant rail for an unconfirmed payee.
+    const WHEN = { G2: 'legality is checked', G3: 'bank details arrive', G4: 'a cap is set', G5: 'the data is complete', G6: 'the payee is confirmed', G7: 'the coin is on the list', G8: 'the partner recovers' };
+    const railHead = (t) => t.split(':')[0].replace(/ now$/, '');
+    const g6c = res.closed.find((cl) => cl.g === 'G6');
+    const later = next ? (next.short || next.rail) : g6c ? railHead(g6c.t) : '';
+    const gateFor = later ? (res.stop || (g6c || res.gates.find((g) => g.id === 'G6' && g.s !== 'pass') ? 'G6' : (res.gates.find((g) => g.s === 'data') || {}).id)) : null;
+    const nowRail = (row.short || row.rail).replace(/,\s*(or|then)\b.*$/, '');
+    const line = later ? nowRail + ' now. ' + later + ' once ' + (WHEN[gateFor] || 'the check clears') + (gateFor ? ' (gate ' + gateFor + ')' : '') + '.' : row.rail + '.';
+    if (R0.rf) R0.rf.textContent = line;
+    if (R0.rs) R0.rs.textContent = line;
     if (R0.cost) { R0.cost.textContent = c.t; R0.cost.classList.toggle('is-none', !!c.none); }
     if (R0.cq) R0.cq.hidden = !c.test;
     if (R0.dg) { R0.dg.textContent = d.g ? d.g + ' ' + D.gates[d.k].name : 'Deciding check'; R0.dg.dataset.m = d.m; }
@@ -505,7 +543,7 @@
     if (notList) { notList.textContent = ''; lines.slice(0, 4).forEach((l) => { const li = PDD.el('li', null, notList); if (l.src && l.src.length) chip(li, l.t, l.src, l.note); else li.textContent = l.t; }); }
     const reason = reasonOf(row);
     const sg = res.stop ? res.gates.find((x) => x.id === res.stop) : null;
-    if (sr) sr.textContent = 'Result: ' + row.rail + '.' + (next ? ' Then ' + next.rail + '.' : '') + ' Cost: ' + c.t + '. ' + reason + '.' + (sg ? ' Stopped at ' + sg.id + ': ' + sg.why + '.' : '') + res.closed.map((cl) => ' ' + cl.g + ' closes a rail. ' + cl.t + '.').join('') + (res.needs.length ? ' Needs data at ' + res.needs.join(', ') + '.' : '') + ' This is our view.';
+    if (sr) sr.textContent = 'Result: ' + row.rail + '.' + (next ? ' Then ' + next.rail + '.' : '') + ' Cost: ' + c.t + '. ' + reason + '.' + (sg ? ' Stopped at ' + sg.id + ': ' + sg.why + '.' : '') + res.closed.map((cl) => ' ' + cl.g + ' closes a rail. ' + cl.t + '.').join('') + (res.needs.length ? ' Needs data at ' + res.needs.join(', ') + '.' : '') + ' Our read.';
     [R0.rf, R0.rs, R0.cost, R0.why].forEach((e) => { if (!e) return; e.classList.remove('is-new'); void e.offsetWidth; e.classList.add('is-new'); });
     resEl.classList.remove('is-busy');
   };
@@ -520,6 +558,10 @@
       ax.textContent = '';
       const mk = ticks(P);
       mk.forEach((e, j) => { const i = PDD.el('i', j === mk.length - 1 ? { class: 'is-end' } : j === 0 ? { class: 'is-first' } : null, ax, axis(e)); i.style.setProperty('--a', P.at(Math.pow(10, e)).toFixed(1)); });
+      // r37: a tick at every power of ten, labeled or not
+      for (let e = -2; e <= P.top; e++) if (!mk.includes(e)) { const t = PDD.el('i', { class: 'is-tick' }, ax); t.style.setProperty('--a', P.at(Math.pow(10, e)).toFixed(1)); }
+      let cap = lad.querySelector('.pdd-s3-lcap');
+      if (!cap) { cap = PDD.el('p', { class: 'pdd-s3-lcap' }, null, 'Log scale, each tick is 10x'); ax.after(cap); }
     }
     const said2 = [];
     P.rows.forEach((x) => {
@@ -541,10 +583,30 @@
       if (x.id === 'tether') m.r.dataset.h = x.tether ? (x.tether > 1000 ? 'pct' : 'fee') : 'none';
       const lx = m.r.querySelector('.pdd-s3-lx'); if (lx) lx.hidden = !x.over;
       if (x.id === 'coin') { m.r.dataset.h = x.away ? 'none' : 'pct'; const lq = m.r.querySelector('.pdd-s3-lq'); if (lq) lq.hidden = !x.away; }
+      // r37: a row with no price shows a chip where its bar would be, so it never reads as a zero cost
+      if (!x.segs.length) m.r.dataset.h = 'none'; else if (!m.r.dataset.h || m.r.dataset.h === 'none') m.r.dataset.h = x.pct ? 'pct' : 'fee';
+      if (m.ln) { let npc = m.ln.querySelector('.pdd-s3-npc'); if (!npc) npc = PDD.el('em', { class: 'pdd-s3-npc' }, m.ln, 'No public price'); npc.hidden = !!x.segs.length; }
       m.r.classList.toggle('is-on', x.on); m.r.classList.toggle('is-dim', x.off);
       if (m.em) m.em.hidden = !x.on;
       if (x.segs.length) said2.push(m.name + ' ' + x.val + (x.over ? ', over its limit' : ''));
     });
+    // r37: three labeled groups. Per-item fees, percent-of-amount prices at this size, and rows with no public price,
+    // read from the row data (data-usd, data-pct, the Tether rule) and the price() result. Rows move only when the order changes.
+    const rowsBox = lad.querySelector('.pdd-s3-rows');
+    if (rowsBox) {
+      const GROUPS = [['fee', 'Per-item fee'], ['pct', 'Percent of amount at your size'], ['none', 'No public price']];
+      const grp = (x) => (!x.segs.length ? 'none' : x.pct || x.tether ? 'pct' : 'fee');
+      const want = [];
+      GROUPS.forEach(([k, t]) => {
+        let h = rowsBox.querySelector('.pdd-s3-lg[data-g="' + k + '"]');
+        if (!h) h = PDD.el('p', { class: 'pdd-s3-lg', 'data-g': k }, null, t);
+        const members = P.rows.filter((x) => grp(x) === k);
+        h.hidden = !members.length;
+        want.push(h); members.forEach((x) => want.push(x.m.r));
+      });
+      const have = [...rowsBox.children];
+      if (want.length !== have.length || want.some((n, i) => n !== have[i])) want.forEach((n) => rowsBox.appendChild(n));
+    }
     // top five: your rail, then priced rows on this route, then priced rows off it, then rows with no price
     const rank = (x) => (x.on ? 0 : x.segs.length && !x.off ? 1 : x.segs.length ? 2 : 3);
     const order = P.rows.map((x, k) => ({ x, k })).sort((a, b) => rank(a.x) - rank(b.x) || a.k - b.k);
@@ -633,7 +695,7 @@
     { p: 'us-next', o: {}, t: (res, P) => ['The same supplier at ' + amtSay(P) + '. ACH still costs ' + costOf(P, 'ach') + ', since its fee does not grow with size. Percentage prices belong to cross-border rails, so they step back.'] },
     { p: 'us-next', o: { amount: 2, speed: 'same' }, t: (res, P) => { const c = res.closed[0]; return ['A ' + amtSay(P) + ' treasury payment, same day. ' + (c ? 'Gate ' + c.g + ' closes Same Day ACH above $1 million. ' : '') + 'RTP and FedNow allow up to ' + limitOf('fednow') + ' but publish no customer price. A Fedwire median bank fee is ' + costOf(P, 'fedwire').replace(metaOf('fedwire').pre, '') + '.']; } },
     { p: 'brazil', o: {}, t: (res, P) => { const c = res.closed.find((x) => /^Stablecoin/.test(x.t)); return ['A ' + amtSay(P) + ' payout to a Brazil payee at a weekend. ' + (c ? 'Gate ' + c.g + ' closes the stablecoin rail on Brazil eFX legs. ' : '') + 'The bank partner is priced at the ' + pctOf('sme') + ' SME average, ' + costOf(P, 'sme') + '. ', 'Wise lists from ' + pctOf('wise') + ', ' + costOf(P, 'wise').replace(metaOf('wise').pre, '') + ', and is worth a quote first.']; } },
-    { p: 'contractor', o: { day: 'outside' }, t: (res, P) => ['After hours, ' + amtSay(P) + ' to a consenting payee abroad with a wallet. The lane opens January 18, 2027 at the earliest. ', 'It wins on after-hours reach, not on price.', ' Wise shows ' + costOf(P, 'wise') + '. The 200 USDC test ran from ' + pctOf('coin') + ', ' + costOf(P, 'coin') + ' here, not a quote.'] },
+    { p: 'contractor', o: { day: 'outside' }, t: (res, P) => ['After hours, ' + amtSay(P) + ' to a consenting payee abroad with a wallet. The lane opens 18 Jan 2027 at the earliest. ', 'It wins on after-hours reach, not on price.', ' Wise shows ' + costOf(P, 'wise') + '. The 200 USDC test ran from ' + pctOf('coin') + ', ' + costOf(P, 'coin') + ' here, not a quote.'] },
   ];
   const N = SCEN.length, HOLD = 4200;
   const scenOf = () => SCEN.findIndex((sc) => { const p = Object.assign({}, D.presets[sc.p], sc.o); return KEYS.every((k) => p[k] === st[k]) && p.amount === st.amount; });
@@ -659,7 +721,8 @@
         const row = rowOf(res.row), c = costLine(res, P), reason = reasonOf(row);
         if (pk) pk.textContent = touched ? 'Your inputs.' : 'This payout.';
         if (row.src && row.src.length) chip(pt, reason, row.src, row.note); else pt.appendChild(document.createTextNode(reason));
-        pt.appendChild(document.createTextNode('. ' + (c.sub ? c.sub + '.' : '')));
+        // r37: the cost basis is added only when there is no price to show, so the result is not stated twice
+        pt.appendChild(document.createTextNode('.' + (c.none && c.sub ? ' ' + c.sub + '.' : '')));
         scene.removeAttribute('data-scen');
       }
     }
@@ -906,6 +969,24 @@
     });
     show(cur, false);
     PDD.onResize(track, place);
+    // r37: the Today marker reads the real date, "1 Nov 2026", and sits between its dated neighbours inside its own slot
+    const todayLi = track.querySelector('.pdd-s5-today');
+    if (todayLi) {
+      const now = new Date(), MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const label = now.getDate() + ' ' + MON[now.getMonth()] + ' ' + now.getFullYear();
+      const span = todayLi.querySelector('span.pdd-today[data-today]') || todayLi.querySelector('span');
+      if (span) { span.textContent = span.classList.contains('pdd-today') ? label : 'Today, ' + label; span.setAttribute('data-today', now.toISOString().slice(0, 10)); }
+      const lis = [...track.children], k = lis.indexOf(todayLi);
+      const dateOf = (li) => { const b = li.querySelector('button[data-id]'); const d = b && byId[b.dataset.id]; const t = d && Date.parse(d.when); return t && !isNaN(t) ? t : null; };
+      let a = null, b = null, ia = k - 1, ib = k + 1;
+      while (ia >= 0 && (a = dateOf(lis[ia])) == null) ia--;
+      while (ib < lis.length && (b = dateOf(lis[ib])) == null) ib++;
+      if (k >= 0 && a != null && b != null && b > a) {
+        const f = Math.max(0, Math.min(1, (now.getTime() - a) / (b - a)));
+        const n = k - 0.4 + 0.8 * f; // stays inside its slot so the pill never crosses a neighbour's label
+        todayLi.style.setProperty('--n', n.toFixed(2)); track.style.setProperty('--today', (n + 0.5).toFixed(2));
+      }
+    }
   }
   const copyBtn = scene.querySelector('.pdd-s5-copybtn');
   const said = scene.querySelector('.pdd-s5-copied');
@@ -940,7 +1021,10 @@
   const runBtn = scene.querySelector('.pdd-bd-run');
   const status = scene.querySelector('.pdd-bd-fst');
   const tabs = [...scene.querySelectorAll('.pdd-bd-seg button[data-val]')];
-  const DEF = { buyer: 'who', builder: 'arch', strategy: 'who' };
+  // r37: every seat lands on Verdict. Who gains, Who loses and Integrations may live as drawers inside the Verdict panel,
+  // so a deep link to them selects Verdict and opens the drawer. If the old tab still exists, it is used as before.
+  const DEF = { buyer: 'verdict', builder: 'verdict', strategy: 'verdict' }; // every seat lands on Verdict with its drawers closed
+  const drawerFor = (v) => scene.querySelector('details[data-p="' + v + '"], details#pdd-bd-' + v + ', details[data-tab="' + v + '"], details[data-drawer="' + v + '"]');
   const STEP = 650;
   let timer = 0, touched = false, ran = false;
   const say = (t) => { if (status) status.textContent = t; };
@@ -969,10 +1053,18 @@
     if (!ran && scene.classList.contains('is-in')) run();
   });
   // deep link: #reader=builder&build=flow opens that tab
-  const pick = (v) => { const b = tabs.find((x) => x.dataset.val === v); if (b && b.getAttribute('aria-pressed') !== 'true') b.click(); return !!b; };
+  // open is true only for a hash the reader changed in session. A page that loads on a drawer link lands on Verdict with the drawer closed.
+  const pick = (v, open) => {
+    let b = tabs.find((x) => x.dataset.val === v);
+    const d = b ? null : drawerFor(v);
+    if (!b && d) { b = tabs.find((x) => x.dataset.val === 'verdict'); if (open && window.matchMedia('(min-width: 1200px)').matches) d.open = true; }
+    if (!b) b = tabs.find((x) => x.dataset.val === 'verdict');
+    if (b && b.getAttribute('aria-pressed') !== 'true') b.click();
+    return !!b;
+  };
   const hashed = /[#&]build=([a-z]+)/.exec(location.hash);
-  if (hashed && pick(hashed[1])) touched = true;
-  window.addEventListener('hashchange', () => { const h = /[#&]build=([a-z]+)/.exec(location.hash); if (h && pick(h[1])) touched = true; });
+  if (hashed && pick(hashed[1], false)) touched = true;
+  window.addEventListener('hashchange', () => { const h = /[#&]build=([a-z]+)/.exec(location.hash); if (h && pick(h[1], true)) touched = true; });
   PDD.onReader((r) => { if (!touched) pick(DEF[r]); });
 })();
 
@@ -1075,8 +1167,8 @@
     { id:'human', x:1025, y:960, ico:'person', role:'slate', L:'AP checker', layer:'base', d:'The same checker as today, now with the payee source and the guard result in front of them.' },
     { id:'agent', x:315, y:450, ico:'agent', role:'coral', L:'Agent', S:'Proposes only', step:'1', layer:'agent', d:'The agent drafts a payout from an approved invoice. It holds no release tool.' },
     { id:'proxy', x:315, y:200, ico:'key', role:'violet', L:'Signing proxy', S:'RFC 9421 out', layer:'agent', d:'The only caller of the signing key. It adds RFC 9421 signatures to calls out to supplier portals and card networks, which check them against the directory.' },
-    { id:'mkeys', x:545, y:200, ico:'db', role:'violet', L:'Mandate keys', S:'Keys and nonce', layer:'controls', d:'The platform public key, each passkey stored at enrolment, a nonce for replay and the revocation list. No directory round trip.' },
-    { id:'mandate', x:545, y:450, ico:'key', role:'amber', L:'Mandate check', S:'Signature, passkey', step:'2', layer:'adapter', badges:['sox','port'], d:'Checks the platform signature against the public key (Ed25519, RFC 9421) and the passkey mandate against the key stored at enrolment. The adapter never checks itself.' },
+    { id:'mkeys', x:545, y:200, ico:'db', role:'violet', L:'Mandate keys', S:'Keys and nonce', layer:'controls', d:'The platform public key, each passkey stored at enrollment, a nonce for replay and the revocation list. No directory round trip.' },
+    { id:'mandate', x:545, y:450, ico:'key', role:'amber', L:'Mandate check', S:'Signature, passkey', step:'2', layer:'adapter', badges:['sox','port'], d:'Checks the platform signature against the public key (Ed25519, RFC 9421) and the passkey mandate against the key stored at enrollment. The adapter never checks itself.' },
     { id:'registry', x:705, y:200, ico:'db', role:'violet', L:'Payee registry', layer:'guard', d:'Known payees and their verified bank details.' },
     { id:'guard', x:705, y:450, ico:'shield', role:'amber', L:'Payee guard', S:'Rule, not model', step:'3', layer:'guard', badges:['sox'], d:'A rule checks every payment before anything else happens: the invoice of record, sanctions, and every new payee or bank detail change.' },
     { id:'invoice', x:545, y:700, ico:'doc', role:'amber', L:'Invoice match', S:'No double pay', layer:'guard', badges:['sox'], d:'Reads the approved invoice from the ERP and checks amount, payee and not yet paid. A duplicate stops here.' },
@@ -1092,7 +1184,7 @@
     { id:'ledger', x:1395, y:700, ico:'ledger', role:'violet', L:'Evidence ledger', S:'Write-once', step:'8', layer:'controls', badges:['sox','port'], d:'Every payment gets an evidence record: payment ID, key ID, guard result, matrix cell, approver and rail reference. Paid status goes back to the ERP. A return opens an exception for a person.' },
     { id:'directory', x:1592, y:200, ico:'globe', role:'slate', L:'Key directory', S:'Card networks', layer:'agent', d:'The platform key is registered in the scheme directory. Counterparties check signed calls against it.' },
     { id:'bportal', x:1592, y:700, ico:'portal', role:'slate', L:'Bank portal', S:'Exceptions', layer:'rails', d:'The portal stays for exceptions and manual payments.' },
-    { id:'bankapi', x:1592, y:450, ico:'bank', role:'slate', L:'Bank API', S:"Today's bank", layer:'rails', d:'The bank you already use. You stay the Originator. Acknowledgements, returns and statements come back to the adapter.' },
+    { id:'bankapi', x:1592, y:450, ico:'bank', role:'slate', L:'Bank API', S:"Today's bank", layer:'rails', d:'The bank you already use. You stay the Originator. Acknowledgments, returns and statements come back to the adapter.' },
     { id:'ach', x:1825, y:250, ico:'rails', role:'teal', L:'ACH', S:'Same Day too', layer:'rails', d:'Batch and Same Day ACH. Low cost, not final at once.' },
     { id:'rtp', x:1825, y:450, ico:'rtp', role:'teal', L:'RTP', S:'Up to $10M', layer:'rails', d:'Instant and final, 24/7, up to $10M.' },
     { id:'wire', x:1825, y:650, ico:'wire', role:'teal', L:'Wire', S:'Fedwire', layer:'rails', d:'Fedwire for large or urgent payments. Final once processed.' },
@@ -1109,14 +1201,14 @@
     { id:'gateway', x:405, y:450, ico:'gateway', aws:'toolpol', role:'coral', L:'Gateway policy', S:'AgentCore', S2:'No release tools', gL:'Agent gateway', gS:'No release tools', step:'2', layer:'agent', badges:['awsb'], d:'Tool policy denies vendor master writes and release tools. The gateway calls the payment API with its own IAM role.' },
     { id:'traces', x:245, y:700, ico:'trace', aws:'obs', role:'violet', L:'Agent traces', S:'CloudWatch', gS:'Trace store', layer:'controls', d:'Agent traces carry the payment ID and go to the log archive account. Agent-originated ACH entries are tagged for Nacha monitoring.' },
     { id:'api', x:575, y:450, ico:'lock', aws:'api', role:'amber', L:'API Gateway', S:'OpenAPI target', gL:'Payment API', gS:'OpenAPI', pill:'Gateway role only', step:'3', layer:'adapter', d:'An OpenAPI target with the gateway IAM role. The API resource policy admits only that role.' },
-    { id:'mkeys', x:735, y:200, ico:'db', aws:'nonce', role:'violet', L:'Mandate keys', S:'DynamoDB', gS:'Keys and nonce', layer:'controls', d:'The KMS public key, each passkey stored at enrolment, a nonce with a conditional write, and the revocation list. No directory round trip.' },
-    { id:'mandate', x:735, y:450, ico:'key', aws:'verifier', role:'amber', L:'Mandate check', S:'Lambda', gS:'Signature, passkey', step:'4', layer:'adapter', badges:['sox','port'], d:'Checks the platform signature against the KMS public key (Ed25519, RFC 9421) and the passkey mandate against the key stored at enrolment. Created, expires and a nonce block replay.' },
+    { id:'mkeys', x:735, y:200, ico:'db', aws:'nonce', role:'violet', L:'Mandate keys', S:'DynamoDB', gS:'Keys and nonce', layer:'controls', d:'The KMS public key, each passkey stored at enrollment, a nonce with a conditional write, and the revocation list. No directory round trip.' },
+    { id:'mandate', x:735, y:450, ico:'key', aws:'verifier', role:'amber', L:'Mandate check', S:'Lambda', gS:'Signature, passkey', step:'4', layer:'adapter', badges:['sox','port'], d:'Checks the platform signature against the KMS public key (Ed25519, RFC 9421) and the passkey mandate against the key stored at enrollment. Created, expires and a nonce block replay.' },
     { id:'registry', x:895, y:200, ico:'db', aws:'registry', role:'violet', L:'Payee registry', S:'DynamoDB', gS:'Database', layer:'guard', d:'Known payees and verified bank details.' },
     { id:'guard', x:895, y:450, ico:'shield', aws:'guard', role:'amber', L:'Payee guard', S:'Lambda', gS:'Rule service', step:'5', layer:'guard', badges:['sox'], d:'A rule, not a model, runs three checks on every payment: invoice match, sanctions screen and, for a new or changed payee, a US account check.' },
     { id:'invoice', x:750, y:700, ico:'doc', aws:'guard', role:'amber', L:'Invoice match', S:'Lambda', gS:'No double pay', layer:'guard', badges:['sox'], d:'Reads the approved invoice from the ERP and checks amount, payee and not yet paid. A duplicate or an invoice with no record stops here.' },
     { id:'sanctions', x:895, y:700, ico:'globe', aws:'guard', role:'amber', L:'Sanctions screen', S:'SDN list feed', layer:'guard', badges:['sox'], d:'Screens every party against the SDN list feed before release. A hit goes to a queue for a person. Records are kept for 10 years.' },
     { id:'acct', x:1040, y:700, ico:'check', aws:'acctval', role:'amber', L:'US account check', S:'Partner API', layer:'guard', d:'A US account-ownership check. No scheme answer means a callback for a new or changed payee, never a neutral score.' },
-    { id:'railpick', x:1055, y:450, ico:'rails', aws:'adapter', role:'amber', L:'Rail picker', S:'Lambda', gS:'ACH, RTP, wire', step:'6', layer:'guard', d:'Picks the rail before the release policy runs, and writes it into the release record. If failover moves to a stricter rail, the checker approves again.' },
+    { id:'railpick', x:1055, y:450, ico:'rails', aws:'adapter', role:'amber', L:'Rail picker', S:'Lambda', gS:'ACH, RTP, wire', step:'6', layer:'guard', d:'Picks the rail before the release matrix runs, and writes it into the release record. If failover moves to a stricter rail, the checker approves again.' },
     { id:'risk', x:1215, y:200, ico:'risk', aws:'risk', role:'coral', L:'ML risk score', S:'SageMaker AI', gL:'Risk model', gS:'Hold only', layer:'guard', d:'An ML score can only add a hold. It can move a cell to person, never back.' },
     { id:'policy', x:1215, y:450, ico:'policy', aws:'policy', role:'amber', L:'Release policy', S:'Verified Permissions', gL:'Policy engine', gS:'Cedar rules', step:'6', noBadge:true, layer:'guard', badges:['sox','port'], d:'No LLM on the approval path. The matrix runs as Cedar rules on payee status, amount and rail, and picks a rule or a person.', matrix:true },
     { id:'grid', x:1205, y:700, type:'grid', L:'Release matrix', layer:'guard', d:'Rows are established, new and changed payees. Columns are low and high bands for each rail. Green is rule releases, amber is person releases.', matrix:true },
@@ -1133,7 +1225,7 @@
     { id:'kill', x:1685, y:200, ico:'power', aws:'kill', role:'red', L:'Kill switch', S:'AppConfig', gS:'Feature flags', step:'12', layer:'controls', d:'Disable one agent, switch all agent payments off, or revoke the key in the directories. It takes effect within a minute. Recall: an ACH R17 return, a wire recall, or an RTP request for return.' },
     { id:'gate', x:1560, y:960, ico:'lock', aws:'policy', role:'violet', L:'Policy gate', S:'Wallet screen', step:'9b', layer:'controls', dash:true, d:'Lane 9b opens on 18 Jan 2027 at the earliest. All four must pass: a coin from a permitted issuer, the Treasury AML and sanctions rule with a wallet screen, a corridor price win, and payee consent.' },
     { id:'directory', x:2005, y:200, ico:'globe', aws:'directory', role:'slate', L:'Key directory', S:'Card networks', layer:'agent', d:'The platform key is registered here. Visa, Mastercard and Amex check signed calls against it.' },
-    { id:'bankapi', x:2005, y:450, ico:'bank', aws:'ownbank', role:'teal', L:'Own bank API', S:'ACH, RTP first', layer:'rails', d:'Your own bank API makes you the Originator. A sponsor bank or a card-issuing partner are the other ways. Acknowledgements, returns and statements come back to the adapter.' },
+    { id:'bankapi', x:2005, y:450, ico:'bank', aws:'ownbank', role:'teal', L:'Own bank API', S:'ACH, RTP first', layer:'rails', d:'Your own bank API makes you the Originator. A sponsor bank or a card-issuing partner are the other ways. Acknowledgments, returns and statements come back to the adapter.' },
     { id:'cardpartner', x:2005, y:700, ico:'card', aws:'cardpartner', role:'slate', L:'Card partner', S:'Secondary', layer:'rails', d:'A card-issuing partner for the secondary card lane.' },
     { id:'stable', x:2005, y:960, ico:'coin', aws:'stable', role:'violet', L:'Stablecoin', S:'Lane 9b', layer:'rails', dash:true, d:'Wins on cross-border and after-hours payouts. Loses on domestic dollars, where RTP runs 24/7.' },
   ]};
@@ -1294,8 +1386,8 @@
 
   const INTRO = {
     today: 'Today: email, a clerk, a portal and batch rails. Six steps, six pain points.',
-    y1: 'Year 1: one thin service in front of the bank you already use. <span class="op">Our view: build this first. It pays back before any platform work.</span>',
-    target: 'Target: four accounts. A rule or a person releases, and only a signed release reaches the bank. <span class="op">Our view: keep ACH and RTP first until card and stablecoin show volume.</span>',
+    y1: 'Year 1: one thin service in front of the bank you already use. <span class="op">Our read: build this first. It pays back before any platform work.</span>',
+    target: 'Target: four accounts. A rule or a person releases, and only a signed release reaches the bank. <span class="op">Our read: keep ACH and RTP first until card and stablecoin show volume.</span>',
   };
 
   const STORY_META = [
@@ -1516,7 +1608,8 @@
   const nowB = q('.pdd-ar3-nb'), nowT = q('.pdd-ar3-nt'), out = q('.pdd-ar3-out');
   const cT = q('.pdd-ar3-ctr[data-c="t"] b'), cC = q('.pdd-ar3-ctr[data-c="c"] b'), cR = q('.pdd-ar3-ctr[data-c="r"] b');
   const ppBtn = q('.pdd-ar3-pp'), rpBtn = q('.pdd-ar3-rp'), bdBtn = q('.pdd-ar3-bd'), fmBtn = q('.pdd-ar3-fm'), fullA = q('.pdd-ar3-full'), dgBtn = q('.pdd-ar3-dg');
-  const diaBox = q('.pdd-ar3-dia'), diaImg = q('.pdd-ar3-dimg');
+  const diaBox = q('.pdd-ar3-dia');
+  let diaImg = null;
   const chipBtns = qa('.pdd-ar3-chip');
   const mapBox = q('.pdd-ar3-map'), scroller = q('.pdd-ar3-scroll'), prog = q('.pdd-ar3-prog');
   const bump = (e) => { if (reduce()) return; e.classList.remove('is-bump'); void e.offsetWidth; e.classList.add('is-bump'); };
@@ -1552,7 +1645,7 @@
   const drawers = (st) => qa('.pdd-ar3-steps[data-st="' + SEGV[st || state] + '"] .pdd-ar3-dr');
   const stepOf = (id) => { const n = nodeById[id]; if (n && n.step) return n.step; const r = STEPLIST[state].find((s) => s[1] === id); return r ? r[0] : null; };
   function live(id) { const s = id ? stepOf(id) : null; if (!s && id) return; drawers().forEach((d) => d.classList.toggle('is-live', s != null && d.dataset.s === s)); }
-  function openDrawer(id) { const s = stepOf(id); if (!s) return; drawers().forEach((d) => { d.open = d.dataset.s === s; }); }
+  function openDrawer(id) { const s = stepOf(id); if (!s) return; const sw = q('.pdd-ar3-stepsd'); if (sw) sw.open = true; drawers().forEach((d) => { d.open = d.dataset.s === s; }); }
 
   /* ---------- simple layer view ---------- */
   const lay = () => q('.pdd-ar3-lay[data-st="' + SEGV[state] + '"]');
@@ -1675,7 +1768,9 @@
     el('path', { d: 'M-6 -2v-3.5a6 6 0 0 1 12 0V-2M-7.5 -2h15v10h-15z' }, b);
     el('title', null, b, 'Locked: release role only');
   }
-  function badge(g, b, x, y) {
+  function badge(g0, b, x, y) {
+    // r37: badges ride in a .fz group so fit mode scales them with the labels instead of hiding them
+    const g = el('g', { class: 'bdg fz' }, g0);
     if (b === 'sox') el('path', { class: 'sox', d: 'M' + x + ' ' + (y - 11) + ' L' + (x + 11) + ' ' + y + ' L' + x + ' ' + (y + 11) + ' L' + (x - 11) + ' ' + y + ' Z' }, g);
     if (b === 'port') el('circle', { class: 'port', cx: x, cy: y, r: 9 }, g);
     if (b === 'awsb') el('rect', { class: 'awsb', x: x - 9, y: y - 9, width: 18, height: 18, rx: 3 }, g);
@@ -1715,7 +1810,8 @@
       if (n.type === 'grid') { lines.length = 0; lines.push(['nl', 'Release matrix', 24]); }
       const tx = el('text', { class: right ? 'lab right' : 'lab', x: right ? 72 : 0, 'text-anchor': right ? 'start' : 'middle' }, g);
       let y = right ? -84 + (3 - lines.length) * 12 : (n.type === 'grid' ? 63 : (aws ? 55 : 57));
-      lines.forEach(([c, t, lh]) => { el('tspan', { x: right ? 72 : 0, y, class: c }, tx, t); y += lh; });
+      // r37: a space opens each line after the first, so a copied label reads "Supplier portal", not "Supplierportal". dx pulls the glyphs back by half a space.
+      lines.forEach(([c, t, lh], i) => { el('tspan', { x: right ? 72 : 0, y, class: c, dx: i ? (right ? '-.27em' : '-.135em') : null }, tx, (i ? ' ' : '') + t); y += lh; });
     } else el('text', { x: 0, y: 58, 'text-anchor': 'middle', class: 'ns' }, g, n.S);
     if (n.pill) {
       const pg = el('g', { class: 'fz' }, el('g', { class: 'npill', transform: 'translate(0 -70)' }, g));
@@ -2015,6 +2111,7 @@
     const my = ++RUN;
     if (building) stopBuild();
     paused = false; playing = true; syncPlay();
+    { const sd = q('.pdd-ar3-storyd'); if (sd) sd.open = true; }
     const v = V();
     S.clear(); mapClear(); v.begin(); resetCounters(); live(null);
     const steps = STORIES[state][story];
@@ -2095,14 +2192,51 @@
       sv.hidden = !aws;
     });
   }
-  // Diagram shows the draw.io export for the stage in view, with its own zoom
-  let dz = 1;
-  const diaZoom = () => { if (diaImg) diaImg.style.width = Math.round(dz * 100) + '%'; };
+  // r37: Diagram is a pan and zoom viewer over the draw.io export. dz 1 is the SVG's natural size (100 percent), so node
+  // names draw at their exported 32 to 44 px. The .svg loads first and the .png is the fallback. Mouse drag pans, touch scrolls natively.
+  let dz = 1, dnat = 0, dnatH = 0;
+  const DIA_ALT = {
+    today: 'AWS architecture, today: supplier email and bank-detail changes land in a shared inbox, a clerk keys them into the ERP and the bank portal, a maker and checker approve, batch ACH or wire pays, and a spreadsheet reconciles the statement.',
+    y1: 'AWS architecture, year one: the agent proposes a payout, one thin adapter checks the mandate, runs the payee guard and the release matrix, a checker app releases outside the matrix, and the bank connector sends over the bank API you already use to ACH, RTP or wire.',
+    target: 'AWS architecture, target state: agent runtime and policy gateway in the agent account, payment API, mandate check, payee registry and guard, release matrix and workflow in the payment core account, rail adapter and egress in the rail VPC, evidence and trail in the log archive account, and the checker app in the checker account.',
+    gen: 'Generic architecture, target state: agent host and gateway, payment API, mandate check, payee registry and rule service, policy engine and workflow engine, rail adapter and one exit, write-once evidence and audit trail, and a checker app, across core, log and checker accounts.',
+  };
+  const dscroll = diaBox ? diaBox.querySelector('.pdd-ar3-dscroll') : null;
+  const dfit = () => (dnat && dscroll ? Math.max(0.02, (dscroll.clientWidth - 2) / dnat) : 1);
+  const diaZoom = (fx, fy) => {
+    if (!diaImg || !dscroll) return;
+    if (!dnat) { diaImg.style.width = '100%'; return; }
+    const w0 = Math.max(1, diaImg.clientWidth), h0 = Math.max(1, diaImg.clientHeight);
+    if (fx == null) fx = (dscroll.scrollLeft + dscroll.clientWidth / 2) / w0;
+    if (fy == null) fy = (dscroll.scrollTop + dscroll.clientHeight / 2) / h0;
+    const w = Math.round(dnat * dz), h = Math.round(w * dnatH / dnat);
+    diaImg.style.width = w + 'px';
+    dscroll.scrollLeft = Math.max(0, fx * w - dscroll.clientWidth / 2);
+    dscroll.scrollTop = Math.max(0, fy * h - dscroll.clientHeight / 2);
+  };
+  const diaLoaded = () => { dnat = diaImg.naturalWidth || 0; dnatH = diaImg.naturalHeight || 0; dz = 1; diaZoom(1 / 3, 0.5); };
+  if (dscroll) {
+    let drag = null;
+    dscroll.addEventListener('pointerdown', (e) => { if (e.pointerType !== 'mouse' || e.button !== 0) return; drag = { x: e.clientX, y: e.clientY, l: dscroll.scrollLeft, t: dscroll.scrollTop }; dscroll.classList.add('is-drag'); try { dscroll.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ } e.preventDefault(); });
+    dscroll.addEventListener('pointermove', (e) => { if (!drag) return; dscroll.scrollLeft = drag.l - (e.clientX - drag.x); dscroll.scrollTop = drag.t - (e.clientY - drag.y); });
+    const endDrag = () => { drag = null; dscroll.classList.remove('is-drag'); };
+    dscroll.addEventListener('pointerup', endDrag); dscroll.addEventListener('pointercancel', endDrag);
+    const fitBtn = diaBox.querySelector('button[data-dz="reset"]'); if (fitBtn) { fitBtn.textContent = 'Fit'; fitBtn.setAttribute('aria-label', 'Fit the diagram to the panel'); }
+  }
   function syncChrome() {
     if (fullA) fullA.href = fullHref();
     ar.dataset.cloud = view === 'gen' ? 'generic' : 'aws';
     simpleCloud();
-    if (diaImg && mode === 'diagram') { const h = fullHref().replace(/\.svg$/, '.png'); if (diaImg.getAttribute('src') !== h) { dz = 1; diaZoom(); diaImg.src = h; diaImg.alt = 'The draw.io diagram for ' + (state === 'today' ? 'Today' : state === 'y1' ? 'Year 1' : 'Target, ' + (view === 'aws' ? 'AWS' : 'generic')) + '. Full size opens it in a new tab.'; } }
+    if (diaBox && mode === 'diagram') {
+      const h = fullHref();
+      if (!diaImg && h) {
+        diaImg = document.createElement('img'); diaImg.className = 'pdd-ar3-dimg'; diaImg.decoding = 'async'; diaImg.alt = ''; diaImg.draggable = false;
+        diaImg.addEventListener('load', diaLoaded);
+        diaImg.addEventListener('error', () => { const s = diaImg.getAttribute('src') || ''; if (/\.svg$/.test(s)) diaImg.src = s.replace(/\.svg$/, '.png'); });
+        dscroll.appendChild(diaImg);
+      }
+      if (diaImg && h && diaImg.dataset.want !== h) { diaImg.dataset.want = h; dnat = 0; dz = 1; diaImg.src = h; diaImg.alt = DIA_ALT[state === 'target' ? (view === 'aws' ? 'target' : 'gen') : state] + ' Drag to pan, or open Full size in a new tab.'; }
+    }
     if (M.ready) M.svg.setAttribute('aria-label', state === 'today' ? 'Today, the manual payout desk' : state === 'y1' ? 'Year 1, the thin adapter' : 'Target platform, ' + (view === 'aws' ? 'AWS view' : 'generic view'));
   }
   // pick a state: from the toggle (pdd:set), from Build it, or from the address
@@ -2148,11 +2282,11 @@
     mapBox.hidden = m !== 'full';
     if (diaBox) diaBox.hidden = m !== 'diagram';
     if (m === 'full') { mapInit(); syncChrome(); mapRender(true); }
-    if (m === 'diagram') { dz = 1; diaZoom(); syncChrome(); }
+    if (m === 'diagram') { syncChrome(); if (dnat) { dz = 1; diaZoom(1 / 3, 0.5); } }
   }
   fmBtn.addEventListener('click', () => setMode(mode === 'full' ? 'simple' : 'full'));
   if (dgBtn) dgBtn.addEventListener('click', () => setMode(mode === 'diagram' ? 'simple' : 'diagram'));
-  if (diaBox) diaBox.querySelectorAll('button[data-dz]').forEach((b) => b.addEventListener('click', () => { const k = b.dataset.dz; dz = k === 'in' ? Math.min(6, dz * 1.5) : k === 'out' ? Math.max(1, dz / 1.5) : 1; diaZoom(); }));
+  if (diaBox) diaBox.querySelectorAll('button[data-dz]').forEach((b) => b.addEventListener('click', () => { const k = b.dataset.dz; dz = k === 'in' ? Math.min(3, dz * 1.4) : k === 'out' ? Math.max(dfit(), dz / 1.4) : dfit(); diaZoom(); }));
   // the scene tab leaving Architecture pauses a running story
   if (scene) scene.addEventListener('pdd:set', (e) => { if (e.detail && e.detail.key === 'tab' && e.detail.value !== 'arch' && playing && !paused) { paused = true; syncPlay(); } });
   // an opened drawer lights its node on the map
@@ -2165,8 +2299,8 @@
   }));
   if ('ResizeObserver' in window) new ResizeObserver(() => { S.resize(); applyZoom(); }).observe(ar);
   syncChrome(); S.layers(); setNow('i', intro(), true); renderProgress();
-  // r35 close-out: the full map is the default view from 760px up. Phones keep the simple view.
-  if (fitOk()) setMode('full');
+  // r37: Architecture opens on the simple view at every width. Full map is one click away, and its legend drawer is open so it reads at 1440 in fit mode.
+  const legd = q('.pdd-ar3-legd'); if (legd) legd.open = true;
   ar.classList.add('is-ready');
   window.__pddArch = { state: () => state, mode: () => mode, setMode, setStory: (k) => { story = k; chipBtns.forEach((c) => c.setAttribute('aria-pressed', String(c.dataset.k === k))); }, runStory, playing: () => playing, pick: (v) => pickArch(v) };
   // the verdict path links to the target design

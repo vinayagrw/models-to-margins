@@ -28,7 +28,6 @@ const deepDiveHook =
         subline:
           'Code owns money. Small models decide. Big models take the hard cases. APIs before screens. A person on anything you cannot undo.',
         model: 'Claude Opus 4.8, OSWorld-Verified vs OSWorld 2.0',
-        tag: 'verified 2026',
         bars: [
           { label: 'Short tasks', bench: 'OSWorld-Verified', value: 83.4 },
           { label: 'Long workflows', bench: 'OSWorld 2.0', value: 20.6 }
@@ -109,7 +108,7 @@ const heroLinks = [
                   <figure
                     class="hook-stat"
                     role="img"
-                    aria-label={`Claude Opus 4.8: ${panel.hook.bars.map((b) => `${b.label} ${b.value}% success on ${b.bench}`).join(', ')}. Evidence: ${panel.hook.tag}.`}
+                    aria-label={`Claude Opus 4.8: ${panel.hook.bars.map((b) => `${b.label} ${b.value}% success on ${b.bench}`).join(', ')}. `}
                   >
                     {panel.hook.bars.map((bar) => (
                       <div class="hook-bar" aria-hidden="true">
@@ -124,7 +123,7 @@ const heroLinks = [
                     ))}
                     <figcaption aria-hidden="true">
                       <span>{panel.hook.model}</span>
-                      <span class="hook-tag">{panel.hook.tag}</span>
+                      {panel.hook.tag && <span class="hook-tag">{panel.hook.tag}</span>}
                     </figcaption>
                   </figure>
                 </>

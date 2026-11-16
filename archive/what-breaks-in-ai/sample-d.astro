@@ -1,0 +1,57 @@
+---
+/* Sample D: the operations floor. The same compact header and note panel as the cinematic route,
+   then WhatBreaksFloor instead of the stage. Not indexed. The article at
+   /deep-dives/what-breaks-in-ai stays the canonical page. */
+import { getEntry, render } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import EntryMeta from '../../../components/EntryMeta.astro';
+import BackLink from '../../../components/BackLink.astro';
+import WhatBreaksFloor from '../../../components/deep-dive/WhatBreaksFloor.astro';
+
+const entry: any = await getEntry('deep-dives', 'what-breaks-in-ai');
+if (!entry) throw new Error('what-breaks-in-ai entry missing');
+const { Content } = await render(entry);
+const d = entry.data;
+const bpTitle = d.bpTitle ?? d.title;
+---
+
+<BaseLayout title={`${d.title}, sample D | Models to Margins`} description={d.summary} currentPath="/deep-dives">
+  <Fragment slot="head">
+    <meta name="robots" content="noindex" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet" />
+  </Fragment>
+
+  <article class="article-shell wb-page wbf-page">
+    <header class="wb-head">
+      <p class="wb-head-eyebrow">Deep Dive{d.bpEyebrow && ` · ${d.bpEyebrow}`}</p>
+      <h1>{bpTitle}</h1>
+      <p class="wb-head-summary">{d.summary}</p>
+      <div class="wb-head-foot">
+        <BackLink href="/deep-dives" label="Back to Deep Dives" />
+        <EntryMeta date={d.pubDate} primary={d.geography} readTime={d.readTime} extra={d.horizon} />
+      </div>
+      <div class="wb-note-wrap"><Content /></div>
+    </header>
+    <WhatBreaksFloor />
+  </article>
+</BaseLayout>
+
+<style is:global>
+  /* The compact header shell, the same rules as the cinematic branch of [slug].astro. */
+  .wb-page { max-width: 1240px; margin: 0 auto; padding: 16px 16px 32px; }
+  .wb-head { display: grid; gap: 14px; }
+  .wb-head-eyebrow { margin: 0; text-wrap: pretty; font: 600 14px/1.3 "IBM Plex Mono", ui-monospace, Menlo, monospace; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); }
+  .wb-head h1 { margin: 0; font-size: clamp(32px, 4.6vw, 56px); line-height: 1.05; letter-spacing: -.02em; text-wrap: balance; }
+  .wb-head-summary { margin: 0; max-width: 820px; font-size: 18px; line-height: 1.5; color: var(--muted); text-wrap: pretty; }
+  .wb-head-foot { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: center; }
+  .wb-head-foot .back-link { min-height: 44px; display: inline-flex; align-items: center; gap: 8px; }
+  .wb-page .meta-row .meta-pill, .wb-page .meta-row span { font-size: 14px; }
+  .wb-note-wrap .note-panel { display: grid; gap: 8px; padding: 16px 18px; border-radius: 14px; border: 1px solid var(--line); background: var(--surface-muted); margin: 0; }
+  .wb-note-wrap .note-panel p { margin: 0; font-size: 15px; line-height: 1.55; text-wrap: balance; }
+  .wb-note-wrap .wb-nw { white-space: nowrap; }
+  .wb-note-wrap .wb-ev { display: inline-flex; font: 600 14px/1.2 "IBM Plex Mono", ui-monospace, Menlo, monospace; padding: 3px 7px; border: 1.5px solid currentColor; border-radius: 6px; font-style: normal; vertical-align: middle; }
+  .wb-note-wrap .wb-ev.verified { color: #1f5e5a; } .wb-note-wrap .wb-ev.vendor { color: #7c2130; } .wb-note-wrap .wb-ev.illustrative { color: var(--muted); border-style: dashed; } .wb-note-wrap .wb-ev.design { color: #1e3a5f; border-style: dotted; }
+  [data-theme="dark"] .wb-note-wrap .wb-ev.verified { color: #7fd0c4; } [data-theme="dark"] .wb-note-wrap .wb-ev.vendor { color: #c79a45; } [data-theme="dark"] .wb-note-wrap .wb-ev.design { color: #86abdd; }
+</style>

@@ -63,23 +63,10 @@
 
 | Experience | Route | Format | What it demonstrates |
 |---|---|---|---|
-| Decide, Don't Chat | `/deep-dives/decide-dont-chat` | interactive deep dive (`ddc` and `dcr` kits) | Where each agent step should run: code owns money, small models decide, big models take the hard cases, APIs before screens, and a person signs anything you cannot undo. Featured on the home page |
-| When AI agents pay suppliers: the B2B payouts desk | `/deep-dives/agentic-payouts-desk` | interactive deep dive (`pdd` kit) | Six screens for three seats: where AI earns a place, how agent payments get built, the money path, a rail chooser and the rules timeline. Old payout URLs redirect here |
-| Which layer answers which question | `/deep-dives/knowledge-layer` | interactive deep dive (`klg` kit) | Opens on routing: four questions sent to the store that owns each one, a sorter of ten questions and six stores, a replay of three faults, cost and a store chooser |
-| The Margin Reckoning — AI-Led SDLC | `/briefs/ai-led-sdlc` | custom live brief | Kinetic ledger weighing AI output volume against stalled margin across an 8-scene governed SDLC, with a river-flow review gate and cost-of-inaction heat matrix |
-| Token Mission Control 2026 | `/briefs/token-optimization-2026` | custom live brief | Live atlas of token economics for agentic coding — context pruning, model routing, and budget controls that keep AI work from runaway spend |
-| Where AI Margin Actually Accrues | `/briefs/operator-grade-intelligence-engine` | custom live brief | Scroll-editorial operating board on why durable AI value sticks to proprietary data, workflow queues, and execution rails over thin copilots |
-| Private AI vs Public AI | `/briefs/private-ai-vs-public-ai` | custom live brief | Shared shell + live visual + decision framing in one page |
-| Governed Procurement AI | `/briefs/governed-procurement-ai` | custom live brief | Procurement command-center brief with governed execution and ROI framing |
-| AI for Corporate Clarity | `/briefs/ai-for-corporate-clarity` | custom live brief | Clarity board + stakeholder translation workflow for executive communication |
-| AI Playbook for a 10-Year-Old | `/deep-dives/ai-playbook-for-explaining-a-problem-to-a-10-year-old` | premium deep dive | Research-backed playbook for using AI to translate hard ideas into child-sized explanations without becoming a shortcut machine |
-| Future of Work Deep Dive | `/deep-dives/future-of-work-2026` | premium deep dive | Modern Markdown, semantic HTML, structured editorial design |
-| Harness Engineering Deep Dive | `/deep-dives/harness-engineering` | premium deep dive + slide-deck sub-route | Article-shell page with 10 inline interactive visuals; optional `/present` sub-route renders the same content as a single-viewport keyboard-navigable slide deck |
-| From Models to Margins — The Metric Chain | `/deep-dives/from-models-to-margins-metric-chain` | premium deep dive (bespoke Blueprint template) | Field-tested playbook on the five metric layers, four practices, and vanity traps for AI products, rendered in the bespoke `blueprint` template with 11 themed interactive visuals on a sticky scene spine |
-| Microservices vs Modular Monolith | `/deep-dives/microservices-vs-modular-monolith` | premium deep dive (bespoke Blueprint template) | Nine scenes of date-stamped evidence plus a statistics audit that replaces the maturity-ladder story with a forces-based decision framework |
-| The AI Ops Execution Layer | `/deep-dives/ai-ops-execution-layer` | premium deep dive (bespoke Console template) | Eight-scene capability atlas on AI that acts instead of reports, with a governed write path, an autonomy ladder, and a graded evidence refresh |
-| Loop Engineering | `/deep-dives/loop-engineering` | premium deep dive (bespoke Console template) | Sequel to Harness Engineering: ten visual-led scenes with 12 interactive instruments — era timeline, evidence board with a dated four-week self-evolving-harness ledger, failure lamps, and an adoption playbook |
-| The Customs Entry Agent | `/deep-dives/customs-entry-agent` | premium deep dive (bespoke Atlas template) | Visual-first solution architecture for agentic US customs filing: five chapters (problem, solution, end-to-end architecture, ROI, challenges) with 15 interactive figures. Three of them are stencils built from the shared `aws-stencil-diagram` engine — computed frame boxes, orthogonal connectors auto-routed through the corridors between boxes and collision-tested against every service box, packets riding the elbows in flow order, a step scrubber, per-node detail cards, pan, zoom and fullscreen: an entry-lifecycle stencil carrying four selectable journeys over one topology (repeat SKU, near neighbour, genuinely novel, and the rulebook-change loop that runs backwards), the full AWS reference architecture with official icons and nested Cloud/Region/VPC/subnet/account frames plus 18 numbered badges and two routes that do not exist by construction, and an integration map of ten external systems where every node's card carries transport, cadence, idempotency key and failure semantics. Alongside them: a persona user-flow swimlane, a playable rulebook-invalidation sweep, an append-only audit ledger, and an illustrative cost model with kill-criteria lamps |
+| When AI agents pay suppliers: the B2B payouts desk | `/deep-dives/agentic-payouts-desk` | interactive deep dive (Ledger template, `pdd` kit) | Six screens for three seats (finance buyer, product builder, strategy reader): the answer per seat, where AI earns a place, how agent payments get built, the money path, a rail chooser with a price ladder and a scenario player, and the rules timeline |
+
+> [!NOTE]
+> **Archive and redirects.** On 2026-10-24 every other page moved out of `src/` into `_archive/site-2026-10-24/` (`briefs/`, `deep-dives/`, `pages/`). The page once served at `/deep-dives/payouts-decision-desk` is now `/deep-dives/agentic-payouts-desk`. Every archived route, the old desk path included, redirects to `/deep-dives/agentic-payouts-desk` through the `redirects` map in `astro.config.mjs`, so old links still land on a live page. To bring a page back, move its file from the archive into `src/` and delete its redirect line.
 
 ## How It Works
 
@@ -110,24 +97,7 @@ flowchart LR
 | Home | `/` | `src/pages/index.astro` |
 | Briefs index | `/briefs` | `src/pages/briefs/index.astro` |
 | Deep Dives index | `/deep-dives` | `src/pages/deep-dives/index.astro` |
-| Custom live brief | `/briefs/ai-led-sdlc` | `src/pages/briefs/ai-led-sdlc.astro` |
-| Custom live brief | `/briefs/token-optimization-2026` | `src/pages/briefs/token-optimization-2026.astro` |
-| Custom live brief | `/briefs/operator-grade-intelligence-engine` | `src/pages/briefs/operator-grade-intelligence-engine.astro` |
-| Custom live brief | `/briefs/private-ai-vs-public-ai` | `src/pages/briefs/private-ai-vs-public-ai.astro` |
-| Custom live brief | `/briefs/governed-procurement-ai` | `src/pages/briefs/governed-procurement-ai.astro` |
-| Custom live brief | `/briefs/ai-for-corporate-clarity` | `src/pages/briefs/ai-for-corporate-clarity.astro` |
-| Premium deep dive | `/deep-dives/ai-playbook-for-explaining-a-problem-to-a-10-year-old` | `src/content/deep-dives/ai-playbook-for-explaining-a-problem-to-a-10-year-old.md` |
-| Premium deep dive | `/deep-dives/future-of-work-2026` | `src/content/deep-dives/future-of-work-2026.md` |
-| Premium deep dive | `/deep-dives/harness-engineering` | `src/content/deep-dives/harness-engineering.md` (article-shell, canonical) |
-| Slide-deck sub-route | `/deep-dives/harness-engineering/present` | `src/pages/deep-dives/harness-engineering/present.astro` (full-viewport slide deck of the same content) |
-| Premium deep dive | `/deep-dives/from-models-to-margins-metric-chain` | `src/content/deep-dives/from-models-to-margins-metric-chain.md` (bespoke `template: blueprint`) |
-| Premium deep dive | `/deep-dives/microservices-vs-modular-monolith` | `src/content/deep-dives/microservices-vs-modular-monolith.md` (bespoke `template: blueprint`) |
-| Premium deep dive | `/deep-dives/ai-ops-execution-layer` | `src/content/deep-dives/ai-ops-execution-layer.md` (bespoke `template: console`) |
-| Premium deep dive | `/deep-dives/loop-engineering` | `src/content/deep-dives/loop-engineering.md` (bespoke `template: console`) |
-| Premium deep dive | `/deep-dives/customs-entry-agent` | `src/content/deep-dives/customs-entry-agent.md` (bespoke `template: atlas`) |
-| Premium deep dive | `/deep-dives/ai-governance-before-roi` | `src/content/deep-dives/ai-governance-before-roi.md` (bespoke `template: boardroom`) |
-| Premium deep dive | `/deep-dives/automation-capex-air-pocket` | `src/content/deep-dives/automation-capex-air-pocket.md` (bespoke `template: gantry`) |
-| Premium deep dive | `/deep-dives/taiwan-incident-generalized` | `src/content/deep-dives/taiwan-incident-generalized.md` (bespoke `template: sitrep`) |
+| Interactive deep dive | `/deep-dives/agentic-payouts-desk` | `src/content/deep-dives/agentic-payouts-desk.md` (`template: ledger`, `pdd.css`, `pdd.js`). Source ledger: `docs/agentic-payouts-desk-sources.md` |
 | Hidden visitor analytics | `/admin/insights?key=…` | `src/pages/admin/insights.astro` + `public/scripts/insights*.js` (secret-gated, not linked from any public surface) |
 
 ### Content model
@@ -153,8 +123,9 @@ models-to-margins/
     styles/            Shared design system
   public/
     visuals/           Standalone HTML/SVG interactive experiences
-    scripts/           Client beacon, dashboard, spine scripts (blueprint, console, ledger, atlas)
-    styles/            Bespoke deep-dive stylesheets (blueprint, console, ledger, atlas)
+    scripts/           Client beacon, dashboard, spine scripts per template, page kits (mwf-story, maa, ami, sbp, pdd, aip, ppr)
+    styles/            Bespoke deep-dive stylesheets per template, page kit styles (mwf-story, maa, ami, sbp, pdd, aip, ppr)
+  scripts/             Repo tooling: layout-check.mjs (rendered layout gate)
   functions/           Analytics API handlers (imported by worker.js)
   test/                Node test suite for enrichment + storage
   docs/
@@ -228,15 +199,62 @@ For a deep dive that needs its own visual identity, opt in with a frontmatter `t
 |---|---|---|---|
 | `template: blueprint` | Paper-light drawing board with a sticky scene spine | `.dd-blueprint` + `public/styles/deep-dive-blueprint.css` + `public/scripts/spine-blueprint.js` | metric-chain, microservices-vs-modular-monolith |
 | `template: console` | Dark instrument panel with thesis lamps, master tiles, and a mission-brief block | `.dd-console` + `public/styles/deep-dive-console.css` + `public/scripts/spine-console.js` | loop-engineering, ai-ops-execution-layer |
-| `template: ledger` | Customs paper-of-record: manila bond paper with ruled ledger lines, an entry-form header, rubber-stamp verdict chips, and EXHIBIT bars (night-audit navy in dark) | `.dd-ledger` + `public/styles/deep-dive-ledger.css` + `public/scripts/spine-ledger.js` | none currently (built for customs-entry-agent, which moved to atlas) |
+| `template: ledger` | Customs paper-of-record: manila bond paper with ruled ledger lines, an entry-form header, rubber-stamp verdict chips, and EXHIBIT bars (night-audit navy in dark) | `.dd-ledger` + `public/styles/deep-dive-ledger.css` + `public/scripts/spine-ledger.js` | measured-workflow-factory, three-topics-priced, monetizing-ai-agents, agent-monetization-instrument, stablecoin-b2b-payouts, payouts-decision-desk |
 | `template: atlas` | Systems atlas / mission control: dark grid ground, no sidebar, a chapter rail that is a horizontal band up to 1640px and a vertical figure index beyond it, full-width FIG. frames, stat tiles, and signal-LED verdict chips (pale blueprint grey in light) | `.dd-atlas` + `public/styles/deep-dive-atlas.css` + `public/scripts/spine-atlas.js` | customs-entry-agent |
 | `template: boardroom` | Annual-report / proxy-statement filing: ivory stock with an oxblood rule and Fraunces display, a sticky agenda spine with dot leaders, Exhibit-plated figures (brass-on-graphite in dark) | `.dd-boardroom` + `public/styles/deep-dive-boardroom.css` + `public/scripts/spine-boardroom.js` | ai-governance-before-roi |
 | `template: gantry` | Loading-dock control board: concrete daylight surfaces with fill-only safety yellow and a numbered dock-door spine (D-01…) with a read-progress gauge, sodium-amber night shift in dark | `.dd-gantry` + `public/styles/deep-dive-gantry.css` + `public/scripts/spine-gantry.js` | automation-capex-air-pocket |
 | `template: sitrep` | After-action review binder: photocopied-report paper with an olive structural accent and a literal "Not an official record" cover cell, a phase-timeline spine, exhibit case-tab figures (ops-console dark), signal-red reserved for disputed/gap states only | `.dd-sitrep` + `public/styles/deep-dive-sitrep.css` + `public/scripts/spine-sitrep.js` | taiwan-incident-generalized |
-| `template: waybill` | Carbonless consignment note: pale green-white NCR stock with a perforated tear strip, condensed uppercase headings and red carbon impressions, dock-office slate in dark. Signature element is the custody chain, one row per handoff | `.dd-waybill` + `public/styles/deep-dive-waybill.css` + `public/scripts/spine-waybill.js` | candidate-waybill *(prototype)* |
+| `template: waybill` | Carbonless consignment note: pale green-white NCR stock with a perforated tear strip, condensed uppercase headings and red carbon impressions, dock-office slate in dark. Signature element is the custody chain, one row per handoff | `.dd-waybill` + `public/styles/deep-dive-waybill.css` + `public/scripts/spine-waybill.js` | private-vs-public-ai-architecture |
 | `template: tower` | Operations control room: instrument grid on cool paper-grey, cyan live accent, status lamps with owner and clock columns, near-black night tower in dark. Signature element is the control row, lamp plus owner plus clock | `.dd-tower` + `public/styles/deep-dive-tower.css` + `public/scripts/spine-tower.js` | candidate-tower *(prototype)* |
 
 New bespoke looks add a `template:` value, a branch in `[slug].astro`, and scoped CSS/JS under a fresh `.dd-<name>` namespace. House-style note: prose in these templates uses no semicolons or em-dashes (scene headings keep their em-dash because the reading-map anchors depend on the slug).
+
+#### Interactive pages on the ledger template (page kits)
+
+The most recent deep dives are interactive instruments: one question per screen, one large visual, a reader switch, and evidence chips that open the source. They use `template: ledger` and carry their own prefixed kit:
+
+| Kit | Files | Used by |
+|---|---|---|
+| `mwf-` | `public/styles/mwf-story.css`, `public/scripts/mwf-story.js` | measured-workflow-factory |
+| `maa-` | `public/styles/maa.css`, `public/scripts/maa.js` | monetizing-ai-agents |
+| `ami-` | `public/styles/ami.css`, `public/scripts/ami.js` | agent-monetization-instrument |
+| `sbp-` | `public/styles/sbp.css`, `public/scripts/sbp.js` | stablecoin-b2b-payouts |
+| `pdd-` | `public/styles/pdd.css`, `public/scripts/pdd.js` | agentic-payouts-desk (live) |
+| `aip-` | `public/styles/aip.css`, `public/scripts/aip.js` | ai-in-one-payout |
+| `ppr-` | `public/styles/ppr.css`, `public/scripts/ppr.js` | payouts-replay |
+
+Rules for these pages:
+
+- The Markdown file is raw HTML inside the ledger shell. It is assembled from per-screen fragments (html, css, js), so edit the kit files and the content file together.
+- Every number, date and company fact carries a hidden `data-src` key tied to a source that was opened. Sources never show on the page. On the payouts desk the keys resolve in `docs/agentic-payouts-desk-sources.md`. Anything else is labelled Vendor, Illustration or Our arithmetic, and our own view is drawn as an amber highlight rather than a tag.
+- From `pdd-` onward, pages use one shared 12-column grid (`.pdd-grid`, `.pdd-c3` to `.pdd-c9`), equal-height cards and drawers for detail, and must pass the layout gate below.
+
+#### Layout gate
+
+`scripts/layout-check.mjs` renders a page in headless Chrome and fails on measured layout faults. Run it against the dev server before calling any page done:
+
+```bash
+npm run check:layout -- /deep-dives/agentic-payouts-desk --root=.pdd "--scene=section[id^=pdd-]" --readers=buyer,builder,strategy
+```
+
+Pages with interactive states (a stepper, tabs) pass every state, not only the first. `--states` adds URL hash parts, joined to the reader, and runs the full set once per state. On the payouts desk each build tab, each architecture stage and rail view B open from a deep link. The full payouts run is one script:
+
+```bash
+npm run check:layout:payouts
+```
+
+Owner-approved exceptions live in `scripts/layout-allow.json`, keyed by page path, each with a reason. The gate applies them for every caller and prints them at the top of the run, so no flag is typed by hand. Today there is one: the payouts Architecture screen may reach 1.9 viewports at 1440, because the owner chose a full map that fits its panel with no inner scroll. `--scene-allow` on the command line overrides the file.
+
+It runs at 375, 1024 and 1440 wide in light and dark, once per reader.
+
+| Fault | Fails when |
+|---|---|
+| Line breaks | Last line of a heading or label under 20% of its box. A label under 8 words on 3 or more lines. A word broken mid-word. Headings without `text-wrap: balance`. A line that starts with a full stop or comma |
+| Empty space | A panel over 220px tall with more than 35% empty at the bottom or right. Content under 60% of the width at 1024 and above. Cards in a row more than 25% apart in height |
+| Length | A screen over 1.5 viewports at 1440, 2.5 at 1024 or 4 at 375. A page over 9, 14 or 22 viewports. More than 1,800 visible words per reader |
+| Crowding | Text within 8px of an edge. Overlapping text. Tap targets under 42px. Text under 14px. Sideways overflow |
+
+Flags: `--only=<scene id>`, `--widths=`, `--themes=`, `--json=out.json`, `--shots=<dir>` for outlined screenshots, `--budget-words=`.
 
 #### Optional slide-deck sub-route
 
@@ -289,6 +307,8 @@ npm run build
 npm run preview
 npm run check
 npm test          # node --test: analytics enrichment + storage suites
+npm run check:layout -- <path>   # rendered layout gate, needs the dev server running
+npm run check:layout:payouts     # the full payouts desk gate, every reader and state
 ```
 
 Visibility and discovery docs:
@@ -305,9 +325,7 @@ This repo deploys as a Cloudflare **Worker with Static Assets** (served on `*.wo
 | Entry point | `main = "worker.js"` in `wrangler.toml` |
 | Static assets | `[assets] directory = "./dist"`, binding `ASSETS` |
 | KV | `ANALYTICS` namespace binding (persistent visitor events) |
-| Normal deploy | Push to `main`. The Cloudflare build connected to this repo builds and deploys it |
-| Manual fallback | `npm run build` then `npx wrangler deploy` |
-| Layout gate | `npm run check:layout -- <url> --readers=buyer,builder,strategy`, and `npm run check:layout:payouts` for the payouts desk |
+| Build + deploy | `npm run build` then `npx wrangler deploy` |
 
 > [!WARNING]
 > Do not add `pages_build_output_dir` to `wrangler.toml` or deploy this repo through the Pages pipeline — the `/api/*` routes live in `worker.js`, and a Pages deploy would silently drop them.

@@ -1,0 +1,267 @@
+<section class="acx-scene" id="acx-s6" aria-labelledby="acx-s6-h">
+  <header class="acx-head"><span class="acx-num">06</span><h2 id="acx-s6-h">2026 to 2030</h2>
+    <p class="acx-dek" data-for="leader">Four ways this could go. Pick a year and a world.</p>
+    <p class="acx-dek" data-for="architect">Four scenarios with kill tests. Pick a year and a world.</p>
+  </header>
+  <div class="acx-split s6-split">
+    <div class="acx-card s6-map">
+      <div class="s6-grid">
+        <div class="s6-hrow"><span class="s6-corner"></span></div>
+        <div class="s6-rows"></div>
+      </div>
+      <div class="s6-legend" aria-hidden="true"></div>
+    </div>
+    <aside class="acx-card acx-panel s6-panel" aria-live="polite"><div class="s6-stack"></div></aside>
+  </div>
+  <div class="acx-card s6-fc">
+    <div class="s6-fch"><h3>Forecasts and incentives</h3></div>
+    <div class="s6-axis" aria-hidden="true"><span></span><div class="s6-ticks"></div><span></span></div>
+    <ol class="s6-frows"></ol>
+  </div>
+  <p class="s6-out"><a class="s6-link" href="/deep-dives/agentic-payouts-desk">B2B payouts have their own desk<span aria-hidden="true">&nbsp;&#8594;</span></a></p>
+</section>
+<style id="acx-s6-css">
+#acx-s6 .s6-map{container-type:inline-size; padding:12px 16px 16px; display:flex; flex-direction:column; gap:12px; min-width:0}
+#acx-s6 .s6-grid{--nc:200px; display:flex; flex-direction:column; gap:4px; flex:1}
+#acx-s6 .s6-rows{display:flex; flex-direction:column; gap:4px; flex:1}
+#acx-s6 .s6-row{flex:1}
+#acx-s6 .s6-hrow,#acx-s6 .s6-row{display:grid; grid-template-columns:var(--nc) repeat(var(--ny),minmax(0,1fr)); gap:4px}
+#acx-s6 .s6-hrow{align-items:end; margin-bottom:4px}
+#acx-s6 .s6-yb{min-height:42px; min-width:42px; padding:0 6px; border:0; border-radius:999px; background:var(--acx-sunk); cursor:pointer; font-family:var(--acx-mono); font-size:14px; font-weight:600; color:var(--acx-ink2)}
+#acx-s6 .s6-yb[aria-pressed="true"]{background:var(--acx-ink); color:var(--acx-bg)}
+#acx-s6 .s6-sb{display:flex; align-items:center; min-height:46px; padding:4px 10px; border:1px solid transparent; border-radius:var(--acx-r-sm); background:transparent; cursor:pointer; text-align:left; font-size:15px; font-weight:500; line-height:1.25; color:var(--acx-ink); text-wrap:balance}
+#acx-s6 .s6-sb[aria-pressed="true"]{border-color:var(--acx-accent); box-shadow:0 0 0 1px var(--acx-accent); font-weight:650}
+#acx-s6 .s6-yb:focus-visible,#acx-s6 .s6-sb:focus-visible,#acx-s6 .s6-link:focus-visible{outline:2px solid var(--acx-accent); outline-offset:2px}
+#acx-s6 .s6-c{position:relative; display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:5px; min-height:46px; padding:4px; border-radius:6px; background:var(--acx-bg2); border:1px solid var(--acx-line); transition:opacity .2s, background-color .2s}
+#acx-s6 .s6-c.is-yr{background:var(--acx-sunk); border-color:var(--acx-line2)}
+#acx-s6 .s6-row.is-sc .s6-c{border-color:var(--acx-accent)}
+#acx-s6 .s6-all{display:flex; align-items:center; padding:4px 10px; font-size:14px; color:var(--acx-ink3)}
+#acx-s6 .s6-row.is-all .s6-c{background:transparent; border-style:solid; border-color:var(--acx-line)}
+#acx-s6 .s6-c.is-later > *{opacity:.3}
+#acx-s6 .s6-dot{display:inline-block; width:12px; height:12px; border-radius:50%; flex:none}
+#acx-s6 .s6-dot[data-ev="verified"]{background:var(--acx-live)}
+#acx-s6 .s6-dot[data-ev="vendor"]{border:2.5px solid var(--acx-pilot)}
+#acx-s6 .s6-dot[data-ev="illustrative"]{border:2.5px solid var(--acx-spec)}
+#acx-s6 .s6-ms{display:inline-block; width:12px; height:12px; flex:none; transform:rotate(45deg); border-radius:2px; background:var(--acx-accent)}
+#acx-s6 .s6-legend{display:flex; flex-wrap:wrap; align-items:center; gap:6px 16px; font-size:14px; color:var(--acx-ink2)}
+#acx-s6 .s6-legend span{display:inline-flex; align-items:center; gap:7px}
+#acx-s6 .s6-legend .s6-lgk{color:var(--acx-ink3); margin-left:8px}
+#acx-s6 .acx-dek{text-wrap:balance}
+#acx-s6 .s6-yr{display:grid; flex:1}
+#acx-s6 .s6-yl{grid-area:1/1; visibility:hidden; display:flex; flex-direction:column; gap:8px}
+#acx-s6 .s6-d.is-on .s6-yl.is-on{visibility:visible}
+#acx-s6 .s6-yr .acx-k{font-family:var(--acx-mono); font-size:14px; color:var(--acx-ink3); text-transform:uppercase; letter-spacing:.05em}
+#acx-s6 .s6-sp{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px}
+#acx-s6 .s6-sp li{display:grid; grid-template-columns:12px 1fr; gap:4px 12px; align-items:baseline; font-size:14px; line-height:1.4; color:var(--acx-ink)}
+#acx-s6 .s6-sp{gap:6px}
+#acx-s6 .s6-sp li .s6-dot{transform:translateY(1px)}
+#acx-s6 .s6-spt{display:block; text-wrap:pretty}
+#acx-s6 .s6-spt .acx-ev{margin-left:6px}
+#acx-s6 .s6-spn{font-size:14px; color:var(--acx-ink3)}
+#acx-s6 .s6-panel{container-type:inline-size}
+#acx-s6 .s6-stack{display:grid; flex:1}
+#acx-s6 .s6-d{grid-area:1/1; visibility:hidden; display:flex; flex-direction:column; gap:10px}
+#acx-s6 .s6-d.is-on{visibility:visible}
+#acx-s6 .s6-dh{display:flex; align-items:center; gap:14px}
+#acx-s6 .acx-panel .s6-lead{font-size:16px; color:var(--acx-ink); text-wrap:balance; max-width:68ch}
+#acx-s6 .s6-by{display:flex; flex-direction:column; gap:6px; padding:10px 16px 12px; border-radius:var(--acx-r-sm); background:var(--acx-sunk)}
+#acx-s6 .s6-step{display:grid; grid-template-columns:repeat(var(--nk),1fr); position:relative}
+#acx-s6 .s6-step::before{content:""; position:absolute; left:calc(50% / var(--nk)); right:calc(50% / var(--nk)); top:6px; height:1px; background:var(--acx-line2)}
+#acx-s6 .s6-step span{position:relative; display:flex; flex-direction:column; align-items:center; gap:6px; font-family:var(--acx-mono); font-size:14px; color:var(--acx-ink3)}
+#acx-s6 .s6-step span::before{content:""; width:12px; height:12px; border-radius:2px; transform:rotate(45deg); background:var(--acx-sunk); border:2px solid var(--acx-ink3)}
+#acx-s6 .s6-step span.is-past::before{background:var(--acx-ink3)}
+#acx-s6 .s6-step span.is-on{color:var(--acx-ink); font-weight:600}
+#acx-s6 .s6-step span.is-on::before{background:var(--acx-accent); border-color:var(--acx-accent)}
+#acx-s6 .s6-byt{display:grid}
+#acx-s6 .s6-byt p{grid-area:1/1; visibility:hidden; font-size:18px; line-height:1.35; font-weight:500; color:var(--acx-ink); text-wrap:balance}
+#acx-s6 .s6-d.is-on .s6-byt p.is-on{visibility:visible}
+#acx-s6 .s6-sig{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px}
+#acx-s6 .acx-panel .s6-sig li{position:relative; padding-left:20px; color:var(--acx-ink)}
+#acx-s6 .s6-sig li::before{content:""; position:absolute; left:2px; top:.5em; width:8px; height:8px; border-radius:50%; border:2px solid var(--acx-accent2)}
+#acx-s6 .s6-fc{margin-top:var(--acx-gap); padding:14px 20px 10px; container-type:inline-size; display:flex; flex-direction:column; gap:6px}
+#acx-s6 .s6-fch{display:flex; flex-wrap:wrap; align-items:baseline; gap:4px 14px}
+#acx-s6 .s6-fch h3{font-size:20px; line-height:1.2}
+#acx-s6 .s6-axis,#acx-s6 .s6-fr{display:grid; grid-template-columns:minmax(0,440px) minmax(0,1fr) minmax(0,210px); gap:6px 20px; align-items:center}
+#acx-s6 .s6-ticks,#acx-s6 .s6-tr{position:relative; height:24px}
+#acx-s6 .s6-ticks span{position:absolute; top:0; transform:translateX(-50%); font-family:var(--acx-mono); font-size:14px; color:var(--acx-ink3); white-space:nowrap}
+#acx-s6 .s6-frows{list-style:none; margin:0; padding:0; display:flex; flex-direction:column}
+#acx-s6 .s6-fr{padding:5px 0; border-top:1px solid var(--acx-line)}
+#acx-s6 .s6-who{display:flex; flex-direction:column; gap:1px; min-width:0}
+#acx-s6 .s6-who b{font-size:15px; font-weight:600; color:var(--acx-ink)}
+#acx-s6 .s6-who span{font-size:14px; color:var(--acx-ink3); text-wrap:pretty}
+#acx-s6 .s6-tr{height:28px}
+#acx-s6 .s6-tr .s6-g{position:absolute; top:0; bottom:0; width:1px; background:var(--acx-line)}
+#acx-s6 .s6-tr .s6-bar{position:absolute; top:10px; height:8px; min-width:8px; border-radius:4px; background:var(--acx-accent)}
+#acx-s6 .s6-tr .s6-wash{position:absolute; top:10px; height:8px; border-radius:4px; background:color-mix(in srgb, var(--acx-accent) 20%, transparent)}
+#acx-s6 .s6-tr .s6-pt{position:absolute; top:7px; width:14px; height:14px; margin-left:-7px; border-radius:50%; background:var(--acx-accent); box-shadow:0 0 0 2px var(--acx-panel)}
+#acx-s6 .s6-val{display:flex; flex-wrap:wrap; align-items:baseline; gap:2px 10px; font-family:var(--acx-mono); font-size:14px; color:var(--acx-ink)}
+#acx-s6 .s6-val .s6-yrv{color:var(--acx-ink3)}
+#acx-s6 .s6-nw{white-space:nowrap}
+#acx-s6 .s6-out{margin-top:6px; display:flex; justify-content:flex-end}
+#acx-s6 .s6-link{display:inline-flex; align-items:center; min-height:42px; padding:0 4px; font-size:15px; font-weight:600; color:var(--acx-accent); text-decoration:none; border-bottom:1px solid transparent}
+#acx-s6 .s6-link:hover{text-decoration:underline; text-underline-offset:4px}
+@container (max-width:380px){ #acx-s6 .s6-dh{flex-direction:column; align-items:flex-start; gap:8px} #acx-s6 .s6-byt p{font-size:16px} #acx-s6 .s6-by{padding:12px 12px} }
+@container (max-width:440px){
+  #acx-s6 .s6-hrow,#acx-s6 .s6-row{grid-template-columns:repeat(var(--ny),minmax(0,1fr))}
+  #acx-s6 .s6-corner{display:none}
+  #acx-s6 .s6-row .s6-sb,#acx-s6 .s6-row .s6-all{grid-column:1/-1; min-height:42px}
+  #acx-s6 .s6-c{min-height:40px}
+}
+@container (max-width:440px){ #acx-s6 .s6-yl{display:none} #acx-s6 .s6-yl.is-on{display:flex} }
+@container (max-width:1000px){
+  #acx-s6 .s6-axis,#acx-s6 .s6-fr{grid-template-columns:minmax(0,280px) minmax(0,1fr) minmax(0,180px)}
+}
+@container (max-width:700px){
+  #acx-s6 .s6-axis,#acx-s6 .s6-fr{grid-template-columns:minmax(0,1fr)}
+  #acx-s6 .s6-axis > span{display:none}
+  #acx-s6 .s6-fr{gap:6px}
+}
+@media (max-width:1200px){ #acx-s6 .s6-grid{--nc:160px} }
+@media (max-width:640px){ #acx-s6 .s6-map{padding:12px 8px 14px} #acx-s6 .s6-legend,#acx-s6 .s6-yr{padding-left:6px; padding-right:6px} #acx-s6 .s6-out{justify-content:flex-start} }
+</style>
+<script>ACX.scene('s6', function (el, A) {
+  var esc = A.esc, D = A.data || {};
+  var SC = (D.scenarios || []).filter(function (s) { return s && s.id; });
+  var SP = (D.signposts || []).filter(function (s) { return s && s.yr; });
+  var FC = (D.forecasts || []).filter(function (f) { return f && f.author; });
+  function kind(t) { return /^vendor/i.test(t || '') ? 'vendor' : (/^illus/i.test(t || '') ? 'illustrative' : 'verified'); }
+  var yrs = [];
+  SP.forEach(function (s) { yrs.push(Number(s.yr)); });
+  SC.forEach(function (s) { Object.keys(s.by || {}).forEach(function (k) { yrs.push(Number(k)); }); });
+  yrs = yrs.filter(function (y) { return y > 1999; });
+  var Y0 = Math.min.apply(null, yrs), Y1 = Math.max.apply(null, yrs), YEARS = [];
+  for (var y = Y0; y <= Y1; y++) YEARS.push(y);
+  var grid = el.querySelector('.s6-grid');
+  grid.style.setProperty('--ny', YEARS.length);
+
+  el.querySelector('.s6-hrow').insertAdjacentHTML('beforeend', YEARS.map(function (y) {
+    return '<button type="button" class="s6-yb" data-yr="' + y + '" aria-pressed="false">' + y + '</button>';
+  }).join(''));
+  el.querySelector('.s6-rows').innerHTML = SC.map(function (s) {
+    var cells = YEARS.map(function (y) {
+      var dots = SP.filter(function (p) { return p.scenario === s.id && Number(p.yr) === y; }).map(function (p) { return '<i class="s6-dot" data-ev="' + kind(p.ev) + '"></i>'; }).join('');
+      var ms = (s.by || {})[y] ? '<i class="s6-ms"></i>' : '';
+      return '<span class="s6-c" data-yr="' + y + '" aria-hidden="true">' + ms + dots + '</span>';
+    }).join('');
+    return '<div class="s6-row" data-sc="' + esc(s.id) + '"><button type="button" class="s6-sb" data-sc="' + esc(s.id) + '" aria-pressed="false">' + esc(s.name) + '</button>' + cells + '</div>';
+  }).join('');
+  var known = {}; SC.forEach(function (s) { known[s.id] = 1; });
+  function shared(p) { return !known[p.scenario]; }
+  if (SP.some(shared)) {
+    el.querySelector('.s6-rows').insertAdjacentHTML('beforeend', '<div class="s6-row is-all"><span class="s6-all">All worlds</span>' + YEARS.map(function (y) {
+      return '<span class="s6-c" data-yr="' + y + '" aria-hidden="true">' + SP.filter(function (p) { return shared(p) && Number(p.yr) === y; }).map(function (p) { return '<i class="s6-dot" data-ev="' + kind(p.ev) + '"></i>'; }).join('') + '</span>';
+    }).join('') + '</div>');
+  }
+  var evs = {}; SP.forEach(function (p) { evs[kind(p.ev)] = 1; });
+  el.querySelector('.s6-legend').innerHTML = '<span><i class="s6-ms"></i>Milestone</span>' +
+    ['verified', 'vendor', 'illustrative'].filter(function (k) { return evs[k]; }).map(function (k) {
+      return '<span><i class="s6-dot" data-ev="' + k + '"></i>' + (k === 'verified' ? 'Verified' : k === 'vendor' ? 'Vendor' : 'Illustrative') + '</span>';
+    }).join('');
+
+  // scenario drawers: the end state by the chosen year sits in a fixed box
+  el.querySelector('.s6-stack').innerHTML = SC.map(function (s, i) {
+    var keys = Object.keys(s.by || {}).map(Number).sort(function (a, b) { return a - b; });
+    var step = keys.map(function (k) { return '<span data-k="' + k + '">' + k + '</span>'; }).join('');
+    var txt = keys.map(function (k) { return '<p data-k="' + k + '">' + esc(s.by[k]) + '</p>'; }).join('');
+    return '<div class="s6-d" data-sc="' + esc(s.id) + '">' +
+      '<div class="s6-dh">' + A.icon(s.icon || 'i-roadmap', s.tone || 'teal', 'hero') + '<h3>' + esc(s.name) + '</h3></div>' +
+      (s.one ? '<p class="s6-lead" data-for="leader">' + esc(s.one) + '</p>' : '') +
+      (s.arch ? '<p class="s6-lead" data-for="architect">' + esc(s.arch) + '</p>' : '') +
+      (keys.length ? '<div class="s6-by"><p class="acx-k s6-byk"></p><div class="s6-byt">' + txt + '</div><div class="s6-step" style="--nk:' + keys.length + '" aria-hidden="true">' + step + '</div></div>' : '') +
+      '<div class="s6-yr">' + YEARS.map(function (yv) {
+        var own = SP.filter(function (p) { return Number(p.yr) === yv && p.scenario === s.id; });
+        var all = SP.filter(function (p) { return Number(p.yr) === yv && shared(p); });
+        function li(p) {
+          // the tag rides with the last word so it never sits alone on a line
+          var t = String(p.text || ''), k = t.lastIndexOf(' '), head = k > 0 ? t.slice(0, k + 1) : '', tail = k > 0 ? t.slice(k + 1) : t;
+          return '<li><i class="s6-dot" data-ev="' + kind(p.ev) + '" aria-hidden="true"></i><span class="s6-spt">' + esc(head) + '<span class="s6-nw">' + esc(tail) + (p.ev ? ' ' + A.ev(p.ev) : '') + '</span></span></li>';
+        }
+        return '<div class="s6-yl" data-yr="' + yv + '"><p class="acx-k">' + yv + ' signposts</p>' +
+          (own.length ? '<ul class="s6-sp">' + own.map(li).join('') + '</ul>' : '') +
+          (all.length ? '<p class="s6-spn">All worlds</p><ul class="s6-sp">' + all.map(li).join('') + '</ul>' : '') +
+          (own.length || all.length ? '' : '<p class="s6-spn">None dated this year</p>') + '</div>';
+      }).join('') + '</div>' +
+      '</div>';
+  }).join('');
+
+  // forecasts: read the range text into numbers so each one plots on a shared log axis
+  var MUL = { million: 1e6, billion: 1e9, trillion: 1e12 };
+  function parse(f) {
+    // structured fields win when the data carries them
+    if (f.lo != null || f.hi != null) return { segs: [{ lo: f.lo == null ? null : Number(f.lo), hi: f.hi == null ? null : Number(f.hi), geo: f.geo || '' }], yr: f.yr ? String(f.yr) : '' };
+    var str = String(f.range || ''), segs = [], m;
+    var re = /(up to|more than)?\s*(\d+(?:\.\d+)?)(?:\s+to\s+(\d+(?:\.\d+)?))?\s+(million|billion|trillion)\s+USD(?:\s+(US|global))?(?:\s+in\s+(\d{4}))?/gi;
+    while ((m = re.exec(str))) {
+      if (m[6]) continue; // a base year figure, not the forecast
+      var k = MUL[m[4].toLowerCase()], a = parseFloat(m[2]) * k, b = m[3] ? parseFloat(m[3]) * k : null, q = (m[1] || '').toLowerCase();
+      segs.push(q === 'up to' ? { lo: null, hi: a, geo: m[5] || '' } : q === 'more than' ? { lo: a, hi: null, geo: m[5] || '' } : { lo: a, hi: b == null ? a : b, geo: m[5] || '' });
+    }
+    var yy = str.match(/by (\d{4})/i);
+    return { segs: segs, yr: yy ? yy[1] : '' };
+  }
+  function cv(v) { var t = v >= 1e12 ? [v / 1e12, 'T'] : v >= 1e9 ? [v / 1e9, 'B'] : [v / 1e6, 'M']; return String(+t[0].toFixed(2)) + t[1]; }
+  function geo(f, g) { if (g) return /^us$/i.test(g) ? 'US' : String(g).toLowerCase(); var sc = String(f.scope || ''); return /\bUS\b/.test(sc) ? 'US' : (/global/i.test(sc) ? 'global' : ''); }
+  var rows = FC.map(function (f) { var p = parse(f); var vals = []; p.segs.forEach(function (s) { if (s.lo) vals.push(s.lo); if (s.hi) vals.push(s.hi); }); return { f: f, p: p, top: vals.length ? Math.max.apply(null, vals) : 0, vals: vals }; });
+  var allv = []; rows.forEach(function (r) { allv = allv.concat(r.vals); });
+  var L0 = allv.length ? Math.floor(Math.log10(Math.min.apply(null, allv))) : 9;
+  var L1 = allv.length ? Math.log10(Math.max.apply(null, allv) * 3) : 13;
+  function x(v) { return Math.max(0, Math.min(100, (Math.log10(v) - L0) / (L1 - L0) * 100)); }
+  var ticks = []; for (var e = L0; e <= L1; e++) ticks.push(Math.pow(10, e));
+  var grids = ticks.map(function (t) { return '<i class="s6-g" style="left:' + x(t).toFixed(2) + '%"></i>'; }).join('');
+  el.querySelector('.s6-ticks').innerHTML = ticks.map(function (t, i) {
+    var pos = x(t), al = i === 0 ? 'translateX(0)' : (pos > 96 ? 'translateX(-100%)' : 'translateX(-50%)');
+    return '<span style="left:' + pos.toFixed(2) + '%;transform:' + al + '">' + cv(t) + '</span>';
+  }).join('');
+  rows.sort(function (a, b) { return b.top - a.top; });
+  // one evidence tag for the chart when every forecast shares it, else one per row
+  var oneEv = FC.length && FC.every(function (f) { return f.ev && f.ev === FC[0].ev; }) ? FC[0].ev : '';
+  if (oneEv) el.querySelector('.s6-fch').insertAdjacentHTML('beforeend', A.ev(oneEv));
+  el.querySelector('.s6-frows').innerHTML = rows.map(function (r) {
+    var f = r.f, marks = '', lab = [];
+    r.p.segs.forEach(function (s) {
+      var g = geo(f, s.geo);
+      if (s.lo == null) { marks += '<i class="s6-wash" style="left:0;width:' + x(s.hi).toFixed(2) + '%"></i><i class="s6-pt" style="left:' + x(s.hi).toFixed(2) + '%"></i>'; lab.push('Up to ' + cv(s.hi)); }
+      else if (s.hi == null) { marks += '<i class="s6-wash" style="left:' + x(s.lo).toFixed(2) + '%;right:0"></i><i class="s6-pt" style="left:' + x(s.lo).toFixed(2) + '%"></i>'; lab.push('Over ' + cv(s.lo)); }
+      else if (s.hi > s.lo) { marks += '<i class="s6-bar" style="left:' + x(s.lo).toFixed(2) + '%;width:' + (x(s.hi) - x(s.lo)).toFixed(2) + '%"></i>'; lab.push(cv(s.lo) + '–' + cv(s.hi)); }
+      else { marks += '<i class="s6-pt" style="left:' + x(s.lo).toFixed(2) + '%"></i>'; lab.push(cv(s.lo)); }
+      if (g) lab[lab.length - 1] += ' ' + g;
+    });
+    return '<li class="s6-fr" title="' + esc(f.range + '. ' + (f.scope || '')) + '">' +
+      '<span class="s6-who"><b>' + esc(f.author) + '</b>' + (f.incentive ? '<span>' + esc(f.incentive) + '</span>' : '') + '</span>' +
+      '<span class="s6-tr" role="img" aria-label="' + esc(f.range + ', ' + (f.scope || '')) + '">' + grids + marks + '</span>' +
+      '<span class="s6-val">' + (lab.length ? lab.map(function (l, i) { return '<span class="s6-nw">' + esc(l) + (i < lab.length - 1 ? ',' : '') + '</span>'; }).join('') : '<span>' + esc(f.range) + '</span>') + (r.p.yr ? '<span class="s6-yrv">' + esc(r.p.yr) + '</span>' : '') + (!oneEv && f.ev ? A.ev(f.ev) : '') + '</span>' +
+      '</li>';
+  }).join('');
+
+  var cur = { yr: YEARS[0], sc: SC[0] && SC[0].id };
+  var ybs = el.querySelectorAll('.s6-yb'), sbs = el.querySelectorAll('.s6-sb'), rowEls = el.querySelectorAll('.s6-row');
+  var cells = el.querySelectorAll('.s6-c'), drawers = el.querySelectorAll('.s6-d');
+  var names = {}; SC.forEach(function (s) { names[s.id] = s.name; });
+  var yls = el.querySelectorAll('.s6-yl');
+  function render() {
+    var yv = cur.yr;
+    ybs.forEach(function (b) { b.setAttribute('aria-pressed', String(Number(b.dataset.yr) === yv)); });
+    sbs.forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.sc === cur.sc)); });
+    rowEls.forEach(function (r) { r.classList.toggle('is-sc', r.dataset.sc === cur.sc); });
+    cells.forEach(function (c) { var cy = Number(c.dataset.yr); c.classList.toggle('is-yr', cy === yv); c.classList.toggle('is-later', cy > yv); });
+    yls.forEach(function (l) { l.classList.toggle('is-on', Number(l.dataset.yr) === yv); });
+    drawers.forEach(function (d) {
+      var on = d.dataset.sc === cur.sc; d.classList.toggle('is-on', on);
+      var ks = [].map.call(d.querySelectorAll('.s6-byt p'), function (p) { return Number(p.dataset.k); });
+      if (!ks.length) return;
+      var past = ks.filter(function (k) { return k <= yv; }), k = past.length ? past[past.length - 1] : ks[0];
+      d.querySelector('.s6-byk').textContent = 'By ' + k;
+      d.querySelectorAll('.s6-byt p').forEach(function (p) { p.classList.toggle('is-on', Number(p.dataset.k) === k); });
+      d.querySelectorAll('.s6-step span').forEach(function (s) { var sk = Number(s.dataset.k); s.className = sk === k ? 'is-on' : (sk < k ? 'is-past' : ''); });
+    });
+  }
+  function setYr(v) { var n = Number(v); cur.yr = YEARS.indexOf(n) >= 0 ? n : YEARS[0]; render(); }
+  function setSc(v) { cur.sc = names[v] ? v : (SC[0] && SC[0].id); render(); }
+  ybs.forEach(function (b) { b.addEventListener('click', function () { A.set('yr', b.dataset.yr); }); });
+  sbs.forEach(function (b) { b.addEventListener('click', function () { A.set('sc', b.dataset.sc); }); });
+  A.on('yr', setYr);
+  A.on('sc', setSc);
+  cur.yr = YEARS.indexOf(Number(A.get('yr'))) >= 0 ? Number(A.get('yr')) : YEARS[0];
+  cur.sc = names[A.get('sc')] ? A.get('sc') : (SC[0] && SC[0].id);
+  render();
+});</script>

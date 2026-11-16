@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ten building blocks</title>
+<script src="./_theme-bootstrap.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<link rel="stylesheet" href="./_theme.css">
+<style>
+.blocks{display:grid;gap:8px}
+.blk{background:var(--surface);border:1px solid var(--rule);border-radius:12px}
+.blk summary{list-style:none;display:grid;grid-template-columns:44px 210px minmax(0,1fr) 44px 28px;gap:14px;align-items:center;min-height:52px;padding:6px 14px;cursor:pointer}
+.blk summary::-webkit-details-marker{display:none}
+.blk summary::after{content:"+";font:600 20px/1 var(--mono);color:var(--muted);text-align:center}
+.blk[open] summary::after{content:"\2212"}
+.blk .id{font:500 14px/1 var(--mono);color:var(--muted)}
+.blk b{font-weight:600;line-height:1.25}
+.bar{height:14px;border-radius:7px;background:var(--off);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--new);border-radius:7px}
+.blk.top3 .bar i{background:var(--accent)}
+.cnt{font-size:20px;font-weight:700;text-align:right}
+.cov{display:flex;flex-wrap:wrap;gap:8px;padding:4px 14px 14px 72px}
+.cov span{font-size:14px;font-weight:500;background:var(--bg);border:1px solid var(--rule);border-radius:999px;padding:6px 10px}
+.cov span i{font:500 14px/1 var(--mono);font-style:normal;color:var(--muted);margin-right:6px}
+.note{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center}
+.key{display:inline-flex;align-items:center;gap:8px;font-size:14px;color:var(--muted)}
+.key i{width:28px;height:10px;border-radius:5px;background:var(--new)}
+.key.a i{background:var(--accent)}
+@media (max-width:700px){.blk summary{grid-template-columns:minmax(0,1fr) 40px 24px;row-gap:8px}.blk .id{display:none}.blk .bar{grid-column:1/-1;grid-row:2}.cov{padding-left:14px}}
+</style>
+</head>
+<body>
+<svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true"><defs>
+<linearGradient id="g-top" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#000"/></linearGradient>
+<linearGradient id="g-left" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".9"/><stop offset="1" stop-color="#fff" stop-opacity=".1"/></linearGradient>
+<linearGradient id="g-right" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#000" stop-opacity=".05"/><stop offset="1" stop-color="#000" stop-opacity=".35"/></linearGradient>
+<radialGradient id="g-shadow"><stop offset="0" stop-color="#000" stop-opacity=".35"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
+<mask id="m-top" maskContentUnits="userSpaceOnUse"><rect x="16" y="14" width="88" height="52" fill="url(#g-top)"/></mask>
+<linearGradient id="g-shine" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".35"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/></linearGradient>
+</defs></svg><main class="shell" id="blocks">
+  <div class="note"><span class="key a"><i></i>The four blocks that do most of the work</span><span class="key"><i></i>Other blocks</span><span class="tag">Open a block to see what it covers</span></div>
+  <div class="blocks"><details class="blk" id="P1"><summary><span class="id">P1</span><b>Check every claim</b><span class="bar" role="img" aria-label="4 of 24"><i style="width:16.7%"></i></span><span class="cnt">4</span></summary><div class="cov"><span><i>S1</i>Citation does not hold</span><span><i>S6</i>Snippets, not pages</span><span><i>S9</i>Memory beats search</span><span><i>F1</i>Confident wrong answers</span></div></details><details class="blk" id="P2"><summary><span class="id">P2</span><b>Source and date rules</b><span class="bar" role="img" aria-label="5 of 24"><i style="width:20.8%"></i></span><span class="cnt">5</span></summary><div class="cov"><span><i>S3</i>Stops too early</span><span><i>S4</i>Planted sources win</span><span><i>S5</i>Stale facts</span><span><i>S8</i>False premise</span><span><i>S9</i>Memory beats search</span></div></details><details class="blk" id="P3"><summary><span class="id">P3</span><b>Failure log</b><span class="bar" role="img" aria-label="3 of 24"><i style="width:12.5%"></i></span><span class="cnt">3</span></summary><div class="cov"><span><i>S2</i>Silent failure</span><span><i>S6</i>Snippets, not pages</span><span><i>S7</i>Blocked pages</span></div></details><details class="blk top3" id="P4"><summary><span class="id">P4</span><b>Agent fence</b><span class="bar" role="img" aria-label="5 of 24"><i style="width:20.8%"></i></span><span class="cnt">5</span></summary><div class="cov"><span><i>S10</i>Planted instructions</span><span><i>F2</i>Agents act wrongly</span><span><i>F4</i>Agent tools attacked</span><span><i>F9</i>Controls lag rollout</span><span><i>F11</i>Loses context</span></div></details><details class="blk" id="P5"><summary><span class="id">P5</span><b>One approved tool</b><span class="bar" role="img" aria-label="3 of 24"><i style="width:12.5%"></i></span><span class="cnt">3</span></summary><div class="cov"><span><i>F3</i>Data leaves your control</span><span><i>F9</i>Controls lag rollout</span><span><i>F14</i>Vendor lock-in</span></div></details><details class="blk top3" id="P6"><summary><span class="id">P6</span><b>Gateway, pinned models</b><span class="bar" role="img" aria-label="5 of 24"><i style="width:20.8%"></i></span><span class="cnt">5</span></summary><div class="cov"><span><i>F6</i>Models change</span><span><i>F7</i>Surprise usage caps</span><span><i>F12</i>Outages</span><span><i>F13</i>Misfiring safety filters</span><span><i>F14</i>Vendor lock-in</span></div></details><details class="blk top3" id="P7"><summary><span class="id">P7</span><b>Contract terms</b><span class="bar" role="img" aria-label="4 of 24"><i style="width:16.7%"></i></span><span class="cnt">4</span></summary><div class="cov"><span><i>F6</i>Models change</span><span><i>F7</i>Surprise usage caps</span><span><i>F12</i>Outages</span><span><i>F14</i>Vendor lock-in</span></div></details><details class="blk" id="P8"><summary><span class="id">P8</span><b>Value ledger</b><span class="bar" role="img" aria-label="3 of 24"><i style="width:12.5%"></i></span><span class="cnt">3</span></summary><div class="cov"><span><i>F5</i>Spend without return</span><span><i>F7</i>Surprise usage caps</span><span><i>F10</i>Review overload</span></div></details><details class="blk top3" id="P9"><summary><span class="id">P9</span><b>Named checkers</b><span class="bar" role="img" aria-label="7 of 24"><i style="width:29.2%"></i></span><span class="cnt">7</span></summary><div class="cov"><span><i>S1</i>Citation does not hold</span><span><i>S4</i>Planted sources win</span><span><i>S8</i>False premise</span><span><i>F1</i>Confident wrong answers</span><span><i>F2</i>Agents act wrongly</span><span><i>F8</i>Tells you what you want</span><span><i>F10</i>Review overload</span></div></details><details class="blk" id="P10"><summary><span class="id">P10</span><b>Your own test set</b><span class="bar" role="img" aria-label="24 of 24"><i style="width:100.0%"></i></span><span class="cnt">24</span></summary><div class="cov"><span>All 24 problems. It is how you prove the other fixes work.</span></div></details></div>
+</main>
+
+<script>
+/* Report content height so the host .visual-frame hugs the visual. */
+(() => {
+  const main = document.querySelector('main');
+  const post = () => {
+    if (document.documentElement.dataset.embedded !== 'true') return;
+    window.parent.postMessage({ type: 'm2m:frame-size', height: Math.ceil(main.getBoundingClientRect().height) }, '*');
+  };
+  new ResizeObserver(post).observe(main);
+  window.addEventListener('load', post);
+  if (document.fonts) document.fonts.ready.then(post);
+  window.m2mPostSize = post;
+})();
+</script>
+<script>
+const h=new URLSearchParams(location.hash.slice(1));const o=h.get("open");
+if(o){const el=document.getElementById(o);if(el&&el.tagName==="DETAILS")el.open=true;}
+document.querySelectorAll("details").forEach(dt=>dt.addEventListener("toggle",()=>window.m2mPostSize&&window.m2mPostSize()));
+</script>
+</body>
+</html>

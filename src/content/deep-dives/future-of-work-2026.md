@@ -3,7 +3,7 @@ title: Future of Work Deep Dive
 summary: An evidence-led decision dashboard ranking the top five job-creation arenas across three horizons, with explicit scoring, confidence, and source traceability.
 pubDate: 2026-04-13
 updatedDate: 2026-04-13
-featured: true
+featured: false
 listed: true
 geography: United States with clearly labeled global capital context
 horizon: 1 to 10 years

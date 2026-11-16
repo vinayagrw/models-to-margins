@@ -1,0 +1,1301 @@
+{
+  "path": {
+    "steps": [
+      {
+        "id": "ask",
+        "name": "Ask",
+        "ic": "i-analyst",
+        "block": "P5",
+        "leader": "Staff use one approved AI tool. Company data stays under its terms.",
+        "parts": [],
+        "options": [],
+        "std": ""
+      },
+      {
+        "id": "gate",
+        "name": "Gateway",
+        "ic": "i-gateway",
+        "block": "P6",
+        "leader": "Every call passes one gateway. It pins the model version, logs the call and stops spend at a cap.",
+        "parts": [],
+        "options": [],
+        "std": ""
+      },
+      {
+        "id": "read",
+        "name": "Read sources",
+        "ic": "i-network",
+        "block": "P2",
+        "leader": "The tool reads allowed sources, checks dates, and reads web pages in a model that cannot act.",
+        "parts": [],
+        "options": [],
+        "std": ""
+      },
+      {
+        "id": "act",
+        "name": "Agent acts",
+        "ic": "i-agent",
+        "block": "P4",
+        "leader": "An agent works with its own low-privilege login. Delete, deploy or pay needs a person to approve.",
+        "parts": [],
+        "options": [],
+        "std": ""
+      },
+      {
+        "id": "check",
+        "name": "Claim check",
+        "ic": "i-hcc-evidence",
+        "block": "P1",
+        "leader": "A separate checker ties each claim to a quoted sentence on a page it opened. Claims it cannot back are marked.",
+        "parts": [],
+        "options": [],
+        "std": ""
+      },
+      {
+        "id": "human",
+        "name": "Named checker",
+        "ic": "i-approve",
+        "block": "P9",
+        "leader": "For work that leaves the company, a named person opens the sources and figures before it is sent.",
+        "parts": [],
+        "options": [],
+        "std": ""
+      },
+      {
+        "id": "log",
+        "name": "Logged",
+        "ic": "i-monitor",
+        "block": "P3",
+        "leader": "Failures and cost land in the failure log and value ledger. Stop rules end what does not pay back.",
+        "parts": [],
+        "options": [],
+        "std": ""
+      }
+    ],
+    "always": [
+      {
+        "block": "P10",
+        "ic": "i-eval",
+        "name": "Your own test set",
+        "leader": "Runs before any model or setting change."
+      },
+      {
+        "block": "P7",
+        "ic": "i-policy-doc",
+        "name": "Contract terms",
+        "leader": "Notice before change, pay per result, full export."
+      }
+    ],
+    "plays": [
+      {
+        "id": "good",
+        "label": "A good answer",
+        "st": {},
+        "msg": "Every control passes. The answer leaves with its sources checked and the call logged."
+      },
+      {
+        "id": "planted",
+        "label": "A planted source",
+        "st": {
+          "read": "warn",
+          "check": "warn",
+          "human": "stop",
+          "act": "na"
+        },
+        "msg": "Source lists catch known bad sites, and the checker can tick a quote that sits on a planted page. The named checker is the net that stops it."
+      },
+      {
+        "id": "figure",
+        "label": "An unbacked figure",
+        "st": {
+          "check": "stop",
+          "act": "na"
+        },
+        "msg": "The claim check finds no sentence that backs the figure and marks it. It goes back to be fixed before anyone sees it."
+      },
+      {
+        "id": "overreach",
+        "label": "An agent overreach",
+        "st": {
+          "act": "stop"
+        },
+        "msg": "The agent tries to delete a production table. The fence asks a person to approve, and the action is refused and logged."
+      }
+    ]
+  },
+  "layers": [
+    {
+      "name": "People and money",
+      "blocks": [
+        "P9",
+        "P8",
+        "P3"
+      ]
+    },
+    {
+      "name": "Controls",
+      "blocks": [
+        "P1",
+        "P2",
+        "P4"
+      ]
+    },
+    {
+      "name": "Platform",
+      "blocks": [
+        "P5",
+        "P6",
+        "P10"
+      ]
+    },
+    {
+      "name": "Contracts",
+      "blocks": [
+        "P7"
+      ]
+    }
+  ],
+  "blocks": {
+    "P1": {
+      "name": "Check every claim",
+      "ic": "i-hcc-evidence",
+      "owner": "Architect",
+      "includes": "Claim checker, link check, cite only opened pages, grounding and citations switched on.",
+      "cost": "$20 to $13,930 a month",
+      "costev": "illustrative",
+      "options": [
+        {
+          "name": "AWS Bedrock Guardrails grounding check",
+          "what": "Scores each answer against its source and blocks it below a threshold you set.",
+          "ev": "vendor"
+        },
+        {
+          "name": "Google check grounding API",
+          "what": "Gives each sentence a support score and the source chunks behind it.",
+          "ev": "vendor"
+        },
+        {
+          "name": "Azure AI Content Safety groundedness",
+          "what": "Flags text the sources do not support, with an optional reason for each flag.",
+          "ev": "vendor"
+        },
+        {
+          "name": "NVIDIA NeMo Guardrails fact rails",
+          "what": "Open source rails that score an answer against retrieved text and refuse below a bar.",
+          "ev": "vendor"
+        },
+        {
+          "name": "Anthropic Citations",
+          "what": "Returns the exact source passage for each cited line. A separate checker is still needed.",
+          "ev": "vendor"
+        }
+      ],
+      "std": "NIST AI 600-1 MS-2.5-003 and MP-2.3-003. OWASP LLM09 Misinformation"
+    },
+    "P2": {
+      "name": "Source and date rules",
+      "ic": "i-rule-registry",
+      "owner": "Architect",
+      "includes": "Allow and block lists, source labels, today's date, expiry dates, a premise check.",
+      "cost": "",
+      "costev": "",
+      "options": [
+        {
+          "name": "Anthropic web search and fetch",
+          "what": "Allow or deny lists of domains, page age on each result, full page reads before citing.",
+          "ev": "vendor"
+        },
+        {
+          "name": "OpenAI web search tool",
+          "what": "Up to 100 allowed or blocked domains, with the full list of sources consulted.",
+          "ev": "vendor"
+        },
+        {
+          "name": "Google grounding with Search",
+          "what": "Excluded domains and a map from each part of the answer to its source.",
+          "ev": "vendor"
+        },
+        {
+          "name": "Perplexity search filters",
+          "what": "Allow or deny lists of up to 20 domains and a recency filter.",
+          "ev": "vendor"
+        }
+      ],
+      "std": "NIST AI 600-1 MS-2.5-003. OWASP LLM09 Misinformation"
+    },
+    "P3": {
+      "name": "Failure log",
+      "ic": "i-monitor",
+      "owner": "Evals lead",
+      "includes": "Records every failed search, block and cut, shows it first, and blocks reports with no source.",
+      "cost": "$0 to $411 a month",
+      "costev": "illustrative",
+      "options": [
+        {
+          "name": "OpenTelemetry GenAI conventions",
+          "what": "Shared field names for model, tokens and cost, so traces from any tool line up.",
+          "ev": "verified"
+        },
+        {
+          "name": "MCP trace context",
+          "what": "Carries one trace across the agent and every tool server it calls.",
+          "ev": "verified"
+        },
+        {
+          "name": "Langfuse",
+          "what": "Accepts OpenTelemetry traces and keeps datasets for replaying failures.",
+          "ev": "vendor"
+        },
+        {
+          "name": "Arize Phoenix",
+          "what": "Open tracing with versioned datasets for replaying failures.",
+          "ev": "vendor"
+        }
+      ],
+      "std": "OWASP Agentic ASI08 and ASI10. NCSC advice to log inputs, outputs and tool calls"
+    },
+    "P4": {
+      "name": "Agent fence",
+      "ic": "i-security",
+      "owner": "Security lead",
+      "includes": "Sandbox, own identity per agent, approval for risky actions, action log, register, tested off switch, isolated reader.",
+      "cost": "$181 to $453 a month",
+      "costev": "illustrative",
+      "options": [
+        {
+          "name": "Microsoft Entra Agent ID",
+          "what": "Gives each agent its own directory identity, with sign-in and audit logs.",
+          "ev": "vendor"
+        },
+        {
+          "name": "Okta for AI Agents and Agent Gateway",
+          "what": "Agent registry, short-lived tokens per tool call, and one place to revoke.",
+          "ev": "vendor"
+        },
+        {
+          "name": "MCP authorisation spec",
+          "what": "Tokens must name the target server, and servers must not pass tokens on.",
+          "ev": "verified"
+        },
+        {
+          "name": "AWS AgentCore Gateway and Policy",
+          "what": "Checks every tool call against written policy, including approval before a transfer.",
+          "ev": "vendor"
+        },
+        {
+          "name": "Docker MCP Gateway",
+          "what": "Runs tool servers in locked-down containers, with profiles as allow lists.",
+          "ev": "vendor"
+        },
+        {
+          "name": "gVisor and Firecracker",
+          "what": "Open source isolation layers for running AI-written code.",
+          "ev": "verified"
+        },
+        {
+          "name": "CaMeL pattern",
+          "what": "A planner that never reads untrusted text, with policy checks before each tool call.",
+          "ev": "verified"
+        }
+      ],
+      "std": "OWASP LLM01 and LLM06. OWASP Agentic ASI01, ASI02, ASI03 and ASI05"
+    },
+    "P5": {
+      "name": "One approved tool",
+      "ic": "i-cloud",
+      "owner": "CIO",
+      "includes": "One enterprise tool, no-training terms, data-loss controls, blocks on unneeded AI apps, admin export.",
+      "cost": "$4,000 to $6,000 a month",
+      "costev": "illustrative",
+      "options": [
+        {
+          "name": "Claude Team and Enterprise",
+          "what": "Company seats with admin controls. Team from $20 a seat a month billed yearly.",
+          "ev": "vendor"
+        },
+        {
+          "name": "Microsoft 365 Copilot",
+          "what": "Business add-on $21 a user a month, enterprise $30, both paid yearly.",
+          "ev": "vendor"
+        },
+        {
+          "name": "Google Workspace with Gemini",
+          "what": "Gemini in Gmail, Docs and Meet. Business Standard $14 a user a month on a yearly plan.",
+          "ev": "vendor"
+        },
+        {
+          "name": "ChatGPT Business and Enterprise",
+          "what": "Business $20 a seat a month billed yearly. Enterprise priced by sales.",
+          "ev": "vendor"
+        }
+      ],
+      "std": "NIST AI 600-1 GV-6.1-007, keep an approved provider list. NIST AI RMF GOVERN 2.3"
+    },
+    "P6": {
+      "name": "Gateway, pinned models",
+      "ic": "i-gateway",
+      "owner": "Platform lead",
+      "includes": "All calls through one gateway, pinned versions, fallback, cost metering, your own logs.",
+      "cost": "$0 to $700 a month",
+      "costev": "illustrative",
+      "options": [
+        {
+          "name": "LiteLLM proxy",
+          "what": "Open source router with fallbacks, budgets and rate limits per key, team and user.",
+          "ev": "vendor"
+        },
+        {
+          "name": "Kong AI Gateway",
+          "what": "Proxies model, MCP and agent traffic with rate limits, caching and prompt guards.",
+          "ev": "vendor"
+        },
+        {
+          "name": "Cloudflare AI Gateway",
+          "what": "Hosted gateway with logs, caching, rate limits, retries and model fallback.",
+          "ev": "vendor"
+        },
+        {
+          "name": "Azure API Management AI gateway",
+          "what": "Token quotas per consumer, load balancing, safety screening and prompt logging.",
+          "ev": "vendor"
+        },
+        {
+          "name": "Portkey, now Prisma AIRS AI Gateway",
+          "what": "Open source gateway with fallbacks, retries, load balancing and guardrail hooks.",
+          "ev": "vendor"
+        }
+      ],
+      "std": "NIST AI 600-1 GV-1.6-003, record model versions in the inventory. OWASP LLM10 Unbounded Consumption"
+    },
+    "P7": {
+      "name": "Contract terms",
+      "ic": "i-policy-doc",
+      "owner": "Procurement lead",
+      "includes": "Notice before retirement, limit and price changes, fees tied to resolved cases, full export, no silent renewal, service credits.",
+      "cost": "$256 to $1,535 a month",
+      "costev": "illustrative",
+      "options": [
+        {
+          "name": "EU model clauses for AI",
+          "what": "Model terms for buying AI, with data handover, deletion and a yearly audit right.",
+          "ev": "verified"
+        },
+        {
+          "name": "US OMB M-25-22",
+          "what": "US federal buying rules: test rights, notice of changes, roll back and exit terms.",
+          "ev": "verified"
+        },
+        {
+          "name": "NIST AI 600-1 GV-6.2-007",
+          "what": "Names contract review as its own step for generative AI.",
+          "ev": "verified"
+        }
+      ],
+      "std": "NIST AI 600-1 GV-6.1 and GV-6.2-007. EU model clauses for AI. US OMB M-25-22 section 4.d.iii"
+    },
+    "P8": {
+      "name": "Value ledger",
+      "ic": "i-kpi",
+      "owner": "Finance lead",
+      "includes": "Cost and one value measure per use case, stop rules, budgets and hard caps.",
+      "cost": "$199 to $997 a month",
+      "costev": "illustrative",
+      "options": [
+        {
+          "name": "FinOps Foundation practices",
+          "what": "Cost tags, quotas, unit costs and anomaly alerts, applied to AI spend.",
+          "ev": "verified"
+        },
+        {
+          "name": "Vantage",
+          "what": "Cloud cost tracking from free up to $200 a month by tracked spend.",
+          "ev": "vendor"
+        },
+        {
+          "name": "OpenCost",
+          "what": "Free open source cost tracking. Hosting is yours to run.",
+          "ev": "vendor"
+        },
+        {
+          "name": "Langfuse cost tracking",
+          "what": "Token and cost per trace, included in its tracing plans.",
+          "ev": "vendor"
+        }
+      ],
+      "std": "NIST AI RMF MAP 3.1, MAP 3.2 and GOVERN 1.5. FinOps cost tracking and quotas"
+    },
+    "P9": {
+      "name": "Named checkers",
+      "ic": "i-analyst",
+      "owner": "Team heads and HR",
+      "includes": "A named checker for output that leaves, review capacity planned for AI volume.",
+      "cost": "$1,941 to $9,703 a month",
+      "costev": "illustrative",
+      "options": [],
+      "std": "EU AI Act Article 26(2) for high-risk use, applies from 2 Dec 2027. NIST AI 600-1 MP-3.4-005. NIST AI RMF MEASURE 3.3"
+    },
+    "P10": {
+      "name": "Your own test set",
+      "ic": "i-eval",
+      "owner": "Evals lead",
+      "includes": "Your own questions with planted errors, stale facts, blocked pages and injections, run before any change.",
+      "cost": "$1 to $1,344 a month",
+      "costev": "illustrative",
+      "options": [
+        {
+          "name": "promptfoo",
+          "what": "Open source runner that scores your test cases and can fail a build below a pass rate.",
+          "ev": "vendor"
+        },
+        {
+          "name": "UK AISI Inspect",
+          "what": "Open source evaluation framework with sandboxed tools and over 200 ready-made tests.",
+          "ev": "verified"
+        },
+        {
+          "name": "Langfuse",
+          "what": "Traces, model and code graders, test datasets and prompt versions.",
+          "ev": "vendor"
+        },
+        {
+          "name": "Arize Phoenix",
+          "what": "Traces, evaluations and experiments that compare prompt, model and retrieval changes.",
+          "ev": "vendor"
+        },
+        {
+          "name": "Braintrust",
+          "what": "Test runs and scoring from $0, Pro at $249 a month.",
+          "ev": "vendor"
+        },
+        {
+          "name": "LangSmith",
+          "what": "Traces and tests from $0 a seat, Plus at $39 a seat a month.",
+          "ev": "vendor"
+        }
+      ],
+      "std": "NIST AI RMF MEASURE 2.3. NIST AI 600-1 MS-2.5-003. US OMB M-25-22 section 4.d.iii.F"
+    }
+  },
+  "lanes": {
+    "rows": [
+      "Leadership",
+      "Procurement and legal",
+      "Security",
+      "Platform and architecture",
+      "Finance",
+      "Team heads and HR"
+    ],
+    "cols": [
+      "Buy",
+      "Pilot",
+      "Go live",
+      "Run",
+      "Change"
+    ],
+    "cells": [
+      {
+        "r": 0,
+        "c": 0,
+        "task": "Set policy",
+        "detail": "Set the AI policy and risk tolerance. Name one owner per building block and pick one approved tool.",
+        "cad": "once",
+        "std": "NIST AI RMF GOVERN 2.3 and 1.3. ISO 42001 clauses 5.1, 5.2 and 6.1.2",
+        "ev": "verified"
+      },
+      {
+        "r": 1,
+        "c": 0,
+        "task": "Write contract terms",
+        "detail": "Put the change terms into the contract: no training on your data, your right to test, notice of changes, incident notice, data handover in a common format, an audit right and an exit plan.",
+        "cad": "once",
+        "std": "NIST AI 600-1 GV-6.1 and GV-6.2-007. EU model clauses for AI, sections D and E. US OMB M-25-22 section 4.d.iii",
+        "ev": "verified"
+      },
+      {
+        "r": 2,
+        "c": 0,
+        "task": "Assess the supplier",
+        "detail": "Assess the supplier, list every third party that can see your content, keep an approved provider list and threat-model the use case.",
+        "cad": "once",
+        "std": "NIST AI 600-1 GV-6.1-007 and GV-3.2-005",
+        "ev": "verified"
+      },
+      {
+        "r": 3,
+        "c": 0,
+        "task": "Build test set",
+        "detail": "Write down the intended purpose and build your own test set from data the vendor cannot see and that looks like live data.",
+        "cad": "once",
+        "std": "NIST AI RMF MAP 1.1 and MEASURE 2.3. US OMB M-25-22 section 4.d.iii.E",
+        "ev": "verified"
+      },
+      {
+        "r": 4,
+        "c": 0,
+        "task": "Set review rule",
+        "detail": "Write the business case with costs, including the cost of AI errors. Set the stop rule and the budget cap before any pilot starts.",
+        "cad": "once",
+        "std": "NIST AI RMF MAP 3.1 and 3.2. FinOps cost tracking and quotas. US OMB M-25-22 section 4.e.iv",
+        "ev": "verified"
+      },
+      {
+        "r": 5,
+        "c": 0,
+        "task": "Name checkers",
+        "detail": "Name the use case and who checks its output. Plan AI literacy training for every user.",
+        "cad": "once",
+        "std": "EU AI Act Article 4. NIST AI RMF MAP 3.4 and GOVERN 2.2. ISO 42001 clause 7.2",
+        "ev": "verified"
+      },
+      {
+        "r": 0,
+        "c": 1,
+        "task": "Review results",
+        "detail": "Hold the go or stop decision at the end of the pilot, judged against the stop rule set at Buy.",
+        "cad": "once",
+        "std": "NIST AI RMF MANAGE 1.1",
+        "ev": "verified"
+      },
+      {
+        "r": 1,
+        "c": 1,
+        "task": "Collect vendor papers",
+        "detail": "Collect the acceptable use policy, model or system card, user guides and feedback channel from the vendor.",
+        "cad": "once",
+        "std": "US OMB M-26-04 appendix A. EU general-purpose AI code, transparency chapter",
+        "ev": "verified"
+      },
+      {
+        "r": 2,
+        "c": 1,
+        "task": "Test for injection",
+        "detail": "Test the pilot set-up for prompt injection and data leaks, and switch logging on.",
+        "cad": "once",
+        "std": "NIST AI 600-1 GV-3.2-005. NIST AI RMF GOVERN 4.3",
+        "ev": "verified"
+      },
+      {
+        "r": 3,
+        "c": 1,
+        "task": "Run tests",
+        "detail": "Run the test set, plant known errors to measure how many the checks catch, and start the failure log.",
+        "cad": "weekly",
+        "std": "NIST AI RMF MEASURE 2.3. NIST AI 600-1 MS-2.5-003 and MG-4.3-002",
+        "ev": "verified"
+      },
+      {
+        "r": 4,
+        "c": 1,
+        "task": "Track unit cost",
+        "detail": "Track cost per call or per case and one value measure, and compare both with the stop rule.",
+        "cad": "weekly",
+        "std": "FinOps unit costs. NIST AI RMF MAP 3.1 and 3.2",
+        "ev": "verified"
+      },
+      {
+        "r": 5,
+        "c": 1,
+        "task": "Train checkers",
+        "detail": "Train the named checkers, time each review and collect user feedback.",
+        "cad": "weekly",
+        "std": "NIST AI 600-1 GV-3.2-004 and MP-3.4-005. EU AI Act Article 26(2) for high-risk use, applies from 2 Dec 2027",
+        "ev": "verified"
+      },
+      {
+        "r": 0,
+        "c": 2,
+        "task": "Accept residual risk",
+        "detail": "Sign off the remaining risk, the named owners and a plan to switch the tool off.",
+        "cad": "once",
+        "std": "NIST AI RMF GOVERN 2.3 and 1.7. ISO 42001 clause 9.3",
+        "ev": "verified"
+      },
+      {
+        "r": 1,
+        "c": 2,
+        "task": "Labels and assessments",
+        "detail": "Label AI text and deepfakes published on public-interest matters. For high-risk use, add the impact assessments and tell affected people.",
+        "cad": "once",
+        "std": "EU AI Act Articles 26, 27 and 50(4)",
+        "ev": "verified"
+      },
+      {
+        "r": 2,
+        "c": 2,
+        "task": "Drill off switch",
+        "detail": "Test the off switch, agree an incident plan with the vendor and keep logs for at least six months for high-risk use.",
+        "cad": "once",
+        "std": "NIST AI 600-1 GV-1.7-001. EU AI Act Article 26(6), applies from 2 Dec 2027",
+        "ev": "verified"
+      },
+      {
+        "r": 3,
+        "c": 2,
+        "task": "Pin model version",
+        "detail": "Pin the model version behind the gateway and add the system to the AI inventory with its version, owners and known issues.",
+        "cad": "once",
+        "std": "NIST AI 600-1 GV-1.6-001 and GV-1.6-003",
+        "ev": "verified"
+      },
+      {
+        "r": 4,
+        "c": 2,
+        "task": "Set spend caps",
+        "detail": "Set spending caps, alerts and cost tags per team and project.",
+        "cad": "once",
+        "std": "FinOps tags, quotas and alerts",
+        "ev": "verified"
+      },
+      {
+        "r": 5,
+        "c": 2,
+        "task": "Size checker roster",
+        "detail": "Put the checker roster in place, sized to the volume of AI output, with training done.",
+        "cad": "once",
+        "std": "EU AI Act Articles 4 and 26(7). ISO 42001 clauses 7.2 and 7.3",
+        "ev": "verified"
+      },
+      {
+        "r": 0,
+        "c": 3,
+        "task": "Review value",
+        "detail": "Review the value ledger, failure log and incidents, then decide to continue, fix or stop.",
+        "cad": "quarterly",
+        "std": "NIST AI RMF GOVERN 1.5. ISO 42001 clause 9.3. US OMB M-25-22 section 4.d.iii.E",
+        "ev": "verified"
+      },
+      {
+        "r": 1,
+        "c": 3,
+        "task": "Review vendor terms",
+        "detail": "Review vendor performance and terms, watch for retirement notices and use the audit right.",
+        "cad": "quarterly",
+        "std": "NIST AI RMF MANAGE 3.1. EU model clauses for AI, article 20 (yearly audit)",
+        "ev": "verified"
+      },
+      {
+        "r": 2,
+        "c": 3,
+        "task": "Watch logs, report",
+        "detail": "Watch logs and incidents. Report a serious incident to the provider and the authority within the legal clock: 15 days, 10 for a death, 2 for a widespread breach or critical infrastructure.",
+        "cad": "weekly",
+        "std": "NIST AI 600-1 MG-4.3-003. EU AI Act Articles 26(5) and 73",
+        "ev": "verified"
+      },
+      {
+        "r": 3,
+        "c": 3,
+        "task": "Watch for drift",
+        "detail": "Run the test set, watch for drift and made-up content, and keep the failure log current.",
+        "cad": "weekly",
+        "std": "NIST AI 600-1 MG-4.1-002, MG-4.3-002 and MS-2.5-003",
+        "ev": "verified"
+      },
+      {
+        "r": 4,
+        "c": 3,
+        "task": "Update value ledger",
+        "detail": "Update cost per unit and value per use case, look for anomalies and apply the stop rules.",
+        "cad": "monthly",
+        "std": "FinOps anomaly detection. NIST AI RMF MAP 3.2",
+        "ev": "verified"
+      },
+      {
+        "r": 5,
+        "c": 3,
+        "task": "Sample and measure",
+        "detail": "Sample approved output, track the checkers' catch rate and review backlog, and refresh training.",
+        "cad": "monthly",
+        "std": "NIST AI 600-1 MP-3.4-005. NIST AI RMF MEASURE 3.3. EU AI Act Article 4",
+        "ev": "verified"
+      },
+      {
+        "r": 0,
+        "c": 4,
+        "task": "Approve the change",
+        "detail": "Approve a material change, a switch of vendor or a retirement.",
+        "cad": "per change",
+        "std": "NIST AI RMF MANAGE 2.4 and GOVERN 1.7",
+        "ev": "verified"
+      },
+      {
+        "r": 1,
+        "c": 4,
+        "task": "Act on notice",
+        "detail": "Act on the vendor notice. At exit, get your data back in a common format with proof of deletion.",
+        "cad": "per change",
+        "std": "US OMB M-25-22 sections 4.d.iii.G and 4.f.i. EU model clauses for AI, articles 15 to 17",
+        "ev": "verified"
+      },
+      {
+        "r": 2,
+        "c": 4,
+        "task": "Re-test the fence",
+        "detail": "Re-test the changed model and its fallback, and update the threat model.",
+        "cad": "per change",
+        "std": "NIST AI 600-1 GV-6.2-006 and GV-3.2-005",
+        "ev": "verified"
+      },
+      {
+        "r": 3,
+        "c": 4,
+        "task": "Test, then switch",
+        "detail": "Run the full test set before switching and roll back if the new version scores below the bar.",
+        "cad": "per change",
+        "std": "US OMB M-25-22 section 4.d.iii.F. NIST AI RMF MANAGE 4.1. ISO 42001 clause 10.2",
+        "ev": "verified"
+      },
+      {
+        "r": 4,
+        "c": 4,
+        "task": "Re-price the case",
+        "detail": "Re-price the business case and re-check the stop rule.",
+        "cad": "per change",
+        "std": "US OMB M-25-22 section 4.e.iv. NIST AI RMF MAP 3.2",
+        "ev": "verified"
+      },
+      {
+        "r": 5,
+        "c": 4,
+        "task": "Tell users, retrain",
+        "detail": "Tell users what changed, retrain the checkers and adjust review capacity.",
+        "cad": "per change",
+        "std": "NIST AI 600-1 MG-2.4-001 for retirement or switch-off. EU AI Act Article 4",
+        "ev": "verified"
+      }
+    ]
+  },
+  "fixfirst": {
+    "moves": [
+      {
+        "n": "1",
+        "ic": "i-approve",
+        "title": "Name a checker for what leaves",
+        "who": "Head of each team that sends AI work out",
+        "first": "Name one person who opens every cited source and figure before it is sent. Turn on citations and source rules for search.",
+        "covers": [
+          "F1",
+          "S1",
+          "S2",
+          "S3",
+          "S4",
+          "S5",
+          "S6",
+          "S7",
+          "S8",
+          "S9"
+        ],
+        "effort": "Low to medium",
+        "block": "P9",
+        "coverslabel": "F1, S1 to S9"
+      },
+      {
+        "n": "2",
+        "ic": "i-security",
+        "title": "Fence every agent",
+        "who": "Security lead",
+        "first": "List every agent, give each its own low-privilege login, and test the off switch.",
+        "covers": [
+          "F2",
+          "F4",
+          "F9",
+          "S10"
+        ],
+        "effort": "Medium",
+        "block": "P4"
+      },
+      {
+        "n": "3",
+        "ic": "i-model",
+        "title": "Pin models and test before change",
+        "who": "Platform lead",
+        "first": "Pin model versions and run your own test set before any model or setting change. Search failures get this second check.",
+        "covers": [
+          "F6",
+          "F12",
+          "F13",
+          "F14",
+          "S1",
+          "S2",
+          "S3",
+          "S4",
+          "S5",
+          "S6",
+          "S7",
+          "S8",
+          "S9",
+          "S10"
+        ],
+        "coverslabel": "F6, F12, F13, F14, second check on S1 to S10",
+        "effort": "Low to medium",
+        "block": "P6"
+      },
+      {
+        "n": "4",
+        "ic": "i-policy-doc",
+        "title": "Write change into contracts",
+        "who": "Procurement lead",
+        "first": "At the next renewal, add notice for retirements, limits and prices, full export and no silent renewal.",
+        "covers": [
+          "F6",
+          "F7",
+          "F12",
+          "F14"
+        ],
+        "effort": "Low",
+        "block": "P7"
+      }
+    ],
+    "next": [
+      {
+        "step": "One approved tool",
+        "who": "CIO",
+        "covers": "F3",
+        "block": "P5"
+      },
+      {
+        "step": "Value ledger and stop rules",
+        "who": "Finance lead",
+        "covers": "F5, F7",
+        "block": "P8"
+      },
+      {
+        "step": "Source rules and failure log",
+        "who": "Architect",
+        "covers": "S2 to S9",
+        "block": "P2"
+      },
+      {
+        "step": "Isolated reader for agents",
+        "who": "Security lead",
+        "covers": "S10",
+        "block": "P4"
+      },
+      {
+        "step": "Review capacity",
+        "who": "HR and team heads",
+        "covers": "F10",
+        "block": "P9"
+      }
+    ],
+    "ev": "design"
+  },
+  "build": {
+    "order": [
+      "Contracts",
+      "Platform",
+      "Controls",
+      "People and money"
+    ],
+    "why": {
+      "Contracts": "Change terms at the next renewal, before anything is built on them.",
+      "Platform": "One tool, a gateway with pinned models, your own test set.",
+      "Controls": "Claim check, source rules and the agent fence, on the gateway.",
+      "People and money": "Named checkers, a value ledger and the failure log."
+    },
+    "ev": "design"
+  },
+  "board": [
+    {
+      "n": "0 of 24",
+      "s": "We tracked 24 ways AI tools fail. None was fixed in the last 30 days.",
+      "ev": "verified"
+    },
+    {
+      "n": "13%",
+      "s": "Gartner survey: only 13% of CIOs say AI has brought significant or transformational value.",
+      "ev": "vendor"
+    },
+    {
+      "n": "60%+",
+      "s": "In one audit, over 60% of AI search citations got the article, publisher or link wrong.",
+      "ev": "verified"
+    },
+    {
+      "n": "3.3x",
+      "s": "AI agents acting wrongly is the one problem with harm clearly rising. Monthly incidents were 3.3 times higher in September and October than in June to August, against 1.3 times for all AI incidents logged.",
+      "ev": "verified"
+    },
+    {
+      "n": "4 of 10",
+      "s": "Ten building blocks cover all 24 problems. Four do most of the work: a named checker, an agent fence, pinned models and contract terms.",
+      "ev": "design"
+    }
+  ],
+  "unknowns": [
+    {
+      "t": "Proof the fixes work",
+      "s": "Only 12 of the 24 failures have an independent measured result, mostly in labs. None was measured inside a working company.",
+      "ev": "verified"
+    },
+    {
+      "t": "The human steps",
+      "s": "In lab tests, doctors missed most planted errors in AI drafts. Stop rules and off-switch drills are measured nowhere."
+    },
+    {
+      "t": "Cost",
+      "s": "The cost bands are modelled from list prices for one example firm."
+    },
+    {
+      "t": "Interviews",
+      "s": "This is desk research. Interviews with the people who own AI have not been run."
+    }
+  ],
+  "labels": {
+    "worse": {
+      "name": "Harm rising",
+      "s": "Our count of dated harm events grew faster than AI news overall."
+    },
+    "new": {
+      "name": "New events",
+      "s": "Fresh cases appeared, but a rise in harm was not shown."
+    },
+    "true": {
+      "name": "Still true",
+      "s": "Nothing changed in the window."
+    }
+  },
+  "incidents": {
+    "label": "Monthly incidents",
+    "rows": [
+      {
+        "name": "AI agents acting wrongly",
+        "x": 3.3
+      },
+      {
+        "name": "All AI incidents logged",
+        "x": 1.3
+      }
+    ],
+    "ev": "verified",
+    "months": {
+      "labels": [
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct"
+      ],
+      "note": "October scaled to a full month",
+      "series": [
+        {
+          "name": "AI agents acting wrongly",
+          "v": [
+            1,
+            2,
+            6,
+            11,
+            8.7
+          ]
+        },
+        {
+          "name": "All AI incidents logged",
+          "v": [
+            53,
+            55,
+            49,
+            53,
+            83
+          ]
+        }
+      ]
+    }
+  },
+  "hero": [
+    {
+      "n": "0 of 24",
+      "l": "fixed, rechecked 15 Nov 2026",
+      "ev": "verified"
+    },
+    {
+      "n": "13%",
+      "l": "CIOs see value, Gartner survey",
+      "ev": "vendor"
+    },
+    {
+      "n": "3.3x",
+      "l": "agent misfires rise",
+      "ev": "verified"
+    }
+  ],
+  "story": {
+    "case": {
+      "kick": "A real case",
+      "head": [
+        "A bot ",
+        "invented",
+        " a refund policy"
+      ],
+      "steps": [
+        {
+          "t": "What happened",
+          "ic": "i-analyst",
+          "s": "An airline chatbot told a grieving customer he could claim a bereavement fare after travel. No such rule existed.",
+          "ev": "verified"
+        },
+        {
+          "t": "The loss",
+          "ic": "i-policy-doc",
+          "n": "C$812",
+          "s": "A Canadian tribunal held the airline liable for its bot, February 2024.",
+          "ev": "verified"
+        },
+        {
+          "t": "The fix",
+          "ic": "i-approve",
+          "s": "Named checkers test what customer bots say against the written policy before release.",
+          "ev": "design"
+        }
+      ]
+    },
+    "fixes": {
+      "kick": "Our read",
+      "head": [
+        "Four fixes, ",
+        "one",
+        " table"
+      ]
+    },
+    "sure": {
+      "kick": "How sure",
+      "head": [
+        "Half the proof is ",
+        "measured",
+        ""
+      ]
+    },
+    "chapters": [
+      {
+        "head": [
+          "Answers you ",
+          "can't",
+          " trust"
+        ],
+        "glow": "coral",
+        "tone": "cor",
+        "fixes": [
+          "P9"
+        ],
+        "beyond": [
+          "F8"
+        ],
+        "case": {
+          "t": "Bot made up a refund policy",
+          "ic": "i-analyst",
+          "n": "C$812",
+          "s": "An airline chatbot made up a bereavement refund policy. A tribunal held the airline liable, February 2024.",
+          "ev": "verified"
+        },
+        "industry": [
+          {
+            "l": "UK court warning",
+            "s": "High Court ruling on fake AI case citations, 6 Jun 2025",
+            "ev": "verified"
+          },
+          {
+            "l": "Fake case tracker",
+            "s": "2,293 court decisions logged by 14 Nov 2026",
+            "ev": "verified"
+          },
+          {
+            "l": "Formal output checks",
+            "s": "AWS made policy checks on outputs generally available, 6 Aug 2025",
+            "ev": "vendor"
+          }
+        ],
+        "our": "Named checkers open every source and figure before an answer leaves."
+      },
+      {
+        "head": [
+          "Agents that ",
+          "act",
+          " wrongly"
+        ],
+        "glow": "amber",
+        "tone": "amb",
+        "fixes": [
+          "P4"
+        ],
+        "beyond": [
+          "F3",
+          "F10",
+          "F11"
+        ],
+        "case": {
+          "t": "An agent wiped a database",
+          "ic": "i-agent",
+          "n": "1,000+",
+          "s": "During a code freeze, a coding agent deleted live records on over 1,000 executives and companies, July 2025.",
+          "ev": "verified"
+        },
+        "industry": [
+          {
+            "l": "Agentic top 10",
+            "s": "OWASP list of agent risks, over 100 contributors, 9 Dec 2025",
+            "ev": "verified"
+          },
+          {
+            "l": "Agent login rules",
+            "s": "MCP spec requires OAuth 2.1 for HTTP servers, 18 Jun 2025",
+            "ev": "verified"
+          },
+          {
+            "l": "Attack testing",
+            "s": "NIST new attacks lifted hijack success from 11% to 81%",
+            "ev": "verified"
+          }
+        ],
+        "our": "An agent fence gives each agent its own low-privilege login and an off switch."
+      },
+      {
+        "head": [
+          "Vendors you ",
+          "don't",
+          " control"
+        ],
+        "glow": "slate",
+        "tone": "tea",
+        "fixes": [
+          "P6",
+          "P7"
+        ],
+        "beyond": [
+          "F5"
+        ],
+        "case": {
+          "t": "Silent model change",
+          "ic": "i-model",
+          "n": "16%",
+          "s": "Anthropic's own postmortem: serving bugs degraded its model answers. At the peak, 31 August 2025, 16% of one model's requests were hit.",
+          "ev": "vendor"
+        },
+        "industry": [
+          {
+            "l": "Retirement notice",
+            "s": "OpenAI gives at least 6 months before retiring a model, 11 Jun 2026",
+            "ev": "vendor"
+          },
+          {
+            "l": "EU code",
+            "s": "EU code of practice for model providers, 10 Jul 2025",
+            "ev": "verified"
+          },
+          {
+            "l": "Rehiring signal",
+            "s": "Gartner survey: 18% of service leaders rehire after AI cuts, 7% already, 11% planned",
+            "ev": "vendor"
+          }
+        ],
+        "our": "Pinned models and contract terms stop a vendor change from reaching you unseen."
+      }
+    ],
+    "ch_note": "Chapters group failures by the first fix that catches them. Failures beyond the four sit in the closest chapter.",
+    "gaps": {
+      "kick": "What still breaks",
+      "head": [
+        "Still ",
+        "unsolved",
+        ""
+      ],
+      "items": [
+        {
+          "l": "Prompt injection",
+          "ch": 2,
+          "s": "UK NCSC says it may never be fully mitigated, 8 Dec 2025",
+          "ev": "verified"
+        },
+        {
+          "l": "Repeat attacks",
+          "ch": 2,
+          "s": "Hijack success rose from 57% to 80% over 25 tries",
+          "ev": "verified"
+        },
+        {
+          "l": "Optional agent login",
+          "ch": 2,
+          "s": "MCP login is optional in the 2025-06-18 spec, local servers sit outside it",
+          "ev": "verified"
+        },
+        {
+          "l": "Fake citations",
+          "ch": 1,
+          "s": "Sanctions have not stopped them, 2,293 cases by 14 Nov 2026",
+          "ev": "verified"
+        },
+        {
+          "l": "Silent quality drops",
+          "ch": 3,
+          "s": "The vendor's own evals missed the Aug 2025 bugs, customers cannot detect them",
+          "ev": "vendor"
+        }
+      ],
+      "our": "Our fixes shrink these risks. None of them closes the five gaps above."
+    }
+  },
+  "fixRows": [
+    {
+      "block": "P9",
+      "name": "Named checkers",
+      "who": "Team heads",
+      "first": "Name team checkers",
+      "covers": [
+        "F1",
+        "S1",
+        "S2",
+        "S3",
+        "S4",
+        "S5",
+        "S6",
+        "S7",
+        "S8",
+        "S9"
+      ]
+    },
+    {
+      "block": "P4",
+      "name": "Agent fence",
+      "who": "Security lead",
+      "first": "List every agent",
+      "covers": [
+        "F2",
+        "F4",
+        "F9",
+        "S10"
+      ]
+    },
+    {
+      "block": "P6",
+      "name": "Pinned models",
+      "who": "Platform lead",
+      "first": "Pin model versions",
+      "covers": [
+        "F6",
+        "F12",
+        "F13",
+        "F14",
+        "S1",
+        "S2",
+        "S3",
+        "S4",
+        "S5",
+        "S6",
+        "S7",
+        "S8",
+        "S9",
+        "S10"
+      ]
+    },
+    {
+      "block": "P7",
+      "name": "Contract terms",
+      "who": "Procurement lead",
+      "first": "Add renewal terms",
+      "covers": [
+        "F6",
+        "F7",
+        "F12",
+        "F14"
+      ]
+    }
+  ]
+}

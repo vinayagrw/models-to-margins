@@ -1,0 +1,847 @@
+{
+ "timeline": [
+  {
+   "id": "T01",
+   "date": "2026-09-15",
+   "text": "A major bot network starts blocking AI agents on ad pages by default, including existing free sites. Launched just before the window, felt within it",
+   "status": "worse",
+   "label": "#7 worse",
+   "ids": [
+    "S7"
+   ],
+   "ev": "verified",
+   "src": "V9 P2 row 34, ledger row 24"
+  },
+  {
+   "id": "T02",
+   "date": "2026-09-25",
+   "text": "Fake support numbers planted for 374+ companies reach AI answers",
+   "status": "worse",
+   "label": "#4 worse",
+   "ids": [
+    "S4"
+   ],
+   "ev": "verified",
+   "src": "V9 P2 row 35, ledger row 17"
+  },
+  {
+   "id": "T03",
+   "date": "2026-09-29",
+   "text": "OpenAI halves what its $200 Pro plan includes",
+   "status": "part",
+   "label": "#7 new event",
+   "ids": [
+    "F7"
+   ],
+   "ev": "verified",
+   "src": "V9 P1 row 57, VR4-04"
+  },
+  {
+   "id": "T04",
+   "date": "2026-10-05",
+   "text": "Claude Code starts reporting unread page text instead of dropping it",
+   "status": "part",
+   "label": "#6 partly fixed",
+   "ids": [
+    "S6"
+   ],
+   "ev": "verified",
+   "src": "V9 P2 row 36, ledger row 22"
+  },
+  {
+   "id": "T05",
+   "date": "2026-10-07",
+   "text": "A spending-limit fault pauses some paying organisations across every Claude product",
+   "status": "true",
+   "label": "#12 still true",
+   "ids": [
+    "F12"
+   ],
+   "ev": "verified",
+   "src": "V9 P1 row 58, VR3-22"
+  },
+  {
+   "id": "T06",
+   "date": "2026-10-08",
+   "text": "8 of 10 AI search platforms cite a made-up concept within a week",
+   "status": "worse",
+   "label": "#4 worse",
+   "ids": [
+    "S4"
+   ],
+   "ev": "verified",
+   "src": "V9 P2 row 37, ledger row 16"
+  },
+  {
+   "id": "T07",
+   "date": "2026-10-09",
+   "text": "A lawyer is ordered to pay $38,877.59 personally over AI-invented citations",
+   "status": "true",
+   "label": "#1 still true",
+   "ids": [
+    "F1"
+   ],
+   "ev": "verified",
+   "src": "V9 P1 row 59, VR3-03, VR3-04, L-06"
+  },
+  {
+   "id": "T08",
+   "date": "2026-10",
+   "text": "Full Fact: stale figures and wrong office holders with search on",
+   "status": "true",
+   "label": "#5 still true",
+   "ids": [
+    "S5",
+    "S9"
+   ],
+   "ev": "verified",
+   "src": "V9 P2 row 38, ledger row 20"
+  },
+  {
+   "id": "T09",
+   "date": "2026-10-13",
+   "text": "A hidden instruction could run code through Copilot in Visual Studio",
+   "status": "true",
+   "label": "#4 still true",
+   "ids": [
+    "F4"
+   ],
+   "ev": "verified",
+   "src": "V9 P1 row 60, VR4-06"
+  },
+  {
+   "id": "T10",
+   "date": "2026-10-14",
+   "text": "Eight US states sue OpenAI over ChatGPT safety",
+   "status": "part",
+   "label": "#8 new event",
+   "ids": [
+    "F8"
+   ],
+   "ev": "verified",
+   "src": "V9 P1 row 61, VR3-07"
+  },
+  {
+   "id": "T11",
+   "date": "2026-10-15",
+   "text": "One leading model opened no page in over half its searches",
+   "status": "true",
+   "label": "#6 still true",
+   "ids": [
+    "S6"
+   ],
+   "ev": "verified",
+   "src": "V9 P2 row 39, ledger row 21"
+  },
+  {
+   "id": "T12",
+   "date": "2026-10-14",
+   "text": "The FTC subpoenas OpenAI and Anthropic",
+   "status": "part",
+   "label": "#9 new event",
+   "ids": [
+    "F9"
+   ],
+   "ev": "verified",
+   "src": "V9 P1 row 62, VR4-17"
+  },
+  {
+   "id": "T13",
+   "date": "2026-10-16",
+   "text": "A UK regulator says switching barriers keep customers on Microsoft",
+   "status": "part",
+   "label": "#14 new event",
+   "ids": [
+    "F14"
+   ],
+   "ev": "verified",
+   "src": "V9 P1 row 63, LK-10"
+  },
+  {
+   "id": "T14",
+   "date": "2026-10-19",
+   "text": "Gartner finds only 13% of CIOs see significant or transformational value",
+   "status": "true",
+   "label": "#5 still true",
+   "ids": [
+    "F5"
+   ],
+   "ev": "vendor",
+   "src": "V9 P1 row 64, VR2-01"
+  },
+  {
+   "id": "T15",
+   "date": "2026-10-21",
+   "text": "Claude Code cloud sessions now return blocked fetches as normal results, as local sessions already did",
+   "status": "part",
+   "label": "#2 partly fixed",
+   "ids": [
+    "S2",
+    "S7"
+   ],
+   "ev": "verified",
+   "src": "V9 P2 row 40, ledger row 22"
+  },
+  {
+   "id": "T16",
+   "date": "2026-10-21",
+   "text": "OpenAI says its agents muted alerts and removed a monitor",
+   "status": "worse",
+   "label": "#2 harm rising",
+   "ids": [
+    "F2"
+   ],
+   "ev": "verified",
+   "src": "V9 P1 row 65, VR4-03"
+  },
+  {
+   "id": "T17",
+   "date": "2026-10-22",
+   "text": "Publisher copyright suit that alleges invented quotes heads toward a jury trial",
+   "status": "true",
+   "label": "#1 still true",
+   "ids": [
+    "S1"
+   ],
+   "ev": "verified",
+   "src": "V9 P2 row 41, ledger row 41"
+  }
+ ],
+ "scorecard": {
+  "models": [
+   "Claude",
+   "ChatGPT",
+   "Gemini",
+   "AI Overviews",
+   "Perplexity",
+   "Grok",
+   "Copilot"
+  ],
+  "grades": {
+   "S1": [
+    "B",
+    "M",
+    "W",
+    "N",
+    "M",
+    "W",
+    "M"
+   ],
+   "S2": [
+    "N",
+    "M",
+    "W",
+    "N",
+    "W",
+    "N",
+    "B"
+   ],
+   "S3": [
+    "M",
+    "M",
+    "M",
+    "X",
+    "W",
+    "M",
+    "X"
+   ],
+   "S4": [
+    "B",
+    "W",
+    "B",
+    "N",
+    "M",
+    "W",
+    "N"
+   ],
+   "S5": [
+    "W",
+    "B",
+    "M",
+    "N",
+    "X",
+    "X",
+    "N"
+   ],
+   "S6": [
+    "X",
+    "N",
+    "X",
+    "X",
+    "X",
+    "X",
+    "X"
+   ],
+   "S7": [
+    "N",
+    "N",
+    "B",
+    "X",
+    "N",
+    "X",
+    "X"
+   ],
+   "S8": [
+    "B",
+    "W",
+    "B",
+    "N",
+    "X",
+    "M",
+    "N"
+   ],
+   "S9": [
+    "N",
+    "N",
+    "W",
+    "X",
+    "X",
+    "N",
+    "X"
+   ],
+   "S10": [
+    "B",
+    "M",
+    "W",
+    "X",
+    "N",
+    "X",
+    "N"
+   ]
+  },
+  "older": {
+   "S1": [
+    false,
+    false,
+    false,
+    false,
+    false,
+    true,
+    true
+   ],
+   "S2": [
+    true,
+    true,
+    false,
+    false,
+    true,
+    false,
+    true
+   ],
+   "S3": [
+    false,
+    false,
+    false,
+    false,
+    true,
+    true,
+    false
+   ],
+   "S4": [
+    false,
+    false,
+    true,
+    false,
+    false,
+    false,
+    true
+   ],
+   "S5": [
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    true
+   ],
+   "S6": [
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "S7": [
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "S8": [
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    true
+   ],
+   "S9": [
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "S10": [
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false
+   ]
+  },
+  "key": {
+   "B": "Better than peers",
+   "M": "Mixed",
+   "W": "Worse than peers",
+   "N": "Not enough data",
+   "X": "No independent data"
+  },
+  "ev": "verified",
+  "src": "V9 P2 row 42, doc section 5"
+ },
+ "segments": [
+  {
+   "id": "consumer",
+   "name": "Consumer",
+   "ic": "i-analyst",
+   "tone": "iso-teal",
+   "job": "Give me a correct answer on health, money or law, and say when you are unsure.",
+   "top": [
+    "F1",
+    "F3",
+    "F8",
+    "F6",
+    "F7"
+   ]
+  },
+  {
+   "id": "developer",
+   "name": "Developer",
+   "ic": "i-coder",
+   "tone": "iso-violet",
+   "job": "Finish the task inside the scope I set, and prove it with a real test run.",
+   "top": [
+    "F2",
+    "F4",
+    "F6",
+    "F7",
+    "F10"
+   ]
+  },
+  {
+   "id": "enterprise",
+   "name": "Enterprise",
+   "ic": "i-executive",
+   "tone": "iso-amber",
+   "job": "Show which AI uses pay back, without our data leaving our control.",
+   "top": [
+    "F1",
+    "F2",
+    "F3",
+    "F4",
+    "F6"
+   ]
+  }
+ ],
+ "journey": [
+  {
+   "id": 0,
+   "name": "Try",
+   "ic": "i-canary",
+   "ids": [
+    "F1",
+    "F3",
+    "F8",
+    "F11",
+    "F13"
+   ]
+  },
+  {
+   "id": 1,
+   "name": "Pilot",
+   "ic": "i-deploy",
+   "ids": [
+    "F2",
+    "F5",
+    "F7"
+   ]
+  },
+  {
+   "id": 2,
+   "name": "Production",
+   "ic": "i-kubernetes",
+   "ids": [
+    "F4",
+    "F6",
+    "F12",
+    "F14"
+   ]
+  },
+  {
+   "id": 3,
+   "name": "Scale",
+   "ic": "i-network",
+   "ids": [
+    "F9",
+    "F10"
+   ]
+  }
+ ],
+ "pipeline": [
+  {
+   "id": 0,
+   "name": "Understand",
+   "ic": "i-analyst",
+   "ids": [
+    "S8"
+   ]
+  },
+  {
+   "id": 1,
+   "name": "Plan",
+   "ic": "i-roadmap",
+   "ids": [
+    "S3"
+   ]
+  },
+  {
+   "id": 2,
+   "name": "Search",
+   "ic": "i-network",
+   "ids": [
+    "S5"
+   ]
+  },
+  {
+   "id": 3,
+   "name": "Fetch",
+   "ic": "i-cloud",
+   "ids": [
+    "S7"
+   ]
+  },
+  {
+   "id": 4,
+   "name": "Read",
+   "ic": "i-policy-doc",
+   "ids": [
+    "S6",
+    "S10"
+   ]
+  },
+  {
+   "id": 5,
+   "name": "Rank",
+   "ic": "i-kpi",
+   "ids": [
+    "S4"
+   ]
+  },
+  {
+   "id": 6,
+   "name": "Reconcile",
+   "ic": "i-eval",
+   "ids": [
+    "S9"
+   ]
+  },
+  {
+   "id": 7,
+   "name": "Write and cite",
+   "ic": "i-llm-drafter",
+   "ids": [
+    "S1",
+    "S2"
+   ]
+  }
+ ],
+ "lenses": [
+  "Reports",
+  "Impact",
+  "Hidden",
+  "Confidence"
+ ],
+ "matrix": {
+  "rows": [
+   "High",
+   "Mid",
+   "Low"
+  ],
+  "cols": [
+   "Low",
+   "Medium",
+   "High"
+  ],
+  "rowAxis": "Impact",
+  "colAxis": "Effort to fix",
+  "hot": [
+   0,
+   1
+  ]
+ },
+ "lanes": [
+  {
+   "name": "Gather",
+   "parts": [
+    {
+     "name": "Premise check",
+     "ic": "i-approve",
+     "ids": [
+      "S8"
+     ]
+    },
+    {
+     "name": "Planner",
+     "ic": "i-roadmap",
+     "ids": [
+      "S3"
+     ]
+    },
+    {
+     "name": "Multi-index search",
+     "ic": "i-network",
+     "ids": [
+      "S3",
+      "S5"
+     ]
+    },
+    {
+     "name": "Fetch and render",
+     "ic": "i-cloud",
+     "ids": [
+      "S7"
+     ]
+    },
+    {
+     "name": "Isolated reader",
+     "ic": "i-security",
+     "ids": [
+      "S6",
+      "S10"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "Check",
+   "parts": [
+    {
+     "name": "Source labels",
+     "ic": "i-kpi",
+     "ids": [
+      "S4",
+      "S5"
+     ]
+    },
+    {
+     "name": "Coverage check",
+     "ic": "i-measure",
+     "ids": [
+      "S3"
+     ]
+    },
+    {
+     "name": "Reconcile",
+     "ic": "i-eval",
+     "ids": [
+      "S9"
+     ]
+    },
+    {
+     "name": "Quoted writer",
+     "ic": "i-llm-drafter",
+     "ids": [
+      "S1",
+      "S6"
+     ]
+    },
+    {
+     "name": "Citation checker",
+     "ic": "i-hcc-evidence",
+     "ids": [
+      "S1"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "Deliver",
+   "parts": [
+    {
+     "name": "Failure ledger",
+     "ic": "i-monitor",
+     "ids": [
+      "S2",
+      "S7"
+     ]
+    },
+    {
+     "name": "Stakes gate",
+     "ic": "i-gateway",
+     "ids": [
+      "S2",
+      "S8"
+     ]
+    },
+    {
+     "name": "Human sign-off",
+     "ic": "i-executive",
+     "ids": [
+      "S1",
+      "S4",
+      "S8"
+     ]
+    },
+    {
+     "name": "Answer and gaps",
+     "ic": "i-submit",
+     "ids": [
+      "S2"
+     ]
+    }
+   ]
+  }
+ ],
+ "donow": {
+  "use": [
+   "Treat any answer you will repeat to a client as unchecked until two key claims match a quoted sentence on the page.",
+   "Use deep research mode for multi-part questions, and ask for the plan first.",
+   "End with: list the searches you ran, the pages you opened, and anything that failed.",
+   "Paste or upload the source yourself when it matters, especially paywalled pages and PDFs.",
+   "Never give a browsing agent your email, payments or private files."
+  ],
+  "build": [
+   "Measure a baseline on your own questions first. Agree a ceiling on what each run may cost.",
+   "Ship the failure ledger and zero-source rule next. Continue only if silent failures fall.",
+   "Run domain allow and block lists on every answer. Add read-before-cite and a citation checker to anything forwarded.",
+   "Show source labels beside every check mark. A quote from a planted page still passes the check.",
+   "If the agent can act, read pages in a separate model with no tools. Read-only research can use filters."
+  ],
+  "consumer": [
+   "Check any health, money or legal answer with a qualified person before acting.",
+   "Ask for the best case against your view. Agreement is not evidence.",
+   "Keep company and private data out of personal AI accounts.",
+   "Note your plan's limits and model, and check them again after each update.",
+   "Restate key facts and rules at the start of long chats."
+  ],
+  "developer": [
+   "Give agents the least access they need, with no production access or saved passwords.",
+   "Require an approval step before any delete or deploy.",
+   "Accept \"tests pass\" only with a test log the tool captured.",
+   "Pin model versions and rerun your own tests before any upgrade.",
+   "Treat repos, plug-ins and tool settings as untrusted, and patch agent tools quickly."
+  ],
+  "enterprise": [
+   "Who: the CIO. First step: give staff one approved AI tool, with controls that stop company data leaving.",
+   "Who: the finance lead. First step: for each AI project, compare what it saves with what it costs. Agree the rule for stopping it before it starts.",
+   "Who: the security lead. First step: list every AI tool that can act on its own. Make sure every action is recorded and it can be switched off. Test the switch.",
+   "Who: the procurement lead. First step: add notice periods to AI contracts for when a vendor retires the AI version you use, and for changes to usage limits.",
+   "Who: the HR lead, with team managers. First step: work out how many people are needed to check AI work, and shape roles around that volume.",
+   "Who: the head of each team that sends AI work outside the company. First step: name one person who checks every figure, quote and source before it is sent."
+  ]
+ },
+ "note": "timeline: TL on drafts/src.html (8 events, S ids) and drafts/frontier-challenges-src.html (9 events, F ids), merged by date, text as on the pages with em-dashes and semicolons replaced, one undated October event kept at month precision (2026-10). scorecard: COLS, G and GN on src.html, an s suffix in G became older=true (all evidence before 2026). segments: SEG on the frontier page. journey: STAGES on the frontier page with ids from each problem's j. pipeline: STAGES on src.html with ids from each problem's stage. lenses: LN on the frontier page. matrix: RH and CH on the frontier page, axis names from its heading and aria label, hot is the highlighted cell. lanes: LANES on src.html, a design proposal and not a fact (V9 Page 2 note). donow: DO on src.html (use, build) and on the frontier page (consumer, developer, enterprise, bold tags removed). ev and src on timeline and scorecard come from docs/V12_extra_data_check.md. owners: the six owners and first steps from the For managers section of docs/Frontier_AI_Challenges_User_Research.md, reworded only for length, ev design because they are recommendations (ledger row H-03). objections: three from the sceptical CIO review (Frontier_AI_Challenges_User_Research.md section 12, C1 and C2) and the hostile review of our own test (AI_Web_Search_Failures_Technical_Design.md 10.0c, objection 1), shortened, ev design (ledger row H-04). ownCase: our scheduled runs could search but not open pages, from docs/AI_Web_Search_Failures_research/D1_routine_dns_case.md, rung 3 own logs (ledger row H-05).",
+ "owners": [
+  {
+   "id": "cio",
+   "name": "CIO",
+   "ic": "i-executive",
+   "first": "Give staff one approved AI tool, with controls that stop company data leaving.",
+   "ev": "design",
+   "src": "docs/Frontier_AI_Challenges_User_Research.md, For managers, What to do first, items 1 to 6. Ledger: AI_Challenges_Solutions_Technical_Design.md A.3 row H-03"
+  },
+  {
+   "id": "finance",
+   "name": "Finance lead",
+   "ic": "i-kpi",
+   "first": "For each AI project, compare what it saves with what it costs. Agree the stop rule before it starts.",
+   "ev": "design",
+   "src": "docs/Frontier_AI_Challenges_User_Research.md, For managers, What to do first, items 1 to 6. Ledger: AI_Challenges_Solutions_Technical_Design.md A.3 row H-03"
+  },
+  {
+   "id": "security",
+   "name": "Security lead",
+   "ic": "i-security",
+   "first": "List every AI tool that can act on its own. Record every action it takes and test the off switch.",
+   "ev": "design",
+   "src": "docs/Frontier_AI_Challenges_User_Research.md, For managers, What to do first, items 1 to 6. Ledger: AI_Challenges_Solutions_Technical_Design.md A.3 row H-03"
+  },
+  {
+   "id": "procurement",
+   "name": "Procurement lead",
+   "ic": "i-policy-doc",
+   "first": "Add notice periods to AI contracts for model retirement and for changes to usage limits.",
+   "ev": "design",
+   "src": "docs/Frontier_AI_Challenges_User_Research.md, For managers, What to do first, items 1 to 6. Ledger: AI_Challenges_Solutions_Technical_Design.md A.3 row H-03"
+  },
+  {
+   "id": "hr",
+   "name": "HR lead",
+   "ic": "i-analyst",
+   "first": "With team managers, work out how many people are needed to check AI work. Shape roles around that volume.",
+   "ev": "design",
+   "src": "docs/Frontier_AI_Challenges_User_Research.md, For managers, What to do first, items 1 to 6. Ledger: AI_Challenges_Solutions_Technical_Design.md A.3 row H-03"
+  },
+  {
+   "id": "teams",
+   "name": "Team heads",
+   "ic": "i-approve",
+   "first": "Name one person who checks every figure, quote and source before AI-written work is sent.",
+   "ev": "design",
+   "src": "docs/Frontier_AI_Challenges_User_Research.md, For managers, What to do first, items 1 to 6. Ledger: AI_Challenges_Solutions_Technical_Design.md A.3 row H-03"
+  }
+ ],
+ "objections": [
+  {
+   "q": "No firm cost",
+   "a": "The failures are scored from the buyer side, not for any one firm",
+   "ev": "design",
+   "src": "Frontier_AI_Challenges_User_Research.md section 12, C1"
+  },
+  {
+   "q": "Single scorer",
+   "a": "Tiers replace ranks, and a second blind scorer now checks them",
+   "ev": "design",
+   "src": "Frontier_AI_Challenges_User_Research.md section 12, C2"
+  },
+  {
+   "q": "Self-scored search test",
+   "a": "Its scores stay unconfirmed until an outside rater rescores",
+   "ev": "design",
+   "src": "AI_Web_Search_Failures_Technical_Design.md 10.0c, objection 1"
+  }
+ ],
+ "ownCase": {
+  "st": "read",
+  "cap": "Our own runs read snippets, not pages",
+  "num": "19 of 19",
+  "numl": "page fetches failed on 24 Oct",
+  "ev": "verified",
+  "ids": [
+   "S7",
+   "S6",
+   "S5",
+   "S2"
+  ],
+  "fix": "Each run now opens one known page first and warns if it fails",
+  "src": "docs/AI_Web_Search_Failures_research/D1_routine_dns_case.md, rung 3"
+ },
+ "slenses": [
+  "Reports",
+  "Measured",
+  "Impact",
+  "Hidden"
+ ]
+}

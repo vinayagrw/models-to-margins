@@ -1,0 +1,1685 @@
+{
+ "layers": [
+  {
+   "id": "L1",
+   "name": "Discover",
+   "icon": "i-network",
+   "tone": "slate",
+   "one": "Agents find products and what each merchant's checkout supports.",
+   "arch": "Product feeds, well known capability files, MCP servers and Agent Cards tell agents what they can buy and how."
+  },
+  {
+   "id": "L2",
+   "name": "Intent and mandate",
+   "icon": "i-policy-doc",
+   "tone": "violet",
+   "one": "Proof of what the user allowed the agent to buy.",
+   "arch": "Token limits, signed open or closed mandates, or instructions the network holds. None defines a dispute process."
+  },
+  {
+   "id": "L3",
+   "name": "Agent identity",
+   "icon": "i-security",
+   "tone": "teal",
+   "one": "Lets a merchant tell a trusted agent from a bot.",
+   "arch": "Mostly RFC 9421 signed requests checked against a key directory, plus network registration or KYA tokens."
+  },
+  {
+   "id": "L4",
+   "name": "Credential",
+   "icon": "i-vault",
+   "tone": "amber",
+   "one": "What pays, without handing card numbers to the agent.",
+   "arch": "Agentic network tokens, PSP scoped tokens, wallet accounts, stablecoin keys or bank account mandates such as UPI Reserve Pay."
+  },
+  {
+   "id": "L5",
+   "name": "Rail",
+   "icon": "i-event-stream",
+   "tone": "coral",
+   "one": "How the money moves, and how fast and costly.",
+   "arch": "Card networks, real time bank rails, stablecoins on chain or Lightning. Each sets cost, speed and reversibility."
+  },
+  {
+   "id": "L6",
+   "name": "Settle",
+   "icon": "i-clearinghouse",
+   "tone": "slate",
+   "one": "Money lands, and both sides reconcile the order.",
+   "arch": "Acquirers settle cards. Facilitators verify and settle HTTP 402 payments on chain, some batching many into one."
+  },
+  {
+   "id": "L7",
+   "name": "Dispute",
+   "icon": "i-appeal",
+   "tone": "red",
+   "one": "Who refunds or absorbs a bad agent purchase.",
+   "arch": "Card reason codes written for human buyers, mandates offered as evidence, and no dispute path on chain rails."
+  }
+ ],
+ "usecases": [
+  {
+   "id": "C",
+   "name": "Consumer checkout",
+   "one": "A person's agent buys from a merchant with card or wallet."
+  },
+  {
+   "id": "B",
+   "name": "B2B procurement",
+   "one": "A business agent pays suppliers or invoices within limits a human set."
+  },
+  {
+   "id": "M",
+   "name": "Machine pay per call",
+   "one": "An agent pays per API call, tool call or page."
+  }
+ ],
+ "protocols": [
+  {
+   "id": "acp",
+   "name": "ACP",
+   "full": "Agentic Commerce Protocol",
+   "owner": "OpenAI, Stripe and Meta",
+   "kind": "commerce",
+   "layers": [
+    "L1",
+    "L2",
+    "L4",
+    "L7"
+   ],
+   "icon": "i-submit",
+   "tone": "teal",
+   "status": {
+    "C": {
+     "m": "Spec",
+     "as_of": "2026-11-15",
+     "ev": "verified 2026",
+     "src": [
+      "R1-01",
+      "R1-02",
+      "R1-15"
+     ]
+    },
+    "B": {
+     "m": "Absent",
+     "as_of": "",
+     "ev": "",
+     "src": []
+    },
+    "M": {
+     "m": "Absent",
+     "as_of": "",
+     "ev": "",
+     "src": []
+    }
+   },
+   "flow": "token",
+   "one": "Simple REST checkout. It has gone quiet, and ChatGPT now sends buyers to retailer sites.",
+   "arch": "Merchant feed, checkout sessions, then delegated payment returns a token capped by amount, merchant and expiry. Idempotency keys required. No agent identity scheme. Copilot Checkout used it for Stripe sellers at launch.",
+   "gaps": "No signed user mandate, one time allowance only, no release since April.",
+   "params": {
+    "P1": "human present",
+    "P3": "OAuth client",
+    "P4": "token scoped limits",
+    "P5": "PSP scoped token or network token",
+    "P6": "card network",
+    "P7": "reversible by chargeback",
+    "P9": "card reason codes",
+    "P11": "REST checkout API",
+    "P12": "optional HMAC for webhooks"
+   }
+  },
+  {
+   "id": "ucp",
+   "name": "UCP",
+   "full": "Universal Commerce Protocol",
+   "owner": "Google and Shopify, with Stripe and councils",
+   "kind": "commerce",
+   "layers": [
+    "L1",
+    "L2",
+    "L3",
+    "L4",
+    "L7"
+   ],
+   "icon": "i-network",
+   "tone": "teal",
+   "status": {
+    "C": {
+     "m": "Live",
+     "as_of": "2026-10-15",
+     "ev": "verified 2026",
+     "src": [
+      "R1-29"
+     ]
+    },
+    "B": {
+     "m": "Absent",
+     "as_of": "",
+     "ev": "",
+     "src": []
+    },
+    "M": {
+     "m": "Absent",
+     "as_of": "",
+     "ev": "",
+     "src": []
+    }
+   },
+   "flow": "token",
+   "one": "The only checkout protocol with verified live consumer checkout in the last 90 days, via Google Universal Cart.",
+   "arch": "Business profile and keys at a well known file, optional signed requests, checkout over REST, MCP, A2A or embedded. An optional AP2 mandate extension locks the session once negotiated.",
+   "gaps": "Nothing tagged since August, both 2026 releases broke old versions. No B2B or pay per call.",
+   "params": {
+    "P1": "human present",
+    "P3": "signed HTTP requests",
+    "P4": "none, or signed cart mandate",
+    "P5": "wallet account, PSP or network token",
+    "P6": "card network",
+    "P7": "reversible by chargeback",
+    "P9": "card reason codes",
+    "P11": "REST, MCP, A2A, embedded",
+    "P12": "HTTP message signatures, SD-JWT"
+   }
+  },
+  {
+   "id": "ap2",
+   "name": "AP2",
+   "full": "Agent Payments Protocol",
+   "owner": "Google, standards work in FIDO",
+   "kind": "trust",
+   "layers": [
+    "L2",
+    "L3",
+    "L4",
+    "L7"
+   ],
+   "icon": "i-policy-doc",
+   "tone": "violet",
+   "status": {
+    "C": {
+     "m": "Spec",
+     "as_of": "2026-11-15",
+     "ev": "verified 2026",
+     "src": [
+      "R1-35",
+      "R1-39"
+     ]
+    },
+    "B": {
+     "m": "Spec",
+     "as_of": "2026-11-15",
+     "ev": "verified 2026",
+     "src": [
+      "R1-35",
+      "R1-39"
+     ]
+    },
+    "M": {
+     "m": "Spec",
+     "as_of": "2026-11-15",
+     "ev": "verified 2026",
+     "src": [
+      "R1-35",
+      "R1-39"
+     ]
+    }
+   },
+   "flow": "mandate",
+   "one": "Signed mandates that prove what the user allowed, for purchases with or without them present.",
+   "arch": "Open Checkout and Payment mandates set limits ahead, closed ones bind one cart. SD-JWT credentials with the agent key bound in. Transport left to UCP or A2A.",
+   "gaps": "No release since April. Disputes out of scope. Signatures can sit on manipulated choices.",
+   "params": {
+    "P1": "human present or not present",
+    "P3": "verifiable credential",
+    "P4": "signed intent and cart mandates",
+    "P5": "instrument agnostic",
+    "P6": "not defined",
+    "P7": "set by rail",
+    "P9": "signed mandate as evidence",
+    "P11": "not defined, runs inside UCP or A2A",
+    "P12": "SD-JWT"
+   }
+  },
+  {
+   "id": "a2a",
+   "name": "A2A",
+   "full": "Agent2Agent and its x402 extension",
+   "owner": "Linux Foundation, extension by Google",
+   "kind": "commerce",
+   "layers": [
+    "L1",
+    "L3"
+   ],
+   "icon": "i-agent",
+   "tone": "teal",
+   "status": {
+    "C": {
+     "m": "Spec",
+     "as_of": "2026-11-15",
+     "ev": "verified 2026",
+     "src": [
+      "R1-42"
+     ]
+    },
+    "B": {
+     "m": "Spec",
+     "as_of": "2026-11-15",
+     "ev": "verified 2026",
+     "src": [
+      "R1-42"
+     ]
+    },
+    "M": {
+     "m": "Spec",
+     "as_of": "2026-11-15",
+     "ev": "verified 2026",
+     "src": [
+      "R1-41",
+      "R1-42"
+     ]
+    }
+   },
+   "flow": "none",
+   "one": "Messaging between agents across companies. Commerce comes only through extensions such as x402.",
+   "arch": "Signed Agent Cards for discovery and long running tasks. The x402 extension adds payment states and an append only receipts list, but has seen little work.",
+   "gaps": "No commerce meaning in core. Extension has no spend limits or mandate link.",
+   "params": {
+    "P1": "machine to machine or not present",
+    "P3": "signed agent card",
+    "P4": "not defined",
+    "P5": "stablecoin key via extension",
+    "P6": "stablecoin on chain via extension",
+    "P7": "final, refund by agreement",
+    "P9": "none",
+    "P11": "A2A messages",
+    "P12": "JWS on Agent Cards"
+   }
+  },
+  {
+   "id": "mcp",
+   "name": "MCP",
+   "full": "Model Context Protocol, WebMCP and Shop MCP",
+   "owner": "MCP project, W3C group, Shopify",
+   "kind": "commerce",
+   "layers": [
+    "L1"
+   ],
+   "icon": "i-mcp",
+   "tone": "teal",
+   "status": {
+    "C": {
+     "m": "Live",
+     "as_of": "2026-10-13",
+     "ev": "verified 2026",
+     "src": [
+      "R1-33"
+     ]
+    },
+    "B": {
+     "m": "Absent",
+     "as_of": "",
+     "ev": "",
+     "src": []
+    },
+    "M": {
+     "m": "Live",
+     "as_of": "2026-08-18",
+     "ev": "verified 2026",
+     "src": [
+      "R1-47",
+      "R2-56"
+     ]
+    }
+   },
+   "flow": "h402",
+   "one": "How agents call tools. Shopify runs live checkout on it, and paid tools wrap x402 or MPP.",
+   "arch": "Stateless spec with no payment primitive. Shop MCP completes checkout only after the shopper confirms. AWS AgentCore pays for MCP tools over x402 and MPP.",
+   "gaps": "No payment object, no mandate, no standard human confirmation for paid tool calls.",
+   "params": {
+    "P1": "human present or machine to machine",
+    "P3": "OAuth client",
+    "P4": "not defined",
+    "P5": "via x402 or MPP wrapper",
+    "P6": "via x402 or MPP wrapper",
+    "P7": "via x402 or MPP wrapper",
+    "P9": "not defined",
+    "P11": "MCP tool calls",
+    "P12": "none in core"
+   }
+  },
+  {
+   "id": "wba",
+   "name": "Web Bot Auth",
+   "full": "IETF Web Bot Auth over RFC 9421",
+   "owner": "IETF working group, Cloudflare and Google authors",
+   "kind": "trust",
+   "layers": [
+    "L3"
+   ],
+   "icon": "i-security",
+   "tone": "violet",
+   "status": {
+    "C": {
+     "m": "Live",
+     "as_of": "2026-11-15",
+     "ev": "verified 2026",
+     "src": [
+      "R1-16",
+      "R1-34"
+     ]
+    },
+    "B": {
+     "m": "Spec",
+     "as_of": "2026-11-15",
+     "ev": "verified 2026",
+     "src": [
+      "R1-56"
+     ]
+    },
+    "M": {
+     "m": "Spec",
+     "as_of": "2026-11-15",
+     "ev": "verified 2026",
+     "src": [
+      "R1-56"
+     ]
+    }
+   },
+   "flow": "token",
+   "one": "Signed requests that prove which agent called. ChatGPT's browser already signs with it.",
+   "arch": "Agent publishes keys at a well known address and signs each request. Verifiers fetch the directory and check the signature. Proves the agent, not the user's consent.",
+   "gaps": "Not yet an RFC. Card network tags differ from the draft's single tag.",
+   "params": {
+    "P1": "not defined",
+    "P3": "signed HTTP requests",
+    "P4": "not defined",
+    "P5": "not defined",
+    "P6": "not defined",
+    "P7": "not defined",
+    "P9": "not defined",
+    "P11": "any HTTP",
+    "P12": "HTTP message signatures"
+   }
+  },
+  {
+   "id": "visa-tap",
+   "name": "Visa TAP",
+   "full": "Visa Trusted Agent Protocol",
+   "owner": "Visa with Cloudflare",
+   "kind": "trust",
+   "layers": [
+    "L2",
+    "L3",
+    "L4"
+   ],
+   "icon": "i-security",
+   "tone": "violet",
+   "status": {
+    "C": {
+     "m": "Pilot",
+     "as_of": "2026-07-02",
+     "ev": "vendor",
+     "src": [
+      "G-34"
+     ]
+    },
+    "B": {
+     "m": "Pilot",
+     "as_of": "2026-10-20",
+     "ev": "verified 2026",
+     "src": [
+      "R1-54"
+     ]
+    },
+    "M": {
+     "m": "Absent",
+     "as_of": "",
+     "ev": "",
+     "src": []
+    }
+   },
+   "flow": "token",
+   "one": "Visa's agent identity check, now in a live B2B invoice pilot with BILL and Billtrust.",
+   "arch": "Registered agents sign each request with RFC 9421 and a browse or pay tag. Merchant or CDN verifies against a Visa hosted key directory and a replay cache.",
+   "gaps": "No versioned spec, sample repo idle, tags differ from the IETF draft.",
+   "params": {
+    "P1": "human present or not present",
+    "P3": "signed HTTP requests, network registered agent",
+    "P4": "network held instructions",
+    "P5": "agentic network token",
+    "P6": "card network",
+    "P7": "reversible by chargeback",
+    "P9": "card reason codes",
+    "P11": "agentic browser",
+    "P12": "HTTP message signatures"
+   }
+  },
+  {
+   "id": "mc-vi",
+   "name": "Verifiable Intent",
+   "full": "Mastercard Verifiable Intent",
+   "owner": "Mastercard, contributed to FIDO",
+   "kind": "trust",
+   "layers": [
+    "L2",
+    "L3",
+    "L7"
+   ],
+   "icon": "i-policy-doc",
+   "tone": "violet",
+   "status": {
+    "C": {
+     "m": "Spec",
+     "as_of": "2026-11-15",
+     "ev": "verified 2026",
+     "src": [
+      "R1-61",
+      "R1-63"
+     ]
+    },
+    "B": {
+     "m": "Absent",
+     "as_of": "",
+     "ev": "",
+     "src": []
+    },
+    "M": {
+     "m": "Absent",
+     "as_of": "",
+     "ev": "",
+     "src": []
+    }
+   },
+   "flow": "mandate",
+   "one": "A signed record of what the cardholder asked for, shown in parts to each party.",
+   "arch": "Chained SD-JWT layers bound to device and agent keys. The network sees payment data, the merchant sees checkout data. Fields align to AP2.",
+   "gaps": "Still a first draft with one maintainer and no verified production use.",
+   "params": {
+    "P1": "human present or not present",
+    "P3": "verifiable credential",
+    "P4": "signed cart or intent mandate",
+    "P5": "card",
+    "P6": "card network",
+    "P7": "reversible by chargeback",
+    "P9": "signed mandate as evidence",
+    "P11": "maps onto AP2, ACP, UCP",
+    "P12": "SD-JWT"
+   }
+  },
+  {
+   "id": "kya",
+   "name": "KYAPay and KYA",
+   "full": "Know Your Agent tokens and framework",
+   "owner": "Skyfire draft, Ant, Mastercard and Visa framework",
+   "kind": "trust",
+   "layers": [
+    "L3",
+    "L4"
+   ],
+   "icon": "i-approve",
+   "tone": "violet",
+   "status": {
+    "C": {
+     "m": "Spec",
+     "as_of": "2026-11-15",
+     "ev": "verified 2026",
+     "src": [
+      "R1-67"
+     ]
+    },
+    "B": {
+     "m": "Unsettled",
+     "as_of": "2026-11-15",
+     "ev": "vendor",
+     "src": [
+      "R1-68"
+     ]
+    },
+    "M": {
+     "m": "Spec",
+     "as_of": "2026-11-15",
+     "ev": "verified 2026",
+     "src": [
+      "R1-67"
+     ]
+    }
+   },
+   "flow": "none",
+   "one": "A trusted issuer vouches for the agent and its human in a signed token.",
+   "arch": "KYAPay carries identity and payment claims in JWTs sent in a request header. The cross network KYA framework has no spec or timeline.",
+   "gaps": "Individual draft only. The trusted issuer list is out of scope.",
+   "params": {
+    "P1": "not present or machine to machine",
+    "P3": "verifiable credential or KYA token",
+    "P4": "token scoped limits",
+    "P5": "wallet account held by issuer",
+    "P6": "not defined",
+    "P7": "not defined",
+    "P9": "none",
+    "P11": "HTTP header",
+    "P12": "JWS"
+   }
+  },
+  {
+   "id": "fido",
+   "name": "FIDO, EMVCo, OpenID",
+   "full": "Standards body work on agent identity and intent",
+   "owner": "FIDO Alliance, EMVCo, OpenID Foundation",
+   "kind": "trust",
+   "layers": [
+    "L2",
+    "L3"
+   ],
+   "icon": "i-rule-registry",
+   "tone": "violet",
+   "status": {
+    "C": {
+     "m": "Unsettled",
+     "as_of": "2026-11-15",
+     "ev": "verified 2026",
+     "src": [
+      "R1-40",
+      "R1-64"
+     ]
+    },
+    "B": {
+     "m": "Unsettled",
+     "as_of": "2026-11-15",
+     "ev": "verified 2026",
+     "src": [
+      "R1-40",
+      "R1-64"
+     ]
+    },
+    "M": {
+     "m": "Unsettled",
+     "as_of": "2026-11-15",
+     "ev": "verified 2026",
+     "src": [
+      "R1-40",
+      "R1-64"
+     ]
+    }
+   },
+   "flow": "mandate",
+   "one": "Where mandate and agent authentication standards are expected to settle. No public draft yet.",
+   "arch": "FIDO groups seeded with AP2 and Verifiable Intent, chaired by Mastercard and Visa for payments. EMVCo drafted intent services and is exploring agent checks. AuthZEN covers approvals.",
+   "gaps": "No timeline from FIDO. EMVCo text seen only through trade press.",
+   "params": {
+    "P1": "not defined",
+    "P3": "verifiable credential, expected",
+    "P4": "signed intent mandate, expected",
+    "P5": "not defined",
+    "P6": "not defined",
+    "P7": "not defined",
+    "P9": "not defined",
+    "P11": "not defined",
+    "P12": "passkey or FIDO"
+   }
+  },
+  {
+   "id": "visa-ic",
+   "name": "Visa Intelligent Commerce",
+   "full": "Visa Intelligent Commerce and Connect",
+   "owner": "Visa",
+   "kind": "payment",
+   "layers": [
+    "L2",
+    "L4",
+    "L5"
+   ],
+   "icon": "i-vault",
+   "tone": "amber",
+   "status": {
+    "C": {
+     "m": "Live",
+     "as_of": "2026-10-28",
+     "ev": "verified 2026",
+     "src": [
+      "R2-11",
+      "R2-01",
+      "G-112"
+     ]
+    },
+    "B": {
+     "m": "Pilot",
+     "as_of": "2026-10-21",
+     "ev": "verified 2026",
+     "src": [
+      "R2-04"
+     ]
+    },
+    "M": {
+     "m": "Spec",
+     "as_of": "2026-11-15",
+     "ev": "verified 2026",
+     "src": [
+      "R2-05",
+      "C395"
+     ]
+    }
+   },
+   "flow": "token",
+   "one": "Gives each agent its own Visa token after a passkey. Live, with volume Visa calls limited.",
+   "arch": "Token provisioned through Visa Token Service, instructions sent as an encrypted payload. Connect accepts TAP, MPP, ACP and UCP. No agentic volume published.",
+   "gaps": "No agentic fee or volume disclosed. Cardholders answer for enrolled agents under Visa rules.",
+   "params": {
+    "P1": "human present or not present",
+    "P3": "network registered agent",
+    "P4": "network held instructions",
+    "P5": "agentic network token",
+    "P6": "card network",
+    "P7": "reversible by chargeback",
+    "P9": "card reason codes",
+    "P11": "REST APIs, MCP server",
+    "P12": "passkey, HTTP message signatures"
+   }
+  },
+  {
+   "id": "mc-agentpay",
+   "name": "Agent Pay",
+   "full": "Mastercard Agent Pay and Agent Pay for Machines",
+   "owner": "Mastercard",
+   "kind": "payment",
+   "layers": [
+    "L3",
+    "L4",
+    "L5"
+   ],
+   "icon": "i-vault",
+   "tone": "amber",
+   "status": {
+    "C": {
+     "m": "Live",
+     "as_of": "2026-10-28",
+     "ev": "verified 2026",
+     "src": [
+      "R2-11",
+      "R2-09",
+      "R1-18",
+      "G-117"
+     ]
+    },
+    "B": {
+     "m": "Absent",
+     "as_of": "",
+     "ev": "",
+     "src": []
+    },
+    "M": {
+     "m": "Spec",
+     "as_of": "2026-11-15",
+     "ev": "vendor",
+     "src": [
+      "R2-13",
+      "R2-14"
+     ]
+    }
+   },
+   "flow": "token",
+   "one": "Agentic Mastercard tokens for registered agents. Live in Shop Pay and several markets, volumes small.",
+   "arch": "Agent registers, signs requests through Web Bot Auth, and pays with an agentic token in the normal card form. Issuer authorises, with a passkey where needed.",
+   "gaps": "No GA statement or agent liability rule found. Machines product has no real money.",
+   "params": {
+    "P1": "human present or not present",
+    "P3": "network registered agent, signed HTTP requests",
+    "P4": "network held instructions",
+    "P5": "agentic network token",
+    "P6": "card network",
+    "P7": "reversible by chargeback",
+    "P9": "card reason codes",
+    "P11": "agentic browser",
+    "P12": "HTTP message signatures, passkey"
+   }
+  },
+  {
+   "id": "amex-ace",
+   "name": "Amex ACE",
+   "full": "American Express ACE developer kit",
+   "owner": "American Express",
+   "kind": "payment",
+   "layers": [
+    "L2",
+    "L3",
+    "L4",
+    "L7"
+   ],
+   "icon": "i-payer",
+   "tone": "amber",
+   "status": {
+    "C": {
+     "m": "Spec",
+     "as_of": "2026-11-15",
+     "ev": "verified 2026",
+     "src": [
+      "G-24",
+      "G-20"
+     ]
+    },
+    "B": {
+     "m": "Absent",
+     "as_of": "",
+     "ev": "",
+     "src": []
+    },
+    "M": {
+     "m": "Absent",
+     "as_of": "",
+     "ev": "",
+     "src": []
+    }
+   },
+   "flow": "token",
+   "one": "Promises agent error cover, not yet live. Intent Intelligence has no live integrations.",
+   "arch": "Intent Intelligence, published 2026-10-13, carries the purchase intent registered agents send Amex. Agent Purchase Protection is promised, not yet available.",
+   "gaps": "No live integration yet. Protection terms and developer kit status not confirmed.",
+   "params": {
+    "P1": "not confirmed",
+    "P3": "network registered agent",
+    "P4": "network held instructions",
+    "P5": "not confirmed",
+    "P6": "card network",
+    "P7": "reversible by chargeback",
+    "P9": "card reason codes, protection promised",
+    "P11": "not found",
+    "P12": "not found"
+   }
+  },
+  {
+   "id": "spt",
+   "name": "Stripe SPT",
+   "full": "Stripe Shared Payment Tokens and Link",
+   "owner": "Stripe",
+   "kind": "payment",
+   "layers": [
+    "L2",
+    "L4"
+   ],
+   "icon": "i-gateway",
+   "tone": "amber",
+   "status": {
+    "C": {
+     "m": "Live",
+     "as_of": "2026-11-15",
+     "ev": "vendor",
+     "src": [
+      "R2-15",
+      "G-205"
+     ]
+    },
+    "B": {
+     "m": "Spec",
+     "as_of": "2026-11-15",
+     "ev": "verified 2026",
+     "src": [
+      "R2-15"
+     ]
+    },
+    "M": {
+     "m": "Spec",
+     "as_of": "2026-11-15",
+     "ev": "verified 2026",
+     "src": [
+      "R2-17"
+     ]
+    }
+   },
+   "flow": "token",
+   "one": "A scoped grant of the buyer's saved payment method to one seller, capped and revocable.",
+   "arch": "Limits on currency, amount and expiry. Stripe may ride Visa or Mastercard agentic tokens underneath. Still under preview terms. Link balance spends USDC through a card.",
+   "gaps": "No agent signature in the token flow. Link makes users answer for agent purchases.",
+   "params": {
+    "P1": "human present",
+    "P3": "none",
+    "P4": "token scoped limits",
+    "P5": "PSP scoped token",
+    "P6": "card network, wallets",
+    "P7": "reversible by chargeback",
+    "P9": "card reason codes",
+    "P11": "REST checkout API",
+    "P12": "none, 3DS step up possible"
+   }
+  },
+  {
+   "id": "x402",
+   "name": "x402",
+   "full": "x402 HTTP payments",
+   "owner": "x402 Foundation, Linux Foundation",
+   "kind": "payment",
+   "layers": [
+    "L4",
+    "L5",
+    "L6"
+   ],
+   "icon": "i-event-stream",
+   "tone": "amber",
+   "status": {
+    "C": {
+     "m": "Spec",
+     "as_of": "2026-11-15",
+     "ev": "verified 2026",
+     "src": [
+      "R2-30"
+     ]
+    },
+    "B": {
+     "m": "Spec",
+     "as_of": "2026-11-15",
+     "ev": "verified 2026",
+     "src": [
+      "R2-30"
+     ]
+    },
+    "M": {
+     "m": "Live",
+     "as_of": "2026-11-15",
+     "ev": "vendor",
+     "src": [
+      "R2-38",
+      "R2-39",
+      "G-104"
+     ]
+    }
+   },
+   "flow": "h402",
+   "one": "Pay per request with HTTP 402 and stablecoins. Live, small, and down sharply since August.",
+   "arch": "Server answers 402 with terms, client signs a stablecoin payment and retries, the server verifies, serves, then settles through a facilitator. Upto and batch settlement are merged.",
+   "gaps": "No protocol refund or dispute path. Papers show unpaid service and paid but denied outcomes.",
+   "params": {
+    "P1": "machine to machine",
+    "P3": "none, payment is identity",
+    "P4": "none, client spend cap",
+    "P5": "stablecoin key",
+    "P6": "stablecoin on chain",
+    "P7": "final, refund by agreement",
+    "P9": "none",
+    "P11": "HTTP 402",
+    "P12": "on chain signatures"
+   }
+  },
+  {
+   "id": "mpp",
+   "name": "MPP",
+   "full": "Machine Payments Protocol",
+   "owner": "Tempo and Stripe",
+   "kind": "payment",
+   "layers": [
+    "L4",
+    "L5",
+    "L6"
+   ],
+   "icon": "i-event-stream",
+   "tone": "amber",
+   "status": {
+    "C": {
+     "m": "Spec",
+     "as_of": "2026-11-15",
+     "ev": "verified 2026",
+     "src": [
+      "R2-22",
+      "R2-17"
+     ]
+    },
+    "B": {
+     "m": "Absent",
+     "as_of": "",
+     "ev": "",
+     "src": []
+    },
+    "M": {
+     "m": "Live",
+     "as_of": "2026-11-15",
+     "ev": "verified 2026",
+     "src": [
+      "R2-28",
+      "R2-17"
+     ]
+    }
+   },
+   "flow": "h402",
+   "one": "HTTP 402 payments across many methods, from stablecoins to cards. Much smaller on chain.",
+   "arch": "Charge, session and subscription intents. Methods include Tempo, Stripe, Lightning and Solana, with no ACH. Card payments settle off chain and are not counted.",
+   "gaps": "IETF draft expired without working group adoption.",
+   "params": {
+    "P1": "machine to machine",
+    "P3": "none",
+    "P4": "none",
+    "P5": "stablecoin key, PSP token or card",
+    "P6": "stablecoin, card, Lightning",
+    "P7": "final on chain, chargeback on card",
+    "P9": "set by method",
+    "P11": "HTTP 402",
+    "P12": "set by method"
+   }
+  },
+  {
+   "id": "upi",
+   "name": "UPI agents",
+   "full": "UPI Reserve Pay for agents",
+   "owner": "NPCI with Razorpay",
+   "kind": "rail",
+   "layers": [
+    "L4",
+    "L5"
+   ],
+   "icon": "i-clearinghouse",
+   "tone": "coral",
+   "status": {
+    "C": {
+     "m": "Pilot",
+     "as_of": "2026-02-20",
+     "ev": "verified 2026",
+     "src": [
+      "R2-68",
+      "R2-69"
+     ]
+    },
+    "B": {
+     "m": "Absent",
+     "as_of": "",
+     "ev": "",
+     "src": []
+    },
+    "M": {
+     "m": "Absent",
+     "as_of": "",
+     "ev": "",
+     "src": []
+    }
+   },
+   "flow": "mandate",
+   "one": "Users approve one spending limit per merchant, then the agent orders without repeated PIN prompts.",
+   "arch": "UPI Reserve Pay blocks funds for several debits under a user approved limit. Piloted on Claude with Zomato, Swiggy and Zepto for a small group.",
+   "gaps": "A wider agent protocol is reported, not confirmed. Liability and limits pending.",
+   "params": {
+    "P1": "human not present",
+    "P3": "none",
+    "P4": "network held instructions",
+    "P5": "bank account mandate",
+    "P6": "real time account to account",
+    "P7": "final, refund by merchant",
+    "P9": "not checked",
+    "P11": "inside the AI app",
+    "P12": "UPI PIN at limit approval"
+   }
+  },
+  {
+   "id": "pix",
+   "name": "Pix agents",
+   "full": "Pix agent payments through Iniciador MCP",
+   "owner": "Banco Central do Brasil rail, Iniciador agent layer",
+   "kind": "rail",
+   "layers": [
+    "L4",
+    "L5"
+   ],
+   "icon": "i-clearinghouse",
+   "tone": "coral",
+   "status": {
+    "C": {
+     "m": "Spec",
+     "as_of": "2026-11-15",
+     "ev": "vendor",
+     "src": [
+      "R2-72",
+      "R2-71"
+     ]
+    },
+    "B": {
+     "m": "Absent",
+     "as_of": "",
+     "ev": "",
+     "src": []
+    },
+    "M": {
+     "m": "Absent",
+     "as_of": "",
+     "ev": "",
+     "src": []
+    }
+   },
+   "flow": "none",
+   "one": "Agents start Pix payments, and the user approves each one by device biometric.",
+   "arch": "Iniciador's MCP server lets bank and fintech agents start Pix payments. Pix Automatico is a live recurring mandate rail on its own.",
+   "gaps": "Launch status unstated and no volume disclosed.",
+   "params": {
+    "P1": "human present",
+    "P3": "none",
+    "P4": "none, per payment approval",
+    "P5": "bank account mandate",
+    "P6": "real time account to account",
+    "P7": "final, refund by agreement",
+    "P9": "not checked",
+    "P11": "MCP tool calls",
+    "P12": "device biometric"
+   }
+  },
+  {
+   "id": "alipay",
+   "name": "Alipay and AMP",
+   "full": "Alipay AI Pay and Ant AMP",
+   "owner": "Ant Group and Ant International",
+   "kind": "rail",
+   "layers": [
+    "L2",
+    "L3",
+    "L4",
+    "L5"
+   ],
+   "icon": "i-payer",
+   "tone": "coral",
+   "status": {
+    "C": {
+     "m": "Pilot",
+     "as_of": "2026-05-26",
+     "ev": "vendor",
+     "src": [
+      "R2-66",
+      "R2-67",
+      "G-49"
+     ]
+    },
+    "B": {
+     "m": "Absent",
+     "as_of": "",
+     "ev": "",
+     "src": []
+    },
+    "M": {
+     "m": "Spec",
+     "as_of": "2026-11-15",
+     "ev": "vendor",
+     "src": [
+      "R1-69",
+      "R1-70"
+     ]
+    }
+   },
+   "flow": "none",
+   "one": "The largest reported base, with explicit user approval for every payment. Figures are self reported.",
+   "arch": "AI Pay installs into agents after an identity check. AI Wallet sits between user and agent. Ant's AMP runs on Alipay+ wallets.",
+   "gaps": "Vendor figures only. AMP has no disclosed volumes or go live dates.",
+   "params": {
+    "P1": "human present",
+    "P3": "verifiable credential or KYA token",
+    "P4": "none, per payment approval",
+    "P5": "wallet account",
+    "P6": "wallet balance",
+    "P7": "not checked",
+    "P9": "PSP or platform policy",
+    "P11": "agent plug in",
+    "P12": "not stated"
+   }
+  }
+ ],
+ "flows": [
+  {
+   "id": "token",
+   "name": "Token checkout",
+   "one": "The agent never sees the card. A wallet or network hands the merchant a scoped token.",
+   "arch": "Discovery file or feed, signed agent request, buyer confirmation, then a single use network or PSP token charged through the merchant's own PSP. Disputes follow card reason codes.",
+   "steps": [
+    {
+     "layer": "L1",
+     "actor": "Agent",
+     "msg": "Reads merchant profile and catalog"
+    },
+    {
+     "layer": "L3",
+     "actor": "Agent",
+     "msg": "Signs request with registered agent key"
+    },
+    {
+     "layer": "L2",
+     "actor": "Shopper",
+     "msg": "Confirms total and payment method"
+    },
+    {
+     "layer": "L4",
+     "actor": "Wallet",
+     "msg": "Issues single use network token"
+    },
+    {
+     "layer": "L5",
+     "actor": "Acquirer",
+     "msg": "Authorises token on card network"
+    },
+    {
+     "layer": "L6",
+     "actor": "Merchant",
+     "msg": "Sends order events to the agent"
+    },
+    {
+     "layer": "L7",
+     "actor": "Issuer",
+     "msg": "Handles disputes under card reason codes"
+    }
+   ]
+  },
+  {
+   "id": "mandate",
+   "name": "Signed mandate",
+   "one": "The user signs limits ahead, the agent signs the cart, and both become evidence.",
+   "arch": "Open mandate on a trusted surface binds the agent key. The agent signs a closed mandate over the cart hash. Credential provider checks both before issuing a token.",
+   "steps": [
+    {
+     "layer": "L2",
+     "actor": "Shopper",
+     "msg": "Signs open mandate on trusted surface"
+    },
+    {
+     "layer": "L1",
+     "actor": "Agent",
+     "msg": "Builds cart with the merchant"
+    },
+    {
+     "layer": "L2",
+     "actor": "Agent",
+     "msg": "Signs closed mandate bound to cart"
+    },
+    {
+     "layer": "L3",
+     "actor": "Merchant",
+     "msg": "Checks agent key in the mandate"
+    },
+    {
+     "layer": "L4",
+     "actor": "Credential provider",
+     "msg": "Verifies mandates and issues payment token"
+    },
+    {
+     "layer": "L6",
+     "actor": "Processor",
+     "msg": "Verifies bindings and returns signed receipts"
+    },
+    {
+     "layer": "L7",
+     "actor": "Merchant",
+     "msg": "Keeps mandates and receipts as evidence"
+    }
+   ]
+  },
+  {
+   "id": "h402",
+   "name": "HTTP 402 pay per call",
+   "one": "The server asks for payment in its reply, and the agent pays and retries.",
+   "arch": "A 402 reply carries the price. The wallet checks its cap, signs and retries. The server verifies, serves, then settles through a facilitator. Payment is final.",
+   "steps": [
+    {
+     "layer": "L1",
+     "actor": "Agent",
+     "msg": "Calls a paid API or tool"
+    },
+    {
+     "layer": "L5",
+     "actor": "Server",
+     "msg": "Replies 402 with price and payee"
+    },
+    {
+     "layer": "L2",
+     "actor": "Wallet",
+     "msg": "Checks the spend cap"
+    },
+    {
+     "layer": "L4",
+     "actor": "Wallet",
+     "msg": "Signs stablecoin payment authorisation"
+    },
+    {
+     "layer": "L6",
+     "actor": "Facilitator",
+     "msg": "Verifies the signed payment for the server"
+    },
+    {
+     "layer": "L6",
+     "actor": "Server",
+     "msg": "Serves the data, settles, returns receipt"
+    },
+    {
+     "layer": "L7",
+     "actor": "Payer",
+     "msg": "No protocol dispute path, refund by agreement"
+    }
+   ]
+  }
+ ],
+ "params": [
+  {
+   "id": "P1",
+   "area": "A",
+   "name": "Initiator presence",
+   "values": [
+    "human present",
+    "human not present",
+    "machine to machine"
+   ],
+   "who": "Protocol and merchant",
+   "why": "Sets whether step up is possible and how disputes are judged.",
+   "kind": "choice"
+  },
+  {
+   "id": "P2",
+   "area": "A",
+   "name": "Payer type",
+   "values": [
+    "consumer",
+    "business",
+    "agent owned wallet"
+   ],
+   "who": "Agent platform",
+   "why": "Picks the legal regime, consumer rules or business contract.",
+   "kind": "choice"
+  },
+  {
+   "id": "P3",
+   "area": "A",
+   "name": "Agent identity method",
+   "values": [
+    "none",
+    "signed HTTP requests",
+    "network registered agent",
+    "verifiable credential or KYA token",
+    "OAuth client",
+    "CDN verified bot, Direct or Intermediary"
+   ],
+   "who": "Protocol and network",
+   "why": "Lets a merchant tell a trusted agent from a bot.",
+   "kind": "choice"
+  },
+  {
+   "id": "P4",
+   "area": "B",
+   "name": "Mandate type",
+   "values": [
+    "none",
+    "implicit",
+    "token scoped limits",
+    "signed intent mandate",
+    "signed cart mandate",
+    "network held instructions"
+   ],
+   "who": "Protocol",
+   "why": "Decides what proof exists that the user agreed.",
+   "kind": "choice"
+  },
+  {
+   "id": "P5",
+   "area": "C",
+   "name": "Credential",
+   "values": [
+    "agentic network token",
+    "PSP scoped token",
+    "wallet account",
+    "stablecoin key",
+    "bank account mandate",
+    "virtual card"
+   ],
+   "who": "Payer and PSP",
+   "why": "Decides who can see and reuse the payment detail.",
+   "kind": "choice"
+  },
+  {
+   "id": "P6",
+   "area": "C",
+   "name": "Rail",
+   "values": [
+    "card network",
+    "real time account to account",
+    "stablecoin on chain",
+    "Lightning",
+    "wallet balance"
+   ],
+   "who": "Payer and merchant",
+   "why": "Sets cost, speed, reach and reversibility.",
+   "kind": "choice"
+  },
+  {
+   "id": "P7",
+   "area": "C",
+   "name": "Finality",
+   "values": [
+    "reversible by chargeback",
+    "final, refund by agreement"
+   ],
+   "who": "Rail",
+   "why": "Decides who absorbs a bad purchase.",
+   "kind": "choice"
+  },
+  {
+   "id": "P8",
+   "area": "D",
+   "name": "Merchant of record",
+   "values": [
+    "merchant",
+    "agent platform",
+    "marketplace"
+   ],
+   "who": "Contract, set by the agent platform's checkout",
+   "why": "Owns tax, refunds and customer service.",
+   "kind": "choice"
+  },
+  {
+   "id": "P9",
+   "area": "D",
+   "name": "Dispute path",
+   "values": [
+    "card reason codes",
+    "PSP or platform policy",
+    "signed mandate as evidence",
+    "none"
+   ],
+   "who": "Network and protocol",
+   "why": "Card reason codes were written for human buyers.",
+   "kind": "choice"
+  },
+  {
+   "id": "P10",
+   "area": "D",
+   "name": "Liability holder",
+   "values": [
+    "issuer when authenticated",
+    "merchant by default",
+    "agent platform by contract",
+    "user under an authorised presumption",
+    "cardholder for an enrolled agent on Visa",
+    "Amex protection promised, not live"
+   ],
+   "who": "Law, network rules, contract",
+   "why": "The open question that slows adoption.",
+   "kind": "context"
+  },
+  {
+   "id": "P11",
+   "area": "E",
+   "name": "Transport",
+   "values": [
+    "REST checkout API",
+    "HTTP 402",
+    "MCP tool calls",
+    "A2A messages",
+    "agentic browser"
+   ],
+   "who": "Protocol",
+   "why": "Sets who must change their stack.",
+   "kind": "choice"
+  },
+  {
+   "id": "P12",
+   "area": "E",
+   "name": "Crypto primitive",
+   "values": [
+    "HTTP message signatures",
+    "SD-JWT or JWS",
+    "on chain signatures",
+    "passkey or FIDO",
+    "macaroons"
+   ],
+   "who": "Protocol",
+   "why": "Decides what can be verified offline and by whom.",
+   "kind": "choice"
+  },
+  {
+   "id": "P13",
+   "area": "E",
+   "name": "Discovery",
+   "values": [
+    "product feed",
+    "well known capability file",
+    "MCP server",
+    "open web"
+   ],
+   "who": "Merchant",
+   "why": "An agent cannot buy what it cannot find.",
+   "kind": "choice"
+  },
+  {
+   "id": "P14",
+   "area": "F",
+   "name": "Jurisdiction",
+   "values": [
+    "US",
+    "EU",
+    "UK",
+    "India",
+    "Singapore",
+    "Brazil",
+    "China",
+    "other"
+   ],
+   "who": "Law",
+   "why": "Consent, refund and liability rules differ by country.",
+   "kind": "context"
+  },
+  {
+   "id": "P15",
+   "area": "A",
+   "name": "Merchant authenticity check",
+   "values": [
+    "none",
+    "domain check",
+    "signed merchant identity",
+    "network listed merchant"
+   ],
+   "who": "Agent platform and network",
+   "why": "Agents have paid fake stores in tests. P3 checks only the agent.",
+   "kind": "choice"
+  },
+  {
+   "id": "P16",
+   "area": "F",
+   "name": "Agent access policy",
+   "values": [
+    "none published",
+    "robots file",
+    "terms of use",
+    "agent or capability file",
+    "protocol discovery file"
+   ],
+   "who": "Merchant",
+   "why": "Merchants now publish opposite rules on which agents may browse or buy.",
+   "kind": "choice"
+  },
+  {
+   "id": "P17",
+   "area": "E",
+   "name": "Checkout location",
+   "values": [
+    "native in the agent",
+    "embedded merchant checkout",
+    "merchant site through an agent browser",
+    "handoff link to the buyer"
+   ],
+   "who": "Protocol and merchant",
+   "why": "Decides where the buyer's final page lives, which transport alone does not say.",
+   "kind": "choice"
+  },
+  {
+   "id": "P18",
+   "area": "B",
+   "name": "Consent capture surface",
+   "values": [
+    "agent interface",
+    "trusted surface such as a wallet or OS",
+    "merchant page",
+    "network app"
+   ],
+   "who": "Protocol",
+   "why": "Decides who can prove consent. A bot signature is not consent.",
+   "kind": "choice"
+  },
+  {
+   "id": "P22",
+   "area": "C",
+   "name": "Agent signal at authorization",
+   "kind": "choice",
+   "values": [
+    "none, card on file",
+    "agentic network token with agent header",
+    "PSP token riding an agentic token",
+    "single use virtual card"
+   ],
+   "who": "Network and PSP, agent platform picks",
+   "why": "Stored cards hide the agent, so the issuer cannot apply agent risk controls."
+  },
+  {
+   "id": "P24",
+   "area": "A",
+   "name": "Buyer identity and account linking",
+   "kind": "choice",
+   "values": [
+    "guest",
+    "OAuth account link",
+    "platform wallet identity",
+    "network enrolment"
+   ],
+   "who": "Merchant offers, agent platform chooses, user consents",
+   "why": "Keeps loyalty and the customer record with the merchant."
+  },
+  {
+   "id": "P26",
+   "area": "B",
+   "name": "Mandate enforcement point",
+   "kind": "choice",
+   "values": [
+    "network at credential retrieval",
+    "merchant against the cart",
+    "PSP by token scope",
+    "agent platform only"
+   ],
+   "who": "Protocol",
+   "why": "Tells the merchant which checks it must run and which it cannot."
+  }
+ ],
+ "vars": [
+  {
+   "id": "V1",
+   "name": "Spend limit",
+   "typical": "per payment, per period, per merchant",
+   "why": "Caps loss when the agent errs. Only the platform or network sees every merchant.",
+   "kind": "choice",
+   "who": "Agent platform or network"
+  },
+  {
+   "id": "V2",
+   "name": "Expiry",
+   "typical": "minutes to months, and different at each layer",
+   "why": "Shorter expiry lowers the stolen credential window. Lifetimes differ by layer.",
+   "kind": "choice",
+   "who": "Protocol and the issuer of each layer"
+  },
+  {
+   "id": "V3",
+   "name": "Scope",
+   "typical": "merchant, category, product, SKU list",
+   "why": "Stops the right amount being spent on the wrong thing.",
+   "kind": "choice",
+   "who": "User, through the agent platform"
+  },
+  {
+   "id": "V4",
+   "name": "Revocation",
+   "typical": "by user, platform or network",
+   "why": "A mandate must not outlive the user's intent.",
+   "kind": "choice",
+   "who": "User, platform or network"
+  },
+  {
+   "id": "V5",
+   "name": "Step up threshold",
+   "typical": "amount or risk score that forces a passkey or approval",
+   "why": "Balances friction against fraud.",
+   "kind": "choice",
+   "who": "Merchant, PSP and issuer"
+  },
+  {
+   "id": "V6",
+   "name": "Idempotency key and retries",
+   "typical": "key per order, retry cap",
+   "why": "Stops double charges when an agent retries.",
+   "kind": "choice",
+   "who": "Merchant and PSP"
+  },
+  {
+   "id": "V7",
+   "name": "Order events",
+   "typical": "created, updated, fulfilled, refunded",
+   "why": "The agent must tell the user what happened.",
+   "kind": "choice",
+   "who": "Merchant"
+  },
+  {
+   "id": "V8",
+   "name": "Evidence retention",
+   "typical": "mandate, cart, agent id, logs, kept for the rail's dispute window, then deleted",
+   "why": "Needed to win a dispute.",
+   "kind": "choice",
+   "who": "Merchant, within the retention rule"
+  },
+  {
+   "id": "V9",
+   "name": "Fees",
+   "typical": "card fees, gas, protocol fee, agent platform fee per sale",
+   "why": "Decides which use cases pay off.",
+   "kind": "choice",
+   "who": "Network, PSP and agent platform"
+  },
+  {
+   "id": "V10",
+   "name": "Latency budget",
+   "typical": "milliseconds to seconds per payment",
+   "why": "Pay per call needs sub second settlement.",
+   "kind": "choice",
+   "who": "Merchant and agent platform"
+  },
+  {
+   "id": "V11",
+   "name": "Pre signing context capture",
+   "typical": "none, cart only, cart plus offers and ranking shown",
+   "why": "A valid signature can sit on a manipulated choice.",
+   "kind": "evidence",
+   "who": "Agent platform"
+  },
+  {
+   "id": "V12",
+   "name": "Agent model and version recorded",
+   "typical": "not recorded, in the mandate, in the receipt",
+   "why": "Model updates change what agents buy, and users rarely notice.",
+   "kind": "evidence",
+   "who": "Agent platform"
+  },
+  {
+   "id": "V13",
+   "name": "Revocation evidence",
+   "typical": "user record, platform signed notice, issuer or network registry",
+   "why": "A bank now makes customers prove they revoked an agent.",
+   "kind": "evidence",
+   "who": "Protocol, with the payer's bank"
+  },
+  {
+   "id": "V15",
+   "name": "Settlement mode",
+   "typical": "per payment, metered session, batched with upto or batch settlement, or authorize then capture, through a network, PSP, facilitator or wallet provider",
+   "why": "Cost, latency and concentration sit in how and through whom payments settle.",
+   "kind": "choice",
+   "who": "Facilitator or PSP"
+  },
+  {
+   "id": "V16",
+   "name": "Minimum ticket",
+   "typical": "smallest amount the PSP or facilitator will settle per payment",
+   "why": "Decides which use cases are possible at all, such as pay per call.",
+   "kind": "choice",
+   "who": "PSP or facilitator"
+  },
+  {
+   "id": "V17",
+   "name": "Own agent completed share",
+   "kind": "evidence",
+   "who": "Merchant, measured",
+   "typical": "below 1%, 1% to 3%, above 3% (our proposed threshold)",
+   "why": "Our proposed threshold, not sourced. Above 3% for two months, build the gateway.",
+   "ev": "illustrative"
+  }
+ ]
+}

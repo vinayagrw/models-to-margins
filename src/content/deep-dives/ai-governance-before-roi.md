@@ -4,6 +4,7 @@ summary: Fourteen weekly runs of one industry series have found universal AI ado
 pubDate: 2026-08-17
 geography: United States
 template: boardroom
+gate: true
 bpEyebrow: Deep Dive No. 14
 bpTitle: AI Governance Arrives Before AI ROI Does
 bpSubtitle: Fourteen runs, six converging surveys, and not one audited facility-level return.
@@ -51,17 +52,17 @@ The week of August 11 to 15, 2026 produced no audited AI return and five governa
   ></iframe>
 </div>
 
-On August 11, Target named Chandhu Nair its first chief AI officer, an SVP title, effective August 24, after six-plus years running stores, data, AI and innovation at Lowe's. Purvi Shah was promoted SVP of user experience in the same announcement. Neither move disclosed a measured return. Around them, four more AI moves landed with no disclosed economics at all: Deloitte and Ivalua announced a strategic alliance for agentic source-to-pay on August 12, Exiger was named a 2026 Great Supply Chain Partner by SupplyChainBrain on August 10 (the report's own author calls this a trade-press award, not a result), USPS disclosed it is evaluating AI for dynamic routing (coverage August 13), and Crocs signed an AI vendor deal to simplify operations with no figures attached. On the regulatory side, OSHA extended its warehousing and distribution-center National Emphasis Program from three years to five, a second governance move with no economic disclosure of its own.
-
-<blockquote>
-  <p>The AI story this week was governance, not capability. Fourteen runs in, no operator in this sector has published an audited, facility-level AI ROI figure.</p>
-  <cite>Industry weekly deep-dive, Run #14, executive summary, 2026-08-15</cite>
-</blockquote>
+On August 11, Target named Chandhu Nair its first chief AI officer, an SVP title, effective August 24, after six-plus years running stores, data, AI and innovation at Lowe's. Purvi Shah was promoted SVP of user experience in the same announcement. Neither move disclosed a measured return.
 
 The sector's fourteen-run pattern is now explicit: adoption is universal, measurement is absent, and this week's response was to appoint someone accountable rather than to publish a number.
 
 <details>
-<summary>Appendix 1, Governance events, Jul 2 to Aug 24 2026 (7 rows)</summary>
+<summary>Appendix 1, more moves (7 rows)</summary>
+<blockquote>
+<p>The AI story this week was governance, not capability. Fourteen runs in, no operator in this sector has published an audited, facility-level AI ROI figure.</p>
+<cite>Industry weekly deep-dive, Run #14, executive summary, 2026-08-15</cite>
+</blockquote>
+<p>Around them, four more AI moves landed with no disclosed economics at all: Deloitte and Ivalua announced a strategic alliance for agentic source-to-pay on August 12, Exiger was named a 2026 Great Supply Chain Partner by SupplyChainBrain on August 10 (the report's own author calls this a trade-press award, not a result), USPS disclosed it is evaluating AI for dynamic routing (coverage August 13), and Crocs signed an AI vendor deal to simplify operations with no figures attached. On the regulatory side, OSHA extended its warehousing and distribution-center National Emphasis Program from three years to five, a second governance move with no economic disclosure of its own.</p>
 <div class="table-wrap">
 <table>
 <thead><tr><th>Date</th><th>Organization</th><th>Event</th><th>Disclosed economics</th><th>Source</th><th>Verdict</th></tr></thead>
@@ -98,10 +99,11 @@ Both Chandhu Nair and Purvi Shah report to chief information and product officer
   <p>Advisory sources claim most chief AI officers report to the CEO or the board, and a circulating figure claims 76% of organizations now have a CAIO, up from 26% a year earlier. Neither claim traces to a rigorous in-window survey. This page states the Target arrangement as one instance and declines to assert a sector-wide reporting split.</p>
 </div>
 
-The role itself is churn-prone. Ranju Das, Lululemon's first Chief AI and Technology Officer, started in September 2025 and left disclosed August 13, 2026, under twelve months in the seat, with analysts flagging turnover concerns as the departure lands weeks before an incoming CEO starts. Elsewhere the appointment pace continues without any published tenure data: Bank of Ireland's Prag Sharma is set to become CAIO in October 2026, HSBC has confirmed David Rice as its first CAIO, Lloyds named Sameer Gupta Chief Data and AI Officer in April 2026, and Orange is reported to be adding a CAIO in September 2026 on low-confidence secondary sourcing.
+The role itself is churn-prone. Ranju Das, Lululemon's first Chief AI and Technology Officer, started in September 2025 and left disclosed August 13, 2026, under twelve months in the seat, with analysts flagging turnover concerns as the departure lands weeks before an incoming CEO starts.
 
 <details>
-<summary>Appendix 2, CAIO appointments and exits in and near the window (6 rows)</summary>
+<summary>Appendix 2, CAIO moves (6 rows)</summary>
+<p>Elsewhere the appointment pace continues without any published tenure data: Bank of Ireland's Prag Sharma is set to become CAIO in October 2026, HSBC has confirmed David Rice as its first CAIO, Lloyds named Sameer Gupta Chief Data and AI Officer in April 2026, and Orange is reported to be adding a CAIO in September 2026 on low-confidence secondary sourcing.</p>
 <div class="table-wrap">
 <table>
 <thead><tr><th>Organization</th><th>Name</th><th>Announced</th><th>Effective</th><th>Reporting line as reported</th><th>Confidence</th><th>Verdict</th></tr></thead>
@@ -137,10 +139,6 @@ Six independent studies converge on the same shape, and what converges is not a 
   <div class="br-stat"><b>6%</b><span>Deloitte</span><span>see ROI inside a year</span></div>
 </div>
 
-Sage puts about 10% of retail and wholesale operators with AI live in workflows. MIT's Project NANDA, published August 2025 and never updated for 2026, found 95% of generative AI pilots show no measurable profit-and-loss impact, and its methodology has been publicly criticized. JLL's figures, 88% piloting with only 5% hitting all their AI goals, come from an October 2025 survey and must not be read as a 2026 data point. Stord found enterprise AI adoption rising from 78% in 2024 to 88% in 2025 while only 7% reached full scale. Deloitte's 2026 edition, fieldwork from August to September 2025, found only 20% of leaders already growing revenue from AI against 74% who aspire to, while 66% report productivity or efficiency gains. Gartner's supply-chain release, published August 5, 2026, is the sixth independent confirmation: 55% of chief supply chain officers are unclear on the ROI of their own AI investments while 67% of supply-chain digital spend is now allocated to AI, drawn from 394 professionals surveyed November 2025 to February 2026 plus 135 senior leaders surveyed January to April 2026.
-
-Two reinforcements landed inside this window. KPMG's Global AI Pulse for Q2 2026, a sample of over 2,000 leaders, found only 7% report established ROI, and that leaders with strong AI cost visibility are five times likelier to report established ROI, 15% versus 3%, while 42% cannot see where their AI money goes at all. Gartner separately found only about one quarter of AI customer-service use cases produce ROI.
-
 <div class="callout caveat">
   <strong>Caveat</strong>
   <p>The apparent agreement across six surveys is not proof of a shared underlying rate, it is six different weak-evidence instruments landing near the same shape. Capgemini's monthly figure of 70% seeing ROI directly contradicts Deloitte's 6%, and Google Cloud's vendor report claims 74% of executives with agents in production saw first-year ROI. Both are shown here, both are excluded from the convergence claim, and Capgemini's number in particular has no named study, date, or sample behind it.</p>
@@ -149,7 +147,9 @@ Two reinforcements landed inside this window. KPMG's Global AI Pulse for Q2 2026
 The one number this page treats as strong counter-evidence is HappyRobot's net dollar retention above 150%, disclosed alongside its August 4, 2026 Series C, because it is revealed preference rather than a survey. It still says nothing about the customers' own ROI, only that they keep paying and expanding.
 
 <details>
-<summary>Appendix 3, Survey provenance ledger (10 rows)</summary>
+<summary>Appendix 3, survey detail (10 rows)</summary>
+<p>Sage puts about 10% of retail and wholesale operators with AI live in workflows. MIT's Project NANDA, published August 2025 and never updated for 2026, found 95% of generative AI pilots show no measurable profit-and-loss impact, and its methodology has been publicly criticized. JLL's figures, 88% piloting with only 5% hitting all their AI goals, come from an October 2025 survey and must not be read as a 2026 data point. Stord found enterprise AI adoption rising from 78% in 2024 to 88% in 2025 while only 7% reached full scale. Deloitte's 2026 edition, fieldwork from August to September 2025, found only 20% of leaders already growing revenue from AI against 74% who aspire to, while 66% report productivity or efficiency gains. Gartner's supply-chain release, published August 5, 2026, is the sixth independent confirmation: 55% of chief supply chain officers are unclear on the ROI of their own AI investments while 67% of supply-chain digital spend is now allocated to AI, drawn from 394 professionals surveyed November 2025 to February 2026 plus 135 senior leaders surveyed January to April 2026.</p>
+<p>Two reinforcements landed inside this window. KPMG's Global AI Pulse for Q2 2026, a sample of over 2,000 leaders, found only 7% report established ROI, and that leaders with strong AI cost visibility are five times likelier to report established ROI, 15% versus 3%, while 42% cannot see where their AI money goes at all. Gartner separately found only about one quarter of AI customer-service use cases produce ROI.</p>
 <div class="table-wrap">
 <table>
 <thead><tr><th>Study</th><th>Publisher</th><th>Fieldwork</th><th>Published</th><th>Sample</th><th>In-window</th><th>Headline figure</th><th>Does not measure</th><th>Verdict</th></tr></thead>
@@ -182,21 +182,23 @@ August 2, 2026 was the EU AI Act's largest scheduled milestone. Most of what was
   ></iframe>
 </div>
 
-The Digital Omnibus, which multiple law-firm trackers place in force around July 27, 2026, postponed Annex III high-risk obligations from August 2, 2026 to December 2, 2027, a slip of about sixteen months, and pushed Annex I embedded-product high-risk obligations to August 2, 2028, a slip of about twenty-four months. What still took effect on August 2 were Article 50 transparency obligations, the Article 4 AI-literacy duty, GPAI enforcement powers, the full penalty regime, and a new Article 5 prohibition on AI-generated non-consensual intimate imagery and CSAM added through the same Omnibus.
+The Digital Omnibus, which multiple law-firm trackers place in force around July 27, 2026, postponed Annex III high-risk obligations from August 2, 2026 to December 2, 2027, a slip of about sixteen months, and pushed Annex I embedded-product high-risk obligations to August 2, 2028, a slip of about twenty-four months.
 
 <div class="callout counter-signal">
   <strong>Counter-signal</strong>
   <p>This is the strongest single argument against this page's own thesis. The EU did not simply arrive at governance slower than industry arrived at ROI, it built a deadline, then moved the deadline under competitiveness pressure. Governance is not a monotonic curve.</p>
 </div>
 
-The softening is not confined to Europe. Colorado paused enforcement of its AI Act on April 27, 2026 and narrowed SB 24-205 into a replacement, SB 26-189, effective January 1, 2027. US federal preemption of state AI laws remains a stated policy push, not enacted law, through the window. Texas TRAIGA has been the exception in the other direction, live and enforceable since January 1, 2026. Against that state-level drift, board-level governance hardened on schedule: the National Association of Corporate Directors published formal board guidance on July 2, 2026, telling directors to fold AI risk into enterprise risk management, assess individual directors' AI competence, update committee charters, and set AI-specific KPIs, and NACD's own survey data show 62% or more of directors now give AI full-board agenda time, a sharp year-over-year rise.
+Against that state-level drift, board-level governance hardened on schedule: the National Association of Corporate Directors published formal board guidance on July 2, 2026, telling directors to fold AI risk into enterprise risk management, assess individual directors' AI competence, update committee charters, and set AI-specific KPIs, and NACD's own survey data show 62% or more of directors now give AI full-board agenda time, a sharp year-over-year rise.
 
 <blockquote>
   <p>Governance is arriving unevenly, faster inside the boardroom than inside the statute book.</p>
 </blockquote>
 
 <details>
-<summary>Appendix 4, Regulatory and board-governance timeline (6 rows)</summary>
+<summary>Appendix 4, rulebook detail (6 rows)</summary>
+<p>What still took effect on August 2 were Article 50 transparency obligations, the Article 4 AI-literacy duty, GPAI enforcement powers, the full penalty regime, and a new Article 5 prohibition on AI-generated non-consensual intimate imagery and CSAM added through the same Omnibus.</p>
+<p>The softening is not confined to Europe. Colorado paused enforcement of its AI Act on April 27, 2026 and narrowed SB 24-205 into a replacement, SB 26-189, effective January 1, 2027. US federal preemption of state AI laws remains a stated policy push, not enacted law, through the window. Texas TRAIGA has been the exception in the other direction, live and enforceable since January 1, 2026.</p>
 <div class="table-wrap">
 <table>
 <thead><tr><th>Instrument</th><th>Jurisdiction</th><th>Original date</th><th>Current date</th><th>Status</th><th>Direction</th><th>Confidence</th><th>Verdict</th></tr></thead>
@@ -225,19 +227,18 @@ Consumers say they are open to AI shopping for them. That openness collapses at 
   ></iframe>
 </div>
 
-The Croud Consumer Index, released August 11, 2026 from over 2,000 US consumers, found 69% of Americans open to AI purchasing on their behalf without approval in at least one category, and roughly three in four willing to use AI instant checkout in at least one category. Croud is a digital-marketing agency that sells AI-commerce services, so its headline is displayed as stated intent, not measured behavior. The same release found only 44% actually trust AI tools, against 59% who trust friends and family, 35% who want a human to review before an agent buys, and delegation concentrating in groceries at 41% and household supplies at 31%. Checkout.com, a payments processor with its own agentic-checkout product, found the harder number: 63% of shoppers want AI for product discovery, but only 4% trust it at the payment stage itself.
+The Croud Consumer Index, released August 11, 2026 from over 2,000 US consumers, found 69% of Americans open to AI purchasing on their behalf without approval in at least one category, and roughly three in four willing to use AI instant checkout in at least one category. Checkout.com, a payments processor with its own agentic-checkout product, found the harder number: 63% of shoppers want AI for product discovery, but only 4% trust it at the payment stage itself.
 
 <div class="callout resolution">
   <strong>Resolution</strong>
   <p>Consumers delegate replenishment, not selection. That maps agentic commerce onto the lowest-margin, highest-frequency SKUs, exactly where retailers have the least pricing power and the most to lose, not onto considered purchases where brand choice matters.</p>
 </div>
 
-Stord's earlier survey found 30% of consumers would never allow AI to handle shopping or access payment information at all, a hard refusal that caps the addressable population before any execution risk is even priced in. Salesforce reported roughly 200% growth in AI-chat-originated shopping traffic, another vendor claim from a company that sells the software generating that traffic.
-
-The same governance-before-proof pattern shows up in the plumbing underneath agentic commerce. The Model Context Protocol's 2026-07-28 specification aligned its authorization model with OAuth 2.1, the change enterprise security teams had been waiting for, GitHub shipped support for it July 23, and 6sense moved its MCP server from open beta on July 14 to general availability folded into its August 10 Summer release. A standardization artifact, arriving before any agentic-checkout ROI has been proven.
-
 <details>
-<summary>Appendix 5, Consumer and protocol datapoints (7 rows)</summary>
+<summary>Appendix 5, consumer detail (7 rows)</summary>
+<p>Croud is a digital-marketing agency that sells AI-commerce services, so its headline is displayed as stated intent, not measured behavior. The same release found only 44% actually trust AI tools, against 59% who trust friends and family, 35% who want a human to review before an agent buys, and delegation concentrating in groceries at 41% and household supplies at 31%.</p>
+<p>Stord's earlier survey found 30% of consumers would never allow AI to handle shopping or access payment information at all, a hard refusal that caps the addressable population before any execution risk is even priced in. Salesforce reported roughly 200% growth in AI-chat-originated shopping traffic, another vendor claim from a company that sells the software generating that traffic.</p>
+<p>The same governance-before-proof pattern shows up in the plumbing underneath agentic commerce. The Model Context Protocol's 2026-07-28 specification aligned its authorization model with OAuth 2.1, the change enterprise security teams had been waiting for, GitHub shipped support for it July 23, and 6sense moved its MCP server from open beta on July 14 to general availability folded into its August 10 Summer release. A standardization artifact, arriving before any agentic-checkout ROI has been proven.</p>
 <div class="table-wrap">
 <table>
 <thead><tr><th>Source</th><th>Date</th><th>Figure</th><th>Sample</th><th>Seller interest</th><th>Verdict</th></tr></thead>
@@ -267,16 +268,10 @@ Before asking what the sector should do next, this page states what it will acce
   ></iframe>
 </div>
 
-Applied consistently, the market has bifurcated by what gets measured, not by what gets claimed. Vendors touching money movement, like HappyRobot, can show retention and recovery figures. Vendors touching physical throughput, like Dexterity's FedEx rollout or Amazon's robotic-arm fleet, show deployment counts. Vendors touching decision support show nothing at all. The honest procurement order follows that ladder until someone publishes an audit.
-
 <div class="callout alert">
   <strong>The zero-disclosure capex problem</strong>
   <p>FedEx is automating trailer load and unload across thousands of dock doors in more than twenty US hubs with no published throughput or cost-per-trailer figure. Amazon will more than double its robotic-arm fleet in 2026 against more than 750,000 robots already touching over 75% of its orders, again with nothing disclosed at facility level. Either the internal numbers are strong and proprietary, or the decision is strategic and defensive. The absence of data means neither can be asserted.</p>
 </div>
-
-The cost side is just as undisclosed. Amazon's $400M retrofit of two Florida fulfillment centers displaced 1,110 workers under WARN notices despite a "temporary" framing, while warehousing employment fell 34,700 year over year even as truck transportation held flat. Nobody is measuring that side of the ledger either.
-
-The series carries a standing "still owed" list across fourteen runs. Altana and Cervo's operating metrics, entries per hour, error rate, classification accuracy, are owed for a fourth run. Agility Robotics' audited S-4 filing is owed for a fifth. Returns-fraud AI accuracy and false-positive rates are owed for a twelfth. Amazon's agentic-commerce customers beyond Kate Spade and Tapestry are owed for an eleventh. Stord and Wiliot's facility-level audited ROI is owed for a thirteenth. And, after fourteen runs, any audited facility-level AI ROI figure from any operator in this sector at all is still owed.
 
 Three actions follow directly. Instrument one deployment to publish-quality standard, a single facility, one before-and-after, one independently checkable number, because the operator who publishes first sets the sector's benchmark and gains the procurement leverage. Screen vendors on net dollar retention rather than pilot counts, ARR growth, or customer logos. Structure contracts so the vendor carries the measurement burden, not the buyer.
 
@@ -286,7 +281,10 @@ Three actions follow directly. Instrument one deployment to publish-quality stan
 </div>
 
 <details>
-<summary>Appendix 6, The still-owed ledger (6 rows)</summary>
+<summary>Appendix 6, still owed (6 rows)</summary>
+<p>Applied consistently, the market has bifurcated by what gets measured, not by what gets claimed. Vendors touching money movement, like HappyRobot, can show retention and recovery figures. Vendors touching physical throughput, like Dexterity's FedEx rollout or Amazon's robotic-arm fleet, show deployment counts. Vendors touching decision support show nothing at all. The honest procurement order follows that ladder until someone publishes an audit.</p>
+<p>The cost side is just as undisclosed. Amazon's $400M retrofit of two Florida fulfillment centers displaced 1,110 workers under WARN notices despite a "temporary" framing, while warehousing employment fell 34,700 year over year even as truck transportation held flat. Nobody is measuring that side of the ledger either.</p>
+<p>The series carries a standing "still owed" list across fourteen runs. Altana and Cervo's operating metrics, entries per hour, error rate, classification accuracy, are owed for a fourth run. Agility Robotics' audited S-4 filing is owed for a fifth. Returns-fraud AI accuracy and false-positive rates are owed for a twelfth. Amazon's agentic-commerce customers beyond Kate Spade and Tapestry are owed for an eleventh. Stord and Wiliot's facility-level audited ROI is owed for a thirteenth. And, after fourteen runs, any audited facility-level AI ROI figure from any operator in this sector at all is still owed.</p>
 <div class="table-wrap">
 <table>
 <thead><tr><th>What was promised</th><th>By whom</th><th>First requested</th><th>Runs outstanding</th><th>What would close it</th></tr></thead>

@@ -1,0 +1,363 @@
+{
+ "R4-01": {
+  "verdict": "keep",
+  "why": "Abstract matches. v1 2025-08-04, revised 2025-10-27 and 2025-12-17",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R4-02": {
+  "verdict": "keep",
+  "why": "Abstract says all models show severe first proposal bias and 10-30x advantage for speed over quality",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R4-04": {
+  "verdict": "fix",
+  "why": "Numbers right, but human participants were steered by an LLM. It is not agent bias, yet 7.6 and challenge 10 treat it as agent picks",
+  "opened": true,
+  "checker": "K4",
+  "fix": "7.4: In a study of human participants, an LLM shopping assistant nearly tripled sponsored picks (61.2 percent versus 22.4 percent with search), and Sponsored labels did not significantly reduce it. 7.6: Position and first proposal bias steer agent picks, and LLM persuasion steers users. data.json ch10 one: Agents still buy the wrong thing, hidden prompts can steer them, and LLM sales pitches steer the people using them."
+ },
+ "R4-07": {
+  "verdict": "keep",
+  "why": "Matches. 186 deals were the one real run of four",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R4-09": {
+  "verdict": "keep",
+  "why": "Matches Guardio 2025-08-20, some runs autofilled card and completed checkout",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R4-11": {
+  "verdict": "keep",
+  "why": "Matches, 2026-01-30 revised 2026-05-18",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R4-12": {
+  "verdict": "keep",
+  "why": "Matches, simulation and evaluated attacks only, about 3.8 ms",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R4-14": {
+  "verdict": "keep",
+  "why": "Matches, local chains, Base Sepolia and live endpoints",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R4-15": {
+  "verdict": "keep",
+  "why": "Matches, four flaw classes, up to 100 percent leakage, official SDKs and a production deployment, all disclosed",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R4-16": {
+  "verdict": "keep",
+  "why": "Matches, 33 vulnerabilities across three platforms, three chain into payment hijack, PCAT defence",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R4-17": {
+  "verdict": "keep",
+  "why": "Matches: 48 threats, eight reach High in at least one architecture, signatures alone do not ensure intent when pre authorization context is manipulated",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R4-18": {
+  "verdict": "fix",
+  "why": "86 cases include 46 known or calibration cases. Findings are formal consistency findings, not confirmed issues",
+  "opened": true,
+  "checker": "K4",
+  "fix": "Tamarin models of x402, MPP, ACP and AP2 found 40 previously undocumented formal consistency findings across 86 verification cases"
+ },
+ "R4-21": {
+  "verdict": "keep",
+  "why": "Matches, January to December 2025, no malicious intent, malicious bots up 59 percent",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R4-22": {
+  "verdict": "keep",
+  "why": "Matches PYMNTS 2026-06-10 citing HUMAN, 7,851 percent year over year, 2.3 percent checkout, retail 46.6 percent",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R5-34": {
+  "verdict": "keep",
+  "why": "Matches, 2025 versus 2024, started from almost nothing in 2024",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R5-32": {
+  "verdict": "keep",
+  "why": "HUMAN CISO guide PDF: in 2025, 77 percent on product and search pages, 2.3 percent checkout",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R5-33": {
+  "verdict": "keep",
+  "why": "HUMAN PDF industry chart shows retail and ecommerce 46.6 percent",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R4-23": {
+  "verdict": "keep",
+  "why": "Matches, carding up 250 percent since 2022, post login takeover quadrupled",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R5-35": {
+  "verdict": "keep",
+  "why": "Matches HUMAN Satori report via PPC Land 2026-06-04",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R4-24": {
+  "verdict": "keep",
+  "why": "Matches DataDome via SecurityInfoWatch 2026-09-22, window 2025-07 to 2026-06, 605.6 million requests in H1 2026",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R4-25": {
+  "verdict": "keep",
+  "why": "Matches, about 20,000 to 21,000 sites tested",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R5-36": {
+  "verdict": "keep",
+  "why": "Matches Imperva 2026-04-29, all automated traffic",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R4-26": {
+  "verdict": "keep",
+  "why": "Matches, nearly 1 billion USD Jul to Dec 2025, no agent figure",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R4-27": {
+  "verdict": "keep",
+  "why": "Matches Visa release 2026-11-05, 22 models, 42.8 percent of runs failed, checkout and payment not yet tested",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R4-28": {
+  "verdict": "keep",
+  "why": "Matches, 54 percent of failed runs ended in a purchase",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R5-27": {
+  "verdict": "keep",
+  "why": "Matches Adobe via Small Business Trends, September 2026, link clicks not agents",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R5-28": {
+  "verdict": "keep",
+  "why": "Matches, 71 percent YoY September 2026",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R4-30": {
+  "verdict": "fix",
+  "why": "Page says retailers and other companies. Figures are Gambit's reconstruction, cards validated by Overwatch Data, cost from operator's own records",
+  "opened": true,
+  "checker": "K4",
+  "fix": "Three open source agent frameworks breached at least 27 online retailers and other companies, took over 600,000 card records and skimmed over 100 sites, at about 25.46 USD per target by the operator's own records (Gambit Security 2026-09-22, via CSA note 2026-09-26)"
+ },
+ "R4-31": {
+  "verdict": "fix",
+  "why": "2026-08-18 date covers the 3 critical fixes only, 9 medium and low findings were sent 2026-09-09. No advisory statement is dated 2026-10-23",
+  "opened": true,
+  "checker": "K4",
+  "fix": "25 flaws, 3 critical. V12 reported 25 flaws and the x402 Foundation fixed the 3 critical ones on 2026-08-18. As of 2026-10-23 no security advisory had been published. No exploitation reported."
+ },
+ "R4-32": {
+  "verdict": "keep",
+  "why": "Matches. Note the 1 USD cap can be switched off with spendControls false",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R4-33": {
+  "verdict": "keep",
+  "why": "Matches Reuters via The Star 2026-09-22, six named banks",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R5-37": {
+  "verdict": "keep",
+  "why": "Counted 99 unique named user agents with Disallow / on 2026-11-15. EtaoSpider and Scrapy are not AI specific",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R5-38": {
+  "verdict": "keep",
+  "why": "Notices sent late Sunday 2026-09-20",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R5-39": {
+  "verdict": "keep",
+  "why": "Ruling Tuesday 2026-08-04, preliminary injunction only, lawsuit ongoing",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R5-63": {
+  "verdict": "fix",
+  "why": "PYMNTS survey with no sample or base on the page, and no vendor tag in the doc",
+  "opened": true,
+  "checker": "K4",
+  "fix": "59 percent of AI-assisted purchases still end at Amazon (PYMNTS survey, base not stated)"
+ },
+ "R5-04": {
+  "verdict": "keep",
+  "why": "Matches Visa, Harris Poll, n 2,065, fieldwork 2026-05-26 to 28",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R4-29": {
+  "verdict": "keep",
+  "why": "Matches Visa 2026-10-30, Morning Consult, n 1,016, also 23 percent",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R5-24": {
+  "verdict": "keep",
+  "why": "Matches Kantar, 28 percent comfortable with AI buying for them",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R5-01": {
+  "verdict": "keep",
+  "why": "Matches Accenture, 25,590 consumers in 16 countries",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R5-02": {
+  "verdict": "keep",
+  "why": "Matches, 32 percent decision within limits with approval before payment",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R5-13": {
+  "verdict": "keep",
+  "why": "Matches Forkast citing PYMNTS and Visa survey of 1,185 merchants",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R5-14": {
+  "verdict": "keep",
+  "why": "Matches, 93 percent want AI provider to bear the loss",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R5-61": {
+  "verdict": "fix",
+  "why": "Page says failures came from credential sharing and app connection friction, not reasoning or wrong purchases. Misused as wrong purchase evidence in challenge 10",
+  "opened": true,
+  "checker": "K4",
+  "fix": "Remove from challenge 10 evidence and data.json ch10 src. In challenge 6: all three errands failed on credential sharing and app connection friction (PYMNTS test, 2026-09-09)"
+ },
+ "R5-62": {
+  "verdict": "fix",
+  "why": "Source is Meta employees' internal posts reported by Reuters, not an independent test",
+  "opened": true,
+  "checker": "K4",
+  "fix": "Meta employees testing Muse at launch said in internal posts, reviewed by Reuters, that it uploaded sensitive information without permission"
+ },
+ "R5-44": {
+  "verdict": "keep",
+  "why": "Matches American Banker, from 2026-11-24 liable unless evidence of revocation",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R5-45": {
+  "verdict": "keep",
+  "why": "Matches Payments Dive, Wells Fargo email 2026-10-02",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R5-46": {
+  "verdict": "keep",
+  "why": "Matches, PNC CEO at Money20/20 2026-10-19",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R5-47": {
+  "verdict": "keep",
+  "why": "Matches, Stripe issuing lead said no case law",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R4-64": {
+  "verdict": "keep",
+  "why": "Matches Worldpay, no liability shift exists yet",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R4-65": {
+  "verdict": "keep",
+  "why": "Matches Worldpay, issuer carries authenticated token fraud, non fraud disputes murkier",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R4-42": {
+  "verdict": "keep",
+  "why": "Matches Waller Sibos 2026-09-29",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R4-43": {
+  "verdict": "keep",
+  "why": "Matches, fraud systems calibrated to humans need recalibration",
+  "opened": true,
+  "checker": "K4"
+ },
+ "C284": {
+  "verdict": "keep",
+  "why": "Matches Waller speech, early phase, no fraud or adoption numbers (checked on federalreserve.gov copy)",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R5-07": {
+  "verdict": "keep",
+  "why": "Matches Riskified Q1 2026, US and UK consumers",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R5-09": {
+  "verdict": "keep",
+  "why": "Matches Checkout.com 2026-06-16",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R4-46": {
+  "verdict": "keep",
+  "why": "Matches Ashurst 2025-11-03",
+  "opened": true,
+  "checker": "K4"
+ },
+ "C372": {
+  "verdict": "keep",
+  "why": "Matches, registered agent and authenticated intent, 2026-04-15",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R5-70": {
+  "verdict": "keep",
+  "why": "Matches ACP issue 315, open, 2026-10-15",
+  "opened": true,
+  "checker": "K4"
+ },
+ "R5-71": {
+  "verdict": "keep",
+  "why": "Worded as an issue claim, which is right. No maintainer reply, row removal was a v0.1 commit",
+  "opened": true,
+  "checker": "K4"
+ }
+}

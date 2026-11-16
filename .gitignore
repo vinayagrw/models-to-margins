@@ -162,3 +162,4 @@ m2m-app/
 
 # Personal local notes (never committed)
 *.local.md
+/docs/linkedin/

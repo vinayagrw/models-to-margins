@@ -1,0 +1,349 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}body{margin:0;font:14px system-ui}img{max-width:100%}[hidden]{display:none!important}</style></head><body><title>What Breaks in AI</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,600&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: one 1180px column of full-width bands, one main visual per band. Detail lives in a shared drawer. */
+:root{
+  --bg:#F5F4F1; --panel:#FFFFFF; --ink:#1B2226; --muted:#55606A; --line:#DCDAD4;
+  --copper:#B45A28; --teal:#1F5E5A;
+  --worse:#B3122E; --worse-bg:#FBE3E7; --true:#8A4B12; --true-bg:#F8E9D9; --part:#1F5E5A; --part-bg:#DDEEEA;
+  --off:#E7E5E0;
+  --display:"Newsreader",Georgia,"Times New Roman",serif;
+  --body:"Public Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#121618; --panel:#1B2125; --ink:#E9ECEC; --muted:#A3ADB3; --line:#2E363B;
+  --copper:#E08A57; --teal:#5FB3A9;
+  --worse:#FF7A8E; --worse-bg:#3A1A21; --true:#F0B27A; --true-bg:#33261A; --part:#7FD0C4; --part-bg:#173230;
+  --off:#262D31; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#121618; --panel:#1B2125; --ink:#E9ECEC; --muted:#A3ADB3; --line:#2E363B;
+  --copper:#E08A57; --teal:#5FB3A9;
+  --worse:#FF7A8E; --worse-bg:#3A1A21; --true:#F0B27A; --true-bg:#33261A; --part:#7FD0C4; --part-bg:#173230;
+  --off:#262D31; color-scheme:dark}
+.iso-teal{--iso-hi:#87C4B5;--iso-mid:#0F8A6B;--iso-lo:#084C3B}
+.iso-amber{--iso-hi:#DCBA87;--iso-mid:#B8740F;--iso-lo:#654008}
+.iso-coral{--iso-hi:#E8AA96;--iso-mid:#D2552D;--iso-lo:#742F19}
+.iso-violet{--iso-hi:#A5A2D4;--iso-mid:#4B44A8;--iso-lo:#29255C}
+.iso-red{--iso-hi:#E48896;--iso-mid:#C8102E;--iso-lo:#6E0919}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:16px/1.55 var(--body);margin:0}
+main{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+section{padding-block:56px;border-top:1px solid var(--line)}
+section:first-child{border-top:0;padding-top:40px}
+h1,h2,h3{font-family:var(--display);font-weight:600;text-wrap:balance;margin:0;letter-spacing:-.01em}
+h1{font-size:clamp(34px,5.2vw,58px);line-height:1.06;max-width:17ch}
+h2{font-size:clamp(26px,3.2vw,36px);line-height:1.15}
+p{text-wrap:pretty;margin:0}
+.eyebrow{font:500 14px/1.3 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--copper)}
+.lede{font-size:18px;color:var(--muted);max-width:62ch}
+.head{display:grid;gap:10px;margin-bottom:28px}
+.tag{font:500 14px/1.3 var(--mono);color:var(--muted);letter-spacing:.02em}
+button{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--copper);outline-offset:2px}
+svg.ic{display:block;flex:none}
+
+/* hero */
+.hero{display:grid;grid-template-columns:1.35fr 1fr;gap:40px;align-items:center}
+.hero-copy{display:grid;gap:18px;min-width:0}
+.stats{display:grid;gap:14px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 20px;display:grid;grid-template-columns:auto 1fr;gap:4px 16px;align-items:center}
+.stat b{font:600 40px/1 var(--display);color:var(--copper);grid-row:span 2}
+.stat b.w{color:var(--worse)}
+.stat span{font-weight:600;line-height:1.3}
+
+/* segments */
+.segs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.seg{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;display:grid;gap:14px;align-content:start}
+.seg .sh{display:flex;gap:14px;align-items:center}
+.seg h3{font-size:26px}
+.seg .job{color:var(--muted);font-weight:500}
+.seg ol{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.seg li button{width:100%;min-height:46px;display:flex;align-items:center;gap:12px;text-align:left;border:1.5px solid var(--line);background:var(--bg);border-radius:10px;padding:8px 12px;font-weight:600;cursor:pointer}
+.seg li button:hover{border-color:var(--copper)}
+.seg li button.w{border-color:var(--worse)}
+.seg li .n{font:600 20px/1 var(--display);color:var(--muted);min-width:18px}
+
+/* cards */
+.legend{display:flex;flex-wrap:wrap;gap:10px 18px;margin-bottom:18px}
+.pill{display:inline-flex;align-items:center;gap:6px;font:600 14px/1 var(--body);padding:6px 10px;border-radius:999px;white-space:nowrap}
+.pill.worse{background:var(--worse-bg);color:var(--worse)}
+.pill.true{background:var(--true-bg);color:var(--true)}
+.pill.part{background:var(--part-bg);color:var(--part)}
+.cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px 14px 14px;display:grid;gap:10px;justify-items:start;text-align:left;cursor:pointer;min-width:0;transition:transform .15s,border-color .15s}
+.card:hover{transform:translateY(-2px);border-color:var(--copper)}
+.card .top{display:flex;justify-content:space-between;width:100%;align-items:flex-start}
+.card .rank{font:600 30px/1 var(--display);color:var(--muted)}
+.card h3{font:700 17px/1.25 var(--body)}
+.score{display:flex;gap:3px;width:100%}
+.score i{height:6px;flex:1;border-radius:2px;background:var(--off)}
+.score i.on{background:var(--copper)}
+.watch{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:22px}
+.watch .tag{margin-right:6px}
+.chip{border:1.5px solid var(--copper);background:var(--panel);border-radius:999px;min-height:44px;padding:9px 14px;font-weight:600;font-size:14px;line-height:1.2;cursor:pointer}
+.chip.w{border-color:var(--worse);color:var(--worse)}
+.chip:hover{background:var(--true-bg)}
+.chip.w:hover{background:var(--worse-bg)}
+
+/* journey */
+.pipe{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.stage{display:grid;justify-items:center;gap:8px;align-content:start;text-align:center;min-width:0;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px 12px}
+.stage .num{font:500 14px/1 var(--mono);color:var(--muted)}
+.stage h3{font-size:24px}
+.stage .chips{display:grid;gap:8px;justify-items:stretch;width:100%}
+.pipe-note{margin-top:22px;color:var(--muted);max-width:70ch}
+
+/* matrix */
+.mxwrap{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:32px;align-items:center}
+.mx{display:grid;grid-template-columns:64px repeat(3,minmax(0,1fr));gap:8px}
+.mx .ch,.mx .rh{font:500 14px/1.2 var(--mono);color:var(--muted);display:flex;align-items:center}
+.mx .ch{justify-content:center;padding-bottom:2px}
+.mx .rh{justify-content:flex-end;text-align:right;padding-right:4px}
+.cell{background:var(--panel);border:1px solid var(--line);border-radius:12px;min-height:112px;padding:10px;display:flex;flex-wrap:wrap;gap:8px;align-content:center;justify-content:center}
+.cell.hot{background:var(--worse-bg);border-color:var(--worse)}
+.dot{width:44px;height:44px;border-radius:50%;background:var(--copper);color:#fff;font:600 16px/44px var(--body);text-align:center;border:0;cursor:pointer;padding:0}
+.dot.w{background:var(--worse)}
+.mx .xl{grid-column:2/-1;text-align:center;font:500 14px/1.2 var(--mono);color:var(--muted)}
+.mxside{display:grid;gap:14px}
+.mxside .row{display:flex;gap:12px;align-items:center}
+
+/* month */
+.tl{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.ev{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;display:grid;gap:8px;align-content:start;min-width:0}
+.ev .d{font:500 14px/1 var(--mono);color:var(--muted)}
+.ev p{font-weight:600;line-height:1.35}
+.ev .pill{justify-self:start}
+
+/* do */
+.tabs{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap}
+.tabs button{min-height:44px;padding:8px 16px;border-radius:10px;border:1.5px solid var(--line);background:var(--panel);font-weight:600;cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--teal);border-color:var(--teal);color:#fff}
+.dolist{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px;list-style:none;padding:0;margin:0}
+.dolist li{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;display:grid;gap:10px;align-content:start}
+.dolist .n{font:600 26px/1 var(--display);color:var(--teal)}
+.dolist p{font-weight:500;line-height:1.4;text-wrap:pretty}
+.foot{padding-block:28px 48px;color:var(--muted);font-size:14px;border-top:1px solid var(--line)}
+
+/* drawer */
+.scrim{position:fixed;inset:0;background:rgb(0 0 0 / .35);z-index:9}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(460px,100%);background:var(--panel);z-index:10;overflow-y:auto;box-shadow:-12px 0 40px rgb(0 0 0 / .2);
+  padding:calc(20px + env(safe-area-inset-top,0px)) max(22px,env(safe-area-inset-right,0px)) calc(28px + env(safe-area-inset-bottom,0px)) 22px;display:grid;gap:16px;align-content:start}
+.drawer .dh{display:flex;gap:14px;align-items:center}
+.drawer h2{font-size:28px}
+.close{margin-left:auto;min-width:44px;min-height:44px;border-radius:10px;border:1.5px solid var(--line);background:var(--panel);font-size:22px;cursor:pointer}
+.big{display:grid;gap:4px;background:var(--bg);border-radius:12px;padding:14px 16px}
+.big b{font:600 34px/1.05 var(--display);color:var(--copper)}
+.big b.w{color:var(--worse)}
+.big span{text-wrap:pretty}
+.lens{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.lens div{background:var(--bg);border-radius:10px;padding:10px 8px;display:grid;gap:6px;justify-items:center;text-align:center}
+.lens b{font:600 22px/1 var(--display)}
+.lens span{font:500 14px/1.2 var(--mono);color:var(--muted)}
+.dl{display:grid;gap:12px;margin:0}
+.dl dt{font:500 14px/1.2 var(--mono);text-transform:uppercase;letter-spacing:.06em;color:var(--teal)}
+.dl dd{margin:2px 0 0;line-height:1.5;text-wrap:pretty}
+.navrow{display:flex;gap:10px}
+.navrow button{flex:1;min-height:44px;border-radius:10px;border:1.5px solid var(--line);background:var(--panel);font-weight:600;cursor:pointer}
+
+@media (max-width:1000px){
+  .hero{grid-template-columns:1fr}
+  .segs{grid-template-columns:1fr}
+  .cards{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .pipe{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .mxwrap{grid-template-columns:1fr}
+  .tl{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .dolist{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:560px){
+  section{padding-block:40px}
+  .cards{grid-template-columns:1fr}
+  .card{grid-template-columns:auto 1fr;align-items:center;column-gap:14px}
+  .card .top{grid-row:span 3;width:auto;flex-direction:column;align-items:center;gap:4px}
+  .pipe{grid-template-columns:1fr}
+  .tl{grid-template-columns:1fr}
+  .dolist{grid-template-columns:1fr}
+  .mx{grid-template-columns:48px repeat(3,minmax(0,1fr));gap:6px}
+  .cell{padding:8px 4px;gap:6px}
+  .stat b{font-size:34px}
+  .lens{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* deep dive additions */
+.lanes{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.35fr);gap:20px}
+.lane{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;display:grid;gap:14px;align-content:start}
+.lane .sh{display:flex;gap:14px;align-items:center}
+.lane h3{font-size:24px}
+.lane .job{color:var(--muted);font-weight:500;text-wrap:balance}
+.tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.lane.f .tiles{grid-template-columns:repeat(3,minmax(0,1fr))}
+.tile{display:flex;align-items:center;gap:10px;min-height:56px;text-align:left;border:1.5px solid var(--line);background:var(--bg);border-radius:10px;padding:8px 10px;font-weight:600;font-size:15px;line-height:1.25;cursor:pointer;min-width:0}
+.tile:hover{border-color:var(--copper)}
+.tile.w{border-color:var(--worse)}
+.tile{text-wrap:balance}
+.tile .k{font:500 14px/1 var(--mono);color:var(--muted);flex:none;min-width:26px}
+.fixes{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.fixc{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px 16px;display:grid;gap:10px;align-content:start;min-width:0}
+.fixc .n{font:600 30px/1 var(--display);color:var(--teal)}
+.fixc h3{font:700 18px/1.25 var(--body)}
+.fixc p{line-height:1.45}
+.fixc .who{font:500 14px/1.3 var(--mono);color:var(--copper)}
+.next{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-top:16px}
+.next div{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:grid;gap:6px;align-content:start}
+.next b{font:700 15px/1.3 var(--body)}
+.next span{font:500 14px/1.3 var(--mono);color:var(--muted)}
+.blocks{display:grid;gap:8px}
+.brow{display:grid;grid-template-columns:200px minmax(0,1fr) 44px;gap:14px;align-items:center}
+.brow b{font-weight:600}
+.bar{height:14px;border-radius:7px;background:var(--off);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--teal);border-radius:7px}
+.brow span{font:600 18px/1 var(--display);text-align:right}
+.board{list-style:none;margin:0;padding:0;display:grid;gap:12px;counter-reset:b}
+.board li{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px;display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;align-items:center}
+.board li b{font:600 30px/1 var(--display);color:var(--copper);min-width:96px}
+.board li p{font-size:17px;font-weight:500;line-height:1.4;text-wrap:balance}
+.unk{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.unk div{border:1.5px dashed var(--line);border-radius:12px;padding:14px;display:grid;gap:6px;align-content:start}
+.unk b{font-weight:700}
+.unk p{color:var(--muted);line-height:1.45;text-wrap:balance}
+.foot{text-wrap:balance}
+#map .lede{text-wrap:balance}
+.evp{display:inline-block;font:600 14px/1.2 var(--body);padding:9px 12px;border-radius:999px}
+.dl dd.evd{display:grid;gap:8px;justify-items:start}
+.drawer .dl dd{text-wrap:balance}
+.evp.m{background:var(--part-bg);color:var(--part)}
+.evp.v{background:var(--true-bg);color:var(--true)}
+.evp.n{background:var(--off);color:var(--muted)}
+@media (max-width:1000px){.lanes{grid-template-columns:1fr}.fixes{grid-template-columns:repeat(2,minmax(0,1fr))}.next{grid-template-columns:repeat(2,minmax(0,1fr))}.unk{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:560px){.tiles,.lane.f .tiles{grid-template-columns:1fr}.fixes,.next,.unk{grid-template-columns:1fr}.brow{grid-template-columns:minmax(0,1fr) 40px;row-gap:6px}.brow .bar{grid-column:1/-1;grid-row:2}.board li{grid-template-columns:1fr;gap:8px}}
+</style>
+
+<svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true"><defs>
+<linearGradient id="g-top" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#000"/></linearGradient>
+<linearGradient id="g-left" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".9"/><stop offset="1" stop-color="#fff" stop-opacity=".1"/></linearGradient>
+<linearGradient id="g-right" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#000" stop-opacity=".05"/><stop offset="1" stop-color="#000" stop-opacity=".35"/></linearGradient>
+<radialGradient id="g-shadow"><stop offset="0" stop-color="#000" stop-opacity=".35"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
+<mask id="m-top" maskContentUnits="userSpaceOnUse"><rect x="16" y="14" width="88" height="52" fill="url(#g-top)"/></mask>
+<linearGradient id="g-shine" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".35"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/></linearGradient>
+</defs><symbol id="i-scrub" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14l6-6 6 6-4 4H8z"/><path d="M10 8l3-3 6 6-3 3"/><path d="M4 21h9"/><circle cx="19" cy="18" r=".8" fill="currentColor"/></g></symbol><symbol id="i-approve" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l3 3 5-6"/></g></symbol><symbol id="i-rollback" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4v6h6"/><path d="M4.5 10A8 8 0 1 1 6 17.5"/><circle cx="12" cy="12" r="1" fill="currentColor"/></g></symbol><symbol id="i-gateway" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V9l8-6 8 6v12"/><path d="M9 21v-7h6v7"/><circle cx="12" cy="9" r="1" fill="currentColor"/></g></symbol><symbol id="i-model" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M4 7.5l8 4.5 8-4.5M12 12v9"/></g></symbol><symbol id="i-pattern-miner" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="6"/><path d="M14.5 14.5L20 20"/><path d="M7 11l2-2 2 2 2-2"/></g></symbol><symbol id="i-agent" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="8" width="14" height="11" rx="3"/><path d="M12 4v4"/><circle cx="12" cy="3.5" r="1"/><circle cx="9.5" cy="13" r="1" fill="currentColor"/><circle cx="14.5" cy="13" r="1" fill="currentColor"/><path d="M10 16.5h4"/></g></symbol><symbol id="i-sql" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="7" ry="2.5"/><path d="M5 5v14c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5V5"/><path d="M5 12c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5"/><circle cx="16" cy="18" r=".6" fill="currentColor"/></g></symbol><symbol id="i-cache" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L5 13h6l-1 9 8-11h-6z"/></g></symbol><symbol id="i-vault" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="15" rx="2"/><circle cx="12" cy="11.5" r="3.5"/><path d="M12 8v1.5M15.5 11.5H14M6 19v2M18 19v2"/></g></symbol><symbol id="i-monitor" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M6 11h3l2-3 2 5 2-2h3"/><path d="M9 20h6M12 16v4"/></g></symbol><symbol id="i-cloud" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 18a4 4 0 0 1-.5-8A6 6 0 0 1 18 9a4.5 4.5 0 0 1-.5 9z"/><circle cx="12" cy="14" r=".8" fill="currentColor"/></g></symbol><symbol id="i-network" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="2"/><circle cx="5" cy="19" r="2"/><circle cx="19" cy="19" r="2"/><circle cx="12" cy="13" r="1.2" fill="currentColor"/><path d="M12 7v5M6.5 17.5l4.5-3.5M17.5 17.5L13 14"/></g></symbol><symbol id="i-kpi" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7"/><path d="M3 20h18"/><circle cx="20" cy="7" r="1" fill="currentColor"/></g></symbol><symbol id="i-measure" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15L15 4l5 5L9 20z"/><path d="M8 11l2 2M11 8l2 2M14 5l1 1M5 14l1 1"/></g></symbol><symbol id="i-pm" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><path d="M14 12.5h-3a1.25 1.25 0 0 0 0 2.5h2a1.25 1.25 0 0 1 0 2.5h-3M12 11.5v7.5"/></g></symbol><symbol id="i-executive" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7" r="3.5"/><path d="M5 21a7 7 0 0 1 14 0"/><path d="M12 14l-1.3 2 1.3 3 1.3-3z"/></g></symbol><symbol id="i-policy-doc" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18H6z"/><path d="M9 7h6M9 10h6"/><path d="M12 13l3 1.2v1.8c0 1.8-1.3 2.8-3 3.5-1.7-.7-3-1.7-3-3.5v-1.8z"/></g></symbol><symbol id="i-hcc-evidence" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h10l4 4v14H5z"/><circle cx="11" cy="12" r="3"/><path d="M13.2 14.2L16 17"/><path d="M15 3v4h4"/></g></symbol><symbol id="i-denial" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/></g></symbol><symbol id="i-risk" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l9.5 17h-19z"/><path d="M12 10v4"/><circle cx="12" cy="17" r=".8" fill="currentColor"/></g></symbol><symbol id="i-security" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><rect x="9" y="11" width="6" height="5" rx="1"/><path d="M10 11V9.5a2 2 0 0 1 4 0V11"/></g></symbol><symbol id="i-cross" viewBox="0 0 120 120"><ellipse cx="60" cy="98" rx="50" ry="13" fill="url(#g-shadow)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="16,40 60,66 60,90 16,64" style="fill:var(--iso-mid,#0F8A6B)" mask="url(#m-top)" opacity=".6"/><polygon points="104,40 60,66 60,90 104,64" style="fill:var(--iso-lo,#08523F)"/><polygon points="104,40 60,66 60,90 104,64" fill="url(#g-right)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-mid,#0F8A6B)"/><polygon points="60,14 104,40 60,66 16,40" style="fill:var(--iso-hi,#87C5B5)" mask="url(#m-top)"/><polygon points="60,14 104,40 60,66 16,40" fill="url(#g-shine)"/><polyline points="16,40 60,66 104,40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="1"/><g transform="translate(44.4 24.4) scale(1.3)" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7l10 10M17 7L7 17"/><circle cx="12" cy="12" r="10" stroke-dasharray="3 3"/></g></symbol></svg>
+
+<main>
+  <section id="top">
+    <div class="hero">
+      <div class="hero-copy">
+        <div class="eyebrow">AI deep dive · October 2026</div>
+        <h1>What breaks in frontier AI, and how to fix it</h1>
+        <p class="lede">We tracked 24 ways AI tools fail: 10 when they search the web and 14 across wider use. Every one has a fix today. Four fixes cover most of the damage, and most of them a buyer can start without waiting for a vendor.</p>
+      </div>
+      <div class="stats">
+        <div class="stat"><b class="w">0 of 24</b><span>problems were fixed in the last 30 days</span><span class="tag">Re-checked 25 Sep to 25 Oct 2026</span></div>
+        <div class="stat"><b>13%</b><span>of CIOs say AI brought significant or transformational value</span><span class="tag">Analyst survey, verified 2026</span></div>
+        <div class="stat"><b>60%+</b><span>of AI search citations tested got the article, publisher or link wrong</span><span class="tag">Independent audit, 2025</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="map">
+    <div class="head">
+      <div class="eyebrow">Two kinds of failure</div>
+      <h2>Search failures hide in the answer. The rest hit the business</h2>
+      <p class="lede">Open any problem for the number, the fix, its owner and the first step.</p>
+    </div>
+    <div class="legend">
+      <span class="pill worse">Harm rising</span>
+      <span class="pill part">New events</span>
+      <span class="pill true">Still true</span>
+    </div>
+    <div class="lanes" id="lanes"></div>
+  </section>
+
+  <section id="fix">
+    <div class="head">
+      <div class="eyebrow">Fix first</div>
+      <h2>Four fixes do most of the work</h2>
+    </div>
+    <div class="fixes" id="fixes"></div>
+    <div class="next" id="next"></div>
+  </section>
+
+  <section id="blocks">
+    <div class="head">
+      <div class="eyebrow">One platform, not 24 projects</div>
+      <h2>Ten building blocks cover all 24 problems</h2>
+      <p class="lede">Each bar shows how many of the 24 problems a block helps fix. Your own test set touches all of them, because it is how you prove the rest work.</p>
+    </div>
+    <div class="blocks" id="bl"></div>
+  </section>
+
+  <section id="board">
+    <div class="head">
+      <div class="eyebrow">For your board</div>
+      <h2>Five sentences to repeat</h2>
+    </div>
+    <ol class="board" id="brd"></ol>
+  </section>
+
+  <section id="unknown">
+    <div class="head">
+      <div class="eyebrow">What we do not know yet</div>
+      <h2>The fixes are clearer than the proof</h2>
+    </div>
+    <div class="unk" id="unk"></div>
+  </section>
+
+  <p class="foot">Evidence comes from studies, court records, regulator releases, security advisories, vendor documents and surveys, each reopened by a separate checker. Desk research only, with no interviews yet.</p>
+</main>
+
+<div class="scrim" id="scrim" hidden></div>
+<aside class="drawer" id="drawer" hidden role="dialog" aria-modal="true" aria-labelledby="dr-title"></aside>
+
+<script>
+const I=[{"id": "S1", "lane": "s", "name": "Citation does not hold", "ic": "i-hcc-evidence", "st": "true", "see": "A link that loads but does not say what the answer says. Some links never existed.", "why": "Links are attached after the text is written, from a pool of snippets and copies. Nothing checks that the page holds the sentence.", "num": "60%+", "numl": "of 1,600 citation tests named the wrong article, publisher or URL", "tag": "Independent audit, 2025", "fix": "A separate checker keeps only claims backed by a quoted sentence from a page it opened.", "own": "Vendor and buyer", "first": "Turn on citations and a link check, then hand-check 20 claims.", "eff": "Medium", "mat": "Parts sold, full checker custom", "ev": "m", "evl": "A link check cut dead or invented links to under 1%", "b": ["P1", "P9"], "tier": ""}, {"id": "S2", "lane": "s", "name": "Silent failure", "ic": "i-monitor", "st": "true", "see": "A finished, confident report when the search found nothing or the tool broke.", "why": "Guessing scores better than saying \"I don't know\", and tool errors often come back looking like success.", "num": "73.2%", "numl": "of answers that used planted content gave no warning", "tag": "Preprint, Oct 2026", "fix": "Log every failed search, blocked page and cut text, show it above the answer, and never deliver a report with no opened source.", "own": "Vendor and buyer", "first": "Ask for the searches run, pages opened and what failed. Reject reports with no sources.", "eff": "Low", "mat": "Early product", "ev": "n", "evl": "Not measured yet", "b": ["P3"], "tier": ""}, {"id": "S3", "lane": "s", "name": "Stops too early", "ic": "i-pattern-miner", "st": "true", "see": "Few sources, generic queries, and the key page never found.", "why": "Agents stop when they feel confident, not when each part of the question has evidence.", "num": "71.5%", "numl": "of errors on same-day news came from retrieval, not reasoning", "tag": "Preprint, May 2026", "fix": "Split the question into parts and stop only when each part has evidence or a plain \"not found\".", "own": "Vendor and buyer", "first": "Ask for the plan first, plus a list of what was looked for and not found.", "eff": "Medium", "mat": "Research, with planning sold", "ev": "m", "evl": "Forcing full coverage lifted accuracy 2.7 to 8.2 points in a lab test", "b": ["P2"], "tier": ""}, {"id": "S4", "lane": "s", "name": "Planted sources win", "ic": "i-risk", "st": "new", "see": "SEO lists, vendor pages, one forum comment or a scam phone number presented as fact.", "why": "Ranking rewards relevance, not reliability. Many copies of one planted page look like agreement.", "num": "8 of 10", "numl": "AI search platforms cited a made-up concept within 7 days", "tag": "Preprint, Oct 2026", "fix": "Use a list of trusted primary sites for high-stakes work, and label every source.", "own": "Buyer", "first": "Write a 20 to 50 site list for one workflow.", "eff": "Low", "mat": "Generally available", "ev": "n", "evl": "Not measured yet", "b": ["P2", "P9"], "tier": ""}, {"id": "S5", "lane": "s", "name": "Stale facts", "ic": "i-rollback", "st": "true", "see": "Last year's figure, a former office holder, old install steps.", "why": "Snippets and caches lag the live page, and the model's sense of today drifts toward its training date.", "num": "5x", "numl": "more outdated answers when built from snippets than from opened pages", "tag": "Preprint, Oct 2026", "fix": "Put today's date in the request, fetch fresh pages, and tell the model when old evidence stopped applying.", "own": "Vendor and buyer", "first": "Add \"as of today\" and source dates to price, rule and people questions.", "eff": "Low", "mat": "Generally available", "ev": "m", "evl": "Larger models switched almost perfectly when told evidence had expired", "b": ["P2"], "tier": ""}, {"id": "S6", "lane": "s", "name": "Snippets, not pages", "ic": "i-scrub", "st": "true", "see": "An answer built from a search snippet or a cut-down summary of the page.", "why": "Opening pages costs time and tokens. Some tools pass the page through a smaller model first.", "num": "53.6%", "numl": "of search episodes where one leading model opened no page at all", "tag": "Preprint, Oct 2026", "fix": "Cite only pages that were opened, and report any text that was cut.", "own": "Buyer", "first": "Log whether each cited page was opened, and block those that were not.", "eff": "Medium", "mat": "Early product", "ev": "m", "evl": "Opened pages were stale 1.3% of the time, snippets 6.4%", "b": ["P1", "P3"], "tier": ""}, {"id": "S7", "lane": "s", "name": "Blocked pages", "ic": "i-denial", "st": "new", "see": "The best source is paywalled, bot-blocked or built in JavaScript, so the answer leans on copies.", "why": "Sites are closing the door to AI bots, and many AI fetchers do not run JavaScript.", "num": "Default", "numl": "AI-bot blocking now covers ad pages on existing free sites on a major network", "tag": "News report, Oct 2026", "fix": "Name each blocked page, then route to your own copy, a licensed source, a file reader or a browser tool.", "own": "Buyer", "first": "Test whether each team's top 10 sources open, and set a route for the rest.", "eff": "High", "mat": "Error codes sold, paid access early", "ev": "n", "evl": "Not measured beyond one case of our own", "b": ["P3"], "tier": ""}, {"id": "S8", "lane": "s", "name": "False premise", "ic": "i-cross", "st": "true", "see": "The wrong fact in your question is accepted and \"confirmed\" with sources.", "why": "Models are tuned to agree, and the premise gets written into the search query.", "num": "64%", "numl": "of fabricated facts accepted by one leading model", "tag": "Preprint, May 2026", "fix": "List the question's assumptions and check each one before searching.", "own": "Vendor and buyer", "first": "Add \"list and check my assumptions first\" to research prompts.", "eff": "Medium", "mat": "Research", "ev": "m", "evl": "A plain prompt gave the same gain as the full check", "b": ["P2", "P9"], "tier": ""}, {"id": "S9", "lane": "s", "name": "Memory beats search", "ic": "i-sql", "st": "true", "see": "An answer from training data when search was on, or a correct memory overwritten by a bad page.", "why": "The model's own confidence decides what to trust, and that confidence is poorly calibrated.", "num": "60%+", "numl": "of cases where models took wrong retrieved text over correct memory", "tag": "Peer-reviewed study, 2024", "fix": "Require a dated primary source for changing facts, with an expiry date.", "own": "Vendor and buyer", "first": "Require a dated primary source for prices, rules and office holders.", "eff": "Medium", "mat": "Research", "ev": "m", "evl": "Measured in lab tests only", "b": ["P1", "P2"], "tier": ""}, {"id": "S10", "lane": "s", "name": "Planted instructions", "ic": "i-security", "st": "true", "see": "Usually nothing. Hidden text on a page steers the answer or tells an agent to act.", "why": "One model reads data and instructions together and cannot reliably tell them apart.", "num": "73.1%", "numl": "of injected attacks on real pages got past a standard browsing planner", "tag": "Preprint, Oct 2026", "fix": "Keep page text away from any model that can act, and ask before actions that follow web content.", "own": "Vendor and buyer", "first": "Remove email, payment and file access from browsing agents, and turn on approvals.", "eff": "High", "mat": "Filters sold, isolation in research", "ev": "m", "evl": "Attacks got through 12.8% of the time, against 73.1% without", "b": ["P4"], "tier": ""}, {"id": "F1", "lane": "f", "name": "Confident wrong answers", "ic": "i-risk", "st": "true", "see": "A fluent answer with invented case law, a wrong figure or an unneeded medical test, and the error only shows up later in court or with a client.", "why": "The model sounds just as sure when it is wrong, and people often use the output without checking.", "num": "Over 2,200", "numl": "court cases now listed with AI-invented content", "tag": "Researcher's case database, Oct 2026", "fix": "A named person checks every citation and figure before anything is filed or sent. Record which model produced which output.", "own": "Team heads, with the CIO", "first": "Name one person per team who opens every cited source and figure before AI work leaves the company.", "eff": "Medium", "mat": "Generally available", "ev": "m", "evl": "Grounded legal tools were wrong less often. The human check is not measured", "b": ["P1", "P9", "P10"], "tier": "A"}, {"id": "F2", "lane": "f", "name": "Agents act wrongly", "ic": "i-agent", "st": "worse", "see": "An agent deletes files, touches production, uses saved passwords, or says tests pass when the last run came before its own edits.", "why": "Agents get broad permissions by default, and few teams can trace what an agent actually did.", "num": "80 of 357", "numl": "\"tests pass\" claims in one team's audit had no up-to-date test run behind them", "tag": "One user team, Oct 2026", "fix": "Give agents the least access they need and an approval step before delete or deploy. Accept a pass only with a captured test log.", "own": "Security lead and CIO", "first": "Turn sandboxes on by policy and give each agent its own low-privilege login.", "eff": "Medium", "mat": "Generally available, often off by default", "ev": "v", "evl": "Vendor's own test only", "b": ["P4", "P9"], "tier": "A"}, {"id": "F3", "lane": "f", "name": "Data leaves your control", "ic": "i-vault", "st": "true", "see": "Staff paste company data into personal AI accounts. Consumers learn from lawsuits that allege their chats were used without valid consent.", "why": "Policies alone do not stop it, and uploads were highest where AI was banned.", "num": "48%", "numl": "of employees who use AI uploaded company information to public AI tools", "tag": "University and KPMG survey, 2025", "fix": "Give staff an approved tool with controls that stop company data leaving, and check what each vendor may do with your chats.", "own": "CIO and security lead", "first": "Pick one approved AI tool with no-training terms and turn on data-loss controls.", "eff": "Medium", "mat": "Generally available, some parts in preview", "ev": "v", "evl": "Vendor survey, not cause and effect", "b": ["P5"], "tier": "A"}, {"id": "F4", "lane": "f", "name": "Agent tools attacked", "ic": "i-security", "st": "true", "see": "A hidden instruction in a repo, web page or plug-in makes a coding tool leak secrets or run code on a developer's machine.", "why": "Agent tools treat text they read as instructions, and some vendors decline to treat these chains as flaws.", "num": "8.8", "numl": "severity out of 10 for a Copilot flaw in Visual Studio triggered by a hidden instruction", "tag": "Security researcher, Oct 2026", "fix": "Treat repos, plug-ins and tool settings as untrusted, keep agents off the open internet by default, and patch agent tools quickly.", "own": "Security lead, with procurement", "first": "Allow only listed tool servers, and close agents' network access by default.", "eff": "Medium", "mat": "Mixed", "ev": "v", "evl": "Vendor's own test. Adaptive attacks beat most filters", "b": ["P4"], "tier": "B"}, {"id": "F5", "lane": "f", "name": "Spend without return", "ic": "i-kpi", "st": "true", "see": "AI budgets keep rising while finance teams still cannot see which uses pay back.", "why": "Few firms compare value with cost, and few set rules for stopping a pilot.", "num": "13%", "numl": "of CIOs report significant or transformational value from AI, in a survey of 2,002 tech leaders", "tag": "Analyst survey, May to Jul 2026", "fix": "Track value against cost for each use case, and write the stop rule before each pilot starts.", "own": "Finance lead", "first": "Write the value measure, cost measure and stop rule before the next pilot starts.", "eff": "Medium", "mat": "Meters sold, value standards early", "ev": "v", "evl": "Analyst survey, a link not proof", "b": ["P8"], "tier": "C"}, {"id": "F6", "lane": "f", "name": "Models change", "ic": "i-model", "st": "true", "see": "The model behaves differently after an update, an old model disappears, or an API model is retired and calls start failing.", "why": "Vendors replace models to free capacity, and default settings change too.", "num": "29", "numl": "OpenAI model IDs shut down in one day", "tag": "Vendor notice, Oct 2026", "fix": "Pin model versions, keep a register of retirement dates and rerun your own tests before accepting any change.", "own": "Platform lead, with procurement", "first": "Pin the model version in every production use and keep a list of retirement dates.", "eff": "Low to medium", "mat": "Generally available", "ev": "m", "evl": "Model updates broke 24.7% to 47.2% of right answers in a lab test", "b": ["P6", "P7", "P10"], "tier": "B"}, {"id": "F7", "lane": "f", "name": "Surprise usage caps", "ic": "i-measure", "st": "new", "see": "A paid allowance runs out far faster than expected, and there is no way to tell in advance what a task will cost.", "why": "Vendors reprice and cut allowances often, compute is scarce, and meters are not documented.", "num": "33", "numl": "pricing and limit changes across AI tools in one quarter", "tag": "Community tracker, Q3 2026", "fix": "Write notice periods for limit changes into contracts, track usage per task and ask vendors for a cost preview.", "own": "Finance lead and procurement", "first": "Set hard spend caps per person, team and agent.", "eff": "Low", "mat": "Generally available", "ev": "n", "evl": "Not measured yet", "b": ["P6", "P7", "P8"], "tier": "C"}, {"id": "F8", "lane": "f", "name": "Tells you what you want", "ic": "i-approve", "st": "new", "see": "The assistant agrees, praises and goes along. Most people do not notice. Vulnerable users can be pulled deeper into harmful beliefs.", "why": "Models tend to go along with the person in front of them. Eight US states now allege the design itself is too agreeable.", "num": "8", "numl": "US states sued OpenAI on the same day over ChatGPT safety", "tag": "State filings, Oct 2026", "fix": "If you run a consumer chat product, add crisis routing, age checks and instructions against blind agreement. Test them on your own chats.", "own": "Mostly the vendor", "first": "Test your chatbot with anti-agreement instructions, and route crisis talk to people.", "eff": "High for vendors", "mat": "Partly available", "ev": "m", "evl": "Cut agreement with delusions by 73.8% in simulated chats", "b": ["P9", "P10"], "tier": "B"}, {"id": "F9", "lane": "f", "name": "Controls lag rollout", "ic": "i-policy-doc", "st": "new", "see": "Agents go live faster than anyone can list, trace or switch them off. Regulators have started asking vendors questions.", "why": "Rollout plans run ahead of governance. This month the EU AI Office sent its first information requests and the FTC sent subpoenas.", "num": "71% vs 21%", "numl": "of organisations plan AI agents within a year, against those with governance for them", "tag": "Analyst survey of 2,000+ tech leaders, Q2 2026", "fix": "Keep a list of every agent, with full traces and a kill switch you have tested.", "own": "CIO and security lead", "first": "List every agent in one register and rehearse switching one off.", "eff": "Medium", "mat": "Registers sold, standards early", "ev": "n", "evl": "Not measured yet", "b": ["P4", "P5"], "tier": "C"}, {"id": "F10", "lane": "f", "name": "Review overload", "ic": "i-pm", "st": "true", "see": "People spend more time checking AI output, maintainers face a flood of low-quality AI submissions, and some roles are being cut.", "why": "Output grows faster than review capacity, and rework eats the time AI saved.", "num": "25%", "numl": "of incoming code changes are low-quality AI work, say open-source maintainers", "tag": "Maintainer survey, Oct 2026", "fix": "Plan roles and review capacity around the volume AI produces, not the old workload.", "own": "Team heads and HR", "first": "Track changes per reviewer and cap incoming AI-written changes.", "eff": "High", "mat": "Tools sold, role design in research", "ev": "v", "evl": "Two studies disagree", "b": ["P8", "P9"], "tier": "C"}, {"id": "F11", "lane": "f", "name": "Loses context", "ic": "i-cache", "st": "true", "see": "The assistant forgets earlier decisions, ignores house rules or invents context it never had.", "why": "Long chats get compressed, sometimes to save cost when space remains, and rules in a prompt are advice the model can drop.", "num": "7 of about 20", "numl": "coding sessions lost working context overnight in one user's log", "tag": "User report, Oct 2026", "fix": "Keep key rules and decisions in files the tool reloads, and enforce house rules outside the model.", "own": "Platform lead", "first": "Put hard rules in tool settings, not in the prompt.", "eff": "Medium", "mat": "Generally available", "ev": "m", "evl": "A recap won back about half of a 34-point drop in a lab test", "b": ["P4"], "tier": "C"}, {"id": "F12", "lane": "f", "name": "Outages", "ic": "i-cloud", "st": "true", "see": "Errors and slowdowns in the middle of a task, sometimes while the status page says all is well.", "why": "Compute is tight, and a single fault can block every product a vendor runs at once.", "num": "~10,000", "numl": "outage reports for one Gemini outage while its status page showed no issue", "tag": "Outage tracker, Oct 2026", "fix": "Fail over across providers, and alert on spend-limit and capacity errors.", "own": "Platform lead and procurement", "first": "Route AI calls through a gateway with a tested fallback to a second provider.", "eff": "Medium", "mat": "Generally available", "ev": "n", "evl": "Not measured yet", "b": ["P6", "P7"], "tier": "C"}, {"id": "F13", "lane": "f", "name": "Misfiring safety filters", "ic": "i-denial", "st": "true", "see": "Normal work is refused or flagged, while some harmful requests still get through.", "why": "Filters trade false alarms against misses, so normal work gets caught along with real risks.", "num": "Over half", "numl": "of reasonable safety research tasks refused by three Anthropic models in a UK government test", "tag": "UK government test from last winter, reported Oct 2026", "fix": "Ask vendors for an appeal or allowlist path and their false-alarm rates.", "own": "Mostly the vendor", "first": "Test models on your own harmless but sensitive prompts before choosing filter levels.", "eff": "Medium", "mat": "Generally available", "ev": "v", "evl": "Vendor's own test only", "b": ["P6", "P10"], "tier": "C"}, {"id": "F14", "lane": "f", "name": "Vendor lock-in", "ic": "i-gateway", "st": "new", "see": "Moving a working AI tool to another provider takes far longer than planned, and price rises arrive that you cannot avoid.", "why": "Model names are hard-coded, prompts are tuned to one model, and business plans limit what you can export.", "num": "81%", "numl": "of 520 tech leaders say switching costs made them delay, scale back or rework a move", "tag": "Vendor survey, Sep 2026", "fix": "Keep model names in settings behind a gateway, own your tests and prompts, and write exit terms into contracts.", "own": "CIO and procurement", "first": "At the next renewal, add export, notice and no-silent-renewal terms.", "eff": "Medium to high", "mat": "Gateways sold, export weak", "ev": "n", "evl": "Not measured yet", "b": ["P5", "P6", "P7"], "tier": "C"}];
+const BL=[["P1", "Check every claim"], ["P2", "Source and date rules"], ["P3", "Failure log"], ["P4", "Agent fence"], ["P5", "One approved tool"], ["P6", "Gateway, pinned models"], ["P7", "Contract terms"], ["P8", "Value ledger"], ["P9", "Named checkers"], ["P10", "Your own test set"]];
+const COV={"P1": 4, "P2": 5, "P3": 3, "P4": 5, "P5": 3, "P6": 5, "P7": 4, "P8": 3, "P9": 7, "P10": 24};
+const ST={worse:["worse","Harm rising"],new:["part","New events"],true:["true","Still true"]};
+const EV={m:"Measured",v:"Vendor or survey only",n:"Not measured"};
+const $=q=>document.querySelector(q);
+const icon=(id,size,cls)=>`<svg class="ic ${cls}" width="${size}" height="${size}" aria-hidden="true"><use href="#${id}"/></svg>`;
+const role=f=>f.st==="worse"?"iso-red":f.lane==="s"?"iso-violet":"iso-coral";
+const W=f=>f.st==="worse"?"w":"";
+const LANES=[["s","Web search","i-network","iso-violet","10 ways answers go wrong when AI searches the web."],["f","Wider AI use","i-executive","iso-amber","14 problems in daily use, by tier. A hurts most."]];
+$("#lanes").innerHTML=LANES.map(l=>`<div class="lane ${l[0]}"><div class="sh">${icon(l[2],88,l[3])}<h3>${l[1]}</h3></div><p class="job">${l[4]}</p><div class="tiles">${I.filter(f=>f.lane===l[0]).map(f=>`<button class="tile ${W(f)}" data-open="${f.id}"><span class="k">${f.id}</span>${f.name}</button>`).join("")}</div></div>`).join("");
+const FIX=[
+ ["1","Name a checker for what leaves","Head of each team that sends AI work out","Name one person who opens every cited source and figure before it is sent. Turn on citations.","Covers F1, S1. Low to medium effort"],
+ ["2","Fence every agent","Security lead","List every agent, give each its own low-privilege login, and test the off switch.","Covers F2, F4, F9, S10. Medium effort"],
+ ["3","Pin models and test before change","Platform lead","Pin model versions and run your own test set before any model or setting change.","Covers F6, F12, F13, F14 and all search. Low to medium"],
+ ["4","Write change into contracts","Procurement lead","At the next renewal, add notice for retirements, limits and prices, full export and no silent renewal.","Covers F6, F7, F12, F14. Low effort"]];
+$("#fixes").innerHTML=FIX.map(f=>`<div class="fixc"><span class="n">${f[0]}</span><h3>${f[1]}</h3><span class="who">${f[2]}</span><p>${f[3]}</p><span class="tag">${f[4]}</span></div>`).join("");
+const NEXT=[["One approved tool","CIO · F3"],["Value ledger and stop rules","Finance lead · F5, F7"],["Source rules and failure log","Architect · S2 to S9"],["Isolated reader for agents","Security lead · S10"],["Review capacity","HR and team heads · F10"]];
+$("#next").innerHTML=NEXT.map((n,i)=>`<div><span>Then ${i+5}</span><b>${n[0]}</b><span>${n[1]}</span></div>`).join("");
+$("#bl").innerHTML=BL.map(b=>`<div class="brow"><b>${b[1]}</b><div class="bar" role="img" aria-label="${COV[b[0]]} of 24"><i style="width:${COV[b[0]]/24*100}%"></i></div><span>${COV[b[0]]}</span></div>`).join("");
+const BRD=[["0 of 24","We tracked 24 ways AI tools fail. None was fixed in the last 30 days."],["13%","Only 13% of CIOs say AI has brought significant or transformational value."],["60%+","In one audit, over 60% of AI search citations got the article, publisher or link wrong."],["3.3x","AI agents acting wrongly is the one problem with harm clearly rising. Our count of agent incidents per month was about 3.3 times higher in Sep and Oct than in Jun to Aug."],["4 of 10","Ten building blocks cover all 24 problems. Four of them do most of the work: a named checker, an agent fence, pinned models and contract terms."]];
+$("#brd").innerHTML=BRD.map(b=>`<li><b>${b[0]}</b><p>${b[1]}</p></li>`).join("");
+const UNK=[["Proof the fixes work","Most fixes have no independent before-and-after number yet."],["The human steps","Named checkers, stop rules and off-switch drills are measured nowhere."],["Cost","No block has a priced total for a given firm. Price each at the first funding gate."],["Interviews","This is desk research. Interviews with AI owners have not been run."]];
+$("#unk").innerHTML=UNK.map(u=>`<div><b>${u[0]}</b><p>${u[1]}</p></div>`).join("");
+/* drawer */
+let cur=null;
+function openD(id){
+  const k=I.findIndex(f=>f.id===id); if(k<0) return; const f=I[k]; cur=k;
+  $("#drawer").innerHTML=`<div class="dh">${icon(f.ic,88,role(f))}<div class="tag">${f.id} · ${f.lane==="s"?"Web search":"Wider AI, tier "+f.tier}</div><button class="close" id="dr-x" aria-label="Close">×</button></div>
+  <h2 id="dr-title">${f.name}</h2>
+  <span class="pill ${ST[f.st][0]}" style="justify-self:start">${ST[f.st][1]}</span>
+  <div class="big"><b class="${W(f)}">${f.num}</b><span>${f.numl}</span><span class="tag">${f.tag}</span></div>
+  <dl class="dl"><div><dt>What you see</dt><dd>${f.see}</dd></div><div><dt>Why it happens</dt><dd>${f.why}</dd></div><div><dt>The fix</dt><dd>${f.fix}</dd></div><div><dt>Who owns it</dt><dd>${f.own}</dd></div><div><dt>First step</dt><dd>${f.first}</dd></div><div><dt>Effort and maturity</dt><dd>${f.eff} effort. ${f.mat}.</dd></div><div><dt>Does the fix work?</dt><dd class="evd"><span class="evp ${f.ev}">${EV[f.ev]}</span><span>${f.evl}.</span></dd></div></dl>
+  <div class="navrow"><button id="dr-p" ${k===0?"disabled":""}>‹ Previous</button><button id="dr-n" ${k===I.length-1?"disabled":""}>Next ›</button></div>`;
+  $("#drawer").hidden=false;$("#scrim").hidden=false;
+  $("#dr-x").onclick=closeD;$("#dr-p").onclick=()=>openD(I[cur-1].id);$("#dr-n").onclick=()=>openD(I[cur+1].id);
+  $("#dr-x").focus();
+}
+function closeD(){$("#drawer").hidden=true;$("#scrim").hidden=true;cur=null;}
+document.addEventListener("click",e=>{const b=e.target.closest("[data-open]");if(b) openD(b.dataset.open);});
+$("#scrim").onclick=closeD;
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&cur!==null) closeD();});
+const h=new URLSearchParams(location.hash.slice(1));if(h.get("open")) openD(h.get("open"));
+</script>
+</body></html>

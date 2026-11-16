@@ -1,0 +1,546 @@
+{
+ "R1-29": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Google blog 2026-10-15: Universal Cart launches in the US today with checkout powered by UCP",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R2-59": {
+  "verdict": "fix",
+  "fix": "PayPal, Shopify and Stripe launched as Copilot Checkout payment partners on 2026-01-08. Stripe says its sellers connect over ACP. Microsoft's current page names UCP as future support and does not name ACP. Also reword 2.2: UCP is the only commerce protocol with a verified live consumer checkout inside the 90 day window.",
+  "why": "ppc.land only quotes Microsoft adopting open standards like ACP. Stripe's own newsroom (2026-01-08) confirms ACP on the Stripe path",
+  "opened": true,
+  "checker": "K1",
+  "new_src": "https://stripe.com/us/newsroom/news/microsoft-copilot-and-stripe"
+ },
+ "R1-72": {
+  "verdict": "fix",
+  "fix": "Keep as the PayPal launch fact. Do not use it to say Copilot Checkout runs on no protocol.",
+  "why": "True of its article only. Stripe's page names ACP for Stripe sellers",
+  "opened": false,
+  "checker": "K1"
+ },
+ "R1-02": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Commits page: last commit 2026-07-18",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R1-19": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Announcements list v2026-08-25 as latest",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R1-21": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Payments TC formed 2026-09-02 with 8 members",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R1-22": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Stripe joined Governing Council 2026-04-28",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R1-23": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Tech Council expanded to 16 seats 2026-04-24",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R1-35": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Changelog: 0.2.0 (2026-04-28). Mandate details not on this page",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R1-40": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "FIDO 2026-04-28: two groups, Mastercard and Visa chair payments, work commenced, no draft",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R1-42": {
+  "verdict": "fix",
+  "fix": "A2A v1.0 is its first stable specification, backed by more than 150 organisations (Linux Foundation, 2026-04-09). Cite the A2A GitHub release page for v1.0.1 on 2026-05-28.",
+  "why": "Cited page gives no patch version or date",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R1-33": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Shopify changelog 2026-10-13: Shop MCP is live, checkout completes after shopper confirms",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R1-47": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "AWS GA notice 2026-08-18. Leaves the 90 day window on 2026-11-16",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R2-56": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "AWS: MPP, x402 upto, Coinbase and Stripe Privy, limits at infrastructure layer",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R1-34": {
+  "verdict": "fix",
+  "fix": "WebMCP C Pilot 2026-11-15. Shopify registers checkout tools on eligible checkouts, but Chrome runs WebMCP as an origin trial (Chrome 149 to 156, shipping planned for 157).",
+  "why": "Shopify page has no date or availability status. The permission quote itself is correct. Chromium intent to experiment 2026-05-15 sets the origin trial",
+  "opened": true,
+  "checker": "K1",
+  "new_src": "https://groups.google.com/a/chromium.org/g/blink-dev/c/gmYffo5WOE8/m/OJxuQRP3AAAJ"
+ },
+ "R1-16": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "OpenAI page: ChatGPT signs with Web Bot Auth, Akamai, Cloudflare, HUMAN and Vercel verify. Page has no date",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R1-57": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "WG milestones 2026-04-30 and 2026-08-31 with no documents attached",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R1-50": {
+  "verdict": "fix",
+  "fix": "Visa TAP C Pilot 2026-07-02. Visa says merchant participation in live European agent purchases (lastminute.com, Frasers, Cleverbridge, BrickDepot) was enabled through TAP. Delete the 2.3 line that no source ties TAP to a live consumer payment.",
+  "why": "Visa's own 2026-07-02 release contradicts the Spec call. R1-50 itself not opened",
+  "opened": false,
+  "checker": "K1",
+  "new_src": "https://www.visa.co.uk/about-visa/newsroom/press-releases.3457328.html"
+ },
+ "R2-04": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Visa 2026-10-21: BILL and Billtrust pilot live end to end, TAP named, GA of two features in 2027",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R2-01": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Visa call 2026-10-27: nearly 50 AI partners live including Shop Pay, no volume",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R2-11": {
+  "verdict": "fix",
+  "fix": "Mastercard Agent Pay C is Live. Shopify's 2026-10-28 page shows Shop Pay in personal agents on Mastercard tokens [R2-11] but does not name Agent Pay. Mastercard's CEO said on 2026-10-29 that Shop Pay uses Agent Pay [R2-09].",
+  "why": "Page supports the Shop Pay and token facts. It names neither Agent Pay nor Intelligent Commerce, so the 2.3 bullet overstates it",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R1-60": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Mastercard 2026-06-02: all European issuers enabled, controlled live transactions with passkeys, 36 banks listed",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R2-09": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "PYMNTS 2026-10-29: CEO says Shop Pay uses Agent Pay and calls VCN a bridge",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R2-13": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "The Block 2026-06-10: more than 30 early adopters, no GA date, no real money shown",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R1-61": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "README: Draft (v0.1), maintained by Mastercard. Mappings to AP2, ACP, UCP not visible on the landing page",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R1-65": {
+  "verdict": "cut",
+  "fix": "Recheck in a browser before acting. A search snippet of the same Amex page matches the doc wording.",
+  "why": "Page failed to open twice (header overflow), so the rule defaults to does not support",
+  "opened": false,
+  "checker": "K1"
+ },
+ "R1-66": {
+  "verdict": "cut",
+  "fix": "Recheck in a browser. If confirmed: Amex announced Agent Purchase Protection on 2026-04-14. It covers registered agents, and agent registration specs are still in development.",
+  "why": "Not openable. Press reports call the protection rolled out on 2026-04-14, so future tense may be wrong",
+  "opened": false,
+  "checker": "K1"
+ },
+ "R1-67": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Datatracker: -02 on 2026-11-02, individual, not endorsed by the IETF, expires 2027-05-06",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R1-68": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Asian Banker 2026-09-10: KYA collaboration through MAS convened BuildFin.ai, no spec or timeline",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R2-15": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Stripe docs: 2026-09-30.preview, agent services preview terms, 34 country codes",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R2-16": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Stripe docs: may use Mastercard Agent Pay and Visa Intelligent Commerce tokens",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R2-21": {
+  "verdict": "fix",
+  "fix": "Keep only as the Instinct Link balance fact. Remove it from the SPT C status sources.",
+  "why": "Article never mentions Shared Payment Tokens",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R2-17": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Stripe agentic docs index lists machine payments with MPP and x402. Machine page not opened",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R2-31": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Coinbase: launched under the Linux Foundation 2026-04-02 with forty members. LF release speaks of an operational launch in July 2026",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R2-33": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "LF 2026-10-01: more than 50 active members. Use as the current count",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R2-38": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Tracker: 200,680,559 transactions, 42,999,352 USD, 12 chains, 18 facilitators",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R2-39": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Tracker: October 5.1M transactions moving 274K USD, peak December 2025 at 54.2M",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R2-28": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Tracker: MPP on Tempo 48,585 events, 1,874 payers, 92 payees",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R2-40": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Tracker: 60.1 percent through one facilitator in 5 days to 14 Nov",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R2-55": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Lightning Labs 2026-07-21: alpha, mainnet by invite, 1 basis point fee, L402 and MCP",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R2-61": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Adyen 2026-06-16: limited availability for US enterprise merchants. Stale for a Pilot cell",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R2-63": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Checkout.com: early access for selected partners, certified payment handler, UCP via Google Pay rails",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R2-64": {
+  "verdict": "fix",
+  "fix": "Worldpay C Absent 2026-11-15 as a shipped product. Announced on 2026-01-28 as launching soon, no later source found.",
+  "why": "Quote correct. Spec is the wrong word for an announced product with no spec",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R2-68": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Razorpay 2026-02-20: pilot with a small group of users on UPI Reserve Pay. Stale",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R2-72": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Lets Money 2026-05-21: Iniciador MCP, biometric approval each payment, offered to institutions",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R2-66": {
+  "verdict": "fix",
+  "fix": "Alipay AI Pay C Live 2026-05-26 on vendor figures, stale, recheck.",
+  "why": "Figures match. 100M users and 120M transactions in one week is not a pilot, and neither page says pilot",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R2-67": {
+  "verdict": "fix",
+  "fix": "Same as R2-66: Live on vendor figures, stale.",
+  "why": "300M transactions to date confirmed. Pilot understates maturity",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R4-27": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Visa 2026-11-05: 22 models, 15 challenges, 42.8 percent of runs failed, about 54 percent of failed runs still bought",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R5-44": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "American Banker 2026-11-02: starting Nov. 24, liable unless evidence of revocation. Year implied, press source",
+  "opened": true,
+  "checker": "K1"
+ },
+ "R2-65": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Fortune 2026-10-15: spokesperson says the bank does not allow third party agents using banking credentials",
+  "opened": true,
+  "checker": "K1"
+ },
+ "status:acp:C": {
+  "verdict": "keep",
+  "fix": "Keep Spec 2026-11-15. Add: Copilot Checkout used ACP for Stripe sellers at launch on 2026-01-08. Stripe's agentic docs now list UCP and not ACP.",
+  "why": "Spec holds but hides that ACP shipped in Copilot Checkout",
+  "opened": true,
+  "checker": "K1"
+ },
+ "status:ucp:C": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Live 2026-10-15 confirmed",
+  "opened": true,
+  "checker": "K1"
+ },
+ "status:mc-agentpay:C": {
+  "verdict": "keep",
+  "fix": "Cite R2-09 as the source that names Agent Pay.",
+  "why": "Live supported by Shopify tokens plus CEO remark",
+  "opened": true,
+  "checker": "K1"
+ },
+ "status:mc-agentpay:M": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Spec, announcement only",
+  "opened": true,
+  "checker": "K1"
+ },
+ "status:visa-tap:C": {
+  "verdict": "fix",
+  "fix": "Pilot 2026-07-02",
+  "why": "Visa release says TAP enabled merchant participation in live European agent purchases",
+  "opened": true,
+  "checker": "K1",
+  "new_src": "https://www.visa.co.uk/about-visa/newsroom/press-releases.3457328.html"
+ },
+ "status:visa-tap:B": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Pilot 2026-10-20 supported by Visa 2026-10-21 release",
+  "opened": true,
+  "checker": "K1"
+ },
+ "status:visa-ic:C": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Live 2026-10-28",
+  "opened": true,
+  "checker": "K1"
+ },
+ "status:visa-ic:B": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Pilot 2026-10-21",
+  "opened": true,
+  "checker": "K1"
+ },
+ "status:spt:C": {
+  "verdict": "fix",
+  "fix": "Live 2026-11-15, preview terms. Sources R2-15 plus Stripe Copilot newsroom and Microsoft merchant page. Drop R2-21.",
+  "why": "Stripe says SPTs are available in US, CA and Europe. Copilot Checkout is available now and uses SPTs",
+  "opened": true,
+  "checker": "K1",
+  "new_src": "https://about.ads.microsoft.com/en/solutions/technology/agentic-commerce"
+ },
+ "status:alipay:C": {
+  "verdict": "fix",
+  "fix": "Live 2026-05-26, ev vendor, stale",
+  "why": "Scale and live use shown, no pilot wording",
+  "opened": true,
+  "checker": "K1"
+ },
+ "status:alipay:M": {
+  "verdict": "fix",
+  "fix": "Split the row. M Spec belongs to Ant AMP, the doc gives Alipay AI Pay M Absent",
+  "why": "Merged row mixes two products",
+  "opened": false,
+  "checker": "K1"
+ },
+ "status:wba:C": {
+  "verdict": "fix",
+  "fix": "Live, as_of 2026-11-15, identity only",
+  "why": "No cited page carries 2026-09-28",
+  "opened": true,
+  "checker": "K1"
+ },
+ "status:mcp:C": {
+  "verdict": "fix",
+  "fix": "Live 2026-10-13, src R1-33 only",
+  "why": "R1-34 is WebMCP, not MCP",
+  "opened": true,
+  "checker": "K1"
+ },
+ "status:mcp:M": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Live 2026-08-18",
+  "opened": true,
+  "checker": "K1"
+ },
+ "status:webmcp:C": {
+  "verdict": "fix",
+  "fix": "Pilot 2026-11-15 (Chrome origin trial). Not on data.json, doc only",
+  "why": "Origin trial 149 to 156, ship 157",
+  "opened": true,
+  "checker": "K1"
+ },
+ "status:x402:C": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Spec",
+  "opened": true,
+  "checker": "K1"
+ },
+ "status:x402:B": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Spec",
+  "opened": true,
+  "checker": "K1"
+ },
+ "status:x402:M": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Live 2026-11-15 on tracker",
+  "opened": true,
+  "checker": "K1"
+ },
+ "status:mpp:M": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Live 2026-11-15 on tracker",
+  "opened": true,
+  "checker": "K1"
+ },
+ "status:upi:C": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Pilot 2026-02-20, stale",
+  "opened": true,
+  "checker": "K1"
+ },
+ "status:pix:C": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Spec, no consumer volume shown",
+  "opened": true,
+  "checker": "K1"
+ },
+ "status:kya:B": {
+  "verdict": "fix",
+  "fix": "Make page and doc agree. Doc has KYAPay B Absent and KYA framework B Unsettled",
+  "why": "Merged row",
+  "opened": false,
+  "checker": "K1"
+ },
+ "status:amex-ace:C": {
+  "verdict": "keep",
+  "fix": "Spec likely right. Sources need a browser recheck",
+  "why": "Amex page not openable",
+  "opened": false,
+  "checker": "K1"
+ },
+ "status:ap2:C": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Spec, no deployment found",
+  "opened": true,
+  "checker": "K1"
+ },
+ "status:mc-vi:C": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Draft v0.1",
+  "opened": true,
+  "checker": "K1"
+ },
+ "status:fido:C": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Unsettled, no draft",
+  "opened": true,
+  "checker": "K1"
+ },
+ "status:a2a:C": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Spec for commerce. LF cites enterprise production use outside commerce",
+  "opened": true,
+  "checker": "K1"
+ }
+}

@@ -3,7 +3,7 @@ title: "From Models to Margins: The Metric Chain for AI Products"
 summary: "AI products have five layers of metrics (Business, User Experience, Model Output, Model, System), and the work is never improving one. It's defending the chain that carries a technical win all the way to a business outcome. A field-tested playbook covering five layers, four practices, the vanity-metric traps, and the platform that keeps the chain honest."
 pubDate: 2026-06-27
 updatedDate: 2026-06-25
-featured: true
+featured: false
 listed: true
 template: blueprint
 bpEyebrow: Metric Chain

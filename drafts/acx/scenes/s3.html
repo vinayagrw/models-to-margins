@@ -1,0 +1,178 @@
+<section class="acx-scene" id="acx-s3" aria-labelledby="acx-s3-h">
+  <header class="acx-head"><span class="acx-num">03</span><h2 id="acx-s3-h">Adoption, graded by evidence</h2>
+    <p class="acx-dek" data-for="leader">Each adoption figure sits on the rung of evidence behind it. Rung 1 is an audit, rung 7 a bare claim. Hollow marks are vendor figures.</p>
+    <p class="acx-dek" data-for="architect">Adoption figures placed on the evidence ladder, from audited record down to unbacked claim. Size designs on the upper rungs and treat the rest as signal.</p>
+  </header>
+  <div class="s3-bar">
+    <div class="acx-seg" role="group" aria-label="Show figures by evidence">
+      <button type="button" data-ev="all" aria-pressed="true">All</button>
+      <button type="button" data-ev="verified" aria-pressed="false"><i class="s3-dot" data-ev="verified" aria-hidden="true"></i>Verified</button>
+      <button type="button" data-ev="vendor" aria-pressed="false"><i class="s3-dot" data-ev="vendor" aria-hidden="true"></i>Vendor</button>
+    </div>
+  </div>
+  <div class="acx-split s3-split">
+    <div class="acx-card s3-ladder">
+      <p class="s3-end">Strongest</p>
+      <ol class="s3-rungs"></ol>
+      <p class="s3-end">Weakest</p>
+    </div>
+    <aside class="acx-card acx-panel s3-panel" aria-live="polite"><div class="s3-stack"></div></aside>
+  </div>
+  <div class="acx-card s3-checks" hidden><p class="acx-k">How this was checked</p><ul class="s3-ck"></ul></div>
+</section>
+<style id="acx-s3-css">
+#acx-s3 .s3-bar{display:flex; flex-wrap:wrap; align-items:center; gap:10px 16px; margin:0 0 14px}
+#acx-s3 .s3-dot{display:inline-block; width:12px; height:12px; border-radius:50%; flex:none; margin-right:8px; vertical-align:-1px}
+#acx-s3 .s3-dot[data-ev="verified"]{background:var(--acx-live)}
+#acx-s3 .s3-dot[data-ev="vendor"]{border:2.5px solid var(--acx-pilot)}
+#acx-s3 .s3-dot[data-ev="illustrative"]{border:2.5px solid var(--acx-spec)}
+#acx-s3 .s3-ladder{padding:14px 18px 14px; display:flex; flex-direction:column; gap:4px}
+#acx-s3 .s3-end{font-family:var(--acx-mono); font-size:14px; color:var(--acx-ink3); letter-spacing:.04em; text-transform:uppercase}
+#acx-s3 .s3-rungs{list-style:none; margin:0; padding:0; display:flex; flex-direction:column}
+#acx-s3 .s3-rung{display:grid; grid-template-columns:minmax(150px,190px) 1fr; gap:10px 14px; align-items:center; padding:8px 0; border-top:1px solid var(--acx-line)}
+#acx-s3 .s3-rung:last-child{border-bottom:1px solid var(--acx-line)}
+#acx-s3 .s3-rh{display:flex; align-items:center; gap:10px; font-size:15px; font-weight:600; color:var(--acx-ink); text-wrap:balance}
+#acx-s3 .s3-rn{flex:none; display:inline-grid; place-items:center; width:32px; height:32px; border-radius:50%; font-family:var(--acx-mono); font-size:14px; color:var(--acx-ink2); border:1px solid var(--acx-line2)}
+#acx-s3 .s3-marks{display:flex; flex-wrap:wrap; gap:6px; min-height:42px; align-items:center}
+#acx-s3 .s3-none{font-size:14px; color:var(--acx-ink3); font-style:italic}
+#acx-s3 .s3-m{display:inline-flex; align-items:center; min-height:42px; min-width:42px; padding:0 12px; border-radius:999px; border:1px solid var(--acx-line); background:var(--acx-bg2); cursor:pointer; font-family:var(--acx-mono); font-feature-settings:"tnum"; font-size:14px; font-weight:600; color:var(--acx-ink); white-space:nowrap; transition:opacity .2s, border-color .2s}
+#acx-s3 .s3-mu{margin-left:6px; font-family:var(--acx-sans); font-weight:500; color:var(--acx-ink2)}
+#acx-s3 .s3-m:hover{border-color:var(--acx-line2)}
+#acx-s3 .s3-m[aria-pressed="true"]{border-color:var(--acx-accent); box-shadow:0 0 0 1px var(--acx-accent); background:var(--acx-sunk)}
+#acx-s3 .s3-m:disabled{opacity:.28; cursor:default}
+#acx-s3 .s3-m:focus-visible{outline:2px solid var(--acx-accent); outline-offset:2px}
+#acx-s3 .s3-stack{display:grid; flex:1}
+#acx-s3 .s3-d{grid-area:1/1; visibility:hidden; display:flex; flex-direction:column; gap:10px}
+#acx-s3 .s3-d.is-on{visibility:visible}
+#acx-s3 .s3-dh{display:flex; align-items:center; gap:14px}
+#acx-s3 .s3-dh > div{display:flex; flex-direction:column; gap:8px; min-width:0}
+#acx-s3 .s3-meter{display:grid; grid-template-columns:repeat(7,1fr); gap:3px; width:min(196px,100%)}
+#acx-s3 .s3-meter i{height:8px; border-radius:4px; background:var(--acx-sunk); border:1px solid var(--acx-line)}
+#acx-s3 .s3-meter i.is-on{background:var(--acx-accent); border-color:var(--acx-accent)}
+#acx-s3 .s3-big{display:flex; flex-wrap:wrap; align-items:baseline; gap:4px 10px}
+#acx-s3 .s3-num{font-family:var(--acx-sans); font-size:52px; line-height:1; font-weight:600; letter-spacing:-.02em; color:var(--acx-ink)}
+#acx-s3 .acx-panel .s3-unit{font-size:16px; color:var(--acx-ink2)}
+#acx-s3 .s3-meta{display:flex; flex-wrap:wrap; align-items:center; gap:6px 12px}
+#acx-s3 .acx-panel .s3-asof{font-family:var(--acx-mono); font-size:14px; color:var(--acx-ink3)}
+#acx-s3 .acx-panel .s3-one{font-size:16px; color:var(--acx-ink)}
+#acx-s3 .acx-panel .s3-ctx{font-size:14px; color:var(--acx-ink3)}
+#acx-s3 .acx-panel .s3-mean{margin-top:auto; padding:12px 14px; border-radius:var(--acx-r-sm); background:var(--acx-sunk); font-size:15px; color:var(--acx-ink2)}
+#acx-s3 .s3-mean b{font-family:var(--acx-mono); font-size:14px; font-weight:600; color:var(--acx-ink); margin-right:10px}
+#acx-s3 .s3-checks{margin:var(--acx-gap) 0 0; padding:14px 18px 16px; display:flex; flex-direction:column; gap:10px}
+#acx-s3 .s3-checks .acx-k{font-family:var(--acx-mono); font-size:14px; color:var(--acx-ink3); text-transform:uppercase; letter-spacing:.05em}
+#acx-s3 .s3-ck{list-style:none; margin:0; padding:0; display:flex; flex-wrap:wrap; align-items:baseline; gap:8px 12px}
+#acx-s3 .s3-ci{display:inline-flex; align-items:baseline; gap:6px}
+#acx-s3 .s3-ci i{width:10px; height:10px; border-radius:3px; background:var(--c); align-self:center}
+#acx-s3 .s3-ck b{font-size:24px; line-height:1.1; font-weight:600; color:var(--acx-ink)}
+#acx-s3 .s3-ck span{font-size:15px; color:var(--acx-ink2)}
+#acx-s3 .s3-op{font-family:var(--acx-mono); font-size:20px; color:var(--acx-ink3)}
+#acx-s3 .s3-bar2{display:flex; gap:2px; height:8px; border-radius:4px; background:var(--acx-sunk)}
+#acx-s3 .s3-bar2 i{display:block; height:8px; border-radius:4px; background:var(--c); min-width:4px}
+@media (max-width:640px){
+  #acx-s3 .s3-rung{grid-template-columns:1fr; gap:8px}
+  #acx-s3 .s3-num{font-size:48px}
+}
+</style>
+<script>ACX.scene('s3', function (el, A) {
+  var esc = A.esc, D = A.data || {};
+  var items = (D.adoption || []).filter(function (x) { return x && x.id; });
+  // the evidence ladder from the research schema, 1 strongest to 7 weakest
+  var RUNG = ['Audited', 'Primary record', 'Observed activity', 'Live deployment', 'Independent survey', 'Self report', 'Projection or claim'];
+  var RMEAN = ['Someone outside audited or reproduced it.', 'A spec, law or filing states it.', 'Counted from on chain or disclosed activity.', 'A live launch is confirmed, volume unknown.', 'A neutral survey or credible press report.', 'The company or its sponsor says so.', 'A projection or a figure with no method.'];
+  var RICON = ['i-approve', 'i-policy-doc', 'i-event-stream', 'i-deploy', 'i-analyst', 'i-executive', 'i-roadmap'];
+  var MODES = ['all', 'verified', 'vendor'];
+  function kind(t) { return /^vendor/i.test(t || '') ? 'vendor' : (/^illus/i.test(t || '') ? 'illustrative' : 'verified'); }
+  function num(x) { return (x < 1000 ? x.toFixed(1) : x.toFixed(0)).replace(/\.0$/, ''); }
+  function compact(v) {
+    var a = Math.abs(v);
+    if (a >= 1e9) return num(v / 1e9) + 'B';
+    if (a >= 1e6) return num(v / 1e6) + 'M';
+    if (a >= 1e4) return num(v / 1e3) + 'K';
+    return String(v);
+  }
+  // value and unit as shown: qualifiers in the unit become a sign on the figure
+  function fig(it) {
+    var u = String(it.unit || ''), v = compact(Number(it.value)), pre = '', post = '';
+    if (/\(more than\)/i.test(u)) { post = '+'; u = u.replace(/\s*\(more than\)/i, ''); }
+    if (/\(nearly\)/i.test(u)) { pre = '~'; u = u.replace(/\s*\(nearly\)/i, ''); }
+    if (/^%\s*fall\b/i.test(u)) pre = '\u2212' + pre;
+    if (/^%/.test(u)) { post += '%'; u = u.replace(/^%\s*/, ''); }
+    if (/^times$/i.test(u)) { post += '×'; u = ''; }
+    // a bare figure gets its unit word, so no chip is just a number
+    var w = u.split(/\s+/).filter(function (x) { return x && !/^(named|on|chain)$/i.test(x); })[0] || '';
+    var bare = !/[%\u00d7]$/.test(pre + v + post);
+    return { v: pre + v + post, u: u, s: bare ? w : '' };
+  }
+  var rungs = el.querySelector('.s3-rungs'), stack = el.querySelector('.s3-stack');
+  var byRung = {};
+  var ORD = { verified: 0, illustrative: 1, vendor: 2 };
+  items.forEach(function (it) { var r = Math.min(7, Math.max(1, Number(it.rung) || 7)); (byRung[r] = byRung[r] || []).push(it); });
+  Object.keys(byRung).forEach(function (r) { byRung[r] = byRung[r].map(function (it, i) { return [it, i]; }).sort(function (a, b) { return (ORD[kind(a[0].ev)] - ORD[kind(b[0].ev)]) || (a[1] - b[1]); }).map(function (x) { return x[0]; }); });
+  var uc = {}; (D.usecases || []).forEach(function (u) { uc[u.id] = u.name; });
+  var pr = {}; (D.protocols || []).forEach(function (p) { pr[p.id] = p.name; });
+
+  rungs.innerHTML = RUNG.map(function (name, i) {
+    var r = i + 1, list = byRung[r] || [];
+    var marks = list.length ? list.map(function (it) {
+      var f = fig(it);
+      return '<button type="button" class="s3-m" data-id="' + esc(it.id) + '" data-ev="' + kind(it.ev) + '" aria-pressed="false" aria-label="' + esc(it.label + ', ' + f.v + ' ' + f.u + ', ' + it.ev) + '" title="' + esc(it.label) + '">' +
+        '<i class="s3-dot" data-ev="' + kind(it.ev) + '" aria-hidden="true"></i>' + esc(f.v) + (f.s ? '<span class="s3-mu">' + esc(f.s) + '</span>' : '') + '</button>';
+    }).join('') : '<span class="s3-none">No figure</span>';
+    return '<li class="s3-rung"><span class="s3-rh"><span class="s3-rn">' + r + '</span>' + esc(name) + '</span><div class="s3-marks">' + marks + '</div></li>';
+  }).join('');
+
+  stack.innerHTML = items.map(function (it) {
+    var f = fig(it), r = Math.min(7, Math.max(1, Number(it.rung) || 7)), k = kind(it.ev);
+    var tone = k === 'vendor' ? 'amber' : (k === 'illustrative' ? 'violet' : 'teal');
+    var meter = ''; for (var i = 1; i <= 7; i++) meter += '<i' + (i === r ? ' class="is-on"' : '') + '></i>';
+    var ctx = [pr[it.protocol], uc[it.use]].filter(Boolean).join(', ');
+    return '<div class="s3-d" data-id="' + esc(it.id) + '">' +
+      '<div class="s3-dh">' + A.icon(RICON[r - 1], tone, 'hero') + '<div><p class="acx-k">Rung ' + r + ', ' + esc(RUNG[r - 1]) + '</p><div class="s3-meter" aria-hidden="true">' + meter + '</div></div></div>' +
+      '<p class="s3-big"><span class="s3-num">' + esc(f.v) + '</span>' + (f.u ? '<span class="s3-unit">' + esc(f.u) + '</span>' : '') + '</p>' +
+      '<h3>' + esc(it.label) + '</h3>' +
+      '<p class="s3-meta">' + A.ev(it.ev) + (it.as_of ? '<span class="s3-asof">as of ' + esc(it.as_of) + '</span>' : '') + '</p>' +
+      (it.one ? '<p class="s3-one">' + esc(it.one) + '</p>' : '') +
+      (ctx ? '<p class="s3-ctx">' + esc(ctx) + '</p>' : '') +
+      '<p class="s3-mean"><b>Rung ' + r + '</b>' + esc(RMEAN[r - 1]) + '</p>' +
+      '</div>';
+  }).join('');
+
+  // audit counts, shown only once the check round has run
+  var ck = D.checks || {};
+  var strip = el.querySelector('.s3-checks');
+  if (Number(ck.claims_total) > 0) {
+    var n = function (k) { return Number(ck[k]) || 0; }, f = function (k) { return esc(n(k).toLocaleString('en-US')); };
+    var parts = [['kept', 'kept', 'var(--acx-live)'], ['fixed', 'fixed', 'var(--acx-pilot)'], ['cut', 'cut', 'var(--acx-pain)'], ['unverified', 'unconfirmed', 'var(--acx-ink3)']].filter(function (x) { return ck[x[0]] != null; });
+    var sum = parts.reduce(function (a, x) { return a + n(x[0]); }, 0), tot = n('claims_total'), re = n('rechecked');
+    var eq = re && sum === re;
+    var item = function (num, lab, c) { return '<li class="s3-ci">' + (c ? '<i style="--c:' + c + '"></i>' : '') + '<b>' + num + '</b><span>' + lab + '</span></li>'; };
+    var html = item(f('claims_total'), ck.rechecked != null ? 'cited,' : 'cited') + (ck.rechecked != null ? item(f('rechecked'), 'rechecked by a second person') : '') +
+      parts.map(function (x, i) { return '<li class="s3-op" aria-hidden="true">' + (i === 0 ? (eq ? '=' : ',') : (eq ? '+' : ',')) + '</li>' + item(f(x[0]), x[1], x[2]); }).join('');
+    strip.querySelector('.s3-ck').innerHTML = html;
+    if (tot && sum) {
+      strip.insertAdjacentHTML('beforeend', '<div class="s3-bar2" aria-hidden="true">' + parts.map(function (x) { return '<i style="width:' + (n(x[0]) / tot * 100).toFixed(2) + '%;--c:' + x[2] + '"></i>'; }).join('') + '</div>');
+    }
+    strip.hidden = false;
+  }
+
+  var sel = null, mode = 'all';
+  var segBtns = el.querySelectorAll('.s3-bar [data-ev]');
+  var markBtns = el.querySelectorAll('.s3-m');
+  function match(it) { return mode === 'all' || kind(it.ev) === mode; }
+  function pick(id) {
+    sel = id;
+    markBtns.forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.id === id)); });
+    stack.querySelectorAll('.s3-d').forEach(function (d) { d.classList.toggle('is-on', d.dataset.id === id); });
+  }
+  function apply(v) {
+    mode = MODES.indexOf(v) >= 0 ? v : 'all';
+    segBtns.forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.ev === mode)); });
+    markBtns.forEach(function (b) { var it = items.find(function (x) { return x.id === b.dataset.id; }); b.disabled = !match(it); });
+    var cur = items.find(function (x) { return x.id === sel; });
+    if (!cur || !match(cur)) { var first = items.find(match) || items[0]; if (first) pick(first.id); }
+  }
+  segBtns.forEach(function (b) { b.addEventListener('click', function () { A.set('ev', b.dataset.ev); }); });
+  markBtns.forEach(function (b) { b.addEventListener('click', function () { pick(b.dataset.id); }); });
+  A.on('ev', function (v) { apply(v || 'all'); });
+  apply(A.get('ev') || 'all');
+});</script>

@@ -1,0 +1,1671 @@
+[
+ {
+  "ac": "AC#8",
+  "id": "G-205",
+  "claim": "Microsoft's merchant page for Copilot Checkout names Universal Commerce Protocol and does not name ACP or PayPal. It says Copilot Checkout is available on Copilot.com and the Copilot mobile app, for English language merchants selling to US buyers, and that it protects transactions from agent initiated fraud with Shared Payment Tokens. No date on the page",
+  "url": "https://about.ads.microsoft.com/en/solutions/technology/agentic-commerce",
+  "date": "read 2026-11-15",
+  "tier": "vendor product page",
+  "from_file": "G3_checker_sources.md",
+  "doc_lines": [
+   60,
+   107,
+   109,
+   129,
+   139,
+   171
+  ],
+  "in_page_data": true
+ },
+ {
+  "ac": "AC#121",
+  "id": "G-101",
+  "claim": "agenteconomy.to is built and maintained by one pseudonymous person and says it is independent of the protocols it tracks. No funding or sponsor named",
+  "url": "https://agenteconomy.to/about",
+  "date": "2026-11-15",
+  "tier": "independent tracker (self description)",
+  "from_file": "G2_gapclose.md",
+  "doc_lines": [
+   131,
+   546,
+   624,
+   628,
+   655,
+   1802
+  ],
+  "in_page_data": false
+ },
+ {
+  "ac": "AC#123",
+  "id": "G-104",
+  "claim": "x402 monthly transactions: August 17,855,635, September 13,003,306, October 5,087,812, November 1 to 15 partial 4,718,179",
+  "url": "https://agenteconomy.to/data.json",
+  "date": "2026-11-15",
+  "tier": "independent tracker (data feed)",
+  "from_file": "G2_gapclose.md",
+  "doc_lines": [
+   131,
+   547,
+   548,
+   630,
+   631,
+   632
+  ],
+  "in_page_data": true
+ },
+ {
+  "ac": "AC#124",
+  "id": "G-106",
+  "claim": "Our arithmetic from G-104 and G-105: counts fell 71.5% August to October. November is on pace for about 10.1M and its value is already 2.6 times October. Daily counts rose from 134,165 (2026-11-05) to 486,706 (2026-11-14)",
+  "url": "https://agenteconomy.to/data.json",
+  "date": "2026-11-15",
+  "tier": "derived",
+  "from_file": "G2_gapclose.md",
+  "doc_lines": [
+   131,
+   548,
+   633,
+   647,
+   951,
+   1693
+  ],
+  "in_page_data": true
+ },
+ {
+  "ac": "AC#206",
+  "id": "G-105",
+  "claim": "x402 monthly value: August 437,476, September 417,033, October 274,220, November 1 to 15 partial 721,545. Field unit not labelled, October matches the page's 274K USD",
+  "url": "https://agenteconomy.to/data.json",
+  "date": "2026-11-15",
+  "tier": "independent tracker (data feed)",
+  "from_file": "G2_gapclose.md",
+  "doc_lines": [
+   547,
+   630,
+   631,
+   632,
+   633
+  ],
+  "in_page_data": true
+ },
+ {
+  "ac": "AC#254",
+  "id": "G-103",
+  "claim": "The methodology page describes Dune and RPC sourcing, decoding and de-duplication, with no wash or test filter",
+  "url": "https://agenteconomy.to/methodology",
+  "date": "2026-11-15",
+  "tier": "independent tracker (method page)",
+  "from_file": "G2_gapclose.md",
+  "doc_lines": [
+   624,
+   655,
+   1802
+  ],
+  "in_page_data": false
+ },
+ {
+  "ac": "AC#42",
+  "id": "C316",
+  "claim": "A tracker lists UCP spec v2026-08-25, a UCP Payments Technical Council formed in September 2026, and Amex's Intent Intelligence framework published 2026-10-13.",
+  "url": "https://agenticplug.ai/current-state-of-agentic-commerce",
+  "date": "",
+  "tier": "baseline",
+  "from_file": "R0_R1_specs.md",
+  "doc_lines": [
+   85,
+   123,
+   1310
+  ],
+  "in_page_data": false
+ },
+ {
+  "ac": "AC#11",
+  "id": "G-06",
+  "claim": "Visa's CEO said agentic commerce is a very small part of Visa's business and Visa disclosed no agent volume",
+  "url": "https://aimmediahouse.com/banking/visa-says-agentic-commerce-has-hit-a-tipping-point",
+  "date": "2026-10-29",
+  "tier": "trade press on earnings call",
+  "from_file": "G1_gapclose.md",
+  "doc_lines": [
+   61,
+   258,
+   1783
+  ],
+  "in_page_data": false
+ },
+ {
+  "ac": "AC#350",
+  "id": "G-07",
+  "claim": "Visa reported nearly 50 AI partners live in production, including Shop Pay, and expects that to double",
+  "url": "https://aimmediahouse.com/banking/visa-says-agentic-commerce-has-hit-a-tipping-point",
+  "date": "2026-10-29",
+  "tier": "trade press on earnings call",
+  "from_file": "G1_gapclose.md",
+  "doc_lines": [
+   842,
+   1290,
+   1300,
+   1314,
+   1363,
+   1679
+  ],
+  "in_page_data": false
+ },
+ {
+  "ac": "AC#406",
+  "id": "R5-50",
+  "claim": "Visa's CEO called the quarter a tipping point for agentic use but expects activity to stay very small relative to Visa",
+  "url": "https://aimmediahouse.com/banking/visa-says-agentic-commerce-has-hit-a-tipping-point",
+  "date": "2026-10-29",
+  "tier": "vendor (Visa) via press",
+  "from_file": "R5_pain.md",
+  "doc_lines": [
+   1449
+  ],
+  "in_page_data": false
+ },
+ {
+  "ac": "AC#218",
+  "id": "G-10",
+  "claim": "Shopify said AI referred orders grew 3.3 times and Q3 2026 was the first quarter of shoppers delegating purchases to agents",
+  "url": "https://aimmediahouse.com/retail/ai-orders-on-shopify-grew-33x-now-agents-are-completing-the-purchase",
+  "date": "2026-11-04",
+  "tier": "trade press on earnings call",
+  "from_file": "G1_gapclose.md",
+  "doc_lines": [
+   566,
+   1397,
+   1845
+  ],
+  "in_page_data": true
+ },
+ {
+  "ac": "AC#416",
+  "id": "C276",
+  "claim": "AP2 uses cryptographically signed mandates of two types, Checkout and Payment, and each type comes in an open and a closed form. An open mandate holds the user's constraints, such as budget and allowed instruments. A closed mandate authorizes one finalized checkout, or a specific amount tied to that checkout.",
+  "url": "https://ap2-protocol.org/",
+  "date": "",
+  "tier": "baseline",
+  "from_file": "R0_R1_specs.md",
+  "doc_lines": [
+   1483,
+   1494
+  ],
+  "in_page_data": true
+ },
+ {
+  "ac": "AC#158",
+  "id": "R1-36",
+  "claim": "AP2 v0.2 defines five roles, including a Trusted Surface, and leaves transport to the surrounding commerce protocol.",
+  "url": "https://ap2-protocol.org/ap2/specification/index.md",
+  "date": "not shown",
+  "tier": "primary",
+  "from_file": "R1_specs.md",
+  "doc_lines": [
+   316,
+   347
+  ],
+  "in_page_data": false
+ },
+ {
+  "ac": "AC#333",
+  "id": "R4-19",
+  "claim": "Researchers propose extending OAuth 2.0 and OpenID Connect with agent credentials for authenticated delegation",
+  "url": "https://arxiv.org/abs/2501.09674",
+  "date": "2025-01-16",
+  "tier": "academic preprint",
+  "from_file": "R4_risk.md",
+  "doc_lines": [
+   754
+  ],
+  "in_page_data": false
+ },
+ {
+  "ac": "AC#331",
+  "id": "R4-10",
+  "claim": "Attacks on commercial LLM agents with web and tool access are simple and need no ML skill",
+  "url": "https://arxiv.org/abs/2502.08586",
+  "date": "2025-02-12",
+  "tier": "academic preprint",
+  "from_file": "R4_risk.md",
+  "doc_lines": [
+   740
+  ],
+  "in_page_data": true
+ },
+ {
+  "ac": "AC#329",
+  "id": "R4-06",
+  "claim": "Agent to agent negotiation benchmarks show outcomes depend on the model and agents can overspend or accept unreasonable deals",
+  "url": "https://arxiv.org/abs/2506.00073",
+  "date": "2025-09-20",
+  "tier": "academic preprint",
+  "from_file": "R4_risk.md",
+  "doc_lines": [
+   731,
+   1484
+  ],
+  "in_page_data": true
+ },
+ {
+  "ac": "AC#334",
+  "id": "R4-20",
+  "claim": "Tomasev et al. argue current trends point to a large, permeable agent economy linked to the human economy",
+  "url": "https://arxiv.org/abs/2509.10147",
+  "date": "2025-09-12",
+  "tier": "academic preprint",
+  "from_file": "R4_risk.md",
+  "doc_lines": [
+   755
+  ],
+  "in_page_data": false
+ },
+ {
+  "ac": "AC#328",
+  "id": "R4-05",
+  "claim": "In simulation, platforms and sellers exploiting AI biases without coordination cause consumer harm more than double independent strategies",
+  "url": "https://arxiv.org/abs/2601.03061",
+  "date": "2026-01-06",
+  "tier": "academic preprint",
+  "from_file": "R4_risk.md",
+  "doc_lines": [
+   730
+  ],
+  "in_page_data": false
+ },
+ {
+  "ac": "AC#332",
+  "id": "R4-13",
+  "claim": "A systematisation across seven agent commerce protocols finds 12 cross layer attack vectors and authorization gaps",
+  "url": "https://arxiv.org/abs/2604.15367",
+  "date": "2026-05-01",
+  "tier": "academic preprint",
+  "from_file": "R4_risk.md",
+  "doc_lines": [
+   742
+  ],
+  "in_page_data": false
+ },
+ {
+  "ac": "AC#136",
+  "id": "R2-57",
+  "claim": "AWS charges nothing extra for AgentCore payments. Wallet providers bill per wallet operation, with 0.005 USD used in the worked example",
+  "url": "https://aws.amazon.com/bedrock/agentcore/pricing/",
+  "date": "checked 2026-11-15",
+  "tier": "T2",
+  "from_file": "R2_rails.md",
+  "doc_lines": [
+   137
+  ],
+  "in_page_data": false
+ },
+ {
+  "ac": "AC#385",
+  "id": "R3-49",
+  "claim": "Basis Theory raised a 33 million USD Series B led by Costanoa. It launched basistheory.ai in June 2025 and formed the Agentic Commerce Consortium",
+  "url": "https://blog.basistheory.com/series-b-announcement",
+  "date": "2025-10-14",
+  "tier": "company blog",
+  "from_file": "R3_players.md",
+  "doc_lines": [
+   1325
+  ],
+  "in_page_data": false
+ },
+ {
+  "ac": "AC#319",
+  "id": "C363",
+  "claim": "Cloudflare says Visa Trusted Agent Protocol and Mastercard Agent Pay both use Web Bot Auth: HTTP Message Signatures with Ed25519 keys, a tag for browsing versus paying, and a nonce against replay. Agent keys sit in directories that Visa and Mastercard host. Amex will also use Web Bot Auth.",
+  "url": "https://blog.cloudflare.com/secure-agentic-commerce/",
+  "date": "",
+  "tier": "baseline",
+  "from_file": "R0_R1_specs.md",
+  "doc_lines": [
+   708,
+   802,
+   1308,
+   1450,
+   1461,
+   1472
+  ],
+  "in_page_data": true
+ },
+ {
+  "ac": "AC#203",
+  "id": "G-35",
+  "claim": "Cloudflare's Trusted Agent Delegation post names no members, proposes four identity tiers and says the site pays when users dispute agent purchases",
+  "url": "https://blog.cloudflare.com/trusted-agent-delegation/",
+  "date": "2026-11-05",
+  "tier": "vendor blog",
+  "from_file": "G1_gapclose.md",
+  "doc_lines": [
+   515,
+   714,
+   1002,
+   1290,
+   1308,
+   1404
+  ],
+  "in_page_data": true
+ },
+ {
+  "ac": "AC#77",
+  "id": "G-121",
+  "claim": "Visa says its payment capabilities will be integrated into OpenAI experiences, using tokenized credentials bound to agents with user set limits. No launch date",
+  "url": "https://corporate.visa.com/en/sites/visa-perspectives/innovation/visa-openai-partnership.html",
+  "date": "2026-06-10",
+  "tier": "vendor article",
+  "from_file": "G2_gapclose.md",
+  "doc_lines": [
+   107,
+   1305,
+   1314
+  ],
+  "in_page_data": false
+ },
+ {
+  "ac": "AC#256",
+  "id": "G-108",
+  "claim": "Token Terminal data, as reported, shows monthly AI agent payment value fell 94.5% from 29M USD (November 2025) to 1.59M USD (October 2026)",
+  "url": "https://cryptobriefing.com/ai-agent-payment-value-drops-94-percent/",
+  "date": "2026-11-09",
+  "tier": "crypto press citing data vendor",
+  "from_file": "G2_gapclose.md",
+  "doc_lines": [
+   635,
+   1693,
+   1847
+  ],
+  "in_page_data": false
+ },
+ {
+  "ac": "AC#54",
+  "id": "R2-25",
+  "claim": "The MPP core IETF draft (draft-ryan-httpauth-payment-01, last revised 2026-03-17) is an expired individual draft, never working group adopted",
+  "url": "https://datatracker.ietf.org/doc/draft-ryan-httpauth-payment/",
+  "date": "2026-09-18",
+  "tier": "T2",
+  "from_file": "R2_rails.md",
+  "doc_lines": [
+   94,
+   133,
+   388,
+   1263
+  ],
+  "in_page_data": false
+ },
+ {
+  "ac": "AC#62",
+  "id": "R2-51",
+  "claim": "Circle's Arc mainnet went live 16 Sep 2026 with permissioned validators including Visa and Mastercard, USDC as gas token, more than 100 partners, and agent wallets, limits and nanopayments",
+  "url": "https://decrypt.co/378374/circle-launches-arc-mainnet-with-blackrock-dtcc-and-visa-as-validators",
+  "date": "2026-09-16",
+  "tier": "T5",
+  "from_file": "R2_rails.md",
+  "doc_lines": [
+   98,
+   141,
+   177
+  ],
+  "in_page_data": false
+ },
+ {
+  "ac": "AC#36",
+  "id": "G-116",
+  "claim": "Mastercard developer guide says standard chargeback and dispute processes apply to agentic transactions. No rule text allocating agent liability was found",
+  "url": "https://developer.mastercard.com/merchant-cloud/documentation/tutorials-and-guides/agentic-commerce-guide/21/",
+  "date": "2026-11-15",
+  "tier": "vendor developer docs",
+  "from_file": "G2_gapclose.md",
+  "doc_lines": [
+   83,
+   319,
+   332,
+   508,
+   665,
+   683
+  ],
+  "in_page_data": true
+ },
+ {
+  "ac": "AC#41",
+  "id": "G-20",
+  "claim": "Mastercard's guide says without an agentic token the network cannot apply risk controls, and certified agents enter a trusted registry",
+  "url": "https://developer.mastercard.com/merchant-cloud/documentation/tutorials-and-guides/agentic-commerce-guide/21/",
+  "date": "not shown (read 2026-11-15)",
+  "tier": "network developer docs",
+  "from_file": "G1_gapclose.md",
+  "doc_lines": [
+   85,
+   121,
+   123,
+   165,
+   192,
+   348
+  ],
+  "in_page_data": true
+ },
+ {
+  "ac": "AC#108",
+  "id": "G-117",
+  "claim": "Mastercard says it has completed live agentic transactions in several markets including Thailand and that agents take on consumer verification",
+  "url": "https://developer.mastercard.com/merchant-cloud/documentation/tutorials-and-guides/agentic-commerce-guide/21/",
+  "date": "2026-11-15",
+  "tier": "vendor developer docs",
+  "from_file": "G2_gapclose.md",
+  "doc_lines": [
+   121,
+   163,
+   189,
+   508,
+   568,
+   709
+  ],
+  "in_page_data": true
+ },
+ {
+  "ac": "AC#109",
+  "id": "G-19",
+  "claim": "Mastercard's merchant guide says stored credentials stop issuers recognizing a payment as agentic",
+  "url": "https://developer.mastercard.com/merchant-cloud/documentation/tutorials-and-guides/agentic-commerce-guide/21/",
+  "date": "not shown (read 2026-11-15)",
+  "tier": "network developer docs",
+  "from_file": "G1_gapclose.md",
+  "doc_lines": [
+   121,
+   333,
+   348,
+   456,
+   803,
+   840
+  ],
+  "in_page_data": true
+ },
+ {
+  "ac": "AC#57",
+  "id": "R2-60",
+  "claim": "PayPal's agent tools page lists 30 toolkit tools in 7 groups and 3 gift card checkout tools on its remote MCP server, with no payout or Venmo tool",
+  "url": "https://developer.paypal.com/ai-tools/agent-tools/",
+  "date": "2026-10-29",
+  "tier": "T2",
+  "from_file": "R2_rails.md",
+  "doc_lines": [
+   97,
+   139
+  ],
+  "in_page_data": false
+ },
+ {
+  "ac": "AC#93",
+  "id": "R1-51",
+  "claim": "The Visa TAP spec page says the merchant rebuilds the signature base and verifies with the agent's public key under RFC 9421 (rechecks baseline C364).",
+  "url": "https://developer.visa.com/capabilities/trusted-agent-protocol/trusted-agent-protocol-specifications",
+  "date": "not shown",
+  "tier": "primary",
+  "from_file": "R1_specs.md",
+  "doc_lines": [
+   117,
+   161,
+   318
+  ],
+  "in_page_data": false
+ },
+ {
+  "ac": "AC#362",
+  "id": "C364",
+  "claim": "Visa's Trusted Agent Protocol spec says a trusted agent adds an RFC 9421 message signature to its request, and the merchant rebuilds the signature base and verifies it with the agent's public key.",
+  "url": "https://developer.visa.com/capabilities/trusted-agent-protocol/trusted-agent-protocol-specifications",
+  "date": "",
+  "tier": "baseline",
+  "from_file": "R0_R1_specs.md",
+  "doc_lines": [
+   1300,
+   1360
+  ],
+  "in_page_data": false
+ },
+ {
+  "ac": "AC#102",
+  "id": "G-16",
+  "claim": "A Visa Intelligent Commerce mandate carries declineThreshold, effectiveUntilTime and recurringFrequency, up to 10 mandates per instruction, and cannot be modified",
+  "url": "https://developer.visa.com/docs/visa-intelligent-commerce/concepts",
+  "date": "not shown (read 2026-11-15)",
+  "tier": "network developer docs",
+  "from_file": "G1_gapclose.md",
+  "doc_lines": [
+   117,
+   260,
+   352,
+   353,
+   454,
+   456
+  ],
+  "in_page_data": true
+ },
+ {
+  "ac": "AC#103",
+  "id": "G-17",
+  "claim": "Visa checks each credential retrieval against the mandate threshold and preferred merchant, summed across the instruction",
+  "url": "https://developer.visa.com/docs/visa-intelligent-commerce/concepts",
+  "date": "not shown (read 2026-11-15)",
+  "tier": "network developer docs",
+  "from_file": "G1_gapclose.md",
+  "doc_lines": [
+   117,
+   260,
+   297,
+   352,
+   454,
+   456
+  ],
+  "in_page_data": true
+ },
+ {
+  "ac": "AC#195",
+  "id": "G-18",
+  "claim": "Visa says a purchase instruction is required to evidence the specific authorized transaction for disputes",
+  "url": "https://developer.visa.com/docs/visa-intelligent-commerce/concepts",
+  "date": "not shown (read 2026-11-15)",
+  "tier": "network developer docs",
+  "from_file": "G1_gapclose.md",
+  "doc_lines": [
+   493,
+   1437
+  ],
+  "in_page_data": true
+ },
+ {
+  "ac": "AC#144",
+  "id": "R2-52",
+  "claim": "Circle Nanopayments let agents pay x402 services gas free, down to 0.000001 USD, with Gateway batching many authorizations into one settlement",
+  "url": "https://developers.circle.com/agent-stack/agent-nanopayments",
+  "date": "checked 2026-11-15",
+  "tier": "T2",
+  "from_file": "R2_rails.md",
+  "doc_lines": [
+   141,
+   177,
+   358,
+   359,
+   949,
+   1088
+  ],
+  "in_page_data": false
+ },
+ {
+  "ac": "AC#151",
+  "id": "G-36",
+  "claim": "Cloudflare says signed agents are now Verified bots, marked Direct or Intermediary from 2026-07-01, and lists no signing agents",
+  "url": "https://developers.cloudflare.com/bots/concepts/bot/signed-agents",
+  "date": "2026-11-12",
+  "tier": "vendor developer docs",
+  "from_file": "G1_gapclose.md",
+  "doc_lines": [
+   280,
+   451,
+   485,
+   802,
+   991,
+   1461
+  ],
+  "in_page_data": true
+ },
+ {
+  "ac": "AC#72",
+  "id": "R1-13",
+  "claim": "OpenAI's commerce docs say shoppers pay on the merchant website or with a saved method, and the ChatGPT Wallet works with existing checkout pages.",
+  "url": "https://developers.openai.com/commerce/guides/accept-payments.md",
+  "date": "not shown",
+  "tier": "vendor",
+  "from_file": "R1_specs.md",
+  "doc_lines": [
+   107
+  ],
+  "in_page_data": false
+ },
+ {
+  "ac": "AC#74",
+  "id": "G-120",
+  "claim": "OpenAI's production guide puts order, fulfilment, support and fraud with the business and relays user risk signals in the Forwarded HTTP header",
+  "url": "https://developers.openai.com/commerce/guides/production",
+  "date": "2026-11-15",
+  "tier": "vendor developer docs",
+  "from_file": "G2_gapclose.md",
+  "doc_lines": [
+   107,
+   1305,
+   1314,
+   1401
+  ],
+  "in_page_data": false
+ },
+ {
+  "ac": "AC#374",
+  "id": "C389",
+  "claim": "AWS WAF Bot Control supports Web Bot Authentication as a cryptographic way for bots and AI agents to prove identity, on CloudFront and Regional resources, from rule set version 4.0.",
+  "url": "https://docs.aws.amazon.com/waf/latest/developerguide/waf-bot-control.html",
+  "date": "",
+  "tier": "baseline",
+  "from_file": "R0_R1_specs.md",
+  "doc_lines": [
+   1308,
+   1461
+  ],
+  "in_page_data": false
+ },
+ {
+  "ac": "AC#185",
+  "id": "R2-48",
+  "claim": "Coinbase's Wallet MCP pays USDC on Base with x402 exact, upto and auth-capture, caps each request with maxPayment and needs approval for every write. The old Payments MCP URL serves this page",
+  "url": "https://docs.cdp.coinbase.com/payments-mcp/welcome",
+  "date": "checked 2026-11-15",
+  "tier": "T2",
+  "from_file": "R2_rails.md",
+  "doc_lines": [
+   358
+  ],
+  "in_page_data": false
+ },
+ {
+  "ac": "AC#143",
+  "id": "G-135",
+  "claim": "Coinbase CDP facilitator supports exact, upto and batch-settlement on Base, Polygon, Arbitrum, Monad and World, and exact and upto on Solana",
+  "url": "https://docs.cdp.coinbase.com/x402/network-support",
+  "date": "2026-11-15",
+  "tier": "vendor developer docs",
+  "from_file": "G2_gapclose.md",
+  "doc_lines": [
+   141,
+   358,
+   497,
+   947,
+   1304,
+   1314
+  ],
+  "in_page_data": false
+ },
+ {
+  "ac": "AC#61",
+  "id": "R2-36",
+  "claim": "Coinbase's facilitator settles on Base, Polygon, Arbitrum, Monad, World and Solana mainnets, supports exact and upto, and keeps batch-settlement EVM only",
+  "url": "https://docs.cdp.coinbase.com/x402/support/faq.md",
+  "date": "checked 2026-11-15",
+  "tier": "T2",
+  "from_file": "R2_rails.md",
+  "doc_lines": [
+   98,
+   141,
+   176,
+   325
+  ],
+  "in_page_data": false
+ },
+ {
+  "ac": "AC#358",
+  "id": "R1-30",
+  "claim": "Stripe is a UCP Tech Council member and offers a Stripe Payments handler for card and Apple Pay in UCP checkouts.",
+  "url": "https://docs.stripe.com/agentic-commerce/protocols/ucp.md",
+  "date": "not shown",
+  "tier": "vendor",
+  "from_file": "R1_specs.md",
+  "doc_lines": [
+   1226,
+   1228
+  ],
+  "in_page_data": false
+ },
+ {
+  "ac": "AC#245",
+  "id": "R5-20",
+  "claim": "44% of merchants are already integrating agentic commerce protocols",
+  "url": "https://ecommercenews.asia/story/merchants-rush-to-adopt-ai-shopping-agents-ravelin-finds",
+  "date": "2026-05-22",
+  "tier": "vendor (Ravelin)",
+  "from_file": "R5_pain.md",
+  "doc_lines": [
+   605
+  ],
+  "in_page_data": false
+ },
+ {
+  "ac": "AC#175",
+  "id": "G-52",
+  "claim": "OpenAI charged a 4% fee on ChatGPT Instant Checkout sales from late January 2026, on top of processing fees",
+  "url": "https://ecommercenews.com.au/story/openai-to-charge-4-fee-on-shopify-chatgpt-checkout",
+  "date": "2026-02-03",
+  "tier": "trade press",
+  "from_file": "G1_gapclose.md",
+  "doc_lines": [
+   351,
+   618,
+   1422,
+   1537,
+   1570,
+   1677
+  ],
+  "in_page_data": true
+ },
+ {
+  "ac": "AC#302",
+  "id": "G-202",
+  "claim": "Regulation (EU) 2026/1744, the Digital Omnibus on AI, was adopted 2026-07-08, published in the Official Journal on 2026-07-24 and in force on the third day after publication (2026-07-27). Annex III high risk duties apply from 2027-12-02 and product embedded (Annex I) ones from 2028-08-02",
+  "url": "https://eur-lex.europa.eu/eli/reg/2026/1744/oj",
+  "date": "2026-07-24",
+  "tier": "law text (EUR-Lex)",
+  "from_file": "G3_checker_sources.md",
+  "doc_lines": [
+   686
+  ],
+  "in_page_data": false
+ },
+ {
+  "ac": "AC#173",
+  "id": "G-22",
+  "claim": "A law firm analysis says agent payments fit neither customer nor merchant initiated cleanly, since MIT needs a prior CIT Trace ID or OTID",
+  "url": "https://fbtgibbons.com/the-payment-infrastructure-layer-how-network-rules-already-govern-agentic-commerce/",
+  "date": "2026-05-05",
+  "tier": "law firm analysis",
+  "from_file": "G1_gapclose.md",
+  "doc_lines": [
+   349,
+   1515,
+   1789
+  ],
+  "in_page_data": true
+ },
+ {
+  "ac": "AC#174",
+  "id": "G-23",
+  "claim": "The same analysis says Mastercard's public rules are silent on agentic terms while Visa's Core Rules carry agent provisions",
+  "url": "https://fbtgibbons.com/the-payment-infrastructure-layer-how-network-rules-already-govern-agentic-commerce/",
+  "date": "2026-05-05",
+  "tier": "law firm analysis",
+  "from_file": "G1_gapclose.md",
+  "doc_lines": [
+   349,
+   1789
+  ],
+  "in_page_data": false
+ },
+ {
+  "ac": "AC#449",
+  "id": "R2-71",
+  "claim": "Central bank data: Pix Automatico moved 3.5B reais in 9.5M transactions in Q2 2026, and recipients rose to 14,000 by August",
+  "url": "https://finsidersbrasil.com.br/giro-noticias/pix-automatico-cresce-no-1o-semestre-de-2026-diz-bc/",
+  "date": "2026-10-28",
+  "tier": "T5",
+  "from_file": "R2_rails.md",
+  "doc_lines": [],
+  "in_page_data": true
+ },
+ {
+  "ac": "AC#147",
+  "id": "G-49",
+  "claim": "Alipay AI Pay opened to OpenClaw type agents including Claude Code, with explicit authorisation for every payment, and reports 100 million users",
+  "url": "https://fintech.global/2026/04/23/alipay-expands-ai-pay-to-openclaw-type-agents/",
+  "date": "2026-04-23",
+  "tier": "trade press (vendor figure)",
+  "from_file": "G1_gapclose.md",
+  "doc_lines": [
+   145,
+   198,
+   570,
+   580,
+   1191,
+   1303
+  ],
+  "in_page_data": true
+ },
+ {
+  "ac": "AC#388",
+  "id": "C398",
+  "claim": "Natural raised a 30M USD Series A led by Forerunner (21 Jul 2026), taking total funding past 40M USD. Six products are generally available: Wallets (FDIC-insured accounts for agents), Vaults, Pay, Request, Transfer and Connect. Cards, Charge, Credit and Billing are still to come.",
+  "url": "https://fintech.global/2026/07/21/natural-raises-30m-to-power-payments-for-ai-agents/",
+  "date": "",
+  "tier": "baseline",
+  "from_file": "R0_R2_rails.md",
+  "doc_lines": [
+   1327
+  ],
+  "in_page_data": false
+ },
+ {
+  "ac": "AC#45",
+  "id": "R1-64",
+  "claim": "EMVCo's Agentic Payments Task Force drafted a framework with Intent Services, Know Your Agent checks and Agentic Transaction Indicators. Comments closed 2026-09-30.",
+  "url": "https://fintech.global/2026/09/04/emvco-drafts-framework-for-agentic-card-payments/",
+  "date": "2026-09-04",
+  "tier": "secondary",
+  "from_file": "R1_specs.md",
+  "doc_lines": [
+   89,
+   127,
+   169,
+   331,
+   1719
+  ],
+  "in_page_data": true
+ },
+ {
+  "ac": "AC#172",
+  "id": "G-21",
+  "claim": "EMVCo's draft agentic payments framework proposes Intent Services and is only exploring Agentic Transaction Indicators and Know Your Agent",
+  "url": "https://fintech.global/2026/09/04/emvco-drafts-framework-for-agentic-card-payments/",
+  "date": "2026-09-04",
+  "tier": "trade press on standards body",
+  "from_file": "G1_gapclose.md",
+  "doc_lines": [
+   348,
+   803,
+   1460,
+   1668,
+   1719,
+   1789
+  ],
+  "in_page_data": true
+ },
+ {
+  "ac": "AC#407",
+  "id": "C294",
+  "claim": "Fed Governor Waller, speaking at Sibos 2026 on 2026-09-29, called trust the biggest barrier to scaling agent-delegated commerce. The report names authentication, liability and fraud as the main obstacles.",
+  "url": "https://forkast.news/?p=131077",
+  "date": "",
+  "tier": "baseline",
+  "from_file": "R0_R4_risk.md",
+  "doc_lines": [
+   1449
+  ],
+  "in_page_data": false
+ },
+ {
+  "ac": "AC#212",
+  "id": "C351",
+  "claim": "Forkast reports the Visa, BILL and Billtrust pilot sets no formal liability framework and does not disclose participant counts, volumes, geography, end date or GA timing.",
+  "url": "https://forkast.news/?p=132486",
+  "date": "",
+  "tier": "baseline",
+  "from_file": "R0_R2_rails.md",
+  "doc_lines": [
+   559,
+   1364
+  ],
+  "in_page_data": false
+ },
+ {
+  "ac": "AC#105",
+  "id": "R4-69",
+  "claim": "Forkast notes Web Bot Auth signatures verify the agent or operator, not the human user",
+  "url": "https://forkast.news/?p=133056",
+  "date": "2026-11-06",
+  "tier": "press",
+  "from_file": "R4_risk.md",
+  "doc_lines": [
+   119,
+   708,
+   714,
+   802,
+   999,
+   1090
+  ],
+  "in_page_data": true
+ },
+ {
+  "ac": "AC#387",
+  "id": "R3-45",
+  "claim": "The OCC gave preliminary conditional approval to Catena Trust Bank, N.A. on 2026-09-18",
+  "url": "https://forkast.news/catena-trust-bank-secures-preliminary-occ-approval-for-ai-agent-financial-infrastructure/",
+  "date": "2026-09-21",
+  "tier": "trade press",
+  "from_file": "R3_players.md",
+  "doc_lines": [
+   1326,
+   1406
+  ],
+  "in_page_data": false
+ },
+ {
+  "ac": "AC#194",
+  "id": "G-41",
+  "claim": "The same article says Checkout.com backs ACP, AP2 and Agent Pay for Machines, and puts integration at 5 thousand to 500 thousand USD per standard",
+  "url": "https://forkast.news/checkout-com-is-building-its-own-agent-infrastructure-while-backing-three-rival-protocols/",
+  "date": "2026-09-23",
+  "tier": "crypto trade press",
+  "from_file": "G1_gapclose.md",
+  "doc_lines": [
+   475,
+   1526,
+   1569
+  ],
+  "in_page_data": true
+ },
+ {
+  "ac": "AC#145",
+  "id": "R2-69",
+  "claim": "NPCI's Unified Agent Protocol for small payments without per payment approval is reported but not confirmed, with limits, liability and timing pending. Reserve Pay caps about 10,000 rupees for up to 90 days",
+  "url": "https://forkast.news/india-eyes-ai-driven-upi-payments-as-npci-weighs-agent-protocol/",
+  "date": "2026-09-09",
+  "tier": "T5",
+  "from_file": "R2_rails.md",
+  "doc_lines": [
+   143,
+   896
+  ],
+  "in_page_data": true
+ },
+ {
+  "ac": "AC#70",
+  "id": "C359",
+  "claim": "OpenAI discontinued ChatGPT Instant Checkout in March 2026. Shoppers now complete purchases on retailer sites, and an OpenAI representative said it is transitioning to an Apps format.",
+  "url": "https://forklog.com/en/openai-abandons-instant-checkout-feature-in-chatgpt/",
+  "date": "",
+  "tier": "baseline",
+  "from_file": "R0_R1_specs.md",
+  "doc_lines": [
+   107,
+   995,
+   1305,
+   1398,
+   1401,
+   1734
+  ],
+  "in_page_data": false
+ },
+ {
+  "ac": "AC#383",
+  "id": "R3-47",
+  "claim": "Kite raised an 18 million USD Series A led by PayPal Ventures and General Catalyst, 33 million USD in total",
+  "url": "https://fortune.com/crypto/2025/09/02/kite-ai-blockchain-paypal-general-catalyst-18-million/",
+  "date": "2025-09-02",
+  "tier": "national press",
+  "from_file": "R3_players.md",
+  "doc_lines": [
+   1323
+  ],
+  "in_page_data": false
+ },
+ {
+  "ac": "AC#393",
+  "id": "G-51",
+  "claim": "Stripe and Paradigm developed Tempo but put no money into its 500 million USD Series A at a 5 billion USD valuation",
+  "url": "https://fortune.com/crypto/2025/10/17/stripe-paradigm-tempo-series-a-5-billion-thrive-capital-greenoaks-joshua-kushner/",
+  "date": "2025-10-17",
+  "tier": "national press",
+  "from_file": "G1_gapclose.md",
+  "doc_lines": [
+   1405,
+   1810
+  ],
+  "in_page_data": false
+ },
+ {
+  "ac": "AC#84",
+  "id": "G-131",
+  "claim": "UCP webhooks MUST be signed with RFC 9421 HTTP Message Signatures, ES256 verification required, Ed25519 optional. Payment authorization and checkout completion responses only RECOMMENDED",
+  "url": "https://github.com/Universal-Commerce-Protocol/ucp/blob/v2026-08-25/docs/specification/signatures.md",
+  "date": "2026-08-25",
+  "tier": "spec",
+  "from_file": "G2_gapclose.md",
+  "doc_lines": [
+   109,
+   453,
+   806,
+   1227
+  ],
+  "in_page_data": false
+ },
+ {
+  "ac": "AC#318",
+  "id": "R5-73",
+  "claim": "A UCP issue says a current IETF Web Bot Auth draft would make verifiers drop UCP's key source",
+  "url": "https://github.com/Universal-Commerce-Protocol/ucp/issues/1080",
+  "date": "2026-11-13",
+  "tier": "developer forum",
+  "from_file": "R5_pain.md",
+  "doc_lines": [
+   707,
+   716,
+   1526,
+   1569,
+   1613
+  ],
+  "in_page_data": true
+ },
+ {
+  "ac": "AC#351",
+  "id": "R1-25",
+  "claim": "UCP main gained a return policy extension (2026-10-23), a completion boundary rule (2026-11-07) and a purchase options and subscription policy (2026-11-10).",
+  "url": "https://github.com/Universal-Commerce-Protocol/ucp/pull/1057",
+  "date": "2026-11-10",
+  "tier": "primary",
+  "from_file": "R1_specs.md",
+  "doc_lines": [
+   908
+  ],
+  "in_page_data": false
+ },
+ {
+  "ac": "AC#80",
+  "id": "R1-24",
+  "claim": "The UCP Food Checkout capability (dev.ucp.food.checkout) with fulfillment and tip extensions merged on 2026-11-10. The business keeps MoR duties.",
+  "url": "https://github.com/Universal-Commerce-Protocol/ucp/pull/897",
+  "date": "2026-11-10",
+  "tier": "primary",
+  "from_file": "R1_specs.md",
+  "doc_lines": [
+   109
+  ],
+  "in_page_data": false
+ },
+ {
+  "ac": "AC#38",
+  "id": "R1-63",
+  "claim": "VI made a breaking field alignment to AP2 on 2026-04-18. Last commit 2026-04-20.",
+  "url": "https://github.com/agent-intent/verifiable-intent/commits/main",
+  "date": "2026-04-18",
+  "tier": "primary",
+  "from_file": "R1_specs.md",
+  "doc_lines": [
+   84,
+   121,
+   164,
+   1346
+  ],
+  "in_page_data": true
+ },
+ {
+  "ac": "AC#14",
+  "id": "R1-03",
+  "claim": "Meta joined the ACP Technical Steering Committee as seat 3 and is listed as lead maintainer with OpenAI and Stripe.",
+  "url": "https://github.com/agentic-commerce-protocol/agentic-commerce-protocol/blob/main/changelog/unreleased/add-meta-tsc-member.md",
+  "date": "2026-04-24",
+  "tier": "primary",
+  "from_file": "R1_specs.md",
+  "doc_lines": [
+   73
+  ],
+  "in_page_data": false
+ },
+ {
+  "ac": "AC#359",
+  "id": "G-130",
+  "claim": "ACP checkout API request signing is SHOULD only (Signature over canonical JSON with Timestamp)",
+  "url": "https://github.com/agentic-commerce-protocol/agentic-commerce-protocol/blob/main/rfcs/rfc.agentic_checkout.md",
+  "date": "2026-11-15",
+  "tier": "spec",
+  "from_file": "G2_gapclose.md",
+  "doc_lines": [
+   1227
+  ],
+  "in_page_data": false
+ },
+ {
+  "ac": "AC#154",
+  "id": "R1-08",
+  "claim": "An ACP RFC proposes a discovery file at /.well-known/acp.json. Status Proposal, version unreleased.",
+  "url": "https://github.com/agentic-commerce-protocol/agentic-commerce-protocol/blob/main/rfcs/rfc.discovery.md",
+  "date": "not shown",
+  "tier": "primary",
+  "from_file": "R1_specs.md",
+  "doc_lines": [
+   314
+  ],
+  "in_page_data": false
+ },
+ {
+  "ac": "AC#153",
+  "id": "R1-07",
+  "claim": "ACP requires Idempotency-Key and API-Version on POSTs, uses a bearer token, and offers a detached JSON signature header for requests.",
+  "url": "https://github.com/agentic-commerce-protocol/agentic-commerce-protocol/blob/main/spec/2026-04-17/openapi/openapi.agentic_checkout.yaml",
+  "date": "2026-04-17",
+  "tier": "primary",
+  "from_file": "R1_specs.md",
+  "doc_lines": [
+   314,
+   387
+  ],
+  "in_page_data": false
+ },
+ {
+  "ac": "AC#193",
+  "id": "G-129",
+  "claim": "ACP order webhooks MUST carry an HMAC-SHA256 Merchant-Signature over timestamp and raw body, 300 second tolerance recommended, events order_create and order_update",
+  "url": "https://github.com/agentic-commerce-protocol/agentic-commerce-protocol/blob/main/spec/2026-04-17/openapi/openapi.agentic_checkout_webhook.yaml",
+  "date": "2026-04-17",
+  "tier": "spec",
+  "from_file": "G2_gapclose.md",
+  "doc_lines": [
+   453,
+   806
+  ],
+  "in_page_data": false
+ },
+ {
+  "ac": "AC#371",
+  "id": "R3-28",
+  "claim": "The coinbase/x402 repo is now a development fork. Issues and pull requests moved to the x402-foundation repo",
+  "url": "https://github.com/coinbase/x402",
+  "date": "not shown",
+  "tier": "code repository",
+  "from_file": "R3_players.md",
+  "doc_lines": [
+   1304
+  ],
+  "in_page_data": false
+ },
+ {
+  "ac": "AC#314",
+  "id": "R5-72",
+  "claim": "An AP2 issue says mandates may not be verifiable years later at dispute time",
+  "url": "https://github.com/google-agentic-commerce/AP2/issues/338",
+  "date": "2026-08-21",
+  "tier": "developer forum",
+  "from_file": "R5_pain.md",
+  "doc_lines": [
+   705,
+   800,
+   1413,
+   1439
+  ],
+  "in_page_data": false
+ },
+ {
+  "ac": "AC#21",
+  "id": "R1-41",
+  "claim": "The A2A x402 extension is v0.1, with canonical URI github.com/google-a2a/a2a-x402/v0.1. Its only release is v0.1.0 (2025-09-16) and its last commit is 2026-05-24.",
+  "url": "https://github.com/google-agentic-commerce/a2a-x402/blob/main/spec/v0.1/spec.md",
+  "date": "2025-09-16",
+  "tier": "primary",
+  "from_file": "R1_specs.md",
+  "doc_lines": [
+   76,
+   113,
+   157,
+   944
+  ],
+  "in_page_data": true
+ },
+ {
+  "ac": "AC#166",
+  "id": "R2-54",
+  "claim": "Lightning Labs' agent toolkit has seven skills and an MCP server, a remote signer that keeps keys off the agent machine, and scoped macaroons. 61 stars",
+  "url": "https://github.com/lightninglabs/lightning-agent-tools",
+  "date": "checked 2026-11-15",
+  "tier": "T2",
+  "from_file": "R2_rails.md",
+  "doc_lines": [
+   327
+  ],
+  "in_page_data": false
+ },
+ {
+  "ac": "AC#122",
+  "id": "G-102",
+  "claim": "The tracker's raw counts include testing, self dealing and infrastructure activity. Data comes from third party Dune dashboards plus its own Tempo RPC indexer",
+  "url": "https://github.com/realdora/agenteconomy",
+  "date": "2026-11-15",
+  "tier": "independent tracker (repo README)",
+  "from_file": "G2_gapclose.md",
+  "doc_lines": [
+   131,
+   546,
+   624,
+   628
+  ],
+  "in_page_data": false
+ },
+ {
+  "ac": "AC#132",
+  "id": "R2-22",
+  "claim": "The MPP specs repo lists methods for Tempo, Stripe, Lightning, Solana and others, and intents charge, session and subscription. No ACH",
+  "url": "https://github.com/tempoxyz/mpp-specs",
+  "date": "checked 2026-11-15",
+  "tier": "T2",
+  "from_file": "R2_rails.md",
+  "doc_lines": [
+   133,
+   173,
+   326,
+   942,
+   1260
+  ],
+  "in_page_data": true
+ },
+ {
+  "ac": "AC#323",
+  "id": "R5-75",
+  "claim": "MPP specs leave receipt and settlement meaning undefined for card methods",
+  "url": "https://github.com/tempoxyz/mpp-specs/issues/292",
+  "date": "2026-07-04",
+  "tier": "developer forum",
+  "from_file": "R5_pain.md",
+  "doc_lines": [
+   713,
+   1561
+  ],
+  "in_page_data": false
+ },
+ {
+  "ac": "AC#27",
+  "id": "R1-52",
+  "claim": "The Visa TAP sample repo has no releases and its last commit was 2025-10-28.",
+  "url": "https://github.com/visa/trusted-agent-protocol",
+  "date": "not shown",
+  "tier": "primary",
+  "from_file": "R1_specs.md",
+  "doc_lines": [
+   80,
+   388,
+   1364
+  ],
+  "in_page_data": false
+ },
+ {
+  "ac": "AC#131",
+  "id": "G-134",
+  "claim": "x402 `batch-settlement` is merged spec since 2026-05-05 (PR #2051), with EVM, SVM and Cloudflare bindings, capital backed or credit backed, value moves after the request",
+  "url": "https://github.com/x402-foundation/x402/blob/main/specs/schemes/batch-settlement/scheme_batch_settlement.md",
+  "date": "2026-05-05",
+  "tier": "spec",
+  "from_file": "G2_gapclose.md",
+  "doc_lines": [
+   131,
+   358,
+   497,
+   712,
+   947,
+   1693
+  ],
+  "in_page_data": false
+ },
+ {
+  "ac": "AC#130",
+  "id": "G-133",
+  "claim": "x402 `upto` scheme is merged spec since 2026-03-04 (PR #1074), with EVM, SVM and XRPL bindings and SDK code in TypeScript, Go and Python",
+  "url": "https://github.com/x402-foundation/x402/blob/main/specs/schemes/upto/scheme_upto.md",
+  "date": "2026-08-25",
+  "tier": "spec",
+  "from_file": "G2_gapclose.md",
+  "doc_lines": [
+   131,
+   358,
+   497,
+   947,
+   1693,
+   1805
+  ],
+  "in_page_data": false
+ },
+ {
+  "ac": "AC#321",
+  "id": "R5-67",
+  "claim": "60 of 423 open x402 issue titles mention dispute, refund, receipt, proof, attestation or delivery",
+  "url": "https://github.com/x402-foundation/x402/issues",
+  "date": "2026-11-15",
+  "tier": "primary (GitHub), counted by R5",
+  "from_file": "R5_pain.md",
+  "doc_lines": [
+   712,
+   1413,
+   1426,
+   1439,
+   1614
+  ],
+  "in_page_data": false
+ },
+ {
+  "ac": "AC#397",
+  "id": "R5-66",
+  "claim": "x402 has 423 open issues and 417 open PRs, the most of the five protocol repos",
+  "url": "https://github.com/x402-foundation/x402/issues",
+  "date": "2026-11-15",
+  "tier": "primary (GitHub API)",
+  "from_file": "R5_pain.md",
+  "doc_lines": [
+   1413
+  ],
+  "in_page_data": false
+ },
+ {
+  "ac": "AC#403",
+  "id": "R5-68",
+  "claim": "An x402 issue says no one is standardizing what happens when paid work is wrong",
+  "url": "https://github.com/x402-foundation/x402/issues/2887",
+  "date": "2026-07-17",
+  "tier": "developer forum",
+  "from_file": "R5_pain.md",
+  "doc_lines": [
+   1439
+  ],
+  "in_page_data": false
+ },
+ {
+  "ac": "AC#204",
+  "id": "R5-69",
+  "claim": "An x402 issue says retries during facilitator outages can pay twice",
+  "url": "https://github.com/x402-foundation/x402/issues/4253",
+  "date": "2026-11-13",
+  "tier": "developer forum",
+  "from_file": "R5_pain.md",
+  "doc_lines": [
+   525,
+   1426,
+   1614
+  ],
+  "in_page_data": false
+ },
+ {
+  "ac": "AC#50",
+  "id": "R2-30",
+  "claim": "The Foundation spec folder holds x402 specification v1 and v2 files, plus transports v1 and v2",
+  "url": "https://github.com/x402-foundation/x402/tree/main/specs",
+  "date": "checked 2026-11-15",
+  "tier": "T2",
+  "from_file": "R2_rails.md",
+  "doc_lines": [
+   93,
+   172
+  ],
+  "in_page_data": true
+ },
+ {
+  "ac": "AC#259",
+  "id": "G-110",
+  "claim": "A Major Matters tracker counted over 200M x402 transactions by June 2026 and Artemis found more than 95% was protocol signalling. agenteconomy.to implies about 154M by end June (our arithmetic)",
+  "url": "https://glenbrook.com/payments_news/the-x402-foundation-activated-a-27-year-old-internet-code-200-million-transactions-later-the-real-volume-is-still-tiny/",
+  "date": "not shown",
+  "tier": "payments press repost",
+  "from_file": "G2_gapclose.md",
+  "doc_lines": [
+   641
+  ],
+  "in_page_data": false
+ },
+ {
+  "ac": "AC#308",
+  "id": "R5-55",
+  "claim": "The FCA Mills Review notes the payments rulebook assumes a human approving each transaction",
+  "url": "https://gocardless.com/blog/action-plan-agentic-commerce",
+  "date": "2026-07 (last edited)",
+  "tier": "vendor blog (GoCardless sells account ...",
+  "from_file": "R5_pain.md",
+  "doc_lines": [
+   693,
+   1515,
+   1568,
+   1618
+  ],
+  "in_page_data": true
+ },
+ {
+  "ac": "AC#429",
+  "id": "R5-56",
+  "claim": "The UK trust framework for agentic payments is planned to cover agent liability and Know Your Agent protocols",
+  "url": "https://gocardless.com/blog/action-plan-agentic-commerce",
+  "date": "2026-07 (last edited)",
+  "tier": "vendor blog summarising HM Treasury",
+  "from_file": "R5_pain.md",
+  "doc_lines": [
+   1621
+  ],
+  "in_page_data": false
+ },
+ {
+  "ac": "AC#3",
+  "id": "G-206",
+  "claim": "The Chromium intent to experiment for WebMCP (2026-05-15) sets a desktop origin trial from Chrome 149 to Chrome 156, with shipping planned for Chrome 157",
+  "url": "https://groups.google.com/a/chromium.org/g/blink-dev/c/gmYffo5WOE8/m/OJxuQRP3AAAJ",
+  "date": "2026-05-15",
+  "tier": "browser vendor public mailing list",
+  "from_file": "G3_checker_sources.md",
+  "doc_lines": [
+   60,
+   79,
+   115,
+   159,
+   195
+  ],
+  "in_page_data": false
+ },
+ {
+  "ac": "AC#326",
+  "id": "R4-03",
+  "claim": "LLMs consistently prefer goods described by an LLM over goods described by a human",
+  "url": "https://ideas.repec.org/a/nas/journl/v122y2025pe2415697122.html",
+  "date": "2025-08",
+  "tier": "peer reviewed journal (PNAS)",
+  "from_file": "R4_risk.md",
+  "doc_lines": [
+   728
+  ],
+  "in_page_data": false
+ },
+ {
+  "ac": "AC#311",
+  "id": "R4-58",
+  "claim": "NPCI was reported to be preparing a Unified Agent Protocol using UPI Circle and Reserve Pay so agents can make small payments within user limits",
+  "url": "https://inc42.com/buzz/npci-to-launch-agentic-payments-on-upi-report/",
+  "date": "2026-09-01",
+  "tier": "press",
+  "from_file": "R4_risk.md",
+  "doc_lines": [
+   696,
+   1516
+  ],
+  "in_page_data": true
+ },
+ {
+  "ac": "AC#35",
+  "id": "G-115",
+  "claim": "Mastercard announced an expansion of Agent Pay on 2026-09-30, with its agent probability score in US testing. No GA, market or liability statement",
+  "url": "https://investor.mastercard.com/investor-news/investor-news-details/2026/Mastercard-Advances-Agentic-Commerce-With-New-Trust-and-Intelligence-Services/default.aspx",
+  "date": "2026-09-30",
+  "tier": "vendor press release",
+  "from_file": "G2_gapclose.md",
+  "doc_lines": [
+   83,
+   121,
+   189,
+   568,
+   1344,
+   1346
+  ],
+  "in_page_data": true
+ },
+ {
+  "ac": "AC#76",
+  "id": "G-136",
+  "claim": "Searches for Mastercard rule text on agent liability, the DRCF statement text and an OpenAI ChatGPT Wallet launch returned 403 or nothing. No claim made on these",
+  "url": "https://investor.mastercard.com/investor-news/investor-news-details/2026/Mastercard-Advances-Agentic-Commerce-With-New-Trust-and-Intelligence-Services/default.aspx",
+  "date": "2026-11-15",
+  "tier": "gap record",
+  "from_file": "G2_gapclose.md",
+  "doc_lines": [
+   107,
+   194,
+   837,
+   1401
+  ],
+  "in_page_data": false
+ },
+ {
+  "ac": "AC#289",
+  "id": "R4-40",
+  "claim": "ITIF asks the CFPB to update Reg E so consumer authorized agents do not waive error resolution rights",
+  "url": "https://itif.org/publications/2026/03/23/agentic-commerce-is-coming-but-regulation-meant-for-humans-will-slow-it-down/",
+  "date": "2026-03-23",
+  "tier": "think tank",
+  "from_file": "R4_risk.md",
+  "doc_lines": [
+   680
+  ],
+  "in_page_data": false
+ },
+ {
+  "ac": "AC#290",
+  "id": "R5-54",
+  "claim": "ITIF says Reg E gives no clear framework for agentic commerce disputes and asks CFPB to clarify",
+  "url": "https://itif.org/publications/2026/03/23/agentic-commerce-is-coming-but-regulation-meant-for-humans-will-slow-it-down/",
+  "date": "2026-03-23",
+  "tier": "think tank",
+  "from_file": "R5_pain.md",
+  "doc_lines": [
+   680,
+   1619,
+   1726
+  ],
+  "in_page_data": false
+ },
+ {
+  "ac": "AC#223",
+  "id": "G-48",
+  "claim": "Alibaba said its Qwen app generated more than 120 million orders in six days, with payment authorised in the chat",
+  "url": "https://kr-asia.com/alibabas-latest-qwen-subsidies-are-a-bet-on-agentic-commerce",
+  "date": "2026-03-30",
+  "tier": "regional tech press (vendor figure)",
+  "from_file": "G1_gapclose.md",
+  "doc_lines": [
+   571,
+   580,
+   1399
+  ],
+  "in_page_data": false
+ },
+ {
+  "ac": "AC#369",
+  "id": "R3-38",
+  "claim": "Alipay AI Pay processed over 120 million transactions in the week of 2026-02-05 to 2026-02-11 and reached 100 million users. Every transaction is confirmed by the user",
+  "url": "https://letsdatascience.com/news/alipay-enables-ai-agents-to-complete-user-approved-payments-5389ae58",
+  "date": "2026-04-21",
+  "tier": "trade press reporting vendor",
+  "from_file": "R3_players.md",
+  "doc_lines": [
+   1303,
+   1399
+  ],
+  "in_page_data": true
+ },
+ {
+  "ac": "AC#55",
+  "id": "R2-53",
+  "claim": "L402 returns 402 with a token and Lightning invoice, the client retries with the preimage, and verification is local. An agent pays once per endpoint",
+  "url": "https://lightning.engineering/posts/2026-03-11-L402-for-agents/",
+  "date": "2026-03-11",
+  "tier": "T3",
+  "from_file": "R2_rails.md",
+  "doc_lines": [
+   95,
+   135,
+   327,
+   943,
+   1256,
+   1259
+  ],
+  "in_page_data": false
+ },
+ {
+  "ac": "AC#116",
+  "id": "G-126",
+  "claim": "Link Purchase Protections cover US residents only, are discretionary, insured by AIG and CNA companies and run by Cover Genius. Silent on agents and Shared Payment Tokens",
+  "url": "https://link.com/terms/purchase-protections",
+  "date": "2026-09-08",
+  "tier": "provider terms",
+  "from_file": "G2_gapclose.md",
+  "doc_lines": [
+   129,
+   509,
+   711
+  ],
+  "in_page_data": false
+ },
+ {
+  "ac": "AC#239",
+  "id": "R5-06",
+  "claim": "55.0% of US and UK consumers are not comfortable with agents buying for them",
+  "url": "https://martechseries.com/analytics/data-management-platforms/privacy-and-regulations/riskified-study-finds-consumers-arent-ready-to-hand-over-control-as-ai-transforms-shopping-with-over-half-afraid-of-online-fraud/",
+  "date": "2026-04-27",
+  "tier": "vendor (Riskified sells fraud and ...",
+  "from_file": "R5_pain.md",
+  "doc_lines": [
+   593
+  ],
+  "in_page_data": false
+ },
+ {
+  "ac": "AC#23",
+  "id": "R1-44",
+  "claim": "MCP spec 2026-07-28 removes sessions and the initialize handshake, adds an extensions field and moves tasks to an extension. It defines no payment primitive.",
+  "url": "https://modelcontextprotocol.io/specification/2026-07-28/changelog",
+  "date": "2026-07-28",
+  "tier": "primary",
+  "from_file": "R1_specs.md",
+  "doc_lines": [
+   77,
+   115
+  ],
+  "in_page_data": false
+ },
+ {
+  "ac": "AC#352",
+  "id": "R1-45",
+  "claim": "Under MCP 2026-07-28 the client learns an out-of-band step's result by retrying, and URL elicitation's elicitationId was removed.",
+  "url": "https://modelcontextprotocol.io/specification/2026-07-28/changelog",
+  "date": "2026-07-28",
+  "tier": "primary",
+  "from_file": "R1_specs.md",
+  "doc_lines": [
+   958
+  ],
+  "in_page_data": false
+ },
+ {
+  "ac": "AC#81",
+  "id": "G-37",
+  "claim": "UCP release v2026-04-08 marks 12 items as breaking, including Order changes and OAuth 2.0 identity linking",
+  "url": "https://newreleases.io/project/github/Universal-Commerce-Protocol/ucp/release/v2026-04-08",
+  "date": "2026-04-08",
+  "tier": "release notes mirror",
+  "from_file": "G1_gapclose.md",
+  "doc_lines": [
+   109,
+   350,
+   453,
+   475,
+   1228,
+   1355
+  ],
+  "in_page_data": true
+ },
+ {
+  "ac": "AC#82",
+  "id": "G-38",
+  "claim": "UCP release v2026-08-25 lists 11 backward incompatible items, including a buyer consent overhaul and removal of signing_keys",
+  "url": "https://newreleases.io/project/github/Universal-Commerce-Protocol/ucp/release/v2026-08-25",
+  "date": "2026-08-25",
+  "tier": "release notes mirror",
+  "from_file": "G1_gapclose.md",
+  "doc_lines": [
+   109,
+   350,
+   453,
+   475,
+   1228,
+   1355
+  ],
+  "in_page_data": true
+ },
+ {
+  "ac": "AC#157",
+  "id": "R1-74",
+  "claim": "The v2026-08-25 release notes split PAN and network token into distinct credential types, add split payments across instruments and add capability-driven OAuth 2.0 scopes for account linking.",
+  "url": "https://newreleases.io/project/github/Universal-Commerce-Protocol/ucp/release/v2026-08-25",
+  "date": "2026-08-25",
+  "tier": "secondary",
+  "from_file": "R1_specs.md",
+  "doc_lines": [
+   315,
+   838,
+   1669
+  ],
+  "in_page_data": false
+ }
+]

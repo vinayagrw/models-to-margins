@@ -1,0 +1,772 @@
+{
+ "R1-29": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Row 1. Date, country, UCP and Google Pay match. Optional: say rolling out",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R1-01": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Row 2. Changelog deprecates 2026-01-30. Only SEPs and fixes after the 2026-04-17 release commit, last 2026-07-18",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R1-02": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Row 2. Changelog deprecates 2026-01-30. Only SEPs and fixes after the 2026-04-17 release commit, last 2026-07-18",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R1-35": {
+  "verdict": "fix",
+  "fix": "No real money AP2 use was verified, and the last AP2 release is v0.2.0 of 2026-04-28 [R1-35].",
+  "why": "Row 32. Release date confirmed. The 2026-04-29 last commit was not visible on the opened page. Its uses in 1.3 and the AP2 mandate list (rows 3, 21) are supported",
+  "opened": true,
+  "checker": "K6"
+ },
+ "K6-row4": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "3: Protocols converge on network tokens, PSP scoped tokens and stablecoin authorisations. Fits ACP Allowance, UCP credential types and Stripe SPT. Note ACP still accepts fpan, so raw card numbers still reach PSP vaults",
+  "opened": true,
+  "checker": "K6"
+ },
+ "K6-row5": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "5.3: Edge checks HTTP message signatures against a key directory, TAP, Agent Pay or a KYA token. Matches the Web Bot Auth draft, the Cloudflare TAP post and the KYAPay draft",
+  "opened": true,
+  "checker": "K6"
+ },
+ "K6-row6": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "5.3: Discovery through a well known capability file. ACP 2026-04-17 adds /.well-known/acp.json and UCP publishes /.well-known/ucp",
+  "opened": true,
+  "checker": "K6"
+ },
+ "K6-row7": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "5.3: Every payment call carries an idempotency key. ACP made Idempotency-Key mandatory on POST. UCP covers idempotency keys on complete checkout retries",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R2-05": {
+  "verdict": "fix",
+  "fix": "Visa Intelligent Commerce takes the purchase instruction through Visa's own API, after a passkey, before it releases credentials [R2-05].",
+  "why": "Row 27. The developer page does not say where the instruction is held. Its use in the token pattern (row 8) is supported",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R2-11": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Row 9. Matches, present tense, Amex coming soon. No protocol named",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R2-15": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Row 10. Matches. Preview API 2026-09-30.preview, 34 countries",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R2-16": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Row 10. Matches. Preview API 2026-09-30.preview, 34 countries",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R1-05": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Row 11. Allowance reason enum has one value, six required fields",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R1-14": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Row 12. Matches",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R1-74": {
+  "verdict": "not checked",
+  "fix": "",
+  "why": "Row 13. Budget",
+  "opened": false,
+  "checker": "K6"
+ },
+ "R2-01": {
+  "verdict": "not checked",
+  "fix": "",
+  "why": "Row 14. Budget",
+  "opened": false,
+  "checker": "K6"
+ },
+ "R4-27": {
+  "verdict": "fix",
+  "fix": "In Visa's benchmark of 22 models, 42.8 percent of runs failed and 54 percent of the failed runs still ended in a purchase decision [R4-27, R4-28]. The benchmark did not test checkout or payment, but a valid token would not have stopped those purchases.",
+  "why": "Row 15. Numbers match. The test covered product selection only, so paid for each of them overstates",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R4-28": {
+  "verdict": "fix",
+  "fix": "In Visa's benchmark of 22 models, 42.8 percent of runs failed and 54 percent of the failed runs still ended in a purchase decision [R4-27, R4-28]. The benchmark did not test checkout or payment, but a valid token would not have stopped those purchases.",
+  "why": "Row 15. Numbers match. The test covered product selection only, so paid for each of them overstates",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R4-09": {
+  "verdict": "not checked",
+  "fix": "",
+  "why": "Row 16. Budget",
+  "opened": false,
+  "checker": "K6"
+ },
+ "R4-33": {
+  "verdict": "not checked",
+  "fix": "",
+  "why": "Row 16. Budget",
+  "opened": false,
+  "checker": "K6"
+ },
+ "R1-11": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Row 17. ACP Allowance has merchant_id. SPT is issued with seller_details",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R4-64": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Row 18. Matches. Undated vendor article, rung 6",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R4-65": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Row 18. Matches. Undated vendor article, rung 6",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R2-18": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Row 19. Matches",
+  "opened": true,
+  "checker": "K6"
+ },
+ "K6-row20": {
+  "verdict": "fix",
+  "fix": "Replace M->>N with M->>P: Charge token through own PSP, then P->>N: Authorise. Add an alt branch where the PSP returns requires_action and the user completes 3D Secure.",
+  "why": "8.1 P1 diagram: Token sequence: agent gets token from PSP, merchant authorises straight with the network. In ACP and SPT flows the merchant charges through its PSP, and an SPT can need 3D Secure before payment",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R1-37": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Row 21. Spec defines exactly two mandate types, each open or closed, and eight constraint types",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R1-38": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Row 21. Spec defines exactly two mandate types, each open or closed, and eight constraint types",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R1-39": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Row 22. Matches",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R1-61": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Row 23. Matches",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R1-62": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Row 23. Matches",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R1-28": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Row 24. Active only in the capability intersection, then Security Locked",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R1-40": {
+  "verdict": "fix",
+  "fix": "Standardisation moved to the FIDO Payments working group, chaired by Mastercard and Visa and seeded by Google and Mastercard contributions [R1-40].",
+  "why": "Row 25. Only the Payments TWG has Mastercard and Visa chairs. The other group is chaired by CVS Health, Google and OpenAI",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R2-68": {
+  "verdict": "not checked",
+  "fix": "",
+  "why": "Row 26. Budget",
+  "opened": false,
+  "checker": "K6"
+ },
+ "R2-69": {
+  "verdict": "not checked",
+  "fix": "",
+  "why": "Row 26. Budget",
+  "opened": false,
+  "checker": "K6"
+ },
+ "R2-73": {
+  "verdict": "not checked",
+  "fix": "",
+  "why": "Row 26. Budget",
+  "opened": false,
+  "checker": "K6"
+ },
+ "R4-44": {
+  "verdict": "not checked",
+  "fix": "",
+  "why": "Row 28. Budget",
+  "opened": false,
+  "checker": "K6"
+ },
+ "R4-46": {
+  "verdict": "not checked",
+  "fix": "",
+  "why": "Row 28. Not opened, budget",
+  "opened": false,
+  "checker": "K6"
+ },
+ "R4-17": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Row 29. Matches the abstract",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R4-11": {
+  "verdict": "not checked",
+  "fix": "",
+  "why": "Row 30. Budget",
+  "opened": false,
+  "checker": "K6"
+ },
+ "R4-12": {
+  "verdict": "not checked",
+  "fix": "",
+  "why": "Row 30. Budget",
+  "opened": false,
+  "checker": "K6"
+ },
+ "R4-61": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Row 31. Matches the v0.2 spec",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R4-62": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Row 31. Matches the v0.2 spec",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R1-25": {
+  "verdict": "not checked",
+  "fix": "",
+  "why": "Row 33. Budget",
+  "opened": false,
+  "checker": "K6"
+ },
+ "K6-row34": {
+  "verdict": "fix",
+  "fix": "Show the agent sending both the user signed open mandate and its own closed mandate to the credential provider. Change the note to: The user signs the limits. The agent key signs the cart inside them.",
+  "why": "8.1 P2 diagram: Mandate sequence and the note: signature proves consent to the cart the agent built. Order matches the v0.2 human not present flow, but the closed cart mandate is signed by the agent key, not the user",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R2-31": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Row 35. Both pages match. The LF release dates the operational launch to July 2026",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R2-33": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Row 35. Both pages match. The LF release dates the operational launch to July 2026",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R2-22": {
+  "verdict": "not checked",
+  "fix": "",
+  "why": "Row 36. Not opened, budget",
+  "opened": false,
+  "checker": "K6"
+ },
+ "R2-23": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Row 36. mpp.dev lists 12 top level methods and no ACH. The R2-22 repo was not opened",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R2-24": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Row 36. mpp.dev lists 12 top level methods and no ACH. The R2-22 repo was not opened",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R2-53": {
+  "verdict": "not checked",
+  "fix": "",
+  "why": "Row 37. Budget",
+  "opened": false,
+  "checker": "K6"
+ },
+ "R1-41": {
+  "verdict": "not checked",
+  "fix": "",
+  "why": "Row 38. Budget",
+  "opened": false,
+  "checker": "K6"
+ },
+ "R1-46": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Row 39. Matches",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R1-47": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Row 40. Matches. AWS names the x402 upto scheme",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R2-56": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Row 40. Matches. AWS names the x402 upto scheme",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R2-17": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Row 40. Matches. AWS names the x402 upto scheme",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R2-34": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Row 41. Matches",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R2-52": {
+  "verdict": "not checked",
+  "fix": "",
+  "why": "Row 42. Budget",
+  "opened": false,
+  "checker": "K6"
+ },
+ "R2-38": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Row 43. Matches data as of 2026-11-15. 274K over 5.1M is 0.054 USD",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R2-39": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Row 43. Matches data as of 2026-11-15. 274K over 5.1M is 0.054 USD",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R2-47": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Row 44. Forkast paraphrases Artemis on 2026-07-10, a mid year estimate",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R2-28": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Row 45. Matches",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R4-14": {
+  "verdict": "not checked",
+  "fix": "",
+  "why": "Row 46. Budget",
+  "opened": false,
+  "checker": "K6"
+ },
+ "R4-15": {
+  "verdict": "not checked",
+  "fix": "",
+  "why": "Row 46. Budget",
+  "opened": false,
+  "checker": "K6"
+ },
+ "R4-31": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Row 47. Matches the CSA note",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R4-32": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Row 47. Matches the CSA note",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R4-67": {
+  "verdict": "fix",
+  "fix": "Final rail with no protocol refund path. The x402 README defines no refund or dispute process [R4-67]. A refund is a voluntary transfer back from the seller, so the payer carries the loss unless the seller agrees.",
+  "why": "Row 48. README has no refund process, but Coinbase tells sellers to refund by transfer and Stripe offers refunds on machine payments it settles. README now lists exact, upto and batch-settlement",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R1-45": {
+  "verdict": "not checked",
+  "fix": "",
+  "why": "Row 49. Budget",
+  "opened": false,
+  "checker": "K6"
+ },
+ "K6-row50": {
+  "verdict": "fix",
+  "fix": "Split S->>F into Verify, then the server does the work, then Settle, then 200 with PAYMENT-RESPONSE. Name the PAYMENT-REQUIRED and PAYMENT-SIGNATURE headers.",
+  "why": "8.1 P3 diagram: 402 sequence verifies and settles before the server serves. The x402 README order is verify, do the work, settle, then respond",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R1-50": {
+  "verdict": "not checked",
+  "fix": "",
+  "why": "Row 51. Not opened, budget",
+  "opened": false,
+  "checker": "K6"
+ },
+ "R1-53": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Row 51. Cloudflare post matches. R1-50 not opened",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R1-56": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Row 52. Matches. Draft requires created and expires, recommends 24 h, names no mandatory algorithm, Ed25519 in examples",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R1-59": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Row 52. Matches. Draft requires created and expires, recommends 24 h, names no mandatory algorithm, Ed25519 in examples",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R1-16": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Row 53. Matches",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R1-26": {
+  "verdict": "fix",
+  "fix": "UCP business profiles publish a JWK set at /.well-known/ucp. RFC 9421 request signatures are one authentication option, Web Bot Auth lookup is an optional layer, and business to platform webhooks must be signed [R1-26].",
+  "why": "Row 54. The spec makes webhook signing the MUST, not every request",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R1-67": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Row 55. KYAPay -02 of 2026-11-02 matches. R1-65 not opened",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R1-65": {
+  "verdict": "not checked",
+  "fix": "",
+  "why": "Row 55. Not opened, budget",
+  "opened": false,
+  "checker": "K6"
+ },
+ "R1-17": {
+  "verdict": "fix",
+  "fix": "Keep the wording and add C359 to the citation.",
+  "why": "Row 56. R1-17 says Instant Checkout moved into individual apps by March, not retailer sites. R1-15 has no date",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R1-54": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Row 57. Two releases, 2026-10-20 and 2026-10-21, both say live",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R2-04": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Row 57. Two releases, 2026-10-20 and 2026-10-21, both say live",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R4-69": {
+  "verdict": "not checked",
+  "fix": "",
+  "why": "Row 58. Not opened, budget",
+  "opened": false,
+  "checker": "K6"
+ },
+ "R1-34": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Row 58. Shopify page matches. R4-69 not opened",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R1-57": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Row 59. Both milestones still open, draft at -01. UCP treats the tag as a hint, not a gate",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R1-68": {
+  "verdict": "not checked",
+  "fix": "",
+  "why": "Row 60. Budget",
+  "opened": false,
+  "checker": "K6"
+ },
+ "R4-68": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Row 61. Matches, 2026-11-05, no members named",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R4-25": {
+  "verdict": "not checked",
+  "fix": "",
+  "why": "Row 62. Budget",
+  "opened": false,
+  "checker": "K6"
+ },
+ "K6-row63": {
+  "verdict": "fix",
+  "fix": "Change the step to: Verify signature and expiry, and the nonce where the network requires one. Show the key fetched from the Signature-Agent URL and matched on keyid.",
+  "why": "8.1 P4 diagram: Registered agent sequence verifies signature, nonce and expiry. The IETF draft leaves nonces to deployment policy. Visa and Mastercard require one",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R2-35": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Row 64. FAQ calls these targets",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R2-13": {
+  "verdict": "not checked",
+  "fix": "",
+  "why": "Row 65. Budget",
+  "opened": false,
+  "checker": "K6"
+ },
+ "K6-row66": {
+  "verdict": "fix",
+  "fix": "Either make leaf T4 Scoped token plus stored instruction as mandate, or change step 3 to: A mandate is required when the human is away and a regulator or the issuer asks for one.",
+  "why": "8.1 verdict: Step 3: a mandate is required when the human is not present. Leaf T4 lets a human away consumer pay with a token and no mandate, which contradicts step 3 and ADR-3",
+  "opened": false,
+  "checker": "K6"
+ },
+ "K6-row68": {
+  "verdict": "fix",
+  "fix": "T5 becomes Signed mandate + registered agent + bank or stablecoin credential. B2B on card becomes Registered agent + token + buyer approval limits, as in the pilot's buyer approved invoices. Ask about finality after the rail is chosen, and note UCC 4A covers wires, not stablecoin transfers.",
+  "why": "8.3 B2B leaves: B2B final rail: mandate plus registered agent. B2B card: registered agent plus token. T5 names no credential, B2B T1 drops the human set spend limits of requirement 1.1.2, and the rail is an output not an input",
+  "opened": true,
+  "checker": "K6"
+ },
+ "K6-row69": {
+  "verdict": "fix",
+  "fix": "Ask the SCA question for every EU, UK and India payer, present or away, and for business payers outside the corporate exemption.",
+  "why": "8.3 question: SCA asked only for consumers with the human away. SCA and RBI two factor rules also cover customer initiated payments, so EU business payers reach a leaf with no SCA check",
+  "opened": false,
+  "checker": "K6"
+ },
+ "R1-15": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Row 70. Supported. UCP keeps the business as MoR and requires continue_url with requires_escalation",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R1-27": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Row 70. Supported. UCP keeps the business as MoR and requires continue_url with requires_escalation",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R4-63": {
+  "verdict": "not checked",
+  "fix": "",
+  "why": "Row 73. Not opened, budget",
+  "opened": false,
+  "checker": "K6"
+ },
+ "K6-row74": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "8.4: Weighted scores 78, 58, 77, 72, 43 and 76, 69, 43, 51. Recomputed the sum of score times weight over 5. All nine match",
+  "opened": false,
+  "checker": "K6"
+ },
+ "K6-row75": {
+  "verdict": "fix",
+  "fix": "Add Live as identity only, 4 to the maturity scale, or score it 5 or 3.",
+  "why": "8.4: Web Bot Auth maturity scored 4, Live as identity, still an IETF draft. The stated scale is Live 5, Pilot 3, Spec 2, so 4 is off the scale",
+  "opened": false,
+  "checker": "K6"
+ },
+ "R1-04": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Row 76. Overview names no ACP. Governance confirms the veto and no foundation",
+  "opened": true,
+  "checker": "K6"
+ },
+ "R1-21": {
+  "verdict": "not checked",
+  "fix": "",
+  "why": "Row 77. Budget",
+  "opened": false,
+  "checker": "K6"
+ },
+ "R1-22": {
+  "verdict": "not checked",
+  "fix": "",
+  "why": "Row 77. Budget",
+  "opened": false,
+  "checker": "K6"
+ },
+ "R1-30": {
+  "verdict": "not checked",
+  "fix": "",
+  "why": "Row 77. Budget",
+  "opened": false,
+  "checker": "K6"
+ },
+ "R2-63": {
+  "verdict": "not checked",
+  "fix": "",
+  "why": "Row 77. Budget",
+  "opened": false,
+  "checker": "K6"
+ },
+ "R2-25": {
+  "verdict": "not checked",
+  "fix": "",
+  "why": "Row 78. Budget",
+  "opened": false,
+  "checker": "K6"
+ },
+ "R2-55": {
+  "verdict": "not checked",
+  "fix": "",
+  "why": "Row 78. Budget",
+  "opened": false,
+  "checker": "K6"
+ },
+ "R5-71": {
+  "verdict": "fix",
+  "fix": "AP2 v0.2 replaced the Intent Mandate with user signed open mandates, and an open issue says the mispick dispute row went with it [R5-71].",
+  "why": "Row 79. The v0.2 spec has the user sign open Checkout and Payment Mandates with limits. Only the Intent Mandate name went",
+  "opened": true,
+  "checker": "K6"
+ },
+ "K6-row80": {
+  "verdict": "keep",
+  "fix": "",
+  "why": "Whole doc: Do not regress list: Travel Rule, MPP no ACH, AP2 and ACP Spec in payouts, ChatGPT March 2026, Visa Direct and Mastercard Move. Lines 99, 127, 475, 567, 605, 618, 841, 890, 1022, 1150, 1175, 1177, 1487 agree. No line breaks one",
+  "opened": false,
+  "checker": "K6"
+ },
+ "R2-21": {
+  "verdict": "not checked",
+  "fix": "",
+  "why": "Row 67. Not opened, budget",
+  "opened": false,
+  "checker": "K6"
+ },
+ "R4-39": {
+  "verdict": "not checked",
+  "fix": "",
+  "why": "Row 68. Not opened, budget",
+  "opened": false,
+  "checker": "K6"
+ },
+ "R4-57": {
+  "verdict": "not checked",
+  "fix": "",
+  "why": "Row 69. Not opened, budget",
+  "opened": false,
+  "checker": "K6"
+ },
+ "R4-34": {
+  "verdict": "not checked",
+  "fix": "",
+  "why": "Row 8.3 table, payer type question. Not opened, budget",
+  "opened": false,
+  "checker": "K6"
+ },
+ "R4-36": {
+  "verdict": "not checked",
+  "fix": "",
+  "why": "Row 8.3 table, payer type question. Not opened, budget",
+  "opened": false,
+  "checker": "K6"
+ }
+}

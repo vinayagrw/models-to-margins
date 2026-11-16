@@ -1,0 +1,670 @@
+{
+ "search": [
+  {
+   "id": 1,
+   "name": "Broken citations",
+   "ic": "i-hcc-evidence",
+   "st": "true",
+   "score": 12,
+   "stage": 8,
+   "see": "A link that loads but does not say what the answer says. Some links never existed.",
+   "why": "Links are attached after the text is written, from a pool of snippets and copies. Nothing checks that the page holds the sentence.",
+   "num": "60%+",
+   "numl": "of 1,600 citation tests named the wrong article, publisher or URL",
+   "tag": "Independent audit, 2025",
+   "fix": "A separate checker ties each claim to a quoted sentence on a page it opened. Claims it cannot tie are dropped or marked.",
+   "you": "Ask for a verbatim quote next to each key claim, then open two links yourself.",
+   "c": 28,
+   "y": 0.82,
+   "ev": "verified",
+   "l": [
+    3,
+    3,
+    3,
+    3
+   ]
+  },
+  {
+   "id": 2,
+   "name": "Silent failure",
+   "ic": "i-monitor",
+   "st": "true",
+   "score": 10,
+   "stage": 8,
+   "see": "A finished, confident report when the search found nothing or the tool broke.",
+   "why": "Guessing scores better than saying \"I don't know\", and tool errors often come back looking like success.",
+   "num": "73.2%",
+   "numl": "of answers that used planted content gave no warning",
+   "tag": "Preprint, Oct 2026",
+   "fix": "Show every failed search, blocked page and spent budget above the answer. Never deliver a report with zero opened sources.",
+   "you": "End research prompts with: list the searches you ran, the pages you opened, and anything that failed.",
+   "c": 10,
+   "y": 0.86,
+   "ev": "verified",
+   "l": [
+    2,
+    2,
+    3,
+    3
+   ]
+  },
+  {
+   "id": 3,
+   "name": "Stops too early",
+   "ic": "i-pattern-miner",
+   "st": "true",
+   "score": 10,
+   "stage": 2,
+   "see": "Few sources, generic queries, and the key page never found.",
+   "why": "Agents stop when they feel confident, not when each part of the question has evidence.",
+   "num": "71.5%",
+   "numl": "of errors on same-day news came from retrieval, not reasoning",
+   "tag": "Preprint, May 2026",
+   "fix": "Split the question into sub-questions and stop only when each has evidence or a clear \"not found\".",
+   "you": "Use deep research mode for multi-part questions and ask for the plan first.",
+   "c": 12,
+   "y": 0.38,
+   "ev": "verified",
+   "l": [
+    3,
+    3,
+    2,
+    2
+   ]
+  },
+  {
+   "id": 4,
+   "name": "Planted sources win",
+   "ic": "i-risk",
+   "st": "new",
+   "score": 10,
+   "stage": 6,
+   "see": "SEO lists, vendor pages, one forum comment or a scam phone number presented as fact.",
+   "why": "Ranking rewards relevance, not reliability. Many copies of one planted page look like agreement.",
+   "num": "8 of 10",
+   "numl": "AI search platforms cited a made-up concept within 7 days",
+   "tag": "Preprint, Oct 2026",
+   "fix": "Label every source by publisher, date and type, and count copies as one source. Use allow and block lists for high-stakes work.",
+   "you": "Ask for primary sources and who published each one.",
+   "c": 15,
+   "y": 0.3,
+   "ev": "verified",
+   "l": [
+    3,
+    2,
+    3,
+    2
+   ]
+  },
+  {
+   "id": 5,
+   "name": "Stale facts",
+   "ic": "i-rollback",
+   "st": "true",
+   "score": 7,
+   "stage": 3,
+   "see": "Last year's figure, a former office holder, old install steps.",
+   "why": "Snippets and caches lag the live page, and the model's sense of today drifts toward its training date.",
+   "num": "5x",
+   "numl": "more outdated answers when built from snippets than from opened pages",
+   "tag": "Preprint, Oct 2026",
+   "fix": "Give the model today's date and open the page for any fact that changes. Show the page date next to each figure.",
+   "you": "Start with \"As of today\" and ask for the date next to every number.",
+   "c": 15,
+   "y": 0.74,
+   "ev": "verified",
+   "l": [
+    2,
+    1,
+    2,
+    2
+   ],
+   "pub": 9
+  },
+  {
+   "id": 6,
+   "name": "Snippets, not pages",
+   "ic": "i-scrub",
+   "st": "true",
+   "score": 9,
+   "stage": 5,
+   "see": "An answer built from a search snippet or a cut-down summary of the page.",
+   "why": "Opening pages costs time and tokens. Some tools pass the page through a smaller model first.",
+   "num": "53.6%",
+   "numl": "of search episodes where one leading model opened no page at all",
+   "tag": "Preprint, Oct 2026",
+   "fix": "Read before cite: only cite pages that were opened, and report any page that was cut.",
+   "you": "Ask it to open every source it cites and quote the exact sentence it used from each page.",
+   "c": 8,
+   "y": 0.7,
+   "ev": "verified",
+   "l": [
+    1,
+    2,
+    3,
+    3
+   ]
+  },
+  {
+   "id": 7,
+   "name": "Blocked pages",
+   "ic": "i-denial",
+   "st": "new",
+   "score": 9,
+   "stage": 4,
+   "see": "The best source is paywalled, bot-blocked or built in JavaScript, so the answer leans on copies.",
+   "why": "Sites are closing the door to AI bots, and many AI fetchers do not run JavaScript.",
+   "num": "Default",
+   "numl": "AI-bot blocking now covers ad pages on existing free sites on a major network",
+   "tag": "News report, Oct 2026",
+   "fix": "Label each blocked fetch, then route to a browser, a document parser or a licensed source. Never evade blocks.",
+   "you": "Paste or upload the source yourself when it matters.",
+   "c": 10,
+   "y": 0.24,
+   "ev": "verified",
+   "l": [
+    2,
+    2,
+    3,
+    2
+   ]
+  },
+  {
+   "id": 8,
+   "name": "False premise",
+   "ic": "i-cross",
+   "st": "true",
+   "score": 6,
+   "stage": 1,
+   "see": "The wrong fact in your question is accepted and \"confirmed\" with sources.",
+   "why": "Models are tuned to agree, and the premise gets written into the search query.",
+   "num": "64%",
+   "numl": "of fabricated facts accepted by one leading model",
+   "tag": "Preprint, May 2026",
+   "fix": "Check the question's assumptions before searching, and flag any that fail.",
+   "you": "Ask neutral questions first, then ask for the best evidence against your view.",
+   "c": 5,
+   "y": 0.82,
+   "ev": "verified",
+   "l": [
+    1,
+    2,
+    2,
+    1
+   ],
+   "pub": 9
+  },
+  {
+   "id": 9,
+   "name": "Memory beats search",
+   "ic": "i-sql",
+   "st": "true",
+   "score": 8,
+   "stage": 7,
+   "see": "An answer from training data when search was on, or a correct memory overwritten by a bad page.",
+   "why": "The model's own confidence decides what to trust, and that confidence is poorly calibrated.",
+   "num": "60%+",
+   "numl": "of cases where models took wrong retrieved text over correct memory",
+   "tag": "Peer-reviewed study, 2024",
+   "fix": "Show disagreements between memory and evidence, and prefer dated primary pages for facts that change.",
+   "you": "Require a dated primary source for prices, rules and people in roles.",
+   "c": 10,
+   "y": 0.44,
+   "ev": "verified",
+   "l": [
+    2,
+    2,
+    2,
+    2
+   ]
+  },
+  {
+   "id": 10,
+   "name": "Planted instructions",
+   "ic": "i-security",
+   "st": "true",
+   "score": 9,
+   "stage": 5,
+   "see": "Usually nothing. Hidden text on a page steers the answer or tells an agent to act.",
+   "why": "One model reads data and instructions together and cannot reliably tell them apart.",
+   "num": "73.1%",
+   "numl": "of injected attacks on real pages got past a standard browsing planner",
+   "tag": "Preprint, Oct 2026",
+   "fix": "Partly fixed at the top: leading products now ship injection filters. For any agent that can act, read pages in a separate model with no tools. Read-only research can use injection filters.",
+   "you": "Never give a browsing agent your email, payments or private files.",
+   "c": 6,
+   "y": 0.34,
+   "ev": "verified",
+   "l": [
+    1,
+    3,
+    2,
+    3
+   ],
+   "pub": 7
+  }
+ ],
+ "frontier": [
+  {
+   "id": 1,
+   "name": "Confident wrong answers in high-stakes work",
+   "sn": "Confident wrong answers",
+   "ic": "i-risk",
+   "st": "true",
+   "tier": "A",
+   "score": 8,
+   "l": [
+    2,
+    3,
+    3,
+    3
+   ],
+   "seg": "Enterprise, consumer",
+   "j": [
+    0
+   ],
+   "mx": [
+    0,
+    1
+   ],
+   "see": "A fluent answer with invented case law, a wrong figure or an unneeded medical test, and the error only shows up later in court or with a client.",
+   "why": "The model sounds just as sure when it is wrong, and people often use the output without checking.",
+   "num": "Over 2,200",
+   "numl": "court cases now listed with AI-invented content",
+   "tag": "Researcher's case database, Oct 2026",
+   "fix": "A named person checks every citation and figure before anything is filed or sent. Record which model produced which output.",
+   "ev": "verified"
+  },
+  {
+   "id": 2,
+   "name": "Agents act or report wrongly",
+   "sn": "Agents act wrongly",
+   "ic": "i-agent",
+   "st": "worse",
+   "tier": "A",
+   "score": 8,
+   "l": [
+    2,
+    3,
+    3,
+    2
+   ],
+   "seg": "Developer, enterprise",
+   "j": [
+    1
+   ],
+   "mx": [
+    0,
+    1
+   ],
+   "see": "An agent deletes files, touches production, uses saved passwords, or says tests pass when the last run came before its own edits.",
+   "why": "Agents get broad permissions by default, and few teams can trace what an agent actually did.",
+   "num": "80 of 357",
+   "numl": "\"tests pass\" claims in one team's audit had no up-to-date test run behind them",
+   "tag": "One user team, Oct 2026",
+   "fix": "Give agents the least access they need and an approval step before delete or deploy. Accept a pass only with a captured test log.",
+   "ev": "verified"
+  },
+  {
+   "id": 3,
+   "name": "Data leaks out",
+   "sn": "Data leaks out",
+   "ic": "i-vault",
+   "st": "true",
+   "tier": "A",
+   "score": 8,
+   "l": [
+    2,
+    3,
+    3,
+    2
+   ],
+   "seg": "Enterprise, consumer",
+   "j": [
+    0
+   ],
+   "mx": [
+    0,
+    1
+   ],
+   "see": "Staff paste company data into personal AI accounts. Consumers learn from lawsuits that allege their chats were used without valid consent.",
+   "why": "Policies alone do not stop it, and uploads were highest where AI was banned.",
+   "num": "48%",
+   "numl": "of employees who use AI uploaded company information to public AI tools",
+   "tag": "University and KPMG survey, 2025",
+   "fix": "Give staff an approved tool with controls that stop company data leaving, and check what each vendor may do with your chats.",
+   "ev": "verified"
+  },
+  {
+   "id": 4,
+   "name": "Agent tools as an attack path",
+   "sn": "Agent tools attacked",
+   "ic": "i-security",
+   "st": "true",
+   "tier": "B",
+   "score": 7,
+   "l": [
+    1,
+    3,
+    3,
+    3
+   ],
+   "seg": "Developer, enterprise",
+   "j": [
+    2
+   ],
+   "mx": [
+    0,
+    1
+   ],
+   "see": "A hidden instruction in a repo, web page or plug-in makes a coding tool leak secrets or run code on a developer's machine.",
+   "why": "Agent tools treat text they read as instructions, and some vendors decline to treat these chains as flaws.",
+   "num": "8.8",
+   "numl": "severity out of 10 for a Copilot flaw in Visual Studio triggered by a hidden instruction",
+   "tag": "Security researcher, Oct 2026",
+   "fix": "Treat repos, plug-ins and tool settings as untrusted, keep agents off the open internet by default, and patch agent tools quickly.",
+   "ev": "verified"
+  },
+  {
+   "id": 5,
+   "name": "Spend without proven return",
+   "sn": "Spend without return",
+   "ic": "i-kpi",
+   "st": "true",
+   "tier": "C",
+   "score": 6,
+   "l": [
+    2,
+    2,
+    2,
+    2
+   ],
+   "seg": "Enterprise",
+   "j": [
+    1
+   ],
+   "mx": [
+    1,
+    1
+   ],
+   "see": "AI budgets keep rising while finance teams still cannot see which uses pay back.",
+   "why": "Few firms compare value with cost, and few set rules for stopping a pilot.",
+   "num": "13%",
+   "numl": "of CIOs report significant or transformational value from AI, in a survey of 2,002 tech leaders",
+   "tag": "Analyst survey, May to Jul 2026",
+   "fix": "Track value against cost for each use case, and write the stop rule before each pilot starts.",
+   "ev": "vendor"
+  },
+  {
+   "id": 6,
+   "name": "Models change under you",
+   "sn": "Models change",
+   "ic": "i-model",
+   "st": "true",
+   "tier": "B",
+   "score": 7,
+   "l": [
+    3,
+    2,
+    2,
+    2
+   ],
+   "seg": "Consumer, developer, enterprise",
+   "j": [
+    2
+   ],
+   "mx": [
+    1,
+    1
+   ],
+   "see": "The model behaves differently after an update, an old model disappears, or an API model is retired and calls start failing.",
+   "why": "Vendors replace models to free capacity, and default settings change too.",
+   "num": "29",
+   "numl": "OpenAI model IDs shut down in one day",
+   "tag": "Vendor notice, Oct 2026",
+   "fix": "Pin model versions, keep a register of retirement dates and rerun your own tests before accepting any change.",
+   "ev": "vendor"
+  },
+  {
+   "id": 7,
+   "name": "Usage caps nobody can predict",
+   "sn": "Surprise usage caps",
+   "ic": "i-measure",
+   "st": "new",
+   "tier": "C",
+   "score": 6,
+   "l": [
+    2,
+    2,
+    2,
+    2
+   ],
+   "seg": "Developer, consumer, enterprise",
+   "j": [
+    1
+   ],
+   "mx": [
+    1,
+    0
+   ],
+   "see": "A paid allowance runs out far faster than expected, and there is no way to tell in advance what a task will cost.",
+   "why": "Vendors reprice and cut allowances often, compute is scarce, and meters are not documented.",
+   "num": "33",
+   "numl": "pricing and limit changes across AI tools in one quarter",
+   "tag": "Community tracker, Q3 2026",
+   "fix": "Write notice periods for limit changes into contracts, track usage per task and ask vendors for a cost preview.",
+   "ev": "verified"
+  },
+  {
+   "id": 8,
+   "name": "Tells people what they want to hear",
+   "sn": "Flattering answers",
+   "ic": "i-approve",
+   "st": "new",
+   "tier": "B",
+   "only": "Consumer list only",
+   "score": 7,
+   "l": [
+    1,
+    3,
+    3,
+    2
+   ],
+   "seg": "Consumer",
+   "j": [
+    0
+   ],
+   "mx": [
+    0,
+    2
+   ],
+   "see": "The assistant agrees, praises and goes along. Most people do not notice. Vulnerable users can be pulled deeper into harmful beliefs.",
+   "why": "Models tend to go along with the person in front of them. Eight US states now allege the design itself is too agreeable.",
+   "num": "8",
+   "numl": "US states sued OpenAI on the same day over ChatGPT safety",
+   "tag": "State filings, Oct 2026",
+   "fix": "If you run a consumer chat product, add crisis routing, age checks and instructions against blind agreement. Test them on your own chats.",
+   "ev": "verified"
+  },
+  {
+   "id": 9,
+   "name": "Controls lag behind rollout",
+   "sn": "Controls lag rollout",
+   "ic": "i-policy-doc",
+   "st": "new",
+   "tier": "C",
+   "score": 6,
+   "l": [
+    2,
+    2,
+    2,
+    2
+   ],
+   "seg": "Enterprise",
+   "j": [
+    3
+   ],
+   "mx": [
+    1,
+    1
+   ],
+   "see": "Agents go live faster than anyone can list, trace or switch them off. Regulators have started asking vendors questions.",
+   "why": "Rollout plans run ahead of governance. This month the EU AI Office sent its first information requests and the FTC sent subpoenas.",
+   "num": "71% vs 21%",
+   "numl": "of organisations plan AI agents within a year, against those with governance for them",
+   "tag": "Analyst survey of 2,000+ tech leaders, Q2 2026",
+   "fix": "Keep a list of every agent, with full traces and a kill switch you have tested.",
+   "ev": "unverified"
+  },
+  {
+   "id": 10,
+   "name": "Review overload and workforce strain",
+   "sn": "Review overload",
+   "ic": "i-pm",
+   "st": "true",
+   "tier": "C",
+   "score": 6,
+   "l": [
+    2,
+    2,
+    2,
+    1
+   ],
+   "seg": "Enterprise, developer",
+   "j": [
+    3
+   ],
+   "mx": [
+    1,
+    2
+   ],
+   "see": "People spend more time checking AI output, maintainers face a flood of low-quality AI submissions, and some roles are being cut.",
+   "why": "Output grows faster than review capacity, and rework eats the time AI saved.",
+   "num": "25%",
+   "numl": "of incoming code changes are low-quality AI work, say open-source maintainers",
+   "tag": "Maintainer survey, Oct 2026",
+   "fix": "Plan roles and review capacity around the volume AI produces, not the old workload.",
+   "ev": "verified"
+  },
+  {
+   "id": 11,
+   "name": "Loses context and instructions",
+   "sn": "Loses context",
+   "ic": "i-cache",
+   "st": "true",
+   "tier": "C",
+   "score": 5,
+   "l": [
+    2,
+    1,
+    2,
+    1
+   ],
+   "seg": "Consumer, developer",
+   "j": [
+    0
+   ],
+   "mx": [
+    2,
+    1
+   ],
+   "see": "The assistant forgets earlier decisions, ignores house rules or invents context it never had.",
+   "why": "Long chats get compressed, sometimes to save cost when space remains, and rules in a prompt are advice the model can drop.",
+   "num": "7 of about 20",
+   "numl": "coding sessions lost working context overnight in one user's log",
+   "tag": "User report, Oct 2026",
+   "fix": "Keep key rules and decisions in files the tool reloads, and enforce house rules outside the model.",
+   "ev": "verified"
+  },
+  {
+   "id": 12,
+   "name": "Outages and capacity shortfalls",
+   "sn": "Outages",
+   "ic": "i-cloud",
+   "st": "true",
+   "tier": "C",
+   "score": 5,
+   "l": [
+    2,
+    2,
+    1,
+    3
+   ],
+   "seg": "Developer, enterprise",
+   "j": [
+    2
+   ],
+   "mx": [
+    1,
+    1
+   ],
+   "see": "Errors and slowdowns in the middle of a task, sometimes while the status page says all is well.",
+   "why": "Compute is tight, and a single fault can block every product a vendor runs at once.",
+   "num": "~10,000",
+   "numl": "outage reports for one Gemini outage while its status page showed no issue",
+   "tag": "Outage tracker, Oct 2026",
+   "fix": "Fail over across providers, and alert on spend-limit and capacity errors.",
+   "ev": "verified"
+  },
+  {
+   "id": 13,
+   "name": "Safety filters block the wrong things",
+   "sn": "Misfiring safety filters",
+   "ic": "i-denial",
+   "st": "true",
+   "tier": "C",
+   "score": 5,
+   "l": [
+    2,
+    2,
+    1,
+    2
+   ],
+   "seg": "Developer, consumer",
+   "j": [
+    0
+   ],
+   "mx": [
+    1,
+    1
+   ],
+   "see": "Normal work is refused or flagged, while some harmful requests still get through.",
+   "why": "Filters trade false alarms against misses, so normal work gets caught along with real risks.",
+   "num": "Over half",
+   "numl": "of reasonable safety research tasks refused by three Anthropic models in a UK government test",
+   "tag": "UK government test from last winter, reported Oct 2026",
+   "fix": "Ask vendors for an appeal or allowlist path and their false-alarm rates.",
+   "ev": "verified"
+  },
+  {
+   "id": 14,
+   "name": "Vendor lock-in",
+   "sn": "Vendor lock-in",
+   "ic": "i-gateway",
+   "st": "new",
+   "tier": "C",
+   "score": 6,
+   "l": [
+    2,
+    2,
+    2,
+    2
+   ],
+   "seg": "Enterprise, developer",
+   "j": [
+    2
+   ],
+   "mx": [
+    1,
+    1
+   ],
+   "see": "Moving a working AI tool to another provider takes far longer than planned, and price rises arrive that you cannot avoid.",
+   "why": "Model names are hard-coded, prompts are tuned to one model, and business plans limit what you can export.",
+   "num": "81%",
+   "numl": "of 520 tech leaders say switching costs made them delay, scale back or rework a move",
+   "tag": "Vendor survey, Sep 2026",
+   "fix": "Keep model names in settings behind a gateway, own your tests and prompts, and write exit terms into contracts.",
+   "ev": "vendor"
+  }
+ ]
+}
