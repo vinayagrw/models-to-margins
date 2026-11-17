@@ -6,20 +6,67 @@
    "Choose",
    "Adoption",
    "Players",
+   "Who pays",
    "Challenges",
    "Future"
   ],
   "eyebrow": "Deep dive, November 2026",
   "title": "Who Pays When the Agent Buys",
   "summary": "Agents can now shop and pay. Nineteen protocols compete to carry those payments, few move real money yet, and the rules on who pays for a wrong purchase are only starting to form. What each protocol decides, how far it has shipped, and what to build first.",
-  "artifact_title": "Who Pays When the Agent Buys"
+  "artifact_title": "Who Pays When the Agent Buys",
+  "plain": [
+   [
+    "Mandate",
+    "The user's signed approval of what the agent may buy"
+   ],
+   [
+    "Agentic or network token",
+    "A stand in card number made for one agent"
+   ],
+   [
+    "PSP",
+    "Your payment provider, such as Stripe or Adyen"
+   ],
+   [
+    "HTTP 402",
+    "A built in web code that asks for payment"
+   ],
+   [
+    "Facilitator",
+    "The service that settles a pay per call payment"
+   ],
+   [
+    "Webhook",
+    "A message one system sends another when something happens"
+   ],
+   [
+    "HMAC, RFC 9421",
+    "Two ways to sign a message so changes show"
+   ],
+   [
+    "SD-JWT",
+    "A signed credential that reveals only chosen fields"
+   ],
+   [
+    "KYA",
+    "Know your agent, checking who runs an agent"
+   ],
+   [
+    "SCA",
+    "EU rule that asks for two proofs of identity"
+   ],
+   [
+    "EMVCo",
+    "The body that sets shared card standards"
+   ]
+  ]
  },
  "checks": {
-  "claims_total": 450,
-  "rechecked": 450,
-  "kept": 382,
-  "fixed": 61,
-  "unverified": 7
+  "claims_total": 455,
+  "rechecked": 455,
+  "kept": 392,
+  "fixed": 63,
+  "unverified": 0
  },
  "layers": [
   {
@@ -905,7 +952,7 @@
     }
    },
    "flow": "h402",
-   "one": "Pay per request with HTTP 402 and stablecoins. Live, small, and down sharply since August.",
+   "one": "Pay per web request with stablecoins. Live, small, and down sharply since August.",
    "arch": "Server answers 402 with terms, client signs a stablecoin payment and retries, the server verifies, serves, then settles through a facilitator. Upto and batch settlement are merged.",
    "gaps": "No protocol refund or dispute path. Papers show unpaid service and paid but denied outcomes.",
    "params": {
@@ -960,7 +1007,7 @@
     }
    },
    "flow": "h402",
-   "one": "HTTP 402 payments across many methods, from stablecoins to cards. Much smaller on chain.",
+   "one": "Pay per web request across many methods, from stablecoins to cards. Much smaller on chain.",
    "arch": "Charge, session and subscription intents. Methods include Tempo, Stripe, Lightning and Solana, with no ACH. Card payments settle off chain and are not counted.",
    "gaps": "IETF draft expired without working group adoption.",
    "params": {
@@ -1870,7 +1917,7 @@
      ]
     },
     "must": "Tag every agent order with the agent platform id",
-    "why": "Your own agent order share is the trigger for building more.",
+    "why": "Your own agent order share, against our proposed 3% trigger, decides when to build more.",
     "layer": "L6"
    },
    {
@@ -2171,7 +2218,7 @@
    "tone": "violet",
    "best_for": "Delegated, recurring and B2B purchases needing proof",
    "breaks_on": "Valid signatures over manipulated context, and no live money yet",
-   "latency": "Signing at setup, millisecond checks per payment",
+   "latency": "Signing at setup, then a fast local check per payment (our estimate)",
    "liability": "Evidence only, dispute resolution left out of scope",
    "one": "The user signs what the agent may buy, and the proof travels.",
    "arch": "The user signs open mandates with limits, and the agent key signs closed cart mandates inside them, as SD-JWT. A verifier checks scope, expiry and replay before payment."
@@ -2483,7 +2530,7 @@
    "as_of": "2026-10-31",
    "protocol": "x402",
    "use": "M",
-   "one": "17.9 million in August, 5.1 million in October, then a rise on one facilitator."
+   "one": "17.9 million in August, 5.1 million in October, then a rise at one settlement service."
   },
   {
    "id": "a5",
@@ -2590,7 +2637,7 @@
    "as_of": "2026-10-28",
    "protocol": "",
    "use": "C",
-   "one": "Muse, Claude Duet and Instinct pay with network tokens. The agent never sees the card."
+   "one": "Muse, Claude Duet and Instinct pay with a network stand in card, never the real one."
   },
   {
    "id": "a12",
@@ -2737,7 +2784,7 @@
      "L7"
     ],
     "score": 400,
-    "one": "Wants the agentic token, not a one time virtual card, inside every agent.",
+    "one": "Wants its own agent card stand in, not a one time virtual card, inside every agent.",
     "arch": "Agent keys in a network directory via Web Bot Auth, Verifiable Intent SD-JWT chains, agentic tokens with passkeys, and an agent transaction score in testing.",
     "moves": [
      {
@@ -2882,6 +2929,59 @@
     "rank": 3,
     "rank_note": "Tied with Visa at 380. Ties break on the score with vendor reach cut, where Visa leads 340 to 320, then on the token layer.",
     "rank_note_ev": "illustrative"
+   },
+   {
+    "id": "stripe",
+    "name": "Stripe",
+    "icon": "i-gateway",
+    "tone": "coral",
+    "layers": [
+     "L2",
+     "L4",
+     "L5",
+     "L6"
+    ],
+    "score": 325,
+    "one": "Wants to sit on the token meter as well as the payment, from checkout to AI usage billing.",
+    "arch": "Shared Payment Tokens grant an agent a scoped, revocable card. Link holds the wallet. MPP and x402 cover machine payments. OpenRouter routes model calls, Token Billing meters them.",
+    "moves": [
+     {
+      "date": "2026-08-19",
+      "text": "Agreed to buy OpenRouter, the router to 400+ AI models",
+      "ev": "verified 2026",
+      "src": [
+       "G-208"
+      ]
+     },
+     {
+      "date": "2026-08-19",
+      "text": "Says tokens are the central currency for AI builders, price not disclosed",
+      "ev": "verified 2026",
+      "src": [
+       "G-208"
+      ]
+     },
+     {
+      "date": "2026-11-15",
+      "text": "Token Billing on Metronome in public preview",
+      "ev": "verified 2026",
+      "src": [
+       "G-211"
+      ]
+     },
+     {
+      "date": "2026-11-15",
+      "text": "No sign yet of OpenRouter in MPP, ACP or x402",
+      "ev": "verified 2026",
+      "src": [
+       "G-212"
+      ]
+     }
+    ],
+    "watch": "OpenRouter usage billed through Stripe, and agent payments on its routed traffic.",
+    "rank": 5,
+    "rank_note": "Shown for its OpenRouter deal, outside the top three. Shopify is number 4 at 375. The deal does not change the score, since moves were already at the top mark.",
+    "rank_note_ev": "illustrative"
    }
   ],
   "startups": [
@@ -2977,7 +3077,7 @@
      "L5"
     ],
     "score": 180,
-    "one": "A self serve agent checkout toolkit that rides Visa and Mastercard agentic tokens.",
+    "one": "A self serve agent checkout toolkit that rides Visa and Mastercard card stand ins for agents.",
     "arch": "Uses Visa Intelligent Commerce and Mastercard Agent Pay tokens where a card is eligible. Checks out through UCP, Shop Pay or browser automation.",
     "moves": [
      {
@@ -3007,13 +3107,122 @@
     },
     "rank": 3
    }
+  ],
+  "research": [
+   {
+    "id": "r-mandate",
+    "name": "Beyond the Mandate",
+    "kind": "Preprint, Aug 2026",
+    "icon": "i-policy-doc",
+    "tone": "coral",
+    "finding": "48 threats, 8 of them high risk",
+    "ev": "verified 2026",
+    "src": [
+     "R4-17"
+    ],
+    "one": "A signed approval proves the cart did not change. It does not prove the user wanted it.",
+    "arch": "AP2 threat model. Valid signatures do not ensure intent when the context before signing is manipulated.",
+    "means": "Keep what the agent saw before the user signed."
+   },
+   {
+    "id": "r-replay",
+    "name": "Zero trust checks for AP2",
+    "kind": "Preprint, Feb 2026",
+    "icon": "i-replay",
+    "tone": "teal",
+    "finding": "Replay stopped at about 3.8 ms, in simulation",
+    "ev": "verified 2026",
+    "src": [
+     "R4-12"
+    ],
+    "one": "Approvals that work once and only for one shop stop copied payments, and the check is fast.",
+    "arch": "Context binding plus consume once mandates stopped the evaluated replay and redirect attacks in simulation.",
+    "means": "Single use approvals tied to merchant and cart."
+   },
+   {
+    "id": "r-x402",
+    "name": "Attacks on x402",
+    "kind": "Two preprints, May 2026",
+    "icon": "i-security",
+    "tone": "red",
+    "finding": "Up to 100 percent of paid content leaked",
+    "ev": "verified 2026",
+    "src": [
+     "R4-14",
+     "R4-15"
+    ],
+    "one": "Pay per call can charge without serving, or serve without being paid.",
+    "arch": "Five practical attacks plus four flaw classes on testnets and live endpoints, all disclosed to maintainers.",
+    "means": "Settle and serve as one step, with a refund path."
+   },
+   {
+    "id": "r-formal",
+    "name": "Formal analysis of four protocols",
+    "kind": "Preprint, Aug 2026",
+    "icon": "i-eval",
+    "tone": "violet",
+    "finding": "40 undocumented findings across 86 cases",
+    "ev": "verified 2026",
+    "src": [
+     "R4-18"
+    ],
+    "one": "A proof tool found gaps in all four major agent payment protocols.",
+    "arch": "Tamarin models of x402, MPP, ACP and AP2. Findings are consistency gaps between authorization, payment and delivery.",
+    "means": "Bind approval, payment and delivery at every step."
+   },
+   {
+    "id": "r-persuade",
+    "name": "Persuasion in AI shopping",
+    "kind": "Preprint, Apr 2026",
+    "icon": "i-explain",
+    "tone": "amber",
+    "finding": "Sponsored picks 61.2 percent, against 22.4 with search",
+    "ev": "verified 2026",
+    "src": [
+     "R4-04"
+    ],
+    "one": "A shopping assistant nearly tripled paid picks, and Sponsored labels did not help.",
+    "arch": "Study of human participants. Labels did not significantly reduce sponsored selection.",
+    "means": "Show paid placement on the approval and receipt."
+   },
+   {
+    "id": "r-deal",
+    "name": "Project Deal",
+    "kind": "Lab report, Apr 2026",
+    "icon": "i-agent",
+    "tone": "slate",
+    "finding": "186 real deals, just over 4,000 USD",
+    "ev": "verified 2026",
+    "src": [
+     "R4-07"
+    ],
+    "one": "People with weaker agents got worse prices and did not notice.",
+    "arch": "69 staff agents traded with each other. Outcome depended on the agent's model, and users did not spot the gap.",
+    "means": "Record the agent model and version for disputes."
+   },
+   {
+    "id": "r-visa",
+    "name": "Visa benchmark",
+    "kind": "Vendor test, Nov 2026",
+    "icon": "i-measure",
+    "tone": "slate",
+    "finding": "54 percent of failed runs still bought something",
+    "ev": "vendor",
+    "src": [
+     "R4-27",
+     "R4-28"
+    ],
+    "one": "When agents got the task wrong, most still went ahead and bought.",
+    "arch": "22 models on shopping tasks, 42.8 percent of runs failed. Checkout and payment were not tested.",
+    "means": "Check the cart against what the user approved."
+   }
   ]
  },
  "scenarios": [
   {
    "id": "open",
    "name": "Network tokens, open checkout",
-   "one": "Agentic network tokens pay, and open protocols carry checkout across many agent platforms.",
+   "one": "Network card stand ins for agents pay, and open protocols carry checkout across many agent platforms.",
    "arch": "Kill test: three platforms still hold over half of agent orders at 2027-12-31. Thesis wins: canonical model plus adapters.",
    "by": {
     "2027": "Top three platforms fall below half of agent orders",
@@ -3044,21 +3253,21 @@
    "id": "referral",
    "name": "Agents refer, people pay",
    "one": "Agents find and compare, then people check out on the merchant's own site.",
-   "arch": "Kill test: your own agent completed share passes the trigger for two months. Thesis holds: wait with readiness, never build the gateway.",
+   "arch": "Kill test: your own agent completed share passes our proposed 3% trigger for two months. Thesis holds: wait with readiness, never build the gateway.",
    "by": {
     "2027": "Agent completed orders stay a small share of orders",
     "2028": "AI referrals keep growing, checkout stays on merchant sites",
     "2030": "Agents shape demand, people still press pay"
    },
    "signals": [
-    "Your agent order share stays below the trigger",
+    "Your agent order share stays below our proposed 3% trigger",
     "Holiday reports count referral clicks, not agent payments"
    ]
   },
   {
    "id": "machines",
    "name": "Machine payments split off",
-   "one": "Pay per call moves to stablecoin rails over HTTP 402, apart from card checkout.",
+   "one": "Pay per call moves to stablecoin rails over a built in web payment code, apart from card checkout.",
    "arch": "Kill test: screened agentic x402 value below a million USD a month at end 2027. Separate lane, settled through a facilitator.",
    "by": {
     "2027": "Stablecoin issuer rule in force in the US",
@@ -3632,8 +3841,8 @@
    "name": "Protocol churn and integration cost",
    "icon": "i-drift",
    "tone": "amber",
-   "one": "Specs break between releases, and every new agent surface asks merchants and PSPs to rebuild.",
-   "arch": "Wait with readiness until your agent share passes the trigger. Then budget each adapter per breaking release, or let the PSP absorb it.",
+   "one": "Specs break between releases, and every new agent surface asks merchants and payment providers to rebuild.",
+   "arch": "Wait with readiness until your agent share passes our proposed 3% trigger for two months running. Then budget each adapter per breaking release, or let the PSP absorb it.",
    "sev": {
     "consumer": 0,
     "merchant": 2,
@@ -3691,6 +3900,555 @@
     "G-15",
     "R5-27"
    ]
+  }
+ ],
+ "liability": {
+  "parties": [
+   {
+    "id": "buyer",
+    "name": "Buyer",
+    "icon": "i-payer",
+    "tone": "amber"
+   },
+   {
+    "id": "merchant",
+    "name": "Merchant",
+    "icon": "i-submit",
+    "tone": "teal"
+   },
+   {
+    "id": "bank",
+    "name": "Bank or network",
+    "icon": "i-vault",
+    "tone": "violet"
+   },
+   {
+    "id": "none",
+    "name": "Not set",
+    "icon": "i-risk",
+    "tone": "slate"
+   }
+  ],
+  "bases": [
+   {
+    "id": "rule",
+    "name": "Written rule or spec"
+   },
+   {
+    "id": "terms",
+    "name": "Terms or guide"
+   },
+   {
+    "id": "reading",
+    "name": "Legal reading"
+   },
+   {
+    "id": "promise",
+    "name": "Promised only"
+   }
+  ],
+  "stages": [
+   "Silent",
+   "Asking",
+   "Drafting",
+   "In force"
+  ],
+  "routes": [
+   {
+    "id": "visa",
+    "name": "Visa card, enrolled agent",
+    "icon": "i-security",
+    "tone": "violet",
+    "who": "buyer",
+    "basis": "rule",
+    "ev": "verified 2026",
+    "one": "Visa's rules make the cardholder answer for an enrolled agent, as if they paid themselves.",
+    "arch": "Rule 4.1.23.10, added 2026-04. No agent dispute condition, so disputes run on reason codes built for human buyers.",
+    "open": "Will a signed mandate count as dispute evidence?",
+    "src": [
+     "G-201"
+    ]
+   },
+   {
+    "id": "mastercard",
+    "name": "Mastercard card",
+    "icon": "i-vault",
+    "tone": "amber",
+    "who": "none",
+    "basis": "terms",
+    "ev": "verified 2026",
+    "one": "No rule text found. Its guide says normal chargeback rights apply.",
+    "arch": "Developer guide: standard fraud, chargeback and dispute processes apply, and agents take on consumer checks. Rules PDF unread.",
+    "open": "Will Mastercard publish a rule like Visa's?",
+    "src": [
+     "G-116",
+     "G-117"
+    ]
+   },
+   {
+    "id": "link",
+    "name": "Stripe Link agent wallet",
+    "icon": "i-gateway",
+    "tone": "coral",
+    "who": "buyer",
+    "basis": "terms",
+    "ev": "verified 2026",
+    "one": "The user pays for every agent purchase, even a different item from the one shown.",
+    "arch": "Link agent wallet FAQ. Purchase Protections are US only, discretionary and silent on agents.",
+    "open": "How do these terms sit with card chargeback rights?",
+    "src": [
+     "G-127",
+     "G-126"
+    ]
+   },
+   {
+    "id": "amex",
+    "name": "Amex card",
+    "icon": "i-approve",
+    "tone": "slate",
+    "who": "none",
+    "basis": "promise",
+    "ev": "vendor",
+    "one": "Agent Purchase Protection is promised for registered agents, not yet live.",
+    "arch": "Cover for registered agents with authenticated intent. Announced, no live integrations found.",
+    "open": "When does the cover go live, and for whom?",
+    "src": [
+     "G-24"
+    ]
+   },
+   {
+    "id": "nonfraud",
+    "name": "Card dispute, not fraud",
+    "icon": "i-appeal",
+    "tone": "teal",
+    "who": "merchant",
+    "basis": "rule",
+    "ev": "verified 2026",
+    "one": "The merchant carries a wrong item dispute by default, unless it wins.",
+    "arch": "Non fraud card disputes default to the merchant. No network has an agent reason code yet.",
+    "open": "Will networks add an agent reason code?",
+    "src": [
+     "C299",
+     "R4-65"
+    ]
+   },
+   {
+    "id": "uslogin",
+    "name": "US bank login shared",
+    "icon": "i-payer",
+    "tone": "amber",
+    "who": "buyer",
+    "basis": "reading",
+    "ev": "verified 2026",
+    "one": "One law firm reads US rules as putting it on the customer until they revoke access.",
+    "arch": "Goodwin on Reg E 1005.2(m): access given to an agent counts as authorised until the bank is told, unless the bank broke its own procedure.",
+    "open": "Does an AI provider count as a person given the access device?",
+    "src": [
+     "R4-34",
+     "C296"
+    ]
+   },
+   {
+    "id": "uk",
+    "name": "UK online payment",
+    "icon": "i-policy-doc",
+    "tone": "violet",
+    "who": "bank",
+    "basis": "reading",
+    "ev": "illustrative",
+    "one": "For an unauthorised online payment the payer carries no loss. This is our reading.",
+    "arch": "PSRs 2017 reg 77(4)(c) and (d), and 77(6) for a payee side that skipped strong checks. Our reading, not a regulator view.",
+    "open": "Is a payment inside the user's mandate authorised?",
+    "src": [
+     "G-124",
+     "G-125"
+    ]
+   },
+   {
+    "id": "stable",
+    "name": "Stablecoin payment",
+    "icon": "i-event-stream",
+    "tone": "teal",
+    "who": "buyer",
+    "basis": "rule",
+    "ev": "verified 2026",
+    "one": "Final on chain. The payer has no way back unless the seller refunds.",
+    "arch": "x402 defines no refund or dispute process. Refunds happen only by the seller's agreement.",
+    "open": "Who offers buyer recourse on final rails?",
+    "src": [
+     "R4-67"
+    ]
+   },
+   {
+    "id": "cdn",
+    "name": "Agent checked at the CDN",
+    "icon": "i-network",
+    "tone": "slate",
+    "who": "merchant",
+    "basis": "terms",
+    "ev": "vendor",
+    "one": "Cloudflare's coalition says the site pays when a user disputes an agent purchase.",
+    "arch": "Trusted Agent Delegation post, 2026-11-05. Identity tiers only, no named members and no rule text.",
+    "open": "Will any site sign up to carry that loss?",
+    "src": [
+     "G-35"
+    ]
+   }
+  ],
+  "places": [
+   {
+    "id": "US",
+    "name": "United States",
+    "icon": "i-policy-doc",
+    "tone": "amber",
+    "stage": 1,
+    "ev": "illustrative",
+    "one": "No agent law. The consumer regulator is silent, and a Fed governor asked who pays.",
+    "arch": "No CFPB statement found by 2026-11-15. Card network rules lead, with Visa's 4.1.23.10 the only agent text.",
+    "next": "Card networks may write the first rule",
+    "src": [
+     "R4-41",
+     "G-31",
+     "R4-42"
+    ]
+   },
+   {
+    "id": "EU",
+    "name": "European Union",
+    "icon": "i-policy-doc",
+    "tone": "violet",
+    "stage": 1,
+    "ev": "illustrative",
+    "one": "New payment law is near final but does not mention agents.",
+    "arch": "PSR final vote planned 2026-12-14, applying about late 2028. An industry council works on agent refunds for local payment methods.",
+    "next": "Parliament vote planned 2026-12-14",
+    "src": [
+     "G-203",
+     "R4-47",
+     "G-32"
+    ]
+   },
+   {
+    "id": "UK",
+    "name": "United Kingdom",
+    "icon": "i-policy-doc",
+    "tone": "teal",
+    "stage": 1,
+    "ev": "illustrative",
+    "one": "Treasury asked about agent liability, and the FCA plans a trust framework.",
+    "arch": "Treasury Question 15 closed 2026-10-06 with no response yet. Regulators say existing law applies to personal agents.",
+    "next": "Treasury response to Question 15",
+    "src": [
+     "R4-53",
+     "R4-55",
+     "G-122"
+    ]
+   },
+   {
+    "id": "IN",
+    "name": "India",
+    "icon": "i-policy-doc",
+    "tone": "coral",
+    "stage": 0,
+    "ev": "illustrative",
+    "one": "Two factor checks on every digital payment, with no agent text.",
+    "arch": "RBI Authentication Directions apply from 2026-04-01. A reported agent protocol on UPI has no confirmed launch.",
+    "next": "Launch of an agent protocol on UPI",
+    "src": [
+     "R4-57",
+     "R4-59"
+    ]
+   },
+   {
+    "id": "SG",
+    "name": "Singapore",
+    "icon": "i-policy-doc",
+    "tone": "slate",
+    "stage": 1,
+    "ev": "illustrative",
+    "one": "AI risk rules apply from 2027-10, and agent guidance goes to consultation in 2027.",
+    "arch": "MAS AI Risk Management Guidelines issued 2026-10-07. Firms stay responsible for third party AI.",
+    "next": "MAS consultation on agents in 2027",
+    "src": [
+     "R4-60"
+    ]
+   }
+  ]
+ },
+ "redteam": [
+  {
+   "id": "RT1",
+   "sev": "high",
+   "verdict": "accepted",
+   "target": "Our main bet",
+   "one": "Our main bet held in every scenario, so nothing could prove it wrong.",
+   "arch": "The thesis had no exit test, and its build trigger could not be measured.",
+   "change": "Added a wait option and a trigger you can measure.",
+   "ev": "illustrative"
+  },
+  {
+   "id": "RT2",
+   "sev": "high",
+   "verdict": "accepted",
+   "target": "Core design",
+   "one": "Building around the signed mandate put the least settled part in the core.",
+   "arch": "Mandate formats still change, so a mandate centred core would churn with every spec.",
+   "change": "The core keeps a thin record of five fields plus the signed original.",
+   "ev": "illustrative"
+  },
+  {
+   "id": "RT3",
+   "sev": "high",
+   "verdict": "accepted",
+   "target": "Options",
+   "one": "No wait option, and no world where agents suggest and people pay.",
+   "arch": "The evidence points to agents that refer while people still pay, and the options ignored it.",
+   "change": "Added wait with readiness, and an agents refer, people pay scenario.",
+   "ev": "illustrative"
+  },
+  {
+   "id": "RT4",
+   "sev": "high",
+   "verdict": "accepted",
+   "target": "Gateway",
+   "one": "A merchant gateway cannot cap an agent's spend at other merchants.",
+   "arch": "Buyer side controls such as cross merchant spend caps sit outside the merchant's reach.",
+   "change": "Spend caps across merchants move to the buyer side and the network.",
+   "ev": "illustrative"
+  },
+  {
+   "id": "RT5",
+   "sev": "high",
+   "verdict": "accepted",
+   "target": "Player scores",
+   "one": "The ranking rewarded writing specs and ignored who controls the token.",
+   "arch": "Spec authorship was over weighted against control of the credential layer.",
+   "change": "Players rescored with a token layer measure.",
+   "ev": "illustrative"
+  },
+  {
+   "id": "RT6",
+   "sev": "high",
+   "verdict": "accepted",
+   "target": "Patterns",
+   "one": "Virtual cards and agent browsers on stored cards were missing.",
+   "arch": "Two live patterns were absent from the comparison and the decision tree.",
+   "change": "Added both, with stored cards as the one to avoid.",
+   "ev": "illustrative"
+  },
+  {
+   "id": "RT7",
+   "sev": "high",
+   "verdict": "accepted",
+   "target": "Parameters",
+   "one": "Key build choices were missing, such as agent flags at authorization.",
+   "arch": "Missing: agent signal in authorization, CIT and MIT, account linking, fees and amount drift.",
+   "change": "Three new parameters joined the build list.",
+   "ev": "illustrative"
+  },
+  {
+   "id": "RT8",
+   "sev": "high",
+   "verdict": "accepted",
+   "target": "Future",
+   "one": "Two scenarios were already happening together, and none had a dated test.",
+   "arch": "Scenarios overlapped and lacked falsifiable, dated kill tests.",
+   "change": "Each scenario now has a dated kill test.",
+   "ev": "illustrative"
+  },
+  {
+   "id": "RT9",
+   "sev": "medium",
+   "verdict": "partly",
+   "target": "Our main bet",
+   "one": "Building to the token moves lock in to the network and the payment provider.",
+   "arch": "Token portability depends on the token requestor, so lock in shifts rather than disappears.",
+   "change": "Kept the bet, and added a contract question on who holds the token.",
+   "ev": "illustrative"
+  },
+  {
+   "id": "RT10",
+   "sev": "medium",
+   "verdict": "accepted",
+   "target": "Scoring weights",
+   "one": "Scoring weights had no basis, and fraud and privacy had no say.",
+   "arch": "Weights were unexplained, and fraud, customer ownership and privacy were unscored.",
+   "change": "Liability became a gate, and weights got a stated basis.",
+   "ev": "illustrative"
+  },
+  {
+   "id": "RT11",
+   "sev": "medium",
+   "verdict": "accepted",
+   "target": "Worked example",
+   "one": "The worked example compared layers as if they were rivals.",
+   "arch": "It ranked options from different stack layers against each other.",
+   "change": "Rebuilt the example to compare like with like.",
+   "ev": "illustrative"
+  },
+  {
+   "id": "RT12",
+   "sev": "medium",
+   "verdict": "accepted",
+   "target": "Agent tiers",
+   "one": "A tier rule would have refused the consumer flows that are live today.",
+   "arch": "The tier 2 rule blocked live consumer flows that cannot yet meet it.",
+   "change": "Relaxed the tier rule for live consumer flows.",
+   "ev": "illustrative"
+  },
+  {
+   "id": "RT13",
+   "sev": "medium",
+   "verdict": "partly",
+   "target": "Parameters",
+   "one": "Too many parameter rows, mixing choices with context.",
+   "arch": "37 rows mixed design choices, context fields and evidence fields.",
+   "change": "Kept the rows, tagged each one, and the page shows only the choices.",
+   "ev": "illustrative"
+  },
+  {
+   "id": "RT14",
+   "sev": "medium",
+   "verdict": "accepted",
+   "target": "Challenges",
+   "one": "The challenge ranking hid two tiers and missed churn, attribution and fees.",
+   "arch": "Ties hid a two tier ranking, and three pains were missing.",
+   "change": "Merged two pairs and added churn and margin challenges.",
+   "ev": "illustrative"
+  },
+  {
+   "id": "RT15",
+   "sev": "medium",
+   "verdict": "accepted",
+   "target": "Startups",
+   "one": "Tempo was counted twice and may sit inside Stripe's orbit.",
+   "arch": "MPP authorship counted for both Stripe and Tempo.",
+   "change": "Tempo left the startup list.",
+   "ev": "illustrative"
+  },
+  {
+   "id": "RT16",
+   "sev": "medium",
+   "verdict": "partly",
+   "target": "Players",
+   "one": "Cloudflare's coalition launch was missed.",
+   "arch": "A dated market move inside the window was not scored.",
+   "change": "Scored as a move, since it names no members yet.",
+   "ev": "illustrative"
+  },
+  {
+   "id": "RT17",
+   "sev": "medium",
+   "verdict": "accepted",
+   "target": "Decision tree",
+   "one": "Some answers ended in flows nobody can build today.",
+   "arch": "Several leaves pointed to flows with no shipped implementation.",
+   "change": "Changed the tree endings to flows you can build.",
+   "ev": "illustrative"
+  },
+  {
+   "id": "RT18",
+   "sev": "medium",
+   "verdict": "accepted",
+   "target": "Evidence store",
+   "one": "Saying every payment can be defended overclaimed, and nobody owned privacy.",
+   "arch": "ADR-4 overclaimed defensibility and gave the evidence store no privacy owner.",
+   "change": "Softened the claim, and the evidence store got a privacy owner.",
+   "ev": "illustrative"
+  },
+  {
+   "id": "RT19",
+   "sev": "low",
+   "verdict": "open",
+   "target": "Speed target",
+   "one": "The speed target for agent checks has never been tested.",
+   "arch": "The 300 ms p95 target has no production measurement behind it.",
+   "change": "Marked as a target. Still open.",
+   "ev": "illustrative"
+  },
+  {
+   "id": "RT20",
+   "sev": "low",
+   "verdict": "accepted",
+   "target": "Consistency",
+   "one": "Small mismatches between sections.",
+   "arch": "Internal slips across sections 1.3, 2.3 and 8.",
+   "change": "Fixed across the doc.",
+   "ev": "illustrative"
+  }
+ ],
+ "decide": [
+  {
+   "id": "D1",
+   "when": "Now",
+   "name": "Tag agent orders",
+   "icon": "i-measure",
+   "tone": "teal",
+   "ev": "illustrative",
+   "adr": "ADR-1",
+   "one": "Mark every order an agent placed, so you can see your own share.",
+   "arch": "Tag P28 on every order. Your agent completed share (V17) is what fires the build trigger in ADR-1.",
+   "trigger": "Without the tag, our proposed 3% trigger cannot fire."
+  },
+  {
+   "id": "D2",
+   "when": "Now",
+   "name": "Name who pays",
+   "icon": "i-risk",
+   "tone": "coral",
+   "ev": "illustrative",
+   "adr": "ADR-6",
+   "one": "Before launch, write down who carries a wrong agent purchase on each payment route.",
+   "arch": "Map each route to its loss holder and basis, network rule, terms or chargeback rights, before go live.",
+   "trigger": "Any agent order on a new route."
+  },
+  {
+   "id": "D3",
+   "when": "Q1 2027",
+   "name": "Evidence before payment",
+   "icon": "i-vault",
+   "tone": "violet",
+   "ev": "illustrative",
+   "adr": "ADR-4",
+   "one": "Save the purchase record before money moves, and keep it only while disputes can happen.",
+   "arch": "Write evidence before the PSP call, then append the result. Retention is the longest dispute window of the rail (V18).",
+   "trigger": "The first agent chargeback."
+  },
+  {
+   "id": "D4",
+   "when": "Q1 2027",
+   "name": "Trust tiers for agents",
+   "icon": "i-security",
+   "tone": "amber",
+   "ev": "illustrative",
+   "adr": "ADR-2",
+   "one": "Let agents browse freely, and ask for more proof before they pay.",
+   "arch": "Tier 0 browse, tier 1 cart, tier 2 pay. Tier 2 needs a signature plus mandate, or a registered agent, agentic token and passkey.",
+   "trigger": "Agent traffic reaching checkout pages."
+  },
+  {
+   "id": "D5",
+   "when": "At trigger",
+   "name": "Build to the token",
+   "icon": "i-gateway",
+   "tone": "slate",
+   "ev": "illustrative",
+   "adr": "ADR-1",
+   "one": "Keep your payment provider until agent orders pass our proposed trigger, then build.",
+   "arch": "Below the trigger, wait with readiness. Above it, canonical model plus adapters, or the PSP if it exports evidence.",
+   "trigger": "Our proposed 3% trigger for two months running."
+  },
+  {
+   "id": "D6",
+   "when": "If you sell APIs",
+   "name": "Pay per call apart",
+   "icon": "i-network",
+   "tone": "teal",
+   "ev": "illustrative",
+   "adr": "ADR-5",
+   "one": "Keep tiny machine payments on their own path, away from card checkout.",
+   "arch": "HTTP 402 calls settle through a facilitator. Budgets sit in the buyer's wallet, never as prepaid balances you hold.",
+   "trigger": "Paid API calls from agents."
   }
  ]
 }

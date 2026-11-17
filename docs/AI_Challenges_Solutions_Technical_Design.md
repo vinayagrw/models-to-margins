@@ -211,7 +211,7 @@ Fail over only to the same model at the same version, never from version X to X+
 | Tool access | Docker MCP Gateway | Runs MCP servers in restricted containers. Profiles act as tool allow lists. Logs calls | Governance version is invite-only | MIT | Not shown | [vendor] | AR2-45, AR2-46 |
 | Tool access | Cloudflare MCP server portals | One URL in front of many MCP servers. Allowlist mode hides every tool by default | Users can still reach a server by its direct URL unless Cloudflare Access is its OAuth provider | Proprietary | Not shown | [vendor] | AR2-49 |
 | Tool access | agentgateway (Linux Foundation) | Open source proxy for MCP and A2A with role-based policy and OpenTelemetry traces | Page does not mention per-tool filtering | Apache-2.0 | Free | none | AR2-50 |
-| Tool access | AWS Bedrock AgentCore Gateway and Policy | Checks every tool call against Cedar policy, plus session rules such as approval before a transfer | Covers only traffic through AgentCore Gateway | Proprietary, Cedar open source | Policy $0.000025 per request. Gateway $0.005 per 1,000 calls | [vendor] | AR2-51, AR2-52 |
+| Tool access | AWS Bedrock AgentCore Gateway and Policy | Checks every tool call against Cedar policy, plus session rules such as approval before a transfer, written in Dogwood, a Cedar-compatible language | Covers only traffic through AgentCore Gateway | Proprietary, Cedar and Dogwood open source | Policy $0.000025 per request. Gateway $0.005 per 1,000 calls | [vendor] | AR2-51, AR2-52 |
 | Sandbox | E2B | Cloud or self-hosted sandboxes for AI-written code | Its own pages do not name the isolation technology. CPU only | Apache-2.0 | Pro $150 a month plus $0.000014 per vCPU-second | [vendor] | AR2-53, AR2-54 |
 | Sandbox | gVisor and Firecracker | A user-space kernel, and lightweight virtual machines | Building blocks with no agent policy | Apache-2.0 | Free | none | AR2-55, AR2-56 |
 | Sandbox | Microsoft Execution Containers (MXC) | OS-enforced containers that limit files, network and desktop access, with policy held outside the agent | MicroVM backend is experimental. Separate agent identity is "coming soon" | MIT | Free | [vendor] | AR2-57, AR2-58 |
@@ -795,7 +795,7 @@ Rows from the round 7 briefs that this document cites. Claim, URL and rung are c
 | AR2-46 | Docker mcp-gateway MIT, profiles act as tool allow-lists | https://github.com/docker/mcp-gateway | 2 | verified (V10a) |
 | AR2-49 | Cloudflare MCP portals: allowlist mode, direct-URL bypass caveat, Logpush Enterprise only | https://developers.cloudflare.com/cloudflare-one/access-controls/ai-controls/mcp-portals/ | 2 | verified (V10a) |
 | AR2-50 | agentgateway Apache-2.0, CEL RBAC, OpenTelemetry | https://github.com/agentgateway/agentgateway | 2 | verified (V10a) |
-| AR2-51 | AgentCore Policy intercepts Gateway tool calls with Cedar, temporal approval rules, CloudWatch logs | https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/policy.html | 2 | verified (V10a) |
+| AR2-51 | AgentCore Policy intercepts Gateway tool calls with Cedar. Temporal approval rules are written in Dogwood, which is Cedar-compatible. CloudWatch logs | https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/policy.html | 2 | verified (V10a) |
 | AR2-52 | AgentCore prices: Policy $0.000025 per request, Gateway $0.005 per 1,000 calls, Identity $0.010 per 1,000 | https://aws.amazon.com/bedrock/agentcore/pricing/ | 2 | verified (V10a) |
 | AR2-53 | E2B prices: Hobby $0 with $100 credit, Pro $150 a month, $0.000014 per vCPU-second | https://e2b.dev/pricing | 2 | verified (V10a) |
 | AR2-54 | E2B Apache-2.0, self-host on AWS, GCP, Azure, Linux | https://github.com/e2b-dev/E2B | 2 | verified (V10a) |
@@ -803,7 +803,7 @@ Rows from the round 7 briefs that this document cites. Claim, URL and rung are c
 | AR2-56 | gVisor user-space kernel, incomplete syscalls, overhead. Apache-2.0 | https://gvisor.dev/docs/ and https://github.com/google/gvisor | 2 | verified (V10a) |
 | AR2-57 | MXC GA. MicroVM experimental. Identity separation and Intune "coming soon" | https://blogs.windows.com/windowsdeveloper/2026/10/07/microsoft-execution-containers-policy-driven-containment-for-ai-agents/ | 2 | verified (V10a) |
 | AR2-58 | MXC MIT licence | https://github.com/microsoft/mxc | 2 | verified (V10a) |
-| AR2-59 | NVIDIA OpenShell sandbox and Sentry quarantine "in milliseconds" | https://nvidianews.nvidia.com/news/open-agent-safety-platform | 5 | verified (V10a) |
+| AR2-59 | NVIDIA OpenShell secure runtime boundary that traces actions, and Sentry quarantine "in milliseconds" | https://nvidianews.nvidia.com/news/open-agent-safety-platform | 5 | verified (V10a) |
 | AR2-60 | Uber MCP Gateway: disabled by default, over 800 servers, over 5,000 tools, PII redaction | https://www.uber.com/us/en/blog/designing-mcp-gateway/ | 5 | verified (V10a) |
 | AR2-63 | Google Cloud Agent Compute Engine microVM per agent | None found | 7 | unverified (V10a), no primary page |
 | AR2-64 | Microsoft Dynamic Permissions give agents no permissions, or the bare minimum, at the outset | SecurityWeek, 2026-10-20 | 6 | verified (V10a), press only |

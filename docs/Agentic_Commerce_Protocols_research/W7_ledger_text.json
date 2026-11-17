@@ -1,0 +1,6 @@
+{"R1-25": "UCP PR 1057, merged 2026-11-07, clarifies the completion boundary: a checkout ID does not by itself bind authorization to a particular checkout state",
+ "R1-07": "ACP requires Idempotency-Key on all POSTs and API-Version, uses a bearer token, and has an optional HMAC Signature header for webhook verification. No JWS or detached signature in the spec",
+ "R5-67": "About 50 of 424 open x402 issue titles mention dispute, refund, receipt, proof, attestation or delivery (48 whole words, 51 stems, 41 for the first four words), counted 2026-11-15",
+ "R3-55": "Scoped, single use Visa cards with passkey approvals, announced in a thread on X (2026-05-26)",
+ "C353": "JPMorgan executives warned on 2026-10-13 that customers who share banking credentials with AI agents may be responsible for misuse",
+ "G-50": "Over 138 million x402 transactions on Base in the period to 2026-07-01, and over 87% of payments between a hundredth of a cent and a dime in the 16 months ending 2026-09"}

@@ -165,7 +165,7 @@
      ]
     },
     "must": "Tag every agent order with the agent platform id",
-    "why": "Your own agent order share is the trigger for building more.",
+    "why": "Your own agent order share, against our proposed 3% trigger, decides when to build more.",
     "layer": "L6"
    },
    {
@@ -466,7 +466,7 @@
    "tone": "violet",
    "best_for": "Delegated, recurring and B2B purchases needing proof",
    "breaks_on": "Valid signatures over manipulated context, and no live money yet",
-   "latency": "Signing at setup, millisecond checks per payment",
+   "latency": "Signing at setup, then a fast local check per payment (our estimate)",
    "liability": "Evidence only, dispute resolution left out of scope",
    "one": "The user signs what the agent may buy, and the proof travels.",
    "arch": "The user signs open mandates with limits, and the agent key signs closed cart mandates inside them, as SD-JWT. A verifier checks scope, expiry and replay before payment."

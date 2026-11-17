@@ -20,7 +20,7 @@ FRAGS = ['d1a', 'd1b', 'd2', 'd3']
 OWN = {'d1a': ['layers', 'usecases', 'protocols', 'flows', 'params', 'vars'],
        'd1b': ['configurator', 'patterns', 'tree', 'criteria', 'arch'],
        'd2': ['adoption', 'players', 'scenarios', 'signposts', 'forecasts'],
-       'd3': ['stakeholders', 'challenges']}
+       'd3': ['stakeholders', 'challenges', 'liability', 'redteam', 'decide']}
 EV = {'verified 2026', 'vendor', 'illustrative'}
 ICONS = set('''i-claim-837 i-remit-835 i-scrub i-submit i-approve i-deploy i-canary i-rollback i-replay i-rule-registry
 i-rule-brick i-sdk i-webhook i-mcp i-cds-hooks i-gateway i-roadmap i-model i-llm-drafter i-pattern-miner i-drift i-explain
@@ -42,8 +42,13 @@ CAPS = {
     ('challenges', 'working'): 14, ('challenges', 'research'): 14,
     ('scenarios', 'name'): 4, ('scenarios', 'one'): 18, ('scenarios', 'arch'): 28, ('signals', '*'): 10, ('by', '*'): 10,
     ('signposts', 'text'): 12, ('forecasts', 'incentive'): 10,
+    ('routes', 'name'): 5, ('routes', 'one'): 16, ('routes', 'arch'): 26, ('routes', 'open'): 12,
+    ('redteam', 'target'): 3, ('redteam', 'one'): 16, ('redteam', 'arch'): 26, ('redteam', 'change'): 14,
+    ('research', 'name'): 6, ('research', 'one'): 18, ('research', 'arch'): 28, ('research', 'finding'): 10, ('research', 'means'): 10,
+    ('decide', 'name'): 4, ('decide', 'one'): 18, ('decide', 'arch'): 30, ('decide', 'trigger'): 12,
+    ('places', 'one'): 16, ('places', 'arch'): 26, ('places', 'next'): 8,
 }
-NEEDS_EV = {'adoption', 'moves', 'challenges', 'signposts', 'forecasts', 'funding'}
+NEEDS_EV = {'adoption', 'moves', 'challenges', 'signposts', 'forecasts', 'funding', 'routes', 'places', 'redteam', 'research', 'decide'}
 
 
 def words(s):

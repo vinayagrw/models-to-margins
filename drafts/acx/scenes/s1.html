@@ -5,6 +5,7 @@
   <div class="s1-ctl-row">
     <div class="s1-ctl"><span class="s1-lab" id="acx-s1-ul">Use case</span><div class="acx-seg" role="group" aria-labelledby="acx-s1-ul" data-s1-seg="use"></div></div>
     <div class="s1-ctl"><span class="s1-lab" id="acx-s1-fl">Path</span><div class="acx-seg" role="group" aria-labelledby="acx-s1-fl" data-s1-seg="flow"></div></div>
+    <details class="s1-gloss" data-for="leader"><summary>Plain words</summary><dl></dl></details>
   </div>
   <div class="acx-split s1-split">
     <div class="acx-card s1-stage">
@@ -37,6 +38,12 @@
 #acx-s1 .s1-lab{font-family:var(--acx-mono); font-size:14px; color:var(--acx-ink3); text-transform:uppercase; letter-spacing:.05em}
 #acx-s1 .s1-out{background:transparent; padding:0 14px; border-style:dashed; color:var(--acx-ink2); font-weight:500}
 #acx-s1 .s1-out:hover{color:var(--acx-accent); border-color:var(--acx-accent)}
+#acx-s1 .s1-gloss{position:relative; align-self:flex-end; margin-left:auto; font-size:15px}
+#acx-s1 .s1-gloss summary{display:inline-flex; align-items:center; min-height:42px; cursor:pointer; font-weight:600; color:var(--acx-accent)}
+#acx-s1 .s1-gloss dl{position:absolute; right:0; top:100%; z-index:5; width:min(520px,calc(100vw - 32px)); display:grid; grid-template-columns:max-content minmax(0,1fr); gap:6px 16px; margin:4px 0 0; padding:12px 14px; border:1px solid var(--acx-line); border-radius:var(--acx-r-sm); background:var(--acx-panel); box-shadow:var(--acx-shadow)}
+#acx-s1 .s1-gloss dt{font-family:var(--acx-mono); font-size:14px; font-weight:600; color:var(--acx-ink)}
+#acx-s1 .s1-gloss dd{margin:0; color:var(--acx-ink2)}
+@media (max-width:699px){ #acx-s1 .s1-gloss dl{grid-template-columns:minmax(0,1fr); gap:0} #acx-s1 .s1-gloss dd{margin-bottom:8px} }
 #acx-s1 .s1-split{grid-template-columns:minmax(0,1fr)}
 @media (min-width:1400px){ #acx-s1 .s1-split{grid-template-columns:minmax(0,1fr) 300px} }
 #acx-s1 .s1-stage{position:relative; padding:14px 14px 16px; min-width:0}
@@ -161,6 +168,8 @@
   'use strict';
   var D = A.data || {};
   var L = D.layers || [], U = D.usecases || [], P = D.protocols || [], F = D.flows || [];
+  var GL = (D.meta && D.meta.plain) || [];
+  el.querySelector('.s1-gloss dl').innerHTML = GL.map(function (g) { return '<dt>' + A.esc(g[0]) + '</dt><dd>' + A.esc(g[1]) + '</dd>'; }).join('');
   var PM = {}; (D.params || []).forEach(function (p) { PM[p.id] = p; });
   var LI = {}; L.forEach(function (l, i) { LI[l.id] = i; });
   var RANK = { Live: 0, Pilot: 1, Spec: 2, Unsettled: 3, Absent: 4 };

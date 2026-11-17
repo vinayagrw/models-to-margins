@@ -89,6 +89,14 @@ def main():
             for k, r in json.load(open(kp)).items():
                 if k not in verdicts:
                     verdicts[k] = {'verdict': {'verified': 'keep', 'wrong': 'fix', 'unverified': 'unverified'}.get(r.get('mark'), '')}
+    for kf in ('W7_K9.json', 'W7_extra.json', 'W8_extra.json'):
+        kp = os.path.join(RES, kf)
+        if os.path.exists(kp):
+            k9 = json.load(open(kp))
+            items = k9.items() if isinstance(k9, dict) else ((r['id'], r) for r in k9)
+            for k, r in items:
+                m = r.get('verdict') or r.get('mark')
+                verdicts[k] = {'verdict': {'verified': 'keep', 'wrong': 'fix', 'unverified': 'unverified', 'cut': 'cut'}.get(m, m or '')}
     doc_ids, data_ids = cited()
     all_ids = list(dict.fromkeys(doc_ids + data_ids))
     unknown = [i for i in all_ids if i not in rows]
@@ -101,12 +109,16 @@ def main():
     out = [APPX, '',
            'Every claim the doc or the page cites, in order of first use. AC ids are stable for this version. '
            'Rung is the evidence ladder (1 strongest, 7 weakest). Check is the verdict of a second checker who opened the page '
-           'and was not the finder, from Wave 3 or the 2026-11-15 recheck (W6): keep, fix (wording changed), cut (removed from doc and page) '
+           'and was not the finder, from Wave 3, the 2026-11-15 recheck (W6) the final recheck (W7) or the 2026-11-16 recheck (W8): keep, fix (wording changed), cut (removed from doc and page) '
            'or unverified (the page would not confirm it, so the claim keeps its hedge).', '',
            '| AC | Claim id | Claim | Source | Date | Rung | Tier | Check |', '|---|---|---|---|---|---|---|---|']
+    lt = os.path.join(RES, 'W7_ledger_text.json')
+    lt = json.load(open(lt)) if os.path.exists(lt) else {}
     for n, i in enumerate(all_ids, 1):
         r = rows.get(i, {'claim': 'not found in briefs', 'url': '', 'rung': '', 'tier': '', 'date': ''})
         v = verdicts.get(i, {}).get('verdict', '')
+        if i in lt:
+            r = dict(r, claim=lt[i])
         out.append('| AC#%d | %s | %s | %s | %s | %s | %s | %s |' % (
             n, i, short(r['claim']), r['url'] or 'baseline row', r['date'], r['rung'], short(r['tier'], 40), v))
     doc = open(DOC).read()

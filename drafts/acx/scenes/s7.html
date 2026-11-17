@@ -1,0 +1,174 @@
+<section class="acx-scene" id="acx-s7" aria-labelledby="acx-s7-h">
+  <header class="acx-head"><span class="acx-num">05</span><h2 id="acx-s7-h">Who pays when the agent gets it wrong</h2>
+    <p class="acx-dek" data-for="leader">No law decides it yet, so each payment route gives its own answer. Pick a route to see who carries the loss today, and what is still open.</p>
+    <p class="acx-dek" data-for="architect">Loss holder per route, and the basis for it. Every route needs a named loss holder before launch. Switch to countries to see how far each regulator has got.</p>
+  </header>
+  <div class="acx-split s7-split">
+    <div class="acx-card s7-map">
+      <div class="s7-bar">
+        <div class="acx-seg s7-seg" role="group" aria-label="Show by">
+          <button type="button" data-wv="routes" aria-pressed="true">By route</button><button type="button" data-wv="places" aria-pressed="false">By country</button>
+        </div>
+        <p class="s7-sum"></p>
+      </div>
+      <div class="s7-grid">
+        <div class="s7-hrow"></div>
+        <ul class="s7-keyl" aria-hidden="true"></ul>
+        <div class="s7-rows"></div>
+      </div>
+      <div class="s7-legend" aria-hidden="true"></div>
+    </div>
+    <aside class="acx-card acx-panel s7-panel" aria-live="polite"><div class="s7-stack"></div></aside>
+  </div>
+</section>
+<style id="acx-s7-css">
+#acx-s7 .s7-map{container-type:inline-size; padding:12px 14px 14px; display:flex; flex-direction:column; gap:12px; min-width:0}
+#acx-s7 .s7-bar{display:flex; flex-wrap:wrap; align-items:center; gap:10px 18px}
+#acx-s7 .s7-sum{display:flex; flex-wrap:wrap; align-items:center; gap:6px 10px; font-size:15px; color:var(--acx-ink2)}
+#acx-s7 .s7-sum b{font-family:'IBM Plex Mono',monospace; font-weight:600; color:var(--acx-ink)}
+#acx-s7 .s7-grid{--nc:220px; display:flex; flex-direction:column; gap:2px}
+#acx-s7 .s7-hrow,#acx-s7 .s7-row{display:grid; grid-template-columns:var(--nc) repeat(4,minmax(0,1fr)); gap:2px}
+#acx-s7 .s7-hrow{align-items:end; margin-bottom:6px}
+#acx-s7 .s7-h{display:flex; flex-direction:column; align-items:center; gap:4px; padding:0 0 6px; font-size:14px; line-height:1.25; color:var(--acx-ink2); text-align:center}
+#acx-s7 .s7-hn{text-wrap:balance}
+#acx-s7 .s7-hc{font-family:'IBM Plex Mono',monospace; font-size:14px; color:var(--acx-ink3)}
+#acx-s7 .s7-stg{min-height:42px; justify-content:flex-end}
+#acx-s7 .s7-keyl{display:none; list-style:none; margin:0 0 8px; padding:0; flex-wrap:wrap; gap:4px 14px}
+#acx-s7 .s7-keyl li{display:flex; align-items:center; gap:6px; font-size:14px; color:var(--acx-ink2); white-space:nowrap}
+#acx-s7 .s7-rows{display:flex; flex-direction:column; gap:2px}
+#acx-s7 .s7-row{width:100%; min-height:48px; padding:0; border:0; border-radius:6px; background:transparent; cursor:pointer; text-align:left; color:var(--acx-ink)}
+#acx-s7 .s7-row[aria-pressed="true"]{outline:2px solid var(--acx-accent); outline-offset:1px}
+#acx-s7 .s7-row:focus-visible{outline:2px solid var(--acx-accent); outline-offset:2px}
+#acx-s7 .s7-name{display:flex; align-items:center; gap:10px; padding:4px 10px 4px 0; font-size:15px; font-weight:500; line-height:1.25; text-wrap:balance}
+#acx-s7 .s7-row[aria-pressed="true"] .s7-name{font-weight:650}
+#acx-s7 .s7-c{display:flex; align-items:center; justify-content:center; min-height:40px; border-radius:4px; background:var(--acx-heat0)}
+#acx-s7 .s7-m{display:block; width:22px; height:22px; border-radius:50%}
+#acx-s7 [data-b="rule"]{background:var(--acx-accent)}
+#acx-s7 [data-b="terms"]{background:repeating-linear-gradient(135deg,var(--acx-accent) 0 3px,transparent 3px 6px); box-shadow:inset 0 0 0 2px var(--acx-accent)}
+#acx-s7 [data-b="reading"]{background:transparent; box-shadow:inset 0 0 0 3px var(--acx-accent)}
+#acx-s7 [data-b="promise"]{background:transparent; border:2px dashed var(--acx-ink3)}
+#acx-s7 .s7-c[data-t="past"]{background:var(--acx-heat1)}
+#acx-s7 .s7-c[data-t="now"]{background:var(--acx-heat2)}
+#acx-s7 .s7-c[data-t="now"] .s7-m{background:var(--acx-accent)}
+#acx-s7 .s7-legend{display:flex; flex-wrap:wrap; align-items:center; gap:6px 16px; font-size:14px; color:var(--acx-ink3)}
+#acx-s7 .s7-lg{display:flex; align-items:center; gap:6px; color:var(--acx-ink2)}
+#acx-s7 .s7-lg .s7-m{width:16px; height:16px}
+#acx-s7 .s7-panel{container-type:inline-size}
+#acx-s7 .s7-stack{display:grid; flex:1}
+#acx-s7 .s7-d{grid-area:1/1; visibility:hidden; display:flex; flex-direction:column; gap:12px}
+#acx-s7 .s7-d.is-on{visibility:visible}
+#acx-s7 .s7-dh{display:flex; align-items:center; gap:14px}
+#acx-s7 .s7-dh > div{display:flex; flex-direction:column; gap:6px; min-width:0}
+#acx-s7 .s7-kick{display:flex; flex-wrap:wrap; align-items:center; gap:4px 10px}
+#acx-s7 .acx-panel .s7-lead{font-size:16px; color:var(--acx-ink); text-wrap:balance; max-width:68ch}
+#acx-s7 .s7-who{display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:var(--acx-r-sm); background:var(--acx-sunk)}
+#acx-s7 .s7-who > div{display:flex; flex-direction:column; gap:2px}
+#acx-s7 .acx-panel .s7-who b{font-size:17px; color:var(--acx-ink)}
+#acx-s7 .acx-panel .s7-who span{font-size:14px; color:var(--acx-ink2)}
+#acx-s7 .s7-kv{display:flex; flex-direction:column; gap:3px; margin-top:auto; padding-top:12px; border-top:1px solid var(--acx-line)}
+#acx-s7 .acx-panel .s7-kv > p:last-child{color:var(--acx-ink); text-wrap:balance; max-width:68ch}
+@container (max-width:599px){
+  #acx-s7 .s7-hrow,#acx-s7 .s7-row{grid-template-columns:repeat(4,minmax(0,1fr)); row-gap:4px}
+  #acx-s7 .s7-corner,#acx-s7 .s7-hn,#acx-s7 .s7-name .acx-ic{display:none}
+  #acx-s7 .s7-row .s7-name{grid-column:1/-1; padding:6px 8px 0}
+  #acx-s7 .s7-c{min-height:24px}
+  #acx-s7 .s7-m{width:18px; height:18px}
+  #acx-s7 .s7-map{gap:8px}
+  #acx-s7 .s7-hrow{margin-bottom:0}
+  #acx-s7 .s7-h{padding-bottom:2px}
+  #acx-s7 .s7-h .acx-ic{width:32px; height:32px}
+  #acx-s7 .s7-keyl{display:flex}
+  #acx-s7 .s7-stg .s7-hn{display:block; font-size:14px}
+}
+@container (max-width:380px){ #acx-s7 .s7-dh > .acx-ic{display:none} #acx-s7 .s7-d{gap:8px} #acx-s7 .s7-who{padding:8px 10px} #acx-s7 .s7-kv{padding-top:8px} }
+@media (max-width:640px){ #acx-s7 .s7-legend{gap:4px 12px} #acx-s7 .s7-lg .s7-m{width:14px; height:14px} }
+@media (max-width:1200px){ #acx-s7 .s7-split{grid-template-columns:1fr} #acx-s7 .s7-grid{--nc:240px} }
+@media (max-width:640px){ #acx-s7 .s7-map{padding:10px 8px 12px} #acx-s7 .s7-bar,#acx-s7 .s7-legend{padding:0 6px} }
+</style>
+<script>ACX.scene('s7', function (el, A) {
+  var esc = A.esc, L = (A.data || {}).liability || {};
+  var PA = L.parties || [], BA = L.bases || [], ST = L.stages || [];
+  var RO = L.routes || [], PL = L.places || [];
+  var grid = el.querySelector('.s7-grid'), hrow = el.querySelector('.s7-hrow'), rowsBox = el.querySelector('.s7-rows');
+  var keyl = el.querySelector('.s7-keyl'), legend = el.querySelector('.s7-legend'), sum = el.querySelector('.s7-sum');
+  var stack = el.querySelector('.s7-stack');
+  function party(id) { return PA.find(function (p) { return p.id === id; }) || {}; }
+  function basis(id) { return BA.find(function (b) { return b.id === id; }) || {}; }
+  function count(id) { return RO.filter(function (r) { return r.who === id; }).length; }
+
+  function drawerRoute(r) {
+    var p = party(r.who), b = basis(r.basis);
+    return '<div class="s7-d" data-id="' + esc(r.id) + '">' +
+      '<div class="s7-dh">' + A.icon(r.icon || 'i-risk', r.tone || 'slate', 'hero') + '<div><p class="s7-kick"><span class="acx-k">Route</span>' + A.ev(r.ev) + '</p><h3>' + esc(r.name) + '</h3></div></div>' +
+      '<div class="s7-who">' + A.icon(p.icon || 'i-risk', p.tone || 'slate', 'chip') + '<div><span class="acx-k">Who carries it today</span><b>' + esc(p.name || '') + '</b><span>Based on: ' + esc(b.name || '') + '</span></div></div>' +
+      '<p class="s7-lead" data-for="leader">' + esc(r.one || '') + '</p>' +
+      '<p class="s7-lead" data-for="architect">' + esc(r.arch || '') + '</p>' +
+      '<div class="s7-kv"><p class="acx-k">Still open</p><p>' + esc(r.open || '') + '</p></div></div>';
+  }
+  function drawerPlace(c) {
+    return '<div class="s7-d" data-id="' + esc(c.id) + '">' +
+      '<div class="s7-dh">' + A.icon(c.icon || 'i-policy-doc', c.tone || 'slate', 'hero') + '<div><p class="s7-kick"><span class="acx-k">Country</span>' + A.ev(c.ev) + '</p><h3>' + esc(c.name) + '</h3></div></div>' +
+      '<div class="s7-who">' + A.icon('i-policy-doc', c.tone || 'slate', 'chip') + '<div><span class="acx-k">Agent liability rule</span><b>' + esc(ST[c.stage] || '') + '</b><span>No country has one in force</span></div></div>' +
+      '<p class="s7-lead" data-for="leader">' + esc(c.one || '') + '</p>' +
+      '<p class="s7-lead" data-for="architect">' + esc(c.arch || '') + '</p>' +
+      '<div class="s7-kv"><p class="acx-k">Next signal</p><p>' + esc(c.next || '') + '</p></div></div>';
+  }
+  stack.innerHTML = RO.map(drawerRoute).join('') + PL.map(drawerPlace).join('');
+  var drawers = [].slice.call(stack.querySelectorAll('.s7-d'));
+  var segs = el.querySelectorAll('.s7-seg button');
+  var cur = { wv: 'routes', wp: '' };
+
+  function renderRoutes() {
+    hrow.innerHTML = '<span class="s7-corner"></span>' + PA.map(function (p) {
+      return '<div class="s7-h">' + A.icon(p.icon, p.tone, 'sec') + '<span class="s7-hn">' + esc(p.name) + '</span><span class="s7-hc">' + count(p.id) + '</span></div>';
+    }).join('');
+    keyl.innerHTML = PA.map(function (p) { return '<li>' + A.icon(p.icon, p.tone, 'chip') + esc(p.name) + ' ' + count(p.id) + '</li>'; }).join('');
+    rowsBox.innerHTML = RO.map(function (r) {
+      var lab = r.name + '. ' + (party(r.who).name || '') + ', ' + (basis(r.basis).name || '').toLowerCase();
+      return '<button type="button" class="s7-row" data-id="' + esc(r.id) + '" aria-pressed="false" aria-label="' + esc(lab) + '">' +
+        '<span class="s7-name">' + A.icon(r.icon || 'i-risk', r.tone || 'slate', 'chip') + '<span>' + esc(r.name) + '</span></span>' +
+        PA.map(function (p) { return '<span class="s7-c">' + (p.id === r.who ? '<i class="s7-m" data-b="' + esc(r.basis) + '"></i>' : '') + '</span>'; }).join('') +
+        '</button>';
+    }).join('');
+    var top = PA.slice().sort(function (a, b) { return count(b.id) - count(a.id); })[0] || {};
+    sum.innerHTML = '<span><b>' + esc(top.name || '') + '</b> carries it on <b>' + count(top.id) + '</b> of <b>' + RO.length + '</b> routes</span>' + A.ev('illustrative');
+    legend.innerHTML = '<span>Basis</span>' + BA.map(function (b) { return '<span class="s7-lg"><i class="s7-m" data-b="' + esc(b.id) + '"></i>' + esc(b.name) + '</span>'; }).join('');
+  }
+  function renderPlaces() {
+    hrow.innerHTML = '<span class="s7-corner"></span>' + ST.map(function (s, i) {
+      return '<div class="s7-h s7-stg"><span class="s7-hc">' + (i + 1) + '</span><span class="s7-hn">' + esc(s) + '</span></div>';
+    }).join('');
+    keyl.innerHTML = '';
+    rowsBox.innerHTML = PL.map(function (c) {
+      return '<button type="button" class="s7-row" data-id="' + esc(c.id) + '" aria-pressed="false" aria-label="' + esc(c.name + '. Agent liability rule: ' + (ST[c.stage] || '')) + '">' +
+        '<span class="s7-name">' + A.icon(c.icon || 'i-policy-doc', c.tone || 'slate', 'chip') + '<span>' + esc(c.name) + '</span></span>' +
+        ST.map(function (s, i) { var t = i < c.stage ? 'past' : (i === c.stage ? 'now' : ''); return '<span class="s7-c"' + (t ? ' data-t="' + t + '"' : '') + '>' + (t === 'now' ? '<i class="s7-m"></i>' : '') + '</span>'; }).join('') +
+        '</button>';
+    }).join('');
+    var inForce = PL.filter(function (c) { return c.stage >= ST.length - 1; }).length;
+    sum.innerHTML = '<span><b>' + inForce + '</b> of <b>' + PL.length + '</b> have an agent liability rule in force</span>' + A.ev('illustrative');
+    legend.innerHTML = '<span>Stage of an agent liability rule, our grading</span>';
+  }
+  function rows() { return [].slice.call(rowsBox.querySelectorAll('.s7-row')); }
+  function showWp(v) {
+    var other = cur.wv === 'places' ? RO : PL;
+    if (v && other.some(function (x) { return x.id === v; })) { showWv(cur.wv === 'places' ? 'routes' : 'places'); return; }
+    var list = cur.wv === 'places' ? PL : RO;
+    var it = list.find(function (x) { return x.id === v; }) || list[0]; if (!it) return;
+    cur.wp = it.id;
+    rows().forEach(function (r) { r.setAttribute('aria-pressed', String(r.dataset.id === cur.wp)); });
+    drawers.forEach(function (d) { d.classList.toggle('is-on', d.dataset.id === cur.wp); });
+  }
+  function showWv(v) {
+    cur.wv = v === 'places' ? 'places' : 'routes';
+    segs.forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.wv === cur.wv)); });
+    if (cur.wv === 'places') renderPlaces(); else renderRoutes();
+    grid.classList.toggle('is-places', cur.wv === 'places');
+    rows().forEach(function (r) { r.addEventListener('click', function () { A.set('wp', r.dataset.id); }); });
+    showWp(A.get('wp'));
+  }
+  segs.forEach(function (b) { b.addEventListener('click', function () { if (b.dataset.wv !== cur.wv) { A.set('wp', ''); A.set('wv', b.dataset.wv); } }); });
+  A.on('wv', showWv);
+  A.on('wp', showWp);
+  showWv(A.get('wv'));
+});</script>

@@ -1,5 +1,5 @@
 <section class="acx-scene" id="acx-s5" aria-labelledby="acx-s5-h">
-  <header class="acx-head"><span class="acx-num">05</span><h2 id="acx-s5-h">Ten challenges, six stakeholders</h2>
+  <header class="acx-head"><span class="acx-num">06</span><h2 id="acx-s5-h">Ten challenges, six stakeholders</h2>
     <p class="acx-dek" data-for="leader">Where each problem hurts, and how much. Darker is worse. Pick a row for the pain and who is fixing it, or a column to rank the rows.</p>
     <p class="acx-dek" data-for="architect">Severity by stakeholder, from none to high. Pick a row for the design response and active work, or a column to rank by that party.</p>
   </header>
@@ -110,7 +110,7 @@
       '<div class="s5-dh">' + A.icon(c.icon || 'i-risk', c.tone || 'slate', 'hero') + '<div><p class="s5-kick"><span class="acx-k">Challenge ' + esc(c.id) + '</span>' + (c.ev ? A.ev(c.ev) : '') + '</p><h3>' + esc(c.name) + '</h3></div></div>' +
       (c.one ? '<p class="s5-lead" data-for="leader">' + esc(c.one) + '</p>' : '') +
       (c.arch ? '<p class="s5-lead" data-for="architect">' + esc(c.arch) + '</p>' : '') +
-      (c.pain ? '<p class="s5-pain">“' + esc(c.pain) + '”</p>' : '') +
+      (c.pain ? '<p class="s5-pain">“' + esc(c.pain) + '”</p><p class="acx-k s5-pq">Paraphrased from research, not a named person</p>' : '') +
       '<div class="s5-kv"><p class="acx-k">Where it hurts</p><ul class="s5-ml">' + SH.slice().sort(function (a, b) { return (sev(c, b.id) - sev(c, a.id)) || (SH.indexOf(a) - SH.indexOf(b)); }).map(function (s) {
         var v = sev(c, s.id), bar = '';
         for (var i = 1; i <= 3; i++) bar += '<i' + (i <= v ? ' data-s="' + v + '"' : '') + '></i>';

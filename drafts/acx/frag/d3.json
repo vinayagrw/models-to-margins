@@ -1,388 +1,937 @@
 {
-  "stakeholders": [
-    {
-      "id": "consumer",
-      "name": "Consumers",
-      "icon": "i-analyst",
-      "tone": "slate"
-    },
-    {
-      "id": "merchant",
-      "name": "Merchants",
-      "icon": "i-kpi",
-      "tone": "teal"
-    },
-    {
-      "id": "issuer",
-      "name": "Issuers and banks",
-      "icon": "i-payer",
-      "tone": "violet"
-    },
-    {
-      "id": "psp",
-      "name": "PSPs and networks",
-      "icon": "i-gateway",
-      "tone": "amber"
-    },
-    {
-      "id": "builder",
-      "name": "Agent builders",
-      "icon": "i-coder",
-      "tone": "coral"
-    },
-    {
-      "id": "regulator",
-      "name": "Regulators",
-      "icon": "i-policy-doc",
-      "tone": "red"
-    }
+ "stakeholders": [
+  {
+   "id": "consumer",
+   "name": "Consumers",
+   "icon": "i-analyst",
+   "tone": "slate"
+  },
+  {
+   "id": "merchant",
+   "name": "Merchants",
+   "icon": "i-kpi",
+   "tone": "teal"
+  },
+  {
+   "id": "issuer",
+   "name": "Issuers and banks",
+   "icon": "i-payer",
+   "tone": "violet"
+  },
+  {
+   "id": "psp",
+   "name": "PSPs and networks",
+   "icon": "i-gateway",
+   "tone": "amber"
+  },
+  {
+   "id": "builder",
+   "name": "Agent builders",
+   "icon": "i-coder",
+   "tone": "coral"
+  },
+  {
+   "id": "regulator",
+   "name": "Regulators",
+   "icon": "i-policy-doc",
+   "tone": "red"
+  }
+ ],
+ "challenges": [
+  {
+   "id": 1,
+   "name": "Who pays, and dispute proof",
+   "icon": "i-risk",
+   "tone": "red",
+   "one": "Visa puts enrolled agents' purchases on the cardholder, Link on the user. Disputes still use human reason codes.",
+   "arch": "Name the loss holder per route before launch. Write evidence before payment: mandate, cart served, agent id and key snapshot, kept for the rail's dispute window.",
+   "sev": {
+    "consumer": 3,
+    "merchant": 3,
+    "issuer": 3,
+    "psp": 3,
+    "builder": 2,
+    "regulator": 2
+   },
+   "pain": "If the agent buys the wrong thing, I cannot tell who pays me back.",
+   "working": "Visa agentic rules, Amex promised cover, UK Treasury, FCA, Cloudflare coalition.",
+   "research": "A valid mandate signature does not prove what the user intended.",
+   "ev": "verified 2026",
+   "src": [
+    "G-201",
+    "G-116",
+    "G-127",
+    "G-24",
+    "G-124",
+    "G-35",
+    "R4-64",
+    "R4-65",
+    "R5-47",
+    "C299",
+    "V#10",
+    "R5-70",
+    "R5-71",
+    "G-18",
+    "R4-17",
+    "R4-53",
+    "R4-55",
+    "R4-68"
+   ]
+  },
+  {
+   "id": 2,
+   "name": "Trust to press pay",
+   "icon": "i-approve",
+   "tone": "violet",
+   "one": "Only 23 to 28 percent of US shoppers are comfortable letting an agent pay.",
+   "arch": "Keep a human approval above a threshold, show cart and merchant before pay, and make disputes one tap. 32 percent accept agent choice with final approval.",
+   "sev": {
+    "consumer": 3,
+    "merchant": 2,
+    "issuer": 2,
+    "psp": 2,
+    "builder": 3,
+    "regulator": 1
+   },
+   "pain": "I will let it choose, but I want to approve before it pays.",
+   "working": "Visa and Mastercard agent programs, Amex promised cover, six bank principles.",
+   "research": "Users with weaker agents got worse deals and did not notice.",
+   "ev": "vendor",
+   "src": [
+    "R5-04",
+    "R4-29",
+    "R5-24",
+    "R5-02",
+    "R4-07",
+    "C363",
+    "C282",
+    "C417",
+    "G-24",
+    "G-44"
+   ]
+  },
+  {
+   "id": 3,
+   "name": "Telling good agents from bad",
+   "icon": "i-security",
+   "tone": "teal",
+   "one": "Merchants cannot tell a trusted agent from a bad bot, and fraud models tuned to humans misread both.",
+   "arch": "Tier 2 for a signature plus mandate, or registered agent, agentic token and passkey. Score unsigned browsers as normal card sales. Send the agent signal at authorization.",
+   "sev": {
+    "consumer": 1,
+    "merchant": 3,
+    "issuer": 3,
+    "psp": 3,
+    "builder": 3,
+    "regulator": 1
+   },
+   "pain": "We cannot tell good agents from bad bots, so we block both and lose sales.",
+   "working": "Visa and Mastercard Web Bot Auth, Cloudflare verified bots, Mastercard agent score.",
+   "research": "Stored cards hide the agent from the issuer's risk controls.",
+   "ev": "vendor",
+   "src": [
+    "R5-13",
+    "R5-36",
+    "R5-35",
+    "R5-58",
+    "R4-69",
+    "C363",
+    "R5-52",
+    "C309",
+    "C284",
+    "R4-43",
+    "R5-59",
+    "C380",
+    "G-19",
+    "G-21",
+    "G-36",
+    "G-43"
+   ]
+  },
+  {
+   "id": 4,
+   "name": "Platforms shut agents out",
+   "icon": "i-cross",
+   "tone": "coral",
+   "one": "Amazon bars 99 named AI agents and crawlers, and calls its own agent primary.",
+   "arch": "Use sanctioned routes such as UCP endpoints, feeds and MCP servers, identify the agent, and honour merchant access files. Merchants should publish an agent access policy.",
+   "sev": {
+    "consumer": 2,
+    "merchant": 2,
+    "issuer": 0,
+    "psp": 1,
+    "builder": 3,
+    "regulator": 1
+   },
+   "pain": "The biggest store shuts my agent out, so it cannot shop where I shop.",
+   "working": "Ninth Circuit Comet ruling, a Shopify storefront routing agents to UCP, network key directories.",
+   "research": "Attackers already use open source agent frameworks to breach retailers and other companies.",
+   "ev": "verified 2026",
+   "src": [
+    "R5-37",
+    "R5-38",
+    "R5-39",
+    "R5-40",
+    "R5-63",
+    "C363",
+    "R4-30",
+    "G-26",
+    "G-27",
+    "G-03"
+   ]
+  },
+  {
+   "id": 5,
+   "name": "Mandates outlive user intent",
+   "icon": "i-policy-doc",
+   "tone": "teal",
+   "one": "Spend limits, product scope and revocation are weakly expressed, so an agent's authority can outlast the user's wish.",
+   "arch": "The agent platform or network enforces limits and expiry. The merchant checks the cart against the authority record, enforces consume once and logs revocations.",
+   "sev": {
+    "consumer": 3,
+    "merchant": 2,
+    "issuer": 2,
+    "psp": 1,
+    "builder": 3,
+    "regulator": 1
+   },
+   "pain": "I switched the agent off, and now I have to prove it.",
+   "working": "AP2 open and closed mandates, Mastercard Verifiable Intent, Visa consumer instructions.",
+   "research": "In simulation, consume once mandates bound to context stopped replay at 3.8 ms.",
+   "ev": "verified 2026",
+   "src": [
+    "R5-44",
+    "R5-16",
+    "R5-71",
+    "R4-12",
+    "R4-06",
+    "R4-32",
+    "C276",
+    "C366",
+    "C282",
+    "G-16",
+    "G-17"
+   ]
+  },
+  {
+   "id": 6,
+   "name": "Wrong or steered purchases",
+   "icon": "i-agent",
+   "tone": "coral",
+   "one": "Agents still buy the wrong thing, hidden prompts steer them, and LLM pitches steer users.",
+   "arch": "Treat merchant content as untrusted, isolate it from cart building, check the cart against the mandate before pay, and record what the agent saw and its model version.",
+   "sev": {
+    "consumer": 3,
+    "merchant": 2,
+    "issuer": 1,
+    "psp": 1,
+    "builder": 3,
+    "regulator": 1
+   },
+   "pain": "My agent bought something I did not want, and I could not tell why.",
+   "working": "Visa benchmark, PCAT defence research, x402 SDK spend caps, AP2 cart mandates.",
+   "research": "Visa benchmark: 54 percent of failed runs still ended in a purchase decision.",
+   "ev": "vendor",
+   "src": [
+    "R4-27",
+    "R4-28",
+    "R4-01",
+    "R4-02",
+    "R4-04",
+    "R4-09",
+    "R4-10",
+    "R4-11",
+    "R4-16",
+    "R4-17",
+    "R5-41",
+    "R5-62",
+    "R4-32",
+    "C276",
+    "G-127"
+   ]
+  },
+  {
+   "id": 7,
+   "name": "Banks refuse agent access",
+   "icon": "i-payer",
+   "tone": "violet",
+   "one": "Citi, Bank of America and JPMorgan keep outside agents from moving money, and banks shift risk to customers.",
+   "arch": "Never ask for bank logins. Use network tokens or read only connectors, and record revocation with a timestamp the user can show. Wells Fargo requires proof from 2026-11-24.",
+   "sev": {
+    "consumer": 3,
+    "merchant": 1,
+    "issuer": 3,
+    "psp": 1,
+    "builder": 3,
+    "regulator": 2
+   },
+   "pain": "My bank says sharing my login with an agent makes me answer for it.",
+   "working": "Plaid read only connectors, network agent tokens, Bank of America and Wells Fargo terms.",
+   "research": "Reg E treats transfers by someone handed the access device as authorized until notice.",
+   "ev": "verified 2026",
+   "src": [
+    "C352",
+    "C353",
+    "R5-43",
+    "R5-44",
+    "R5-45",
+    "R4-34",
+    "R4-35",
+    "R5-61",
+    "C282",
+    "G-29",
+    "G-30",
+    "R2-65"
+   ]
+  },
+  {
+   "id": 8,
+   "name": "Rules assume a human",
+   "icon": "i-rule-registry",
+   "tone": "slate",
+   "one": "Payment rules expect a person to approve each payment, which slows delegated agent payments on regulated rails.",
+   "arch": "Authenticate at delegation where rules allow, then step up per country: EU SCA when an agent pays or sets a merchant initiated mandate, two factors in India.",
+   "sev": {
+    "consumer": 1,
+    "merchant": 1,
+    "issuer": 3,
+    "psp": 2,
+    "builder": 2,
+    "regulator": 3
+   },
+   "pain": "We cannot offer delegated payments because the rules expect a human to approve each one.",
+   "working": "HM Treasury consultation, FCA AI Live Testing, MAS 2027 consultation, NPCI reported agent protocol.",
+   "research": "SCA elements assume human interaction, and PISP status for agents is open.",
+   "ev": "verified 2026",
+   "src": [
+    "R5-55",
+    "R4-53",
+    "C306",
+    "R4-44",
+    "R4-46",
+    "R4-57",
+    "R4-60",
+    "C418",
+    "R4-58",
+    "R4-59",
+    "R5-53",
+    "G-22",
+    "G-122"
+   ]
+  },
+  {
+   "id": 9,
+   "name": "Protocol churn and integration cost",
+   "icon": "i-drift",
+   "tone": "amber",
+   "one": "Specs break between releases, and every new agent surface asks merchants and payment providers to rebuild.",
+   "arch": "Wait with readiness until your agent share passes our proposed 3% trigger for two months running. Then budget each adapter per breaking release, or let the PSP absorb it.",
+   "sev": {
+    "consumer": 0,
+    "merchant": 2,
+    "issuer": 0,
+    "psp": 3,
+    "builder": 3,
+    "regulator": 0
+   },
+   "pain": "Specs change under us, and every new agent surface asks us to rebuild.",
+   "working": "Visa Intelligent Commerce Connect, Adyen Agentic, UCP technical councils.",
+   "research": "A formal analysis found 40 undocumented consistency findings across four agent payment protocols.",
+   "ev": "verified 2026",
+   "src": [
+    "G-37",
+    "G-38",
+    "G-39",
+    "R5-73",
+    "R5-71",
+    "G-41",
+    "R3-35",
+    "C395",
+    "R2-61",
+    "R1-21",
+    "R4-18"
+   ]
+  },
+  {
+   "id": 10,
+   "name": "Losing the customer and margin",
+   "icon": "i-kpi",
+   "tone": "violet",
+   "one": "Agent platforms may own the customer, charge up to 4 percent, and hide which sales they sent.",
+   "arch": "Tag every agent order with the platform id, offer account linking so the customer record stays yours, and track each platform's fee per surface.",
+   "sev": {
+    "consumer": 1,
+    "merchant": 3,
+    "issuer": 1,
+    "psp": 2,
+    "builder": 1,
+    "regulator": 1
+   },
+   "pain": "The agent owns my customer, takes a cut, and I cannot see which sales it sent.",
+   "working": "UCP identity linking, Personal Agent Protocol, Adobe referral measurement.",
+   "research": "Only 37 percent of leaders have a plan to keep the direct relationship.",
+   "ev": "verified 2026",
+   "src": [
+    "G-43",
+    "G-42",
+    "G-52",
+    "G-53",
+    "R5-17",
+    "R5-18",
+    "G-13",
+    "G-37",
+    "G-15",
+    "R5-27"
+   ]
+  }
+ ],
+ "liability": {
+  "parties": [
+   {
+    "id": "buyer",
+    "name": "Buyer",
+    "icon": "i-payer",
+    "tone": "amber"
+   },
+   {
+    "id": "merchant",
+    "name": "Merchant",
+    "icon": "i-submit",
+    "tone": "teal"
+   },
+   {
+    "id": "bank",
+    "name": "Bank or network",
+    "icon": "i-vault",
+    "tone": "violet"
+   },
+   {
+    "id": "none",
+    "name": "Not set",
+    "icon": "i-risk",
+    "tone": "slate"
+   }
   ],
-  "challenges": [
-    {
-      "id": 1,
-      "name": "Who pays, and dispute proof",
-      "icon": "i-risk",
-      "tone": "red",
-      "one": "Visa puts enrolled agents' purchases on the cardholder, Link on the user. Disputes still use human reason codes.",
-      "arch": "Name the loss holder per route before launch. Write evidence before payment: mandate, cart served, agent id and key snapshot, kept for the rail's dispute window.",
-      "sev": {
-        "consumer": 3,
-        "merchant": 3,
-        "issuer": 3,
-        "psp": 3,
-        "builder": 2,
-        "regulator": 2
-      },
-      "pain": "If the agent buys the wrong thing, I cannot tell who pays me back.",
-      "working": "Visa agentic rules, Amex promised cover, UK Treasury, FCA, Cloudflare coalition.",
-      "research": "A valid mandate signature does not prove what the user intended.",
-      "ev": "verified 2026",
-      "src": [
-        "G-201",
-        "G-116",
-        "G-127",
-        "G-24",
-        "G-124",
-        "G-35",
-        "R4-64",
-        "R4-65",
-        "R5-47",
-        "C299",
-        "V#10",
-        "R5-70",
-        "R5-71",
-        "G-18",
-        "R4-17",
-        "R4-53",
-        "R4-55",
-        "R4-68"
-      ]
-    },
-    {
-      "id": 2,
-      "name": "Trust to press pay",
-      "icon": "i-approve",
-      "tone": "violet",
-      "one": "Only 23 to 28 percent of US shoppers are comfortable letting an agent pay.",
-      "arch": "Keep a human approval above a threshold, show cart and merchant before pay, and make disputes one tap. 32 percent accept agent choice with final approval.",
-      "sev": {
-        "consumer": 3,
-        "merchant": 2,
-        "issuer": 2,
-        "psp": 2,
-        "builder": 3,
-        "regulator": 1
-      },
-      "pain": "I will let it choose, but I want to approve before it pays.",
-      "working": "Visa and Mastercard agent programs, Amex promised cover, six bank principles.",
-      "research": "Users with weaker agents got worse deals and did not notice.",
-      "ev": "vendor",
-      "src": [
-        "R5-04",
-        "R4-29",
-        "R5-24",
-        "R5-02",
-        "R4-07",
-        "C363",
-        "C282",
-        "C417",
-        "G-24",
-        "G-44"
-      ]
-    },
-    {
-      "id": 3,
-      "name": "Telling good agents from bad",
-      "icon": "i-security",
-      "tone": "teal",
-      "one": "Merchants cannot tell a trusted agent from a bad bot, and fraud models tuned to humans misread both.",
-      "arch": "Tier 2 for a signature plus mandate, or registered agent, agentic token and passkey. Score unsigned browsers as normal card sales. Send the agent signal at authorization.",
-      "sev": {
-        "consumer": 1,
-        "merchant": 3,
-        "issuer": 3,
-        "psp": 3,
-        "builder": 3,
-        "regulator": 1
-      },
-      "pain": "We cannot tell good agents from bad bots, so we block both and lose sales.",
-      "working": "Visa and Mastercard Web Bot Auth, Cloudflare verified bots, Mastercard agent score.",
-      "research": "Stored cards hide the agent from the issuer's risk controls.",
-      "ev": "vendor",
-      "src": [
-        "R5-13",
-        "R5-36",
-        "R5-35",
-        "R5-58",
-        "R4-69",
-        "C363",
-        "R5-52",
-        "C309",
-        "C284",
-        "R4-43",
-        "R5-59",
-        "C380",
-        "G-19",
-        "G-21",
-        "G-36",
-        "G-43"
-      ]
-    },
-    {
-      "id": 4,
-      "name": "Platforms shut agents out",
-      "icon": "i-cross",
-      "tone": "coral",
-      "one": "Amazon bars 99 named AI agents and crawlers, and calls its own agent primary.",
-      "arch": "Use sanctioned routes such as UCP endpoints, feeds and MCP servers, identify the agent, and honour merchant access files. Merchants should publish an agent access policy.",
-      "sev": {
-        "consumer": 2,
-        "merchant": 2,
-        "issuer": 0,
-        "psp": 1,
-        "builder": 3,
-        "regulator": 1
-      },
-      "pain": "The biggest store shuts my agent out, so it cannot shop where I shop.",
-      "working": "Ninth Circuit Comet ruling, a Shopify storefront routing agents to UCP, network key directories.",
-      "research": "Attackers already use open source agent frameworks to breach retailers and other companies.",
-      "ev": "verified 2026",
-      "src": [
-        "R5-37",
-        "R5-38",
-        "R5-39",
-        "R5-40",
-        "R5-63",
-        "C363",
-        "R4-30",
-        "G-26",
-        "G-27",
-        "G-03"
-      ]
-    },
-    {
-      "id": 5,
-      "name": "Mandates outlive user intent",
-      "icon": "i-policy-doc",
-      "tone": "teal",
-      "one": "Spend limits, product scope and revocation are weakly expressed, so an agent's authority can outlast the user's wish.",
-      "arch": "The agent platform or network enforces limits and expiry. The merchant checks the cart against the authority record, enforces consume once and logs revocations.",
-      "sev": {
-        "consumer": 3,
-        "merchant": 2,
-        "issuer": 2,
-        "psp": 1,
-        "builder": 3,
-        "regulator": 1
-      },
-      "pain": "I switched the agent off, and now I have to prove it.",
-      "working": "AP2 open and closed mandates, Mastercard Verifiable Intent, Visa consumer instructions.",
-      "research": "In simulation, consume once mandates bound to context stopped replay at 3.8 ms.",
-      "ev": "verified 2026",
-      "src": [
-        "R5-44",
-        "R5-16",
-        "R5-71",
-        "R4-12",
-        "R4-06",
-        "R4-32",
-        "C276",
-        "C366",
-        "C282",
-        "G-16",
-        "G-17"
-      ]
-    },
-    {
-      "id": 6,
-      "name": "Wrong or steered purchases",
-      "icon": "i-agent",
-      "tone": "coral",
-      "one": "Agents still buy the wrong thing, hidden prompts steer them, and LLM pitches steer users.",
-      "arch": "Treat merchant content as untrusted, isolate it from cart building, check the cart against the mandate before pay, and record what the agent saw and its model version.",
-      "sev": {
-        "consumer": 3,
-        "merchant": 2,
-        "issuer": 1,
-        "psp": 1,
-        "builder": 3,
-        "regulator": 1
-      },
-      "pain": "My agent bought something I did not want, and I could not tell why.",
-      "working": "Visa benchmark, PCAT defence research, x402 SDK spend caps, AP2 cart mandates.",
-      "research": "Visa benchmark: 54 percent of failed runs still ended in a purchase decision.",
-      "ev": "vendor",
-      "src": [
-        "R4-27",
-        "R4-28",
-        "R4-01",
-        "R4-02",
-        "R4-04",
-        "R4-09",
-        "R4-10",
-        "R4-11",
-        "R4-16",
-        "R4-17",
-        "R5-41",
-        "R5-62",
-        "R4-32",
-        "C276",
-        "G-127"
-      ]
-    },
-    {
-      "id": 7,
-      "name": "Banks refuse agent access",
-      "icon": "i-payer",
-      "tone": "violet",
-      "one": "Citi, Bank of America and JPMorgan keep outside agents from moving money, and banks shift risk to customers.",
-      "arch": "Never ask for bank logins. Use network tokens or read only connectors, and record revocation with a timestamp the user can show. Wells Fargo requires proof from 2026-11-24.",
-      "sev": {
-        "consumer": 3,
-        "merchant": 1,
-        "issuer": 3,
-        "psp": 1,
-        "builder": 3,
-        "regulator": 2
-      },
-      "pain": "My bank says sharing my login with an agent makes me answer for it.",
-      "working": "Plaid read only connectors, network agent tokens, Bank of America and Wells Fargo terms.",
-      "research": "Reg E treats transfers by someone handed the access device as authorized until notice.",
-      "ev": "verified 2026",
-      "src": [
-        "C352",
-        "C353",
-        "R5-43",
-        "R5-44",
-        "R5-45",
-        "R4-34",
-        "R4-35",
-        "R5-61",
-        "C282",
-        "G-29",
-        "G-30",
-        "R2-65"
-      ]
-    },
-    {
-      "id": 8,
-      "name": "Rules assume a human",
-      "icon": "i-rule-registry",
-      "tone": "slate",
-      "one": "Payment rules expect a person to approve each payment, which slows delegated agent payments on regulated rails.",
-      "arch": "Authenticate at delegation where rules allow, then step up per country: EU SCA when an agent pays or sets a merchant initiated mandate, two factors in India.",
-      "sev": {
-        "consumer": 1,
-        "merchant": 1,
-        "issuer": 3,
-        "psp": 2,
-        "builder": 2,
-        "regulator": 3
-      },
-      "pain": "We cannot offer delegated payments because the rules expect a human to approve each one.",
-      "working": "HM Treasury consultation, FCA AI Live Testing, MAS 2027 consultation, NPCI reported agent protocol.",
-      "research": "SCA elements assume human interaction, and PISP status for agents is open.",
-      "ev": "verified 2026",
-      "src": [
-        "R5-55",
-        "R4-53",
-        "C306",
-        "R4-44",
-        "R4-46",
-        "R4-57",
-        "R4-60",
-        "C418",
-        "R4-58",
-        "R4-59",
-        "R5-53",
-        "G-22",
-        "G-122"
-      ]
-    },
-    {
-      "id": 9,
-      "name": "Protocol churn and integration cost",
-      "icon": "i-drift",
-      "tone": "amber",
-      "one": "Specs break between releases, and every new agent surface asks merchants and PSPs to rebuild.",
-      "arch": "Wait with readiness until your agent share passes the trigger. Then budget each adapter per breaking release, or let the PSP absorb it.",
-      "sev": {
-        "consumer": 0,
-        "merchant": 2,
-        "issuer": 0,
-        "psp": 3,
-        "builder": 3,
-        "regulator": 0
-      },
-      "pain": "Specs change under us, and every new agent surface asks us to rebuild.",
-      "working": "Visa Intelligent Commerce Connect, Adyen Agentic, UCP technical councils.",
-      "research": "A formal analysis found 40 undocumented consistency findings across four agent payment protocols.",
-      "ev": "verified 2026",
-      "src": [
-        "G-37",
-        "G-38",
-        "G-39",
-        "R5-73",
-        "R5-71",
-        "G-41",
-        "R3-35",
-        "C395",
-        "R2-61",
-        "R1-21",
-        "R4-18"
-      ]
-    },
-    {
-      "id": 10,
-      "name": "Losing the customer and margin",
-      "icon": "i-kpi",
-      "tone": "violet",
-      "one": "Agent platforms may own the customer, charge up to 4 percent, and hide which sales they sent.",
-      "arch": "Tag every agent order with the platform id, offer account linking so the customer record stays yours, and track each platform's fee per surface.",
-      "sev": {
-        "consumer": 1,
-        "merchant": 3,
-        "issuer": 1,
-        "psp": 2,
-        "builder": 1,
-        "regulator": 1
-      },
-      "pain": "The agent owns my customer, takes a cut, and I cannot see which sales it sent.",
-      "working": "UCP identity linking, Personal Agent Protocol, Adobe referral measurement.",
-      "research": "Only 37 percent of leaders have a plan to keep the direct relationship.",
-      "ev": "verified 2026",
-      "src": [
-        "G-43",
-        "G-42",
-        "G-52",
-        "G-53",
-        "R5-17",
-        "R5-18",
-        "G-13",
-        "G-37",
-        "G-15",
-        "R5-27"
-      ]
-    }
+  "bases": [
+   {
+    "id": "rule",
+    "name": "Written rule or spec"
+   },
+   {
+    "id": "terms",
+    "name": "Terms or guide"
+   },
+   {
+    "id": "reading",
+    "name": "Legal reading"
+   },
+   {
+    "id": "promise",
+    "name": "Promised only"
+   }
+  ],
+  "stages": [
+   "Silent",
+   "Asking",
+   "Drafting",
+   "In force"
+  ],
+  "routes": [
+   {
+    "id": "visa",
+    "name": "Visa card, enrolled agent",
+    "icon": "i-security",
+    "tone": "violet",
+    "who": "buyer",
+    "basis": "rule",
+    "ev": "verified 2026",
+    "one": "Visa's rules make the cardholder answer for an enrolled agent, as if they paid themselves.",
+    "arch": "Rule 4.1.23.10, added 2026-04. No agent dispute condition, so disputes run on reason codes built for human buyers.",
+    "open": "Will a signed mandate count as dispute evidence?",
+    "src": [
+     "G-201"
+    ]
+   },
+   {
+    "id": "mastercard",
+    "name": "Mastercard card",
+    "icon": "i-vault",
+    "tone": "amber",
+    "who": "none",
+    "basis": "terms",
+    "ev": "verified 2026",
+    "one": "No rule text found. Its guide says normal chargeback rights apply.",
+    "arch": "Developer guide: standard fraud, chargeback and dispute processes apply, and agents take on consumer checks. Rules PDF unread.",
+    "open": "Will Mastercard publish a rule like Visa's?",
+    "src": [
+     "G-116",
+     "G-117"
+    ]
+   },
+   {
+    "id": "link",
+    "name": "Stripe Link agent wallet",
+    "icon": "i-gateway",
+    "tone": "coral",
+    "who": "buyer",
+    "basis": "terms",
+    "ev": "verified 2026",
+    "one": "The user pays for every agent purchase, even a different item from the one shown.",
+    "arch": "Link agent wallet FAQ. Purchase Protections are US only, discretionary and silent on agents.",
+    "open": "How do these terms sit with card chargeback rights?",
+    "src": [
+     "G-127",
+     "G-126"
+    ]
+   },
+   {
+    "id": "amex",
+    "name": "Amex card",
+    "icon": "i-approve",
+    "tone": "slate",
+    "who": "none",
+    "basis": "promise",
+    "ev": "vendor",
+    "one": "Agent Purchase Protection is promised for registered agents, not yet live.",
+    "arch": "Cover for registered agents with authenticated intent. Announced, no live integrations found.",
+    "open": "When does the cover go live, and for whom?",
+    "src": [
+     "G-24"
+    ]
+   },
+   {
+    "id": "nonfraud",
+    "name": "Card dispute, not fraud",
+    "icon": "i-appeal",
+    "tone": "teal",
+    "who": "merchant",
+    "basis": "rule",
+    "ev": "verified 2026",
+    "one": "The merchant carries a wrong item dispute by default, unless it wins.",
+    "arch": "Non fraud card disputes default to the merchant. No network has an agent reason code yet.",
+    "open": "Will networks add an agent reason code?",
+    "src": [
+     "C299",
+     "R4-65"
+    ]
+   },
+   {
+    "id": "uslogin",
+    "name": "US bank login shared",
+    "icon": "i-payer",
+    "tone": "amber",
+    "who": "buyer",
+    "basis": "reading",
+    "ev": "verified 2026",
+    "one": "One law firm reads US rules as putting it on the customer until they revoke access.",
+    "arch": "Goodwin on Reg E 1005.2(m): access given to an agent counts as authorised until the bank is told, unless the bank broke its own procedure.",
+    "open": "Does an AI provider count as a person given the access device?",
+    "src": [
+     "R4-34",
+     "C296"
+    ]
+   },
+   {
+    "id": "uk",
+    "name": "UK online payment",
+    "icon": "i-policy-doc",
+    "tone": "violet",
+    "who": "bank",
+    "basis": "reading",
+    "ev": "illustrative",
+    "one": "For an unauthorised online payment the payer carries no loss. This is our reading.",
+    "arch": "PSRs 2017 reg 77(4)(c) and (d), and 77(6) for a payee side that skipped strong checks. Our reading, not a regulator view.",
+    "open": "Is a payment inside the user's mandate authorised?",
+    "src": [
+     "G-124",
+     "G-125"
+    ]
+   },
+   {
+    "id": "stable",
+    "name": "Stablecoin payment",
+    "icon": "i-event-stream",
+    "tone": "teal",
+    "who": "buyer",
+    "basis": "rule",
+    "ev": "verified 2026",
+    "one": "Final on chain. The payer has no way back unless the seller refunds.",
+    "arch": "x402 defines no refund or dispute process. Refunds happen only by the seller's agreement.",
+    "open": "Who offers buyer recourse on final rails?",
+    "src": [
+     "R4-67"
+    ]
+   },
+   {
+    "id": "cdn",
+    "name": "Agent checked at the CDN",
+    "icon": "i-network",
+    "tone": "slate",
+    "who": "merchant",
+    "basis": "terms",
+    "ev": "vendor",
+    "one": "Cloudflare's coalition says the site pays when a user disputes an agent purchase.",
+    "arch": "Trusted Agent Delegation post, 2026-11-05. Identity tiers only, no named members and no rule text.",
+    "open": "Will any site sign up to carry that loss?",
+    "src": [
+     "G-35"
+    ]
+   }
+  ],
+  "places": [
+   {
+    "id": "US",
+    "name": "United States",
+    "icon": "i-policy-doc",
+    "tone": "amber",
+    "stage": 1,
+    "ev": "illustrative",
+    "one": "No agent law. The consumer regulator is silent, and a Fed governor asked who pays.",
+    "arch": "No CFPB statement found by 2026-11-15. Card network rules lead, with Visa's 4.1.23.10 the only agent text.",
+    "next": "Card networks may write the first rule",
+    "src": [
+     "R4-41",
+     "G-31",
+     "R4-42"
+    ]
+   },
+   {
+    "id": "EU",
+    "name": "European Union",
+    "icon": "i-policy-doc",
+    "tone": "violet",
+    "stage": 1,
+    "ev": "illustrative",
+    "one": "New payment law is near final but does not mention agents.",
+    "arch": "PSR final vote planned 2026-12-14, applying about late 2028. An industry council works on agent refunds for local payment methods.",
+    "next": "Parliament vote planned 2026-12-14",
+    "src": [
+     "G-203",
+     "R4-47",
+     "G-32"
+    ]
+   },
+   {
+    "id": "UK",
+    "name": "United Kingdom",
+    "icon": "i-policy-doc",
+    "tone": "teal",
+    "stage": 1,
+    "ev": "illustrative",
+    "one": "Treasury asked about agent liability, and the FCA plans a trust framework.",
+    "arch": "Treasury Question 15 closed 2026-10-06 with no response yet. Regulators say existing law applies to personal agents.",
+    "next": "Treasury response to Question 15",
+    "src": [
+     "R4-53",
+     "R4-55",
+     "G-122"
+    ]
+   },
+   {
+    "id": "IN",
+    "name": "India",
+    "icon": "i-policy-doc",
+    "tone": "coral",
+    "stage": 0,
+    "ev": "illustrative",
+    "one": "Two factor checks on every digital payment, with no agent text.",
+    "arch": "RBI Authentication Directions apply from 2026-04-01. A reported agent protocol on UPI has no confirmed launch.",
+    "next": "Launch of an agent protocol on UPI",
+    "src": [
+     "R4-57",
+     "R4-59"
+    ]
+   },
+   {
+    "id": "SG",
+    "name": "Singapore",
+    "icon": "i-policy-doc",
+    "tone": "slate",
+    "stage": 1,
+    "ev": "illustrative",
+    "one": "AI risk rules apply from 2027-10, and agent guidance goes to consultation in 2027.",
+    "arch": "MAS AI Risk Management Guidelines issued 2026-10-07. Firms stay responsible for third party AI.",
+    "next": "MAS consultation on agents in 2027",
+    "src": [
+     "R4-60"
+    ]
+   }
   ]
+ },
+ "redteam": [
+  {
+   "id": "RT1",
+   "sev": "high",
+   "verdict": "accepted",
+   "target": "Our main bet",
+   "one": "Our main bet held in every scenario, so nothing could prove it wrong.",
+   "arch": "The thesis had no exit test, and its build trigger could not be measured.",
+   "change": "Added a wait option and a trigger you can measure.",
+   "ev": "illustrative"
+  },
+  {
+   "id": "RT2",
+   "sev": "high",
+   "verdict": "accepted",
+   "target": "Core design",
+   "one": "Building around the signed mandate put the least settled part in the core.",
+   "arch": "Mandate formats still change, so a mandate centred core would churn with every spec.",
+   "change": "The core keeps a thin record of five fields plus the signed original.",
+   "ev": "illustrative"
+  },
+  {
+   "id": "RT3",
+   "sev": "high",
+   "verdict": "accepted",
+   "target": "Options",
+   "one": "No wait option, and no world where agents suggest and people pay.",
+   "arch": "The evidence points to agents that refer while people still pay, and the options ignored it.",
+   "change": "Added wait with readiness, and an agents refer, people pay scenario.",
+   "ev": "illustrative"
+  },
+  {
+   "id": "RT4",
+   "sev": "high",
+   "verdict": "accepted",
+   "target": "Gateway",
+   "one": "A merchant gateway cannot cap an agent's spend at other merchants.",
+   "arch": "Buyer side controls such as cross merchant spend caps sit outside the merchant's reach.",
+   "change": "Spend caps across merchants move to the buyer side and the network.",
+   "ev": "illustrative"
+  },
+  {
+   "id": "RT5",
+   "sev": "high",
+   "verdict": "accepted",
+   "target": "Player scores",
+   "one": "The ranking rewarded writing specs and ignored who controls the token.",
+   "arch": "Spec authorship was over weighted against control of the credential layer.",
+   "change": "Players rescored with a token layer measure.",
+   "ev": "illustrative"
+  },
+  {
+   "id": "RT6",
+   "sev": "high",
+   "verdict": "accepted",
+   "target": "Patterns",
+   "one": "Virtual cards and agent browsers on stored cards were missing.",
+   "arch": "Two live patterns were absent from the comparison and the decision tree.",
+   "change": "Added both, with stored cards as the one to avoid.",
+   "ev": "illustrative"
+  },
+  {
+   "id": "RT7",
+   "sev": "high",
+   "verdict": "accepted",
+   "target": "Parameters",
+   "one": "Key build choices were missing, such as agent flags at authorization.",
+   "arch": "Missing: agent signal in authorization, CIT and MIT, account linking, fees and amount drift.",
+   "change": "Three new parameters joined the build list.",
+   "ev": "illustrative"
+  },
+  {
+   "id": "RT8",
+   "sev": "high",
+   "verdict": "accepted",
+   "target": "Future",
+   "one": "Two scenarios were already happening together, and none had a dated test.",
+   "arch": "Scenarios overlapped and lacked falsifiable, dated kill tests.",
+   "change": "Each scenario now has a dated kill test.",
+   "ev": "illustrative"
+  },
+  {
+   "id": "RT9",
+   "sev": "medium",
+   "verdict": "partly",
+   "target": "Our main bet",
+   "one": "Building to the token moves lock in to the network and the payment provider.",
+   "arch": "Token portability depends on the token requestor, so lock in shifts rather than disappears.",
+   "change": "Kept the bet, and added a contract question on who holds the token.",
+   "ev": "illustrative"
+  },
+  {
+   "id": "RT10",
+   "sev": "medium",
+   "verdict": "accepted",
+   "target": "Scoring weights",
+   "one": "Scoring weights had no basis, and fraud and privacy had no say.",
+   "arch": "Weights were unexplained, and fraud, customer ownership and privacy were unscored.",
+   "change": "Liability became a gate, and weights got a stated basis.",
+   "ev": "illustrative"
+  },
+  {
+   "id": "RT11",
+   "sev": "medium",
+   "verdict": "accepted",
+   "target": "Worked example",
+   "one": "The worked example compared layers as if they were rivals.",
+   "arch": "It ranked options from different stack layers against each other.",
+   "change": "Rebuilt the example to compare like with like.",
+   "ev": "illustrative"
+  },
+  {
+   "id": "RT12",
+   "sev": "medium",
+   "verdict": "accepted",
+   "target": "Agent tiers",
+   "one": "A tier rule would have refused the consumer flows that are live today.",
+   "arch": "The tier 2 rule blocked live consumer flows that cannot yet meet it.",
+   "change": "Relaxed the tier rule for live consumer flows.",
+   "ev": "illustrative"
+  },
+  {
+   "id": "RT13",
+   "sev": "medium",
+   "verdict": "partly",
+   "target": "Parameters",
+   "one": "Too many parameter rows, mixing choices with context.",
+   "arch": "37 rows mixed design choices, context fields and evidence fields.",
+   "change": "Kept the rows, tagged each one, and the page shows only the choices.",
+   "ev": "illustrative"
+  },
+  {
+   "id": "RT14",
+   "sev": "medium",
+   "verdict": "accepted",
+   "target": "Challenges",
+   "one": "The challenge ranking hid two tiers and missed churn, attribution and fees.",
+   "arch": "Ties hid a two tier ranking, and three pains were missing.",
+   "change": "Merged two pairs and added churn and margin challenges.",
+   "ev": "illustrative"
+  },
+  {
+   "id": "RT15",
+   "sev": "medium",
+   "verdict": "accepted",
+   "target": "Startups",
+   "one": "Tempo was counted twice and may sit inside Stripe's orbit.",
+   "arch": "MPP authorship counted for both Stripe and Tempo.",
+   "change": "Tempo left the startup list.",
+   "ev": "illustrative"
+  },
+  {
+   "id": "RT16",
+   "sev": "medium",
+   "verdict": "partly",
+   "target": "Players",
+   "one": "Cloudflare's coalition launch was missed.",
+   "arch": "A dated market move inside the window was not scored.",
+   "change": "Scored as a move, since it names no members yet.",
+   "ev": "illustrative"
+  },
+  {
+   "id": "RT17",
+   "sev": "medium",
+   "verdict": "accepted",
+   "target": "Decision tree",
+   "one": "Some answers ended in flows nobody can build today.",
+   "arch": "Several leaves pointed to flows with no shipped implementation.",
+   "change": "Changed the tree endings to flows you can build.",
+   "ev": "illustrative"
+  },
+  {
+   "id": "RT18",
+   "sev": "medium",
+   "verdict": "accepted",
+   "target": "Evidence store",
+   "one": "Saying every payment can be defended overclaimed, and nobody owned privacy.",
+   "arch": "ADR-4 overclaimed defensibility and gave the evidence store no privacy owner.",
+   "change": "Softened the claim, and the evidence store got a privacy owner.",
+   "ev": "illustrative"
+  },
+  {
+   "id": "RT19",
+   "sev": "low",
+   "verdict": "open",
+   "target": "Speed target",
+   "one": "The speed target for agent checks has never been tested.",
+   "arch": "The 300 ms p95 target has no production measurement behind it.",
+   "change": "Marked as a target. Still open.",
+   "ev": "illustrative"
+  },
+  {
+   "id": "RT20",
+   "sev": "low",
+   "verdict": "accepted",
+   "target": "Consistency",
+   "one": "Small mismatches between sections.",
+   "arch": "Internal slips across sections 1.3, 2.3 and 8.",
+   "change": "Fixed across the doc.",
+   "ev": "illustrative"
+  }
+ ],
+ "decide": [
+  {
+   "id": "D1",
+   "when": "Now",
+   "name": "Tag agent orders",
+   "icon": "i-measure",
+   "tone": "teal",
+   "ev": "illustrative",
+   "adr": "ADR-1",
+   "one": "Mark every order an agent placed, so you can see your own share.",
+   "arch": "Tag P28 on every order. Your agent completed share (V17) is what fires the build trigger in ADR-1.",
+   "trigger": "Without the tag, our proposed 3% trigger cannot fire."
+  },
+  {
+   "id": "D2",
+   "when": "Now",
+   "name": "Name who pays",
+   "icon": "i-risk",
+   "tone": "coral",
+   "ev": "illustrative",
+   "adr": "ADR-6",
+   "one": "Before launch, write down who carries a wrong agent purchase on each payment route.",
+   "arch": "Map each route to its loss holder and basis, network rule, terms or chargeback rights, before go live.",
+   "trigger": "Any agent order on a new route."
+  },
+  {
+   "id": "D3",
+   "when": "Q1 2027",
+   "name": "Evidence before payment",
+   "icon": "i-vault",
+   "tone": "violet",
+   "ev": "illustrative",
+   "adr": "ADR-4",
+   "one": "Save the purchase record before money moves, and keep it only while disputes can happen.",
+   "arch": "Write evidence before the PSP call, then append the result. Retention is the longest dispute window of the rail (V18).",
+   "trigger": "The first agent chargeback."
+  },
+  {
+   "id": "D4",
+   "when": "Q1 2027",
+   "name": "Trust tiers for agents",
+   "icon": "i-security",
+   "tone": "amber",
+   "ev": "illustrative",
+   "adr": "ADR-2",
+   "one": "Let agents browse freely, and ask for more proof before they pay.",
+   "arch": "Tier 0 browse, tier 1 cart, tier 2 pay. Tier 2 needs a signature plus mandate, or a registered agent, agentic token and passkey.",
+   "trigger": "Agent traffic reaching checkout pages."
+  },
+  {
+   "id": "D5",
+   "when": "At trigger",
+   "name": "Build to the token",
+   "icon": "i-gateway",
+   "tone": "slate",
+   "ev": "illustrative",
+   "adr": "ADR-1",
+   "one": "Keep your payment provider until agent orders pass our proposed trigger, then build.",
+   "arch": "Below the trigger, wait with readiness. Above it, canonical model plus adapters, or the PSP if it exports evidence.",
+   "trigger": "Our proposed 3% trigger for two months running."
+  },
+  {
+   "id": "D6",
+   "when": "If you sell APIs",
+   "name": "Pay per call apart",
+   "icon": "i-network",
+   "tone": "teal",
+   "ev": "illustrative",
+   "adr": "ADR-5",
+   "one": "Keep tiny machine payments on their own path, away from card checkout.",
+   "arch": "HTTP 402 calls settle through a facilitator. Budgets sit in the buyer's wallet, never as prepaid balances you hold.",
+   "trigger": "Paid API calls from agents."
+  }
+ ]
 }

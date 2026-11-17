@@ -4,7 +4,11 @@
     <p class="acx-dek" data-for="architect">Adoption figures placed on the evidence ladder, from audited record down to unbacked claim. Size designs on the upper rungs and treat the rest as signal.</p>
   </header>
   <div class="s3-bar">
-    <div class="acx-seg" role="group" aria-label="Show figures by evidence">
+    <div class="acx-seg s3-view" role="group" aria-label="Show">
+      <button type="button" data-v="ev" aria-pressed="true">Evidence ladder</button>
+      <button type="button" data-v="rt" aria-pressed="false">Red team</button>
+    </div>
+    <div class="acx-seg s3-filter" role="group" aria-label="Show figures by evidence">
       <button type="button" data-ev="all" aria-pressed="true">All</button>
       <button type="button" data-ev="verified" aria-pressed="false"><i class="s3-dot" data-ev="verified" aria-hidden="true"></i>Verified</button>
       <button type="button" data-ev="vendor" aria-pressed="false"><i class="s3-dot" data-ev="vendor" aria-hidden="true"></i>Vendor</button>
@@ -17,6 +21,14 @@
       <p class="s3-end">Weakest</p>
     </div>
     <aside class="acx-card acx-panel s3-panel" aria-live="polite"><div class="s3-stack"></div></aside>
+  </div>
+  <div class="acx-split s3-rt" hidden>
+    <div class="acx-card s3-board">
+      <p class="s3-rsum"></p>
+      <div class="s3-tiles"></div>
+      <div class="s3-rkey" aria-hidden="true"></div>
+    </div>
+    <aside class="acx-card acx-panel s3-panel" aria-live="polite"><div class="s3-rstack"></div></aside>
   </div>
   <div class="acx-card s3-checks" hidden><p class="acx-k">How this was checked</p><ul class="s3-ck"></ul></div>
 </section>
@@ -68,6 +80,30 @@
 #acx-s3 .s3-op{font-family:var(--acx-mono); font-size:20px; color:var(--acx-ink3)}
 #acx-s3 .s3-bar2{display:flex; gap:2px; height:8px; border-radius:4px; background:var(--acx-sunk)}
 #acx-s3 .s3-bar2 i{display:block; height:8px; border-radius:4px; background:var(--c); min-width:4px}
+#acx-s3 .s3-board{container-type:inline-size; padding:14px 18px; display:flex; flex-direction:column; gap:14px; min-width:0}
+#acx-s3 .s3-rsum{font-size:15px; color:var(--acx-ink2); text-wrap:balance; max-width:64ch}
+#acx-s3 .s3-rsum b{font-family:var(--acx-mono); font-weight:600; color:var(--acx-ink)}
+#acx-s3 .s3-tiles{display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:6px}
+#acx-s3 .s3-t{position:relative; display:flex; flex-direction:column; align-items:flex-start; gap:4px; min-height:64px; padding:8px 10px; border:1px solid var(--acx-line); border-radius:var(--acx-r-sm); background:var(--acx-heat1); cursor:pointer; text-align:left; color:var(--acx-ink)}
+#acx-s3 .s3-t[data-sev="high"]{background:var(--acx-heat3); color:var(--acx-on-accent)}
+#acx-s3 .s3-t[data-sev="medium"]{background:var(--acx-heat2)}
+#acx-s3 .s3-t[aria-pressed="true"]{outline:2px solid var(--acx-accent); outline-offset:2px}
+#acx-s3 .s3-t:focus-visible{outline:2px solid var(--acx-ink); outline-offset:2px}
+#acx-s3 .s3-tid{font-family:var(--acx-mono); font-size:14px; font-weight:600}
+#acx-s3 .s3-tn{font-size:14px; line-height:1.2; text-wrap:balance}
+#acx-s3 .s3-vm{position:absolute; top:8px; right:8px; width:14px; height:14px; border-radius:50%}
+#acx-s3 [data-vd="accepted"]{background:currentColor}
+#acx-s3 [data-vd="partly"]{background:linear-gradient(90deg,currentColor 50%,transparent 50%); box-shadow:inset 0 0 0 2px currentColor}
+#acx-s3 [data-vd="open"]{box-shadow:inset 0 0 0 2px currentColor}
+#acx-s3 .s3-rkey{display:flex; flex-wrap:wrap; align-items:center; gap:6px 16px; font-size:14px; color:var(--acx-ink2)}
+#acx-s3 .s3-rk{display:inline-flex; align-items:center; gap:6px}
+#acx-s3 .s3-rk .s3-vm{position:static; color:var(--acx-ink2)}
+#acx-s3 .s3-rk .s3-sw{width:18px; height:14px; border-radius:3px; background:var(--acx-heat1)}
+#acx-s3 .s3-rk .s3-sw[data-sev="high"]{background:var(--acx-heat3)} #acx-s3 .s3-rk .s3-sw[data-sev="medium"]{background:var(--acx-heat2)}
+#acx-s3 .s3-rstack{display:grid; flex:1}
+#acx-s3 .s3-chg{margin-top:auto; padding:12px 14px; border-radius:var(--acx-r-sm); background:var(--acx-sunk); display:flex; flex-direction:column; gap:4px}
+#acx-s3 .acx-panel .s3-chg p:last-child{font-size:16px; color:var(--acx-ink)}
+@container (max-width:599px){ #acx-s3 .s3-tiles{grid-template-columns:repeat(4,minmax(0,1fr))} #acx-s3 .s3-tn{display:none} #acx-s3 .s3-t{min-height:48px; padding:6px 8px} }
 @media (max-width:640px){
   #acx-s3 .s3-rung{grid-template-columns:1fr; gap:8px}
   #acx-s3 .s3-num{font-size:48px}
@@ -156,7 +192,7 @@
   }
 
   var sel = null, mode = 'all';
-  var segBtns = el.querySelectorAll('.s3-bar [data-ev]');
+  var segBtns = el.querySelectorAll('.s3-filter [data-ev]');
   var markBtns = el.querySelectorAll('.s3-m');
   function match(it) { return mode === 'all' || kind(it.ev) === mode; }
   function pick(id) {
@@ -175,4 +211,40 @@
   markBtns.forEach(function (b) { b.addEventListener('click', function () { pick(b.dataset.id); }); });
   A.on('ev', function (v) { apply(v || 'all'); });
   apply(A.get('ev') || 'all');
+
+  // red team view: the 20 critiques of our own design, shown in place of the ladder
+  var RT = (D.redteam || []).filter(function (x) { return x && x.id; });
+  var SEV = { high: 'High', medium: 'Medium', low: 'Low' }, VD = { accepted: 'Accepted', partly: 'Partly accepted', open: 'Still open' };
+  var split = el.querySelector('.s3-split'), rtBox = el.querySelector('.s3-rt'), filt = el.querySelector('.s3-filter');
+  var viewBtns = el.querySelectorAll('.s3-view [data-v]');
+  var cnt = function (k, v) { return RT.filter(function (x) { return x[k] === v; }).length; };
+  el.querySelector('.s3-rsum').innerHTML = '<b>' + RT.length + '</b> critiques from an outside reviewer who tried to make our design fail. <b>' + cnt('sev', 'high') + '</b> high. <b>' + cnt('verdict', 'accepted') + '</b> accepted, <b>' + cnt('verdict', 'partly') + '</b> partly, <b>' + cnt('verdict', 'open') + '</b> still open.';
+  el.querySelector('.s3-tiles').innerHTML = RT.map(function (r) {
+    return '<button type="button" class="s3-t" data-id="' + esc(r.id) + '" data-sev="' + esc(r.sev) + '" aria-pressed="false" aria-label="' + esc(r.id + ', ' + r.target + ', ' + SEV[r.sev] + ', ' + VD[r.verdict]) + '">' +
+      '<span class="s3-tid">' + esc(r.id) + '</span><span class="s3-tn">' + esc(r.target) + '</span><i class="s3-vm" data-vd="' + esc(r.verdict) + '" aria-hidden="true"></i></button>';
+  }).join('');
+  el.querySelector('.s3-rkey').innerHTML = ['high', 'medium', 'low'].map(function (k) { return '<span class="s3-rk"><i class="s3-sw" data-sev="' + k + '"></i>' + SEV[k] + '</span>'; }).join('') +
+    ['accepted', 'partly', 'open'].map(function (k) { return '<span class="s3-rk"><i class="s3-vm" data-vd="' + k + '"></i>' + VD[k] + '</span>'; }).join('');
+  el.querySelector('.s3-rstack').innerHTML = RT.map(function (r) {
+    return '<div class="s3-d" data-id="' + esc(r.id) + '">' +
+      '<div class="s3-dh">' + A.icon(r.sev === 'high' ? 'i-risk' : 'i-explain', r.sev === 'high' ? 'red' : (r.sev === 'medium' ? 'amber' : 'slate'), 'hero') + '<div><p class="acx-k">' + esc(r.id) + ', ' + SEV[r.sev] + ', ' + VD[r.verdict] + '</p>' + A.ev(r.ev) + '</div></div>' +
+      '<h3>' + esc(r.target) + '</h3>' +
+      '<p class="s3-one" data-for="leader">' + esc(r.one) + '</p>' +
+      '<p class="s3-one" data-for="architect">' + esc(r.arch || r.one) + '</p>' +
+      '<div class="s3-chg"><p class="acx-k">What we changed</p><p>' + esc(r.change) + '</p></div></div>';
+  }).join('');
+  var tiles = el.querySelectorAll('.s3-t'), rds = el.querySelectorAll('.s3-rstack .s3-d');
+  function showRt(v) {
+    var r = RT.find(function (x) { return x.id === v; });
+    var on = !!r;
+    split.hidden = on; filt.hidden = on; rtBox.hidden = !on;
+    viewBtns.forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.v === (on ? 'rt' : 'ev'))); });
+    if (!on) return;
+    tiles.forEach(function (t) { t.setAttribute('aria-pressed', String(t.dataset.id === r.id)); });
+    rds.forEach(function (d) { d.classList.toggle('is-on', d.dataset.id === r.id); });
+  }
+  viewBtns.forEach(function (b) { b.addEventListener('click', function () { A.set('rt', b.dataset.v === 'rt' ? (RT[0] || {}).id : ''); }); });
+  tiles.forEach(function (t) { t.addEventListener('click', function () { A.set('rt', t.dataset.id); }); });
+  A.on('rt', showRt);
+  showRt(A.get('rt'));
 });</script>

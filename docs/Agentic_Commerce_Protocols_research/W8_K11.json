@@ -1,0 +1,29 @@
+[
+  {
+    "id": "G-136",
+    "verdict": "wrong",
+    "checked_at": "2026-11-16",
+    "urls": [
+      "https://web.archive.org/web/20261115135651/https://openai.com/index/introducing-chatgpt-wallet/",
+      "https://openai.com/index/introducing-chatgpt-wallet/",
+      "https://developers.openai.com/commerce/guides/accept-payments.md",
+      "https://developers.openai.com/commerce/guides/overview.md",
+      "https://runtimewire.com/article/exclusive-openai-is-building-a-chatgpt-wallet-for-agentic-purchases",
+      "https://help.openai.com/en/articles/20001508-using-your-chatgpt-wallet-balance",
+      "https://web.archive.org/web/20261022222150/https://help.openai.com/en/articles/20001508-using-your-chatgpt-wallet-balance",
+      "https://openai.com/news/"
+    ],
+    "evidence": "OpenAI announced ChatGPT Wallet on November 13, 2026. The Wayback copy of openai.com/index/introducing-chatgpt-wallet (captured 2026-11-15) is dated November 13, 2026 and says \"ChatGPT Wallet begins rolling out today in dots\". It is built with American Express, Mastercard and Visa, starts with ChatGPT Pro subscribers aged 18 and older in the US with eligible US-issued cards, needs a security check such as Face ID for every purchase, and the network supplies a payment token in place of the real card. Full delegation with spending limits is described as a future step. The live openai.com URL and openai.com/news returned HTTP 403 to automated fetch, so the evidence rests on the Wayback copy. The developer accept-payments guide still says the merchant gets a network token, links it by PAR, and must not reuse the credential, so that half of the claim stands. The overview guide says Wallet supports payment steps \"where available\". RuntimeWire (August 13, 2026) reported the wallet as unreleased code, which is now out of date. The help.openai.com article on the ChatGPT wallet balance (live 403, Wayback copy of 2026-10-22 read) is a separate USD stored balance for ChatGPT plan purchases, not the agent payment wallet.",
+    "suggested_text": "OpenAI's docs describe a ChatGPT Wallet that hands the merchant a network token linked by PAR that must not be reused [R1-14]. OpenAI launched it on 2026-11-13 in dots, for US ChatGPT Pro users with US cards, built with Amex, Mastercard and Visa, and each purchase needs a security check [G-136]."
+  },
+  {
+    "id": "W#10",
+    "verdict": "verified",
+    "checked_at": "2026-11-16",
+    "urls": [
+      "https://www.meow.com/blog/inside-meow-mcp-server"
+    ],
+    "evidence": "The page loaded on 2026-11-16 (no 526 this time). It is dated Wednesday, June 10, 2026. Scoped tokens default to two capabilities, read (balances, transactions, card status) and request-to-spend (agent prepares a payment the account holder must approve). Wire dispatch, ACH execution, card issuance and payment initiation are off by default, and the FAQ says agents cannot spend on their own unless the account holder turns on the matching toggle. Per-agent ceilings are configurable, and the page says an agent cannot issue a card above \"the per-agent ceiling\". No default dollar limits are given. A Wayback copy was not needed because the live page loaded.",
+    "suggested_text": ""
+  }
+]

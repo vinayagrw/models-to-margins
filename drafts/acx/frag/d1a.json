@@ -883,7 +883,7 @@
     }
    },
    "flow": "h402",
-   "one": "Pay per request with HTTP 402 and stablecoins. Live, small, and down sharply since August.",
+   "one": "Pay per web request with stablecoins. Live, small, and down sharply since August.",
    "arch": "Server answers 402 with terms, client signs a stablecoin payment and retries, the server verifies, serves, then settles through a facilitator. Upto and batch settlement are merged.",
    "gaps": "No protocol refund or dispute path. Papers show unpaid service and paid but denied outcomes.",
    "params": {
@@ -938,7 +938,7 @@
     }
    },
    "flow": "h402",
-   "one": "HTTP 402 payments across many methods, from stablecoins to cards. Much smaller on chain.",
+   "one": "Pay per web request across many methods, from stablecoins to cards. Much smaller on chain.",
    "arch": "Charge, session and subscription intents. Methods include Tempo, Stripe, Lightning and Solana, with no ACH. Card payments settle off chain and are not counted.",
    "gaps": "IETF draft expired without working group adoption.",
    "params": {

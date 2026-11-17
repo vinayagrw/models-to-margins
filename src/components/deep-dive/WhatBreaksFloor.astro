@@ -414,6 +414,17 @@ const { ST, hl, fixRowsHtml, PB, gapsHtml, caught, chapters } = story(chip);
     .wbf.walking .wbf-floor { gap: 28px 10px; padding: 18px 10px; }
   }
 
+  /* Round 11 gate fix: at 1280 and wider an open drawer sits beside the floor, not under it, so the page stays under 9 viewports. The floor uses the 5-column walk layout and snake routing meanwhile. */
+  @media (min-width: 1280px) {
+    .wbf:not(.walking) #wbf-floorview:has(> #wbf-card:not([hidden])) { grid-template-columns: minmax(0, 1fr) 340px; align-items: start; }
+    .wbf:not(.walking) #wbf-floorview:has(> #wbf-card:not([hidden])) > .wbf-refh, .wbf:not(.walking) #wbf-floorview:has(> #wbf-card:not([hidden])) > .wbf-top { grid-column: 1 / -1; }
+    .wbf:not(.walking) #wbf-floorview:has(> #wbf-card:not([hidden])) > .wbf-floorwrap { grid-column: 1; grid-row: 3; }
+    .wbf:not(.walking) #wbf-floorview > #wbf-card:not([hidden]) { grid-column: 2; grid-row: 3; align-self: stretch; contain: size; overflow-y: auto; overscroll-behavior: contain; }
+    .wbf:not(.walking) #wbf-floorview:has(> #wbf-card:not([hidden])) .wbf-floor { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 28px 24px; }
+    .wbf:not(.walking) #wbf-floorview:has(> #wbf-card:not([hidden])) .wbf-st { grid-column: var(--c5); grid-row: calc(var(--r5) + 1); }
+    .wbf:not(.walking) #wbf-floorview:has(> #wbf-card:not([hidden])) .wbf-legend { grid-column: 1 / -1; grid-row: 1; }
+  }
+
   .wbf-own { display: grid; gap: 10px; }
   .wbf-ownchips { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(190px, 100%), 1fr)); gap: 8px; }
   .wbf-ownchips button { min-height: 52px; display: flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 10px; border: 1.5px solid var(--srule); background: var(--spanel); font-size: 15px; font-weight: 600; text-align: left; }
@@ -719,7 +730,7 @@ const { ST, hl, fixRowsHtml, PB, gapsHtml, caught, chapters } = story(chip);
     const floor = $('#wbf-floor'); const svg = $('.wbf-belts', floor) as unknown as SVGSVGElement; const linesG = $('#wbf-lines', floor);
     const box = (id: string) => { const b = stEl(id); const f = floor.getBoundingClientRect(), r = b.getBoundingClientRect(); return { x: r.left - f.left + r.width / 2, y: r.top - f.top + r.height / 2, w: r.width / 2, h: r.height / 2 }; };
     const edge = (a: any, b: any) => { const dx = b.x - a.x, dy = b.y - a.y; const t = Math.min(dx ? a.w / Math.abs(dx) : 1e9, dy ? a.h / Math.abs(dy) : 1e9); return { x: a.x + dx * t, y: a.y + dy * t }; };
-    const snakeMode = () => matchMedia('(max-width: 1099px)').matches || root!.classList.contains('walking');
+    const snakeMode = () => matchMedia('(max-width: 1099px)').matches || root!.classList.contains('walking') || (matchMedia('(min-width: 1280px)').matches && document.getElementById('wbf-card')?.hidden === false);
     // Orthogonal routing through the gutters, so links never cross a station.
     const gaps = () => { const cs = getComputedStyle(floor); return { rg: parseFloat(cs.rowGap) || 30, cg: parseFloat(cs.columnGap) || 12 }; };
     function routePts(from: string, to: string) {

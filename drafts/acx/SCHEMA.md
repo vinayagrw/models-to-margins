@@ -84,6 +84,7 @@ Severity in `sev` is 0 none, 1 low, 2 medium, 3 high.
 | s2 Compare and choose | 330 |
 | s3 Adoption and evidence | 250 |
 | s4 Who is solving it | 300 |
+| s7 Who pays (placed fifth) | 260 |
 | s5 Ten challenges | 320 |
 | s6 2026 to 2030 | 250 |
 
@@ -95,8 +96,9 @@ Total about 1,750, under the 1,800 cap. Drawer text counts only when its drawer 
 |---|---|
 | s1 | `use` (C, B, M), `flow` (token, mandate, h402), `p` (protocol id for the open drawer) |
 | s2 | `cfg` (configurator values joined by `.`), `view` (matrix, arch, tree) |
-| s3 | `ev` (all, verified, vendor) |
+| s3 | `ev` (all, verified, vendor), `rt` (red team critique id, shows the red team view) |
 | s4 | `who` (player id for the open drawer) |
+| s7 | `wv` (routes or places), `wp` (route or place id) |
 | s5 | `ch` (challenge id), `sh` (stakeholder id) |
 | s6 | `yr` (2026 to 2030), `sc` (scenario id) |
 
@@ -107,3 +109,10 @@ Total about 1,750, under the 1,800 cap. Drawer text counts only when its drawer 
 i-claim-837 i-remit-835 i-scrub i-submit i-approve i-deploy i-canary i-rollback i-replay i-rule-registry i-rule-brick i-sdk i-webhook i-mcp i-cds-hooks i-gateway i-roadmap i-model i-llm-drafter i-pattern-miner i-drift i-explain i-eval i-agent i-fhir i-event-stream i-lake i-sql i-cache i-vault i-monitor i-cloud i-kubernetes i-network i-kpi i-measure i-ehr i-pm i-clearinghouse i-payer i-analyst i-coder i-executive i-policy-doc i-hcc-evidence i-denial i-appeal i-risk i-security i-cross
 
 Suggested mapping: Discover `i-network`, Mandate `i-policy-doc`, Identity `i-security`, Credential `i-vault`, Rail `i-event-stream`, Settle `i-clearinghouse`, Dispute `i-appeal`, Issuer or bank `i-payer`, PSP `i-gateway`, Agent `i-agent`, Builder `i-coder`, Fraud `i-risk`, Regulator `i-policy-doc`, Merchant `i-kpi`, Consumer `i-analyst`, Leader `i-executive`.
+
+## Round 4 additions (2026-11-16)
+
+- `players.research[]` (frag d2): id (r-*), name, kind, icon, tone, finding, ev, src, one, arch, means. Shown in scene 4 under the Research tab. Hash `who=r-*` opens the tab.
+- `decide[]` (frag d3): id (D1..D6), when, name, icon, tone, ev (illustrative, our proposal), adr, one, arch, trigger. Shown in scene 6 as the This year view in place of the forecasts. Hash key `dy` (empty means forecasts).
+- `meta.plain[]` (data.json meta): [term, plain words] pairs for the leader only Plain words list in scene 1.
+- Scene 4 tabs (Companies, Startups, Research) are driven by `who`. The tab follows the group of the selected id.

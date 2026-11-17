@@ -68,6 +68,7 @@ Generated on 2026-10-24 from the `data-pdd="sources"` JSON that the page carried
 | F#35 | Circle (via Wayback Machine snapshot of 2026-10-07) | USDC issuer | <https://web.archive.org/web/2026/https://www.circle.com/legal/usdc-terms> |
 | F#36 | Tether | USDT issuer | <https://tether.to/en/legal/> |
 | F#46 | Solana Foundation, Stellar Development Foundation, Circle | chain foundations and issuer | <https://solana.com/docs/payments/send-payments/payment-with-memo> |
+| F#47 | Payoneer, pricing page, updated 1 Jan 2026 | payment provider, sells the service. 1.2% to 4% to a bank account in another currency, with conversion | <https://www.payoneer.com/pricing/> |
 | G#2 | US Department of the Treasury (Federal Register public inspection) | regulator | <https://public-inspection.federalregister.gov/2026-19966.pdf> |
 | G#4 | Nacha | rail operator and rule maker | <https://www.nacha.org/rules/increasing-same-day-ach-dollar-limit-10-million-0> |
 | G#6 | Board of Governors of the Federal Reserve System | regulator | <https://www.federalreserve.gov/newsevents/pressreleases/other20251009a.htm> |
@@ -163,7 +164,7 @@ Generated on 2026-10-24 from the `data-pdd="sources"` JSON that the page carried
 | N#16 | Agentic Commerce Protocol repository | protocol owners | <https://github.com/agentic-commerce-protocol/agentic-commerce-protocol> |
 | N#17 | ForkLog | trade press | <https://forklog.com/en/openai-abandons-instant-checkout-feature-in-chatgpt/> |
 | N#18 | Mastercard newsroom, Europe agentic commerce | network, promotes its own product | <https://newsroom.mastercard.com/news/europe/en/perspectives/en/2026/europe-is-building-the-foundations-for-trusted-agentic-commerce/> |
-| N#19 | Visa, Agentic Ready expands | network, promotes its own programme | <https://corporate.visa.com/en/sites/visa-perspectives/newsroom/visa-agentic-ready-program-expands-globally.html> |
+| N#19 | Visa, Agentic Ready expands | network, promotes its own programme | <https://investor.visa.com/news/news-details/2026/Visa-Announces-Global-Expansion-of-Agentic-Ready-Program/default.aspx> |
 | N#20 | Visa Intelligent Commerce release, Dec 2025 | network, promotes its own product | <https://usa.visa.com/about-visa/newsroom/press-releases.releaseId.21961.html> |
 | N#21 | Cloudflare blog, secure agentic commerce | vendor, promotes its own product | <https://blog.cloudflare.com/secure-agentic-commerce/> |
 | N#22 | Visa Developer, Trusted Agent Protocol specification | network, specification | <https://developer.visa.com/capabilities/trusted-agent-protocol/trusted-agent-protocol-specifications> |
@@ -229,7 +230,7 @@ Generated on 2026-10-24 from the `data-pdd="sources"` JSON that the page carried
 | R#6 | The Block (ledger C419) | trade outlet, secondary. Mastercard Agent Pay for Machines, June 10, 2026 | <https://www.theblock.co/post/404288/mastercard-agent-pay-machines-support-autonomous-ai-transactions-stablecoins> |
 | R#7 | Stripe docs, MCP (ledger C420) | sells the service. Human confirmation for refunds and outbound payments. Agent API keys required for MCP from November 30, 2026 | <https://docs.stripe.com/mcp> |
 | R#8 | Ledger Insights (ledger C421) | trade outlet, secondary. Open USD live about September 30, 2026 | <https://www.ledgerinsights.com/stripe-linked-open-usd-stablecoin-goes-live-with-visa-mastercard-as-backers/> |
-| R#9 | The Paypers citing the WSJ (ledger C422) | trade outlet, secondary. Four US banks plan a tokenized deposit network for the first half of 2027 | <https://thepaypers.com/fintech/news/major-us-banks-plan-tokenised-deposit-network-for-2027> |
+| R#9 | The Paypers citing the WSJ (ledger C422) | trade outlet, secondary. Large US banks, through The Clearing House, plan a tokenized deposit network for the first half of 2027 | <https://thepaypers.com/fintech/news/major-us-banks-plan-tokenised-deposit-network-for-2027> |
 | R#10 | Bank of England, series XUDLUSS (ledger C423) | central bank. Spot rate 1.3363 USD per GBP on October 22, 2026, the latest published day when checked on October 24, 2026. Our arithmetic: 85,000 GBP x 1.3363 = 113,586 USD, shown as about $114,000. October range 1.3160 to 1.3387, so the figure moves about $1,900 either way | <https://www.bankofengland.co.uk/boeapps/database/_iadb-fromshowcolumns.asp?csv.x=yes&Datefrom=01/Oct/2026&Dateto=24/Oct/2026&SeriesCodes=XUDLUSS&CSVF=TN&UsingCodes=Y&VPD=Y&VFD=N> |
 | R#11 | Payment Systems Regulator (ledger C424) | regulator. The APP reimbursement cap is still 85,000 GBP per claim, in force since October 7, 2024 | <https://www.psr.org.uk/information-for-consumers/app-fraud-reimbursement-protections/> |
 | R#12 | AWS docs, API Gateway (ledger C425) | sells the service | <https://docs.aws.amazon.com/apigateway/latest/developerguide/welcome.html> |
@@ -300,7 +301,7 @@ Round 39, 2026-11-01. Backs three corrections (Stripe key date, AgentCore wordin
 | W#7 | PYMNTS, August 21, 2026 | Coupa agent does everything up to the last step and does not have the final say. Coupa newsroom returned 403 | confirmed (secondary) | <https://www.pymnts.com/news/artificial-intelligence/2026/one-ai-agent-2395-payments-still-no-final-say/> |
 | W#8 | Ramp support article, undated | Automatic bill creation does not approve a bill or bypass approvers | confirmed (vendor) | <https://support.ramp.com/ap-agents-available-in-ramp-bill-pay> |
 | W#9 | CFOtech Australia reporting Oracle, Fusion Cloud ERP 26B | Payables Agent routes for approval and payment. Oracle blog returned 403 | confirmed (secondary) | <https://cfotech.com.au/story/oracle-fusion-unveils-ai-agents-to-boost-finance-team-efficiency> |
-| W#10 | Meow, MCP server page, April 8, 2026 | Three key tiers, full autonomy within configured spend limits | confirmed (vendor) | <https://www.meow.com/perspectives/mcp-server-business-banking-ai-agents> |
+| W#10 | Meow, blog, Inside Meow MCP server, June 10, 2026 | Keys default to read and request-to-spend. Agents spend on their own only if the account holder enables it, inside per-agent limits. The April MCP page (HTTP 526 on 2026-11-15) said full autonomy. Page opened and confirmed on 2026-11-16 (W8_K11) | confirmed (vendor) | <https://www.meow.com/blog/inside-meow-mcp-server> |
 | W#11 | FinTech Global, July 14, 2026 | Payouts.com Digital Employee, hard spend limits, shadow mode | confirmed (trade press) | <https://fintech.global/2026/07/14/payouts-com-launches-digital-employee-ai-agents/> |
 | W#12 | Tipalti press release, October 22, 2026 | AP Agent configurable autonomy | confirmed (vendor) | <https://tipalti.com/press/tipalti-ap-agent-agentic-ai/> |
 | W#13 | J.P. Morgan Payments newsroom | Agentic AI payments takeaways, treasury commentary only, no payables agent | confirmed (bank) | <https://www.jpmorgan.com/payments/newsroom/agentic-ai-payments-takeaways-2026> |

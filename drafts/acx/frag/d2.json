@@ -60,7 +60,7 @@
    "as_of": "2026-10-31",
    "protocol": "x402",
    "use": "M",
-   "one": "17.9 million in August, 5.1 million in October, then a rise on one facilitator."
+   "one": "17.9 million in August, 5.1 million in October, then a rise at one settlement service."
   },
   {
    "id": "a5",
@@ -167,7 +167,7 @@
    "as_of": "2026-10-28",
    "protocol": "",
    "use": "C",
-   "one": "Muse, Claude Duet and Instinct pay with network tokens. The agent never sees the card."
+   "one": "Muse, Claude Duet and Instinct pay with a network stand in card, never the real one."
   },
   {
    "id": "a12",
@@ -314,7 +314,7 @@
      "L7"
     ],
     "score": 400,
-    "one": "Wants the agentic token, not a one time virtual card, inside every agent.",
+    "one": "Wants its own agent card stand in, not a one time virtual card, inside every agent.",
     "arch": "Agent keys in a network directory via Web Bot Auth, Verifiable Intent SD-JWT chains, agentic tokens with passkeys, and an agent transaction score in testing.",
     "moves": [
      {
@@ -459,6 +459,59 @@
     "rank": 3,
     "rank_note": "Tied with Visa at 380. Ties break on the score with vendor reach cut, where Visa leads 340 to 320, then on the token layer.",
     "rank_note_ev": "illustrative"
+   },
+   {
+    "id": "stripe",
+    "name": "Stripe",
+    "icon": "i-gateway",
+    "tone": "coral",
+    "layers": [
+     "L2",
+     "L4",
+     "L5",
+     "L6"
+    ],
+    "score": 325,
+    "one": "Wants to sit on the token meter as well as the payment, from checkout to AI usage billing.",
+    "arch": "Shared Payment Tokens grant an agent a scoped, revocable card. Link holds the wallet. MPP and x402 cover machine payments. OpenRouter routes model calls, Token Billing meters them.",
+    "moves": [
+     {
+      "date": "2026-08-19",
+      "text": "Agreed to buy OpenRouter, the router to 400+ AI models",
+      "ev": "verified 2026",
+      "src": [
+       "G-208"
+      ]
+     },
+     {
+      "date": "2026-08-19",
+      "text": "Says tokens are the central currency for AI builders, price not disclosed",
+      "ev": "verified 2026",
+      "src": [
+       "G-208"
+      ]
+     },
+     {
+      "date": "2026-11-15",
+      "text": "Token Billing on Metronome in public preview",
+      "ev": "verified 2026",
+      "src": [
+       "G-211"
+      ]
+     },
+     {
+      "date": "2026-11-15",
+      "text": "No sign yet of OpenRouter in MPP, ACP or x402",
+      "ev": "verified 2026",
+      "src": [
+       "G-212"
+      ]
+     }
+    ],
+    "watch": "OpenRouter usage billed through Stripe, and agent payments on its routed traffic.",
+    "rank": 5,
+    "rank_note": "Shown for its OpenRouter deal, outside the top three. Shopify is number 4 at 375. The deal does not change the score, since moves were already at the top mark.",
+    "rank_note_ev": "illustrative"
    }
   ],
   "startups": [
@@ -554,7 +607,7 @@
      "L5"
     ],
     "score": 180,
-    "one": "A self serve agent checkout toolkit that rides Visa and Mastercard agentic tokens.",
+    "one": "A self serve agent checkout toolkit that rides Visa and Mastercard card stand ins for agents.",
     "arch": "Uses Visa Intelligent Commerce and Mastercard Agent Pay tokens where a card is eligible. Checks out through UCP, Shop Pay or browser automation.",
     "moves": [
      {
@@ -584,13 +637,122 @@
     },
     "rank": 3
    }
+  ],
+  "research": [
+   {
+    "id": "r-mandate",
+    "name": "Beyond the Mandate",
+    "kind": "Preprint, Aug 2026",
+    "icon": "i-policy-doc",
+    "tone": "coral",
+    "finding": "48 threats, 8 of them high risk",
+    "ev": "verified 2026",
+    "src": [
+     "R4-17"
+    ],
+    "one": "A signed approval proves the cart did not change. It does not prove the user wanted it.",
+    "arch": "AP2 threat model. Valid signatures do not ensure intent when the context before signing is manipulated.",
+    "means": "Keep what the agent saw before the user signed."
+   },
+   {
+    "id": "r-replay",
+    "name": "Zero trust checks for AP2",
+    "kind": "Preprint, Feb 2026",
+    "icon": "i-replay",
+    "tone": "teal",
+    "finding": "Replay stopped at about 3.8 ms, in simulation",
+    "ev": "verified 2026",
+    "src": [
+     "R4-12"
+    ],
+    "one": "Approvals that work once and only for one shop stop copied payments, and the check is fast.",
+    "arch": "Context binding plus consume once mandates stopped the evaluated replay and redirect attacks in simulation.",
+    "means": "Single use approvals tied to merchant and cart."
+   },
+   {
+    "id": "r-x402",
+    "name": "Attacks on x402",
+    "kind": "Two preprints, May 2026",
+    "icon": "i-security",
+    "tone": "red",
+    "finding": "Up to 100 percent of paid content leaked",
+    "ev": "verified 2026",
+    "src": [
+     "R4-14",
+     "R4-15"
+    ],
+    "one": "Pay per call can charge without serving, or serve without being paid.",
+    "arch": "Five practical attacks plus four flaw classes on testnets and live endpoints, all disclosed to maintainers.",
+    "means": "Settle and serve as one step, with a refund path."
+   },
+   {
+    "id": "r-formal",
+    "name": "Formal analysis of four protocols",
+    "kind": "Preprint, Aug 2026",
+    "icon": "i-eval",
+    "tone": "violet",
+    "finding": "40 undocumented findings across 86 cases",
+    "ev": "verified 2026",
+    "src": [
+     "R4-18"
+    ],
+    "one": "A proof tool found gaps in all four major agent payment protocols.",
+    "arch": "Tamarin models of x402, MPP, ACP and AP2. Findings are consistency gaps between authorization, payment and delivery.",
+    "means": "Bind approval, payment and delivery at every step."
+   },
+   {
+    "id": "r-persuade",
+    "name": "Persuasion in AI shopping",
+    "kind": "Preprint, Apr 2026",
+    "icon": "i-explain",
+    "tone": "amber",
+    "finding": "Sponsored picks 61.2 percent, against 22.4 with search",
+    "ev": "verified 2026",
+    "src": [
+     "R4-04"
+    ],
+    "one": "A shopping assistant nearly tripled paid picks, and Sponsored labels did not help.",
+    "arch": "Study of human participants. Labels did not significantly reduce sponsored selection.",
+    "means": "Show paid placement on the approval and receipt."
+   },
+   {
+    "id": "r-deal",
+    "name": "Project Deal",
+    "kind": "Lab report, Apr 2026",
+    "icon": "i-agent",
+    "tone": "slate",
+    "finding": "186 real deals, just over 4,000 USD",
+    "ev": "verified 2026",
+    "src": [
+     "R4-07"
+    ],
+    "one": "People with weaker agents got worse prices and did not notice.",
+    "arch": "69 staff agents traded with each other. Outcome depended on the agent's model, and users did not spot the gap.",
+    "means": "Record the agent model and version for disputes."
+   },
+   {
+    "id": "r-visa",
+    "name": "Visa benchmark",
+    "kind": "Vendor test, Nov 2026",
+    "icon": "i-measure",
+    "tone": "slate",
+    "finding": "54 percent of failed runs still bought something",
+    "ev": "vendor",
+    "src": [
+     "R4-27",
+     "R4-28"
+    ],
+    "one": "When agents got the task wrong, most still went ahead and bought.",
+    "arch": "22 models on shopping tasks, 42.8 percent of runs failed. Checkout and payment were not tested.",
+    "means": "Check the cart against what the user approved."
+   }
   ]
  },
  "scenarios": [
   {
    "id": "open",
    "name": "Network tokens, open checkout",
-   "one": "Agentic network tokens pay, and open protocols carry checkout across many agent platforms.",
+   "one": "Network card stand ins for agents pay, and open protocols carry checkout across many agent platforms.",
    "arch": "Kill test: three platforms still hold over half of agent orders at 2027-12-31. Thesis wins: canonical model plus adapters.",
    "by": {
     "2027": "Top three platforms fall below half of agent orders",
@@ -621,21 +783,21 @@
    "id": "referral",
    "name": "Agents refer, people pay",
    "one": "Agents find and compare, then people check out on the merchant's own site.",
-   "arch": "Kill test: your own agent completed share passes the trigger for two months. Thesis holds: wait with readiness, never build the gateway.",
+   "arch": "Kill test: your own agent completed share passes our proposed 3% trigger for two months. Thesis holds: wait with readiness, never build the gateway.",
    "by": {
     "2027": "Agent completed orders stay a small share of orders",
     "2028": "AI referrals keep growing, checkout stays on merchant sites",
     "2030": "Agents shape demand, people still press pay"
    },
    "signals": [
-    "Your agent order share stays below the trigger",
+    "Your agent order share stays below our proposed 3% trigger",
     "Holiday reports count referral clicks, not agent payments"
    ]
   },
   {
    "id": "machines",
    "name": "Machine payments split off",
-   "one": "Pay per call moves to stablecoin rails over HTTP 402, apart from card checkout.",
+   "one": "Pay per call moves to stablecoin rails over a built in web payment code, apart from card checkout.",
    "arch": "Kill test: screened agentic x402 value below a million USD a month at end 2027. Separate lane, settled through a facilitator.",
    "by": {
     "2027": "Stablecoin issuer rule in force in the US",

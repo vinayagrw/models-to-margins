@@ -1,13 +1,19 @@
 <section class="acx-scene" id="acx-s4" aria-labelledby="acx-s4-h">
   <header class="acx-head"><span class="acx-num">04</span><h2 id="acx-s4-h">Who is solving it</h2>
-    <p class="acx-dek" data-for="leader">Three incumbents and three startups, and the layers of the stack each one covers. Pick one to see its strategy and latest moves.</p>
-    <p class="acx-dek" data-for="architect">Coverage across the seven layers, discovery to dispute. Open a player for its build, dated moves and the signal that would change the call.</p>
+    <p class="acx-dek" data-for="leader">Three incumbents and three startups, plus Stripe at number 5 for its OpenRouter deal, and the layers each one covers. Research shows what recent studies found.</p>
+    <p class="acx-dek" data-for="architect">Coverage across the seven layers, discovery to dispute. Open a player for its build, dated moves and the signal that would change the call, or a study for its design change.</p>
   </header>
   <div class="acx-split s4-split">
     <div class="s4-left">
       <ol class="s4-key" aria-label="Stack layers"></ol>
-      <div class="s4-group"><p class="s4-gl">Companies</p><div class="s4-cards" data-g="companies"></div></div>
-      <div class="s4-group"><p class="s4-gl">Startups</p><div class="s4-cards" data-g="startups"></div></div>
+      <div class="acx-seg s4-tabs" role="group" aria-label="Show">
+        <button type="button" data-g="companies" aria-pressed="true">Companies</button>
+        <button type="button" data-g="startups" aria-pressed="false">Startups</button>
+        <button type="button" data-g="research" aria-pressed="false">Research</button>
+      </div>
+      <div class="s4-group" data-g="companies"><div class="s4-cards" data-g="companies"></div></div>
+      <div class="s4-group" data-g="startups" hidden><div class="s4-cards" data-g="startups"></div></div>
+      <div class="s4-group" data-g="research" hidden><div class="s4-cards" data-g="research"></div></div>
     </div>
     <aside class="acx-card acx-panel s4-panel" aria-live="polite"><div class="s4-stack"></div></aside>
   </div>
@@ -19,6 +25,9 @@
 #acx-s4 .s4-key i{width:14px; height:14px; border-radius:4px; flex:none; background:var(--c)}
 #acx-s4 .s4-key b{font-family:var(--acx-mono); font-weight:600; color:var(--acx-ink)}
 #acx-s4 .s4-group{display:flex; flex-direction:column; gap:8px}
+#acx-s4 .s4-tabs{align-self:flex-start}
+#acx-s4 .s4-find{font-size:15px; font-weight:600; color:var(--acx-ink); text-wrap:balance}
+#acx-s4 .s4-card[data-g="research"]{grid-template-columns:minmax(180px,260px) 1fr}
 #acx-s4 .s4-gl{font-family:var(--acx-mono); font-size:14px; color:var(--acx-ink3); text-transform:uppercase; letter-spacing:.05em}
 #acx-s4 .s4-cards{display:grid; grid-template-columns:1fr; gap:10px}
 #acx-s4 .s4-card{display:grid; grid-template-columns:minmax(180px,220px) 1fr; align-items:center; gap:14px 20px; padding:12px 18px 12px 12px; text-align:left; cursor:pointer; min-height:42px; transition:border-color .2s, box-shadow .2s}
@@ -29,6 +38,7 @@
 #acx-s4 .s4-nm{display:flex; flex-direction:column; min-width:0}
 #acx-s4 .s4-name{font-size:18px; font-weight:600; color:var(--acx-ink); line-height:1.2}
 #acx-s4 .s4-kind{font-size:14px; color:var(--acx-ink3)}
+#acx-s4 .s4-card[data-watch]{border-style:dashed}
 #acx-s4 .s4-strip{display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:2px}
 #acx-s4 .s4-seg{display:flex; flex-direction:column; align-items:center; gap:6px}
 #acx-s4 .s4-seg i{display:block; width:100%; height:16px; background:var(--acx-sunk); border-radius:2px}
@@ -68,13 +78,14 @@
 }
 @media (max-width:640px){
   #acx-s4 .s4-card{grid-template-columns:1fr; padding:14px}
+  #acx-s4 .s4-card[data-g="research"]{grid-template-columns:1fr; gap:6px; padding:10px 14px}
 }
 </style>
 <script>ACX.scene('s4', function (el, A) {
   var esc = A.esc, D = A.data || {};
   var P = D.players || {};
   var layers = (D.layers || []).filter(function (l) { return l && l.id; });
-  var groups = [['companies', 'Company'], ['startups', 'Startup']];
+  var groups = [['companies', 'Company'], ['startups', 'Startup'], ['research', 'Research']];
   var all = [];
   groups.forEach(function (g) { (P[g[0]] || []).slice().sort(function (a, b) { return (a.rank || 99) - (b.rank || 99); }).forEach(function (p) { if (p && p.id) all.push({ p: p, kind: g[1], g: g[0] }); }); });
   function lc(i) { return 'var(--acx-l' + (i + 1) + ')'; }
@@ -87,19 +98,33 @@
     var box = el.querySelector('.s4-cards[data-g="' + g[0] + '"]');
     box.innerHTML = all.filter(function (x) { return x.g === g[0]; }).map(function (x) {
       var p = x.p, has = p.layers || [];
+      if (x.g === 'research') {
+        return '<button type="button" class="acx-card s4-card" data-g="research" data-id="' + esc(p.id) + '" aria-pressed="false" aria-label="' + esc(p.name + ', ' + p.kind + ', ' + p.finding) + '">' +
+          '<span class="s4-top">' + A.icon(p.icon || 'i-eval', p.tone || 'slate', 'chip') + '<span class="s4-nm"><span class="s4-name">' + esc(p.name) + '</span><span class="s4-kind">' + esc(p.kind) + '</span></span></span>' +
+          '<span class="s4-find">' + esc(p.finding) + '</span></button>';
+      }
       var covered = layers.filter(function (l) { return has.indexOf(l.id) >= 0; }).map(function (l) { return l.name; });
       var strip = layers.map(function (l, i) {
         var on = has.indexOf(l.id) >= 0;
         return '<span class="s4-seg' + (on ? ' is-on' : '') + '" style="--c:' + lc(i) + '"><i></i><span>' + esc(l.id) + '</span></span>';
       }).join('');
-      return '<button type="button" class="acx-card s4-card" data-id="' + esc(p.id) + '" aria-pressed="false" aria-label="' + esc(p.name + ', ' + x.kind + ', covers ' + (covered.join(', ') || 'no layer')) + '">' +
-        '<span class="s4-top">' + A.icon(p.icon || 'i-agent', p.tone || 'slate', 'sec') + '<span class="s4-nm"><span class="s4-name">' + esc(p.name) + '</span><span class="s4-kind">' + x.kind + (p.rank ? ' #' + p.rank : '') + '</span></span></span>' +
+      return '<button type="button" class="acx-card s4-card" data-id="' + esc(p.id) + '"' + (p.rank > 3 ? ' data-watch="1"' : '') + ' aria-pressed="false" aria-label="' + esc(p.name + ', ' + x.kind + ', covers ' + (covered.join(', ') || 'no layer')) + '">' +
+        '<span class="s4-top">' + A.icon(p.icon || 'i-agent', p.tone || 'slate', 'sec') + '<span class="s4-nm"><span class="s4-name">' + esc(p.name) + '</span><span class="s4-kind">' + x.kind + (p.rank ? ' #' + p.rank : '') + (p.rank > 3 ? ', one to watch' : '') + '</span></span></span>' +
         '<span class="s4-strip" aria-hidden="true">' + strip + '</span></button>';
     }).join('');
   });
 
   el.querySelector('.s4-stack').innerHTML = all.map(function (x) {
     var p = x.p;
+    if (x.g === 'research') {
+      return '<div class="s4-d" data-id="' + esc(p.id) + '">' +
+        '<div class="s4-a"><div class="s4-dh">' + A.icon(p.icon || 'i-eval', p.tone || 'slate', 'sec') + '<div><p class="acx-k">' + esc(p.kind) + '</p><h3>' + esc(p.name) + '</h3></div></div>' +
+        '<p class="s4-strat" data-for="leader">' + esc(p.one) + '</p>' +
+        '<p class="s4-strat" data-for="architect">' + esc(p.arch || p.one) + '</p></div>' +
+        '<div class="s4-b"><p class="acx-k">Finding</p><p class="s4-fund">' + esc(p.finding) + ' ' + A.ev(p.ev || 'illustrative') + '</p>' +
+        (p.means ? '<div class="s4-watch"><p class="acx-k">What it changes in our design</p><p>' + esc(p.means) + '</p></div>' : '') +
+        '</div></div>';
+    }
     var moves = (p.moves || []).slice().sort(function (a, b) { return String(a.date).localeCompare(String(b.date)); }).map(function (m) {
       return '<li><span class="s4-mh"><span class="s4-date">' + esc(m.date) + '</span>' + (m.ev ? A.ev(m.ev) : '') + '</span><span class="s4-mt">' + esc(m.text) + '</span></li>';
     }).join('');
@@ -119,9 +144,14 @@
   }).join('');
 
   var cards = el.querySelectorAll('.s4-card'), drawers = el.querySelectorAll('.s4-d');
+  var tabs = el.querySelectorAll('.s4-tabs [data-g]'), gEls = el.querySelectorAll('.s4-group[data-g]');
+  tabs.forEach(function (b) { b.addEventListener('click', function () { var f = all.find(function (x) { return x.g === b.dataset.g; }); if (f) A.set('who', f.p.id); }); });
   function show(id) {
     var ok = all.some(function (x) { return x.p.id === id; });
     var cur = ok ? id : (all[0] && all[0].p.id);
+    var g = (all.find(function (x) { return x.p.id === cur; }) || {}).g || 'companies';
+    tabs.forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.g === g)); });
+    gEls.forEach(function (e) { e.hidden = e.dataset.g !== g; });
     cards.forEach(function (c) { c.setAttribute('aria-pressed', String(c.dataset.id === cur)); });
     drawers.forEach(function (d) { d.classList.toggle('is-on', d.dataset.id === cur); });
   }

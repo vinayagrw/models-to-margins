@@ -1,0 +1,10 @@
+{
+ "G-136": {
+  "verdict": "fix",
+  "note": "superseded by G-213, launch found 2026-11-16"
+ },
+ "G-213": {
+  "verdict": "verified",
+  "note": "W8_K11, archive copy of the OpenAI post"
+ }
+}

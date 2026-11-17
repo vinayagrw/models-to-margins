@@ -1,6 +1,6 @@
 """Build the agentic commerce protocols page from one data file and six scene files.
 
-Reads   drafts/acx/data.json, drafts/acx/shell/*, drafts/acx/scenes/s1.html .. s6.html
+Reads   drafts/acx/data.json, drafts/acx/shell/*, drafts/acx/scenes/s1.html .. s7.html (s7, who pays, sits between s4 and s5)
 Writes  src/data/acx/acx-body.html   the page body the site template renders
         src/data/acx/data.json       a copy of the data (edit the original, never the copy)
         drafts/acx/out/artifact-src.html, then drafts/build.py makes artifact.html and test.html
@@ -16,7 +16,7 @@ REPO = os.path.abspath(os.path.join(HERE, '..', '..'))
 SITE = os.path.join(REPO, 'src', 'data', 'acx')
 OUT = os.path.join(HERE, 'out')
 SPRITE_SRC = os.path.expanduser('~/.claude/skills/presales-meeting-prep/assets/iso-tile-icons.svg')
-SCENES = ['s1', 's2', 's3', 's4', 's5', 's6']
+SCENES = ['s1', 's2', 's3', 's4', 's7', 's5', 's6']
 
 os.makedirs(SITE, exist_ok=True)
 os.makedirs(OUT, exist_ok=True)

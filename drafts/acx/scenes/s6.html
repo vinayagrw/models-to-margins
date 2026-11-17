@@ -1,5 +1,5 @@
 <section class="acx-scene" id="acx-s6" aria-labelledby="acx-s6-h">
-  <header class="acx-head"><span class="acx-num">06</span><h2 id="acx-s6-h">2026 to 2030</h2>
+  <header class="acx-head"><span class="acx-num">07</span><h2 id="acx-s6-h">2026 to 2030</h2>
     <p class="acx-dek" data-for="leader">Four ways this could go. Pick a year and a world.</p>
     <p class="acx-dek" data-for="architect">Four scenarios with kill tests. Pick a year and a world.</p>
   </header>
@@ -14,9 +14,15 @@
     <aside class="acx-card acx-panel s6-panel" aria-live="polite"><div class="s6-stack"></div></aside>
   </div>
   <div class="acx-card s6-fc">
-    <div class="s6-fch"><h3>Forecasts and incentives</h3></div>
+    <div class="s6-fch"><h3>Forecasts and incentives</h3><span class="s6-fev"></span>
+      <div class="acx-seg s6-fv" role="group" aria-label="Show">
+        <button type="button" data-v="fc" aria-pressed="true">Forecasts</button>
+        <button type="button" data-v="dy" aria-pressed="false">This year</button>
+      </div>
+    </div>
     <div class="s6-axis" aria-hidden="true"><span></span><div class="s6-ticks"></div><span></span></div>
     <ol class="s6-frows"></ol>
+    <div class="s6-dy" hidden><p class="s6-dyn"></p><ol class="s6-dl"></ol></div>
   </div>
   <p class="s6-out"><a class="s6-link" href="/deep-dives/agentic-payouts-desk">B2B payouts have their own desk<span aria-hidden="true">&nbsp;&#8594;</span></a></p>
 </section>
@@ -81,6 +87,20 @@
 #acx-s6 .s6-fc{margin-top:var(--acx-gap); padding:14px 20px 10px; container-type:inline-size; display:flex; flex-direction:column; gap:6px}
 #acx-s6 .s6-fch{display:flex; flex-wrap:wrap; align-items:baseline; gap:4px 14px}
 #acx-s6 .s6-fch h3{font-size:20px; line-height:1.2}
+#acx-s6 .s6-fv{margin-left:auto}
+#acx-s6 .s6-dyn{font-size:14px; color:var(--acx-ink3); display:flex; flex-wrap:wrap; align-items:center; gap:6px 10px}
+#acx-s6 .s6-dl{list-style:none; margin:0; padding:0; display:flex; flex-direction:column}
+#acx-s6 .s6-dl > li{border-top:1px solid var(--acx-line)}
+#acx-s6 .s6-di{display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:12px; width:100%; min-height:52px; padding:6px 0; border:0; background:none; text-align:left; cursor:pointer; color:inherit; font:inherit}
+#acx-s6 .s6-di:focus-visible{outline:2px solid var(--acx-accent); outline-offset:2px}
+#acx-s6 .s6-dt{display:flex; flex-direction:column; min-width:0}
+#acx-s6 .s6-dn{font-size:16px; font-weight:600; color:var(--acx-ink)}
+#acx-s6 .s6-di[aria-expanded="true"] .s6-dn{color:var(--acx-accent)}
+#acx-s6 .s6-dw,#acx-s6 .s6-adr{font-family:var(--acx-mono); font-size:14px; color:var(--acx-ink3)}
+#acx-s6 .s6-dd{display:flex; flex-direction:column; gap:8px; padding:0 0 12px 58px}
+#acx-s6 .s6-dd p{font-size:15px; color:var(--acx-ink); text-wrap:balance}
+#acx-s6 .s6-trg{padding:8px 12px; border-radius:var(--acx-r-sm); background:var(--acx-sunk)}
+#acx-s6 .acx-card .s6-trg p{font-size:14px}
 #acx-s6 .s6-axis,#acx-s6 .s6-fr{display:grid; grid-template-columns:minmax(0,440px) minmax(0,1fr) minmax(0,210px); gap:6px 20px; align-items:center}
 #acx-s6 .s6-ticks,#acx-s6 .s6-tr{position:relative; height:24px}
 #acx-s6 .s6-ticks span{position:absolute; top:0; transform:translateX(-50%); font-family:var(--acx-mono); font-size:14px; color:var(--acx-ink3); white-space:nowrap}
@@ -114,7 +134,11 @@
 @container (max-width:700px){
   #acx-s6 .s6-axis,#acx-s6 .s6-fr{grid-template-columns:minmax(0,1fr)}
   #acx-s6 .s6-axis > span{display:none}
-  #acx-s6 .s6-fr{gap:6px}
+  #acx-s6 .s6-fr{grid-template-columns:minmax(0,1fr) auto; grid-template-areas:"who who" "tr val"; gap:2px 10px}
+  #acx-s6 .s6-who{grid-area:who} #acx-s6 .s6-tr{grid-area:tr} #acx-s6 .s6-val{grid-area:val; flex-direction:column; align-items:flex-end; gap:0; text-align:right}
+  #acx-s6 .s6-fc{padding:12px 12px 8px}
+  #acx-s6 .s6-dd{padding-left:0}
+  #acx-s6 .s6-fv{margin-left:0}
 }
 @media (max-width:1200px){ #acx-s6 .s6-grid{--nc:160px} }
 @media (max-width:640px){ #acx-s6 .s6-map{padding:12px 8px 14px} #acx-s6 .s6-legend,#acx-s6 .s6-yr{padding-left:6px; padding-right:6px} #acx-s6 .s6-out{justify-content:flex-start} }
@@ -215,7 +239,7 @@
   rows.sort(function (a, b) { return b.top - a.top; });
   // one evidence tag for the chart when every forecast shares it, else one per row
   var oneEv = FC.length && FC.every(function (f) { return f.ev && f.ev === FC[0].ev; }) ? FC[0].ev : '';
-  if (oneEv) el.querySelector('.s6-fch').insertAdjacentHTML('beforeend', A.ev(oneEv));
+  if (oneEv) el.querySelector('.s6-fev').innerHTML = A.ev(oneEv);
   el.querySelector('.s6-frows').innerHTML = rows.map(function (r) {
     var f = r.f, marks = '', lab = [];
     r.p.segs.forEach(function (s) {
@@ -264,4 +288,30 @@
   cur.yr = YEARS.indexOf(Number(A.get('yr'))) >= 0 ? Number(A.get('yr')) : YEARS[0];
   cur.sc = names[A.get('sc')] ? A.get('sc') : (SC[0] && SC[0].id);
   render();
+
+  // decide this year: our proposed sequence from the design decisions, shown in place of the forecasts
+  var DY = (D.decide || []).filter(function (x) { return x && x.id; });
+  var dyBox = el.querySelector('.s6-dy'), h3 = el.querySelector('.s6-fch h3');
+  var hide = [el.querySelector('.s6-axis'), el.querySelector('.s6-frows'), el.querySelector('.s6-fev')];
+  var fvBtns = el.querySelectorAll('.s6-fv [data-v]');
+  el.querySelector('.s6-dyn').innerHTML = 'Our proposed order, drawn from the design decisions.' + (DY[0] && DY[0].ev ? ' ' + A.ev(DY[0].ev) : '');
+  el.querySelector('.s6-dl').innerHTML = DY.map(function (d) {
+    return '<li><button type="button" class="s6-di" data-id="' + esc(d.id) + '" aria-expanded="false">' + A.icon(d.icon || 'i-roadmap', d.tone || 'slate', 'chip') +
+      '<span class="s6-dt"><span class="s6-dn">' + esc(d.name) + '</span><span class="s6-dw">' + esc(d.when) + '</span></span><span class="s6-adr">' + esc(d.adr || '') + '</span></button>' +
+      '<div class="s6-dd" hidden><p data-for="leader">' + esc(d.one) + '</p><p data-for="architect">' + esc(d.arch || d.one) + '</p>' +
+      '<div class="s6-trg"><p class="acx-k">Trigger</p><p>' + esc(d.trigger) + '</p></div></div></li>';
+  }).join('');
+  var dis = el.querySelectorAll('.s6-di');
+  function showDy(v) {
+    var on = DY.some(function (x) { return x.id === v; });
+    hide.forEach(function (n) { if (n) n.hidden = on; });
+    dyBox.hidden = !on;
+    h3.textContent = on ? 'Decide this year' : 'Forecasts and incentives';
+    fvBtns.forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.v === (on ? 'dy' : 'fc'))); });
+    dis.forEach(function (b) { var o = on && b.dataset.id === v; b.setAttribute('aria-expanded', String(o)); b.nextElementSibling.hidden = !o; });
+  }
+  fvBtns.forEach(function (b) { b.addEventListener('click', function () { A.set('dy', b.dataset.v === 'dy' ? (DY[0] || {}).id : ''); }); });
+  dis.forEach(function (b) { b.addEventListener('click', function () { A.set('dy', b.dataset.id); }); });
+  A.on('dy', showDy);
+  showDy(A.get('dy'));
 });</script>

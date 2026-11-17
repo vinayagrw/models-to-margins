@@ -1,0 +1,101 @@
+[
+ {
+  "id": "R1-25",
+  "claim": "A UCP maintainer notes a checkout ID does not by itself bind authorization to a checkout state (doc line 908). Ledger AC#351 instead says UCP main gained a return policy extension (2026-10-23), a completion boundary rule (2026-11-07) and a purchase options and subscription policy (2026-11-10).",
+  "verdict": "verified",
+  "checked_at": "https://github.com/Universal-Commerce-Protocol/ucp/pull/1057",
+  "corrected": "Body text stands. PR 1057, merged 2026-11-07, states \"A checkout ID does not by itself bind authorization to a particular checkout state.\" The ledger row AC#351 names a return policy and subscription policy that this PR does not mention. Reword it to: UCP PR 1057, merged 2026-11-07, clarifies the completion boundary.",
+  "load_bearing": false,
+  "why": "One bullet in a list of UCP gaps. No ranking or recommendation depends on it.",
+  "doc_lines": [
+   908,
+   2286
+  ]
+ },
+ {
+  "id": "R1-07",
+  "claim": "ACP requires Idempotency-Key and API-Version on POSTs, uses a bearer token, and offers a detached JSON signature header for requests (ledger AC#153). Doc line 387 also cites it for P12 detached JWS over canonical JSON and HMAC. Doc line 314 says optional HMAC signature for webhooks.",
+  "verdict": "wrong",
+  "checked_at": "https://raw.githubusercontent.com/agentic-commerce-protocol/agentic-commerce-protocol/main/spec/2026-04-17/openapi/openapi.agentic_checkout.yaml",
+  "corrected": "ACP requires Idempotency-Key on all POSTs and API-Version, uses a bearer token, and has an optional Signature header described as an HMAC signature for webhook verification. The spec file does not mention JWS, detached signatures or canonical JSON. Line 314 is right. On line 387, drop R1-07 from the detached JWS value and keep it only for HMAC. Fix ledger AC#153 to match.",
+  "load_bearing": false,
+  "why": "A cell in the protocol comparison matrix. Line 314 already carries the correct wording.",
+  "doc_lines": [
+   314,
+   387,
+   2088
+  ]
+ },
+ {
+  "id": "R5-67",
+  "claim": "About 50 to 60 of 423 open x402 issue titles concern dispute, refund, receipt or proof (doc lines 712, 1615). Ledger AC#321 says 60 of 423 titles mention dispute, refund, receipt, proof, attestation or delivery.",
+  "verdict": "wrong",
+  "checked_at": "GitHub API, repos/x402-foundation/x402/issues?state=open, all pages, 2026-11-15",
+  "corrected": "About 50 of 424 open x402 issue titles (count on 2026-11-15) mention dispute, refund, receipt, proof, attestation or delivery. Whole word matches give 48 and word stems give 51. The four words dispute, refund, receipt or proof alone give 41. The count is live and moves.",
+  "load_bearing": true,
+  "why": "It is the only numeric evidence for the no proof of delivery challenge (rank 13) and the matching objection line.",
+  "doc_lines": [
+   712,
+   1414,
+   1427,
+   1440,
+   1615,
+   2256
+  ]
+ },
+ {
+  "id": "G-136",
+  "claim": "A ChatGPT Wallet launch could not be confirmed (doc lines 194, 837, 1402). The ledger row is a gap record about searches that returned 403 or nothing.",
+  "verdict": "unverified",
+  "checked_at": "https://investor.mastercard.com/investor-news/investor-news-details/2026/Mastercard-Advances-Agentic-Commerce-With-New-Trust-and-Intelligence-Services/default.aspx (dated 2026-09-30, no mention of OpenAI or ChatGPT). Also opened https://runtimewire.com/article/exclusive-openai-is-building-a-chatgpt-wallet-for-agentic-purchases (2026-08-13, describes code found in an app bundle, does not say it launched).",
+  "corrected": "",
+  "load_bearing": false,
+  "why": "A negative finding that no page can confirm. The ACP stage call rests on G-119, G-204 and G-205, not on this. No launch was found in a fresh search either, so the wording is safe as a hedge.",
+  "doc_lines": [
+   194,
+   837,
+   1402,
+   2011
+  ]
+ },
+ {
+  "id": "R3-55",
+  "claim": "Prava gives agents one time Visa cards with passkey approvals, announced on X (doc line 1034). Ledger AC#355 says each purchase is approved by passkey.",
+  "verdict": "verified",
+  "checked_at": "https://runtimewire.com/article/prava-launches-prava-pay-ai-agents-one-time-cards",
+  "corrected": "Body text stands. The article (2026-05-26) says scoped, single-use Visa cards with passkey approvals, announced in a thread on X. It does not say each purchase needs a passkey, so ledger AC#355 should drop \"with each purchase approved by passkey\".",
+  "load_bearing": false,
+  "why": "One minor player in the long list. It fails the two layer test and scores 25.",
+  "doc_lines": [
+   1034,
+   2290
+  ]
+ },
+ {
+  "id": "C353",
+  "claim": "JPMorgan executives said on 2026-10-13 that customers who share banking credentials with AI agents could be responsible for misuse (doc lines 1505, 1596). Ledger AC#418 says CFO Jeremy Barnum said it on the Q3 2026 call.",
+  "verdict": "verified",
+  "checked_at": "https://www.americanbanker.com/news/jpmorgan-warns-of-risks-to-consumers-who-rely-on-ai-agents",
+  "corrected": "Body text stands. The article (Tuesday 2026-10-13) gives the warning to unnamed bank executives. Barnum is quoted only on AI competition and no Q3 call is named. Ledger AC#418 should read: JPMorgan executives warned on 2026-10-13 that customers who share banking credentials with AI agents may be responsible for misuse.",
+  "load_bearing": false,
+  "why": "Supporting evidence for the shared login challenge. C352, G-29, G-30 and R5-44 carry the point with it.",
+  "doc_lines": [
+   1505,
+   1596,
+   2353
+  ]
+ },
+ {
+  "id": "G-50",
+  "claim": "More than 138M x402 transactions on Base to the end of June 2026. Over 87 percent of payments in the 16 months to September 2026 fell between a hundredth of a cent and a dime (doc line 640).",
+  "verdict": "verified",
+  "checked_at": "https://www.chainalysis.com/blog/north-america-crypto-adoption-2026/",
+  "corrected": "Body text stands. The page states over 138 million x402 transactions on Base in the period to 1 July 2026, and over 87% of payments between a hundredth of a cent and a dime in the 16 months ending September 2026. Ledger AC#257 joins the two figures as one set and should name both periods.",
+  "load_bearing": false,
+  "why": "A context row in the metrics table. Line 647 says the page uses the monthly trend from G-104 and G-106, not this lifetime count.",
+  "doc_lines": [
+   640,
+   2192
+  ]
+ }
+]
